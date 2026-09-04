@@ -15,10 +15,15 @@ index:
     packed_size   — u32   (byte length of the payload)
     offset        — u32   (absolute file offset of the payload)
     field_c       — u32   — **= CRC32(payload) — CONFIRMED 5,596/5,596 (100%, ITER-3)**
-    field_d       — u32   — equals CRC32(payload) in 3,435 entries; differs in
-                           2,161 (UNKNOWN — REJECTED: crc32 of 2003-era file
-                           (0 hits), crc32c, name-concats, halves, cross-entry
-                           matches; possibly a checksum of another build)
+    field_d       — u32   — == CRC32(payload) in 3,435 entries; differs in 2,161.
+                           REJECTED: crc32 of the 2003-era file (0/2,161), crc32c,
+                           name-concats, halves, bitwise-not, crop-variants.
+                           LEADING HYPOTHESIS (STRONGLY_SUPPORTED by correlation):
+                           d = CRC32 of the file's FIRST-INSERTED version in the
+                           archive lineage (build-history marker). Correlations:
+                           era-CHANGED files 85% d≠c (182/214); era-IDENTICAL 37%
+                           (1,944 — implies pre-2003 content versions we do not
+                           have on disk); NEW-ONLY (59xxxx) 80% d==c (139/174).
 ```
 
 Validated on PCG 9.3.5 Models.bnt: 5,596 entries, index consumed

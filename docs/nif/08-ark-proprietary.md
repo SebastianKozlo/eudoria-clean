@@ -20,7 +20,9 @@ skinned/transformed extents):
 
 ```
 [u8 mode (00/01 — Mode1/Mode2 marker)]
-[12 B header: ffffff-pattern flags — exact semantics UNKNOWN]
+[12 B header: ffffff-pattern + flag u32 at offset 3 — only 10 distinct
+ headers in 4,838 files: {00000000 x3807, 00000001 x312, 01000000 x72,
+ 01000001 x34} + pattern variants (ffffff / 00ff); flag bits UNKNOWN]
 [f32 min.x][f32 min.y][f32 min.z]
 [f32 max.x][f32 max.y][f32 max.z]
 [u8 pad = 0]
