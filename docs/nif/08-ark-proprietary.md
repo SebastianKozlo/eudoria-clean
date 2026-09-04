@@ -225,10 +225,10 @@ u4 (+16), extension starts at +20.
 |---|---|---|
 | FIXED_A_57 | 346 | fixed 37 B |
 | FIXED_B_61 | 192 | fixed 41 B (selector: peek[7]==0x01) |
-| SHORT28 | 35 | fixed 8 B (all zeros / peek[7]==0x00) |
-| BINARY | 4 | self-terminating: sentinel 0xFFFFFFFF then float trailer -1.0×n |
+| SHORT28 | 35 | fixed 8 B = **8×00, verified 35/35 (ITER-31)** ("28" = block payload length, not ext length) |
+| BINARY | 4 | **CONFIRMED (ITER-31)**: `[2B lead][N×5B groups][9B tail][FFFFFFFF][00][-1.0×5][00]`; N=u4>>8, 5N+37=len (4/4); the 30 B closing section = the FIXED_A ext minus its 7-zero prefix |
 | TEXT_CRLF | 183 | self-terminating text grammar (below) |
-| G9_RTTI | 10 | v4 known-type RTTI boundary search |
+| G9_RTTI | 10 | **CONFIRMED (ITER-31)**: `[2B lead][degtext?][N×5B groups, N=u4>>8][pad][[01]+33B REC33]` — the 33 B G3B record grammar embedded (incl. the ultra-rare flag=02); R7/R9's published hexes were LINK-SHIFTED views (v4 exts sliced from the 2-byte link field) — corrected in `PE_NIF_RARE_VARIANTS_R31_20260904_154509` |
 
 Selector: peek 8 bytes + header fields:
 `u3==0xFFFFFFFF && u2<4` → FIXED_A; `peek[7]==0` → SHORT28; `peek[7]==1` →
@@ -247,20 +247,25 @@ Census of the stored `ark_extension` payloads
 | FIXED_B_61 | 190 | **1** | same null record + `[01][u32 29]` size prefix |
 | SHORT28 | 35 | **1** | 8×00 (empty) |
 | V10_BASE_33B | 125 | 92 | **the SAME 33B record as G3B** (X ∈ {5,4,0xff,...}) |
-| G9_RTTI (v4) | 10 | 4 | same record embedded after a small v4 prefix |
-| G3D | 348 | 348 | **STRONGLY_SUPPORTED (ITER-15, materialized evidence)**: node-reference list — 5-byte records `[00][02\|03 class][u16 NiNode block_index][00]`; 100% of 15,885 indices point at NiNode blocks in-file |
+| G9_RTTI (v4) | 10 | 4 | same record embedded after a small v4 prefix (link-shift corrected in ITER-31) |
+| G3E (v10) | 4 | — | **CONFIRMED (ITER-31)**: `[m×5B groups][00 02 01][u32 text_len][text][00 00]`; text_len == actual 4/4; the text parses with the NodeDataStart grammar 4/4 |
+| G3A_PREAMBLE | 6 | — | **CONFIRMED (ITER-31)**: ext = 0 B; valid v10 preamble at ext_start, next block = NiNode 6/6 |
+| G3D | 348 | 348 | **CONFIRMED**: node-reference list — 5-byte records `[00][class 01\|02\|03][u16 NiNode block_index][00]`; 100% of 15,885 indices point at NiNode blocks in-file (post-audit + R15-COR) |
 
-**Conclusion (STRONGLY_SUPPORTED — pending independent post-audit for
-CONFIRMED): NiArkAnimationExtraData appears to have ONE binary record
-grammar (`[u32 29][02][01/02][X][Y][5×f32]`) + TEXT records + G3D index
-lists. The FIXED variants appear to be simply "default/empty behavior"
-(null record with X=-1, all params -1.0). The variant zoo = framing
-differences, not different data.** Evidence packages:
-ITER-15 `99_Audits\PE_NIF_G3D_NODE_REFS_R15_EVIDENCE_20260904_135342\`,
-ITER-16 `99_Audits\PE_NIF_G3CB_GRAMMAR_R16_EVIDENCE_20260904_135649\`
-(1,274 records JSONL). Remaining open: G3D header/record semantics
-(what the indices
-reference) and the G3C_BOUNDARY long-text field parse.
+**Conclusion — CONFIRMED (byte-exact closure by ITER-30/31): the whole
+NiArkAnimationExtraData family (5,596 blocks, one per file; the earlier
+"5,521" was an arithmetic text error) is ONE record grammar
+`[u32 size][02][flag][u32 X][u8 Y][5×f32][u8 class][u8 N][N×(string+u32)]`
++ TEXT records + G3D index lists + null/empty variants. The FIXED variants
+are "default/empty behavior" (null record with X=-1, params -1.0). The
+variant zoo = framing differences, not different data.** Every family now
+has a byte-exact grammar: G3B 1,682/1,682, G3D 348/348, FIXED_A/B null
+records, SHORT28/G3A empty, G3E 4/4, BINARY 4/4, G9_RTTI 10/10 (ITER-31);
+TEXT records censused 1,274/1,274 with the branched suffix schema.
+Evidence packages: ITER-15/16 + R15-COR/R16-COR + `PE_NIF_G3B_VARIABLE_R30_20260904_152304`
++ `PE_NIF_RARE_VARIANTS_R31_20260904_154509`. Remaining open in the family:
+G3D class-byte role semantics (01/02/03) and the per-channel TEXT param
+semantic labels.
 
 ### v10 variants — 9.3.5 census (ITER-3):
 | Variant | Count | Note |
