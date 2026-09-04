@@ -123,16 +123,30 @@ independent decoder = non-circular):
 - morph files carry NO NiKeyframeController (0/354) — morph data is a
   standalone animation channel
 
-OPEN (339/354 blocks): variable/sparse record layout — ITER-13/14 status:
-big records = uniform W-float record + variable remainder; the
-`[u16 idx][f32][f32]` entry hypothesis (ITER-13) was **REJECTED at
-exact-consumption level (48/51 remainders NOFIT; 3 fit a
-`[u32 count][f32]...` variant)**. Remainders observed 8–36 B. The exact
-grammar needs a raw-span (not float-filtered) record reconstruction —
-tracked as the last open item of the morph family.
+OPEN (339/354 blocks): variable/sparse record layout — status after
+ITER-14/17/18 (external post-audit corrected):
+- ITER-13/14: the `[u16 idx][f32][f32]` entry hypothesis **REJECTED at
+  exact-consumption level (48/51 remainders NOFIT; 3 fit a
+  `[u32 count][f32]...` length check only — not a full validation)**.
+- ITER-17's 446/10,274 (4.34%) negative is **REJECTED — invalid predicate**
+  (unit bug: `Wm` in bytes treated as a float count; external post-audit
+  P0 finding, confirmed independently in R18-run1 and corrected).
+- ITER-18 (run6, correct units): the entry-stream model
+  `[uniform W floats][[u16 id][4×f32] entries + pad floats + 2B zero tail]`
+  explains **6,167/10,274 big spans EXACTLY (60.03% — an upper bound due to
+  pad permissivity)**; 51,250 entries censused (dominant id=0 ×35,087,
+  structured id clusters 14080/14272/14336 even-32 steps, 1536/768/512
+  power-of-2). The residual **4,107 spans contain a structurally DIFFERENT
+  pattern: repeating `[u16 value][u16 0]` pairs** (f16-like quantized
+  values, e.g. `b640 0000 b744 0000 b780`) — candidate for the next
+  iteration, NOT yet tested.
+- The exact grammar needs a raw-span (not float-filtered) record
+  reconstruction — tracked as the last open item of the morph family.
 Provenance: `99_Audits\PE_NIF_MORPH_DECODE_R4_20260904_122056\` +
-`99_Audits\PE_NIF_MORPH_SPARSE_CLOSURE_R14_20260904_133726\`
-(SPARSE_CLOSURE.json, driver SHA `FCB70364...`).
+`99_Audits\PE_NIF_MORPH_SPARSE_CLOSURE_R14_20260904_133726\` +
+`99_Audits\PE_NIF_MORPH_KEYFRAME_R18_20260904_141009\`
+(MORPH_SPAN_WALK.json = full 10,274-row per-span census; 6-run history in
+REPORT.md with two documented driver bugs and fixes).
 
 ## NiArkShaderExtraData — 2,084× — SEMANTICS DECODED (ITER-3 census 2026-09-04)
 
@@ -246,16 +260,29 @@ NodeDataStart
 <count: 0|1|2>      channel count
 <start: float>      start time / initial state
 <offset: float>     
-<mode>              activeIdle (looping idle) | single (play-once)
+<mode>              activeIdle (looping idle) | single (play-once) |
+                    Single | active | activeIdle/single
 <channel>           derivatives | ParticleSystem | Controllers | cyclic |
                     Texture | NodeUpdate
 <target>            position | velocity | rotation | values | All
 [<subtype>]         translation | NORMAL | ...
 <axis: 0|1|2>       rotation/translation axis
-<6 numeric params>  in PAIRS (e.g. ParticleSystem: 15/15, 3/3, 30/30, 0/0,
-                    13.33/13.33, 0/0 = rate, size, lifetime, ..., spread;
-                    derivatives translation: amplitude, phase, period, ...)
+<params>            CHANNEL-DEPENDENT (see branched schema below)
 ```
+
+**Param tail is BRANCHED, not fixed-6** (correction run
+`PE_NIF_G3CB_SCHEMA_R16_COR_20260904_142550`, per external post-audit —
+records have 7..24 fields total):
+
+| channel | n | fields | params after prefix | typical params |
+|---|---|---|---|---|
+| derivatives | 605 | 13–16 | 7–10 | amplitude, phase, period, ... |
+| ParticleSystem | 257 | 20–24 | 14–18 | 15/15, 3/3, 30/30, 0/0, 13.33/13.33, 0/0 = rate, size, lifetime, spread, ... |
+| Controllers | 237 | 7–22 | 1–16 | minimal (axis-driven) up to long lists |
+| cyclic | 157 | 14–16 | 8–10 | oscillation params |
+
+Param SEMANTICS per channel remain open (values are readable; exact
+meaning of each position is not yet field-by-field mapped).
 
 Confirmed behavior examples: rotating asteroids (`Asteroid` 120.0 deg/s,
 `Spacestation` 150.0), industrial machinery (shaft machine fins rotation
@@ -324,20 +351,22 @@ Other variant findings (ITER-7, same run dir):
   systems (`PCloud01-Emitter ... ParticleSystem values NOR...`)
 - **G3E (4)**: `[binary header incl. u32 text_len]` + the same TEXT records
 - **G9_RTTI v4 (10)**: binary record family with all -1.0 float params
-- **G3D (348)**: **DECODED — STRONGLY_SUPPORTED (materialized evidence
-  2026-09-04, ITER-15; pending independent post-audit for CONFIRMED)**:
-  ext = k × 5-byte records `[u8 00][u8 02\|03 = class][u16 block_index][u8 00]`
-  (k = 47–49 typical; ext 245 B = 49 records EXACTLY). **All 15,885 indices
-  (100%) point at NiNode blocks in the same file** — G3D is the binary
-  node-reference list (the set of scene nodes covered by the behavior;
-  marker 02 regular / 03 special), the index-based counterpart of the TEXT
-  records' named directives. Evidence package:
-  `99_Audits\PE_NIF_G3D_NODE_REFS_R15_EVIDENCE_20260904_135342\`
-  (denominator correction: the earlier inline number 15,743 was a
-  per-block-capped artifact; true count 15,885). The frozen parser's size
-  formula `byte[1]×5` is WRONG (e.g. 9×5=45 ≠ 245); the boundary search
-  compensates today; formula correction is a bounded R61 follow-up
-  (frozen-baseline rules: full 5426+5596 regression before any change).
+- **G3D (348)**: **DECODED — CONFIRMED (post-audit 2026-09-04 + correction
+  run `PE_NIF_G3D_CLASS_R15_COR_20260904_142037`)**: ext = k × 5-byte
+  records `[u8 00][u8 class 01|02|03][u16 block_index][u8 00]`
+  (k = 47–49 typical; ext 245 B = 49 records EXACTLY). Class census:
+  **02 ×15,150 | 03 ×718 | 01 ×17 (7 files: 146709, 137260, 459889, ...)**.
+  **All 15,885 indices (100%) are in-bounds and point at NiNode blocks in
+  the same file** — G3D is the binary node-reference list (the set of scene
+  nodes covered by the behavior), the index-based counterpart of the TEXT
+  records' named directives. The frame (348/348), in-bounds (15,885/15,885)
+  and NiNode-target (15,885/15,885) claims were independently reproduced in
+  the correction run and match the external post-audit exactly. **OPEN: the
+  class-byte semantics (01/02/03; 01 is rare — 17 records in 7 files).**
+  The frozen parser's size formula `byte[1]×5` is WRONG (e.g. 9×5=45 ≠ 245);
+  the boundary search compensates today; formula correction is a bounded
+  R61 follow-up (frozen-baseline rules: full 5426+5596 regression before
+  any change).
 
 ### TEXT_CRLF grammar (31/31 CONFIRMED) — the record framing
 
