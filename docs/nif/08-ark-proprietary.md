@@ -200,8 +200,32 @@ Confirmed examples: scene rotators (`Bip01_rotator1..4`, `Asteroid` 120.0,
 **Conclusion: NiArkAnimationExtraData (one per file) is the file's behavior
 metadata carrier; the TEXT variants hold human-readable per-node directives
 for procedural animation (rotators, flames, sprays, particle systems,
-texture animation, loop modes).** The binary variants (G3B ×1,685 dominant,
-FIXED_A/B, Mode2 33B, G3D) remain layout-UNKNOWN — the last big NIF unknown.
+texture animation, loop modes).**
+
+### G3B binary record — DECODED (ITER-6)
+
+The dominant binary variant (1,685 blocks; u4=0x01000000 marker in 1,682)
+carries the SAME behavior metadata in a compact binary record:
+
+```
+per 33-byte record (ext is 33 B or 66 B = 2 records; 82 multi-record blocks):
+  u32 size = 29 (constant — CONFIRMED)
+  u8  02   (constant — CONFIRMED)
+  u8  01   (constant — CONFIRMED)
+  u32 X    behavior/channel enum (values 1..15; top: 5×356, 4×184, 10×174,
+           3×147, 7×109, 1×99, 6×90, 12×77 ...)
+  u8  Y    flag (1 ×1,376 / 0 ×70 — enable/loop)
+  f32 ×5   animation params — ALWAYS the symmetric pattern
+           (A, A/2, 0, 0, A): (3.333,1.667,0,0,3.333) ×140, (2,1,0,0,2) ×84,
+           (1.333,0.667,0,0,1.333) ×75, (1,0.5,0,0,1) ×61, (0,0,0,0,0) ×56
+  pad      2–3 zero bytes
+```
+
+Parse coverage: 1,446/1,628 33-multiple blocks parse byte-exact
+(`99_Audits\PE_NIF_G3B_DECODE_R6_20260904_123703\`). Semantics
+STRONGLY_SUPPORTED: binary cousin of the TEXT records — behavior enum +
+symmetric oscillation/rotation parameters. OPEN: variable-length G3B exts
+(49–95 B, 182 blocks) and FIXED_A/B + Mode2 + G3D layouts.
 
 ### TEXT_CRLF grammar (31/31 CONFIRMED) — the record framing
 
