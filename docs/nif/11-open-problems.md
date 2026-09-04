@@ -1,15 +1,26 @@
 # 11 — Open problems and REJECTED claims
 
+## Solved during the documentation loop (2026-09-04, ITER-3 census)
+
+| Item | Status |
+|---|---|
+| BNT2 index field_c | **CONFIRMED = CRC32(payload), 5,596/5,596** |
+| NiArkShaderExtraData unknownString | **DECODED** — CRLF shader config (`effectfile`, `CullMethod`, `AlphaTreshold`, `EnableAnimation`, `reflectionMapCube`/`EnvMapCube`); unknownInt = 0 always |
+| NiArkViewportInfoExtraData ext len 13 | **DECODED** — `0x03 + 12×00` (2,304 files); length histogram quantized odd |
+| NiVertexMorphExtraData header | **DECODED** — `0x01 + u32 vertex_count + u16 flags` |
+| NiArkTextureExtraData entry names | `<material>_<SLOT>` convention decoded (BASE/BUMP/ENVIRONMENT) |
+| NiArkAnimationExtraData u1 | constant 5 (v10) / 0 (v4) — era marker |
+
 ## Byte-level UNKNOWNs (parse-safe, semantics open — all raw-kept + SHA256)
 
 | Item | What is known | What is open |
 |---|---|---|
-| NiArkAnimationExtraData extension | full grammar (FIXED/BINARY/TEXT_CRLF variants, trailers 6/35/39 B) | per-field semantics of node records; u1..u4 header meanings |
-| NiArkImporterExtraData trailing 38 B (v10) | always 38 B (Mode1+Mode2) | field meanings |
-| NiArkTextureExtraData num_tex (=3), field1, field2-low8 | entry structure + counts decoded | semantics; low-8 flags |
-| NiArkViewportInfoExtraData extension | ≤121 B, boundary-exact | full internal layout |
-| NiVertexMorphExtraData payload | 15..59,027 B, first byte always 0x01 | morph/weight field layout |
-| NiArkShaderExtraData unknownInt/unknownString | int + string layout | shader config semantics |
+| BNT2 index field_d | == CRC32(payload) in 3,435/5,596 | the differing 2,161 (REJECTED: 2003-era crc, crc32c, name-concats, halves, cross-entry) |
+| NiArkAnimationExtraData extension | full grammar + variant census (9.3.5: V10_BASE_0B 2270, G3B 1685, G3D 348, FIXED_A 347, G3C 308, FIXED_B 190, TEXT_CRLF 172, V10_BASE_33B 125) | per-field semantics of node records; u2/u3 packed meanings |
+| NiArkImporterExtraData trailing 38 B (v10) | first byte = Mode marker; `ffffff 00000000 ffffffff ffffff` + float-like ~20 B + 00; 4,017 distinct | field meanings |
+| NiArkTextureExtraData field1 / field2-low8 | two classes: {field1=1, low8=0} ×3,042 / {field1=-256, low8=255} ×1,796 | what the classes mean |
+| NiArkViewportInfoExtraData ext > 13 B | quantized odd lengths 21/85/49/45/121/35/39/43 | internal layout of longer exts |
+| NiVertexMorphExtraData payload | header decoded; sizes 765..205,125; 1.0f terminators | internal record layout |
 | BNT2 index field_c / field_d | structure | semantics (hash? crc? flags?) |
 | NiPixelData unknown3/unknown8 bytes | offsets fixed | meaning |
 | NiVertexColorProperty unknown_pe_field | values 0/1 | meaning |

@@ -14,14 +14,18 @@ index:
     name          — variable-length ASCII, 0x0A-terminated (e.g. "23225.nif\n")
     packed_size   — u32   (byte length of the payload)
     offset        — u32   (absolute file offset of the payload)
-    field_c       — u32   — UNKNOWN (hash/crc? — unverified)
-    field_d       — u32   — UNKNOWN (unverified)
+    field_c       — u32   — **= CRC32(payload) — CONFIRMED 5,596/5,596 (100%, ITER-3)**
+    field_d       — u32   — equals CRC32(payload) in 3,435 entries; differs in
+                           2,161 (UNKNOWN — REJECTED: crc32 of 2003-era file
+                           (0 hits), crc32c, name-concats, halves, cross-entry
+                           matches; possibly a checksum of another build)
 ```
 
 Validated on PCG 9.3.5 Models.bnt: 5,596 entries, index consumed
 byte-exact (150,133/150,133), adjacency holds for EVERY entry
 (`offset_{i+1} = offset_i + size_i`), zero anomalies. NIF payloads are
 stored **uncompressed** (raw NIF bytes, first entry at offset 0).
+**field_c gives free per-payload integrity checking for any tool.**
 
 SHA256 (9.3.5 Models.bnt):
 `c950a8c26f2063f4dd748d88c95bd769aac77a2f5f76face7e969be0b3d3bee0`
