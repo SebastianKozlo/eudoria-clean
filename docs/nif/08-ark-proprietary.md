@@ -244,7 +244,7 @@ reference) and the G3C_BOUNDARY long-text field parse.
 |---|---|---|
 | V10_BASE_0B | 2,270 | u2=FFFFFFFF, u4=0 |
 | G3B | 1,685 | binary → boundary search |
-| G3D | 348 | u3≠0, byte0=0x01, size=byte[1]×5 |
+| G3D | 348 | u3≠0, byte0=0x01, size=u3_byte1×5 |
 | FIXED_A_57 | 347 | 37 B |
 | G3C | 308 | text-like → TEXT_CRLF grammar |
 | FIXED_B_61 | 190 | 41 B |
@@ -399,13 +399,19 @@ Other variant findings (ITER-7, same run dir):
   and NiNode-target (15,885/15,885) claims were independently reproduced in
   the correction run and match the external post-audit exactly. **OPEN: the
   class-byte semantics (01/02/03; 01 is rare — 17 records in 7 files).**
-  The frozen parser's size formula `byte[1]×5` is WRONG — **the correct
-  predictor is `byte[9] × 5` = ext_len, EXACT for 348/348 (ITER-26,
-  `PE_NIF_G3D_LEN_PREDICTOR_R26_20260904_145035`)**: header byte 9 = the
-  number of 5-byte records (byte[1] is the wrong offset; the boundary
-  search compensates today, preserving 100% parse closure). The frozen-
-  baseline amendment (one-byte fix in a sandbox copy + full 5,426+5,596
-  regression + external post-audit) is the designed ITER-27 follow-up.
+  **Size formula — RETRACTION of the old "WRONG formula" claim
+  (ITER-27, `PE_NIF_G3D_FORMULA_RETRACTION_R27_20260904_145244`)**: the
+  frozen parser's formula `u3_byte1 × 5` (its internal comment calls it
+  "byte[1]×5" — byte 1 **of u3**, which is header byte 9) was **ALWAYS
+  CORRECT: u3_byte1×5 == ext_len for 348/348 blocks** (e.g. 591990.nif:
+  hdr `05 00 00 00 02 00 00 00 01 31 00 00 …` → u3=0x00003101 →
+  u3_byte1=0x31=49 → 49×5=245 ✓). The ITER-7 example "9×5=45≠245" was a
+  MISREADING (actual b1=0; no such block exists) — claim REJECTED and
+  RETRACTED; the ITER-26 report repeated it without checking the census
+  (documented anti-pattern: overclaim-from-prior-text). NO frozen-baseline
+  amendment needed; the designed regression is CANCELLED. The parser
+  validates the formula end against the next-block preamble and only
+  falls back to boundary search when that validation fails.
   **Class semantics (ITER-22, `PE_NIF_G3D_CLASS_SEM_R22_20260904_144632`)**:
   ALL three classes target SKELETON nodes (class 2: bone ×14,429 + other
   ×721; class 3: bone ×666 + other ×52; class 1: bone ×15 + other ×2 —
