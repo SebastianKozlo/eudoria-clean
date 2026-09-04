@@ -163,11 +163,19 @@ ITER-14/17/18/19 (external post-audit corrected):
   (unit bug: `Wm` in bytes treated as a float count; external post-audit
   P0 finding, confirmed independently in R18-run1 and corrected).
 - The morph big-span population is **MULTI-FORMAT** (ITER-19 union run):
-  - **Family A (r18, 6,167 spans exact-fit — upper bound due to pad
-    permissivity)**: entry-stream `[uniform W floats][[u16 id][4×f32]
-    entries + pad floats + 2B zero tail]`; 51,250 entries (dominant id=0
-    ×35,087, structured clusters 14080/14272/14336 even-32 steps,
-    1536/768/512 power-of-2).
+  - **Family A (r18, 6,167 spans exact-fit — CONSUMPTION MODEL ONLY)**:
+    entry-stream `[uniform W floats][[u16 id][4×f32] entries + pad floats + 2B zero tail]`;
+    51,250 entries. **ITER-33 (`PE_NIF_MORPH_IDS_R33_20260904_162507`) shows this is
+    NOT the true record grammar for the majority**: the u16 ids have NO single
+    corpus-wide semantics — T1 id<N REJECTED corpus-wide (nonzero in-range 23.53%);
+    T2 float-half REJECTED as clean f32-array; T3 not contiguous (steps 128/32/64/16);
+    T4 even-32 clusters NOT N-related (id/N 3.11–256; 5-bit-quantized weight band);
+    T6 no cross-block partition (disjoint only 5/64 files). **The REAL sparse morph
+    records = 10.8% of entries** (id<N, 49.8% weight-pairs f0+f1=1.0, 99.0% clean
+    floats, 4-aligned starts → **vertex-index STRONGLY_SUPPORTED**, consistent with
+    ITER-4's W=11 model); **the dominant 89.2% (incl. all id=0 ×35,087 — 87.96% carry
+    non-zero float content, NOT padding) are greedy-walk artifacts: fragments of a
+    quantized float payload whose precise encoding remains UNVERIFIED**.
   - **Family B (r19, H-KEY42 — 1,915 spans STRICT exact-fit)**:
     `[tag][W×f32 first record]` + k × units
     `[u32 n][f32 w][(W-2)×f32]` (unit_len = 6+(W-2)×4; W=11 ×1,025 /
