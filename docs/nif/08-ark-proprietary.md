@@ -21,8 +21,8 @@ skinned/transformed extents):
 ```
 [u8 mode (00/01 — Mode1/Mode2 marker)]
 [12 B header: ffffff-pattern + flag u32 at offset 3 — only 10 distinct
- headers in 4,838 files: {00000000 x3807, 00000001 x312, 01000000 x72,
- 01000001 x34} + pattern variants (ffffff / 00ff); flag bits UNKNOWN]
+  headers in 4,838 files: {00000000 x3807, 00000001 x312, 01000000 x72,
+  01000001 x34} + pattern variants (ffffff / 00ff); flag bits UNKNOWN]
 [f32 min.x][f32 min.y][f32 min.z]
 [f32 max.x][f32 max.y][f32 max.z]
 [u8 pad = 0]
@@ -33,6 +33,28 @@ bounds == mesh (-50..50, 0..142.3); 505813 z 0..11528.7 (a 115 m tower);
 bounds (culling/DPVS-relevant). First byte 00/01 matches Mode1/Mode2.
 Validation:
 `99_Audits\PE_NIF_IMPORTER_DECODE_R10_20260904_132004\02_results\IMPORTER_BOUNDS_VALIDATION.json`.
+
+**Header patterns — DECODED (ITER-29,
+`PE_NIF_IMPORTER_HEADER_R29_20260904_150900`)**: the header (before the
+38B bbox tail) has exactly **14 distinct byte patterns (4 v10 + 10 v4),
+10 after masking the file-specific v4 link u32** — reproducing ITER-11's
+count with the delta documented. Layout is **version-routed (CONFIRMED)**:
+v10 `[u32 11]"ArkImporter"[u32 8][u32 str_len]<exporter_string>` in
+4,838/4,838 10.1.0.0 files; v4
+`[i32 link][i32 0][i32 8][u32 str_len]<string>[3 flag bytes]` in 758/758
+4.x files. The varying bytes are:
+1. **The exporter/toolchain version string — ERA PROVENANCE
+   (STRONGLY_SUPPORTED)**: `Gamebryo_1_1` ×4,004 | `4.1.0.12` ×1,113 |
+   `4.0.0.2` ×352 | `4.0.0.0` ×127 (sum 5,596). The string survives NIF
+   version up-conversion (834/4,838 v10 files carry 4.x-era strings —
+   re-export history; e.g. 139 4.1.0.12-NIF files carry a 4.0.0.2
+   string). Era matrix (nif_version × exporter_string) in
+   `02_results\PATTERNS.json`.
+2. **The v4 next-extra-data link**: 38/38 in-range targets =
+   NiStringExtraData; −1 terminator ×720.
+3. **A 3-byte flag region** with only 3 observed states (558/128/72 —
+   `000000`/`0000ff`/`00ffff`) — semantics UNVERIFIED (kept out of claims).
+
 The version string = the exporter/Gamebryo version that produced the file.
 
 ## NiArkTextureExtraData — one per file (5,596×); THE texture binding block
