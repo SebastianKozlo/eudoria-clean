@@ -34,6 +34,9 @@ export const KNOWN_HASHES = {
   'PCG_9_3_5:Terrain/terrain.bnt': '95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990',
   // EU-runtime texture corpus (8,095 BNT2 entries; M3-2-R1 8,095/8,095 raw payloads).
   'EU_LATER:Textures.bnt': '2EAE115958D3157FA62F8CBFBAC6F4BFB5C38A820F1D05F9248C4200C0208A56',
+  // PCG_9_3_5 texture corpus (SAME-ERA container for the clean runtime primary
+  // era; BNT2 framing verified in-session ITER 020; 973,942,771 bytes).
+  'PCG_9_3_5:Textures.bnt': '61ACD13B140E130647EEE24C1E2669D3734990B76CF74897DDD3BA0F4EA61393',
   // Jan-2003 CD texture corpus (4,833 ArkVFS entries; F-107 canon).
   'CD_JAN_2003:Textures.ark': 'D611D1257D2E5433B6DF218D671AA60D003C5C6587858757C7AF3219BB739B80',
 };

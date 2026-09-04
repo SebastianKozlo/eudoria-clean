@@ -4,7 +4,8 @@
 // fetches original PE containers from ABSOLUTE paths exposed explicitly
 // via /pcg/... aliases (see ALIASES) — never writes.
 //
-// Port 8130 (new; 8124/8126 belong to legacy eudoria-web servers).
+// Port: env PORT override, default 8132 (ITER 020; 8130 was the ITER 019
+// server; 8000/8124/8126 belong to legacy eudoria-web servers).
 'use strict';
 import http from 'node:http';
 import { promises as fs } from 'node:fs';
@@ -12,7 +13,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
-const PORT = 8130;
+const PORT = Number(process.env.PORT) || 8132;
 
 // Explicit, era-labeled, read-only aliases into the original corpora.
 // PCG_9_3_5 primary reference (ledger ENTRY #6): pcg_install.

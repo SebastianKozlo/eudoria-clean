@@ -21,6 +21,7 @@ import { Bnt2Archive } from './Bnt2Archive.js';
 import { ArkArchive } from './ArkArchive.js';
 import { Bnt2TerrainArchive } from './Bnt2TerrainArchive.js';
 import { decodeTdfPayload, gridFromName, isSentinelName, TDF_SENTINEL_NAME } from './TdfDecoder.js';
+import { decodeMaterialTail, maskSumStats, MATERIAL_TAIL_START } from './TdfMaterialTailDecoder.js';
 import { TerrainTile, HEIGHT_SCALE_CALIBRATION } from './TerrainTile.js';
 import { makeProvenance, EVIDENCE_STATUS, ERAS, KNOWN_HASHES } from './PEProvenance.js';
 
@@ -242,6 +243,60 @@ export class PESourceMount {
     });
   }
 
+  /**
+   * getTerrainMaterials — Gate B clean-path material decode (ITER 020).
+   * Decodes the TDF material tail of one tile into canonical material
+   * objects with FULL provenance, through the SAME clean chain as
+   * getTerrainTile (era-validated archive framing, ORIGINAL bytes only).
+   * Stone04 full-coverage base rule CONFIRMED (iter009); normalization
+   * REJECTED — sums>255 tolerated as ORIGINAL DATA. System records
+   * (dim=2/4/8/32/256) are carried raw with UNVERIFIED labels.
+   * @returns {{tile, materials, systemRecords, sums, provenance}}
+   */
+  async getTerrainMaterials({ era, gridX, gridY }) {
+    const tile = await this.getTerrainTile({ era, gridX, gridY });
+    const decoded = decodeMaterialTail(tile.tail);
+    return {
+      tile,
+      materials: decoded.namedMaterials.map((m) => ({
+        position: decoded.records.indexOf(m),
+        id: m.id,
+        name: m.name,
+        dim: m.dim,
+        bps: m.bps,
+        unk: m.unk,
+        res: m.res,
+        maskEncoding: m.maskEncoding,
+        mask: m.mask,          // Uint8Array(256) — 16x16 row-major weights
+        recordOffset: m.recordOffset,
+        size: m.size,
+      })),
+      systemRecords: decoded.systemRecords.map((r) => ({
+        dim: r.dim, id: r.id, bps: r.bps, size: r.size,
+        maskEncoding: r.maskEncoding, recordOffset: r.recordOffset,
+        label: 'SYSTEM_RECORD_ROLE_UNVERIFIED (iter016 census: dim=2 template/parameter, dim=4 u16-per-pixel, dim=32 system mask, dim=256 fine-grain candidate)',
+      })),
+      sums: maskSumStats(decoded.namedMaterials),
+      provenance: makeProvenance({
+        era: tile.provenance.era,
+        container: tile.provenance.container,
+        entry: tile.provenance.entry,
+        physicalSource: tile.provenance.physicalSource,
+        offset: tile.provenance.offset,
+        decoderVersion: `${PESOURCE_DECODER_VERSION}+material-tail-v1`,
+        evidenceStatus: EVIDENCE_STATUS.CONFIRMED,
+        extra: {
+          ...tile.provenance.extra,
+          materialTailStart: MATERIAL_TAIL_START,
+          recordCount: decoded.records.length,
+          namedMaterialCount: decoded.namedMaterials.length,
+          systemRecordCount: decoded.systemRecords.length,
+          tailConsumedExactly: decoded.consumed === tile.tail.byteLength,
+        },
+      }),
+    };
+  }
+
   /** The sentinel/overview tile, explicit (charter §3: handled explicitly). */
   async getSentinelInfo({ era }) {
     const container = 'Terrain/50.bnt';
@@ -302,7 +357,12 @@ export class PESourceMount {
         extra: {
           textureId, containerFormat: m.format, payloadSize: payload.byteLength,
           hashVerified: m.hashVerified,
-          crossEra: era !== 'JUL_2003', // explicit cross-era tag (always true for texture containers)
+          crossEra: era === 'JUL_2003' ? false : era !== 'PCG_9_3_5',
+          // PCG_9_3_5:Textures.bnt is SAME-ERA for the clean runtime primary era
+          // (ledger ENTRY #6; verified in-session ITER 020). JUL_2003 has no
+          // texture container (auditor-verified) — any JUL texture resolution
+          // is cross-era BY CONSTRUCTION and stays explicit.
+          sameEraAsCleanRuntimePrimary: era === 'PCG_9_3_5',
         },
       }),
     };
