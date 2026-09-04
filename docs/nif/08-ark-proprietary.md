@@ -69,18 +69,34 @@ extension (2,304 files) = **`03 + 12×00`**; length histogram is quantized to
 odd sizes: 13 (×2,304), 21 (×752), 85 (×592), 49 (×255), 45 (×80), 121 (×79),
 35, 39, 43. Max 121 B. Longer extensions: raw-kept + SHA256, layout UNKNOWN.
 
-## NiVertexMorphExtraData — 354× (9.3.5) — header DECODED (ITER-3)
+## NiVertexMorphExtraData — 354× (9.3.5) — record model DECODED (ITER-4)
 
 ```
 0x01 (constant)
-u32  vertex-count of the morph-target mesh (CONFIRMED when the correct
-     mesh is paired: 592572.nif 1294 == 1294; other samples need correct
-     mesh pairing — the file can contain several meshes)
-u16  flags/params (values 0, 64, 1024 observed; semantics UNKNOWN)
-[variable payload 765..205,125 B — float-bearing morph/weight data,
- ends with 1.0f terminators in sampled targets]
+u32  vertex count N (= the morph-target mesh vertex count; CONFIRMED when
+     the correct mesh is paired: 592572.nif 1294 == 1294)
+u16  tag (constant per block; values 0,1,3,14,16,24,64,384,512,1024,1536;
+     0x0000 requires special handling)
+payload = N per-vertex records + tail:
+  record = [u16 tag][W × f32]         W ∈ {10, 11} per block
+  the LAST record carries one EXTRA f32 (terminator/final weight — UNKNOWN)
 ```
-Internal record layout: UNKNOWN (raw-kept).
+
+CONFIRMED (exact tag-first walk, byte-exact to block end; cross-check:
+records == N for every fully-walked block; R61 block boundary = ground truth;
+independent decoder = non-circular):
+- W=10 records: `[1.0, ...9 delta floats]` (e.g. 591782: all-identity
+  `[1, 0×9]`; 591807: real deltas)
+- W=11 records: `[w0, w1, ...9 floats]` with **w0 + w1 = 1.0 exactly**
+  (blend weights of two morph states)
+- values quantized on a 2⁻¹⁸ grid (3.8147e-06 = exactly 2⁻¹⁸, recurring)
+- morph files carry NO NiKeyframeController (0/354) — morph data is a
+  standalone animation channel
+
+OPEN (339/354 blocks): variable/sparse record layout (large records with
+embedded sub-arrays, e.g. 2796..20,156 B) — structure UNKNOWN.
+Provenance: `99_Audits\PE_NIF_MORPH_DECODE_R4_20260904_122056\`
+(probes 1–6, driver hashes recorded; MORPH_PROBE6_FINAL.json).
 
 ## NiArkShaderExtraData — 2,084× — SEMANTICS DECODED (ITER-3 census 2026-09-04)
 

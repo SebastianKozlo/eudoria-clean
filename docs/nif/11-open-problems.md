@@ -20,7 +20,7 @@
 | NiArkImporterExtraData trailing 38 B (v10) | first byte = Mode marker; `ffffff 00000000 ffffffff ffffff` + float-like ~20 B + 00; 4,017 distinct | field meanings |
 | NiArkTextureExtraData field1 / field2-low8 | two classes: {field1=1, low8=0} ×3,042 / {field1=-256, low8=255} ×1,796 | what the classes mean |
 | NiArkViewportInfoExtraData ext > 13 B | quantized odd lengths 21/85/49/45/121/35/39/43 | internal layout of longer exts |
-| NiVertexMorphExtraData payload | header decoded; sizes 765..205,125; 1.0f terminators | internal record layout |
+| NiVertexMorphExtraData payload | per-vertex record model CONFIRMED (ITER-4: N records × [tag][W×f32], W∈{10,11}, weight pairs sum to 1.0, 2⁻¹⁸ quantization); exact-walk blocks: 15/354 uniform | the 339 sparse/variable blocks' inner layout; the last-record extra float's meaning |
 | BNT2 index field_c / field_d | structure | semantics (hash? crc? flags?) |
 | NiPixelData unknown3/unknown8 bytes | offsets fixed | meaning |
 | NiVertexColorProperty unknown_pe_field | values 0/1 | meaning |
