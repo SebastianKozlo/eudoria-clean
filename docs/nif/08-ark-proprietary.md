@@ -289,7 +289,14 @@ records have 7..24 fields total):
 |---|---|---|---|---|
 | derivatives | 605 | 13–16 | 7–10 | amplitude, phase, period, ... |
 | ParticleSystem | 257 | 20–24 | 14–18 | 15/15, 3/3, 30/30, 0/0, 13.33/13.33, 0/0 = rate, size, lifetime, spread, ... |
-| Controllers | 237 | 7–22 | 1–16 | minimal (axis-driven) up to long lists |
+| Controllers | 237 | 7–22 | 1–16 | **FULLY MAPPED (ITER-24,
+`PE_NIF_CONTROLLERS_GRAMMAR_R24_20260904_144839`)**: positions 00–07 =
+`[node][count][start 0.0][offset][mode][Controllers][All][play-mode
+LOOP/DONOTCHANGE/SINGLE]` (237/237), then OPTIONAL NAMED SUB-RECORDS:
+`Target:` + 6 floats (attachment position+rotation — the ITEM ATTACHMENT
+system: Bip01_item ×107, the item bone), `Camera:` + 2 (camera params —
+loops with the ITER-8 viewport findings), `IconSize:` + 1,
+`ViewportSettings:` + params, texture-anim triple (GeoTexanim01). |
 | cyclic | 157 | 14–16 | 8–10 | oscillation params |
 
 Param SEMANTICS per channel remain partially mapped (ITER-23,
