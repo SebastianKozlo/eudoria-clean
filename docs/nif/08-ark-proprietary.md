@@ -399,10 +399,13 @@ Other variant findings (ITER-7, same run dir):
   and NiNode-target (15,885/15,885) claims were independently reproduced in
   the correction run and match the external post-audit exactly. **OPEN: the
   class-byte semantics (01/02/03; 01 is rare — 17 records in 7 files).**
-  The frozen parser's size formula `byte[1]×5` is WRONG (e.g. 9×5=45 ≠ 245);
-  the boundary search compensates today; formula correction is a bounded
-  R61 follow-up (frozen-baseline rules: full 5426+5596 regression before
-  any change).
+  The frozen parser's size formula `byte[1]×5` is WRONG — **the correct
+  predictor is `byte[9] × 5` = ext_len, EXACT for 348/348 (ITER-26,
+  `PE_NIF_G3D_LEN_PREDICTOR_R26_20260904_145035`)**: header byte 9 = the
+  number of 5-byte records (byte[1] is the wrong offset; the boundary
+  search compensates today, preserving 100% parse closure). The frozen-
+  baseline amendment (one-byte fix in a sandbox copy + full 5,426+5,596
+  regression + external post-audit) is the designed ITER-27 follow-up.
   **Class semantics (ITER-22, `PE_NIF_G3D_CLASS_SEM_R22_20260904_144632`)**:
   ALL three classes target SKELETON nodes (class 2: bone ×14,429 + other
   ×721; class 3: bone ×666 + other ×52; class 1: bone ×15 + other ×2 —
