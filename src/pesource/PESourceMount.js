@@ -19,6 +19,7 @@
 import { BuntArchive } from './BuntArchive.js';
 import { Bnt2Archive } from './Bnt2Archive.js';
 import { ArkArchive } from './ArkArchive.js';
+import { Bnt2TerrainArchive } from './Bnt2TerrainArchive.js';
 import { decodeTdfPayload, gridFromName, isSentinelName, TDF_SENTINEL_NAME } from './TdfDecoder.js';
 import { TerrainTile, HEIGHT_SCALE_CALIBRATION } from './TerrainTile.js';
 import { makeProvenance, EVIDENCE_STATUS, ERAS, KNOWN_HASHES } from './PEProvenance.js';
@@ -48,7 +49,7 @@ export class PESourceMount {
    */
   async mountEra({ era, container, path, expectedSha256 = null, verifyHash = false, format = 'BUNT' }) {
     if (!Object.values(ERAS).includes(era)) throw new Error(`[PESourceMount] unknown era ${era}`);
-    if (!['BUNT', 'BNT2', 'ARKVFS'].includes(format)) {
+    if (!['BUNT', 'BNT2', 'ARKVFS', 'BNT2_TERRAIN'].includes(format)) {
       throw new Error(`[PESourceMount] unknown container format ${format}`);
     }
     const key = `${era}:${container}`;
@@ -90,6 +91,38 @@ export class PESourceMount {
       const m = this._mount(era, container);
       arch = new BuntArchive(m.bytes, this.io);
       this.archives.set(key, arch);
+    }
+    return arch;
+  }
+
+  /**
+   * Era-versioned TERRAIN archive reader (ITER 019, ledger ENTRY #3 versioning
+   * rule). JUL_2003 -> BuntArchive (BUNT framing, unchanged legacy path).
+   * PCG_9_3_5 -> Bnt2TerrainArchive (BNT2 framing, era-validated). The two
+   * framings are never mixed; the reader choice is explicit per era+container.
+   */
+  _terrainArchive(era, container) {
+    const key = `${era}:${container}`;
+    let arch = this.terrainArchives?.get(key);
+    if (!arch) {
+      const m = this._mount(era, container);
+      if (era === ERAS.JUL_2003) {
+        if (m.format !== 'BUNT') {
+          throw new Error(`[PESourceMount] ${key}: JUL_2003 terrain requires BUNT framing (got ${m.format})`);
+        }
+        arch = new BuntArchive(m.bytes, this.io);
+      } else if (era === ERAS.PCG_9_3_5) {
+        if (m.format !== 'BNT2_TERRAIN') {
+          throw new Error(
+            `[PESourceMount] ${key}: PCG_9_3_5 terrain requires BNT2_TERRAIN framing (got ${m.format})`);
+        }
+        arch = new Bnt2TerrainArchive(m.bytes, this.io);
+      } else {
+        throw new Error(
+          `[PESourceMount] terrain decoding not authorized for era ${era} (NO silent era substitution)`);
+      }
+      if (!this.terrainArchives) this.terrainArchives = new Map();
+      this.terrainArchives.set(key, arch);
     }
     return arch;
   }
@@ -153,16 +186,24 @@ export class PESourceMount {
   /**
    * getTerrainTile — canonical TerrainTile from ORIGINAL bytes.
    * Grid addressing is FILENAME-XY ONLY (entry-index ordering is REJECTED —
-   * it caused horizontal bands; superseded 2026-07-28).
+   * it caused horizontal bands; superseded 2026-07-28). The SAME filename-xy
+   * convention is era-validated for PCG_9_3_5 terrain.bnt (identical 220x236
+   * regular grid; iter019_era_validation_terrain_bnt.json grid_refined).
    * The sentinel tile (7ffe7ffe.tdf) is handled EXPLICITLY and never returned
-   * as a regular tile.
+   * as a regular tile. PCG_9_3_5 special-row tiles (y=0xff1a..0xffff, 6,530
+   * entries, semantics UNRESOLVED) are excluded LOUDLY from regular addressing.
    */
   async getTerrainTile({ era, gridX, gridY }) {
-    if (era !== ERAS.JUL_2003) {
-      // Only the JUL-2003 50.bnt terrain is decoded by this gate. Other eras
-      // must not be silently substituted for historical truth.
+    const TERRAIN_CONTAINERS = {
+      [ERAS.JUL_2003]: 'Terrain/50.bnt',
+      [ERAS.PCG_9_3_5]: 'Terrain/terrain.bnt',
+    };
+    const container = TERRAIN_CONTAINERS[era];
+    if (!container) {
+      // Only era-validated terrain corpora are decoded. Other eras must not
+      // be silently substituted for terrain truth.
       throw new Error(
-        `[PESourceMount] getTerrainTile: era ${era} is not the canonical JUL_2003 terrain (NO silent era substitution)`);
+        `[PESourceMount] getTerrainTile: era ${era} has no era-validated terrain container (NO silent era substitution)`);
     }
     if (!Number.isInteger(gridX) || !Number.isInteger(gridY) ||
         gridX < 0 || gridX > 219 || gridY < 0 || gridY > 235) {
@@ -172,11 +213,10 @@ export class PESourceMount {
     if (isSentinelName(name)) {
       throw new Error('[PESourceMount] sentinel tile requested — use getSentinel()');
     }
-    const container = 'Terrain/50.bnt';
     const m = this._mount(era, container);
-    const arch = this._archive(era, container);
+    const arch = this._terrainArchive(era, container);
     const entry = arch.entryByName(name);
-    if (!entry) throw new Error(`[PESourceMount] tile ${name} not found in ${container}`);
+    if (!entry) throw new Error(`[PESourceMount] tile ${name} not found in ${era}:${container}`);
     const { payload } = await arch.readEntry(entry);
     const decoded = decodeTdfPayload(payload, { name, gridX, gridY });
     return new TerrainTile({
@@ -190,11 +230,12 @@ export class PESourceMount {
         decoderVersion: PESOURCE_DECODER_VERSION,
         evidenceStatus: EVIDENCE_STATUS.CONFIRMED,
         extra: {
-          packedSize: entry.packedSize,
+          packedSize: entry.packedSize ?? entry.size ?? null,
           decompressedSize: payload.byteLength,
           heightDataOffsetPayloadRelative: 64, // explicit: heights @64..2111 payload-relative
           mask16OffsetRecordRelative: 52,     // explicit: material mask @52..307 RECORD-relative
           offsetSpacesSeparated: true,
+          containerFormat: m.format,
           hashVerified: m.hashVerified,
         },
       }),
