@@ -200,7 +200,7 @@ Census of the stored `ark_extension` payloads
 | SHORT28 | 35 | **1** | 8×00 (empty) |
 | V10_BASE_33B | 125 | 92 | **the SAME 33B record as G3B** (X ∈ {5,4,0xff,...}) |
 | G9_RTTI (v4) | 10 | 4 | same record embedded after a small v4 prefix |
-| G3D | 348 | 348 | **index lists**: 6-byte records `[u8 00][u8 02\|03][u16 index][u16 0]` (40 records per 245 B) — the 02/03 byte matches the G3B behavior-enum space |
+| G3D | 348 | 348 | **CONFIRMED (ITER-15): node-reference list** — 5-byte records `[00][02\|03 class][u16 NiNode block_index][00]`; 100% of 15,743 indices point at NiNode blocks in-file |
 
 **Conclusion: NiArkAnimationExtraData has ONE binary record grammar
 (`[u32 29][02][01/02][X][Y][5×f32]`) + TEXT records + G3D index lists.
@@ -312,11 +312,16 @@ Other variant findings (ITER-7, same run dir):
   systems (`PCloud01-Emitter ... ParticleSystem values NOR...`)
 - **G3E (4)**: `[binary header incl. u32 text_len]` + the same TEXT records
 - **G9_RTTI v4 (10)**: binary record family with all -1.0 float params
-- **G3D (348)**: index-list binary (dominant lens 245/240 B; entries look
-  like index lists 5..55). **PARSER BUG FOUND**: the frozen G3D size formula
-  `byte[1]×5` is WRONG (e.g. 9×5=45 ≠ 245) — the boundary search compensates
+- **G3D (348)**: **DECODED + CONFIRMED (ITER-15, 348/348 byte-exact)**:
+  ext = k × 5-byte records `[u8 00][u8 02\|03 = class][u16 block_index][u8 00]`
+  (k = 47–49 typical; ext 245 B = 49 records EXACTLY). **Every single index
+  (15,743 total, 100%) points at a NiNode block in the same file** — G3D is
+  the binary node-reference list (the set of scene nodes covered by the
+  behavior; marker 02 regular / 03 special), the index-based counterpart of
+  the TEXT records' named directives. The frozen parser's size formula
+  `byte[1]×5` is WRONG (e.g. 9×5=45 ≠ 245); the boundary search compensates
   today; formula correction is a bounded R61 follow-up (frozen-baseline
-  rules apply: 5426+5596 regression before any change).
+  rules: full 5426+5596 regression before any change).
 
 ### TEXT_CRLF grammar (31/31 CONFIRMED) — the record framing
 
