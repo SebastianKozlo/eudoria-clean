@@ -123,15 +123,16 @@ independent decoder = non-circular):
 - morph files carry NO NiKeyframeController (0/354) — morph data is a
   standalone animation channel
 
-OPEN (339/354 blocks): variable/sparse record layout — **ITER-13 lead: big
-records = uniform W-float vertex record + appended SPARSE ENTRIES of the
-pattern `[u16 vertex_index][2 × f32]`** (e.g. 592572: idx 192 + 0.7125/0.3229;
-579739: idx 3 + 0.4427/0.0553; remainders 8–36 B observed). Exact entry
-grammar (count fields, entry terminators) needs one more validation pass —
-full closure pending.
-Provenance: `99_Audits\PE_NIF_MORPH_DECODE_R4_20260904_122056\`
-(probes 1–6, driver hashes recorded; MORPH_PROBE6_FINAL.json) + ITER-13
-remainder census (session 2026-09-04).
+OPEN (339/354 blocks): variable/sparse record layout — ITER-13/14 status:
+big records = uniform W-float record + variable remainder; the
+`[u16 idx][f32][f32]` entry hypothesis (ITER-13) was **REJECTED at
+exact-consumption level (48/51 remainders NOFIT; 3 fit a
+`[u32 count][f32]...` variant)**. Remainders observed 8–36 B. The exact
+grammar needs a raw-span (not float-filtered) record reconstruction —
+tracked as the last open item of the morph family.
+Provenance: `99_Audits\PE_NIF_MORPH_DECODE_R4_20260904_122056\` +
+`99_Audits\PE_NIF_MORPH_SPARSE_CLOSURE_R14_20260904_133726\`
+(SPARSE_CLOSURE.json, driver SHA `FCB70364...`).
 
 ## NiArkShaderExtraData — 2,084× — SEMANTICS DECODED (ITER-3 census 2026-09-04)
 
