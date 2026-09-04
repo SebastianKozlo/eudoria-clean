@@ -30,6 +30,12 @@ PCG_9_3_5 corpus, 2026-09-04 audit) is the executable embodiment of this wiki.
 Continuity 2003 → 9.3.5 (name-level): 5,422 shared names, 4 removed
 (13563/261922/38579/524174), 174 added (all post-2003 ID range 59xxxx).
 
+**Era drift (ITER-2 census, 2026-09-04):** of the 5,422 shared names,
+**5,208 (96.05%) are byte-identical** across eras (same SHA256). Only 214
+changed: 211 re-exported within v10.1.0.0 (content edits), 3 upgraded
+v4.1.0.12 → v10.1.0.0. The 2003 model corpus survived into 9.3.5 essentially
+untouched. Provenance: `99_Audits\PE_NIF_ERA_DRIFT_R2_20260904_115051\`.
+
 ## Canonical denominators (stable — do not redefine)
 
 | Denominator | 2003 | 9.3.5 |

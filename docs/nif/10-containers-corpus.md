@@ -61,3 +61,18 @@ Provenance:
 Regeneration rule: the manifest is derived documentation — regenerate via
 the deep-dump driver after any corpus/parser change (revalidation triggers:
 parser change, new corpus, era change, exporter bug discovery).
+
+## Era drift census (ITER-2) — CONFIRMED
+
+Comparing the 5,422 names shared by the 2003 extracted corpus and the 9.3.5
+Models.bnt payloads (SHA256 per file):
+
+| Class | Count | % |
+|---|---|---|
+| byte-identical (same SHA256) | 5,208 | 96.05% |
+| re-exported within v10.1.0.0 | 211 | 3.9% |
+| upgraded v4.1.0.12 → v10.1.0.0 | 3 | 0.06% |
+
+Evidence: `99_Audits\PE_NIF_ERA_DRIFT_R2_20260904_115051\02_results\`
+(ERA_DRIFT_2003_VS_PCG953.csv — one row per shared name;
+ERA_DRIFT_SUMMARY.json; driver SHA256 recorded, hashed before execution).
