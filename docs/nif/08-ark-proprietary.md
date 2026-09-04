@@ -64,10 +64,24 @@ v10: Name SS + VARIABLE extension (0..121 B observed), boundary via
      pre-pass; last-block rule; 200 B guard)
 v4:  Name SS + link + variable extension, boundary via known-type RTTI search
 ```
-Extension internals: partially decoded (ITER-3): the dominant 13-byte
-extension (2,304 files) = **`03 + 12×00`**; length histogram is quantized to
-odd sizes: 13 (×2,304), 21 (×752), 85 (×592), 49 (×255), 45 (×80), 121 (×79),
-35, 39, 43. Max 121 B. Longer extensions: raw-kept + SHA256, layout UNKNOWN.
+Extension internals: **DECODED (ITER-3+8 census)** — structure =
+`[u8 class byte][flags][variable payload]`:
+
+| Ext len | Blocks | Content |
+|---|---|---|
+| 13 | 2,304 | `0x03 + 12×00` (deterministic; class byte 0x03) |
+| 21 | 752 | `0x03 + zeros + u32 flag=1 + zeros` (1 distinct value) |
+| 35 | 18 | all zeros (deterministic) |
+| 39 | 11 | zeros + flags + `1.0f` + small floats |
+| 45 | 80 | class byte 0x02 + flags + zeros (32 variants) |
+| 49 | 255 | class 0x03 + flags (pos4: 1×187/0×68; pos7: 0x40×162) + zeros |
+| 85 | 592 | class 0x03 + flags + **float parameter block** (fov≈2.0, positions -0.5757/-0.382/-1.539, 19.55, 0.6969...; 556 DISTINCT = per-file camera/viewport params) |
+| 121 | 79 | same family, longer (78 distinct, per-file params) |
+
+Semantic: the 85/121 B classes carry **per-file viewport/camera parameters**
+(floats CONFIRMED; exact field semantics PLAUSIBLE — likely fov/near/far/
+position). Full census:
+`99_Audits\PE_NIF_VIEWPORT_DECODE_R8_20260904_125635\02_results\VIEWPORT_CENSUS.json`.
 
 ## NiVertexMorphExtraData — 354× (9.3.5) — record model DECODED (ITER-4)
 
