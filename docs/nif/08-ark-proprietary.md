@@ -310,6 +310,16 @@ ParticleSystem → mixed). Numeric positions (amplitude/phase/period)
 remain INFERRED — value distributions do not prove semantic roles
 without runtime consumer paths.
 
+**The named-directive vocabulary is exactly FOUR (ITER-25,
+`PE_NIF_TEXT_NAMED_DIRECTIVES_R25_20260904_144944`)**: `ViewportSettings:`
+(+13) | `Target:` (+11) | `Camera:` (+4) | `IconSize:` (+1) — each ×26,
+ALWAYS as a suite in that order (29 params), in derivatives ×23 /
+Controllers ×2 / ParticleSystem ×1. This is the **viewport/camera suite —
+the TEXT-twin of the binary NiArkViewportInfoExtraData ext** (ITER-8:
+85B/121B per-file camera params; 121 = 85 + 36, the suite's extra
+params): the engine has BOTH a binary and a text serialization of the
+same viewport/camera data.
+
 Confirmed behavior examples: rotating asteroids (`Asteroid` 120.0 deg/s,
 `Spacestation` 150.0), industrial machinery (shaft machine fins rotation
 1400.0, pistons `Geo_Pist_001/002/004` translation amplitude 100.0,
