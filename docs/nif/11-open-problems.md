@@ -16,7 +16,8 @@
 | Item | What is known | What is open |
 |---|---|---|
 | BNT2 index field_d | == CRC32(payload) in 3,435/5,596 | the differing 2,161 (REJECTED: 2003-era crc, crc32c, name-concats, halves, cross-entry) |
-| NiArkAnimationExtraData extension | full grammar + variant census (9.3.5: V10_BASE_0B 2270, G3B 1685, G3D 348, FIXED_A 347, G3C 308, FIXED_B 190, TEXT_CRLF 172, V10_BASE_33B 125) | per-field semantics of node records; u2/u3 packed meanings |
+| NiArkAnimationExtraData TEXT records | **DECODED (ITER-5)**: per-node procedural behavior config — node name, activeIdle behavior, channels (derivatives/Controllers/cyclic/ParticleSystem/Texture/NodeUpdate), targets (position/rotation/velocity/All), axis+speed params, LOOP mode; 887 records censused | the binary variants: G3B (×1,685, dominant), FIXED_A/B, Mode2 33B, G3D layouts |
+| NiArkAnimationExtraData extension | full grammar + variant census (9.3.5: V10_BASE_0B 2270, G3B 1685, G3D 348, FIXED_A 347, G3C 308, FIXED_B 190, TEXT_CRLF 172, V10_BASE_33B 125) | binary-variant inner layouts |
 | NiArkImporterExtraData trailing 38 B (v10) | first byte = Mode marker; `ffffff 00000000 ffffffff ffffff` + float-like ~20 B + 00; 4,017 distinct | field meanings |
 | NiArkTextureExtraData field1 / field2-low8 | two classes: {field1=1, low8=0} ×3,042 / {field1=-256, low8=255} ×1,796 | what the classes mean |
 | NiArkViewportInfoExtraData ext > 13 B | quantized odd lengths 21/85/49/45/121/35/39/43 | internal layout of longer exts |
