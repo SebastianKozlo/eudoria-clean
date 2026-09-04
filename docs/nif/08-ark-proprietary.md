@@ -226,34 +226,41 @@ era/version marker); u2 ∈ {2, -1, 4, 3} (2,621 / 2,395 / 313 / 267 —
 variant selector); u3 ∈ {0, -1, 0x3101, 0x3001} (packed); u4 ∈ {0,
 0x01000000} (the Mode2 marker).
 
-### TEXT node record semantics — DECODED (ITER-5 census, 2026-09-04)
+### TEXT node record semantics — DECODED (ITER-5/16 census, 2026-09-04)
 
 Each "NodeDataStart" record is a readable, CRLF-delimited **per-node
-procedural behavior/animation config** for the MindArk engine:
+procedural behavior/animation config** for the MindArk engine. Full field
+grammar (unified across TEXT_CRLF / G3C / G3C_BOUNDARY; confirmed by
+direct readability on machinery models — shaft machines, hydraulic pumps,
+pistons, rotating fins, particle clouds):
 
 ```
 NodeDataStart
-<node name>            scene node / bone (Bip01_item ×85, Geo_Flame ×36,
-                       Spray ×21, Bip01_Door_001 ×15, GeoGlower,
-                       GeoTexanim01, Geo_Lampshade, Asteroid, Moon1...)
-<int>                  (UNKNOWN flag)
-<float> <float>        (start time / offset — UNKNOWN)
-activeIdle             default behavior/state (714 of 887 records)
-<channel type>         derivatives (453) | Controllers (197) | cyclic (131)
-                       | ParticleSystem (54) | Texture (13) | NodeUpdate (3)
-<channel target>       position (367) | rotation (170) | velocity (86)
-                       | All (197) | single (3)
-<numeric params...>    rotation axis (0/1/2; larger values for cyclic),
-                       speeds (e.g. 120.0 = asteroid rotation deg/s), ranges
-LOOP | (other mode)    play mode (LOOP ×155)
+<node name>         scene node / bone (Bip01_item, Geo_Flame, Spray,
+                    Bip_Coord_1, Geo_Pist_001, PCloud01-Emitter, Asteroid...)
+<count: 0|1|2>      channel count
+<start: float>      start time / initial state
+<offset: float>     
+<mode>              activeIdle (looping idle) | single (play-once)
+<channel>           derivatives | ParticleSystem | Controllers | cyclic |
+                    Texture | NodeUpdate
+<target>            position | velocity | rotation | values | All
+[<subtype>]         translation | NORMAL | ...
+<axis: 0|1|2>       rotation/translation axis
+<6 numeric params>  in PAIRS (e.g. ParticleSystem: 15/15, 3/3, 30/30, 0/0,
+                    13.33/13.33, 0/0 = rate, size, lifetime, ..., spread;
+                    derivatives translation: amplitude, phase, period, ...)
 ```
 
-Confirmed examples: scene rotators (`Bip01_rotator1..4`, `Asteroid` 120.0,
-`Spacestation` 150.0, `Moon1/Moon2` — rotating world objects), item bones
-(`Bip01_item ... Controllers All LOOP`), texture-animated geometry
-(`GeoTexanim01`, `Texture` channel). 887 records extracted from 480 blocks
-(172 TEXT_CRLF + 308 G3C); full corpus in
-`99_Audits\PE_NIF_TEXTCRLF_DECODE_R5_20260904_123415\02_results\TEXTCRLF_RECORDS.jsonl`.
+Confirmed behavior examples: rotating asteroids (`Asteroid` 120.0 deg/s,
+`Spacestation` 150.0), industrial machinery (shaft machine fins rotation
+1400.0, pistons `Geo_Pist_001/002/004` translation amplitude 100.0,
+hydraulic pump, translator −100.0), particle emitters (`PCloud01-Emitter`,
+`PArray01..05-Emitter` — steam/smoke clouds), flames, sprays, doors,
+texture-animated geometry (`GeoTexanim01`), item bones
+(`Bip01_item ... Controllers All LOOP`). 887 records censused in ITER-5 +
+the G3C_BOUNDARY long configs (92 blocks, 10–14 records each) in ITER-16;
+full corpus in `99_Audits\PE_NIF_TEXTCRLF_DECODE_R5_20260904_123415\02_results\TEXTCRLF_RECORDS.jsonl`.
 
 **Conclusion: NiArkAnimationExtraData (one per file) is the file's behavior
 metadata carrier; the TEXT variants hold human-readable per-node directives
