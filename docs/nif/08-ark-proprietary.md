@@ -124,29 +124,33 @@ independent decoder = non-circular):
   standalone animation channel
 
 OPEN (339/354 blocks): variable/sparse record layout — status after
-ITER-14/17/18 (external post-audit corrected):
+ITER-14/17/18/19 (external post-audit corrected):
 - ITER-13/14: the `[u16 idx][f32][f32]` entry hypothesis **REJECTED at
   exact-consumption level (48/51 remainders NOFIT; 3 fit a
   `[u32 count][f32]...` length check only — not a full validation)**.
 - ITER-17's 446/10,274 (4.34%) negative is **REJECTED — invalid predicate**
   (unit bug: `Wm` in bytes treated as a float count; external post-audit
   P0 finding, confirmed independently in R18-run1 and corrected).
-- ITER-18 (run6, correct units): the entry-stream model
-  `[uniform W floats][[u16 id][4×f32] entries + pad floats + 2B zero tail]`
-  explains **6,167/10,274 big spans EXACTLY (60.03% — an upper bound due to
-  pad permissivity)**; 51,250 entries censused (dominant id=0 ×35,087,
-  structured id clusters 14080/14272/14336 even-32 steps, 1536/768/512
-  power-of-2). The residual **4,107 spans contain a structurally DIFFERENT
-  pattern: repeating `[u16 value][u16 0]` pairs** (f16-like quantized
-  values, e.g. `b640 0000 b744 0000 b780`) — candidate for the next
-  iteration, NOT yet tested.
-- The exact grammar needs a raw-span (not float-filtered) record
-  reconstruction — tracked as the last open item of the morph family.
-Provenance: `99_Audits\PE_NIF_MORPH_DECODE_R4_20260904_122056\` +
-`99_Audits\PE_NIF_MORPH_SPARSE_CLOSURE_R14_20260904_133726\` +
-`99_Audits\PE_NIF_MORPH_KEYFRAME_R18_20260904_141009\`
-(MORPH_SPAN_WALK.json = full 10,274-row per-span census; 6-run history in
-REPORT.md with two documented driver bugs and fixes).
+- The morph big-span population is **MULTI-FORMAT** (ITER-19 union run):
+  - **Family A (r18, 6,167 spans exact-fit — upper bound due to pad
+    permissivity)**: entry-stream `[uniform W floats][[u16 id][4×f32]
+    entries + pad floats + 2B zero tail]`; 51,250 entries (dominant id=0
+    ×35,087, structured clusters 14080/14272/14336 even-32 steps,
+    1536/768/512 power-of-2).
+  - **Family B (r19, H-KEY42 — 1,915 spans STRICT exact-fit)**:
+    `[tag][W×f32 first record]` + k × units
+    `[u32 n][f32 w][(W-2)×f32]` (unit_len = 6+(W-2)×4; W=11 ×1,025 /
+    W=10 ×890; dominant unit headers (0,0.0) ×19,702, (1,0.0) ×3,293;
+    the hex-visible `01 00 00 00 80 3f` = (1,1.0) variant). Length
+    arithmetic exact (e.g. 214=46+4×42).
+  - **Residual: 3,438 spans (33.5%) fit NEITHER model — OPEN.**
+  - 1,246 spans fit both models (predicate ambiguity documented);
+    109 files have big spans, 100 are mixed-family.
+- Provenance: `99_Audits\PE_NIF_MORPH_DECODE_R4_20260904_122056\` +
+  `PE_NIF_MORPH_SPARSE_CLOSURE_R14_20260904_133726\` +
+  `PE_NIF_MORPH_KEYFRAME_R18_20260904_141009\` +
+  `PE_NIF_MORPH_NOFIT_STRUCT_R19_20260904_143755\`
+  (HEX_SAMPLES.txt 459 spans; KEY42_VALIDATION.json; UNION_CLASSIFICATION.json).
 
 ## NiArkShaderExtraData — 2,084× — SEMANTICS DECODED (ITER-3 census 2026-09-04)
 
