@@ -358,52 +358,62 @@ metadata carrier; the TEXT variants hold human-readable per-node directives
 for procedural animation (rotators, flames, sprays, particle systems,
 texture animation, loop modes).**
 
-### G3B binary record — DECODED (ITER-6)
+### G3B binary record — GRAMMAR CONFIRMED 100% (ITER-6 → refined ITER-30)
 
-The dominant binary variant (1,685 blocks; u4=0x01000000 marker in 1,682)
-carries the SAME behavior metadata in a compact binary record:
-
-```
-per 33-byte record (ext is 33 B or 66 B = 2 records; 82 multi-record blocks):
-  u32 size = 29 (constant — CONFIRMED)
-  u8  02   (constant — CONFIRMED)
-  u8  01   (constant — CONFIRMED)
-  u32 X    behavior/channel enum (values 1..15; top: 5×356, 4×184, 10×174,
-           3×147, 7×109, 1×99, 6×90, 12×77 ...)
-  u8  Y    flag (1 ×1,376 / 0 ×70 — enable/loop)
-  f32 ×5   animation params — ALWAYS the symmetric pattern
-           (A, A/2, 0, 0, A): (3.333,1.667,0,0,3.333) ×140, (2,1,0,0,2) ×84,
-           (1.333,0.667,0,0,1.333) ×75, (1,0.5,0,0,1) ×61, (0,0,0,0,0) ×56
-  pad      2–3 zero bytes
-```
-
-Parse coverage: 1,446/1,628 33-multiple blocks parse byte-exact
-(`99_Audits\PE_NIF_G3B_DECODE_R6_20260904_123703\`). Semantics
-STRONGLY_SUPPORTED: binary cousin of the TEXT records — behavior enum +
-symmetric oscillation/rotation parameters. OPEN: variable-length G3B exts
-(49–95 B, 182 blocks) and FIXED_A/B + Mode2 + G3D layouts.
-
-### Variable G3B records + the animation EVENT REGISTRY (ITER-7)
-
-Variable exts (57 blocks, 49–95 B) = the same binary record **plus embedded
-null-terminated ASCII strings — the named animation-event system**:
+The dominant binary variant (1,685 blocks; u4=0x01000000 Mode2 marker in
+1,682; 3 text-degenerate 7 B exts are G3C-signature, see below). **Every
+parseable G3B ext holds EXACTLY ONE record** (ITER-30, `PE_NIF_G3B_VARIABLE_R30_20260904_152304`;
+byte-exact on 1,682/1,682 binary-family blocks — 54/54 variable + all
+33 B/66 B):
 
 ```
-[u32 rest_size][02][01][u32 X][u8 Y][5 × f32][strings...]
+record = [u32 size][u8 02 marker][u8 flag {01,00,02}][u32 X behavior/channel
+          enum][u8 Y flag/loop][5 x f32 params][u8 class {00,01}]
+          [u8 count N][N x (ASCII event-name string \0 + u32 value)]
+size   = len(record) - 4 = 29 + Σ(len_i+1) + 4N     (H1-refined: 54/54 exact)
+strings: printable + CRLF allowed inside; each null-terminated + 4 value bytes.
+count=0 -> record is exactly 33 B (the two "pad" tail bytes = [class][count])
 ```
 
-Embedded name census (468 blocks carry strings;
-`99_Audits\PE_NIF_ANIM_REMAINDER_R7_20260904_124614\G3B_EMBEDDED_STRINGS.json`):
+Corrections of prior readings (ITER-30, evidence-decomposed):
+- **flag byte is an ENUM, not a const**: {0x01 ×1,559 | 0x00 ×120 | 0x02 ×3}
+  — ITER-6's "u8 01 const" was its own filter's artifact; the 182 non-fits
+  of the old 33 B rule decompose exactly: 97 flag=00 + 82 66 B + 3 flag=02.
+- **"66 B = 2 records" REJECTED**: all 82 66 B exts are ONE record (size=62)
+  with 2 embedded strings (overwhelmingly "morph: left"/"morph: right").
+- **class byte (offset 31)** ∈ {0x00 ×1,663 | 0x01 ×19}; class=01 always
+  with count=0 (fail-closed rule).
+- The old wiki "182 variable-length (49–95 B)" was a MISLABEL — the true
+  variable population is **57** (54 binary 48–392 B + 3 text-degenerate).
+- The float quintets remain symmetric (A, A/2, 0, 0, A); ITER-6's value
+  census stands.
+
+Semantics STRONGLY_SUPPORTED: binary cousin of the TEXT records —
+behavior enum + symmetric oscillation/rotation parameters + the named
+event triggers.
+
+### Embedded string registry — the animation EVENT system (ITER-7 → corrected ITER-30)
+
+Corpus-wide: **263 strings in 136 string-bearing records** (incl. the 66 B
+exts). ITER-7's "468 blocks with strings" is corrected: **136 real grammar
+string records + 332 float-byte scan artifacts** (records with count=0 whose
+floats coincidentally looked like ASCII) — fully reconciled, intersection
+136/136, 0 grammar-strings missed.
 
 | Event name | Count | Meaning |
 |---|---|---|
-| `morph: left` / `morph: right` (+ case variants) | 160+ | morph-channel triggers → NiVertexMorphExtraData targets |
-| `sound:hit_01` / `hit_02` / `hit_03` | 12+ | sound-cue triggers |
-| `start_usetool: effect_01` | 11 | tool-use effect trigger |
-| `start_usetool: sound_01` | 2 | tool-use sound trigger |
+| `morph: left` / `morph: right` (+ variants incl. authentic typo `morph: rifgt`) | dominant | morph-channel triggers → NiVertexMorphExtraData targets |
+| `sound:hit_01/02/03` | 8/8/4 | sound-cue triggers |
+| `start_usetool: effect_01` | 15 | tool-use effect trigger |
+| `start_usetool: effect_01\r\nstart_usetool: sound_01` (multi-line) | 2 | combined tool-use trigger |
+| 500078.nif 392 B record: `end`, `morph: 1`, + 11× `start -name <anim> -loop` (DUNGMASTER_Run/Walk/Trott, Idle_02, attack_01, die, fighting, gethit, idle_01, stand, staydead) | 13 strings | named animation-command set |
+
+Per-string u32 value: float-interpretable 263/263; 113/263 = 0.0; non-zero
+examples 0.8, 0.35, 0.0667, 20.83 (semantics UNVERIFIED).
 
 **This closes the loop with ITER-4: the behavior records drive vertex
-morphs by NAME ("morph: left/right") and fire sound/effect events.**
+morphs by NAME ("morph: left/right") and fire sound/effect/animation
+events.**
 
 Other variant findings (ITER-7, same run dir):
 - **G3C_BOUNDARY (92 blocks)**: long text configs (1482–2152 B) — particle
