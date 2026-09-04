@@ -378,6 +378,13 @@ Other variant findings (ITER-7, same run dir):
   the boundary search compensates today; formula correction is a bounded
   R61 follow-up (frozen-baseline rules: full 5426+5596 regression before
   any change).
+  **Class semantics (ITER-22, `PE_NIF_G3D_CLASS_SEM_R22_20260904_144632`)**:
+  ALL three classes target SKELETON nodes (class 2: bone ×14,429 + other
+  ×721; class 3: bone ×666 + other ×52; class 1: bone ×15 + other ×2 —
+  names overlap: Bip01/Scene Root/Pelvis in classes 2 AND 3). The class
+  is NOT a node-kind flag; it is a per-record ROLE flag in the animated-
+  node list (exact 01/02/03 meaning OPEN; per-file record tables in
+  the run dir enable interleaving/depth analysis).
 
 ### TEXT_CRLF grammar (31/31 CONFIRMED) — the record framing
 
