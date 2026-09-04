@@ -165,6 +165,28 @@ Selector: peek 8 bytes + header fields:
 FIXED_B; `u2==3 && u3==5` → BINARY; 7-zero prefix → FIXED_A; all-zero →
 SHORT28; else TEXT_CRLF (fallback G9).
 
+### Variant UNIFICATION (ITER-9) — the whole family is ONE record format
+
+Census of the stored `ark_extension` payloads
+(`99_Audits\PE_NIF_FIXED_DECODE_R9_20260904_131247\`):
+
+| Variant | n | distinct | Content — ALL share the binary record family |
+|---|---|---|---|
+| V10_BASE_0B | 2,270 | 1 | empty (no behavior) |
+| FIXED_A_57 | 347 | **2** | `[7×00][02][000000][ffffffff][-1.0×5][00]` — **null behavior record** (X=-1, params -1.0) |
+| FIXED_B_61 | 190 | **1** | same null record + `[01][u32 29]` size prefix |
+| SHORT28 | 35 | **1** | 8×00 (empty) |
+| V10_BASE_33B | 125 | 92 | **the SAME 33B record as G3B** (X ∈ {5,4,0xff,...}) |
+| G9_RTTI (v4) | 10 | 4 | same record embedded after a small v4 prefix |
+| G3D | 348 | 348 | **index lists**: 6-byte records `[u8 00][u8 02\|03][u16 index][u16 0]` (40 records per 245 B) — the 02/03 byte matches the G3B behavior-enum space |
+
+**Conclusion: NiArkAnimationExtraData has ONE binary record grammar
+(`[u32 29][02][01/02][X][Y][5×f32]`) + TEXT records + G3D index lists.
+The FIXED variants are simply "default/empty behavior" (null record with
+X=-1, all params -1.0). The variant zoo = framing differences, not different
+data.** Remaining open: G3D header/record semantics (what the indices
+reference) and the G3C_BOUNDARY long-text field parse.
+
 ### v10 variants — 9.3.5 census (ITER-3):
 | Variant | Count | Note |
 |---|---|---|
