@@ -200,13 +200,18 @@ Census of the stored `ark_extension` payloads
 | SHORT28 | 35 | **1** | 8×00 (empty) |
 | V10_BASE_33B | 125 | 92 | **the SAME 33B record as G3B** (X ∈ {5,4,0xff,...}) |
 | G9_RTTI (v4) | 10 | 4 | same record embedded after a small v4 prefix |
-| G3D | 348 | 348 | **CONFIRMED (ITER-15): node-reference list** — 5-byte records `[00][02\|03 class][u16 NiNode block_index][00]`; 100% of 15,743 indices point at NiNode blocks in-file |
+| G3D | 348 | 348 | **STRONGLY_SUPPORTED (ITER-15, materialized evidence)**: node-reference list — 5-byte records `[00][02\|03 class][u16 NiNode block_index][00]`; 100% of 15,885 indices point at NiNode blocks in-file |
 
-**Conclusion: NiArkAnimationExtraData has ONE binary record grammar
-(`[u32 29][02][01/02][X][Y][5×f32]`) + TEXT records + G3D index lists.
-The FIXED variants are simply "default/empty behavior" (null record with
-X=-1, all params -1.0). The variant zoo = framing differences, not different
-data.** Remaining open: G3D header/record semantics (what the indices
+**Conclusion (STRONGLY_SUPPORTED — pending independent post-audit for
+CONFIRMED): NiArkAnimationExtraData appears to have ONE binary record
+grammar (`[u32 29][02][01/02][X][Y][5×f32]`) + TEXT records + G3D index
+lists. The FIXED variants appear to be simply "default/empty behavior"
+(null record with X=-1, all params -1.0). The variant zoo = framing
+differences, not different data.** Evidence packages:
+ITER-15 `99_Audits\PE_NIF_G3D_NODE_REFS_R15_EVIDENCE_20260904_135342\`,
+ITER-16 `99_Audits\PE_NIF_G3CB_GRAMMAR_R16_EVIDENCE_20260904_135649\`
+(1,274 records JSONL). Remaining open: G3D header/record semantics
+(what the indices
 reference) and the G3C_BOUNDARY long-text field parse.
 
 ### v10 variants — 9.3.5 census (ITER-3):
@@ -319,16 +324,20 @@ Other variant findings (ITER-7, same run dir):
   systems (`PCloud01-Emitter ... ParticleSystem values NOR...`)
 - **G3E (4)**: `[binary header incl. u32 text_len]` + the same TEXT records
 - **G9_RTTI v4 (10)**: binary record family with all -1.0 float params
-- **G3D (348)**: **DECODED + CONFIRMED (ITER-15, 348/348 byte-exact)**:
+- **G3D (348)**: **DECODED — STRONGLY_SUPPORTED (materialized evidence
+  2026-09-04, ITER-15; pending independent post-audit for CONFIRMED)**:
   ext = k × 5-byte records `[u8 00][u8 02\|03 = class][u16 block_index][u8 00]`
-  (k = 47–49 typical; ext 245 B = 49 records EXACTLY). **Every single index
-  (15,743 total, 100%) points at a NiNode block in the same file** — G3D is
-  the binary node-reference list (the set of scene nodes covered by the
-  behavior; marker 02 regular / 03 special), the index-based counterpart of
-  the TEXT records' named directives. The frozen parser's size formula
-  `byte[1]×5` is WRONG (e.g. 9×5=45 ≠ 245); the boundary search compensates
-  today; formula correction is a bounded R61 follow-up (frozen-baseline
-  rules: full 5426+5596 regression before any change).
+  (k = 47–49 typical; ext 245 B = 49 records EXACTLY). **All 15,885 indices
+  (100%) point at NiNode blocks in the same file** — G3D is the binary
+  node-reference list (the set of scene nodes covered by the behavior;
+  marker 02 regular / 03 special), the index-based counterpart of the TEXT
+  records' named directives. Evidence package:
+  `99_Audits\PE_NIF_G3D_NODE_REFS_R15_EVIDENCE_20260904_135342\`
+  (denominator correction: the earlier inline number 15,743 was a
+  per-block-capped artifact; true count 15,885). The frozen parser's size
+  formula `byte[1]×5` is WRONG (e.g. 9×5=45 ≠ 245); the boundary search
+  compensates today; formula correction is a bounded R61 follow-up
+  (frozen-baseline rules: full 5426+5596 regression before any change).
 
 ### TEXT_CRLF grammar (31/31 CONFIRMED) — the record framing
 
