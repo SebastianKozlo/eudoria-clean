@@ -13,10 +13,24 @@ v10: ExtraData base(name = "ArkImporter" or empty) + int32 (value 8)
      + SizedString version ("Gamebryo_1_1", "4.0.0.0", "4.0.0.2", "4.1.0.12")
      + ALWAYS 38 raw trailing bytes (all 2,330 v10 files — Mode1 AND Mode2)
 ```
-The 38 trailing bytes (ITER-3 census): first byte 00/01 (matches Mode1/Mode2),
-then a repeating pattern `ffffff 00000000 ffffffff ffffff` + ~20 B per-file
-data (float-like values in the ±20..54 range) + 00 terminator; 4,017 distinct
-values across 5,596 files; zero-density ≈ 15%. Exact field semantics UNKNOWN.
+The 38 trailing bytes — **DECODED (ITER-10): the MODEL'S LOCAL BOUNDING BOX**
+(CONFIRMED 3,020/3,020 mesh-bearing files — the bounds contain the raw mesh
+geometry in 100% of cases; exactly equal in 1,786; where larger, they cover
+skinned/transformed extents):
+
+```
+[u8 mode (00/01 — Mode1/Mode2 marker)]
+[12 B header: ffffff-pattern flags — exact semantics UNKNOWN]
+[f32 min.x][f32 min.y][f32 min.z]
+[f32 max.x][f32 max.y][f32 max.z]
+[u8 pad = 0]
+```
+Examples: 505775 bounds ±1906 vs mesh ±1835 (skinning margin); 508854
+bounds == mesh (-50..50, 0..142.3); 505813 z 0..11528.7 (a 115 m tower);
+505007 y up to 19483 (large structure). These are the engine-side model
+bounds (culling/DPVS-relevant). First byte 00/01 matches Mode1/Mode2.
+Validation:
+`99_Audits\PE_NIF_IMPORTER_DECODE_R10_20260904_132004\02_results\IMPORTER_BOUNDS_VALIDATION.json`.
 The version string = the exporter/Gamebryo version that produced the file.
 
 ## NiArkTextureExtraData — one per file (5,596×); THE texture binding block
