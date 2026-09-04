@@ -80,14 +80,22 @@ v10 (R6 unified grammar, H1 CONFIRMED 2330/2330):
 The `bnt2_id` is the texture ID in Textures.bnt — see 09-semantics.
 
 ITER-3 census facts (9.3.5):
-- **Entry names follow a `<material>_<SLOT>` convention** — decoded examples:
-  `Box01_0_BASE` (427×), `head_up_BUMP`, `Nameless0_ENVIRONMENT` (483×),
-  `comp_0_BASE`, `Cylinder01_0_BASE`; 8,430 distinct names.
+- **Entry names follow a `<material>_<SLOT>` convention — FULLY CONFIRMED
+  (ITER-32, `PE_NIF_MATERIAL_CENSUS_R32_20260904_160538`): 24,508/24,508
+  entries conform, ZERO exceptions. The complete SLOT vocabulary = 40 slots**:
+  BASE ×14,307 (58.4%, f1=0) | GLOSS ×2,791 (f1=3) | DARK ×1,816 (f1=1) |
+  ENVIRONMENT ×1,694 (f1=9, f2=0 always — count == NiTextureEffect count,
+  cross-block linkage) | GLOW ×1,524 (f1=4) | BUMP ×970 (f1=5) |
+  DETAIL ×199 (f1=2) | DECAL0 ×50 (f1=6) | ANIM0–31 ×1,157 (f1=11 in 985) —
+  **f1 is a PERFECT slot-type enum**. The ANIM entries' trailing
+  `frame_index` == slot number (1,157/1,157 verified —
+  02_results\ANIM_FRAME_CHECK.json). 8,430 distinct names (ITER-3).
 - field1 has exactly two classes: `1` (3,042 files) / `-256` (0xFFFFFF00,
   1,796 files) — semantics UNKNOWN.
 - field2 low-8: `0` (3,800) / `255` (1,796 — correlates with field1=-256).
-- entry f1 top values: 0 (10,724), 3, 9, 1, 4, 5 — small enum/index-like.
-- entry f2: `-1` (17,421) / `0` (2,216).
+  The packed entry-count formula `(u32>>8)&0x00FFFFFF` re-validated
+  corpus-wide by independent decode + exact consumption (4,838/4,838).
+- entry f1 = slot-type enum (above); f2: `-1` (17,421) / `0` (2,216).
 - entry ref: range 4..454 (slot/purpose index — NOT the bnt2_id, which lives
   in the 9-byte trailing).
 
@@ -182,7 +190,7 @@ ITER-14/17/18/19 (external post-audit corrected):
   `PE_NIF_MORPH_NOFIT_STRUCT_R19_20260904_143755\`
   (HEX_SAMPLES.txt 459 spans; KEY42_VALIDATION.json; UNION_CLASSIFICATION.json).
 
-## NiArkShaderExtraData — 2,084× — SEMANTICS DECODED (ITER-3 census 2026-09-04)
+## NiArkShaderExtraData — 2,084× — SEMANTICS FULLY DECODED (ITER-3 → completed ITER-32)
 
 ```
 ExtraData base + unknownInt i32 (ALWAYS 0 — 2,084/2,084) + unknownString SizedString
@@ -196,19 +204,33 @@ effectfile <effect name>\r\n
 [optional parameter lines]
 ```
 
-Observed directives (9.3.5 corpus, 577 distinct configs):
-- `effectfile 1024_BaseBSRSkinIndoors` (527×), `1022_BaseBSRIndoors`,
-  `1021_BaseBSR`, `1011_Base`, `Vegetation`
-- `CullMethod 2`
-- `AlphaTreshold 0|128` (the typo "Treshold" is AUTHENTIC MindArk)
-- `EnableAnimation 0.0|1.0`
-- `reflectionMapCube SE_Reflection_Cubemap_Indoor.dds` /
-  `SE_Reflection_Cubemap_Outdoors.dds`
-- `EnvMapCube SE_Reflection_Cubemap_Outdoors.dds`
+**COMPLETE directive vocabulary = 17 names (ITER-32,
+`PE_NIF_MATERIAL_CENSUS_R32_20260904_160538`; the prior "577 distinct
+configs" was a 120-char truncation artifact — true count 623, prior
+method reproduced exactly):**
 
-**This block is the era's per-material shader/effekt assignment** — it names
-the engine effect file applied to the material. Layout CONFIRMED by 3
-external sources + traces; semantics CONFIRMED by corpus census.
+| Directive | n | Values |
+|---|---|---|
+| `effectfile` | 2,049 | 11 effect files in 2 families: **Vegetation-animation** (`Vegetation`) vs **10xx_Base/BSR-reflection** (`1024_BaseBSRSkinIndoors` ×527, `1022_BaseBSRIndoors`, `1021_BaseBSR`, `1011_Base`, ...) |
+| `effectFile` | 35 | case variant (same values) |
+| `CullMethod` | 1,065 | 2 ×713 / 1 ×352 |
+| `AlphaTreshold` | 1,058 | **110 distinct values** (0 ×293, 128 ×154, 110 ×63, 80 ×26, ...) — per-material alpha threshold (typo "Treshold" is AUTHENTIC MindArk) |
+| `EnableAnimation` / `ModelAmpPlanar` / `ModelAmpHeight` / `ModelFreqScale` | 1,058 each | **the atomic Vegetation wind-animation clique** (with AlphaTreshold) |
+| `reflectionMapCube` | 181 | `SE_Reflection_Cubemap_Indoor/Outdoors.dds` + 6 more |
+| `softwareBitmap` | 120 | ALWAYS `"undefined"` |
+| `effectFilename` | 72 | **8 authentic MindArk exporter source paths**: `C:\CVS\BRANCH_T\MindArk\resource\Materials\1004_Vegetation.fx` ×32, `C:\Source\Mindark\cpp\Ark\Shared\Model\Vegetation.fx` ×28, `C:\3dsmax7\maps\fx\Vegetation.fx`, `R:\_PE Work Directory\...` |
+| `EnvMapCube` | 63 | `SE_Reflection_Cubemap_Outdoors.dds` + 5 more |
+| `ambientMapCube` | 58 | `SE_Ambient_Cubemap...` ×4 |
+| `globalWind` | 8 | wind params |
+| `MAX_CullMethod` / `MAX_UseAlpha` | 5 each | MAX-export variants |
+| `BaseTexture` | 2 | — |
+
+**This block is the era's per-material shader/effect assignment** — it names
+the engine effect file applied to the material, its cull/alpha/wind-animation
+parameters, and (via `effectFilename`) the exporter's original source path.
+Layout CONFIRMED by 3 external sources + traces; semantics CONFIRMED by
+corpus census (full per-effectfile parameter profiles + co-occurrence in
+the run's `02_results\SHADER_DIRECTIVES.json` / `SHADER_CONFIGS.json`).
 
 ## NiArkBillboardNode — 293×
 
