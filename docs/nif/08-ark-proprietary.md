@@ -143,9 +143,14 @@ ITER-14/17/18/19 (external post-audit corrected):
     W=10 ×890; dominant unit headers (0,0.0) ×19,702, (1,0.0) ×3,293;
     the hex-visible `01 00 00 00 80 3f` = (1,1.0) variant). Length
     arithmetic exact (e.g. 214=46+4×42).
-  - **Residual: 3,438 spans (33.5%) fit NEITHER model — OPEN.**
-  - 1,246 spans fit both models (predicate ambiguity documented);
-    109 files have big spans, 100 are mixed-family.
+  - **Residual (ITER-20)**: of the 3,438 neither-spans, **90.31% fit the
+    entry-stream model under BACKTRACKING** (DFS entry-or-pad with ids
+    < 0x10000 — the greedy walk's rejection of ids ≥ 0x8000 was the
+    blocker; 0x8000 is the low half of 1.0f). Final classification of
+    all 10,274 big spans: **Family A 90.25% (upper bound) + Family B
+    → 96.84% total; 325 spans (3.16%, 56 files, top 551564.nif ×84)
+    remain structurally UNKNOWN** — the last open sliver of the morph
+    family. Per-entry semantics (ids, weights) OPEN.
 - Provenance: `99_Audits\PE_NIF_MORPH_DECODE_R4_20260904_122056\` +
   `PE_NIF_MORPH_SPARSE_CLOSURE_R14_20260904_133726\` +
   `PE_NIF_MORPH_KEYFRAME_R18_20260904_141009\` +
