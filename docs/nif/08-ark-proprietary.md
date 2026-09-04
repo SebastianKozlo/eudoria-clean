@@ -227,6 +227,39 @@ STRONGLY_SUPPORTED: binary cousin of the TEXT records — behavior enum +
 symmetric oscillation/rotation parameters. OPEN: variable-length G3B exts
 (49–95 B, 182 blocks) and FIXED_A/B + Mode2 + G3D layouts.
 
+### Variable G3B records + the animation EVENT REGISTRY (ITER-7)
+
+Variable exts (57 blocks, 49–95 B) = the same binary record **plus embedded
+null-terminated ASCII strings — the named animation-event system**:
+
+```
+[u32 rest_size][02][01][u32 X][u8 Y][5 × f32][strings...]
+```
+
+Embedded name census (468 blocks carry strings;
+`99_Audits\PE_NIF_ANIM_REMAINDER_R7_20260904_124614\G3B_EMBEDDED_STRINGS.json`):
+
+| Event name | Count | Meaning |
+|---|---|---|
+| `morph: left` / `morph: right` (+ case variants) | 160+ | morph-channel triggers → NiVertexMorphExtraData targets |
+| `sound:hit_01` / `hit_02` / `hit_03` | 12+ | sound-cue triggers |
+| `start_usetool: effect_01` | 11 | tool-use effect trigger |
+| `start_usetool: sound_01` | 2 | tool-use sound trigger |
+
+**This closes the loop with ITER-4: the behavior records drive vertex
+morphs by NAME ("morph: left/right") and fire sound/effect events.**
+
+Other variant findings (ITER-7, same run dir):
+- **G3C_BOUNDARY (92 blocks)**: long text configs (1482–2152 B) — particle
+  systems (`PCloud01-Emitter ... ParticleSystem values NOR...`)
+- **G3E (4)**: `[binary header incl. u32 text_len]` + the same TEXT records
+- **G9_RTTI v4 (10)**: binary record family with all -1.0 float params
+- **G3D (348)**: index-list binary (dominant lens 245/240 B; entries look
+  like index lists 5..55). **PARSER BUG FOUND**: the frozen G3D size formula
+  `byte[1]×5` is WRONG (e.g. 9×5=45 ≠ 245) — the boundary search compensates
+  today; formula correction is a bounded R61 follow-up (frozen-baseline
+  rules apply: 5426+5596 regression before any change).
+
 ### TEXT_CRLF grammar (31/31 CONFIRMED) — the record framing
 
 ```

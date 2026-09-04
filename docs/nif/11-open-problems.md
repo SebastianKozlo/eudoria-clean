@@ -16,7 +16,8 @@
 | Item | What is known | What is open |
 |---|---|---|
 | BNT2 index field_d | == CRC32(payload) in 3,435/5,596 | the differing 2,161 (REJECTED: 2003-era crc, crc32c, name-concats, halves, cross-entry) |
-| NiArkAnimationExtraData TEXT records | **DECODED (ITER-5)**: per-node procedural behavior config — node name, activeIdle behavior, channels (derivatives/Controllers/cyclic/ParticleSystem/Texture/NodeUpdate), targets (position/rotation/velocity/All), axis+speed params, LOOP mode; 887 records censused | the binary variants: G3B (×1,685, dominant), FIXED_A/B, Mode2 33B, G3D layouts |
+| NiArkAnimationExtraData TEXT records | **DECODED (ITER-5)**: per-node procedural behavior config — node name, activeIdle behavior, channels (derivatives/Controllers/cyclic/ParticleSystem/Texture/NodeUpdate), targets (position/rotation/velocity/All), axis+speed params, LOOP mode; 887 records censused | G3C_BOUNDARY long text records (92) field-by-field parse |
+| NiArkAnimation binary records | **DECODED (ITER-6/7)**: G3B 33B record + embedded event-name registry (morph: left/right, sound:hit_01-03, start_usetool:*) connecting behaviors to vertex morphs BY NAME | G3D internal layout (348 blocks; index lists; the frozen parser's byte[1]×5 size formula is WRONG — correction = bounded R61 follow-up under frozen-baseline rules); G3D/G9 exact string framing |
 | NiArkAnimationExtraData extension | full grammar + variant census (9.3.5: V10_BASE_0B 2270, G3B 1685, G3D 348, FIXED_A 347, G3C 308, FIXED_B 190, TEXT_CRLF 172, V10_BASE_33B 125) | binary-variant inner layouts |
 | NiArkImporterExtraData trailing 38 B (v10) | first byte = Mode marker; `ffffff 00000000 ffffffff ffffff` + float-like ~20 B + 00; 4,017 distinct | field meanings |
 | NiArkTextureExtraData field1 / field2-low8 | two classes: {field1=1, low8=0} ×3,042 / {field1=-256, low8=255} ×1,796 | what the classes mean |
