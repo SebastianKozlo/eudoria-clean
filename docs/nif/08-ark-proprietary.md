@@ -292,8 +292,16 @@ records have 7..24 fields total):
 | Controllers | 237 | 7–22 | 1–16 | minimal (axis-driven) up to long lists |
 | cyclic | 157 | 14–16 | 8–10 | oscillation params |
 
-Param SEMANTICS per channel remain open (values are readable; exact
-meaning of each position is not yet field-by-field mapped).
+Param SEMANTICS per channel remain partially mapped (ITER-23,
+`PE_NIF_TEXT_PARAM_SEM_R23_20260904_144748` — per-position OBSERVED
+distributions in TEXT_PARAM_SEMANTICS.json). Two structural facts
+(OBSERVED): **Controllers records carry a named `Target:` param
+(236/236)** — the Controllers suffix is not purely numeric; and the
+axis slot is channel-dependent in meaning (position → 0/1/2 axis;
+velocity → mostly 2; cyclic → 1/2/3; Texture → UV speeds 0.02/0.05;
+ParticleSystem → mixed). Numeric positions (amplitude/phase/period)
+remain INFERRED — value distributions do not prove semantic roles
+without runtime consumer paths.
 
 Confirmed behavior examples: rotating asteroids (`Asteroid` 120.0 deg/s,
 `Spacestation` 150.0), industrial machinery (shaft machine fins rotation
