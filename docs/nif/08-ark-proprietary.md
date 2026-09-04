@@ -93,6 +93,7 @@ Extension internals: **DECODED (ITER-3+8 census)** — structure =
 | 49 | 255 | class 0x03 + flags (pos4: 1×187/0×68; pos7: 0x40×162) + zeros |
 | 85 | 592 | class 0x03 + flags + **float parameter block** (fov≈2.0, positions -0.5757/-0.382/-1.539, 19.55, 0.6969...; 556 DISTINCT = per-file camera/viewport params) |
 | 121 | 79 | same family, longer (78 distinct, per-file params) |
+| 43 | 11 | **DECODED (ITER-28, `PE_NIF_VIEWPORT_43B_R28_20260904_145342`)**: marker `00 00 01 00` (class byte at offset 2 = 0x01) + either all-zero defaults (sub-class A) or camera floats (B: 1.0, -0.2083, -0.2710, -16.32, -48.65, 0.747) — the same viewport/camera family. (ITER-8 census said ×4 — the narrower inline byte-class count; R61-derived ext census = 11; both kept.) |
 
 Semantic: the 85/121 B classes carry **per-file viewport/camera parameters**
 (floats CONFIRMED; exact field semantics PLAUSIBLE — likely fov/near/far/
