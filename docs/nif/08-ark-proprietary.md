@@ -176,6 +176,18 @@ ITER-14/17/18/19 (external post-audit corrected):
     ITER-4's W=11 model); **the dominant 89.2% (incl. all id=0 ×35,087 — 87.96% carry
     non-zero float content, NOT padding) are greedy-walk artifacts: fragments of a
     quantized float payload whose precise encoding remains UNVERIFIED**.
+  - **RESOLVED (ITER-34, `PE_NIF_MORPH_QUANT_R34_20260904_164538`)**: the artifact
+    payload's true structure = records **`[u16 head][k×f32 weights (Σ=1.0)][9×f32 delta
+    triples]`** with per-record k∈{2,3,4} — byte-exact on 2,093/2,427 real-record
+    spans (86.2%; 84 files); the prompt-literal `[u16 idx][W×f32]` fits only 132
+    spans (REJECTED as universal). The delta floats are f32s **quantized to ≤7-bit
+    mantissas (≥16 trailing zero bits — the LE "00 00" signature in 99.4% of the
+    12-byte groups) on 2⁻¹⁴..2⁻²¹ grids** (T-LATTICE STRONGLY_SUPPORTED);
+    T-F16 REJECTED (the T4 band was a bit-pattern consequence, not f16 weights);
+    T-5BIT REJECTED (ids = float high-half fragments + record heads); T-12B
+    CONFIRMED as 3×f32 groups at even alignments. The walk's "ids" = high halves
+    of the quantized floats. Remaining UNVERIFIED: the exact head semantics in
+    artifact regions and the 9-float triple grouping (3 morph states × XYZ?).
   - **Family B (r19, H-KEY42 — 1,915 spans STRICT exact-fit)**:
     `[tag][W×f32 first record]` + k × units
     `[u32 n][f32 w][(W-2)×f32]` (unit_len = 6+(W-2)×4; W=11 ×1,025 /
@@ -190,13 +202,15 @@ ITER-14/17/18/19 (external post-audit corrected):
     data of families A/B (unreliable Wm estimate for heterogeneous
     blocks). Full hex on disk
     (`PE_NIF_MORPH_UNKNOWN325_R21_20260904_144453\02_results\HEX_UNKNOWN.txt`)
-    for any future deep dive. Per-entry semantics (ids/weights/headers)
-    remain OPEN.
+    for any future deep dive.
 - Provenance: `99_Audits\PE_NIF_MORPH_DECODE_R4_20260904_122056\` +
   `PE_NIF_MORPH_SPARSE_CLOSURE_R14_20260904_133726\` +
   `PE_NIF_MORPH_KEYFRAME_R18_20260904_141009\` +
-  `PE_NIF_MORPH_NOFIT_STRUCT_R19_20260904_143755\`
-  (HEX_SAMPLES.txt 459 spans; KEY42_VALIDATION.json; UNION_CLASSIFICATION.json).
+  `PE_NIF_MORPH_NOFIT_STRUCT_R19_20260904_143755\` +
+  `PE_NIF_MORPH_IDS_R33_20260904_162507\` +
+  `PE_NIF_MORPH_QUANT_R34_20260904_164538\`
+  (HEX_SAMPLES.txt 459 spans; KEY42_VALIDATION.json; UNION_CLASSIFICATION.json;
+  ID_TESTS.json; QUANT_TESTS.json; REAL_SPARSE_GRAMMAR.json).
 
 ## NiArkShaderExtraData — 2,084× — SEMANTICS FULLY DECODED (ITER-3 → completed ITER-32)
 
