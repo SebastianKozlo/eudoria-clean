@@ -1,0 +1,149 @@
+# M1 GATE REMOTE AUDIT PACKAGE — PE_WORLD_SURFACE_FIDELITY_R1
+# RUN: ITER_052 (ledger ITER_038) — THE M1 GATE REMOTE AUDIT PACKAGE
+# BUILT: 2026-09-05 (packaging iteration; per the OPENCODE -> GITHUB -> EXTERNAL
+#   AUDIT CONTRACT sections 2/3/4/5/6/7/9/10/11/12/15/16)
+# PURPOSE: make the Milestone 1 gate FULLY inspectable from this repository
+#   alone. This package COPIES/CONSOLIDATES existing artifacts faithfully —
+#   it RE-DERIVES NOTHING and CLAIMS NOTHING NEW (no new forensics).
+
+## The gate decision state (one paragraph)
+
+Milestone 1 (PE_WORLD_SURFACE_FIDELITY_R1) reached its gate, was audited
+(REPORT V1 = PASSED), and that PASS verdict was REJECTED by the human
+independent audit on a byte-proven FLOAT64 operand misread (decisions-ledger
+ENTRY #10) plus independent gaps. A mandated correction series followed
+(ledger ITER_035/036/037 = the FLOAT64 operand lock, the milestone-wide
+float-constant lock sweep, and the original-direct single-model witness).
+The gate was then RE-JUDGED (REPORT V2 = PARTIAL_PASS_CORRECTED — the
+auditor's PROPOSED verdict; the human + the external ChatGPT review DECIDE).
+The loop is HARD-STOPPED at the gate. Nothing here authorizes Milestone 2.
+
+## Package structure (contract section 4 equivalents)
+
+| Contract element | This package | What it is |
+|---|---|---|
+| REPORT | `REPORT_V1_SUPERSEDED.md` + `REPORT_V2_REJUDGMENT.md` | the milestone gate audit V1 (SUPERSEDED — retained for the record, per the no-history-rewrite rule) and the V2 re-judgment (CURRENT). |
+| GATES | `GATES/` | the corrected 19-row gate deliverable matrix (md + json, the ITER_034 deliverable) + the ITER_035/036 amendment records + `GATES/AMENDMENTS.md` (the layering note). |
+| EVIDENCE_MANIFEST | `EVIDENCE_MANIFEST.json` | the consolidated per-claim manifest (contract section 7 fields per claim), built FROM the matrix rows + the per-iteration evidence SHA manifests. Local-only evidence is represented by identity metadata (path + SHA256); original game payloads are NEVER committed (contract section 3). |
+| RETRACTIONS/SUPERSESSIONS | `RETRACTIONS.md` | the consolidated retraction/supersession record: the human rejection (ENTRY #10), the V1 verdict supersession, the iter024 RTTI negative, the water-lead naming, the per-cell-renorm refinement, the RNG draw construction, the circular-reference demonstrative failures. |
+| UNRESOLVED | `UNRESOLVED.md` | the 27 known-open items + the 5 honest limits (V2 section 2), consolidated. |
+| ROADMAP MAPPING | `ROADMAP_MAPPING.md` | HISTORICAL_RUN -> CONTRIBUTES_TO -> EU935-Mx for the M1 iterations + the bootstrap + the showcase/viewer work (contract section 16; nothing renamed). |
+| HANDOFF | `HANDOFF.md` | the contract section-12 EXTERNAL AUDIT HANDOFF block as a committed file. |
+
+## How to audit this package (for the external ChatGPT auditor)
+
+1. Read `REPORT_V2_REJUDGMENT.md` (the current judgment) and
+   `REPORT_V1_SUPERSEDED.md` (the rejected one — the diff between them IS
+   the correction story).
+2. Read `GATES/AMENDMENTS.md`, then the 19-row matrix in
+   `GATES/M1_GATE_DELIVERABLE_MATRIX.md` (rows 10/11 and the blend/integration
+   corrections are applied via the amendment records — see the layering note).
+3. Walk CLAIM -> SOURCE -> METHOD -> IMPLEMENTATION -> TEST -> EVIDENCE ->
+   VERDICT per row via `EVIDENCE_MANIFEST.json`: every claim carries its
+   source era/path/SHA, the generator (iteration + repo commit), the evidence
+   artifact identity (repo path OR local-only identity + SHA256), the measured
+   quantity + denominator, the independent source of truth, why the validation
+   is non-circular, the failure case the test would detect, and the limitations.
+4. Check `RETRACTIONS.md` against the claims (nothing retracted is cited as
+   standing evidence; everything superseded says so).
+5. Check `UNRESOLVED.md` (the 27 open items + the 5 honest limits) against any
+   claim that sounds too strong.
+6. Verify code claims against the repo tree (`src/pesource/`, `terrain/`) and
+   the cited commits (the English commit trail on master).
+7. The original physical corpora are LOCAL-ONLY (contract section 3): their
+   identity (era, path, size, SHA256) is in `EVIDENCE_MANIFEST.json`
+   (`local_only_original_sources`) and in `docs/audits/README.md`.
+
+## Provenance of this package
+
+- BASE_SHA: c0c2f2f (master, origin in sync, working tree CLEAN before this
+  package; no preexisting uncommitted work).
+- All copied artifacts are byte-exact copies of the local canonical audit
+  tree (D:\Eudoria_Reconstruction\99_Audits\PE_MILESTONE_1_WORLD_SURFACE_R1\);
+  their SHA256 values (re-hashed fresh at packaging time) are recorded in the
+  session evidence file iter038_gate_package_manifest.json (local evidence
+  tree) and match the ledger/manifest-recorded values.
+- The consolidated files (this index, AMENDMENTS.md, EVIDENCE_MANIFEST.json,
+  RETRACTIONS.md, UNRESOLVED.md, ROADMAP_MAPPING.md, HANDOFF.md) are
+  consolidations OF RECORDS THAT ALREADY EXIST (the matrix, the V1/V2 audits,
+  the ledger, the iteration manifests) — every number and SHA in them is
+  copied from those records, not re-measured.
+
+---
+
+## COMPLETION RECORD — PE_M1_GATE_PACKAGE_COMPLETION_R1_20260905_041816 (appended 2026-09-05)
+
+The five files promised by the package-structure table above but never built when the
+ITER_052 packaging session was interrupted are NOW BUILT, by the bounded mechanical
+completion run `PE_M1_GATE_PACKAGE_COMPLETION_R1_20260905_041816` (PE-MASTER ORDERED_WORK
+relayed verbatim by the human 2026-09-05; commit/push scope granted for this package ONLY).
+This section is APPENDED — nothing above was rewritten (the pre-append state is frozen at
+`99_Audits\PE_M1_GATE_PACKAGE_COMPLETION_R1_20260905_041816\01_RAW\GATE_INDEX.md.pre`,
+SHA256 F3CDFD3DCF8D63DA7B4932C8C30721BDD5B6B8063E5BE0903A65D2DD93025720, byte-prefix-proven
+by the run's consistency check).
+
+### The five built files (+ the hygiene supplement)
+
+| File | Built from (all READ-ONLY; SHAs verified before use) | What it is |
+|---|---|---|
+| `EVIDENCE_MANIFEST.json` | the LIVE V3 matrix (md+json) + `M1_LEDGER.md` (35 entries parsed) + the repair run's `artifact_index.csv` (57 SHAs cross-checked) + `DOMAIN_MANIFEST.json` + the repair-run evidence JSONs (`domain_reproof` / `oracle_battery` / `offline_rechecks` / `fail_closed_gates` / `PE_SECTION_MAP` / `CONSTANT_ADDRESS_LOCK`) + `PE_MASTER_REVIEW.md` | the consolidated per-claim manifest: 19 claim rows, each with source (era/description/local path/size/SHA256 — every SHA re-hashed from the physical file), generator (iteration + repo commit + generator-script SHA), measured quantity + DENOMINATOR, independent source of truth, why_non_circular, failure_case_detected, dependencies, limitations; plus the era-bounded registry, the V3 open list, the regression-sweep record, the post-audit confirmation section, the 5 hygiene findings, and the `local_only_original_sources` identity table (era/path/size/SHA256/reproduction — ZERO payload bytes committed). |
+| `RETRACTIONS.md` | the V1 audit's self-correcting-loop record + decisions-ledger ENTRY #10 + the V2 re-judgment + `GATES\AMENDMENTS.md` + the repair run's `SUPERSESSION.csv` + `VALIDATOR_MUTATION_MATRIX.csv` + `PE_MASTER_REVIEW.md` | the consolidated retraction/supersession record — nothing retracted is cited as standing anywhere in this package. |
+| `UNRESOLVED.md` | the frozen matrix PART 4 (27 known-open) + `REPORT_V2_REJUDGMENT.md` §2 (5 honest limits) + the V3 open list (7 items incl. the x87 CW measurement) | the consolidated open-items export (the AUDIT_ENTRYPOINT Open P0 #2 deliverable). |
+| `ROADMAP_MAPPING.md` | `docs/audits/README.md` (EU935-M0..M12 namespace) + the ledger + the run-directory census | HISTORICAL_RUN -> CONTRIBUTES_TO -> EU935-Mx for the M1 iterations + the bootstrap + the showcase/viewer work; nothing renamed. |
+| `HANDOFF.md` | the V1/V2 reports + the PE-MASTER verdict chain + this index | the external-audit handoff block as a committed file (for the PE-MASTER pre-check and the human's Desktop relay decision). |
+| `CORRECTION_NOTES.md` | `PE_MASTER_REVIEW.md` CODE_FINDINGS 1-4 + this completion run's own pre-build verification (HYG-5) | the hygiene supplements: the synthetic-domain PC24 field = NOT_MEASURED (with the PE-MASTER independent measurement 103,073/1,245,184 cited), the dead null key, the failed-attempts register (8 log FILES / 10 EVENTS), the hardcoded-numbers process note, and the iter033_manifest.json citation-label defect. Supplements ONLY — no frozen evidence file was edited. |
+
+### The matrix consolidation (V3 = the LIVE matrix)
+
+`GATES\M1_GATE_DELIVERABLE_MATRIX_V3.md` + `GATES\M1_GATE_DELIVERABLE_MATRIX_V3.json` are
+SHA-verified byte-identical copies of the LIVE V3 matrix (source:
+`99_Audits\PE_M1_VALIDATOR_COVERAGE_REPAIR_R1_20260905_012439\05_ANALYSIS\`, SHA256
+B0B69F0634774CC4032A471D7F69BFF7312D427166DC24217C26B93B2DFF797F /
+0E46AB2C94EA1BA7B4527950A4D8851AB69DFA48B7DCDDD449F9A52BD39931F8). The OLD matrix copies
+in `GATES\` stay FROZEN HISTORY and are marked SUPERSEDED-BY-V3 in the appended section of
+`GATES\AMENDMENTS.md` (they were NOT deleted or modified).
+
+### The supersession chain (explicit, end to end)
+
+1. **REPORT_V1** (this package) — the V1 milestone gate audit PASSED — **REJECTED** by the
+   human independent audit on a byte-proven FLOAT64 operand misread (decisions-ledger
+   ENTRY #10); retained as history, superseded, never deleted.
+2. **The correction series** — ledger ITER_035/036/037 (the FLOAT64 operand lock, the
+   milestone-wide float-constant lock sweep, the original-direct single-model witness);
+   amendment records in `GATES\AMENDMENT_ITER035_ROWS10_11.json` + `GATES\AMENDMENT_ITER036_CLOSURE.json`.
+3. **REPORT_V2_REJUDGMENT** (this package) — **PARTIAL_PASS_CORRECTED** (the auditor's
+   PROPOSED verdict; the human + the external review DECIDE).
+4. **The external V2 audit** (`PE_M1_V2_EXTERNAL_AUDIT_20260905_012439`) — verdict
+   **DIRECT**: do not close M1; repair the validation-proof infrastructure; all 19
+   allegations recorded.
+5. **The validator-coverage repair run** (`PE_M1_VALIDATOR_COVERAGE_REPAIR_R1_20260905_012439`)
+   — executed OFFLINE; **19/19 allegations ACCEPTED** (none REFUTED, none UNRESOLVED); the
+   oracle repaired + platform-validated; the REAL VCL domain re-proven (7 pairs x 32768 r +
+   65536 u16, engine-vs-JS 0 mismatches); 13/13 fail-closed negative controls; the PE
+   address mapping reclassified 60/19 with NO load-bearing change; the 76/2048/16 recorded
+   results re-verified bit-exact offline; **the V3 matrix created** (the old matrix = frozen
+   history).
+6. **The PE-MASTER post-audit** — **MASTER_ACCEPTED** (advisory; PE-MASTER status
+   PROVISIONAL_UNTIL_QUALIFIED — the verdict is NOT a gate), persisted as
+   `docs/audits/PE_M1_VALIDATOR_COVERAGE_REPAIR_R1_20260905_012439/PE_MASTER_REVIEW.md`;
+   its independent counter-check CONFIRMS: the real-domain PC24 sensitivity 14,104/229,376
+   (exactly), rand01/positions PC24 = 0, and — its OWN auditor-side measurement — the
+   synthetic-domain PC24 sensitivity 103,073/1,245,184 (the repair run had NOT measured it;
+   see CORRECTION_NOTES.md HYG-1). Its CODE_FINDINGS 1-4 are consolidated by the
+   correction-notes; it ordered THIS completion run.
+7. **THIS completion package** (`PE_M1_GATE_PACKAGE_COMPLETION_R1_20260905_041816`) — the 5
+   files built + the V3 copies + the hygiene notes + the internal-consistency check
+   (fail-closed; every SHA re-hashed; V3 copies hash-identical; append-only proofs for this
+   index and AMENDMENTS.md). MECHANICAL consolidation only: no new forensics, no new claims,
+   no runtime (`04_RUNTIME\NOT_EXECUTED.md` in the run dir).
+
+### State after completion (binding)
+
+M1 remains **PARTIAL / HARD_STOPPED_AT_GATE**; this completion does NOT close M1, does NOT
+unlock M2, does NOT change charter section 13. The open items live in `UNRESOLVED.md`. The
+PE-MASTER pre-check of THIS package comes next; the Desktop relay is the human's decision
+alone. Provenance: built by pe-reconstruction from read-only records (BASE_SHA 382c296;
+the commit scope is ONLY this gate package + the run's own package dir; the run's
+`STAGE_ACCEPTANCE_GATES.csv` + `00_CONTROL\consistency_check.py` carry the verification
+record; the run-local originals of everything cited live under
+`99_Audits\PE_M1_GATE_PACKAGE_COMPLETION_R1_20260905_041816\`).

@@ -1,0 +1,425 @@
+{
+  "deliverable": "M1_GATE_DELIVERABLE_MATRIX",
+  "milestone": "PE_WORLD_SURFACE_FIDELITY_R1",
+  "session": {
+    "iter": "M1 ITER_048 (ledger ITER_034)",
+    "date": "2026-09-04",
+    "charter_sha256": "7A10CD2BE286499540C6668C90E63897781BF6B472541FF0CCB75ADA84562ECA",
+    "charter_verified_in_session": true,
+    "governing_ledger_entries": ["#2 clean runtime strategy", "#3 foundation gate refinement", "#7 backup-first + M1-E start", "#8 English repo + GitHub remote", "#9 Three.js r185 target"],
+    "clean_runtime": {
+      "repo": "eudoria-clean",
+      "commit": "b7d38ad",
+      "branch": "master (origin in sync)",
+      "three": "0.185.0",
+      "r185_baseline": "CALIBRATED (gate A-J, ledger ITER_019)",
+      "tree_verified_unchanged": true
+    },
+    "legacy_oracle": "eudoria-web r169 FROZEN (LEGACY_REFERENCE / DEBUG / REGRESSION_ORACLE)",
+    "era_labels": {
+      "JUL_2003": "charter primary target; 50.bnt SHA A6E59EE07A51EAC06A3E75DA5421E5928D59EDED74F096DCAD04CE80ED01DA00",
+      "PCG_9_3_5": "clean-runtime primary era; Entropia.exe 9.3.5.6746 SHA E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "CD_JAN_2003": "Textures.ark SHA D611D125...",
+      "EU_LATER": "Textures.bnt SHA 2EAE1159..."
+    },
+    "p0_scope": "CONSOLIDATION + VERIFICATION ONLY (no new forensics/RE; no runtime code changes)"
+  },
+  "taxonomy": ["CONFIRMED", "STRONGLY_SUPPORTED", "PLAUSIBLE", "UNVERIFIED", "REJECTED"],
+  "final_matrix_19_rows": [
+    {
+      "row": 1, "subsystem": "TERRAIN_HEIGHT",
+      "verdict": "CONFIRMED (structure/bytes); engine height-form: identity+operation CONFIRMED, final role STRONGLY_SUPPORTED",
+      "knowledge": "TDF heights = 32x32 uint16 LE at payload offset 64 (two offset spaces never collapsed); PE2003 FUN_0047fb20 = min+(max-min)*u16/65535; 9.3.5 sibling FUN_00989e70 clamp-65535",
+      "implementation": "terrain.bnt/50.bnt -> PESourceMount -> TerrainTile -> PETerrainCore (heightScale 1/128 CURRENT_RUNTIME_CALIBRATION; disjoint-tile borders kept as original data)",
+      "validation": "9/9 tiles byte-faithful vs independent parser; 9216/9216 identical vs r169 oracle chunk; JUL full-map SHA 3DC16D52... == iter002; sentinel explicit",
+      "historical_fidelity": "byte-exact from original bytes both eras; 773/51,920 PCG-vs-JUL height-divergent tiles recorded",
+      "evidence_status": "CONFIRMED (byte-level); heightScale 128 u16/m STRONGLY_SUPPORTED (calibration)",
+      "evidence": [
+        {"file": "iter019_p0_browser_result.json", "sha256": "20CFC413E530E3F7C67760E884977F23970EEA6167E75E6159FEFE5CA8EC3FC9"},
+        {"file": "iter019_p0_byte_audit.json", "sha256": "4C29D22071E3E9CACD4744329B985EA534CFF1558C93F761AD1A8E89B2EF7A6B"},
+        {"file": "iter019_era_validation_terrain_bnt.json", "sha256": "D2D13D84558E337D8A3B8CA14DAFA8240A8B4A4B4B97AFA470F707141183F1DD"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5"],
+      "honest_bounds": "per-tile min/max SOURCE UNRESOLVED (sub-header zero on 386/400 sampled; identity lerp used); full-lerp form in 9.3.5 itself UNRESOLVED (open #9)"
+    },
+    {
+      "row": 2, "subsystem": "TERRAIN_GRID",
+      "verdict": "CONFIRMED",
+      "knowledge": "BUNT filename-xy 220x236 = 51,920 regular + 1 sentinel (JUL); PCG BNT2 58,451 = 51,920 regular (same convention) + 6,530 special-row + sentinel; tile = 128 world units (>>7 math)",
+      "implementation": "era-validated versioned decoders (BuntArchive JUL / Bnt2TerrainArchive PCG); sentinel explicit",
+      "validation": "iter019 era-validation 0 failures; iter008b exact consumption 51,920/51,920; denominators 7040x7552 checked in-browser",
+      "historical_fidelity": "original container bytes both eras",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter008b_winning_walk.json", "sha256": "AAFD1A4EB0E459C27C597E5AEF96EEEA4B187F8F40EBA9D7AFA274AADFF80E11"},
+        {"file": "iter019_era_validation_terrain_bnt.json", "sha256": "D2D13D84558E337D8A3B8CA14DAFA8240A8B4A4B4B97AFA470F707141183F1DD"},
+        {"file": "iter030_findings.json", "sha256": "1104F3186116A98856438741D7F7439E25E6DEF578EAD6D2AA666812B3951207"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5"],
+      "honest_bounds": "6,530 special-row tiles structure-censused only; semantics UNRESOLVED (open #6)"
+    },
+    {
+      "row": 3, "subsystem": "TERRAIN_WORLD_TRANSFORM",
+      "verdict": "STRONGLY_SUPPORTED (engine facts CONFIRMED; global georef intentionally NOT claimed)",
+      "knowledge": "world = 131,072 units (ArkHeightTree root 65,536 half, vtable-proven); tile = 128 units; m->cm x100 (FUN_0082b790); height field full-world 512u texels origin -65,536; climate/detail grids center 65,536u region",
+      "implementation": "clean pages render REGIONS: per-tile meshes at TILE_WORLD=128; cm->m bridge 0.01 [P-UNITS]; no global-world placement claim",
+      "validation": "deterministic renders + heights oracle; engine constants address-cited",
+      "historical_fidelity": "tile/world sizes engine-confirmed; regional placement = reconstruction window [P-WINDOW]",
+      "evidence_status": "STRONGLY_SUPPORTED; cross-era field-vs-tile georeferencing UNPINNED (r 0.527 saturation; measured contradiction -130..-125 m vs +16..+487 m)",
+      "evidence": [
+        {"file": "iter030_findings.json", "sha256": "1104F3186116A98856438741D7F7439E25E6DEF578EAD6D2AA666812B3951207"},
+        {"file": "iter031_water_findings.json", "sha256": "2f9bef450e74e49886af958b573f98c6e2c465d368f203587f6fcc82269c9eb8"},
+        {"file": "iter030_page_result.json", "sha256": "9B62AD3399F8D1D4E295862D5B065D580D5AB66E7DBA6655DD03FF3F20F8E39B"}
+      ],
+      "era": ["PCG_9_3_5", "JUL_2003"],
+      "honest_bounds": "[P3b] row-input substitution backed by a MEASURED contradiction; georef pin = open #5"
+    },
+    {
+      "row": 4, "subsystem": "TERRAIN_MATERIAL_RECORDS",
+      "verdict": "CONFIRMED (structure both eras; consumer role CONFIRMED 9.3.5)",
+      "knowledge": "JUL: size-tagged record sequence stride size+4, exact consumption 51,920/51,920; 175 ids; masks RAW+RLE; base-first (Stone04 51,521 tiles pos-0). PCG 9.3.5: payload = serialized MaTerrainMapPatch (the 52/64 offset-space unified); layer types {0 heights, 2 per-material masks (sub = texture id), 3 dim-32, 6 per-tile texture-carrier plane, 7 u16 normals, 9/0xa system}; THE MASKS DRIVE THE LOD VERTEX-COLOR BAKE + ZONE SHADOW PAINT (NOT the base/factor/detail texel source; exhaustive 838/838 census)",
+      "implementation": "TdfMaterialTailDecoder.js (named dim=16 RAW/RLE; system records carried raw UNVERIFIED); PESourceMount.getTerrainMaterials (provenance + tailConsumedExactly)",
+      "validation": "iter008b corpus walk; iter020 64/64 vs independent parser; iter021 95 records both parsers; JUL oracle 9/9 sequence; >4-material tiles rendered AS-IS (legacy 4-cap = structural difference recorded)",
+      "historical_fidelity": "record grammar CONFIRMED both eras; consumer semantics CONFIRMED 9.3.5; era drift = CONTENT never GRAMMAR",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter008b_winning_walk.json", "sha256": "AAFD1A4EB0E459C27C597E5AEF96EEEA4B187F8F40EBA9D7AFA274AADFF80E11"},
+        {"file": "iter020_material_decode_audit.json", "sha256": "51898ABC09B15F6711634955928B8DF56FD35B4E2B2E17BDCAEB7543F223F458"},
+        {"file": "iter030_findings.json", "sha256": "1104F3186116A98856438741D7F7439E25E6DEF578EAD6D2AA666812B3951207"},
+        {"file": "iter030_pcg_tile_census.json", "sha256": "C3EB3C28CBEF2926E2A706F51D437D07C793C10D6A2CA74017FBD49F30E7F071"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5"],
+      "honest_bounds": "dim=2/dim=4 semantics UNRESOLVED (open #7/#8); zone scratch reader not located (open #11); Grassmix04 duplicate-id + unnamed dim=16 system records recorded (open #24)"
+    },
+    {
+      "row": 5, "subsystem": "TERRAIN_TEXTURE_RESOLUTION",
+      "verdict": "CONFIRMED (resolution layer, oracle-verified); world-data grids MISSING/ERA-BOUNDED (patcher-delivered)",
+      "knowledge": "material id@+16 -> BNT2 '<id>.dat': EU_LATER 175/175, CD 171/175 (4 later-era additions - the era gap REAL), PCG 8,381 entries region 10/10+20/20 same-era 0 fallbacks; TGA2 256x256x24 uniform; climate system textures 96/96 in PCG Textures.bnt (17 palettes 64x256x32 + 79 details); world-data set 429259 (257x257 heights LOCAL) + 432502 (65x65 climate MISSING) + 459344 (129x129 detail selectors MISSING) - patcher-delivered (ClientLoader FTP; client fetch LOCAL-ONLY, miss halts init)",
+      "implementation": "PESourceMount.resolveTexture (era-explicit, LOUD NOT_FOUND, provenance) + TgaDecoder (validated TGA2 subset); pages fetch palettes/field/details LIVE with SHA provenance",
+      "validation": "frozen M3-2-R1 manifest agreement 175/175 (independent pipeline); M3-4 witness intersection 0; iter011 cross-run drift 0; four-era water texture byte-identity",
+      "historical_fidelity": "original era bytes, era-labeled; NO silent cross-era",
+      "evidence_status": "CONFIRMED (resolution); MISSING-locally items bounded ([P1]/[P2]; open #4)",
+      "evidence": [
+        {"file": "iter010_id_resolution.json", "sha256": "ECA9B3588D99D1FF44CCC880B1EE82A245113DE1EB86357ED715C1F4AAF10D2A"},
+        {"file": "iter011_payload_classification.json", "sha256": "86271B9F08BF2057B846C3D21F10E1B0E385E9266575A5B47B4E91BA3BB0C2CE"},
+        {"file": "iter030_page_result.json", "sha256": "9B62AD3399F8D1D4E295862D5B065D580D5AB66E7DBA6655DD03FF3F20F8E39B"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5", "CD_JAN_2003", "EU_LATER"],
+      "honest_bounds": "the JUL_2003 texture container DOES NOT EXIST (both usable corpora CROSS-ERA by construction, tagged per resolution); 110/175 era-stable, 61 divergent (which matches JUL undecidable - open #23)"
+    },
+    {
+      "row": 6, "subsystem": "TERRAIN_BLEND_SEMANTICS",
+      "verdict": "CONFIRMED (era 9.3.5: shader op + factor content + filtering; code + data + gate)",
+      "knowledge": "TERRAIN_14 (ps.1.4): D = d0*w0+d1*w1+d2*w2 (factor RGB u8/255 UNRENORMALIZED) -> overlay keyed on D vs 0.5 -> light/shadow/fog (shadow = base alpha, mul r0,r0,r0.a); FACTOR CONTENT = ONE-HOT palette-alpha 3-band partition (>=73->R, 53..73->G, <53->B) + noise + accumulated weight (NO normalization needed - the renorm candidate REFINED; RAW + CLAMP255 falsified); BASE = palette bake (row=altitude 255*(1-(h-2)/512-noise2), col=63*(noise1+roughness)); LAYER CAP 3 details + 1 base per pass; filtering states verbatim (base/factor CLAMP LINEAR/LINEAR/POINT-mip; details WRAP LINEAR/LINEAR/LINEAR-mip, LOD bias -0.5, repeats 32/32/16); Terrain_14 = loaded primary (mode-2, Ark11 fallback mode-1); TDF masks feed VERTEX COLORS (row 4), NOT the factor",
+      "implementation": "terrain/materials_confirmed.html+js renders the CONFIRMED architecture; materials_wsum kept as the labeled comparison; the naive sequential-mix calibration FALSIFIED for the real engine - superseded",
+      "validation": "HLSL byte-extracted from original materials.vfs; producer FUN_00939c40 decompiled + disasm-pinned; 53/73 thresholds byte-match the original palette alphas {45,62,85}; 18-tile gate 0.0% saturation (vs naive 84.0%); page probe: naive 43.36% vs confirmed 0.0% (reproduced in the fresh sweep)",
+      "historical_fidelity": "era-9.3.5-CONFIRMED from the shipped .fx + binary; PE2-2003 fixed-function blend era-divergent RECORDED",
+      "evidence_status": "CONFIRMED (era 9.3.5); JUL_2003 runtime blend era-divergent (open #22)",
+      "evidence": [
+        {"file": "iter024_fx_id_0x3ea_Terrain_14.hlsl", "sha256": "5AE4AF81B54A71E66E1F63A9718A984314D8FCB0763FDFFF19AE0C7EDF8516F1"},
+        {"file": "iter024_blend_op_findings.json", "sha256": "BA08FFD6F92B741AA76E095AA0EEE7066C51AB73CC5CFD8FB39134C4CC204126"},
+        {"file": "iter030_findings.json", "sha256": "1104F3186116A98856438741D7F7439E25E6DEF578EAD6D2AA666812B3951207"},
+        {"file": "iter030_page_result.json", "sha256": "9B62AD3399F8D1D4E295862D5B065D580D5AB66E7DBA6655DD03FF3F20F8E39B"}
+      ],
+      "era": ["PCG_9_3_5"],
+      "honest_bounds": ">4-material reduction mechanism UNRESOLVED (open #25); quadtree construction not RE'd; LOD bias -0.5 not expressible in r185 (documented renderer deviation)"
+    },
+    {
+      "row": 7, "subsystem": "FOLIAGE_SOURCE",
+      "verdict": "CONFIRMED (9.3.5 loader positive + source graph address-cited)",
+      "knowledge": "FUN_0041dae0 registers .vcl extension + VegetationClimates\\ dir + VegetationClimates.bnt + CREATES ArkVegetationClimateFactory @0x00420007; 45 ArkVegetation* classes RTTI-proven; init FUN_0044cb70 <- FUN_0044d590 (same init as the palette manager); VegetationClimates.bnt = BNT2, 32 .vcl, 492 TSV rows, 12 columns, 256 distinct model ids (255/256 resolve; 1 unresolved: 10136); both corpus copies byte-identical JUL==PCG (SHA 7B858401...); THE 2003 PE2 BINARY HAS NO LOADER (era-labeled)",
+      "implementation": "VegetationClimateDecoder.js (FUN_0083a7d0 flat 12-value stream -> 0x30 records; reproduces the audited census exactly) + PESourceMount.getVegetationClimate (SHA-pinned, provenance with the loader-absence note)",
+      "validation": "string census + mount decompile + RTTI chain (fresh project, sandbox SHA-pinned, ~250 functions); census re-derived (492/256/32; the '493' lead corrected, off-by-one recorded)",
+      "historical_fidelity": "9.3.5 foliage LOCALLY reproducible down to the RNG; JUL_2003 = the data with the loader ABSENT (recorded, never silently bridged)",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter032_findings.json", "sha256": "af8b900a3864612356a9575ee740f821bcec1b7eb0ff65194e24a36e89b16866"},
+        {"file": "iter032_rtti_chain.json", "sha256": "176bccc010f606c4808df07024e5216ad6ae6da3d8ebbe669e4aca6b6f4f8f8a"},
+        {"file": "iter032_re_dec_0083a7d0_vcl_parser.c", "sha256": "f7e887de9f27f0bd4e294c1cc7c5519018823a534e01dbd43f461b00d85d8a99"},
+        {"file": "iter033_manifest.json", "sha256": "F299C6222917DA8859351D9BE4D2DF0D40F9C6BB7767378DFB22B18C4FFAD46C"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5"],
+      "honest_bounds": ".vcl fetch id source + type-id constant UNVERIFIED (open #3); cell byte-stream origin not closed (open #18); JUL-era foliage runtime = absent-loader era fact"
+    },
+    {
+      "row": 8, "subsystem": "FOLIAGE_MODEL_BINDING",
+      "verdict": "CONFIRMED (mechanism) + IMPLEMENTED via GENERATED_CACHE (honestly labeled)",
+      "knowledge": "node+0x19 u32 id -> GetModel (type-0x66 fetch -> the 0x14 ArkVegetationModelClient); VCL col0 = the id source; ids = the Models container ids",
+      "implementation": "the 10 climate-0 col0 ids bound to the legacy GLB corpus copied read-only into assets/foliage_glb/ + MANIFEST.json (GENERATED_CACHE, per-file SHA256, verified at load, loud NOT_FOUND; 0 misses)",
+      "validation": "10/10 resolved; manifest SHAs pinned (iter033_manifest); fresh sweep reproduced 76/76 rendered, 0 NOT_FOUND",
+      "historical_fidelity": "BINDING MECHANISM engine-confirmed; the RENDERED MESHES = GENERATED_CACHE (export source corpus UNVERIFIED at file level; era Models.bnt NIFs remain the semantic truth) - labeled",
+      "evidence_status": "CONFIRMED (mechanism) / GENERATED_CACHE (assets, labeled)",
+      "evidence": [
+        {"file": "iter032_re_dec_0094b1d0_getmodel.c", "sha256": "a0c2c9566eb40ffbe2ec0fd018e65f509fa643cafd2af6b4f0a7623c41168278"},
+        {"file": "iter033_foliage_generator_census.json", "sha256": "3AAFBF4874046395C63EA095B69FC172C4A908E22D0980448BD852416FA80E24"},
+        {"file": "iter033_manifest.json", "sha256": "F299C6222917DA8859351D9BE4D2DF0D40F9C6BB7767378DFB22B18C4FFAD46C"}
+      ],
+      "era": ["PCG_9_3_5", "legacy export corpus (labeled)"],
+      "honest_bounds": "[P-MATERIALS] per-model materials = GENERATED_CACHE GLBs; the clean pesource NIF path queued (open #21)"
+    },
+    {
+      "row": 9, "subsystem": "FOLIAGE_BIOME_RULES",
+      "verdict": "PARTIALLY CONFIRMED (record structure CONFIRMED; per-location selection UNVERIFIED -> [P-CLIMATE])",
+      "knowledge": "12-column records: col1 density 0..330, col2/col3 scale (corr 0.449), col4/col5 elevation bands (corr 0.296), col7 ~maxElev (corr 0.382), col10/col11 probability pair (corr 0.370); ADJACENT CLIMATES SHARE MODEL SETS (0<->9 Jaccard 0.583); VCL ids 0..31 vs palette ids DISJOINT (two climate resource families, one shared init FUN_0044d590); .tez = LOCAL terrain edit zones (no climate carrier; alignment near-random vs climate cells; d 20xxx byte-proven disjoint from templates/hierarchy except d=20070==B(template 1969), role UNVERIFIED)",
+      "implementation": "records decoded canonically into the generator; climate choice = DOCUMENTED constant index 0 [P-CLIMATE] (the constant-byte-0 convention)",
+      "validation": "iter032_vcl_columns (census + correlations); iter032_climate_id_space (disjointness measured); iter032_tez_zoning_v3 (geometry census both eras); iter022 (id-space joins raw + structured)",
+      "historical_fidelity": "DATA original (era-invariant); SELECTION SEMANTICS PLAUSIBLE-UNVERIFIED (the shared-selector hypothesis)",
+      "evidence_status": "structure CONFIRMED; selection UNVERIFIED (bounded)",
+      "evidence": [
+        {"file": "iter032_vcl_columns.json", "sha256": "a62d9473d6d6d82c97595ceeccbcb915490f95a2b0f14750dbc03075a6526789"},
+        {"file": "iter032_climate_id_space.json", "sha256": "d7541e1d4f5f76fb6bc331fad2e82fe10c8a64af63019e6e85897c1614d01f51"},
+        {"file": "iter032_tez_zoning_v3.json", "sha256": "4892b189c6de2f0783331ac305bdaab4caf4ea200bbf353141173dca59806278"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5"],
+      "honest_bounds": "cols 6-11 semantics UNVERIFIED (open #17); the climate->region binding NOT in .tez (measured negative); 2xxxx resource-space hypothesis PLAUSIBLE (open #26)"
+    },
+    {
+      "row": 10, "subsystem": "FOLIAGE_DISTRIBUTION",
+      "verdict": "CONFIRMED (mechanism) + IMPLEMENTED with era-bounded [P-CELLSTREAM] stand-in",
+      "knowledge": "FUN_0098fe00 procedural grid (subdivision 0..4 -> steps 1/2/4/8/16; 24B cells; density = *(cell+8)>>3); FUN_00990810 stored cell records {u16 x, u16 y, u32 id}; FUN_0095b180 spawn loop (pos = u16/K, scale = |rand*2.0| MEASURED, model bind; rotation IDENTITY = the RE-faithful absence); spawn default level 1",
+      "implementation": "PEFoliageCore.js generator (every stage address-cited); the historical cell byte-stream = the LOCAL DETERMINISTIC STAND-IN [P-CELLSTREAM]",
+      "validation": "iter033 census: 76 instances / 4 sub-cells / 4 distinct models with per-instance seedInputs/rngState0/samplerValue/scale; 28 zero-counts recorded; elevation-band diagnostic MEASURED without filtering (62 within / 14 outside); fresh sweep reproduced 76/76 exactly",
+      "historical_fidelity": "MECHANISM engine-confirmed; CELL CONTENT era-bounded stand-in (labeled)",
+      "evidence_status": "CONFIRMED (mechanism) / [P-CELLSTREAM]+[P-WINDOW] bounded (content)",
+      "evidence": [
+        {"file": "iter033_foliage_generator_census.json", "sha256": "3AAFBF4874046395C63EA095B69FC172C4A908E22D0980448BD852416FA80E24"},
+        {"file": "iter032_re_dec_0098fe00_grid_gen.c", "sha256": "d02fc56af76c1b1cda2cc85b15736d683bd3d13b945d93d8bdffa27245e2bd9e"},
+        {"file": "iter032_re_dec_00990810_cell_records.c", "sha256": "45339fe1862b967c093da1823c1785a6c5967114bf1d9290a3182682249ebdd7"}
+      ],
+      "era": ["PCG_9_3_5"],
+      "honest_bounds": "cell byte-stream origin (open #18); rotation/variant candidates unread (open #19); elevation-band filter rule UNVERIFIED (open #20)"
+    },
+    {
+      "row": 11, "subsystem": "FOLIAGE_SEED/RNG",
+      "verdict": "CONFIRMED (position-keyed determinism, decompiled + cross-checked 76/76)",
+      "knowledge": "seed = ((p4*16+p5)*16+p1+p2+p3)*0x5CC7+0x6D7 (uint32), state = x*8^x; then MSVC rand() LCG state*0x343FD+0x269EC3 >>16 &0x7FFF; seed inputs: p1 = packed 32-bit query position, p2 = VIEW BAND (10/20/30), p4/p5 = the record u16 pair; NO global seed, NO server RNG in the local path; seed-20030130 legacy scatter = VISUAL_RECONSTRUCTION_LEGACY (different BY CONSTRUCTION)",
+      "implementation": "VegetationRNG class (formulas VERBATIM, address-cited); divisor + lerp per FUN_0098ce30/FUN_0095ac30",
+      "validation": "INDEPENDENT python implementation (m1_iter033_rng_reference.py SHA 43E31935..., written from the decompiles NOT the JS) recomputed ALL 76: state0/samplerValue/scale EXACT, 0 mismatches, PASS; the MSVC constants = an external public LCG matched by the binary's bytes",
+      "historical_fidelity": "engine-byte-confirmed for 9.3.5",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter033_rng_crosscheck.json", "sha256": "F8056CD5EC3F7051DAF7799D7B3BAC92A7C9087A012CCD891BE61E70E6337F42"},
+        {"file": "iter032_re_dec_0098cdf0_rng_seed.c", "sha256": "d416a42236a26759c6e2f3dd7c8a8a426880d949fdb80ac1536de477bc5f1221"},
+        {"file": "iter032_re_dec_0098ce30_rng_next.c", "sha256": "0a4af5879de70c1250bb3bd8d80a6cbc5d75e7dcc6e069eb406a7e4244ceb8f5"}
+      ],
+      "era": ["PCG_9_3_5"],
+      "honest_bounds": "[P-RNG-DIV] 32768.0 divisor candidate (_DAT_00a7d7a8 runtime-initialized); [P-RNG-P3] p3=0 (*(impl+0x24) UNVERIFIED); p2 = view band 10 STRONGLY_SUPPORTED not byte-pinned"
+    },
+    {
+      "row": 12, "subsystem": "WATER_SOURCE",
+      "verdict": "CONFIRMED",
+      "knowledge": "NO dedicated water container (0/53 containers, 0/2,217 files); water data = TDF material tails (Water01-05) + materials.vfs 0x3eb Water technique (JUL BYTE-IDENTICAL to 9.3.5) + the client plane builders (WaterPlane01 -> FUN_0093be20/FUN_0093c210/FUN_0093b4c0/FUN_0094a250 leaf-corner walk, z=param_7) + the name-registered WAVES_01/02/03 + sky0/1.tga family (NOT local); MusDef DeepWater = AUDIO ONLY; 'Geowater:0' = a second family (0xb7dc gate UNRESOLVED)",
+      "implementation": "terrain/water_system.html+js - ground terrain UNDER a separate water surface over the proven water window (56-59 x 107-110; 5/16 tiles Water02=9088)",
+      "validation": "iter023 exhaustive census (denominators explicit); iter031 dual-era byte-extraction (SHA 857dea6e... both eras); fresh sweep hash MATCH",
+      "historical_fidelity": "all constants VERBATIM from the byte-faithful .fx; non-local textures bounded [P-WAVES]/[P-SKY]",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter023_water_container_census.json", "sha256": "5F2907E7777C2E18C84ED5C3A7A0CCA2FA49AB05E95D6AF3EE1660FFDFE707E2"},
+        {"file": "iter031_water_findings.json", "sha256": "2f9bef450e74e49886af958b573f98c6e2c465d368f203587f6fcc82269c9eb8"},
+        {"file": "iter031_fx_id_0x3eb_Water.hlsl", "sha256": "857dea6eb601cdd130b0a1fa2ff1a38b419cad7cb94a46521377e173b6449f5f"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5"],
+      "honest_bounds": "env +0x14 wind writer (open #13); Geowater family (open #14); type-6 2x2 mask + 20-byte tail semantics (no consumer located)"
+    },
+    {
+      "row": 13, "subsystem": "WATER_REGIONS",
+      "verdict": "CONFIRMED (data-level coherent regions + the RE plane-per-tile-node spawn)",
+      "knowledge": "the 5 water materials form coherent 4-connected lake/ocean components (largest 3,805-tile coastal ring); PCG 5,690 / JUL 5,523 water tiles (each id once per tile; Water03 era divergence +167 recorded); plane spawn = per material-driver RB-tree tile node (FUN_0093f800 third loop: obj[0]==0 -> FUN_0093d7d0 region from obj+9 grid coords); type-6 = per-tile TEXTURE-CARRIER (neutral gray ~120; on 46,218 dry tiles too) - the water-plane-candidate hypothesis REJECTED-as-primary; the 12 no-type-6 tiles = era-stable high dry ground",
+      "implementation": "the water page renders the water-window region from the SAME tile data",
+      "validation": "full-corpus dual-era walk 0 failures; JUL counts == frozen iter008b census EXACTLY (independent re-derivation); consumer RE (FUN_00934890 -> FUN_00953340 in the LOD ring builder)",
+      "historical_fidelity": "regions = ORIGINAL DATA both eras; the plane model engine-confirmed",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter023_terrain_minheight_water.json", "sha256": "314949A88AA8B8670E9555977B73F584FDDD343F6BA85F463AC54E276DDEA097"},
+        {"file": "iter031_type6_census.json", "sha256": "8d62122d9a6761f9b95303c959f286a7870515c0cce1a32473c33ad466131322"},
+        {"file": "iter031_water_findings.json", "sha256": "2f9bef450e74e49886af958b573f98c6e2c465d368f203587f6fcc82269c9eb8"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5"],
+      "honest_bounds": "none beyond the type-6 semantics note"
+    },
+    {
+      "row": 14, "subsystem": "WATER_LEVEL",
+      "verdict": "CONFIRMED (engine constant; tile-datum mapping bounded [P-DATUM])",
+      "knowledge": "WATER LEVEL = 10.0f HARDCODED (_DAT_00a7b128): plane z = param_7 = 10.0 (FUN_0094a250); underwater test FUN_00853a80 < 10.0; the unit-consistency triangle (m->cm x100 + the Terrain_14 WATER_LIGHT window [-5,+10] m); the naive 'raw u16==0 = water' REFUTED (the dominant zero component spans the ENTIRE map; 82% of zero tiles carry no water; 1,362 water tiles contain no zero sample); water concentrates at tile-min 0 (median 0 vs global 768) - an OBSERVED CORRELATION, not semantic proof",
+      "implementation": "the page carries the level as a demonstrative control [P-DATUM] (engine 10.0 field-datum; tile-datum UNPINNED; page default 0.0 = the iter023 correlation)",
+      "validation": "iter023 hypothesis test (crosstab 4,328/20,035/1,362/26,195 over 51,920 tiles); iter031 the RE triangle",
+      "historical_fidelity": "the 10.0 constant engine-byte-confirmed; the tile-datum georef = the same open bound as [P3b]",
+      "evidence_status": "CONFIRMED (constant) / naive marker REJECTED (falsified + recorded)",
+      "evidence": [
+        {"file": "iter031_water_findings.json", "sha256": "2f9bef450e74e49886af958b573f98c6e2c465d368f203587f6fcc82269c9eb8"},
+        {"file": "iter023_terrain_minheight_water.json", "sha256": "314949A88AA8B8670E9555977B73F584FDDD343F6BA85F463AC54E276DDEA097"}
+      ],
+      "era": ["PCG_9_3_5", "JUL_2003"],
+      "honest_bounds": "level-in-TILE-datum remains the honest bound (open #5)"
+    },
+    {
+      "row": 15, "subsystem": "WATER_TEXTURE",
+      "verdict": "CONFIRMED (payloads + technique references); plane textures MISSING locally (era-bounded, no proxy as truth)",
+      "knowledge": "the technique references waves01/02.tga + sky0/1.tga (name-registered WAVES family type 1000, NOT local -> [P-WAVES]/[P-SKY]); the Water01-05 TILE-MATERIAL textures = TGA2 256x256x24 FOUR-ERA BYTE-IDENTICAL (PCG==JUL==EU==CD, 5/5; Water01 mean RGB 120.6/166.3/162.3) - a DISTINCT layer from the plane textures",
+      "implementation": "page: synthetic normals + synthetic gradient for the missing plane textures (labeled); the tile-material textures resolvable + byte-identical across eras",
+      "validation": "dual-era resolution + decode (iter023); the .fx decode (iter031); four-era byte-identity measured",
+      "historical_fidelity": "tile-material payloads = original bytes; plane textures honestly MISSING (no fabricated 'historical' texture)",
+      "evidence_status": "CONFIRMED (what exists) / MISSING-locally (labeled)",
+      "evidence": [
+        {"file": "iter031_water_fx_decode.json", "sha256": "3fbd46ec6078e7ea103144c6c39462ffd2a899b81607e2799250a9e513d75941"},
+        {"file": "iter031_fx_id_0x3eb_Water.hlsl", "sha256": "857dea6eb601cdd130b0a1fa2ff1a38b419cad7cb94a46521377e173b6449f5f"},
+        {"file": "iter023_water_container_census.json", "sha256": "5F2907E7777C2E18C84ED5C3A7A0CCA2FA49AB05E95D6AF3EE1660FFDFE707E2"}
+      ],
+      "era": ["PCG_9_3_5", "JUL_2003", "CD_JAN_2003", "EU_LATER"],
+      "honest_bounds": "waves/sky acquisition = a patched-era container or runtime capture (post-M1 track)"
+    },
+    {
+      "row": 16, "subsystem": "WATER_MATERIAL",
+      "verdict": "CONFIRMED",
+      "knowledge": "the full Water technique material set: 22 uniform defaults; WaterColor (0.1,0.2,0.25); alpha band [0.6,0.9]; reflection [0.4,0.9]; SrcAlpha/InvSrcAlpha blend, ZWrite ON, CullMode 1; 4 WRAP/LINEAR samplers; vs_1_1 + ps_2_0; the wind/scroll/4-phase ops; manager slots +0x1b4/+0x1b8/+0x1bc; JUL record 0x3eb BYTE-IDENTICAL to 9.3.5 (era-stable)",
+      "implementation": "carried VERBATIM into the water page constants",
+      "validation": "byte-faithful extraction from BOTH eras (SHA 857dea6e... each; the frozen iter024 artifact's CRLF translation documented as the only delta)",
+      "historical_fidelity": "verbatim original technique constants",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter031_fx_id_0x3eb_Water.hlsl", "sha256": "857dea6eb601cdd130b0a1fa2ff1a38b419cad7cb94a46521377e173b6449f5f"},
+        {"file": "iter031_jul_fx_id_0x3eb_Water.hlsl", "sha256": "857dea6eb601cdd130b0a1fa2ff1a38b419cad7cb94a46521377e173b6449f5f"},
+        {"file": "iter031_jul_materials_compare.json", "sha256": "4c4b8d7363a1b1b3d360c66eeac5928803185960537b7d249a9329de91549028"}
+      ],
+      "era": ["JUL_2003", "PCG_9_3_5"],
+      "honest_bounds": "none beyond the technique-level notes"
+    },
+    {
+      "row": 17, "subsystem": "WATER_ANIMATION",
+      "verdict": "CONFIRMED (mechanism chain; the env writer open)",
+      "knowledge": "g_Time mod 1800 (4-phase wind/scroll ops; page = deterministic frame 300); g_WaterWind = ARK_WATER_WIND (ArkFXPShared<float> @mgr+0x15c, value @mgr+0x184, disasm-pinned; per-frame FUN_009516f0: 0.5 + clamp(env+0x14,0,1)*1.5 -> [0.5,2.0]; ARK_WIND = env+0x10) -> the vtable bind slots -> the .fx g_WaterWind; the auction-UI +0x184 write = a dispositioned FALSE POSITIVE",
+      "implementation": "the page implements the verbatim ops at a deterministic frame (labeled; the determinism-vs-live-animation trade-off documented)",
+      "validation": "the RE chain (fresh project, disasm-pinned stores); the .fx semantic + state macro from the original 1Ark.fx/25ArkLight.fx includes (the include-id rule verified over all referenced numbers)",
+      "historical_fidelity": "ops verbatim; the frame choice = reconstruction determinism discipline",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter031_water_findings.json", "sha256": "2f9bef450e74e49886af958b573f98c6e2c465d368f203587f6fcc82269c9eb8"},
+        {"file": "iter031_water_fx_decode.json", "sha256": "3fbd46ec6078e7ea103144c6c39462ffd2a899b81607e2799250a9e513d75941"},
+        {"file": "iter031_materials_vfs_rec0025_25ArkLight.fx", "sha256": "061c1e43ff5daa65b9a9be1e56591f1d3c5145b606792484403f70986f36d7e3"}
+      ],
+      "era": ["PCG_9_3_5"],
+      "honest_bounds": "the env +0x14 wind WRITER (open #13)"
+    },
+    {
+      "row": 18, "subsystem": "PESOURCE_MOUNT",
+      "verdict": "CONFIRMED",
+      "knowledge": "era-aware source layer: mountEra (BUNT | BNT2 | BNT2_TERRAIN | ARKVFS; KNOWN_HASHES SHA-enforced); enumerate/openResource/getTerrainTile/resolveTexture/getTerrainMaterials/getVegetationClimate; provenance on EVERY resource (era/container/entry/offset/SHA/decoderVersion/evidenceStatus); BUNT_TRAILING_BYTES=8 (51,921/51,921 corpus-proven); decoders VERSIONED per era (Bnt2TerrainArchive for PCG terrain.bnt); NO silent cross-era; NOT_FOUND LOUD; the 9.3.5 type-100 provider set CLOSED (ui.bnt + textures.bnt; the 12-byte Terrain.bnt stub = install-time ORPHAN, the second-provider hypothesis REJECTED); BNT2/BUNT reader continuity documented",
+      "implementation": "src/pesource/* in eudoria-clean - the Rosetta layer with NO renderer semantics",
+      "validation": "iter005 full-map SHA reproduction (3DC16D52... == iter002) + 210/210 chunks; iter019 era-validation (58,451 entries, 0 failures, 448,384 tail records); iter010 oracle agreement 175/175; iter033 VCL mount SHA-pinned; the fresh sweep: every page mount re-verified",
+      "historical_fidelity": "original era bytes only; every era divergence recorded, never silently substituted",
+      "evidence_status": "CONFIRMED",
+      "evidence": [
+        {"file": "iter019_era_validation_terrain_bnt.json", "sha256": "D2D13D84558E337D8A3B8CA14DAFA8240A8B4A4B4B97AFA470F707141183F1DD"},
+        {"file": "iter010_id_resolution.json", "sha256": "ECA9B3588D99D1FF44CCC880B1EE82A245113DE1EB86357ED715C1F4AAF10D2A"},
+        {"file": "iter033_manifest.json", "sha256": "F299C6222917DA8859351D9BE4D2DF0D40F9C6BB7767378DFB22B18C4FFAD46C"}
+      ],
+      "era": ["all four - era-explicit per mount"],
+      "honest_bounds": "the JUL-era water/foliage RUNTIME layers carry the loader-absence/era-stability notes (no bridging claims)"
+    },
+    {
+      "row": 19, "subsystem": "RUNTIME_INTEGRATION",
+      "verdict": "CONFIRMED (M1-E clean chain proven + FRESH regression sweep 5/5 PASS)",
+      "knowledge": "ORIGINAL PCG_9_3_5/JUL bytes -> PESourceMount -> canonical semantic objects -> r185 WebGLRenderer pages: heights (p0), materials, materials_wsum (labeled comparison), materials_confirmed (CONFIRMED architecture), era_divergent, water_system, foliage_system - ZERO legacy runtime input; eudoria-web FROZEN oracle; THREE_R185_PROJECT_BASELINE CALIBRATED",
+      "implementation": "7 deterministic clean pages; generated GLB/PNG/JSON = CACHE/DEBUG/PREVIEW/REGRESSION only; the foliage GLBs = GENERATED_CACHE labeled",
+      "validation": "THE FRESH REGRESSION SWEEP (iter034_regression_sweep.json): ALL 5 clean pages reproduce their recorded deterministic hashes EXACTLY on fresh headless-Chromium loads at b7d38ad; behavioral stats reproduced (whitePct 43.36 vs 0.0; waterTileCount 5, 7.3..120.0 m; foliage 76/76, 0 NOT_FOUND, visible); processes killed + liveness-verified",
+      "historical_fidelity": "every rendered resource traceable to original bytes; placeholders ALL labeled in-page",
+      "evidence_status": "CONFIRMED (deterministic + reproducible + provenance-complete)",
+      "evidence": [
+        {"file": "iter034_regression_sweep.json", "sha256": "SEE 03_EVIDENCE (written this session)"},
+        {"file": "iter019_p0_browser_result.json", "sha256": "20CFC413E530E3F7C67760E884977F23970EEA6167E75E6159FEFE5CA8EC3FC9"},
+        {"file": "iter020_browser_result.json", "sha256": "43AC2739BBBBC9282874B782D3AF79CF88761CB61E032E3549812C8A0D60370D"},
+        {"file": "iter030_page_result.json", "sha256": "9B62AD3399F8D1D4E295862D5B065D580D5AB66E7DBA6655DD03FF3F20F8E39B"},
+        {"file": "iter031_water_findings.json", "sha256": "2f9bef450e74e49886af958b573f98c6e2c465d368f203587f6fcc82269c9eb8"},
+        {"file": "iter033_render_hashes.json", "sha256": "37E0713EBBEC2C7DB61B0F3C01F674EB0CA751CB7A595E927F80B528C536D3BD"}
+      ],
+      "era": ["PCG_9_3_5", "JUL_2003"],
+      "honest_bounds": "REGIONAL runtime (proven 9-tile regions + the water window) - NO full-map claim; NO model/animation/avatar systems (the single-model witness rule gates them); era-bounded inputs never claimed historical (see registry)"
+    }
+  ],
+  "regression_sweep": {
+    "evidence_file": "03_EVIDENCE/iter034_regression_sweep.json",
+    "server": {"pid": 10584, "port": 8132, "killed": true, "liveness_verified_dead": true},
+    "chrome_pids": [12264, 10252, 14656, 14248, 6024],
+    "chrome_killed_liveness_verified": true,
+    "pages": [
+      {"page": "heights (p0)", "recorded": "50BD7F9E4B715DB4972C65B068585696E8FEBC0E360FDABE4E941C6A6EBE33BC", "fresh": "50BD7F9E4B715DB4972C65B068585696E8FEBC0E360FDABE4E941C6A6EBE33BC", "verdict": "MATCH"},
+      {"page": "materials", "recorded": "5F4677E6D7EB2EF2DABBAD7D52400A7412C7309E423C6059BFCDB01A22D336EC", "fresh": "5F4677E6D7EB2EF2DABBAD7D52400A7412C7309E423C6059BFCDB01A22D336EC", "verdict": "MATCH"},
+      {"page": "materials_confirmed", "recorded": "3C7855818B658B03E12132B31E4084A63194AC1F83C6F0568EB92EA886B8318F", "fresh": "3C7855818B658B03E12132B31E4084A63194AC1F83C6F0568EB92EA886B8318F", "verdict": "MATCH"},
+      {"page": "water_system", "recorded": "D7C13F1F128EEA1C096C6CEC00854D4D77DCD915F0FB219A554278FEBDFE3F44", "fresh": "D7C13F1F128EEA1C096C6CEC00854D4D77DCD915F0FB219A554278FEBDFE3F44", "verdict": "MATCH"},
+      {"page": "foliage", "recorded": "A79CB65C1852E8893E1346905D2F29BCBAC0C076D3EA6491AC1E2A7BDD92929F", "fresh": "A79CB65C1852E8893E1346905D2F29BCBAC0C076D3EA6491AC1E2A7BDD92929F", "verdict": "MATCH", "extra": "76 instances / 0 NOT_FOUND / foliageVisible true"}
+    ],
+    "verdict": "PASS - 5/5 MATCH, zero deltas, zero root-causes needed",
+    "executed_script_hashes": {
+      "server.mjs": "43404C17FEEF6BB3E529BFC8917A11B6F09AEA6FD0DFCA7A46E4C653D280B629",
+      "tools/cdp_probe.js": "7052AE4167442F2EC3D943BEE36505CAD5A6775AC1060015F2DB22FCCE112195",
+      "terrain/p0.js": "BD019D56C3968664982321C1D6010EE49EB32529F03C008B8EDC290B096AB0F8",
+      "terrain/materials.js": "A42CE8356A14186001C1E243030D578D3BEC449C4099F1C0CB4BFEFE0023B39D",
+      "terrain/materials_confirmed.js": "6CBEAF4FD1C7956ACEE5AB2BFECDA8E7CDC3B842FD861F254C27086AD1E129C4",
+      "terrain/water_system.js": "92681C80CB6473A9AD2DE60A7AE245FB79887A951154E549E65ADCCB7F8BA0D0",
+      "terrain/foliage_system.js": "011473ED90AEE99F55ECEE4ABADEBF9D637591A02CA9EB2435C11A32D3A66D93"
+    }
+  },
+  "era_bounded_registry": [
+    {"placeholder": "P1 (materials_confirmed)", "missing": "the 65x65 climate byte grid (texture id 432502)", "why": "NOT in any local container (178-container census); the client fetch is LOCAL-ONLY (a miss halts init); patcher-delivered (ClientLoader FTP)", "resume_path": "a patcher-updated Textures.bnt of the era, or a runtime capture", "era_statement": "constant byte 0 -> palette A[0]=0x66DC6 (documented choice; the engine default for unmapped bytes is 0x66DC7); NO historical climate-truth claim"},
+    {"placeholder": "P2 (materials_confirmed)", "missing": "the 129x129 detail-selector grids (texture id 459344)", "why": "same delivery-channel verdict as P1", "resume_path": "same as P1", "era_statement": "constant byte 0 -> the engine tables C[0]=D[0]=458791, E[0]=458792 (the ACTUAL engine entries for byte 0; mechanics CONFIRMED, input bounded)"},
+    {"placeholder": "P3a (materials_confirmed)", "missing": "the ArkHeightTree leaf recursion", "why": "the tree construction not RE'd (iter027 bound 1; leaves carry global-field samples, no tile linkage)", "resume_path": "the quadtree construction RE", "era_statement": "the leaf data chain preserved IN FORM (direct sample + clamp); the recursion is a labeled approximation"},
+    {"placeholder": "P3b (materials_confirmed)", "missing": "the cross-era georeferencing (field vs tiles)", "why": "UNPINNED: r=0.527 saturation (iter028); the MEASURED contradiction: field at engine addressing -130..-125 m vs tiles +16..+487 m (iter030)", "resume_path": "the 2010-era local terrain, or runtime tracing", "era_statement": "the ROW INPUT uses the TILES' OWN heights (backed by the measured contradiction - an honest choice, NOT a historical claim)"},
+    {"placeholder": "P4 (materials_confirmed)", "missing": "the per-session noise-table seeds", "why": "the engine seeds the manager RNG per-session (FUN_004058a0/00405920 Java-LCG decompiled)", "resume_path": "a runtime RNG capture", "era_statement": "FIXED-seed Java-LCG tables - deterministic reconstruction only"},
+    {"placeholder": "P5 (materials_confirmed)", "missing": "the accumulated leaf roughness at the historical scale", "why": "the CONFIRMED 12-slot formula evaluated on the tile grid at the 4-unit sample scale; the historical leaf size/depth rule not pinned", "resume_path": "the quadtree RE (same as P3a)", "era_statement": "formula CONFIRMED, scale DOCUMENTED"},
+    {"placeholder": "P-WAVES (water_system)", "missing": "waves01/02.tga (the plane wave textures)", "why": "name-registered (WAVES_01/02/03, type 1000) NOT in any local container", "resume_path": "a patched-era container or runtime capture", "era_statement": "SYNTHETIC normals - never claimed historical"},
+    {"placeholder": "P-SKY (water_system)", "missing": "sky0/1.tga (the reflection textures)", "why": "same census negative", "resume_path": "same as P-WAVES", "era_statement": "SYNTHETIC gradient - never claimed historical"},
+    {"placeholder": "P-DATUM (water_system)", "missing": "the water level in the TILE datum", "why": "the 10.0f constant is in the GLOBAL-FIELD datum; the field-vs-tile georef UNPINNED (same as P3b)", "resume_path": "the georef pin (P3b's closer)", "era_statement": "the page elevation = a demonstrative control (engine 10.0 field-datum; tile-datum UNPINNED; default 0.0 = the iter023 correlation)"},
+    {"placeholder": "P-CLIMATE (foliage_system)", "missing": "the per-location climate selection (which .vcl applies where)", "why": "the shared-selector hypothesis PLAUSIBLE-NOT-CONFIRMED (VCL ids vs palette ids DISJOINT; the .vcl fetch id source + type-id constant UNVERIFIED)", "resume_path": "the .vcl fetch-id RE + the cell-stream provider RE", "era_statement": "DOCUMENTED choice: climate index 0 - the page demonstrates the MECHANISM, not the historical placement"},
+    {"placeholder": "P-CELLSTREAM (foliage_system)", "missing": "the historical cell byte-stream content", "why": "the DataSource/PatchSourceClient abstraction proven but the data origin NOT closed", "resume_path": "the cell-stream provider RE", "era_statement": "the local deterministic stand-in (round(col1) + the placement hash) is RECONSTRUCTION-ONLY"},
+    {"placeholder": "P-RNG-DIV (foliage_system)", "missing": "the exact RNG normalization divisor", "why": "_DAT_00a7d7a8 reads 0.0 statically (runtime-initialized)", "resume_path": "runtime tracing (separate authorization)", "era_statement": "the 32768.0 divisor CANDIDATE - RNG identity confirmed, divisor labeled"},
+    {"placeholder": "P-RNG-P3 (foliage_system)", "missing": "p3 = *(impl+0x24) of the seed", "why": "UNVERIFIED; p2 = view band 10 STRONGLY_SUPPORTED not byte-pinned", "resume_path": "the impl-object RE", "era_statement": "p3 = 0 in the reconstruction - labeled"},
+    {"placeholder": "P-POS-SCALE (foliage_system)", "missing": "the u16->world position divisor", "why": "_DAT_00a8c758 reads 0.0 statically (runtime-initialized)", "resume_path": "runtime tracing", "era_statement": "the 2.0 divisor CANDIDATE - labeled"},
+    {"placeholder": "P-SCALE-FIELDS (foliage_system)", "missing": "the col2/col3 -> scale min/max field mapping", "why": "the census reading + the impl+0x40/+0x44 direction STRONGLY_SUPPORTED (not byte-pinned)", "resume_path": "the impl-object RE", "era_statement": "a documented reading of the records - labeled"},
+    {"placeholder": "P-WINDOW (foliage_system)", "missing": "the historical generation window (grid extents)", "why": "the extents are settings-scaled, not statically pinneable", "resume_path": "the settings-source RE", "era_statement": "the window = the proven region - a demonstration window"},
+    {"placeholder": "P-UNITS (foliage_system + water)", "missing": "the NIF cm->render-m bridge", "why": "the NIF corpus is cm-native; the m->cm x100 engine scale CONFIRMED but the GLB cache bridge is a reconstruction convention", "resume_path": "the clean pesource NIF path", "era_statement": "the 0.01 bridge - CURRENT_RUNTIME_CALIBRATION"},
+    {"placeholder": "P-MATERIALS (foliage_system)", "missing": "the per-model materials", "why": "the materials come from the GENERATED_CACHE GLBs (export source corpus UNVERIFIED at file level); the 0x3EC technique informs the lighting only", "resume_path": "the clean pesource NIF parser (a JS NIF reader over era Models.bnt)", "era_statement": "GENERATED_CACHE assets + fixed deterministic lights - an era-bounded approximation, NEVER claimed byte-faithful"},
+    {"placeholder": "ROTATION (foliage - RE-faithful absence, not a placeholder)", "missing": "the rotation/variant derivation", "why": "NOT FOUND in the spawn loop (candidates FUN_0095ae20/FUN_0095b4f0 unread)", "resume_path": "the candidate-function RE", "era_statement": "identity rotation = the RE-faithful absence, recorded as such"}
+  ],
+  "known_open_list": [
+    {"id": 1, "item": "TDF sub-header (52..63) min/max source", "status": "UNRESOLVED", "evidence": "iter020 P1 (386/400 zero, 14 nonzero; no probed encoding carries min/max)", "resume": "the FUN_0047fb20 min/max RE path"},
+    {"id": 2, "item": "TDF payload header-xy mismatch (0/400 == filename-xy)", "status": "UNRESOLVED", "evidence": "iter020 P2 (the climate-cell candidate REJECTED - values vary within single cells)", "resume": "RE or runtime tracing"},
+    {"id": 3, "item": "the shared climate selector (.vcl fetch id source + type-id constant)", "status": "UNVERIFIED", "evidence": "iter032 bound 1", "resume": "the fetch-id RE ([P-CLIMATE] closer)"},
+    {"id": 4, "item": "the 65x65 climate grid (432502) + 129x129 detail selectors (459344)", "status": "MISSING locally / patcher-delivered", "evidence": "iter029 (178-container census + local-only fetch + init-halt gate)", "resume": "a patcher-updated era container or a runtime capture"},
+    {"id": 5, "item": "the cross-era georeferencing [P3b]", "status": "UNPINNED", "evidence": "iter028 (r 0.527) + iter030 (the measured contradiction)", "resume": "the 2010-era local terrain or runtime tracing"},
+    {"id": 6, "item": "special-row tiles (6,530 PCG, y=0xff1a..0xffff)", "status": "structure censused, semantics UNRESOLVED", "evidence": "iter019/020 P3 + iter028 specialtiles (LOD-skirt candidate)", "resume": "dedicated RE"},
+    {"id": 7, "item": "dim=2 record semantics", "status": "TEMPLATE role CONFIRMED, semantics UNRESOLVED", "evidence": "iter009/016 (75.72% one template; iter031 closes the '227 constant' as writer garbage)", "resume": "consumer RE"},
+    {"id": 8, "item": "dim=4 record semantics", "status": "U16-PER-PIXEL structure CONFIRMED, role UNVERIFIED", "evidence": "iter016 (size 84, region 32B, id=6)", "resume": "consumer RE"},
+    {"id": 9, "item": "the height-form full-lerp in 9.3.5", "status": "UNRESOLVED", "evidence": "iter024f (FUN_00989e70 = the clamp sibling; the PE2003 FUN_0047fb20 identity+operation CONFIRMED)", "resume": "the 9.3.5 height-path RE"},
+    {"id": 10, "item": "cross-file skeleton pairing", "status": "OUT OF M1 SCOPE (charter s11)", "evidence": "charter; ENTRY #3/#4 witness rules", "resume": "M2 lead (single-model witness first)"},
+    {"id": 11, "item": "the type-2/sub-0 zone scratch reader", "status": "NOT located (written+cleared+dirty-flagged)", "evidence": "iter030 (838-function census)", "resume": "the zone-apply vtable owner"},
+    {"id": 12, "item": "the zone-apply vtable owner", "status": "UNRESOLVED", "evidence": "iter030 (Jython API failures on ptr scans)", "resume": "targeted RE"},
+    {"id": 13, "item": "the env object's +0x14 water-wind WRITER", "status": "OPEN", "evidence": "iter031 (the last wind link)", "resume": "EnvironmentZones/ArkScript/server RE"},
+    {"id": 14, "item": "'Geowater:0' family consumer + the 0xb7dc gate", "status": "UNRESOLVED", "evidence": "iter031", "resume": "targeted RE"},
+    {"id": 15, "item": "the bank[1]/bank[2]/bank[5] consumers (257 G/B float fields + 65x65 B selector)", "status": "UNRESOLVED (candidates: water/min-height)", "evidence": "iter029", "resume": "targeted RE"},
+    {"id": 16, "item": "the runtime world-id singleton (id[0])", "status": "UNRESOLVED (per-planet set-swap question)", "evidence": "iter029", "resume": "the FUN_0044c950 ctor RE"},
+    {"id": 17, "item": "VCL cols 6-11 semantics", "status": "UNVERIFIED (candidacy only)", "evidence": "iter032 bound 4", "resume": "the per-column parser types RE (FUN_0083a5b0)"},
+    {"id": 18, "item": "the cell byte-stream origin", "status": "NOT closed (the abstraction proven)", "evidence": "iter032 bound 3", "resume": "the provider RE ([P-CELLSTREAM] closer)"},
+    {"id": 19, "item": "the rotation/variant derivation", "status": "NOT FOUND in the spawn loop", "evidence": "iter032 bound 5 (FUN_0095ae20/FUN_0095b4f0 unread)", "resume": "the candidate-function RE"},
+    {"id": 20, "item": "the elevation-band filter rule", "status": "UNVERIFIED (measured as a diagnostic: 62 within / 14 outside)", "evidence": "iter033", "resume": "the filter-consumer RE"},
+    {"id": 21, "item": "the clean pesource NIF path", "status": "QUEUED (replaces the GENERATED_CACHE GLB dependency)", "evidence": "iter033 NEXT 2", "resume": "a JS NIF parser over era Models.bnt"},
+    {"id": 22, "item": "the JUL_2003-era terrain material RUNTIME semantics (PE2 D3D8 fixed-function)", "status": "era-divergent RECORDED, not re-RE'd", "evidence": "iter024f era table; the TMF canon = the PE2 reference; iter030 'era drift is CONTENT never GRAMMAR'", "resume": "a dedicated PE2-era RE if ever required"},
+    {"id": 23, "item": "the JUL-era texture version choice (61/175 divergent ids)", "status": "UNDECIDABLE from bytes (PLAUSIBLE: CD closest in time)", "evidence": "iter010/011", "resume": "external evidence or runtime capture"},
+    {"id": 24, "item": "Grassmix04 duplicate id (108727 AND 88103) + unnamed dim=16 512-byte system records", "status": "UNRESOLVED / recorded", "evidence": "iter021 (region B)", "resume": "consumer RE"},
+    {"id": 25, "item": "the >4-material reduction mechanism (top-4 pre-bake vs multipass)", "status": "UNRESOLVED (the 3+1 cap source-anchored; C1 top-3 capture 93-99%/77-95% vs UB; C2 unreliable)", "evidence": "iter024/025", "resume": "the reduction-code RE"},
+    {"id": 26, "item": "the 2xxxx cross-container resource-id space hypothesis", "status": "PLAUSIBLE (no semantics claimed; the d 20070 == B(template 1969) crossing byte-proven, role UNVERIFIED)", "evidence": "iter022", "resume": "a consumer test"},
+    {"id": 27, "item": "era divergence census (heights 773 tiles; Water03 +167; region-B unnamed-record tail divergence)", "status": "RECORDED with era provenance (not open per se)", "evidence": "iter023/025", "resume": "n/a - never silently mixed"}
+  ],
+  "evidence_sha_verification": {
+    "method": "every evidence file cited by the matrix was re-hashed on disk THIS session",
+    "ledger_recorded_matches": [
+      "iter008b_winning_walk.json AAFD1A4E...", "iter009_mask_semantics.json C6144A72...", "iter010_id_resolution.json ECA9B358...",
+      "iter011_payload_classification.json 86271B9F...", "iter020_browser_result.json 43AC2739...", "iter020_material_decode_audit.json 51898ABC...",
+      "iter020_r169_oracle_compare.json 99B3C095...", "iter021_browser_load1.json 54D33DA0...", "iter021_era_byte_audit.json FC6BB890...",
+      "iter023_water_container_census.json 5F2907E7...", "iter023_terrain_minheight_water.json 314949A8...", "iter024_fx_id_0x3ea_Terrain_14.hlsl 5AE4AF81..."
+    ],
+    "manifest_matches": {"iter030": "5/5", "iter031_spot_check": "6/6", "iter032_spot_check": "5/5", "iter033": "4/4 evidence + 7/7 repo runtime (tree unchanged since b7d38ad)"},
+    "fresh_recorded": ["iter019_p0_browser_result.json 20CFC413...", "iter019_p0_byte_audit.json 4C29D220...", "iter019_era_validation_terrain_bnt.json D2D13D84...", "iter024_blend_op_findings.json BA08FFD6..."],
+    "failures": []
+  },
+  "gate_readiness_statement": "All 19 charter matrix rows are evidence-filled with build-time-re-verified SHAs (0 failures); the fresh regression sweep reproduces all 5 clean pages' deterministic hashes exactly; the era-bounded registry and known-open list are consolidated with resume paths. No open item blocks the charter gate definition (PASS does not require pretending unknown historical facts are known; no essential subsystem is knowingly arbitrary). This file is the input to the FULL_MILESTONE_AUDIT."
+}

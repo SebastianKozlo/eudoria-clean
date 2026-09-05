@@ -1,0 +1,52 @@
+{
+ "iter": "036: THE CROSS-CHAIN CLOSURE VERDICT (the float-constant lock sweep)",
+ "p0_question": "Is EVERY float constant cited by the milestone (material/water/foliage chains) operand-width-locked from the binary bytes - and do the affected pages re-validate after any corrections?",
+ "denominators": {
+  "exe_census_vas": 79,
+  "byte_locked": 79,
+  "byte_lock_failures": 0,
+  "width_rederivation_checked": 71,
+  "width_rederivation_mismatches": 0,
+  "fx_token_entries": 57,
+  "fx_sha_mismatches": 0,
+  "immediate_integer_entries": 5,
+  "census_total_entries": 141,
+  "danger_class_members": 8,
+  "dangers_resolved": 8,
+  "corrected_at_code": 4,
+  "corrected_claim_level": 0,
+  "pages_revalidated": 5,
+  "page_revalidation_failures": 0
+ },
+ "census_classes": {
+  "QWORD_F64 (plain f64)": "16 + the new 6 = the exact-value constants (1.0/0.5/3.0/25.0/255.0/1.5/20.0/14.0/30.0/2^32/128.0/32767.0/0.25/50.0/65535.0/10000000.0/53.0/85.0/70.0 + 0.0/1.25/1-128/8.0/1-256/0.20000004768...)",
+  "QWORD_F64_WIDENED_F32_LITERAL_PITFALL": "8 (the danger class; ALL byte-locked; see iter036_dangers.json)",
+  "QWORD_F64_WIDENED_F32_EXACT_LITERAL_OK": "3 (0.5/1.5/0.25 - the decimal literal IS the exact value; no pitfall)",
+  "DWORD_F32 (genuine 4-byte slots)": "27 (2^32/256.0/2048.0/4.0/0.3f/100.0/2.0/50.0/1.5f/512.0/10.0/60.0/0.5f/550.0/3.0/0.66/0.33/30.0f/255.0/50-255/-0.5/32.0/73.0/63.0/65535.0/-20.0 + ...)",
+  "DATA_GLOBAL_NOT_FLOAT": "10 (.data pointer/global slots - NOT constants; the f64 interpretations are garbage; excluded from the float class)",
+  "DATA_GLOBAL_RUNTIME_SLOT_NO_FILE_BYTES": "9 (virtual-only .data tail - bss-like runtime storage; beyond the file image)",
+  "FX_TEXT_CONSTANTS": "57 tokens in materials.vfs records 0x3ea/0x3eb (both eras byte-identical; SHAs 2624c019.../857dea6e... verified against the raw containers)",
+  "IMMEDIATE_INTEGER": "5 (PUSH 0x38A8; SUB 0x80 + LEA x5 = the integer (t-128)*5; FLDZ/FLD1 = the wind clamp; the wind 0.5f/2.0f range; the ps.1.4 CND 0.5)"
+ },
+ "key_confirmations_this_sweep": [
+  "the iter027 thresholds: 73.0 = 0x00A97C90 f32 DWORD (the iter027 'doubles' width-label was ALREADY recorded wrong - the VALUE was correct; no numeric impact) + 53.0 = 0x00A97C98 f64 QWORD - BOTH CONFIRMED",
+  "the iter028 row formula: 255.0 @0x00A7D748 f32 + 2.0 @0x00A7AF9C f32 + 512.0 @0x00A7B0B8 f32 + 63.0 @0x00A97CB0 f32 + 10.0 @0x00A7B128 f32 + 0.25 @0x00A7DCE8 f64 + the clamps -20.0 @0x00A97DC8 f32 / +512.0 @0x00A97C88 f64 - ALL CONFIRMED (values correct; the width notes now explicit)",
+  "the iter031 water level 10.0f = _DAT_00a7b128 bytes 00 00 20 41 CONFIRMED (f32 DWORD, 60 refs)",
+  "the iter031 wind chain CONFIRMED instruction-exactly: FUN_009516f0 loads 0.5f32 @0x00A7B25C + 2.0f32 @0x00A7AF9C, FLDZ/FLD1 clamps, FUN_0041c740 = min+(max-min)*(clamp(x,lo,hi)-lo)/(hi-lo) -> 0.5 + 1.5*clamp(env.waterWind,0,1) in [0.5,2.0] (the '1.5' = the DERIVED max-min, NOT a stored constant)",
+  "the x100 m->cm = 0.00A7AF68 f32 (FLD dword @0x0093b58b in FUN_0093b4c0) CONFIRMED",
+  "the (t-128)*5 = PURE INTEGER arithmetic (SUB EDX,0x80 @0x0094aad7 + LEA x5 @0x0094aadd) - NO float constant; the page's fieldH is BIT-EXACT",
+  "bank[1] = texel/255 + 0.0 (the FADD qword [0x00A79DB0] = 0.0 f64 - a value-neutral compiler idiom; the claim OK) + bank[2] = (texel/255)*1.25 - 0.25 (1.25 = 0x00A7BA28 f64 NEW-locked)",
+  "the zone-mode1 falloff: 8.0 @0x00A85CD0 + 1/256 @0x00A7CBC8 + 1/128 @0x00A97D10 + ~0.2 @0x00A97D00 (all f64 QWORDs, NEW-locked)",
+  "the foliage trio (ITER_049): 32767.0/65535.0/float32(1/12800)-widened - carried in the census (OK, locked)",
+  "the .fx text constants (WaterColor 0.1/0.2/0.25, the alpha band 0.6/0.9, the reflection 0.4/0.9, the repeats 32/32/16, the LOD bias -0.5, the water-light 10.0/-5.0): byte-located at their materials.vfs record offsets, BOTH ERAS BYTE-IDENTICAL, SHAs verified"
+ ],
+ "matrix_rows_affected": {
+  "TERRAIN_BLEND_SEMANTICS": "the noise-table operand lock strengthens the CONFIRMED palette bake (the constants + the draw + the rounding points now byte-exact in the clean page); the model UNCHANGED",
+  "TERRAIN_MATERIAL_RECORDS": "unchanged (no constant touch)",
+  "WATER_LEVEL/WATER_MATERIAL/WATER_ANIMATION": "CONFIRMED (the wind chain now instruction-exact; the 10.0f + the .fx constants byte-locked)",
+  "FOLIAGE_SEED/RNG": "unchanged (locked in ITER_049; carried in the census)",
+  "RUNTIME_INTEGRATION": "materials_confirmed re-rendered deterministically (the new hash EA4411B5... supersedes 3C785581...; 4/4 other pages regression-MATCH)"
+ },
+ "cross_chain_closure_verdict": "THE ERROR CLASS IS CLOSED MILESTONE-WIDE: every float constant cited by the milestone evidence is now (1) byte-read from the SHA-verified sandbox at its VA/file-offset, (2) width-locked from the FRESH-project listing re-derivation (71/71 cross-check 0 mismatches vs the frozen pattern findings + the new 8 claim-site chains disassembled), (3) value-locked with exact rationals, and (4) verdict-attached (OK / CORRECTED with the fix + the bit-exact anti-circular revalidation). The single REMAINING era-bounded item = the noise-table SEED ([P4]; the per-session engine seed is runtime state - unknowable from static data; the construction is now exact). NO unlocked float constant remains in the material/water/foliage chains. The .data runtime globals (10+9 slots) are classified NOT-FLOAT (pointer/storage slots - no float-constant semantics to lock).",
+ "reconstruction_only_labels": "the foliage [P-CLIMATE]/[P-CELLSTREAM]/[P-WINDOW]; the materials [P1]/[P2]/[P3a]/[P3b]/[P5]; the water [P-WAVES]/[P-SKY]/[P-DATUM]; the noise-table SEED [P4] - ALL unchanged as RECONSTRUCTION-ONLY/era-bounded (no historical-truth claims; the operand lock does NOT promote them)"
+}
