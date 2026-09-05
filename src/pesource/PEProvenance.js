@@ -39,6 +39,11 @@ export const KNOWN_HASHES = {
   'PCG_9_3_5:Textures.bnt': '61ACD13B140E130647EEE24C1E2669D3734990B76CF74897DDD3BA0F4EA61393',
   // Jan-2003 CD texture corpus (4,833 ArkVFS entries; F-107 canon).
   'CD_JAN_2003:Textures.ark': 'D611D1257D2E5433B6DF218D671AA60D003C5C6587858757C7AF3219BB739B80',
+  // PCG_9_3_5 vegetation climate corpus (BNT2 framing, 32 .vcl entries;
+  // iter032k census; byte-identical in all 3 corpus copies incl. JUL_2003 —
+  // the DATA is 2003-era, the 9.3.5 loader is later-generation, era-labeled).
+  'PCG_9_3_5:VegetationClimates/VegetationClimates.bnt':
+    '7B858401C3EEBDA574DF4B4517E7FB2A8149C283885F27187682AA1239C745F4',
 };
 
 export function makeProvenance(fields) {

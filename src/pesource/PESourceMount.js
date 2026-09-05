@@ -12,9 +12,10 @@
 // for the runtime) so this module is environment-neutral.
 //
 // Gate scope (M1-A): terrain (50.bnt BUNT). resolveTexture /
-// getVegetationClimate / getWaterResource exist as EXPLICIT stubs with
-// evidence status — they are implemented in their own gates (B/C/D) and must
-// fail loudly, never silently fall back to a derived cache.
+// getVegetationClimate is IMPLEMENTED (Gate C, ITER 047); getWaterResource
+// remains an EXPLICIT stub with evidence status — it is implemented in its
+// own gate (D) and must fail loudly, never silently fall back to a derived
+// cache.
 
 import { BuntArchive } from './BuntArchive.js';
 import { Bnt2Archive } from './Bnt2Archive.js';
@@ -23,6 +24,7 @@ import { Bnt2TerrainArchive } from './Bnt2TerrainArchive.js';
 import { decodeTdfPayload, gridFromName, isSentinelName, TDF_SENTINEL_NAME } from './TdfDecoder.js';
 import { decodeMaterialTail, maskSumStats, MATERIAL_TAIL_START } from './TdfMaterialTailDecoder.js';
 import { TerrainTile, HEIGHT_SCALE_CALIBRATION } from './TerrainTile.js';
+import { decodeVclPayload } from './VegetationClimateDecoder.js';
 import { makeProvenance, EVIDENCE_STATUS, ERAS, KNOWN_HASHES } from './PEProvenance.js';
 
 export const PESOURCE_DECODER_VERSION = 'pesource-m1-v1';
@@ -368,10 +370,68 @@ export class PESourceMount {
     };
   }
 
-  /** getVegetationClimate — Gate C scope. NOT IMPLEMENTED in M1-A. */
-  async getVegetationClimate() {
-    throw new Error(
-      '[PESourceMount] getVegetationClimate: NOT_IMPLEMENTED_IN_THIS_GATE (Gate C — foliage/biome origin)');
+  /**
+   * getVegetationClimate — Gate C (ITER 047, ledger ITER_033). Canonical
+   * .vcl climate decode through the SAME clean chain as the terrain: the
+   * ORIGINAL VegetationClimates.bnt bytes (BNT2 framing, era-validated by
+   * the iter032k census: 32 entries 0.vcl..31.vcl, dir at end) -> the
+   * FUN_0083a7d0-semantics TSV decoder (VegetationClimateDecoder) ->
+   * 12-value records (the 0x30/48-byte engine row layout). The JUL_2003
+   * corpus copy is byte-identical (iter032_vcl_columns.json source census)
+   * but the 2003 PE2 binary has NO loader — era-labeled, never mixed.
+   * @returns {{climateIndex, records, recordCount, text, provenance}}
+   */
+  async getVegetationClimate({ era, climateIndex }) {
+    const VCL_CONTAINERS = {
+      [ERAS.PCG_9_3_5]: 'VegetationClimates/VegetationClimates.bnt',
+    };
+    const container = VCL_CONTAINERS[era];
+    if (!container) {
+      throw new Error(
+        `[PESourceMount] getVegetationClimate: era ${era} has no era-validated ` +
+        `VegetationClimates container (NO silent era substitution)`);
+    }
+    if (!Number.isInteger(climateIndex) || climateIndex < 0 || climateIndex > 31) {
+      throw new Error(`[PESourceMount] climateIndex out of range 0..31: ${climateIndex}`);
+    }
+    const m = this._mount(era, container);
+    if (m.format !== 'BNT2') {
+      throw new Error(`[PESourceMount] ${era}:${container} is not BNT2 framing (got ${m.format})`);
+    }
+    let reader = this._vclReaders?.get(container);
+    if (!reader) {
+      reader = new Bnt2Archive(m.bytes);
+      if (!this._vclReaders) this._vclReaders = new Map();
+      this._vclReaders.set(container, reader);
+    }
+    const entryName = `${climateIndex}.vcl`;
+    const entry = reader.entryByName(entryName);
+    if (!entry) {
+      throw new Error(`[PESourceMount] .vcl entry ${entryName} NOT_FOUND in ${era}:${container}`);
+    }
+    const { payload } = reader.readEntry(entry);
+    const decoded = decodeVclPayload(payload);
+    return {
+      climateIndex,
+      records: decoded.records,
+      recordCount: decoded.recordCount,
+      text: decoded.text,
+      provenance: makeProvenance({
+        era, container, entry: entryName, physicalSource: m.path, offset: entry.offset,
+        decoderVersion: `${PESOURCE_DECODER_VERSION}+vcl-v1`,
+        evidenceStatus: EVIDENCE_STATUS.CONFIRMED,
+        extra: {
+          containerFormat: m.format,
+          packedSize: entry.size,
+          decompressedSize: payload.byteLength,
+          recordCount: decoded.recordCount,
+          hashVerified: m.hashVerified,
+          jul2003ByteIdentity: 'VegetationClimates.bnt byte-identical in all 3 corpus copies ' +
+            '(iter032_vcl_columns.json source census); the 2003 PE2 binary has NO vegetation ' +
+            'loader (iter017 negative) — the loader is 9.3.5-era, era-labeled',
+        },
+      }),
+    };
   }
 
   /** getWaterResource — Gate D scope. The original water system is NOT_RECOVERED. */
