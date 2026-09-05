@@ -17,6 +17,65 @@
 const TGA2_FOOTER = 'TRUEVISION-XFILE.\0';
 
 /**
+ * decodeTga2A32 — STRICT sibling for the 32bpp subset (ITER 030).
+ * CONFIRMED subset (iter027 palette census + iter030 byte-probe): the 17
+ * climate palettes in Textures.bnt are TGA 2.0, uncompressed true-color
+ * (imageType=2), 64x256, 32bpp (BGRA), bottom-up, constant payload size
+ * 65580 = 18 + 65536 + 8 + 18, TRUEVISION-XFILE footer — e.g. entry
+ * 421318.dat (table A[0] = 0x66DC6), 421319.dat (default 0x66DC7).
+ * Anything else fails LOUDLY. The ALPHA channel is carried (the climate
+ * palettes' alpha column selects the one-hot factor band — FUN_00939c40).
+ * @param {Uint8Array} payload
+ * @returns {{ width: number, height: number, rgba: Uint8Array, header: object, footerOk: boolean }}
+ */
+export function decodeTga2A32(payload) {
+  if (!(payload instanceof Uint8Array)) throw new Error('[TgaDecoder] payload must be Uint8Array');
+  const sz = payload.length;
+  if (sz < 26 + 18) throw new Error(`[TgaDecoder] payload too small for TGA2 (${sz})`);
+  const idLength = payload[0];
+  const colorMapType = payload[1];
+  const imageType = payload[2];
+  const headerSize = 18 + idLength;
+  const width = payload[12] | (payload[13] << 8);
+  const height = payload[14] | (payload[15] << 8);
+  const bpp = payload[16];
+  const descriptor = payload[17];
+  if (colorMapType !== 0) throw new Error(`[TgaDecoder] colorMapType ${colorMapType} unsupported (A32 subset: 0)`);
+  if (imageType !== 2) throw new Error(`[TgaDecoder] imageType ${imageType} unsupported (A32 subset: 2)`);
+  if (bpp !== 32) throw new Error(`[TgaDecoder] bpp ${bpp} unsupported (A32 subset: 32)`);
+  const expected = 18 + idLength + width * height * 4 + 8 + 18;
+  if (sz !== expected) throw new Error(`[TgaDecoder] payload size ${sz} != expected TGA2-A32 size ${expected}`);
+  const footer = String.fromCharCode(...payload.subarray(sz - 18, sz));
+  if (footer !== TGA2_FOOTER) throw new Error('[TgaDecoder] TGA2 footer signature missing (A32)');
+  const topDown = (descriptor & 0x20) !== 0;
+  const bpr = width * 4;
+  const rgba = new Uint8Array(width * height * 4);
+  // ROW-ORDER NOTE (iter030 palette probe, 421318.dat): the engine's palette
+  // "row" = the FILE row order (bottom-up storage read directly): row 0 =
+  // the first stored row = the DARK ROCK / high-altitude end — matching the
+  // row formula (row 0 = the [2,514]m clamp's high end, iter028). NO flip is
+  // applied for the A32 subset; the texel = palette[(row*64 + col)*4].
+  for (let y = 0; y < height; y++) {
+    const srcRow = topDown ? height - 1 - y : y;
+    const src = headerSize + srcRow * bpr;
+    const dst = y * width * 4;
+    for (let x = 0; x < width; x++) {
+      const s = src + x * 4;
+      const d = dst + x * 4;
+      rgba[d] = payload[s + 2];     // R (stored BGRA)
+      rgba[d + 1] = payload[s + 1]; // G
+      rgba[d + 2] = payload[s];     // B
+      rgba[d + 3] = payload[s + 3]; // A (carried — the palette alpha drives the factor band)
+    }
+  }
+  return {
+    width, height, rgba,
+    header: { idLength, colorMapType, imageType, width, height, bpp, descriptor, headerSize },
+    footerOk: true,
+  };
+}
+
+/**
  * Decode a TGA 2.0 payload to RGBA.
  * @param {Uint8Array} payload — raw texture payload from the container entry.
  * @returns {{ width: number, height: number, rgba: Uint8Array, header: object, footerOk: boolean }}
