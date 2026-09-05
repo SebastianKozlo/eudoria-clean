@@ -4,10 +4,12 @@
 > at the end of EVERY significant run. It must never claim more than the repo
 > actually contains. Repo: `SebastianKozlo/eudoria-clean`, branch `master`.
 >
-> **HOW TO AUDIT (browser ChatGPT)**: read this file -> walk the referenced
-> run package -> verify claims against code/evidence -> issue a verdict using
-> the exact strings in `PROJECT_OPERATING_MODEL.md` section 4. Do not trust
-> this summary over the physical repo; if they conflict, the repo wins and
+> **HOW TO AUDIT (PE-MASTER)**: read this file -> walk the referenced run
+> package -> verify every load-bearing claim against the raw artifacts on
+> disk (`D:\Eudoria_Reconstruction`) and the repo code/evidence -> issue the
+> verdict using the exact strings in `PROJECT_OPERATING_MODEL.md` section 4,
+> saved by pe-master-auditor as `PE_MASTER_REVIEW.md`. Do not trust this
+> summary over the physical evidence; if they conflict, the evidence wins and
 > you report the conflict.
 
 ## CURRENT STATE (as of this file's last update)
@@ -18,12 +20,12 @@
 | Current milestone | **EU935-M1 World Surface Fidelity** |
 | Milestone state | **HARD_STOPPED_AT_GATE** — V1 gate verdict REJECTED by the human (byte-proven FLOAT64 operand misread, decisions-ledger ENTRY #10); correction series done (ledger ITER_035/036/037); **V2 rejudgment = PARTIAL_PASS_CORRECTED (PROPOSED — the human + external review DECIDE)**. Nothing authorizes M2. |
 | IMMEDIATE BLOCKER | **The M1 gate remote audit package (ITER_052 / ledger ITER_038) is INCOMPLETE and UNTRACKED**: of the files promised by its `GATE_INDEX.md`, five were never built — `EVIDENCE_MANIFEST.json`, `RETRACTIONS.md`, `UNRESOLVED.md`, `ROADMAP_MAPPING.md`, `HANDOFF.md` (verified missing in BOTH the repo copy and the local canonical audit tree). The packaging session was interrupted. **A bounded completion run (consolidation from existing records only — no new forensics, no new claims) is pending human authorization.** Until then the M1 gate package is NOT ready for external audit. |
-| Pending external verdicts | NONE received yet (three-tier model adopted 2026-09-06; browser audits begin with the next completed run). |
+| Pending verdicts | NONE issued yet (three-tier model with browser tier superseded 2026-09-06 by the PE-MASTER model; the runs listed below predate PE-MASTER and may be retro-audited on request). |
 | Open P0s | 1) M1 gate package completion (mechanical). 2) The 27 known-open M1 items + 5 honest limits (to be exported in `UNRESOLVED.md` by the completion run). |
 
 ## LATEST RUNS (newest first — work runs; governance commits excluded from the audit queue)
 
-| Commit | RUN_ID / ITER | Package path (docs/audits/) | One-line purpose | External verdict |
+| Commit | RUN_ID / ITER | Package path (docs/audits/) | One-line purpose | PE-MASTER verdict |
 |---|---|---|---|---|
 | `97ed5e5` | PE_NIF_CLAIM_EVIDENCE_LOCK_R2_20260905_020054 | `PE_NIF_CLAIM_EVIDENCE_LOCK_R2_20260905_020054/` | NIF claim-evidence correction package (EU935-M2 prep): Areas A-E corrected, 18/18 executable gates PASS | PENDING |
 | `c0c2f2f` | PE_NIF_CLAIM_EVIDENCE_LOCK_R1_20260904_233119 (ITER-41) | `PE_NIF_CLAIM_EVIDENCE_LOCK_R1_20260904_233119/` | 23/23 external-audit allegations re-derived; CLAIM_MATRIX 43 atomic claims; doc corrections P1-P7 (proposals) | PENDING |

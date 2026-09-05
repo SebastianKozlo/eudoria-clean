@@ -1,11 +1,12 @@
-# PE / EUDORIA RECONSTRUCTION — PROJECT OPERATING MODEL (THREE-TIER AUDIT)
+# PE / EUDORIA RECONSTRUCTION — PROJECT OPERATING MODEL (TWO-TIER EXTERNAL, PE-MASTER INSIDE)
 
-**Status:** ADOPTED (proposed by the human + browser ChatGPT, 2026-09-05/06)
+**Status:** ADOPTED (2026-09-06, human directive; supersedes the three-tier
+browser variant — the browser ChatGPT tier is REMOVED by human decision)
 **Complements:** `CHATGPT_ARCHITECT_INSTRUCTIONS.md` (still binding)
-**Refines:** the OPENCODE -> GITHUB -> EXTERNAL AUDIT CONTRACT (run-level cadence,
-verdict levels, who-designs-what). The contract's evidence, provenance, hygiene
-and no-original-payload rules are UNCHANGED and remain binding on all tiers.
-**Supersedes:** the implicit "one external ChatGPT does everything" reading.
+**Refines:** the OPENCODE -> GITHUB -> EXTERNAL AUDIT CONTRACT (evidence,
+provenance, hygiene, no-original-payload rules UNCHANGED and binding).
+**Agent charters:** `pe-master.md` (the auditor) and `pe-master-auditor.md`
+(the execution orchestrator) in `.opencode/agents/`.
 
 ---
 
@@ -13,220 +14,205 @@ and no-original-payload rules are UNCHANGED and remain binding on all tiers.
 
 | Party | Role | Cadence |
 |---|---|---|
-| **HUMAN** | Strategic decisions, relay between tiers, FINAL milestone closure (`MILESTONE_CLOSED` / `NEXT_MILESTONE_AUTHORIZED`), may summon Desktop early (`EARLY_DESKTOP_ESCALATION`) on foundational contradictions | always |
-| **OpenCode + GLM 5.3 MAX** (`pe-reconstruction` worker + `pe-master-auditor` internal orchestrator) | ALL execution: forensics, Ghidra, RE, scripts, experiments, implementation, tests, evidence, regression; internal adversarial pre-push audit; loop state + ledgers; commits + pushes; emits the EXTERNAL AUDIT HANDOFF block after each significant run | every run |
-| **ChatGPT (browser)** | RUN-LEVEL external post-auditor + technical pilot: audits every significant run from LIVE GitHub; issues run verdicts; designs the next run direction; NEVER closes milestones | every significant run |
-| **ChatGPT Desktop** | MILESTONE-LEVEL deep auditor: reads `D:\Eudoria_Reconstruction` (original bytes, local evidence, Ghidra artifacts) + GitHub; full milestone deep post-audit; focused revalidation after fixes; designs the next milestone charter | milestone ends only |
+| **HUMAN** | Strategic decisions, milestone authorization, relay to Desktop, FINAL closure (`MILESTONE_CLOSED` / `NEXT_MILESTONE_AUTHORIZED`), `EARLY_DESKTOP_ESCALATION` | always |
+| **PE-MASTER** (OpenCode agent, GLM 5.3 max, Codex-calibrated, read-only, no subagents) | INDEPENDENT adversarial run-level auditor: audits every completed run FROM RAW EVIDENCE ON DISK + repo; verdicts; designs the next experiment; pre-checks the milestone gate package; verifies Desktop findings and orders corrections. Never executes. | every significant run (launched by pe-master-auditor via Task, or directly by the human) |
+| **pe-master-auditor + pe-reconstruction** (execution team) | ALL execution: forensics, Ghidra, RE, scripts, experiments, implementation, tests, regression; the auto loop; internal pre-push QC; commits + pushes; package writing; `AUDIT_ENTRYPOINT.md` maintenance; persists PE-MASTER verdicts; implements ordered corrections | continuous inside the milestone |
+| **ChatGPT Desktop** | MILESTONE-LEVEL deep auditor (cross-engine independent check; reads `D:\Eudoria_Reconstruction` physical evidence + GitHub): full milestone post-audit, focused revalidation, designs the next milestone charter; recommendations get implemented and verified by PE-MASTER | milestone ends only (token-expensive by design) |
+
+**Deliberate trade-off (recorded):** run-level auditing moved from the
+browser ChatGPT (different engine) to PE-MASTER (same engine family as the
+executors). Mitigations: PE-MASTER audits from raw artifacts in a fresh
+context, its charter mandates extra adversarial discipline against
+same-engine error classes, and the cross-engine independence check is
+PRESERVED at the milestone gate by ChatGPT Desktop. One human decision can
+restore the browser tier at any time.
 
 ## 2. THE FLOW
 
 ```text
                  HUMAN
                     |
+        authorize milestone / trigger loop / close milestone
                     v
-        CHATGPT DESKTOP — RARE
-     ARCHITECT / DEEP MILESTONE AUDITOR
-                    |
-         direction / milestone charter
+   pe-master-auditor (orchestrator) + pe-reconstruction (worker)
+        continuous bounded runs inside the milestone
+                    |  every significant run: package + commit + PUSH
                     v
-        CHATGPT IN BROWSER — OFTEN
-      RUN AUDITOR / TECHNICAL PILOT
+        SebastianKozlo/eudoria-clean  (full audit trail)
                     |
-          correction / next run direction
                     v
-          OpenCode + GLM 5.3 MAX
-          FORENSICS / RE / CODE
+        PE-MASTER — per-run adversarial audit
+        (raw evidence on disk + repo; verdict + next experiment)
                     |
-             commit + PUSH
+        verdict -> ordered work -> back to the execution team
+                    |
+   ... runs repeat until PE-MASTER honestly states
+       MILESTONE_CANDIDATE_FOR_DEEP_AUDIT ...
                     v
-        SebastianKozlo/eudoria-clean
-                    |
-                    +----> back to the browser auditor
+        MILESTONE GATE: execution team builds the complete gate
+        package + FULL_MILESTONE_AUDIT -> PUSH -> HARD STOP
+                    v
+        HUMAN relays to CHATGPT DESKTOP (rare, token-expensive)
+        deep milestone post-audit: every claim, every line, local
+        physical evidence -> recommendations
+                    v
+        PE-MASTER verifies each finding -> orders correction runs
+        -> execution team fixes -> PE-MASTER re-checks
+        -> Desktop FOCUSED re-audit -> PASS -> HUMAN closes Mx
+                    v
+        DESKTOP designs Mx+1 charter (from full local context)
+        -> execution resumes under PE-MASTER audits
 ```
 
 ## 3. RUN LIFECYCLE
 
-1. **Direction**: inside an authorized milestone the master-auditor designs
-   each run per the loop discipline (and any Desktop charter the human
-   relays); browser verdicts steer direction asynchronously between runs.
-   One main P0 question per significant run.
-2. **Formalization**: OpenCode's master-auditor converts the direction into a
-   concrete executable `NEXT_PROMPT.md` (RUN_ID, exact input/output paths,
-   PASS/FAIL gates, hard-stop conditions, denominators, forbidden-to-modify
-   list, handoff block). The technical INTENT is the browser's; the forensic
-   FORM (paths, gates, provenance discipline) is the master-auditor's.
-   The master-auditor may return `CHARTER_BLOCKED` with reasons instead of
-   executing a direction that would violate frozen baselines, provenance
-   rules, or evidence hygiene — never silently "improve" it.
-3. **Execution**: `pe-reconstruction` executes inside the bounded run scope
-   (internal iterations allowed). Evidence discipline as per the contract.
-4. **Internal pre-push audit**: master-auditor checks report vs raw evidence,
-   provenance, denominators, overclaims, regressions before the push.
-5. **Push**: code/scripts + REPORT.md + HANDOFF.md + GATES + evidence index +
-   commit + push (original game payloads NEVER committed; identity metadata
-   only).
-6. **Handoff**: the OpenCode final chat response ends with the EXTERNAL AUDIT
-   HANDOFF block (pasteable by the human directly to the browser auditor).
-7. **External run audit**: human pastes the handoff + "zaudytuj". Browser
-   walks LIVE GitHub: HEAD -> commit range -> REPORT -> HANDOFF -> GATES ->
-   EVIDENCE -> CODE -> dependencies -> blast radius.
-8. **Verdict + findings** (see section 4) + the next run direction.
-9. **Persistence**: browser verdicts/findings with project impact are saved by
-   the NEXT OpenCode session as `EXTERNAL_REVIEW.md` (or referenced in the
-   next HANDOFF). Full technical audits with material findings are kept.
-10. **Repeat** until the browser can honestly state
-    `MILESTONE_CANDIDATE_FOR_DEEP_AUDIT`.
+1. **Direction**: pe-master-auditor designs each run per the loop
+   discipline and PE-MASTER's last ORDERED_WORK; Desktop charters when
+   given. One main P0 question per significant run.
+2. **Formalization**: pe-master-auditor converts the direction into an
+   executable `NEXT_PROMPT.md` (RUN_ID, exact paths, PASS/FAIL gates,
+   hard-stops, denominators, forbidden-to-modify list, handoff block).
+   `CHARTER_BLOCKED` allowed for provenance/safety/frozen-baseline
+   violations — never silent "improvement".
+3. **Execution**: pe-reconstruction works inside the bounded scope.
+4. **Internal pre-push QC**: pe-master-auditor checks report vs raw
+   evidence, package completeness, JSON validity, regressions.
+5. **Push**: code/scripts + REPORT + HANDOFF + GATES + evidence index +
+   commit + push (original payloads NEVER; identity metadata only).
+6. **Per-run audit**: pe-master-auditor launches PE-MASTER via the Task
+   tool (or the human talks to PE-MASTER directly). PE-MASTER audits from
+   disk + repo, issues the verdict + corrected checkpoint fragment + the
+   next experiment design + ORDERED_WORK.
+7. **Persistence**: pe-master-auditor saves the PE-MASTER verdict as
+   `PE_MASTER_REVIEW.md` under `docs/audits/<RUN_ID>/`, commits + pushes.
+8. **Act**: implement ORDERED_WORK as the next bounded run (fix, revalidate,
+   or proceed). DEPENDENCY_GATE per section 5.
 
 ## 4. VERDICT LEVELS — MANDATORY EXACT STRINGS
 
-**Level 1 — RUN (browser ChatGPT):**
+**Level 1 — RUN (PE-MASTER):**
 `RUN_ACCEPTED` | `RUN_PARTIAL_PASS` | `RUN_REJECTED` | `REVALIDATION_REQUIRED`
 
-**Level 2 — MILESTONE READINESS (browser ChatGPT):**
-`MILESTONE_CANDIDATE_FOR_DEEP_AUDIT` — this is NOT a PASS and never closes
-anything. Maximum honest wording: "from the run level I no longer see an open
-P0; the milestone is a candidate for the full Desktop audit."
+**Level 2 — MILESTONE READINESS (PE-MASTER):**
+`MILESTONE_CANDIDATE_FOR_DEEP_AUDIT` — NOT a PASS; never closes anything.
 
-**Level 3 — DEEP AUDIT (Desktop ChatGPT):**
+**Level 3 — DEEP AUDIT (ChatGPT Desktop):**
 `MILESTONE_POST_AUDIT_PASS` | `MILESTONE_POST_AUDIT_PARTIAL` |
-`MILESTONE_POST_AUDIT_REJECTED` (+ detailed repair instructions)
+`MILESTONE_POST_AUDIT_REJECTED` (+ recommendations)
 
 **Level 4 — FINAL (human only):**
 `MILESTONE_CLOSED` | `NEXT_MILESTONE_AUTHORIZED`
 
-**Never conflated with:** internal stage verdicts
-(`PASS`/`PARTIAL_PASS`/`FAIL`/`BLOCKED`) and the evidence taxonomy
+**Never conflated with:** internal stage verdicts and the evidence taxonomy
 (`CONFIRMED`/`STRONGLY_SUPPORTED`/`PLAUSIBLE`/`UNVERIFIED`/`REJECTED`),
-which remain unchanged and internal to OpenCode's audit layer.
+which stay unchanged inside the audit layer.
 
-## 5. AUTO LOOP SEMANTICS (AMENDED — ASYNC AUDIT MODEL, 2026-09-06)
+## 5. LOOP SEMANTICS + DEPENDENCY_GATE (default ON)
 
-Per the human directive: OpenCode works autonomously and pushes its own
-completed runs; browser audits are asynchronous; Desktop only at the gate.
-
-- The unattended AUTO LOOP operates **continuously inside the authorized
-  milestone**. Every significant run ends with: push + handoff block +
-  `AUDIT_ENTRYPOINT.md` updated. The loop does **NOT** pause for browser
-  verdicts by default.
-- **Browser audits are asynchronous**: the human relays whenever convenient;
-  the browser walks LIVE GitHub from `AUDIT_ENTRYPOINT.md` (repo root).
-- **DEPENDENCY_GATE (default ON)**: when a run's conclusions are
-  LOAD-BEARING for subsequent runs (a new semantic role / a format-field
-  meaning / an era-canon change / a rewrite of a claim cited by 2+ other
-  runs), the loop marks that run `GATED_PENDING_EXTERNAL_VERDICT` in the
-  entrypoint and does NOT build on its conclusions. While gated and no human
-  is present, the loop switches to INDEPENDENT backlog work (regressions,
-  consolidation, non-dependent P0s) instead of stopping; the gated chain
-  resumes after the verdict. **FULL-ASYNC** (no dependency gates) is
-  available on explicit human request.
-- A browser verdict MAY authorize bounded chained fixes inside one next
-  execution (e.g. "fix F1..F3, rerun the regression sweep").
-- The **milestone gate remains the HARD STOP** (unchanged): there the
-  Desktop deep audit happens; the loop never authorizes the next milestone.
+- The auto loop runs continuously inside the authorized milestone; every
+  significant run ends with push + handoff + `AUDIT_ENTRYPOINT.md` update.
+- The per-run PE-MASTER audit is launched by pe-master-auditor WITHOUT
+  human relay (async from the human's perspective; the human can read
+  `PE_MASTER_REVIEW.md` files anytime).
+- **DEPENDENCY_GATE**: when a run's conclusions are LOAD-BEARING for
+  subsequent runs (new semantic role / format-field meaning / era-canon
+  change / rewrite of a claim cited by 2+ other runs), the loop marks the
+  run `GATED_PENDING_PE_MASTER_VERDICT` and does NOT build on its
+  conclusions until PE-MASTER issues the verdict. While gated and no human
+  is present, the loop switches to independent backlog work instead of
+  stopping. (With PE-MASTER internal this gate is fast — use it liberally.)
+- PE-MASTER's verdict may authorize bounded chained fixes in one execution.
+- The **milestone gate remains the HARD STOP**: Desktop deep audit happens
+  there; the loop never authorizes the next milestone.
 
 ## 6. CORRECTION CYCLE AFTER A DESKTOP PARTIAL/REJECTED
 
 ```text
-Desktop deep audit (findings A/B/C)
-   -> human relays it to the browser ChatGPT and to OpenCode
-   -> OpenCode commits the FULL audit to the repo
-   -> OpenCode executes correction runs
-   -> browser audits each correction run (run-level, as always)
-   -> ... until browser states: all findings FIXED / REVALIDATED
-      / honestly still BLOCKED or UNKNOWN
-   -> browser: "EU935-Mx is again ready for DESKTOP RE-AUDIT"
-   -> Desktop: FOCUSED revalidation (not from zero)
-   -> MILESTONE_POST_AUDIT_PASS
-   -> human: MILESTONE_CLOSED
+Desktop deep audit (findings A/B/C) -> saved in full as
+FULL_EXTERNAL_MILESTONE_POST_AUDIT.md (committed by pe-master-auditor)
+   -> PE-MASTER verifies each finding against evidence
+   -> PE-MASTER orders correction runs (bounded, one finding class each)
+   -> execution team fixes + pushes; PE-MASTER audits each fix
+   -> ... until every finding is FIXED / REVALIDATED / honestly
+      BLOCKED-UNKNOWN
+   -> PE-MASTER declares ready -> Desktop FOCUSED revalidation
+   -> MILESTONE_POST_AUDIT_PASS -> human: MILESTONE_CLOSED
 ```
 
-Desktop is NOT summoned per fix; it returns only at revalidation points.
+Desktop is NOT summoned per fix; only at revalidation points.
+`EARLY_DESKTOP_ESCALATION` (exception): on a mid-milestone foundational
+contradiction the human may summon Desktop early; it rules on that
+contradiction only.
 
 ## 7. MILESTONE CYCLE (OFFICIAL MODEL)
 
 ```text
-DESKTOP defines direction / Mx charter
+DESKTOP defines direction / Mx charter (or human + PE-MASTER for the first)
    -> HUMAN AUTHORIZE
-   -> browser pilots runs (design direction per run)
-   -> OpenCode executes + PUSH
-   -> browser audits each run
+   -> execution team runs (bounded runs, pushes)
+   -> PE-MASTER audits every run (disk + repo)
    -> fix / next run ... repeat
-   -> MILESTONE_CANDIDATE_FOR_DEEP_AUDIT
-   -> OpenCode FULL_MILESTONE_AUDIT + PUSH + HARD STOP
-   -> DESKTOP DEEP MILESTONE POST-AUDIT
-   -> PASS -> HUMAN CLOSES Mx
-            | PARTIAL -> correction cycle (section 6)
-   -> DESKTOP designs Mx+1 charter (from full local context)
-   -> browser pilots Mx+1
+   -> PE-MASTER: MILESTONE_CANDIDATE_FOR_DEEP_AUDIT
+   -> execution team: FULL_MILESTONE_AUDIT + complete gate package
+      + PUSH + HARD STOP
+   -> HUMAN relays to DESKTOP deep post-audit
+   -> PASS  -> human closes Mx
+     PARTIAL -> section 6 cycle
+   -> DESKTOP designs Mx+1 charter -> browser-free resume
 ```
-
-`EARLY_DESKTOP_ESCALATION` (exception): if a foundational assumption is
-contradicted mid-milestone (the FLOAT32/FLOAT64 class of event), the human
-may summon Desktop early. Desktop then rules on the specific contradiction
-only — it does not take over run-level piloting.
 
 ## 8. WHAT GETS PERSISTED IN THE REPO
 
-**Every significant run:** code/scripts (if changed) + REPORT.md + HANDOFF.md
-+ GATES + evidence index + provenance/SHAs + denominators +
-unresolved/rejected/superseded claims. Local-only originals are represented by
-identity metadata (era, path, size, SHA256, reproduction method) — payloads
-never.
+**Every significant run:** code/scripts (if changed) + REPORT.md +
+HANDOFF.md + GATES + evidence index + provenance/SHAs + denominators +
+unresolved/rejected/superseded claims. Local-only originals = identity
+metadata (era, path, size, SHA256, reproduction method) — payloads never.
 
-**Browser run-level audits:** not the whole chat, but every result with
-project impact reaches durable history as `EXTERNAL_REVIEW.md` (committed by
-the next OpenCode session), at minimum referenced in the next HANDOFF.
+**Every PE-MASTER run audit:** `PE_MASTER_REVIEW.md` under
+`docs/audits/<RUN_ID>/` (committed by pe-master-auditor).
 
-**Desktop audits:** ALWAYS in full:
+**Every Desktop milestone audit:** ALWAYS in full:
 `FULL_EXTERNAL_MILESTONE_POST_AUDIT.md` + its correction prompt.
 
-Audit-trail location convention: `docs/audits/<RUN_ID>/`.
+**Every significant run end:** `AUDIT_ENTRYPOINT.md` updated
+(current milestone/gate state, latest runs + SHAs + package paths, pending
+verdicts, open P0s).
 
 ## 9. HONESTY RULES (COMPETENCE SEPARATION)
 
-The browser auditor checks extremely well: repo, commits, code, reports,
-evidence metadata, scripts, denominators, logic, contradictions. But when a
-claim depends exclusively on a local-only physical source
-(`D:\...\Entropia.exe`, `Models.bnt`, Ghidra database, runtime dumps) that is
-not in the repo, the browser does NOT pretend to have verified the bytes. It
-labels such claims:
+PE-MASTER reads BOTH the repo AND `D:\Eudoria_Reconstruction` (raw evidence
+trees, Ghidra projects, sandboxes) — its run-level audit is therefore
+STRONGER than the removed browser tier (which saw repo-only). PE-MASTER
+still must never claim verification of bytes it did not read, and must
+state what it could not check. ChatGPT Desktop owns the milestone-end
+physical revalidation + the cross-engine check.
 
-```text
-REPO_EVIDENCE = CONSISTENT
-PHYSICAL_SOURCE_REVALIDATION = REQUIRED_AT_MILESTONE_AUDIT
-```
-
-Desktop owns the physical revalidation at the milestone deep audit.
-OpenCode's internal audit and the evidence taxonomy remain the first
-line of defense at run level.
-
-## 10. STATE AT ADOPTION (2026-09-05/06, from disk evidence)
+## 10. STATE AT ADOPTION (2026-09-06, from disk evidence)
 
 - **M1 (PE_WORLD_SURFACE_FIDELITY_R1)** is HARD-STOPPED at the gate.
-  V1 gate audit verdict was REJECTED by the human independent audit
-  (byte-proven FLOAT64 operand misread, decisions-ledger ENTRY #10);
-  the correction series followed (ledger ITER_035/036/037 = the operand
-  lock, the float-constant sweep, the original-direct single-model witness);
-  V2 rejudgment = `PARTIAL_PASS_CORRECTED` PROPOSED — the human + the
-  external review DECIDE. Nothing authorizes Milestone 2.
+  V1 gate verdict REJECTED by the human (byte-proven FLOAT64 operand
+  misread, decisions-ledger ENTRY #10); correction series done (ledger
+  ITER_035/036/037); V2 rejudgment = `PARTIAL_PASS_CORRECTED` PROPOSED —
+  the human + external review DECIDE. Nothing authorizes M2.
 - **OPEN ITEM — the M1 gate remote audit package (ITER_052 / ledger
-  ITER_038) is INCOMPLETE and UNTRACKED**: of the files promised by
-  `docs/audits/PE_MILESTONE_1_WORLD_SURFACE_R1_GATE/GATE_INDEX.md`,
-  five were never built (neither in the repo copy nor in the local canonical
-  audit tree): `EVIDENCE_MANIFEST.json`, `RETRACTIONS.md`,
-  `UNRESOLVED.md`, `ROADMAP_MAPPING.md`, `HANDOFF.md`. The packaging
-  session was interrupted. The package MUST NOT be pushed in this state;
-  a bounded completion run (consolidation FROM EXISTING RECORDS, no new
-  forensics, no new claims) is the FIRST RUN under this operating model.
-- The committed-and-pushed state of master is otherwise in sync
-  (`97ed5e5`).
+  ITER_038) is INCOMPLETE and UNTRACKED**: five files promised by its
+  `GATE_INDEX.md` were never built (verified missing in both the repo
+  copy and the local canonical audit tree): `EVIDENCE_MANIFEST.json`,
+  `RETRACTIONS.md`, `UNRESOLVED.md`, `ROADMAP_MAPPING.md`, `HANDOFF.md`.
+  The packaging session was interrupted. **The bounded completion run
+  (consolidation from existing records only — no new forensics, no new
+  claims) is pending human authorization and is the FIRST RUN under this
+  operating model.** Under the new model PE-MASTER pre-checks that
+  package before it goes to Desktop.
+- Before this adoption, several completed runs (iter35/36/37, NIF
+  claim-evidence lock R1/R2) have NO independent PE-MASTER review yet;
+  PE-MASTER may audit them retroactively when the human requests.
 
 ## 11. OPEN DECISIONS (PENDING THE HUMAN)
 
-1. ~~Confirm the auto-loop amendment~~ — RESOLVED 2026-09-06: the human
-   directive chose the ASYNC model (section 5 as amended); the
-   pe-master-auditor profile was amended accordingly (section 22) and
-   synced.
+1. ~~Browser tier~~ — REMOVED by human directive 2026-09-06.
 2. Authorize the M1 gate package completion run (bounded, mechanical
-   consolidation; the first run executed under this operating model).
-3. DEPENDENCY_GATE default stays ON unless the human requests FULL-ASYNC.
+   consolidation; the first run executed + PE-MASTER-audited under this
+   operating model).
+3. DEPENDENCY_GATE default stays ON (now keyed to fast internal
+   PE-MASTER verdicts).
