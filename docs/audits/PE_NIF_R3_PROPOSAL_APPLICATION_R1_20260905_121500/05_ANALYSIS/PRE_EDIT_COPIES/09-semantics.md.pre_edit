@@ -177,7 +177,7 @@ NiKeyframeController — morphs are triggered by behavior events
 [08-ark-proprietary.md](08-ark-proprietary.md). What the data MEANS:
 
 - Uniform blocks = per-vertex morph records: `[u16 tag][k × f32 blend
-  weights summing to 1.0][9 × f32 trailing values; grouping and semantic role UNVERIFIED — the tested variable-k model consumes 9 × f32 after the weight list; grouping them into three triples (e.g. 3 morph states × XYZ) is an OPEN HYPOTHESIS, not an established structure; divisibility of nine does not establish the grouping.]` — each vertex blends
+  weights summing to 1.0][9 × f32 position deltas]` — each vertex blends
   morph states with normalized weights (ITER-4).
 - The delta floats are **quantized f32s**: ≤7-bit mantissas (≥16
   trailing zero mantissa bits — the LE "00 00" low-byte signature in
@@ -188,7 +188,8 @@ NiKeyframeController — morphs are triggered by behavior events
   REJECTED): the R18 walk's u16 "ids" are high-half fragments of these
   quantized floats plus record heads (ITER-34 T-F16/T-5BIT).
 - Real sparse records (10.8% of entries) = `[u16 vertex_index < N][k ×
-  f32 weights ≈1.0][9 × f32 delta triples]` [Scope limits that MUST travel with this wording: the parser takes the SMALLEST k in 1..8 whose weight prefix sums ≈1.0 (first-match; segmentation uniqueness NOT proven); byte-exact on 2,093/2,427 classifier-real spans (86.2%; the 'real-record' class is a hypothesis-aligned classifier) and 3,186/6,167 all fit spans; **334 classifier-real spans do not fit the tested VARIABLE-K model — of those 334, 62 have another recorded fit among the recorded alternatives (g1/g2/mscan; e.g. 592572.nif bi=65 si=45 mscan_ok_m=[30]) and 272 have none among the recorded alternatives; alternative-model fits are recorded fits, NOT true segmentation and NOT semantic confirmation**; observed k ∈ {1,2,3,4} on 9.3.5 exact examples and k ∈ {1..5} on 2003.]; the fixed-W
+  f32 weights ≈1.0][9 × f32 delta triples]` with k per-record ∈ {2,3,4} —
+  byte-exact on 86.2% of real-record spans (ITER-34); the fixed-W
   `[u16 idx][W×f32]` form holds only on the k+9==W subset (132/6,167
   spans).
 - Residual: 325 heterogeneous spans (3.16%, 56 files) fit no single
