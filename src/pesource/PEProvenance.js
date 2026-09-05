@@ -44,6 +44,11 @@ export const KNOWN_HASHES = {
   // the DATA is 2003-era, the 9.3.5 loader is later-generation, era-labeled).
   'PCG_9_3_5:VegetationClimates/VegetationClimates.bnt':
     '7B858401C3EEBDA574DF4B4517E7FB2A8149C283885F27187682AA1239C745F4',
+  // PCG_9_3_5 model corpus (ITER 051, ledger ITER_037: BNT2 framing
+  // verified, 5,596 entries incl. the witness 457485.nif @315,186,289;
+  // same-era model container for the ORIGINAL-DIRECT single-model witness).
+  'PCG_9_3_5:Models/Models.bnt':
+    'C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0',
 };
 
 export function makeProvenance(fields) {

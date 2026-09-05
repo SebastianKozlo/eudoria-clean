@@ -434,6 +434,63 @@ export class PESourceMount {
     };
   }
 
+  /**
+   * getModelResource — ITER 051 (ledger ITER_037): the ORIGINAL-DIRECT
+   * single-model witness (architect decision #3). Reads the model NIF
+   * payload '<modelId>.nif' from the MOUNTED, ERA-EXPLICIT Models.bnt
+   * (BNT2 framing — verified: footer [u32 dir_off]['BNT2'], 5,596 entries;
+   * payloads stored RAW, no zlib). NOT_FOUND is LOUD. The NIF decode itself
+   * lives in the format layer (NifModelReader.js — ONE-MODEL scope, loud
+   * failures); this method returns the ORIGINAL bytes + provenance only.
+   * @returns {{payload: Uint8Array, entry: object, provenance: object}}
+   */
+  async getModelResource({ era, modelId }) {
+    const MODEL_CONTAINERS = {
+      [ERAS.PCG_9_3_5]: 'Models/Models.bnt',
+    };
+    const container = MODEL_CONTAINERS[era];
+    if (!container) {
+      throw new Error(
+        `[PESourceMount] getModelResource: era ${era} has no era-validated ` +
+        `Models container (NO silent era substitution)`);
+    }
+    if (!Number.isInteger(modelId) || modelId < 0) {
+      throw new Error(`[PESourceMount] invalid modelId ${modelId}`);
+    }
+    const m = this._mount(era, container);
+    if (m.format !== 'BNT2') {
+      throw new Error(`[PESourceMount] ${era}:${container} is not BNT2 framing (got ${m.format})`);
+    }
+    let reader = this._modelReaders?.get(container);
+    if (!reader) {
+      reader = new Bnt2Archive(m.bytes);
+      if (!this._modelReaders) this._modelReaders = new Map();
+      this._modelReaders.set(container, reader);
+    }
+    const entryName = `${modelId}.nif`;
+    const entry = reader.entryByName(entryName);
+    if (!entry) {
+      throw new Error(`[PESourceMount] model entry ${entryName} NOT_FOUND in ${era}:${container} (LOUD — no fallback)`);
+    }
+    const { payload } = reader.readEntry(entry);
+    return {
+      payload,
+      entry,
+      provenance: makeProvenance({
+        era, container, entry: entryName, physicalSource: m.path, offset: entry.offset,
+        decoderVersion: `${PESOURCE_DECODER_VERSION}+bnt2-model-v1`,
+        evidenceStatus: EVIDENCE_STATUS.CONFIRMED,
+        extra: {
+          containerFormat: m.format,
+          entrySize: entry.size, crc32: entry.crc32,
+          payloadBytes: payload.byteLength,
+          hashVerified: m.hashVerified,
+          crossEra: era !== 'PCG_9_3_5',
+        },
+      }),
+    };
+  }
+
   /** getWaterResource — Gate D scope. The original water system is NOT_RECOVERED. */
   async getWaterResource() {
     throw new Error(

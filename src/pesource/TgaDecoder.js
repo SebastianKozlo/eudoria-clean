@@ -29,6 +29,49 @@ const TGA2_FOOTER = 'TRUEVISION-XFILE.\0';
  * @returns {{ width: number, height: number, rgba: Uint8Array, header: object, footerOk: boolean }}
  */
 export function decodeTga2A32(payload) {
+  // ROW-ORDER NOTE (iter030 palette probe, 421318.dat): this variant preserves
+  // FILE ROW order (bottom-up storage read directly): row 0 = the first
+  // stored row = the DARK ROCK / high-altitude end — matching the row formula
+  // (row 0 = the [2,514]m clamp's high end, iter028). NO flip is applied for
+  // the A32 subset; the texel = palette[(row*64 + col)*4]. The decode logic
+  // lives in decodeTga2A32Raw_ (shared with the IMAGE-order variant, ITER 051).
+  return decodeTga2A32Raw_(payload);
+}
+
+/**
+ * decodeTga2A32Image — IMAGE-ORDER sibling for the A32 subset (ITER 051,
+ * ledger ITER_037 — the ORIGINAL-DIRECT model witness textures).
+ * Same strict subset as decodeTga2A32 (TGA 2.0, uncompressed true-color,
+ * 32bpp BGRA, TRUEVISION-XFILE footer, exact size check) but returns RGBA in
+ * IMAGE order: row 0 = the visual TOP (the bottom-up storage is flipped).
+ *
+ * WHY a separate function: decodeTga2A32 preserves FILE ROW order (the
+ * climate-palette convention: palette "row" = the first stored row, iter030
+ * — a semantic of the palette bake, NOT of image display). Model textures
+ * are IMAGES: the era's D3D8 surfaces are top-down, and the r185
+ * calibration-gate-E UV convention (with NIF uv used RAW, no V flip) is
+ * v=0 samples the image TOP (the legacy UVConv v1 byte-probe,
+ * runtime_flipY_probe.json + the witness model's own structure: card top
+ * v≈0.104, card bottom v≈0.940, dark ground-shadow vertex colors at z=0).
+ * THREE.DataTexture default flipY=false + this top-first RGBA reproduces
+ * that convention deterministically.
+ */
+export function decodeTga2A32Image(payload) {
+  const decoded = decodeTga2A32Raw_(payload);
+  const { width, height } = decoded;
+  const src = decoded.rgba;
+  const rgba = new Uint8Array(width * height * 4);
+  const bpr = width * 4;
+  for (let y = 0; y < height; y++) {
+    // storage row (bottom-up): image row 0 (top) = the LAST stored row
+    const srcRow = decoded.topDown ? y : height - 1 - y;
+    rgba.set(src.subarray(srcRow * bpr, (srcRow + 1) * bpr), y * bpr);
+  }
+  return { ...decoded, rgba, rowOrder: 'image (row 0 = visual TOP)' };
+}
+
+/** The original A32 decode logic (file-row order), shared by both variants. */
+function decodeTga2A32Raw_(payload) {
   if (!(payload instanceof Uint8Array)) throw new Error('[TgaDecoder] payload must be Uint8Array');
   const sz = payload.length;
   if (sz < 26 + 18) throw new Error(`[TgaDecoder] payload too small for TGA2 (${sz})`);
@@ -50,11 +93,6 @@ export function decodeTga2A32(payload) {
   const topDown = (descriptor & 0x20) !== 0;
   const bpr = width * 4;
   const rgba = new Uint8Array(width * height * 4);
-  // ROW-ORDER NOTE (iter030 palette probe, 421318.dat): the engine's palette
-  // "row" = the FILE row order (bottom-up storage read directly): row 0 =
-  // the first stored row = the DARK ROCK / high-altitude end — matching the
-  // row formula (row 0 = the [2,514]m clamp's high end, iter028). NO flip is
-  // applied for the A32 subset; the texel = palette[(row*64 + col)*4].
   for (let y = 0; y < height; y++) {
     const srcRow = topDown ? height - 1 - y : y;
     const src = headerSize + srcRow * bpr;
@@ -65,11 +103,11 @@ export function decodeTga2A32(payload) {
       rgba[d] = payload[s + 2];     // R (stored BGRA)
       rgba[d + 1] = payload[s + 1]; // G
       rgba[d + 2] = payload[s];     // B
-      rgba[d + 3] = payload[s + 3]; // A (carried — the palette alpha drives the factor band)
+      rgba[d + 3] = payload[s + 3]; // A
     }
   }
   return {
-    width, height, rgba,
+    width, height, rgba, topDown,
     header: { idLength, colorMapType, imageType, width, height, bpp, descriptor, headerSize },
     footerOk: true,
   };
