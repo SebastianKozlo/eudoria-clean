@@ -215,3 +215,13 @@ Gate tally labels MUST be derived from the actual emitted rows at emit time (R2G
 
 ---
 
+
+## LED-ENTRY: WITNESS_MATRIX.json MILD-2 predicted_outcome REFUTED (RUN-E)
+
+- date: 2026-09-05
+- issued_by: PE-MASTER (RUN-E review, MASTER_ACCEPTED) — relayed by the human; appended by pe-master-auditor (RUN-E-CORR)
+- superseded_claim: WITNESS_MATRIX.json MILD-2 predicted_outcome (RUN-C, pinned @ 8c037c0, blob 408f736d)
+- falsified_by: RUN-E execution (PE_NIF_WITNESS_FALSIFICATION_R1_20260905_131214, commit 59b5b63)
+- finding: WITNESS_MATRIX.json MILD-2 predicted_outcome (RUN-C, 8c037c0) REFUTED by RUN-E (59b5b63) execution: actual = FAIL_CLOSED @block 3 (loud desync); TEXT_CRLF->G9_RTTI fallback NOT triggered; actual behavior SAFER (no silent corruption absorption). RUN-C final-message claim 'MILD-2 -> PASS via G9_RTTI' corrected. Zero wiki/grammar impact.
+- severity: P1, matrix-internal prediction error; no safety regression
+- evidence: 01_RAW\FAILURE_DETAILS.json (MILD-2 fail_reason, fail_block_index=3); 05_ANALYSIS\VERDICTS.json (F-1); PE-MASTER physical re-verification (6/6 byte-exact vs originals)
