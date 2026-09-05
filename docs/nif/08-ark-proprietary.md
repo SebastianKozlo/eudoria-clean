@@ -371,6 +371,25 @@ loops with the ITER-8 viewport findings), `IconSize:` + 1,
 `ViewportSettings:` + params, texture-anim triple (GeoTexanim01). |
 | cyclic | 157 | 14–16 | 8–10 | oscillation params |
 
+**TEXT mode semantics — DECODED (ITER-38,
+`PE_NIF_TEXT_MODES_R38_20260904_175053`)**: the mode field is a
+**STATE-BINDING label orthogonal to the param schema** — proof:
+41076.nif registers `Bip01_rotator_1` TWICE, byte-identical except the
+mode (`activeIdle` vs `single`) — the mode column gates the object
+state (idle loop vs one-shot), invisible to params. Specifics:
+`active` = the Geo_Flame01–04 fire-state of one weapon family
+(542418/542466/542520); `Single` = a one-file orthography (386359.nif,
+duplicated paste); `single` = count=1 in 87% (one-shot — PLAUSIBLE);
+`activeIdle/single` = a lone contaminated compound (slash, not hyphen).
+**G3C vs G3C_BOUNDARY (ITER-38, CONFIRMED)**: NOT two container formats —
+a **PARSER-ROUTE split on the SAME TEXT grammar** (G3C = strict
+TEXT_CRLF parse success; G3C_BOUNDARY = the frozen parser's
+boundary-search fallback after ArkAnimationError). The split is
+route-correlated with content: G3C_BOUNDARY is 52.2% ParticleSystem
+(78.6% of all PS records) and 14.7%-contaminated, with the exclusive
+`0.6625f` + PER_PART_ROTATE family; all 26 viewport-suite records and
+all >24-field records are strict-route G3C.
+
 Param SEMANTICS per channel remain partially mapped (ITER-23,
 `PE_NIF_TEXT_PARAM_SEM_R23_20260904_144748` — per-position OBSERVED
 distributions in TEXT_PARAM_SEMANTICS.json). Two structural facts
