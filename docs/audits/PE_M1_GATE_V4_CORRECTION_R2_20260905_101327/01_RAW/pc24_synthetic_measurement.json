@@ -1,0 +1,582 @@
+{
+ "run_id": "PE_M1_GATE_V4_CORRECTION_R2_20260905_101327",
+ "work_item": "W10 - the PC24 SYNTHETIC RE-MEASUREMENT (a measurement without an artifact is not evidence)",
+ "purpose": "run-side double measurement of the synthetic-domain lerp PC=24 sensitivity; the frozen lerp_pc24_mismatches=0 of domain_reproof.json is a DEFAULT COUNTER (measure_pc24=False, HYG-1) and is NEVER touched by this run",
+ "method": {
+  "pc_modes": "oracle_battery.json pcrc_conditional_model: PC=24 -> f32(x) directly; PC=53 -> f32(f64(x)); the engine model = the 80-bit x87 chain (per-step exactness ENFORCED); the lerp semantics = repair_02_domain.py lerp_engine/lerp_pc24/lerp_js verbatim (measure_pc24=True semantics)",
+  "lerp_expression": "value = rand01 * (f32(max) - f32(min)) + f32(min); rand01 = f32(r / 32767.0) with r in [0, 32767]; rand01 engine = f32(f80(r/32767)), rand01 pc24 = f32(r/32767) (measured EQUAL on the full rand01 domain)",
+  "lerp_pc24_model": "d24 = f32(max-min); p24 = f32(rand01*d24); result = f32(p24 + f32(min)) - repair_02_domain.py lerp_pc24 verbatim",
+  "ieee_rounders_source": {
+   "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1_VALIDATOR_COVERAGE_REPAIR_R1_20260905_012439\\00_CONTROL\\repair_lib_ieee.py",
+   "sha256": "1BF5B1C8A94D4D96FF9065B477CEDB3E2A9C81AB42537AB35A60F95195782D28",
+   "note": "the rounders (_round_ieee/_canon/_round_half_even_div/to_f32_nd/to_f64_nd/to_f80_nd) are VERBATIM from the platform-validated repair library"
+  },
+  "int_fast_path_equivalence_assertion": {
+   "samples": 1998,
+   "verdict": "OK (2000-assert style, fail-loud on any divergence)"
+  },
+  "comparison_definition": "lerp_pc24_mismatches = count(r, pair) where lerp_engine != lerp_pc24 (the engine-vs-PC24 sensitivity; engine==js measured 0 on all domains here, so PC53-vs-PC24 is the same count)"
+ },
+ "inputs": {
+  "domain_reproof_json": {
+   "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1_VALIDATOR_COVERAGE_REPAIR_R1_20260905_012439\\01_RAW\\domain_reproof.json",
+   "sha256": "E654D2EF34BFF061FACF18794BE2F6A036B8BEFD847ED9308C0990F1795DEC3E",
+   "pinned": "E654D2EF34BFF061FACF18794BE2F6A036B8BEFD847ED9308C0990F1795DEC3E",
+   "match": true
+  },
+  "oracle_battery_json": {
+   "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1_VALIDATOR_COVERAGE_REPAIR_R1_20260905_012439\\01_RAW\\oracle_battery.json",
+   "sha256": "B04A3175F9E32669795D115271525E344AB823A8071171498845459D267DBFCE",
+   "pinned": "B04A3175F9E32669795D115271525E344AB823A8071171498845459D267DBFCE",
+   "match": true
+  },
+  "pairs_source": "READ from the FROZEN file (sets.synthetic_pairs_old_script = 38; sets.source_pairs_original_vcl = 7); never re-derived"
+ },
+ "script_sha256": "079E1772A2A3F18F4F345F3C484B8B489CBF686641B101917D3779121BA54D08",
+ "domains": {
+  "rand01_r_32767": {
+   "checked": 32768,
+   "engine_vs_pc24": 0,
+   "engine_vs_js": 0
+  },
+  "positions_u16_65535": {
+   "checked": 65536,
+   "engine_vs_pc24": 0,
+   "engine_vs_js": 0
+  },
+  "lerp_pc24_sensitivity_real": {
+   "tag": "REAL",
+   "n_pairs": 7,
+   "checks": 229376,
+   "lerp_pc24_mismatches": 14104,
+   "lerp_engine_vs_js_mismatches": 0,
+   "lerp_80bit_inexact": 0,
+   "per_pair": [
+    {
+     "pair": [
+      0.25,
+      1.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 1491,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.25,
+      1.25
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      1.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      1.5
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      1.55
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 6506,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      2.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 1491,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.8,
+      1.5
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 4616,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    }
+   ]
+  },
+  "lerp_pc24_sensitivity_synthetic": {
+   "tag": "SYNTH",
+   "n_pairs": 38,
+   "checks": 1245184,
+   "lerp_pc24_mismatches": 103073,
+   "lerp_engine_vs_js_mismatches": 0,
+   "lerp_80bit_inexact": 0,
+   "per_pair": [
+    {
+     "pair": [
+      0.2,
+      0.6
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 7375,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.2,
+      1.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 3801,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.2,
+      2.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 5670,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.2,
+      3.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 4746,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.2,
+      4.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 3957,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.2,
+      5.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 15846,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.2,
+      6.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 11807,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      0.6
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 1205,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      1.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      2.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 1491,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      3.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 2405,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      4.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 2184,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      5.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 2620,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      0.5,
+      6.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 1957,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.0,
+      1.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.0,
+      2.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.0,
+      3.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.0,
+      4.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 1491,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.0,
+      5.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.0,
+      6.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 2405,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.5,
+      2.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.5,
+      3.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 3591,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.5,
+      4.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 3178,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.5,
+      5.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 4368,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      1.5,
+      6.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 4304,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.0,
+      2.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.0,
+      3.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.0,
+      4.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.0,
+      5.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 2983,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.0,
+      6.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.5,
+      3.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.5,
+      4.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 3151,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.5,
+      5.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 4180,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      2.5,
+      6.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 4767,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      3.0,
+      3.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      3.0,
+      4.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      3.0,
+      5.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 0,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    },
+    {
+     "pair": [
+      3.0,
+      6.0
+     ],
+     "checks": 32768,
+     "pc24_mismatches": 3591,
+     "engine_vs_js_mismatches": 0,
+     "engine_80bit_inexact": 0
+    }
+   ]
+  }
+ },
+ "total_synthetic_comparisons": 1245184,
+ "measured_synthetic_pc24_mismatches": 103073,
+ "auditor_side_citation": {
+  "value": 103073,
+  "source": "PE_MASTER_REVIEW.md CODE_FINDING 1 + CORRECTION_NOTES.md HYG-1"
+ },
+ "negative_controls": {
+  "NC1_real_domain_pc24_equals_frozen_14104": {
+   "measured": 14104,
+   "expected": 14104,
+   "pass": true
+  },
+  "NC2_rand01_positions_pc24_zero": {
+   "rand01_engine_vs_pc24": 0,
+   "positions_engine_vs_pc24": 0,
+   "expected": 0,
+   "pass": true
+  },
+  "NC3_engine_vs_js_zero_both_domains": {
+   "rand01": 0,
+   "positions": 0,
+   "real": 0,
+   "synthetic": 0,
+   "expected": 0,
+   "pass": true
+  },
+  "NC4_shared_pairs_same_per_pair_count": {
+   "shared": [
+    {
+     "pair": [
+      0.5,
+      1.0
+     ],
+     "real": 0,
+     "synthetic": 0,
+     "pass": true
+    },
+    {
+     "pair": [
+      0.5,
+      2.0
+     ],
+     "real": 1491,
+     "synthetic": 1491,
+     "pass": true
+    }
+   ],
+   "pass": true
+  },
+  "NC5_80bit_exactness_zero_violations": {
+   "real": 0,
+   "synthetic": 0,
+   "expected": 0,
+   "pass": true
+  }
+ },
+ "all_negative_controls_pass": true,
+ "disposition": {
+  "disposition": "CONFIRMED",
+  "detail": "the citation 103,073/1,245,184 is PROMOTED to CONFIRMED (double measurement: PE-MASTER auditor-side + THIS run-side, independent implementations, exact agreement)"
+ },
+ "hygiene_note": "the frozen domain_reproof.json lerp_scale_synthetic.lerp_pc24_mismatches=0 stays UNTOUCHED (HYGIENE-1: it is a default counter from measure_pc24=False, superseded as a READING by CORRECTION_NOTES.md; THIS file is the run-side artifact the reading now points to)",
+ "failures": [],
+ "verdict": "PASS"
+}
