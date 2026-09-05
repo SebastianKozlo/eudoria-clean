@@ -46,8 +46,10 @@ and no-original-payload rules are UNCHANGED and remain binding on all tiers.
 
 ## 3. RUN LIFECYCLE
 
-1. **Direction**: browser ChatGPT designs the next run direction (or the human
-   relays a Desktop charter). One main P0 question per significant run.
+1. **Direction**: inside an authorized milestone the master-auditor designs
+   each run per the loop discipline (and any Desktop charter the human
+   relays); browser verdicts steer direction asynchronously between runs.
+   One main P0 question per significant run.
 2. **Formalization**: OpenCode's master-auditor converts the direction into a
    concrete executable `NEXT_PROMPT.md` (RUN_ID, exact input/output paths,
    PASS/FAIL gates, hard-stop conditions, denominators, forbidden-to-modify
@@ -97,17 +99,30 @@ P0; the milestone is a candidate for the full Desktop audit."
 (`CONFIRMED`/`STRONGLY_SUPPORTED`/`PLAUSIBLE`/`UNVERIFIED`/`REJECTED`),
 which remain unchanged and internal to OpenCode's audit layer.
 
-## 5. AUTO LOOP SEMANTICS (AMENDMENT)
+## 5. AUTO LOOP SEMANTICS (AMENDED — ASYNC AUDIT MODEL, 2026-09-06)
 
-- The unattended AUTO LOOP operates **INSIDE a single bounded RUN charter**
-  (as many internal iterations as the run's P0 needs).
-- A **significant run boundary is an EXTERNAL GATE**: push + handoff + WAIT
-  for the browser verdict. The loop does NOT silently cross it.
+Per the human directive: OpenCode works autonomously and pushes its own
+completed runs; browser audits are asynchronous; Desktop only at the gate.
+
+- The unattended AUTO LOOP operates **continuously inside the authorized
+  milestone**. Every significant run ends with: push + handoff block +
+  `AUDIT_ENTRYPOINT.md` updated. The loop does **NOT** pause for browser
+  verdicts by default.
+- **Browser audits are asynchronous**: the human relays whenever convenient;
+  the browser walks LIVE GitHub from `AUDIT_ENTRYPOINT.md` (repo root).
+- **DEPENDENCY_GATE (default ON)**: when a run's conclusions are
+  LOAD-BEARING for subsequent runs (a new semantic role / a format-field
+  meaning / an era-canon change / a rewrite of a claim cited by 2+ other
+  runs), the loop marks that run `GATED_PENDING_EXTERNAL_VERDICT` in the
+  entrypoint and does NOT build on its conclusions. While gated and no human
+  is present, the loop switches to INDEPENDENT backlog work (regressions,
+  consolidation, non-dependent P0s) instead of stopping; the gated chain
+  resumes after the verdict. **FULL-ASYNC** (no dependency gates) is
+  available on explicit human request.
 - A browser verdict MAY authorize bounded chained fixes inside one next
-  execution (e.g. "fix F1..F3, rerun the regression sweep") without a new
-  external gate — only when explicitly stated in the verdict.
-- The **milestone gate remains the HARD STOP** (unchanged): there the Desktop
-  deep audit happens; the loop never authorizes the next milestone.
+  execution (e.g. "fix F1..F3, rerun the regression sweep").
+- The **milestone gate remains the HARD STOP** (unchanged): there the
+  Desktop deep audit happens; the loop never authorizes the next milestone.
 
 ## 6. CORRECTION CYCLE AFTER A DESKTOP PARTIAL/REJECTED
 
@@ -208,12 +223,10 @@ line of defense at run level.
 
 ## 11. OPEN DECISIONS (PENDING THE HUMAN)
 
-1. Confirm the auto-loop amendment (section 5) -> then the pe-master-auditor
-   profile is amended + synced (canonical -> runtime, SHA256-verified) and
-   OpenCode restarted.
+1. ~~Confirm the auto-loop amendment~~ — RESOLVED 2026-09-06: the human
+   directive chose the ASYNC model (section 5 as amended); the
+   pe-master-auditor profile was amended accordingly (section 22) and
+   synced.
 2. Authorize the M1 gate package completion run (bounded, mechanical
-   consolidation; the first run piloted under this model).
-3. Whether the run direction for that completion run comes from the browser
-   ChatGPT (per section 3.1) or is formalized directly by the
-   master-auditor (permitted for mechanical completion of an interrupted
-   packaging session — no new forensics, no new claims).
+   consolidation; the first run executed under this operating model).
+3. DEPENDENCY_GATE default stays ON unless the human requests FULL-ASYNC.
