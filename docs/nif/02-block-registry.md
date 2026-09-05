@@ -43,7 +43,7 @@ shaderName SizedString + u32 if set]
 | NiTriShape | 21,914 / 21,190 | see 03 |
 | NiTriShapeData | 21,830 / 21,106 | see 03 |
 | NiTexturingProperty | 14,817 | see 04 |
-| NiMaterialProperty | 11,563 / ~11,185 | see 04 |
+| NiMaterialProperty | 11,563 / 11,186 | see 04 |
 | NiArkAnimationExtraData | 5,596 | see 08 |
 | NiArkImporterExtraData | 5,596 | see 08 |
 | NiArkTextureExtraData | 5,596 | see 08 |
@@ -51,7 +51,7 @@ shaderName SizedString + u32 if set]
 | NiZBufferProperty | 5,245 | NET + Flags(u16) + Function(u32, v≥0x0401000C) |
 | NiStringExtraData | 4,781 | ExtraData base + Data(SizedString) |
 | NiVertexColorProperty | 4,313 | NET + flags u16 + vertexMode u16 + lightingMode u16 + **PE ext u32 (always consumed; values 0/1)** |
-| NiArkViewportInfoExtraData | 4,095 / ~3,917 | see 08 |
+| NiArkViewportInfoExtraData | 4,095 / 3,917 | see 08 |
 | NiArkShaderExtraData | 2,084 | see 08 |
 | NiTextureEffect | 1,694 / 1,646 | see 06 |
 | NiTextKeyExtraData | 1,039 | see 05 |
@@ -62,7 +62,7 @@ shaderName SizedString + u32 if set]
 | NiSkinData | 720 | see 07 |
 | NiStencilProperty | 532 | see 04 |
 | NiBillboardNode | 384 | NiNode + mode(u16, v10 only) |
-| NiVertexMorphExtraData | 354 / 79 | see 08 |
+| NiVertexMorphExtraData | 354 / 286 (79 files) | see 08 |
 | NiArkBillboardNode | 293 | = NiNode (+mode u16 in v10) — proven alias |
 | NiPSysEmitterCtlr / UpdateCtlr / EmitterCtlrData / AgeDeath / Spawn / Position / BoundUpdate modifiers | 259 each | see 06 |
 | NiPosData | 258 | KeyGroup<Vec3> |
@@ -96,7 +96,8 @@ Every type above = boundary EXACT (stream ends exactly at block end after
 parse). Types marked `_partial` in the parser keep their raw payload +
 SHA256 for future semantic work: NiArkAnimation variants, NiArkTexture
 entries (9 trailing bytes = anim_flag u8 + frame_index u32 + bnt2_id u32 —
-iteration-24 canon), NiArkImporter trailing 38 B, viewport extensions,
+pre-loop canon; byte-verified in PE_VIEWER_ANIM_PLAYBACK_R1_20260905_210000
+and framed by PE_NIF_MATERIAL_CENSUS_R32; NOT NIF-loop ITER-24), NiArkImporter trailing 38 B, viewport extensions,
 vertex morph payloads.
 
 ## FAIL_CLOSED types (known unsupported)

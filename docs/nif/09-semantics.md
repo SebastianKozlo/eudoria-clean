@@ -32,9 +32,12 @@ mesh → NiArkTextureExtraData entries
   entry name (e.g. "Stone04") + ref + bnt2_id (9 trailing bytes)
   bnt2_id → Textures.bnt (BNT2) payload = TGA 2.0 uncompressed 256×256×24
 ArkTexture bytes[5:8] u32 LE = BNT2 texture ID (99.86% — 23,488 entries,
-23,455 resolved, 33 dangling = SuperSpray particle slots, 14 unique IDs)
+23,455 resolved; 33 dangling = 18 SuperSpray particle slots (3 ids ×6)
++ 15 unshipped individual slots; 14 unique missing IDs — M3-4 R2,
+refined in PE_ASSET_CENSUS_R1)
 ```
-Binding edges (M3-4.5 V2, machine-validated): 20,427 static (Jaccard
+Binding edges (M3-4.5 V2, machine-validated; 2003 corpus — denominators
+match the R35 2003 census): 20,427 static (Jaccard
 1.000000 vs builder; negative control 0.0), 148 controller edges (125
 NiFlipController), 1,749 effect edges (1,646 NiTextureEffect). 200/200
 witnesses field-matched. **STATIC binding = CONFIRMED.**
@@ -65,8 +68,9 @@ runtime/D3D8 evidence).
 - v10 NiTriShape hasShader u8 sits between skinRef and shaderName —
   missing it shifts every following boundary by 1 byte.
 - NiVertexColorProperty has a PE-only u32 after lightingMode.
-- NiArkTexture `num_tex` is always 3 — the real entry count is packed in
-  field2 bits 8..31.
+- NiArkTexture v10 `num_tex` is always 3 — the real entry count is packed in
+  field2 bits 8..31; v4 blocks instead store the entry count directly in
+  `num_tex` (0..51, exact-consumption-validated — ITER-32).
 - BNT/BUNT archives: every entry's packedSize spans 8 bytes into the next
   entry's zlib stream (trailing 8 = next header) — strict decompressors
   (Chromium DecompressionStream) reject the stream; Node zlib tolerates.

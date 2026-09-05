@@ -44,10 +44,10 @@ untouched. Provenance: `99_Audits\PE_NIF_ERA_DRIFT_R2_20260904_115051\`.
 | Total blocks parsed | 296,489 | 392,061 |
 | NiTriShape (container blocks) | 21,190 | 21,914 |
 | NiTriShapeData (geometry payloads = "renderable meshes") | 21,106 | 21,830 |
-| NiMaterialProperty | ~11,185 | 11,563 |
+| NiMaterialProperty | 11,186 | 11,563 |
 | NiFlipController | 125 | 126 |
 | NiTextureEffect | 1,646 | 1,694 |
-| NiVertexMorphExtraData | 79 | 354 |
+| NiVertexMorphExtraData | 286 blocks (79 files) | 354 blocks (118 files) |
 
 NOTE: NiTriShape vs NiTriShapeData differ by a counting method (container vs
 payload); the delta (84 in 2003, 84 in 9.3.5) is NOT a data error.
@@ -74,3 +74,6 @@ payload); the delta (84 in 2003, 84 in 9.3.5) is NOT a data error.
 - PCG_9_3_5 corpus audit: `99_Audits\PE_PCG935_NIF_CORPUS_AUDIT_R1_20260904_113907\`
 - Deep dump (per-file inventory): `99_Audits\PE_PCG935_NIF_DEEP_DUMP_R1_20260904_114352\`
 - External cross-references used during RE: niflib (BSD-3), nif.xml (GPL-3, historical), jnif (MIT), OpenMW niffile.cpp — for STANDARD blocks only; NiArk blocks have no external reference.
+- NIF documentation loop runs (ITER-2..38): `99_Audits\PE_NIF_*` run dirs —
+  per-iteration findings in `00_PROJECT_CONTEXT\PE_AUTO_LOOP.json`
+  (nif_documentation_loop_2026_09_04).

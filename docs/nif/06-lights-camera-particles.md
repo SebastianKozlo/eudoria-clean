@@ -77,6 +77,9 @@ Modifiers/emitters in corpus (with own fields):
 **Controller data**: NiPSysEmitterCtlrData (floatKeys KeyGroup\<f32\> +
 numVisibilityKeys u32 + keys time f32 + u8)
 
-Fun corpus fact: the 33 dangling ArkTexture IDs = SuperSpray particle slots
-(iteration-23 canon) — the particle systems' texture slots point at texture
-IDs that do not exist in Textures.bnt.
+Fun corpus fact: of the 33 dangling ArkTexture IDs, 18 are SuperSpray
+particle slots (3 missing BNT2 ids × 6) and 15 are individual unshipped BASE
+slots (incl. Outpost2_Hospital_dark_0) — texture IDs that do not exist in
+Textures.bnt (pre-loop M3-4 R2 canon, refined in
+PE_ASSET_CENSUS_R1_20260905_200000; 69/69 flip models + the era's particle
+texture convention unchanged).

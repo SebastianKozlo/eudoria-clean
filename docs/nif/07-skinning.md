@@ -1,7 +1,9 @@
 # 07 — Skinning
 
 Status: layouts CONFIRMED (C20/C21 + 4-model byte-exact boundary proof);
-formula CONFIRMED empirically (iteration 27: v' = Σ w · W_bone(t) · X_b ·
+formula CONFIRMED empirically (pre-loop iteration-27 canon, re-confirmed in
+PE_SKINNING_RE_R1_20260906_000000 — NOT NIF-loop ITER-27 (G3D formula
+retraction): v' = Σ w · W_bone(t) · X_b ·
 S · v; 204828 dev 1.7e-4 across 40 bones; 20/20 viewer trace EXACT).
 
 Corpus: 720 NiSkinInstance+NiSkinData in 9.3.5 (2003: 316 carriers / 623
@@ -54,8 +56,8 @@ per partition:
   faces: v4 by numStrips; v10 additionally gated by hasFaces
   hasBoneIndices bool → boneIndices u8[vertices][weightsPerVertex]
 ```
-116 instances in 9.3.5 (v4 layout: 0 occurrences — PE v4 files use the
-unconditional path).
+116 instances in 9.3.5 (2003: 111 — R35 block census; v4 layout: 0
+occurrences — PE v4 files use the unconditional path).
 
 ## Runtime math (for implementers)
 

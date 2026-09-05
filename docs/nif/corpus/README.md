@@ -27,3 +27,6 @@ be diffed across eras. Provenance:
 These files are DERIVED DOCUMENTATION (regenerable), not corpus bytes —
 per the repo git contract, original game files never enter version control.
 
+Cross-era validation: every byte-exact grammar reproduces on the 2003
+corpus (R35 — see [../10-containers-corpus.md](../10-containers-corpus.md)).
+

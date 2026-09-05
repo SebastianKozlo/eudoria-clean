@@ -114,7 +114,7 @@ the 2003 corpus (5,426/5,426 parse closure; run
 | G3B record grammar | 1,650/1,650 binary exact (100%); variable-length histogram IDENTICAL incl. the 392 B block; same flag/class enums | ERA-STABLE (ITER-6-rule failure profile EVOLVED: 180 vs 182, same 3 classes) |
 | Rare variants (G9_RTTI/G3E/BINARY/SHORT28/G3A_PREAMBLE) | identical block counts (10/4/4/35/6), 100% exact fits both eras | ERA-STABLE |
 | Texture slots (40 slots, f1 enum, ANIM frame==slot) | formula 4,665/4,665; v4 decode 761/761; all 40 slots shared; 0/23,488 exceptions; ANIM frame==slot 1,149/1,149 | ERA-STABLE |
-| Shader directives (17-name vocabulary) | CRLF grammar 1,741/1,741 CONFIRMED; vocabulary 16/17 — `BaseTexture` ABSENT-in-2003; effect files 10/11 (`1027_BaseBSRGSkin` absent) | **EVOLVED** (content-level) |
+| Shader directives (17-name vocabulary) | CRLF grammar 1,741/1,741 CONFIRMED; vocabulary 16/17 — `BaseTexture` ABSENT-in-2003; effect files 10/11 (`1027_BaseBSRGSkin` absent); distinct full configs 619 (vs 623) | **EVOLVED** (content-level) |
 | Morph (real-sparse var-k + quantization) | var-k 2,061 spans exact; real-record 1,180/1,457 (81.0% vs 86.2%); strict-00 signature 99.31% with the same gridk profile (2⁻¹⁵..2⁻²²) | ERA-STABLE |
 | Importer (version-routed layout + exporter strings) | constants 100%; 14 exact/10 masked patterns count-identical; same 4-string exporter vocabulary; v4 link chain 38/38 NiStringExtraData | ERA-STABLE |
 
@@ -123,3 +123,10 @@ byte level — across a half-decade corpus gap every byte-exact grammar
 reproduces at 100% and the rare-family and importer pattern censuses are
 count-identical. The era drift is CONTENT (which directive/effect names
 and which records appear), never GRAMMAR.**
+
+**Per-variant era census (R35, `02_results\ERA_CENSUS.json`):** V10_BASE_0B
+2,270→2,205 | G3B 1,685→1,653 | G3D 348→288 | FIXED_A_57 347→347 | G3C
+308→297 | FIXED_B_61 190→192 | TEXT_CRLF 172→173 | V10_BASE_33B 125→125 |
+G3C_BOUNDARY 92→87 | SHORT28 / G9_RTTI / G3A_PREAMBLE / G3E / BINARY
+count-identical (35/10/6/4/4). Seven variants are count-identical across
+eras (all five rare families + FIXED_A_57 + V10_BASE_33B).

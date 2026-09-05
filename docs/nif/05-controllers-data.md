@@ -24,7 +24,8 @@ NOT NiObjectNET — no name/extra/controller fields.
 | NiPSysModifierActiveCtlr | modifierName + unknownLink u32 (v ≤ 0x0A010000) |
 | NiLookAtController | [v10: unknown1 u16] + lookAtNode Ref |
 
-## NiFlipController — CONFIRMED semantics (iteration 24 canon)
+## NiFlipController — CONFIRMED semantics (pre-loop canon; byte-verified in
+PE_VIEWER_ANIM_PLAYBACK_R1_20260905_210000 — NOT NIF-loop ITER-24)
 
 69 flip models in the 2003 corpus. `delta` = seconds per frame
 (byte-verified 114/114: 30 fps × 49, 15 fps × 35; e.g. 0.0333 s; the smoke

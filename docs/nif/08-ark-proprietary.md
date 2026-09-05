@@ -7,11 +7,13 @@ the PE corpus itself — it is the most valuable part of this wiki.
 ## NiArkImporterExtraData — one per file (5,596×)
 
 ```
-v4:  ExtraData base(link) + unkInt1 i32 + unkInt2 i32 + importerName SS
-     + 13 raw bytes + 28 raw bytes
+v4:  ExtraData base(link) + u1 i32 (=0) + u2 i32 (=8) + importerName SS
+     + 3 flag bytes + the 38 B bbox tail (ITER-29 layout; the pre-decode
+     "13 raw + 28 raw" split is superseded)
 v10: ExtraData base(name = "ArkImporter" or empty) + int32 (value 8)
      + SizedString version ("Gamebryo_1_1", "4.0.0.0", "4.0.0.2", "4.1.0.12")
-     + ALWAYS 38 raw trailing bytes (all 2,330 v10 files — Mode1 AND Mode2)
+     + ALWAYS 38 raw trailing bytes (all 4,838 v10 files — Mode1 AND Mode2;
+       R29 census; the 2,330 was the pre-loop development-corpus sample)
 ```
 The 38 trailing bytes — **DECODED (ITER-10): the MODEL'S LOCAL BOUNDING BOX**
 (CONFIRMED 3,020/3,020 mesh-bearing files — the bounds contain the raw mesh
@@ -60,10 +62,12 @@ The version string = the exporter/Gamebryo version that produced the file.
 ## NiArkTextureExtraData — one per file (5,596×); THE texture binding block
 
 ```
-v10 (R6 unified grammar, H1 CONFIRMED 2330/2330):
+v10 (unified grammar — pre-loop E3-A-R1 sample 2,330/2,330, scaled to the
+  full corpus 4,838/4,838 CONFIRMED by ITER-32):
   3 unknown zero bytes
   Name SizedString = "ArkTexture"
-  num_tex i32        <- ALWAYS 3 in corpus; NOT the entry count (semantics UNKNOWN)
+  num_tex i32        <- ALWAYS 3 in v10 blocks (4,838/4,838 — R32); in v4
+                      blocks num_tex IS the entry count (0..51 — R32)
   field1 i32
   field2 i32         <- PACKED: (u32 >> 8) & 0x00FFFFFF = ENTRY COUNT; low 8 bits = flags (UNKNOWN)
   padding u8 = 0
@@ -89,15 +93,19 @@ ITER-3 census facts (9.3.5):
   DETAIL ×199 (f1=2) | DECAL0 ×50 (f1=6) | ANIM0–31 ×1,157 (f1=11 in 985) —
   **f1 is a PERFECT slot-type enum**. The ANIM entries' trailing
   `frame_index` == slot number (1,157/1,157 verified —
-  02_results\ANIM_FRAME_CHECK.json). 8,430 distinct names (ITER-3).
+  02_results\ANIM_FRAME_CHECK.json). 8,430 distinct v10 names (ITER-3);
+  corpus-wide incl. v4: 11,083 (v10 8,430 + v4 3,218, overlap 565 — R32).
 - field1 has exactly two classes: `1` (3,042 files) / `-256` (0xFFFFFF00,
   1,796 files) — semantics UNKNOWN.
-- field2 low-8: `0` (3,800) / `255` (1,796 — correlates with field1=-256).
+- field2 low-8 (v10): `0` (3,042 — joint with field1=1) / `255` (1,796 —
+  joint with field1=-256); the two-class joint is PERFECT over all 4,838 v10
+  blocks (ITER-32; the ITER-3 "3,800" figure had lumped the 758 v4 blocks in).
   The packed entry-count formula `(u32>>8)&0x00FFFFFF` re-validated
   corpus-wide by independent decode + exact consumption (4,838/4,838).
-- entry f1 = slot-type enum (above); f2: `-1` (17,421) / `0` (2,216).
-- entry ref: range 4..454 (slot/purpose index — NOT the bnt2_id, which lives
-  in the 9-byte trailing).
+- entry f1 = slot-type enum (above); f2 corpus-wide (24,508 entries,
+  ITER-32): `-1` (20,189) / `0` (4,319); v10-only: −1 ×17,421 / 0 ×2,216 (ITER-3).
+- entry ref: v10 range 4..454 (433 distinct), v4 range 4..42 (39 distinct)
+  (slot/purpose index — NOT the bnt2_id, which lives in the 9-byte trailing).
 
 v4 layout (different!): base(link) + 2×i32 + u8 + i32 + numTextures i32 +
 per texture: name SS + i32 + i32 + texturingPropRef + 9 raw bytes.
@@ -136,7 +144,10 @@ position). Full census:
 0x01 (constant)
 u32  vertex count N (= the morph-target mesh vertex count; CONFIRMED when
      the correct mesh is paired: 592572.nif 1294 == 1294)
-u16  tag (constant per block; values 0,1,3,14,16,24,64,384,512,1024,1536;
+u16  tag (constant per block; 29 distinct values observed incl. 0 —
+     0,1,2,3,6,8,12,14,16,24,34,38,46,64,67,76,78,96,108,110,192,224,
+     384,448,512,768,896,1024,1536 (R18 MORPH_SPAN_WALK.json block_tag
+     census; 334/354 blocks carry tag≠0 — R33);
      0x0000 requires special handling)
 payload = N per-vertex records + tail:
   record = [u16 tag][W × f32]         W ∈ {10, 11} per block
@@ -155,7 +166,9 @@ independent decoder = non-circular):
   standalone animation channel
 
 OPEN (339/354 blocks): variable/sparse record layout — status after
-ITER-14/17/18/19 (external post-audit corrected):
+ITER-14/17/18/19/20/21 (external post-audit corrected; R20 backtrack census:
+Family A +3,105 backtrack-only fits → 9,272 spans total = 90.25% upper bound;
++669 r19-only Family B spans → 96.84% classified; 325 unknown):
 - ITER-13/14: the `[u16 idx][f32][f32]` entry hypothesis **REJECTED at
   exact-consumption level (48/51 remainders NOFIT; 3 fit a
   `[u32 count][f32]...` length check only — not a full validation)**.
@@ -165,7 +178,10 @@ ITER-14/17/18/19 (external post-audit corrected):
 - The morph big-span population is **MULTI-FORMAT** (ITER-19 union run):
   - **Family A (r18, 6,167 spans exact-fit — CONSUMPTION MODEL ONLY)**:
     entry-stream `[uniform W floats][[u16 id][4×f32] entries + pad floats + 2B zero tail]`;
-    51,250 entries. **ITER-33 (`PE_NIF_MORPH_IDS_R33_20260904_162507`) shows this is
+    65,050 entries (the R18 handoff's 51,250 was a transcription error —
+    R33 exact reproduction: 10,274 spans / 6,167 fits / 65,050 entries /
+    143,874 pad floats; R20 backtrack adds +3,105 backtrack-only fits →
+    Family A total 9,272 spans = 90.25% upper bound). **ITER-33 (`PE_NIF_MORPH_IDS_R33_20260904_162507`) shows this is
     NOT the true record grammar for the majority**: the u16 ids have NO single
     corpus-wide semantics — T1 id<N REJECTED corpus-wide (nonzero in-range 23.53%);
     T2 float-half REJECTED as clean f32-array; T3 not contiguous (steps 128/32/64/16);
@@ -188,7 +204,9 @@ ITER-14/17/18/19 (external post-audit corrected):
     CONFIRMED as 3×f32 groups at even alignments. The walk's "ids" = high halves
     of the quantized floats. Remaining UNVERIFIED: the exact head semantics in
     artifact regions and the 9-float triple grouping (3 morph states × XYZ?).
-  - **Family B (r19, H-KEY42 — 1,915 spans STRICT exact-fit)**:
+  - **Family B (r19, H-KEY42 — 1,915 spans STRICT exact-fit; union census:
+    r18-only 4,921 / both-models 1,246 / r19-only 669 — R19
+    UNION_CLASSIFICATION.json, permissive-predicate ambiguity documented):**
     `[tag][W×f32 first record]` + k × units
     `[u32 n][f32 w][(W-2)×f32]` (unit_len = 6+(W-2)×4; W=11 ×1,025 /
     W=10 ×890; dominant unit headers (0,0.0) ×19,702, (1,0.0) ×3,293;
@@ -264,14 +282,15 @@ BillboardMode u16 (M1D-20/22/23). Not a real distinct layout.
 Canonical header (all files): base + u1 i32 (+4) + u2 (+8) + u3 (+12) +
 u4 (+16), extension starts at +20.
 
-### v4 variants (P0-verified, 760-file corpus):
+### v4 variants (2003 corpus — 761 v4 files: 760 × v4.1.0.12 + 1 × v4.0.0.2;
+R35 era census, superseding the pre-loop M1C 760-file census):
 | Variant | Files | Extension |
 |---|---|---|
-| FIXED_A_57 | 346 | fixed 37 B |
+| FIXED_A_57 | 347 | fixed 37 B (R35 era census; the M1C-era 346 was off by one) |
 | FIXED_B_61 | 192 | fixed 41 B (selector: peek[7]==0x01) |
 | SHORT28 | 35 | fixed 8 B = **8×00, verified 35/35 (ITER-31)** ("28" = block payload length, not ext length) |
 | BINARY | 4 | **CONFIRMED (ITER-31)**: `[2B lead][N×5B groups][9B tail][FFFFFFFF][00][-1.0×5][00]`; N=u4>>8, 5N+37=len (4/4); the 30 B closing section = the FIXED_A ext minus its 7-zero prefix |
-| TEXT_CRLF | 183 | self-terminating text grammar (below) |
+| TEXT_CRLF | 173 | self-terminating text grammar (below; the M1C-era 183 catch-all still contained the 10 G9_RTTI files, which R31 later separated — keeping both rows double-counted them; R35: 173) |
 | G9_RTTI | 10 | **CONFIRMED (ITER-31)**: `[2B lead][degtext?][N×5B groups, N=u4>>8][pad][[01]+33B REC33]` — the 33 B G3B record grammar embedded (incl. the ultra-rare flag=02); R7/R9's published hexes were LINK-SHIFTED views (v4 exts sliced from the 2-byte link field) — corrected in `PE_NIF_RARE_VARIANTS_R31_20260904_154509` |
 
 Selector: peek 8 bytes + header fields:
@@ -311,7 +330,7 @@ Evidence packages: ITER-15/16 + R15-COR/R16-COR + `PE_NIF_G3B_VARIABLE_R30_20260
 G3D class-byte role semantics (01/02/03) and the per-channel TEXT param
 semantic labels.
 
-### v10 variants — 9.3.5 census (ITER-3):
+### 9.3.5 census (ITER-3) — first 8 of 14 variants (NOTE: FIXED_A_57 / FIXED_B_61 / TEXT_CRLF are v4-file families — with SHORT28 35 + BINARY 4 + G9_RTTI 10 they sum to 758 = ALL 9.3.5 v4 files (R30/R31 census, R35 grammar_split); the remaining v10 rows are G3C_BOUNDARY 92, G3A_PREAMBLE 6, G3E 4 — see the unification table):
 | Variant | Count | Note |
 |---|---|---|
 | V10_BASE_0B | 2,270 | u2=FFFFFFFF, u4=0 |
@@ -364,7 +383,8 @@ records have 7..24 fields total):
 | Controllers | 237 | 7–22 | 1–16 | **FULLY MAPPED (ITER-24,
 `PE_NIF_CONTROLLERS_GRAMMAR_R24_20260904_144839`)**: positions 00–07 =
 `[node][count][start 0.0][offset][mode][Controllers][All][play-mode
-LOOP/DONOTCHANGE/SINGLE]` (237/237), then OPTIONAL NAMED SUB-RECORDS:
+LOOP/DONOTCHANGE/SINGLE]` (237/237 records; pos07 census n=234: LOOP ×151 /
+  DONOTCHANGE ×35 / SINGLE ×22 + 3 rare), then OPTIONAL NAMED SUB-RECORDS:
 `Target:` + 6 floats (attachment position+rotation — the ITEM ATTACHMENT
 system: Bip01_item ×107, the item bone), `Camera:` + 2 (camera params —
 loops with the ITER-8 viewport findings), `IconSize:` + 1,
@@ -484,7 +504,7 @@ morphs by NAME ("morph: left/right") and fire sound/effect/animation
 events.**
 
 Other variant findings (ITER-7, same run dir):
-- **G3C_BOUNDARY (92 blocks)**: long text configs (1482–2152 B) — particle
+- **G3C_BOUNDARY (92 blocks)**: long text configs (1482–2152 B) — particle systems (ITER-38 reframe: a PARSER-ROUTE split on the same TEXT grammar — the frozen parser's boundary-fallback route after ArkAnimationError, 52.2% ParticleSystem — not a separate container format)
   systems (`PCloud01-Emitter ... ParticleSystem values NOR...`)
 - **G3E (4)**: `[binary header incl. u32 text_len]` + the same TEXT records
 - **G9_RTTI v4 (10)**: binary record family with all -1.0 float params
