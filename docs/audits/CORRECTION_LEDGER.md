@@ -225,3 +225,12 @@ Gate tally labels MUST be derived from the actual emitted rows at emit time (R2G
 - finding: WITNESS_MATRIX.json MILD-2 predicted_outcome (RUN-C, 8c037c0) REFUTED by RUN-E (59b5b63) execution: actual = FAIL_CLOSED @block 3 (loud desync); TEXT_CRLF->G9_RTTI fallback NOT triggered; actual behavior SAFER (no silent corruption absorption). RUN-C final-message claim 'MILD-2 -> PASS via G9_RTTI' corrected. Zero wiki/grammar impact.
 - severity: P1, matrix-internal prediction error; no safety regression
 - evidence: 01_RAW\FAILURE_DETAILS.json (MILD-2 fail_reason, fail_block_index=3); 05_ANALYSIS\VERDICTS.json (F-1); PE-MASTER physical re-verification (6/6 byte-exact vs originals)
+
+---
+
+## 2026-09-05 (night) â€” PE_M1_X87CW_AUTOMATION_R1 measurement verdict RETRACTED
+
+PE_M1_X87CW_AUTOMATION_R1 measurement verdict OPEN-BREAKPOINT_UNREACHED_WITHIN_BOUNDED_WINDOW (commit f0906b9) RETRACTED as falsified by own artifacts: target_exit_code 3221225781 (0xC0000135, loader-phase DLL death ~20 ms post spawn; mac3r.dll/MSVCR80.dll absent from sandbox wd\ while statically imported). The "300s clean run" was a spin on a dead process. Backend-E qualification 10/10 STANDS. The world-load gating hypothesis remains UNMEASURED pending a live client. Issued by PE-MASTER night audit 2026-09-05.
+
+(Executor's own QC lessons recorded with the retraction: (1) the status code 0xC0000135 was read but NEVER DECODED before the session was interpreted â€” every exit code must be decoded before interpretation; (2) the harness v2 timeout branch OVERWROTE window_closed_by (target_exit -> timeout_no_events) â€” the close marker must never be overwritten; (3) the import-table walk (now done) shows a THIRD missing import: d3dx9_30.dll â€” the repair must close the whole import set, not the two named.)
+
