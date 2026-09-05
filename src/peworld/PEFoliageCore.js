@@ -1,121 +1,172 @@
-// PEFoliageCore.js — M1 ITER 047 (ledger ITER_033, Gate C wiring).
-// PE Runtime Core: the CONFIRMED 9.3.5 vegetation INSTANCE GENERATOR.
-// Implements the source-graph stages recovered in iter032 (Gate C, ledger
-// ITER_032) EXACTLY as decompiled, with every stage address-cited. This
-// module owns the foliage WORLD semantics; the renderer (Three.js r185)
-// receives plain instance records — NO format knowledge.
+// PEFoliageCore.js — M1 ITER 049 (ledger ITER_035, the FLOAT64 operand lock).
+// PE Runtime Core: the vegetation INSTANCE GENERATOR, implementing the 9.3.5
+// chain EXACTLY as the binary computes it — every constant BYTE-LOCKED as
+// FLOAT64 and every float32 store replicated at the binary's own rounding
+// points (the human audit's ENTRY #10 correction; the iter032/033 f32
+// misreads are SUPERSEDED).
 //
-// ============ THE CONFIRMED CHAIN (Entropia.exe 9.3.5.6746, iter032) ============
+// =========== THE FLOAT64 OPERAND LOCK (iter035, FRESH Ghidra ITER049_FLOAT64) ===========
+// Binary: Entropia.exe 9.3.5.6746 sandbox copy, SHA256 E7785430E81DFFE648CE8F5312414B17
+// BC9FCE61389689A22F753765D5280F31 (verified before import). Image base 0x00400000;
+// .rdata VA 0x00A75000 = raw 0x675000 (VA -> file offset = VA - 0x400000).
+//
+// THE THREE CONSTANTS (byte-exact, QWORD f64 operands — the prior f32 reads were
+// the LOW DWORD of these 8-byte doubles):
+//   _DAT_00a7d7a8 @ VA 0x00A7D7A8, file 0x67D7A8, bytes 00 00 00 00 C0 FF DF 40
+//     = 32767.0 f64 — FDIV QWORD @ 0x0098CE5A (FUN_0098ce30). [was read as 0.0f
+//     low dword + ASSUMED 32768.0 — WRONG]
+//   _DAT_00a8c758 @ VA 0x00A8C758, file 0x68C758, bytes 00 00 00 00 E0 FF EF 40
+//     = 65535.0 f64 — FLD QWORD @ 0x0095B2BC + 0x0095B3DB (FUN_0095b180). [was
+//     read as 0.0f low dword + ASSUMED 2.0 — WRONG]
+//   _DAT_00a980d0 @ VA 0x00A980D0, file 0x6980D0, bytes 00 00 00 40 E1 7A 14 3F
+//     = 0.00007812499825377017 f64 — FMUL QWORD @ 0x0095B347 (FUN_0095b180).
+//     BYTE-EXACT ROLE: C = float32(1/12800) widened to f64 (mantissa
+//     0x47AE140000000 = 2348810 * 2^29; the binary stores the f32-rounded
+//     decimal 0.000078125 = 1/12800 = 2^-7/100 in a QWORD slot). [was read as
+//     the low dword 0x40000000 = 2.0f and called "MEASURED 2.0f" — WRONG]
+//
+// THE SIX FLOAT32 STORE/ROUNDING POINTS (the census, iter035_operand_table.json;
+// the chain computes in 80-bit x87 and rounds to f32 AT THESE STORES ONLY):
+//   P1 @0x0098CE60  rand01 = f32(r / 32767.0)         (FUN_0098ce30, before return)
+//   P2 @0x0095ACF0  value  = f32(rand01*(max-min)+min) (FUN_0095ac30, before return)
+//   P3 @0x0095B318  nodeX  = f32(A / 65535.0)          (FUN_0095b180 -> node+0x5C)
+//   P4 @0x0095B322  nodeY  = f32(B / 65535.0)         (FUN_0095b180 -> node+0x60)
+//   P5 @0x0095B353  f32(value * C)                    (FUN_0095b180, pre-FABS)
+//   P6 @0x0095B365  nodeScale = f32(|value*C|)        (FUN_0095b180 -> node+0x68)
+// The lerp min/max are FLOAT32 FIELDS (FLD DWORD [impl+0x44]/[impl+0x40]) — the
+// lerp OPERANDS are f32 values whatever their source.
+// EXACTNESS (proven exhaustively, exact-rational, iter035): the JS formula
+// (f64 arithmetic + Math.fround at the same points) is BIT-EXACT vs the
+// binary's 80-bit-then-FSTP-DWORD double rounding over the COMPLETE input
+// domains (32768/32768 rand01 values, 65536/65536 u16 positions,
+// 1245184+1245184 lerp/scale combinations — 0 mismatches).
+//
+// ============ THE CONFIRMED CHAIN (address-cited; unchanged parts from iter032) ============
 // (1) .vcl TSV -> 12-value records (FUN_0083a7d0; decoded upstream by
-//     VegetationClimateDecoder — the 0x30/48-byte engine row stride).
+//     VegetationClimateDecoder). The parser's 12-value copy is a raw REP MOVSD
+//     (4-byte values, no conversion) — per-column int/float types UNVERIFIED.
 // (2) The per-cell procedural grid: subdivision switch on settings+4,
-//     case 0/1/2/3/4 -> step 1/2/4/8/16 (FUN_0098fe00 @ 0x0098FE00).
-//     The spawn loop FUN_0095b180 builds ArkVegetationSpawnSettings with
-//     value 1 at +4 -> the RE-derived default subdivision = step 2.
+//     case 0/1/2/3/4 -> step 1/2/4/8/16 (FUN_0098fe00 @ 0x0098FE00; INTEGER-ONLY
+//     — 0 FPU instructions in the census). The spawn loop builds
+//     ArkVegetationSpawnSettings with value 1 at +4 -> default subdivision 2.
 // (3) The per-cell records: 8-byte triples {u16 x, u16 y, u32 model_id}
-//     (FUN_00990810 @ 0x00990810 writes u16@0, u16@2, u32@4 per record,
-//     count per cell from the cell stream; density = *(cell+8) >> 3 in
-//     FUN_0098fe00). ERA BOUND (iter032 bound 3): the historical cell byte
-//     stream's ORIGIN is NOT closed (local file vs server content) — the
-//     record CONTENT is therefore generated locally as a labeled stand-in
-//     [P-CELLSTREAM]; the record FORMAT and the spawn semantics below are
-//     the CONFIRMED parts.
-// (4) The position-keyed RNG (FUN_0098cdf0 @ 0x0098CDF0 + FUN_0098ce30 @
-//     0x0098CE30 + the sampler FUN_0095ac30 @ 0x0095AC30):
+//     (FUN_00990810 @ 0x00990810; the FPU usage there = exact 4-byte moves).
+//     [P-CELLSTREAM] the historical cell byte-stream ORIGIN is NOT closed —
+//     the record CONTENT here is the labeled deterministic stand-in.
+// (4) The position-keyed RNG (FUN_0098cdf0 seed + FUN_0098ce30 next +
+//     FUN_0095ac30 sampler):
 //       seed: x = ((p4*16 + p5)*16 + p1 + p2 + p3) * 0x5CC7 + 0x6D7  (uint32)
 //             state = x*8 ^ x                                     (uint32)
-//       next: state = state*0x343FD + 0x269EC3; out = (state>>16) & 0x7FFF
-//             -> the classic MSVC rand() LCG (214013 / 2531011)
-//       sampler: value = rand01 * (max - min) + min  (lerp of the per-model
-//             scale fields impl+0x40/impl+0x44 read in FUN_0095ac30)
-//     The SEED INPUTS (from the FUN_0095ac30 decompile):
-//       p4 = record u16 x & 0xFFFF, p5 = record u16 y & 0xFFFF
-//         -> POSITION-KEYED DETERMINISM (CONFIRMED: the same u16 position
-//            always yields the same scale; no global seed, no server RNG)
-//       p1 = the packed 32-bit query position (FUN_007ce1e0 = *(obj+8),
-//            consumed as one u32; FUN_0098f3a0 splits it >>16 / &0xFFFF)
-//       p2 = *(obj+0x2c) (FUN_007ad080) — by the +0x2c field pattern in the
-//            spawn loop this is the VIEW BAND 10/20/30 (FUN_0095b180 reads
-//            *(...+0x2c) and tests 10/0x14/0x1e) — STRONGLY_SUPPORTED
-//       p3 = *(impl+0x24) (FUN_0098cfe0 object) — UNVERIFIED
-// (5) The instance spawn (FUN_0095b180 @ 0x0095B180): per record triple
-//     {A = u16 x, B = u16 y, id = u32}:
-//       node[pos].x = A / _DAT_00a8c758      (POSITION X — divisor runtime-init)
-//       node[pos].y = B / _DAT_00a8c758      (POSITION Y — same divisor)
-//       node+0x19    = id                    (THE MODEL BIND)
-//       node+0x1a    = |sampler_value * _DAT_00a980d0|  (SCALE; the constant
-//                      is MEASURED 2.0f in the binary bytes)
-//     ROTATION/variant: NOT FOUND in the spawn loop (position + scale +
-//     model id only — iter032 bound 5); identity rotation is therefore the
-//     RE-faithful choice, not a placeholder.
+//       next:  state = state*0x343FD + 0x269EC3 (uint32);
+//             r = (state>>16) & 0x7FFF;  rand01 = f32(r / 32767.0)
+//             (the FADD dword [2^32f] @0x0098CE54 is the compiler's generic
+//             unsigned-conversion idiom — DEAD CODE here: r >= 0 always)
+//       sampler: min/max = the f32 fields impl+0x44/impl+0x40;
+//             value = f32(rand01 * (max - min) + min)
+//       POSITION-KEYED DETERMINISM (the same u16 pair -> the same scale).
+// (5) The instance spawn (FUN_0095b180): per record {A = u16 x, B = u16 y,
+//     id = u32}:
+//       node+0x5C = f32(A / 65535.0)   (the NiNode local translate X — a [0,1]
+//                                   NODE-LOCAL FRACTION: 65535.0 = the u16 max)
+//       node+0x60 = f32(B / 65535.0)   (local translate Y — same)
+//       node+0x64 = id                (THE MODEL BIND; the raw bits move
+//                                   exactly through the FPU roundtrip)
+//       node+0x68 = f32(|value * 0.00007812499825377017|)  (the local scale)
+//     ROTATION/variant: NOT FOUND in the spawn loop (identity = RE-faithful).
+//     THE [0,1]-node-position -> WORLD mapping lives in the visualizer path
+//     (FUN_0095ae20/FUN_0095b4f0 — NOT decompiled; iter032 bound 5 stands) —
+//     it is UNVERIFIED, and this module leaves it to the caller as an explicit
+//     labeled reconstruction calibration (windowWorld below).
 //
-// ================= ERA-BOUNDED PLACEHOLDERS (ALL LABELED) =================
-// [P-CLIMATE]    which .vcl chunk applies to a world region — the per-location
-//                climate input is PLAUSIBLE-UNVERIFIED (the shared-selector
-//                hypothesis, iter032); the CALLER passes the explicit index.
-// [P-CELLSTREAM] the per-cell record CONTENT (positions + model selection +
-//                counts) — the historical stream origin is NOT closed; this
-//                module generates it deterministically (placement hash +
-//                count = max(0, round(col1 density)) per record per sub-cell).
-//                RECONSTRUCTION-ONLY, never claimed historical.
-// [P-RNG-DIV]    _DAT_00a7d7a8 (the rand01 divisor) is runtime-initialized and
-//                reads 0.0 from the file (iter032 bound 2) -> 32768.0 (the
-//                MSVC rand() full range; rand01 in [0,1)).
-// [P-RNG-P3]     p3 = *(impl+0x24) UNVERIFIED -> 0 (documented constant).
-// [P-POS-SCALE]  _DAT_00a8c758 (the u16 -> world position divisor) is
-//                runtime-initialized and not statically recoverable
-//                (iter032 bound 2) -> 2.0 (the u16 position space then covers
-//                65,536 half-units = a world up to 32,768 units, which admits
-//                both deployed calibrations AND the historical client
-//                coordinates, e.g. Fort Zeus 22,467 < 32,768).
-// [P-SCALE-FIELDS] the lerp bounds impl+0x44 (min) / impl+0x40 (max) are the
-//                per-model scale pair; the VCL col2/col3 mapping = the census
-//                min/max reading (col2 -> min, col3 -> max), field-level
-//                direction STRONGLY_SUPPORTED, not byte-pinned.
+// ================== HONEST BOUNDS (all labeled; NO historical-truth claims) ==================
+// [P-CLIMATE]     RECONSTRUCTION-ONLY: which .vcl chunk applies to a region —
+//                 the per-location climate input is PLAUSIBLE-UNVERIFIED (the
+//                 shared-selector hypothesis, iter032); the CALLER passes the
+//                 explicit index.
+// [P-CELLSTREAM]  RECONSTRUCTION-ONLY: the per-cell record CONTENT (positions +
+//                 model selection + counts) — the historical stream origin is
+//                 NOT closed; this module generates it deterministically
+//                 (placementHash + count = max(0, round(col1 density)) per
+//                 record per sub-cell). NEVER claimed historical.
+// [P-RNG-P3]      p3 = *(impl+0x24) UNVERIFIED -> 0 (documented constant).
+// [P-SCALE-FIELDS] the lerp bounds impl+0x44 (min) / impl+0x40 (max) ARE f32
+//                 fields (FLD DWORD, census-locked); the VCL col2/col3 -> field
+//                 mapping = the census min/max reading (STRONGLY_SUPPORTED,
+//                 NOT byte-pinned), and the ABSOLUTE world-size meaning of the
+//                 resulting node scale depends on those field VALUES — bounded.
+// [P-WINDOW]      RECONSTRUCTION-ONLY: the generation window (the u16 record
+//                 space handed to the grid) and its world box — the historical
+//                 grid extents are settings-scaled (FUN_0098fe00 extent getters
+//                 read runtime settings) and the visualizer's [0,1]->world
+//                 transform is NOT decompiled; the caller supplies windowWorld
+//                 as an explicit CURRENT_RUNTIME_CALIBRATION.
+
+export const FOLIAGE_OPERAND_LOCK = {
+  source: 'Entropia.exe 9.3.5.6746 sandbox copy (SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31), FRESH Ghidra project ITER049_FLOAT64, iter035 (ledger ITER_035)',
+  operandTable: '99_Audits/PE_MILESTONE_1_WORLD_SURFACE_R1/03_EVIDENCE/iter035_operand_table.json',
+  rand01Divisor: { symbol: '_DAT_00a7d7a8', va: '0x00A7D7A8', fileOffset: '0x67D7A8',
+    bytes: '00 00 00 00 C0 FF DF 40', f64: 32767.0, operand: 'FDIV QWORD @0x0098CE5A' },
+  nodePosDivisor: { symbol: '_DAT_00a8c758', va: '0x00A8C758', fileOffset: '0x68C758',
+    bytes: '00 00 00 00 E0 FF EF 40', f64: 65535.0, operand: 'FLD QWORD @0x0095B2BC/0x0095B3DB' },
+  nodeScaleMul: { symbol: '_DAT_00a980d0', va: '0x00A980D0', fileOffset: '0x6980D0',
+    bytes: '00 00 00 40 E1 7A 14 3F', f64: 0.00007812499825377017,
+    operand: 'FMUL QWORD @0x0095B347',
+    derivation: 'C = float32(1/12800) widened to f64 = 10737418/2^37 exactly (the f32-rounded decimal 0.000078125 stored in a QWORD slot); role: nodeScale = |lerp| / 12800 (2^-7/100)' },
+  f32RoundingPoints: [
+    'P1 @0x0098CE60 rand01 = f32(r/32767.0)',
+    'P2 @0x0095ACF0 value = f32(rand01*(max-min)+min)',
+    'P3 @0x0095B318 nodeX = f32(A/65535.0)',
+    'P4 @0x0095B322 nodeY = f32(B/65535.0)',
+    'P5 @0x0095B353 f32(value*C)',
+    'P6 @0x0095B365 nodeScale = f32(|value*C|)',
+  ],
+  exactness: 'exhaustive exact-rational proof: the f64+Math.fround replication is BIT-EXACT vs 80-bit+FSTP DWORD over the complete input domains (0 mismatches; iter035_operand_table.json exactness_proofs)',
+};
 
 export const FOLIAGE_RE = {
-  binary: 'Entropia.exe 9.3.5.6746 (iter032, ledger ITER_032)',
-  vclParser: 'FUN_0083a7d0 (12 values -> 0x30 records)',
-  gridGen: 'FUN_0098fe00 (subdivision switch settings+4: 0/1/2/3/4 -> 1/2/4/8/16)',
+  binary: 'Entropia.exe 9.3.5.6746 (iter032 source graph + iter035 FLOAT64 operand lock, ledger ITER_035)',
+  vclParser: 'FUN_0083a7d0 (12 values -> 0x30 records; raw REP MOVSD copy)',
+  gridGen: 'FUN_0098fe00 (subdivision switch settings+4: 0/1/2/3/4 -> 1/2/4/8/16; INTEGER-ONLY per the iter035 census)',
   cellRecords: 'FUN_00990810 ({u16 x, u16 y, u32 model_id} 8-byte triples)',
-  spawnLoop: 'FUN_0095b180 (pos = u16/K; scale = |lerp*2.0|; model id bind)',
+  spawnLoop: 'FUN_0095b180 (nodeX/Y = f32(u16/65535.0); nodeScale = f32(|lerp*C|); model id bind at node+0x64)',
   rngSeed: 'FUN_0098cdf0 (x = ((p4*16+p5)*16+p1+p2+p3)*0x5CC7+0x6D7; state = x*8^x)',
-  rngNext: 'FUN_0098ce30 (MSVC rand(): state*0x343FD+0x269EC3, >>16 &0x7FFF)',
-  rngSampler: 'FUN_0095ac30 (lerp impl+0x44..impl+0x40; p4/p5 = record u16 x/y)',
+  rngNext: 'FUN_0098ce30 (MSVC rand(): state*0x343FD+0x269EC3, >>16 &0x7FFF, /32767.0 f64 -> FSTP DWORD)',
+  rngSampler: 'FUN_0095ac30 (f32 fields impl+0x44/impl+0x40; value = f32(rand01*(max-min)+min) -> FSTP DWORD)',
   spawnSettings: 'FUN_0095b180 builds ArkVegetationSpawnSettings {vtable, 1@+4, ...} -> default level 1',
-  scaleConstant: '_DAT_00a980d0 = 2.0f (MEASURED in the binary bytes)',
-  bounds: 'iter032_findings.json honest_bounds (1)-(5)',
+  constants: '_DAT_00a7d7a8 = 32767.0 f64; _DAT_00a8c758 = 65535.0 f64; _DAT_00a980d0 = 0.00007812499825377017 f64 (all BYTE-LOCKED iter035)',
+  bounds: 'iter032 honest bounds (1)-(7) + the iter035 lock (see FOLIAGE_OPERAND_LOCK + the module header)',
 };
 
 export const FOLIAGE_PLACEHOLDERS = {
-  'P-CLIMATE': 'per-location climate input PLAUSIBLE-UNVERIFIED (shared-selector hypothesis); explicit index passed by the caller',
-  'P-CELLSTREAM': 'per-cell record content = local deterministic stand-in (historical stream origin NOT closed, iter032 bound 3)',
-  'P-RNG-DIV': '_DAT_00a7d7a8 = 32768.0 (runtime-initialized; not statically recoverable, iter032 bound 2)',
+  'P-CLIMATE': 'RECONSTRUCTION-ONLY: per-location climate input PLAUSIBLE-UNVERIFIED (shared-selector hypothesis); explicit index passed by the caller',
+  'P-CELLSTREAM': 'RECONSTRUCTION-ONLY: per-cell record content = local deterministic stand-in (historical stream origin NOT closed, iter032 bound 3); the record FORMAT {u16,u16,u32} + the spawn arithmetic are the CONFIRMED parts',
   'P-RNG-P3': 'seed p3 = *(impl+0x24) UNVERIFIED -> 0',
-  'P-POS-SCALE': '_DAT_00a8c758 = 2.0 (runtime-initialized; not statically recoverable, iter032 bound 2)',
-  'P-SCALE-FIELDS': 'lerp min/max = VCL col2/col3 (census min/max reading; field-level direction STRONGLY_SUPPORTED)',
+  'P-SCALE-FIELDS': 'lerp min/max = the f32 fields impl+0x44/impl+0x40 (FLD DWORD, census-locked); the VCL col2/col3 mapping = the census min/max reading (STRONGLY_SUPPORTED, NOT byte-pinned); the node-scale world-size meaning depends on the field VALUES (bounded)',
+  'P-WINDOW': 'RECONSTRUCTION-ONLY: the generation window + its world box = the caller-supplied CURRENT_RUNTIME_CALIBRATION (the historical grid extents are settings-scaled; the visualizer [0,1]->world transform NOT decompiled)',
 };
 
 /** The MSVC rand() LCG constants (CONFIRMED in the binary bytes). */
 export const MSVC_RAND_MUL = 0x343FD;    // 214013
 export const MSVC_RAND_INC = 0x269EC3;   // 2531011
 
+/** THE LOCKED CONSTANTS (f64, byte-exact — see FOLIAGE_OPERAND_LOCK). */
+export const RAND01_DIVISOR = 32767.0;                 // _DAT_00a7d7a8
+export const NODE_POS_DIVISOR = 65535.0;               // _DAT_00a8c758
+export const NODE_SCALE_MUL = 0.00007812499825377017;  // _DAT_00a980d0
+
 /**
- * VegetationRNG — the CONFIRMED vegetation RNG (FUN_0098cdf0 + FUN_0098ce30).
- * One instance = one seed + one draw (the sampler draws once per record).
+ * VegetationRNG — the CONFIRMED vegetation RNG (FUN_0098cdf0 + FUN_0098ce30),
+ * with the FLOAT64 divisor and the FLOAT32 return rounding LOCKED from the
+ * binary (iter035). One instance = one seed + one draw (the sampler draws once).
  */
 export class VegetationRNG {
-  /** rand01 divisor — [P-RNG-DIV] era-bounded (see module header). */
-  static DIVISOR = 32768.0;
-
   /**
-   * The seed hash, VERBATIM FUN_0098cdf0:
-   *   x = ((p4*0x10 + p5)*0x10 + p1 + p2 + p3) * 0x5CC7 + 0x6D7  (uint32)
-   *   state = x*8 ^ x                                            (uint32)
+   * The seed hash, VERBATIM FUN_0098cdf0 (uint32):
+   *   x = ((p4*0x10 + p5)*0x10 + p1 + p2 + p3) * 0x5CC7 + 0x6D7
+   *   state = x*8 ^ x
    * p4/p5 = the record's u16 position components (POSITION-KEYED);
    * p1 = the packed query position; p2 = the view band (STRONGLY_SUPPORTED);
    * p3 = *(impl+0x24) [P-RNG-P3] = 0.
-   * All arithmetic is uint32 (>>> 0), exactly as the decompile reads.
    */
   seed(p1, p2, p3, p4, p5) {
     const x =
@@ -126,26 +177,37 @@ export class VegetationRNG {
   }
 
   /**
-   * The next value, VERBATIM FUN_0098ce30:
+   * The next value, VERBATIM FUN_0098ce30 with the LOCKED operands:
    *   state = state*0x343FD + 0x269EC3 (uint32)
-   *   return ((state >> 16) & 0x7FFF) / _DAT_00a7d7a8
-   * The divisor is [P-RNG-DIV] 32768.0 -> rand01 in [0, 1).
+   *   r = (state >> 16) & 0x7FFF                      (r in [0, 32767], always >= 0
+   *                                                    -> the 2^32f FADD idiom is DEAD)
+   *   rand01 = f32(r / 32767.0)                       (FDIV QWORD _DAT_00a7d7a8 @0x0098CE5A,
+   *                                                    then FSTP DWORD @0x0098CE60 = F32
+   *                                                    ROUNDING BEFORE RETURN)
+   * rand01 in [0, 1] INCLUSIVE (r = 0x7FFF -> exactly 1.0).
    */
   next01() {
     this.state = (this.state * MSVC_RAND_MUL + MSVC_RAND_INC) >>> 0;
-    return ((this.state >>> 16) & 0x7FFF) / VegetationRNG.DIVISOR;
+    const r = (this.state >>> 16) & 0x7FFF;
+    return Math.fround(r / RAND01_DIVISOR);   // P1: the binary's f32 store point
   }
 }
 
 /**
- * The sampler, VERBATIM FUN_0095ac30 + the FUN_0095b180 scale field:
- *   value = rand01 * (max - min) + min     (lerp of impl+0x40/impl+0x44)
- *   scale = |value * 2.0|                  (spawn loop; _DAT_00a980d0 = 2.0f)
- * min/max = the per-model VCL col2/col3 [P-SCALE-FIELDS].
+ * The sampler + the spawn scale field, VERBATIM the locked chain:
+ *   min/max  = the f32 fields (FLD DWORD [impl+0x44]/[impl+0x40]) — the operands
+ *              are f32 VALUES, so the inputs are frounded first
+ *   value    = f32(rand01 * (max - min) + min)   (FUN_0095ac30, 80-bit lerp ->
+ *              FSTP DWORD @0x0095ACF0 = P2)
+ *   scale    = f32(|value * NODE_SCALE_MUL|)    (FUN_0095b180 FMUL QWORD @0x0095B347
+ *              + FABS + FSTP DWORD @0x0095B365 = P5/P6; |f32(x)| = f32(|x|))
  */
 export function sampleModelScale(rng, min, max) {
-  const value = rng.next01() * (max - min) + min;
-  return { value, scale: Math.abs(value * 2.0) };
+  const fmin = Math.fround(min);   // the f32 field at impl+0x44
+  const fmax = Math.fround(max);   // the f32 field at impl+0x40
+  const value = Math.fround(rng.next01() * (fmax - fmin) + fmin);   // P2
+  const scale = Math.fround(Math.abs(value * NODE_SCALE_MUL));      // P5+P6 (net)
+  return { value, scale };
 }
 
 /**
@@ -189,21 +251,23 @@ function placementHash(cellX, cellY, modelId, j) {
 }
 
 /**
- * generateInstances — the full CONFIRMED chain over one generation window.
+ * generateInstances — the CONFIRMED chain over one generation window, with the
+ * FLOAT64 constants + F32 rounding points LOCKED (iter035).
  *
  * @param {object} opts
  *   records       the 12-value VCL climate records (decoded upstream)
- *   windowU16      {x0, y0, x1, y1} — the generation window in u16 position
- *                  space (world * posScale); the caller derives it from the
- *                  world region (era-bounded [P-WINDOW]: the historical grid
- *                  extents are settings-scaled and not statically pinneable).
- *   posScale       K = _DAT_00a8c758 [P-POS-SCALE] (world = u16 / K)
- *   level          the subdivision level 0..4 (FUN_0098fe00 switch input)
- *   viewBand       the p2 seed input (STRONGLY_SUPPORTED: 10/20/30)
- *   p3             the p3 seed input [P-RNG-P3] (default 0)
+ *   windowU16     {x0, y0, x1, y1} — the generation window in u16 record space
+ *                 ([P-WINDOW] RECONSTRUCTION-ONLY: the caller's calibration)
+ *   windowWorld   {x0, y0, x1, y1} — the WORLD box corresponding to windowU16
+ *                 ([P-WINDOW] RECONSTRUCTION-ONLY: the caller's CURRENT_RUNTIME_
+ *                 CALIBRATION for the [0,1] node position -> world mapping; the
+ *                 visualizer's own transform is NOT decompiled — iter032 bound 5)
+ *   level         the subdivision level 0..4 (FUN_0098fe00 switch input)
+ *   viewBand      the p2 seed input (STRONGLY_SUPPORTED: 10/20/30)
+ *   p3            the p3 seed input [P-RNG-P3] (default 0)
  * @returns {{instances: object[], census: object}}
  */
-export function generateInstances({ records, windowU16, posScale, level, viewBand, p3 = 0 }) {
+export function generateInstances({ records, windowU16, windowWorld, level, viewBand, p3 = 0 }) {
   if (!Array.isArray(records) || records.length === 0) {
     throw new Error('[PEFoliageCore] no climate records (empty climate)');
   }
@@ -216,6 +280,9 @@ export function generateInstances({ records, windowU16, posScale, level, viewBan
   if (!(0 <= x0 && x0 < x1 && x1 <= 0x10000 && 0 <= y0 && y0 < y1 && y1 <= 0x10000)) {
     throw new Error(`[PEFoliageCore] invalid u16 window ${JSON.stringify(windowU16)}`);
   }
+  if (!windowWorld || !(windowWorld.x0 < windowWorld.x1 && windowWorld.y0 < windowWorld.y1)) {
+    throw new Error(`[PEFoliageCore] invalid windowWorld ${JSON.stringify(windowWorld)} (the [P-WINDOW] calibration is REQUIRED and explicit)`);
+  }
   const step = subdivisionStep(level);
   const cells = step * step;
 
@@ -225,6 +292,11 @@ export function generateInstances({ records, windowU16, posScale, level, viewBan
 
   const cellW = (x1 - x0) / step;
   const cellH = (y1 - y0) / step;
+
+  // The [P-WINDOW] linear calibration: u16 record space -> world box (the
+  // CALLER's reconstruction choice; NOT a binary claim).
+  const u16ToWorldX = (u) => windowWorld.x0 + (u - x0) / (x1 - x0) * (windowWorld.x1 - windowWorld.x0);
+  const u16ToWorldY = (u) => windowWorld.y0 + (u - y0) / (y1 - y0) * (windowWorld.y1 - windowWorld.y0);
 
   const instances = [];
   const perCell = [];
@@ -262,17 +334,25 @@ export function generateInstances({ records, windowU16, posScale, level, viewBan
           const ux = bx0 + Math.min(bw - 1, Math.floor(((hA >>> 16) & 0xFFFF) / 65536 * bw));
           const uy = by0 + Math.min(bh - 1, Math.floor((hB & 0xFFFF) / 65536 * bh));
 
-          // The CONFIRMED spawn semantics (FUN_0095ac30 + FUN_0095b180):
+          // The CONFIRMED spawn arithmetic (FUN_0095ac30 + FUN_0095b180, the
+          // iter035 FLOAT64 lock: every constant f64, f32 at the binary's own
+          // FSTP points):
           const rng = new VegetationRNG();
           const state0 = rng.seed(p1, viewBand, p3, ux, uy);
           const { value, scale } = sampleModelScale(rng, rec[2], rec[3]);
-          const wx = ux / posScale;   // FUN_0095b180: pos.x = A / _DAT_00a8c758
-          const wy = uy / posScale;   // pos.y = B / _DAT_00a8c758 (same divisor)
+          // P3/P4: the node-local [0,1] positions (the BINARY fields)
+          const nodeX = Math.fround(ux / NODE_POS_DIVISOR);
+          const nodeY = Math.fround(uy / NODE_POS_DIVISOR);
+          // The [P-WINDOW] page calibration (NOT a binary claim):
+          const wx = u16ToWorldX(ux);
+          const wy = u16ToWorldY(uy);
 
           instances.push({
             cell: [cx, cy], recIndex, modelId,
-            u16: { x: ux, y: uy }, world: { x: wx, y: wy },
-            scale, samplerValue: value,
+            u16: { x: ux, y: uy },
+            node01: { x: nodeX, y: nodeY },          // the BINARY node fields (f32)
+            world: { x: wx, y: wy },                 // the caller's calibration
+            scale, samplerValue: value,              // the BINARY node scale (f32) + lerp
             seedInputs: { p1, p2: viewBand, p3, p4: ux, p5: uy },
             rngState0: state0,
             elevationBand: { min: rec[4], max: rec[5] },
@@ -288,11 +368,17 @@ export function generateInstances({ records, windowU16, posScale, level, viewBan
 
   const census = {
     reChain: FOLIAGE_RE,
+    operandLock: FOLIAGE_OPERAND_LOCK,
     placeholders: FOLIAGE_PLACEHOLDERS,
     inputs: {
       recordCount: records.length,
-      windowU16, posScale, level, step, cells,
+      windowU16, windowWorld, level, step, cells,
       viewBand, p3, p1,
+      constants: {
+        rand01Divisor: RAND01_DIVISOR,
+        nodePosDivisor: NODE_POS_DIVISOR,
+        nodeScaleMul: NODE_SCALE_MUL,
+      },
     },
     totals: {
       instances: instances.length,
