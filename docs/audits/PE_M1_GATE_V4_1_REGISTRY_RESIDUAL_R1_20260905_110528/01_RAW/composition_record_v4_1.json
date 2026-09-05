@@ -1,0 +1,55 @@
+{
+ "run_id": "PE_M1_GATE_V4_1_REGISTRY_RESIDUAL_R1_20260905_110528",
+ "work_item": "W1 - compose the registry fields for P-RNG-DIV + P-POS-SCALE per the iter035 byte locks",
+ "sources": "the iter035 byte locks (CONSTANT_ADDRESS_LOCK + PE_SECTION_MAP) + the historical open-item record (kept as the typed historical context, NOT live status) - zero new forensics",
+ "pre_edit_shas": {
+  "M1_GATE_DELIVERABLE_MATRIX_V4.json": "11FB16B0A175CE183F5C46E734737921DBA0BA72CD975C447CF197C2046F9C58",
+  "M1_GATE_DELIVERABLE_MATRIX_V4.md": "5B90D2C43B3B0D9E5D9CBB05A387557862A61647D1A29F437F6F18416A744ACD"
+ },
+ "post_edit_shas": {
+  "M1_GATE_DELIVERABLE_MATRIX_V4.json": "003056AC0210A7E0C33F304232F2F366D45D4E94B04D9984FA03B62D06CB4A95",
+  "M1_GATE_DELIVERABLE_MATRIX_V4.md": "EC04FC471C55450DF060E5E3441A92584BB0CB7C4C63ED1E223C20F0BE732552"
+ },
+ "composed_fields": {
+  "P-RNG-DIV": {
+   "missing": "composed in V4.1: NONE for the divisor (byte-locked 32767.0 f64 @0x00A7D7A8, iter035; the historical open-item record follows)",
+   "why": {
+    "record_type": "SUPERSESSION (explicitly typed; composed in V4.1; the only permitted carrier of the retired hypothesis wording)",
+    "composed_in": "V4.1",
+    "statement": "composed in V4.1: the pre-iter035 hypothesis 'reads 0.0 statically (runtime-initialized)' was DISPROVEN by the byte lock - the slot is file-backed .rdata (bytes 00 00 00 00 C0 FF DF 40 [32767.0 f64]; 65535.0: 00 00 00 00 E0 FF EF 40)",
+    "supersedes": "_DAT_00a7d7a8 reads 0.0 statically (runtime-initialized)",
+    "sources": "the iter035 byte locks (CONSTANT_ADDRESS_LOCK + PE_SECTION_MAP; _DAT_00a7d7a8, FDIV QWORD @0x0098CE5A) + the PE-MASTER R2 post-audit re-read of the pinned Entropia.exe bytes"
+   },
+   "resume_path": "composed in V4.1: NONE for the divisor; runtime tracing remains relevant only to the actual-CW question",
+   "historical_open_item_record": {
+    "record_type": "RETRACTION (explicitly typed; the historical open-item record kept as historical context, NOT live status)",
+    "missing": "the exact RNG normalization divisor",
+    "why": "_DAT_00a7d7a8 reads 0.0 statically (runtime-initialized)",
+    "resume_path": "runtime tracing (separate authorization)"
+   }
+  },
+  "P-POS-SCALE": {
+   "missing": "composed in V4.1: NONE for the divisor (byte-locked 65535.0 f64 @0x00A8C758, iter035; the historical open-item record follows)",
+   "why": {
+    "record_type": "SUPERSESSION (explicitly typed; composed in V4.1; the only permitted carrier of the retired hypothesis wording)",
+    "composed_in": "V4.1",
+    "statement": "composed in V4.1: the pre-iter035 hypothesis 'reads 0.0 statically (runtime-initialized)' was DISPROVEN by the byte lock - the slot is file-backed .rdata (bytes 00 00 00 00 C0 FF DF 40 [32767.0 f64]; 65535.0: 00 00 00 00 E0 FF EF 40)",
+    "supersedes": "_DAT_00a8c758 reads 0.0 statically (runtime-initialized)",
+    "sources": "the iter035 byte locks (CONSTANT_ADDRESS_LOCK + PE_SECTION_MAP; _DAT_00a8c758, FLD QWORD @0x0095B2BC) + the PE-MASTER R2 post-audit re-read of the pinned Entropia.exe bytes"
+   },
+   "resume_path": "composed in V4.1: NONE for the divisor; runtime tracing remains relevant only to the actual-CW question",
+   "historical_open_item_record": {
+    "record_type": "RETRACTION (explicitly typed; the historical open-item record kept as historical context, NOT live status)",
+    "missing": "the u16->world position divisor",
+    "why": "_DAT_00a8c758 reads 0.0 statically (runtime-initialized)",
+    "resume_path": "runtime tracing"
+   }
+  }
+ },
+ "bounded_diff_proof": {
+  "json": "the 17 other registry entries + every other top-level key verified IDENTICAL (content-equal dump comparison); the only change = the two composed entries",
+  "md": "exactly 2 lines differ (the P-RNG-DIV + P-POS-SCALE registry lines); line count unchanged"
+ },
+ "typed_record_design": "the mandated why text quotes the retired hypothesis verbatim; the V4.1 gate permits that phrase ONLY in typed retraction/supersession records, so the why field IS a typed SUPERSESSION record (the mandated statement verbatim) and the old open-item triple is kept as a typed RETRACTION record (the mandated 'historical open-item record follows'); the live MD layer renders the composed fields WITHOUT the retired wording (the R2-established architecture: retired wordings live ONLY in typed JSON records)",
+ "script_sha256": "36C7A64A042A010641ACCC502ED5145848BB5B40A9600BA595F95D2A4315D97A"
+}
