@@ -1,0 +1,153 @@
+{
+  "run": "PE_NIF_CLAIM_EVIDENCE_LOCK_R1_20260904_233119",
+  "purpose": "Explicit denominators and their definitions, per PE_WORKFLOW_RULES.md section 2. Every number below was re-derived in this run from raw evidence (see 01_RAW/CONTROL_R1_RESULTS.json) or is explicitly labeled INHERITED_FROM_RUN_ARTIFACT.",
+  "denominators": [
+    {
+      "name": "ANIM entries (9.3.5 corpus, slot-named ANIM0-31)",
+      "value": 1157,
+      "definition": "NiArkTextureExtraData entries whose <material>_<SLOT> suffix is ANIM<n>; 9.3.5 Models.bnt (5,596 files)",
+      "verification": "RE-DERIVED: sum of per_slot counts in R32 ANIM_FRAME_CHECK.json = 1157; f1 sums {11:985, 0:142, 4:30}",
+      "source": "99_Audits/PE_NIF_MATERIAL_CENSUS_R32_20260904_160538/02_results/ANIM_FRAME_CHECK.json"
+    },
+    {
+      "name": "ANIM frame-index == slot-number",
+      "value": "1157/1157",
+      "definition": "trailing-9B frame index equals the numeric part of the ANIM slot name",
+      "verification": "RE-DERIVED from ANIM_FRAME_CHECK.json (mismatches: [], regular_00ffffffff_prefix: 0)",
+      "source": "same"
+    },
+    {
+      "name": "f1 distribution over ANIM entries (9.3.5)",
+      "value": { "11": 985, "0": 142, "4": 30 },
+      "definition": "entry f1 field values within the 1,157 ANIM entries",
+      "verification": "RE-DERIVED (sum 1157). 172/1157 ANIM entries do NOT carry f1=11 (auditor F1 allegation CONFIRMED). ANIM16-31 subset: 45 entries, 9 carry f1=11 (R32 REPORT says 10 of 45 - arithmetic slip, raw says 9)",
+      "source": "same"
+    },
+    {
+      "name": "morph fit spans (9.3.5)",
+      "value": 6167,
+      "definition": "R18-run6-walk big spans accepted by the greedy entry-stream walk; reproduced EXACTLY by R33 and R34 (10,274 big spans -> 6,167 fits)",
+      "verification": "RE-DERIVED from REAL_SPARSE_GRAMMAR.json meta.fit_spans_tested",
+      "source": "99_Audits/PE_NIF_MORPH_QUANT_R34_20260904_164538/02_results/REAL_SPARSE_GRAMMAR.json"
+    },
+    {
+      "name": "real-record spans (9.3.5)",
+      "value": 2427,
+      "definition": "has_real(>=1 REAL entry) AND n_wp_inrange>0, where REAL = entry with id!=0 AND id<N AND all-4 floats clean AND pos%4==0 (prompt/R33 criteria) and n_wp_inrange counts weight-pair (f0+f1~=1) entries. MODEL-DEPENDENT SELECTION: both criteria are aligned with the hypotheses under test (R33 vertex-index hypothesis + ITER-4 weight-pair hypothesis) - this is a classifier label, not independent ground truth",
+      "verification": "RE-DERIVED from REAL_SPARSE_GRAMMAR.json meta (real_record_spans_def read verbatim)",
+      "source": "same"
+    },
+    {
+      "name": "variable-k exact spans (9.3.5)",
+      "value": 3186,
+      "definition": "fit spans parsed byte-exact by parse_variable (smallest k in 1..VAR_MAX_K=8 whose weight prefix sums ~1.0 at tol 1e-4, then 9 delta floats; per-record first-match, NO uniqueness proof)",
+      "verification": "RE-DERIVED (VARIABLE_K.spans_exact); = 51.66% of all 6,167 fit spans",
+      "source": "same + 01_source/morph_quant_r34.py L809-841"
+    },
+    {
+      "name": "variable-k exact among real-record spans (9.3.5)",
+      "value": "2093/2427 = 86.24%",
+      "definition": "subset of the 2,427 classifier-real spans that parse byte-exact under variable-k; 334/2,427 real-record spans fit NO tested grammar (R34 honest caveat 3)",
+      "verification": "RE-DERIVED (VARIABLE_K.spans_exact_of_real_record)",
+      "source": "same"
+    },
+    {
+      "name": "other grammar exact fits (9.3.5)",
+      "value": { "G1_prompt_W": 132, "G2_W_plus_1": 1547, "m_scan_any_valid_m": 3705, "mscan_m1": 126, "mscan_m3": 124 },
+      "definition": "alternative grammars on the same 6,167 fit spans; m-scan histogram contains odd widths m=1 x126, m=3 x124",
+      "verification": "RE-DERIVED from REAL_SPARSE_GRAMMAR.json",
+      "source": "same"
+    },
+    {
+      "name": "era join (2003 Models.bnt vs 9.3.5 Models.bnt, name-level)",
+      "value": { "shared_names": 5422, "byte_identical": 5208, "changed": 214, "changed_same_version": 211, "version_flips": 3, "old_only_2003": 4, "new_only_953": 174 },
+      "definition": "direct BNT2 index parse of both containers, payload SHA256 comparison; changed split (211+3) per R36",
+      "verification": "RE-DERIVED from both original containers (parse + compare in control_r1.cjs); matches R36 FIELD_D_TESTS.json populations exactly",
+      "source": "01_Original_Files/BNT_Models/Models.bnt + pcg_install/Data/Models/Models.bnt"
+    },
+    {
+      "name": "c == CRC32(payload)",
+      "value": "11022/11022 (5596/5596 + 5426/5426)",
+      "definition": "BNT2 index field c equals CRC32 of the entry payload",
+      "verification": "RE-DERIVED (control_r1.cjs, 0 mismatches) - auditor's 11022/11022 CONFIRMED independently",
+      "source": "both containers"
+    },
+    {
+      "name": "d == c",
+      "value": { "e953": "3435/5596 (61.42%)", "e2003": "3299/5426 (60.80%)" },
+      "verification": "RE-DERIVED from both containers",
+      "source": "both containers"
+    },
+    {
+      "name": "d stability among byte-identical era pairs",
+      "value": "5205/5208; exceptions 524071.nif, 524077.nif, 524083.nif",
+      "verification": "RE-DERIVED from both containers (auditor F4 sub-claim CONFIRMED)",
+      "source": "both containers"
+    },
+    {
+      "name": "R35 FORMAT EVOLUTION claims",
+      "value": "21 claims: 19 ERA-STABLE, 2 EVOLVED (C-G3B-3 failure-profile, C-SHAD-2 vocabulary), 0 ABSENT, 0 falsifications",
+      "verification": "RE-DERIVED from FORMAT_EVOLUTION.json claims array (21 rows, verdict_counts 19/2)",
+      "source": "99_Audits/PE_NIF_CROSS_ERA_R35_20260904_170224/02_results/FORMAT_EVOLUTION.json"
+    },
+    {
+      "name": "G3B population (2003)",
+      "value": { "all": 1653, "binary_family": 1650, "exact_fit": "1650/1650", "text_degenerate": 3 },
+      "verification": "RE-DERIVED from GRAMMAR_VALIDATION.json G3B_record_grammar['2003']",
+      "source": "99_Audits/PE_NIF_CROSS_ERA_R35_20260904_170224/02_results/GRAMMAR_VALIDATION.json"
+    },
+    {
+      "name": "shader population (2003)",
+      "value": { "blocks": 1741, "vocabulary": 16, "version_line_0": "1741/1741", "anomalies": 0, "distinct_configs": 619, "anim_f1_11_share": "977/1149 (84.9%)" },
+      "verification": "RE-DERIVED from GRAMMAR_VALIDATION.json shader_directives['2003'] + texture_slots['2003'].anim_frame_check",
+      "source": "same"
+    },
+    {
+      "name": "R29 importer patterns",
+      "value": { "exact": 14, "masked": 10, "v10_with_4x_era_strings": 834, "gamebryo_1_1_v10": 4004 },
+      "verification": "RE-DERIVED from PATTERNS.json (patterns.length, masked_patterns.length, era matrix sums)",
+      "source": "99_Audits/PE_NIF_IMPORTER_HEADER_R29_20260904_150900/02_results/PATTERNS.json"
+    },
+    {
+      "name": "R37 G3D records",
+      "value": { "class_histogram": { "01": 17, "02": 15150, "03": 718 }, "root_last": "348/348 (347 TAIL + 1 single-record file, relpos min=max=1.0)" },
+      "verification": "RE-DERIVED from CLASS_SEQUENCES.json (a2_position.scene_root_target)",
+      "source": "99_Audits/PE_NIF_G3D_CLASS_ROLE_R37_20260904_173625/02_results/CLASS_SEQUENCES.json"
+    },
+    {
+      "name": "R38 TEXT mode records",
+      "value": { "total": 1274, "modes": { "activeIdle": 996, "single": 253, "active": 20, "Single": 4, "activeIdle/single": 1 }, "twin_pair": "41076.nif Bip01_rotator_1 x2 (all non-mode fields byte-identical)" },
+      "verification": "RE-DERIVED from MODE_ANALYSIS.json (M1_cross_tables.mode_census, M3 identical_param_pairs_diff_mode)",
+      "source": "99_Audits/PE_NIF_TEXT_MODES_R38_20260904_175053/02_results/MODE_ANALYSIS.json"
+    },
+    {
+      "name": "R39 edit proposals / R40 proposals",
+      "value": { "r39_gaps": 45, "r40_readme": 5, "r40_semantics": 4 },
+      "definition": "machine-verified old_text->new_text proposals (R39: 45/45 old_texts found; R40: 9 proposals)",
+      "verification": "RE-DERIVED: proposal array lengths from EDIT_PROPOSALS.json + the two R40 results JSONs",
+      "source": "99_Audits/PE_NIF_WIKI_AUDIT_R39_20260904_180213/02_results/EDIT_PROPOSALS.json; 99_Audits/PE_NIF_SEMANTICS_ENRICH_R40_20260904_182016/02_results/*.json"
+    },
+    {
+      "name": "ITER-40 applied line count",
+      "value": 236,
+      "definition": "git numstat ADDED lines at commit 077b8a4 (pre 077b8a4^ -> post 077b8a4): README.md +70/-9, 09-semantics.md +166/-2; combined added = 236; NET line delta = 225",
+      "verification": "RE-DERIVED via git diff --numstat. The '+236 lines' in PE_AUTO_LOOP.json last_completed refers to the COMBINED added lines of BOTH files, not to 09-semantics alone (auditor F6 sub-claim CONFIRMED)",
+      "source": "12_WebGame/eudoria-clean git @ 077b8a4"
+    },
+    {
+      "name": "strict CSV errors in the 12 artifact_index.csv manifests",
+      "value": 11,
+      "definition": "rows whose cell count differs from the header (unquoted commas in role/description fields)",
+      "verification": "RE-DERIVED: control_r1.cjs strict validation found exactly 11 bad rows in 8 manifests (R30, R31, R32, R33, R35, R36, R38, R39) - auditor's claim CONFIRMED. NOTE: execution 1 of control_r1.cjs (hash 6A296CC7...) reported 12 because it counted a trailing blank line as a row; fixed (trim) and re-executed (hash 5AD889D3...). See 02_LOGS.",
+      "source": "the 12 run dirs' artifact_index.csv"
+    },
+    {
+      "name": "changed-payload family witnesses (2003, file-level)",
+      "value": { "changed_files_total": 214, "with_animation_block": 214, "with_texture_block": 214, "with_importer_block": 214, "with_shader_block": 9, "with_morph_block": 29, "old_only_4_files": { "animation": 4, "texture": 4, "importer": 4, "shader": 0, "morph": 0 } },
+      "definition": "changed 2003 files (and the 4 old-only files) that contain at least one block of each NiArk family (block-name ASCII scan of the 2003 payload). All such blocks were validated by the R35 validators (which parsed all 5,426 files), so every family has FILE-LEVEL witnesses on genuinely changed payloads. Approximate block-region intersection (name -> next Ark-family name): 49 anim / 9 shader / 214 texture / 29 morph / 49 importer changed files have diff regions inside the coarse span - INTRA-BLOCK byte-level witness NOT established by this heuristic (the span includes intervening standard blocks).",
+      "verification": "RE-DERIVED in control_r1.cjs (block-name scan + common-prefix/suffix diff); counter artifact documented: old_only counters double-increment (block + intersection), corrected values above",
+      "source": "both containers"
+    }
+  ],
+  "non_interchangeable_warning": "6167 fit spans != 2427 real-record spans != 3186 variable-k exact spans != 2093 (real-record subset) != legacy R18/R19/R20/R21 span counts (10,274 big / 1,915 Family-B STRICT / 9,272 upper bound / 325 residual). 5,422 shared names != 5,208 identical != 214 changed != 5,426 (2003 files) != 5,596 (9.3.5 files). ANIM 1,157 (9.3.5) != 1,149 (2003). Added lines 236 != net lines 225."
+}

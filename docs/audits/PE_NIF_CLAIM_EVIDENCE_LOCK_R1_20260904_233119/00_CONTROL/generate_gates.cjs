@@ -1,0 +1,28 @@
+// generate_gates.cjs — emits STAGE_ACCEPTANCE_GATES.csv with strict quoting.
+'use strict';
+const fs = require('fs');
+const RUN = 'D:/Eudoria_Reconstruction/99_Audits/PE_NIF_CLAIM_EVIDENCE_LOCK_R1_20260904_233119';
+const q = s => '"' + String(s).replace(/"/g, '""') + '"';
+const rows = [
+ ['G1','prompt SHA256 verified before execution','match','BFDB1D23E42904FB29CBDB5995D072B8C793AB5D4E241E28BF7F3EFA8EEBA562 (recomputed = expected)','02_LOGS/LOGS.md'],
+ ['G2','output-root collision check (new RUN_ID, fresh dir)','did not exist','created fresh with required structure','Test-Path False before creation; 02_LOGS/LOGS.md'],
+ ['G3','mandatory reading (AGENTS.md + 6 context files + audit report + probe.json + probe.cjs + 12 run dirs)','completed','all read; docs/nif git state recorded (HEAD 8cd0bc3; docs/nif clean; 077b8a4 == current state)','02_LOGS/LOGS.md; 03_STATIC/SOURCE_QUOTES.md'],
+ ['G4','control1 R32 f1 recount incl 985/142/30 check','exact match','f1 {11:985, 0:142, 4:30}, total 1157; frame==slot 1157/1157; ANIM16-31 f11 = 9 (report says 10 - slip documented)','01_RAW/CONTROL_R1_RESULTS.json control1_r32'],
+ ['G5','control2 R33/R34 denominators 6167/2427/2093/3186 + k=1 counterexamples 574845 bi=69 si=14/27','exact match','6167/2427/3186/2093 (86.24%; 51.66%); si=14 -> 14 records k=1; si=27 -> 5 records k=1; 2003 k-hist {1..5}','01_RAW/CONTROL_R1_RESULTS.json control2_r33r34'],
+ ['G6','control2 first-match vs uniqueness (driver source)','verified','parse_variable smallest-k first-match (L825-838); VAR_MAX_K=8; no uniqueness proof; real_record_spans_def = weight-pair-conditioned','03_STATIC/SOURCE_QUOTES.md S3+S4'],
+ ['G7','control3 byte-identical/changed/unique separation + witness indication','separated','5208 identical / 214 changed / 4 old-only / 174 new-only; file-level witnesses: anim/tex/imp 214/214, shader 9, morph 29; intra-block witnesses not established (documented limit)','01_RAW/CONTROL_R1_RESULTS.json control3_4_bnt'],
+ ['G8','control4 c CRC32 vs d hypothesis + 3 same-payload-different-d files + formula range','verified','c==CRC32 11022/11022 (0 mismatches); d stable 5205/5208; exceptions exactly 524071/524077/524083; 10 tested formula families (exact-0); writer evidence absent; iff REJECTED','01_RAW/CONTROL_R1_RESULTS.json; 03_STATIC S7-S8; CLAIM_MATRIX C-R36-01..05'],
+ ['G9','control5 metadata-vs-era / invariant-vs-role / label-vs-behavior separation','separated','R29 14/10+834 re-derived (string=hint STRONGLY_SUPPORTED); R37 348/348 root-last CONFIRMED as corpus invariant (role UNVERIFIED preserved); R38 census + 41076 twin pair re-derived (binding STRONGLY_SUPPORTED; one-shot PLAUSIBLE); wiki flattenings documented','01_RAW/CONTROL_R1_RESULTS.json control5; CLAIM_MATRIX C-R29-*/C-R37-*/C-R38-*'],
+ ['G10','control6 doc-scope corrections as proposals + 12 normalized CSV sidecars','delivered','7 proposal groups (P1-P7) in 06_REPORT; 12 sidecars written (strict CSV valid; original path+SHA; scope classes; UNRESOLVED_ALIAS explicit)','06_REPORT/PROPOSED_DOC_CORRECTIONS.md; 05_ANALYSIS/NORMALIZED_MANIFESTS (12 files)'],
+ ['G11','strict CSV error count reproduced independently','11 in exactly 8 manifests (R30/R31/R32/R33/R35/R36/R38/R39)','re-derived; exec-1 artifact (trailing blank line) documented and fixed','01_RAW/CONTROL_R1_RESULTS.json manifests[]; 02_LOGS/LOGS.md'],
+ ['G12','R40 apply byte-exactness + 236-lines scope + manifest provenance states','verified','re-application reproduces applied files sha-exact (4f976581/bb22d518); 236 = 70+166 added lines combined (net 225); R40 size figures unit-mixed (new finding); 3 manifest differences = pre-apply snapshot / post-apply state / mutable pointer','01_RAW/CONTROL_R1_RESULTS.json control6_r39_r40; CLAIM_MATRIX C-R40-01..04'],
+ ['G13','CLAIM_MATRIX completeness + single-status rule','43 rows / 14 columns','statuses {CONFIRMED 24, REJECTED 9, STRONGLY_SUPPORTED 7, UNVERIFIED 2, PLAUSIBLE 1} - one per atomic row','05_ANALYSIS/CLAIM_MATRIX.csv (validated 0 bad rows)'],
+ ['G14','allegation dispositions with evidence','23 rows all ACCEPTED with re-derived evidence','0 REFUTED; 0 UNRESOLVED','05_ANALYSIS/ALLEGATION_DISPOSITIONS.csv'],
+ ['G15','no forbidden modification (wiki/runs/PE_AUTO_LOOP/canon/frozen parser/original files; no commit/push; no old drivers; no game)','clean','writes ONLY inside the new run dir; git tree clean vs HEAD; all historical paths read-only','02_LOGS/LOGS.md; git status output'],
+ ['G16','JSON/CSV syntax validation + real hashes + no placeholders + manifest self-exclusion documented','pass','all outputs validated (0 bad rows); hashes computed in-run; artifact_index.csv excludes itself (self-hash impossibility - documented)','02_LOGS/LOGS.md; artifact_index.csv self-exclusion row'],
+ ['OVERALL','RUN STATUS','COMPLETED','all 16 gates PASS','06_REPORT/00_FINAL_REPORT.md']
+];
+const head = ['gate_id','gate_name','expected','result','evidence'].map(q).join(',');
+const out = [head].concat(rows.map(r => r.map(q).join(','))).join('\r\n') + '\r\n';
+fs.writeFileSync(RUN + '/STAGE_ACCEPTANCE_GATES.csv', out);
+console.log('STAGE_ACCEPTANCE_GATES.csv written: ' + rows.length + ' rows (16 gates + OVERALL), all quoted.');

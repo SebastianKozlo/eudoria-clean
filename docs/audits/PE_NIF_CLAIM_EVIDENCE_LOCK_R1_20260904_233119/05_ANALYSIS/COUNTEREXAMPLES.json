@@ -1,0 +1,90 @@
+{
+  "run": "PE_NIF_CLAIM_EVIDENCE_LOCK_R1_20260904_233119",
+  "purpose": "Concrete counterexamples that BOUND over-claims. Each entry: the claim it limits, the raw evidence, and the exact scope correction.",
+  "counterexamples": [
+    {
+      "id": "CE-1",
+      "limits_claim": "f1 is a perfect 1:1 slot enum for all 40 slots (incl. ANIM=11) [R32 REPORT section 1; docs/nif/09-semantics.md L55, L70-73; README.md L82]",
+      "evidence": "R32 ANIM_FRAME_CHECK.json per_slot: 142 ANIM entries carry f1=0 and 30 carry f1=4 (172/1157 total); every ANIM slot 0-29 contains >=1 non-11 entry (e.g. ANIM0: 11x110, 4x1, 0x8)",
+      "verification": "RE-DERIVED this run (sums 985/142/30)",
+      "scope_correction": "perfect 1:1 zero-exception mapping holds for the 8 named slots (BASE/DARK/DETAIL/GLOSS/GLOW/BUMP/DECAL0/ENVIRONMENT); for ANIM slots f1=11 in 985/1157 (85.1%), with f1=0 x142 and f1=4 x30 (late v4 frames). The 40-slot vocabulary maps onto 9 distinct f1 type-codes (0,1,2,3,4,5,6,9,11) - ANIM0-31 share the code 11."
+    },
+    {
+      "id": "CE-2",
+      "limits_claim": "R32 REPORT section 4.3: 'the 45 late ANIM16-31 entries ... 10 of 45 carry 11'",
+      "evidence": "ANIM_FRAME_CHECK.json: ANIM16-31 f1=11 counts are 3+3+1+1+1+0*11 = 9, not 10",
+      "verification": "RE-DERIVED (control1: ANIM16_31 = {count:45, f1_11:9, f1_0:22, f1_4:14})",
+      "scope_correction": "report arithmetic slip: 9 of 45 carry f1=11; 36/45 carry f1 0/4. The 985/142/30 and 172-others figures in the same report are correct."
+    },
+    {
+      "id": "CE-3",
+      "limits_claim": "real sparse record k per-record in {2,3,4} [R34 REPORT grammar verdict; docs/nif/09-semantics.md L191]",
+      "evidence": "R34 REAL_SPARSE_GRAMMAR.json VARIABLE_K.exact_examples_cap50: 574845.nif bi=69 si=14 -> 14 records ALL k=1 ({'1':14}); si=27 -> 5 records all k=1; 27 of the 50 example spans are in 574845.nif bi=69, overwhelmingly k=1; R35 GRAMMAR_VALIDATION.json 2003 k_histogram {1:1884, 2:3135, 3:829, 4:215, 5:108}",
+      "verification": "RE-DERIVED (control2)",
+      "scope_correction": "k is per-record variable with observed k in {1,2,3,4} on 9.3.5 exact examples (k=1 concentrated in 574845.nif bi=69 - R34 caveat 2 admits smallest-k parse could mis-parse k=2 as k=1) and k in {1..5} on the 2003 corpus. The parser itself tries k=1..VAR_MAX_K=8 first-match. Claim 'k in {2,3,4}' is REFUTED as stated."
+    },
+    {
+      "id": "CE-4",
+      "limits_claim": "morph payload globally SOLVED / variable-k grammar byte-exact (unqualified)",
+      "evidence": "3186/6167 = 51.66% of all fit spans; 2093/2427 = 86.24% of classifier-real spans; 334/2427 real-record spans fit NO tested grammar (R34 honest caveat 3); m-scan histogram has odd widths m=1 x126, m=3 x124 outside the k+9 model",
+      "verification": "RE-DERIVED (control2 denominators)",
+      "scope_correction": "byte-exact on 2,093/2,427 classifier-real spans (86.2%) and 3,186/6,167 fit spans (51.7%); 334 real-record spans + the odd m-scan widths are honest residuals; segmentation uniqueness NOT proven (smallest-k first-match)."
+    },
+    {
+      "id": "CE-5",
+      "limits_claim": "d==c iff payload unchanged since registration [docs/nif/09-semantics.md L208; 10-containers-corpus.md L23; 11-open-problems.md L24]",
+      "evidence": "(a) 524071.nif / 524077.nif / 524083.nif: payload byte-identical across eras yet d rewritten at 953 to values matching NO observable payload CRC - under the hypothesis this requires an unobserved 'registering event' with unchanged payload, making the mechanism unfalsifiable as stated; (b) CRC collisions and return-to-old-bytes are not excluded by any test in R36; (c) only 10 candidate formulas tested (all exact-0) - exclusion of tested formulas is not exclusion of all deterministic functions; (d) no packer/writer code observed in any of the 12 runs",
+      "verification": "RE-DERIVED (T1 exceptions from both containers; formula list from FIELD_D_TESTS.json T4; writer-evidence absence by reading all 12 REPORT.md files - all state inference-from-values, none observed the writer)",
+      "scope_correction": "keep the CONFIRMED correlations (c=CRC32 11022/11022; d stable 5205/5208 identical; d==c 61.42%/60.80%; 46/46 size-changing re-exports rewrite d; 161/165 equal-size 1-ULP changes keep d; 0/4288 stale d match any observable CRC) and the STRONGLY_SUPPORTED mechanism hypothesis; REMOVE the iff (replace with 'consistent with'); registration-event mechanism stays UNVERIFIED until packer code or historical snapshots are observed."
+    },
+    {
+      "id": "CE-6",
+      "limits_claim": "the era drift is CONTENT, never GRAMMAR [docs/nif/10-containers-corpus.md L121-125]",
+      "evidence": "the R35 test covers 21 claims on 2 corpora where 5,208/5,422 shared files are byte-identical (96.05%) - the second corpus largely repeats the same bytes; witnesses on genuinely changed payloads exist at FILE level (all 214 changed + 4 old-only files parsed; animation/texture/importer blocks in 214 changed files, shader in 9, morph in 29) but INTRA-BLOCK byte-level witnesses were not established by this round's coarse heuristic",
+      "verification": "RE-DERIVED (control3 era join + family witness scan)",
+      "scope_correction": "replace the universal 'never' with the tested scope: 'in the 21 tested grammar claims on the 2003 and 9.3.5 Models.bnt corpora (where 96% of shared files are byte-identical), all drift observed was content-level; no grammar-level falsification was found in the tested claims'. Era label beyond these corpora (other archives, other versions) is NOT covered."
+    },
+    {
+      "id": "CE-7",
+      "limits_claim": "R40 REPORT: 'Simulated apply: README 4,573 -> 9,182 bytes; 09-semantics 3,705 -> 13,214 bytes'",
+      "evidence": "true applied byte sizes are 9,213 (README) and 13,326 (09-semantics); 9,182 = 4,573 BYTES + 4,609 CHAR delta; 13,214 = 3,705 BYTES + 9,509 CHAR delta (unit mix; multibyte UTF-8 chars in new_text account for the difference: 9,213-9,134=79 chars>1byte for README, 13,326-13,148=178 for 09-semantics)",
+      "verification": "RE-DERIVED: exact re-application of the 9 proposals onto git 077b8a4^ reproduces the applied files byte-exact (sha 4f976581.../bb22d518...), so the APPLY is byte-exact; only the report's size arithmetic mixes units",
+      "scope_correction": "report correction: '9,213 bytes / 13,326 bytes' (or state char deltas as chars)."
+    },
+    {
+      "id": "CE-8",
+      "limits_claim": "'+236 lines' as a per-file or 09-semantics figure [PE_AUTO_LOOP.json last_completed]",
+      "evidence": "git numstat at 077b8a4: README +70/-9, 09-semantics +166/-2 -> 236 added lines COMBINED; net line delta 225 (61 README + 164 09-semantics)",
+      "verification": "RE-DERIVED via git diff --numstat",
+      "scope_correction": "'236' is the combined added-line count of both files; net growth is 225 lines."
+    },
+    {
+      "id": "CE-9",
+      "limits_claim": "exporter string = original toolchain version (presented as unqualified fact) [docs/nif/09-semantics.md L219-228]",
+      "evidence": "R29's own taxonomy marks S3 STRONGLY_SUPPORTED (not CONFIRMED); the census confirms the 4-string set, the 834 v10 files with 4.x-era strings and the absence of a 10.1.0.0-era string, but NO re-export event was ever observed - the 'survives up-conversion' reading is inference from string-vs-file-version mismatch",
+      "verification": "RE-DERIVED (834 = 507+212+115 from PATTERNS.json era matrix; R29 REPORT S3 read)",
+      "scope_correction": "keep the census facts CONFIRMED; carry the STRONGLY_SUPPORTED status into the wiki text for the interpretation; do not call the string a certificate of era or a re-export event."
+    },
+    {
+      "id": "CE-10",
+      "limits_claim": "TEXT mode semantics as decoded fact (ungraded) [docs/nif/09-semantics.md L146-155; README.md L80 'SEMANTICS decoded (... modes ITER-38 ...)']",
+      "evidence": "R38's own verdicts: mode census CONFIRMED; mode=state-binding STRONGLY_SUPPORTED (41076.nif twin pair); single~=one-shot PLAUSIBLE; Single=one-file orthography STRONGLY_SUPPORTED; no runtime consumer observed",
+      "verification": "RE-DERIVED (mode census + twin pair from MODE_ANALYSIS.json; verdict block read verbatim)",
+      "scope_correction": "wiki texts should carry the per-claim grading; 'single ~= one-shot' stays PLAUSIBLE; the twin pair proves params-do-not-determine-mode (a corpus fact), not engine state semantics."
+    },
+    {
+      "id": "CE-11",
+      "limits_claim": "'9 x f32 position deltas' [docs/nif/09-semantics.md L180-181, L190-192]",
+      "evidence": "R33/R34 establish '[9 x f32] = 3 delta triples' and explicitly leave the 'three states x XYZ?' grouping UNVERIFIED (R34 report; 11-open-problems.md keeps it open); calling them POSITION deltas is semantic interpretation beyond the grammar proof",
+      "verification": "R34 REPORT grammar line + honest caveats read; ch11 L36 keeps 'the 9-float triple grouping (3 morph states × XYZ?)' open",
+      "scope_correction": "write '9 x f32 delta triples (target quantity UNVERIFIED: position vs other; the 3-states-x-XYZ grouping is an open hypothesis)'."
+    },
+    {
+      "id": "CE-12",
+      "limits_claim": "R32 REPORT section 1: 'The material pipeline vocabulary is now complete and closed' / 'Pipeline materialowy w pelni zdekodowany'",
+      "evidence": "R32's own section 7 keeps UNVERIFIED items (v4 u1b/ub/u2 semantics; ref target semantics; softwareBitmap/globalWind/BaseTexture runtime effect; field1/low8 class meaning) and STRONGLY_SUPPORTED for f1-as-slot-enum semantics; M3-5B (non-BASE slot runtime meaning) remains open",
+      "verification": "R32 REPORT sections 1/4/7 read; runtime semantics untouched by the census",
+      "scope_correction": "'vocabulary census complete and closed (40 slots, 17 directives, 24,508/24,508 convention)' is CONFIRMED; 'pipeline fully decoded' is REJECTED as wording - runtime semantics of non-BASE slots, f1 class meaning and several fields remain open (M3-5B)."
+    }
+  ]
+}
