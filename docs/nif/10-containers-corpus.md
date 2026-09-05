@@ -15,15 +15,29 @@ index:
     packed_size   — u32   (byte length of the payload)
     offset        — u32   (absolute file offset of the payload)
     field_c       — u32   — **= CRC32(payload) — CONFIRMED 5,596/5,596 (100%, ITER-3)**
-    field_d       — u32   — == CRC32(payload) in 3,435 entries; differs in 2,161.
-                           REJECTED: crc32 of the 2003-era file (0/2,161), crc32c,
-                           name-concats, halves, bitwise-not, crop-variants.
-                           LEADING HYPOTHESIS (STRONGLY_SUPPORTED by correlation):
-                           d = CRC32 of the file's FIRST-INSERTED version in the
-                           archive lineage (build-history marker). Correlations:
-                           era-CHANGED files 85% d≠c (182/214); era-IDENTICAL 37%
-                           (1,944 — implies pre-2003 content versions we do not
-                           have on disk); NEW-ONLY (59xxxx) 80% d==c (139/174).
+    field_d       — u32   — **SEMANTICS RESOLVED (ITER-36,
+                            `PE_NIF_FIELD_D_R36_20260904_171903`): a CARRIED-FORWARD
+                            REGISTRATION CRC — the payload's CRC32 at its last
+                            registering event in the archive lineage (build-history
+                            checksum), stale for the ~39% of files modified after
+                            registration; d==c ⟺ unchanged since registration.**
+                            Evidence (cross-era, joined 5,422-name table with the
+                            ORIGINAL 2003 Models.bnt — SHA256
+                            `1322ADF2919B1B24A8B4FDA9618347E00C5A2B35DBB54516E353F1CEFD3524A6`):
+                            T1 d-stable 5,205/5,208 (99.94%) for byte-identical era
+                            pairs (c-stable sanity 5,208/5,208); T2 naive
+                            changed→different-d REFUTED — decomposed: size-changing
+                            re-exports rewrite d 46/46, equal-size (1-ULP float)
+                            re-exports keep d 161/165; prev-build-CRC REJECTED
+                            (d95==c03: 0/214); T3 d==c split by provenance: v4 99.87%,
+                            v10 pre-2003 up-conversions 6.35%, Gamebryo_1_1 65.56%;
+                            T4 ALL deterministic candidates exact-0 (adler32/fnv1a/
+                            CRC32(name)±size/size/offset; 0 of 2,161+2,127 stale d
+                            match any of 11,022 observable payload CRCs); T5 2003
+                            mirror c_eq_d 3,299/5,426 (60.80%) vs 9.3.5 61.42%.
+                            Status: STRONGLY_SUPPORTED (registration-event mechanism
+                            inferred from correlations; the archive tool that wrote d
+                            is not directly observed).
 ```
 
 Validated on PCG 9.3.5 Models.bnt: 5,596 entries, index consumed
