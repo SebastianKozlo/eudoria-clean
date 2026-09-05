@@ -1,7 +1,9 @@
 # PE / EUDORIA RECONSTRUCTION — PROJECT OPERATING MODEL (TWO-TIER EXTERNAL, PE-MASTER INSIDE)
 
-**Status:** ADOPTED (2026-09-06, human directive; supersedes the three-tier
-browser variant — the browser ChatGPT tier is REMOVED by human decision)
+**Status:** ADOPTED (2026-09-06, human directives a-d; supersedes the
+three-tier browser-audit model — the browser ChatGPT tier is REMOVED from
+the mandatory loop and redefined by the architect review (d) as OPTIONAL
+CONSULTATION / BACKUP ARCHITECT, out-of-band, on demand only)
 **Complements:** `CHATGPT_ARCHITECT_INSTRUCTIONS.md` (still binding)
 **Refines:** the OPENCODE -> GITHUB -> EXTERNAL AUDIT CONTRACT (evidence,
 provenance, hygiene, no-original-payload rules UNCHANGED and binding).
@@ -18,6 +20,7 @@ provenance, hygiene, no-original-payload rules UNCHANGED and binding).
 | **PE-MASTER** (OpenCode agent, GLM 5.3 max, ChatGPT-Desktop-calibrated DEEP auditor, read-only, no subagents) | INDEPENDENT deep adversarial run-level auditor: audits every completed run COMPLETELY — reads every code file the run touched (full commit-range diff), every evidence file it analyzed, cross-compares against the prior canonical record, checks consistency and errors at line level, verifies physical provenance (file identities, SHAs, target bytes); verdicts; designs the next experiment; pre-checks the milestone gate package; verifies Desktop findings and orders corrections. Never executes. Coverage honesty mandatory (states what was NOT checked). | every significant run (launched by pe-master-auditor via Task, or directly by the human) |
 | **pe-master-auditor + pe-reconstruction** (execution team) | ALL execution: forensics, Ghidra, RE, scripts, experiments, implementation, tests, regression; the auto loop; internal pre-push QC; commits + pushes; package writing; `AUDIT_ENTRYPOINT.md` maintenance; persists PE-MASTER verdicts; implements ordered corrections | continuous inside the milestone |
 | **ChatGPT Desktop** | MILESTONE-LEVEL deep auditor (cross-engine independent check; reads `D:\Eudoria_Reconstruction` physical evidence + GitHub): full milestone post-audit, focused revalidation, designs the next milestone charter; recommendations get implemented and verified by PE-MASTER | milestone ends only (token-expensive by design) |
+| **ChatGPT (browser)** | OPTIONAL CONSULTATION / BACKUP ARCHITECT — out-of-band second opinion: suspicious PE-MASTER behavior, a second verdict, GLM loop detection, comparing two audits, Desktop token exhaustion, governance design. NOT a mandatory gate in any loop. | on demand only |
 
 **Deliberate trade-off (recorded):** run-level auditing moved from the
 browser ChatGPT (different engine) to PE-MASTER (same engine family as the
@@ -66,9 +69,9 @@ restore the browser tier at any time.
 
 ## 3. RUN LIFECYCLE
 
-1. **Direction**: pe-master-auditor designs each run per the loop
-   discipline and PE-MASTER's last ORDERED_WORK; Desktop charters when
-   given. One main P0 question per significant run.
+1. **Direction**: PE-MASTER sets the P0 direction (its last
+   NEXT_EXPERIMENT / ORDERED_WORK; a Desktop charter when the human
+   relays one). One main P0 question per significant run.
 2. **Formalization**: pe-master-auditor converts the direction into an
    executable `NEXT_PROMPT.md` (RUN_ID, exact paths, PASS/FAIL gates,
    hard-stops, denominators, forbidden-to-modify list, handoff block).
@@ -91,7 +94,8 @@ restore the browser tier at any time.
 ## 4. VERDICT LEVELS — MANDATORY EXACT STRINGS
 
 **Level 1 — RUN (PE-MASTER):**
-`RUN_ACCEPTED` | `RUN_PARTIAL_PASS` | `RUN_REJECTED` | `REVALIDATION_REQUIRED`
+`MASTER_ACCEPTED` | `MASTER_PARTIAL_PASS` | `MASTER_REJECTED` |
+`MASTER_REVALIDATION_REQUIRED`
 
 **Level 2 — MILESTONE READINESS (PE-MASTER):**
 `MILESTONE_CANDIDATE_FOR_DEEP_AUDIT` — NOT a PASS; never closes anything.
@@ -130,7 +134,10 @@ which stay unchanged inside the audit layer.
 ```text
 Desktop deep audit (findings A/B/C) -> saved in full as
 FULL_EXTERNAL_MILESTONE_POST_AUDIT.md (committed by pe-master-auditor)
-   -> PE-MASTER verifies each finding against evidence
+   -> PE-MASTER verifies each finding against evidence INDEPENDENTLY
+      (never blindly executing Desktop's recommendations — Desktop can
+      also be wrong); classifies every finding:
+      ACCEPTED_FINDING / PARTIALLY_ACCEPTED / REJECTED_WITH_EVIDENCE
    -> PE-MASTER orders correction runs (bounded, one finding class each)
    -> execution team fixes + pushes; PE-MASTER audits each fix
    -> ... until every finding is FIXED / REVALIDATED / honestly
@@ -216,9 +223,44 @@ check.
 
 ## 11. OPEN DECISIONS (PENDING THE HUMAN)
 
-1. ~~Browser tier~~ — REMOVED by human directive 2026-09-06.
+1. ~~Browser tier~~ — REMOVED from the mandatory loop (human directive
+   2026-09-06; redefined as OPTIONAL CONSULTATION / BACKUP ARCHITECT,
+   section 1).
 2. Authorize the M1 gate package completion run (bounded, mechanical
    consolidation; the first run executed + PE-MASTER-audited under this
-   operating model).
+   operating model — after the qualification benchmark Q1).
 3. DEPENDENCY_GATE default stays ON (now keyed to fast internal
    PE-MASTER verdicts).
+
+## 12. PE-MASTER QUALIFICATION GATE (before canonical authority)
+
+PE-MASTER_STATUS = PROVISIONAL_UNTIL_QUALIFIED. The agent exists with the
+full deep-audit charter, but is NOT the canonical run auditor (its
+verdicts are not gates, its ORDERED_WORK is not binding) until it passes
+the historical benchmark:
+
+1. **BENCHMARK Q1**: PE-MASTER deep-audits the historical WP1 MODE3
+   runtime run
+   (`D:\Eudoria_Reconstruction\99_Audits\PE_WORLD_WP1_PLACEMENT_BRIDGE_20260831_220000\`
+   + the R47G sandbox
+   `D:\Eudoria_Reconstruction\99_Audits\PE_R47G_D3D_WORLD_RUNTIME_20260901_000000\01_SANDBOX\`),
+   given ONLY the executor's report + raw evidence paths — NO list of
+   known errors. It must find the traps on its own, from the artifacts.
+2. **SCORING** (human-graded; the trap list is held OUT of PE-MASTER's
+   context): >=5/6 known traps + no fabricated findings + correct
+   verdict strings + honest COVERAGE = PASS. Otherwise: profile
+   correction and re-test on a second historical run.
+3. **On PASS**: PE-MASTER_STATUS = QUALIFIED -> canonical run auditor;
+   the per-run Task launches begin. The qualification record is
+   committed as `PE_MASTER_QUALIFICATION_Q1.md` under `docs/audits/`.
+4. **SKILLS**: pe-master-* skills are built ONLY from CONFIRMED lessons
+   (run -> PE-MASTER finding -> correction -> revalidation -> LESSON
+   CONFIRMED -> skill update — never from an unverified error, which
+   would make a mistake a permanent bias). Target set, built gradually:
+   pe-master-forensic-method, pe-master-claim-audit,
+   pe-master-evidence-provenance, pe-master-x86-ghidra-review,
+   pe-master-runtime-hook-audit, pe-master-binary-format-audit,
+   pe-master-rendering-d3d-review, pe-master-nif-review,
+   pe-master-terrain-review, pe-master-network-review,
+   pe-master-counterexample-design, pe-master-blast-radius,
+   pe-master-milestone-gate-review.
