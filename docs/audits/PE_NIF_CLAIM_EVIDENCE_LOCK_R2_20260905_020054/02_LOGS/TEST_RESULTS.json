@@ -1,0 +1,339 @@
+{
+  "run": "PE_NIF_CLAIM_EVIDENCE_LOCK_R2_20260905_020054",
+  "phase": "final",
+  "checker": "00_CONTROL/run_gates.py (Python 3.12, stdlib only)",
+  "independence_note": "Python re-derivation over the physical containers and original manifests; Node control_r2.cjs results used only as the compared counterpart, never as the source of truth for a gate",
+  "gates": [
+    {
+      "gate_id": "R2G1",
+      "gate_name": "execution prompt SHA256 verified (pre-execution record)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "SHA256 of OPENCODE_R2_PROMPT.md",
+      "denominator": "1 prompt file",
+      "independent_source_of_truth": "the prompt file itself (physical)",
+      "why_non_circular": "hash recomputation, not a stored value",
+      "failure_case_detected": "any byte change in the prompt fails the gate",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G2",
+      "gate_name": "physical source identity (both Models.bnt SHA256)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "SHA256 of both containers (Python + Node agree)",
+      "denominator": "2 containers",
+      "independent_source_of_truth": "the physical game files",
+      "why_non_circular": "fresh recomputation in two languages",
+      "failure_case_detected": "a modified/replaced container fails the gate",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G3",
+      "gate_name": "era join classification by exact bytes (Python == Node)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "shared/identical/changed/old-only/new-only = 5422/5208/214/4/174",
+      "denominator": "both corpora (5,426 + 5,596)",
+      "independent_source_of_truth": "the two physical containers",
+      "why_non_circular": "two independent implementations (Python/Node) over the same bytes",
+      "failure_case_detected": "sum-invariant violation or cross-language disagreement fails the gate",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G4",
+      "gate_name": "family unique-file counts within eligible populations (Python == Node)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "unique files: changed anim/tex/importer 214, shader 9, morph 3; old-only 4/0/4/0/4",
+      "denominator": "214 changed + 4 old-only files",
+      "independent_source_of_truth": "the physical containers",
+      "why_non_circular": "cross-language re-derivation; unique-file dedup enforced",
+      "failure_case_detected": "unique_file_count > eligible population (the R1 8>4 defect class) fails the gate",
+      "fixtures": [
+        {
+          "fixture": "R1 raw old_only_files_with_block=8 (animation/texture/importer)",
+          "invariant": "unique_file_count <= 4",
+          "result": "FAIL_DETECTED"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G5",
+      "gate_name": "morph occurrence vs unique-file distinction (29 occurrences in 3 files)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "ascii_occurrences=29; unique_files=3 (548296=13, 548808=13, 566482=3)",
+      "denominator": "214 changed files",
+      "independent_source_of_truth": "the physical containers",
+      "why_non_circular": "cross-language recount; occurrence and file counters kept separate",
+      "failure_case_detected": "presenting 29 as a file count fails the gate",
+      "fixtures": [
+        {
+          "fixture": "R1 raw changed_files_with_block=29 (morph) interpreted as files",
+          "invariant": "unique_file_count == 3",
+          "result": "FAIL_DETECTED"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G6",
+      "gate_name": "old-only double-increment defect reproduced and corrected (8 -> 4 unique files)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "R1 counter 8 (2x4 double increment) vs corrected unique files 4",
+      "denominator": "4 old-only files",
+      "independent_source_of_truth": "the physical containers + immutable R1 raw artifact (read-only)",
+      "why_non_circular": "fixture reproduces R1 exactly; corrected count from fresh scan",
+      "failure_case_detected": "the R1 8>population-4 violation is DETECTED (must FAIL) \u2014 a gate blind to it would pass",
+      "fixtures": [
+        {
+          "fixture": "R1 old_only counter = 8",
+          "invariant": "unique_file_count <= 4",
+          "result": "FAIL_DETECTED"
+        },
+        {
+          "corrected": "R2 unique files = 4",
+          "result": "PASS"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G7",
+      "gate_name": "synthetic counter invariants (duplicate family = one file; absent = 0; old-only increments once)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "t1 (4 occ, 2 files); t2 (0,0); t3 (2 occ, 1 file; R1-style buggy counter = 4)",
+      "denominator": "3 synthetic vectors",
+      "independent_source_of_truth": "synthetic buffers defined identically in both implementations",
+      "why_non_circular": "cross-language agreement on synthetic invariants",
+      "failure_case_detected": "the R1-style buggy counter (4 for one old-only file) is DETECTED as violating the once-per-file invariant",
+      "fixtures": [
+        {
+          "fixture": "R1-style buggy old-only counter",
+          "expected_unique_files": 1,
+          "buggy_result": 4,
+          "result": "FAIL_DETECTED"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G8",
+      "gate_name": "candidate recount: NINE exact-zero + payload-CRC nonzero (Python == Node == R36 historical)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "9 exact-zero candidates on both corpora; d==crc32(payload) = 3435/5596 and 3299/5426",
+      "denominator": "10 candidates x 2 corpora (5,596 + 5,426 each)",
+      "independent_source_of_truth": "the physical containers + the immutable R36 FIELD_D_TESTS.json (three-way agreement)",
+      "why_non_circular": "three independent computations (Node, Python, R36 historical)",
+      "failure_case_detected": "the R1 ten-exact-zero wording is DETECTED as violating the nine/ten invariant (crc32 nonzero)",
+      "fixtures": [
+        {
+          "fixture": "R1 C-R36-05 \"All 10 TESTED ... exact 0 counts on both full corpora\"",
+          "invariant": "exactly nine candidates are exact-zero",
+          "result": "FAIL_DETECTED"
+        },
+        {
+          "corrected": "R2 C2-B-03 wording (nine + crc32 nonzero)",
+          "result": "PASS"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G9",
+      "gate_name": "c==CRC32(payload) 11,022/11,022; d==c 3435/5596 + 3299/5426; d-stability 5205/5208 + 3 exceptions",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "mismatches=0; d_eq_c=3435+3299; stable=5205; exceptions=524071/524077/524083.nif",
+      "denominator": "11,022 entries / 5,208 identical pairs",
+      "independent_source_of_truth": "the physical containers",
+      "why_non_circular": "Python zlib.crc32 vs Node table-driven crc32 (independent implementations)",
+      "failure_case_detected": "any crc mismatch, count divergence or cross-language disagreement fails the gate",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G10",
+      "gate_name": "12/12 lossless sidecars reconstruct originals byte-exactly (independent Python csv+base64+hashlib)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "12/12 full-file SHA256 equality; 21 columns strict; per-row hash verified; source identity; coverage; withholding rule",
+      "denominator": "12 manifests / 145 data rows + 12 headers + 1 preserved empty line; 11 malformed rows in 8 manifests",
+      "independent_source_of_truth": "the ORIGINAL manifest files (immutable bytes)",
+      "why_non_circular": "Python csv module (strict) + independent decode vs the Node writer; source of truth is the original file bytes, not R2 output",
+      "failure_case_detected": "any byte divergence, missing row, wrong hash or inferred field mapping on a malformed row fails the gate",
+      "fixtures": [
+        {
+          "fixture": "R1 sidecars (12): no raw_text column; role text lost on the R39 GAP row",
+          "result": "FAIL_DETECTED (documented in R2G11)"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G11",
+      "gate_name": "R39 GAP_ANALYSIS role text raw round-trip equality (no silent truncation)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "decoded row bytes == original manifest line bytes; full role text present; reconstruction UNRESOLVED",
+      "denominator": "1 row (R39 manifest line 5)",
+      "independent_source_of_truth": "the original R39 artifact_index.csv bytes",
+      "why_non_circular": "byte comparison against the original file, independent of the Node builder",
+      "failure_case_detected": "the R1 sidecar role \"per-file gaps [priorities]\" is DETECTED as losing the original text (must FAIL the losslessness invariant)",
+      "fixtures": [
+        {
+          "fixture": "R1 sidecar role \"per-file gaps [priorities]\"",
+          "invariant": "decoded role text contains the full original text",
+          "result": "FAIL_DETECTED"
+        },
+        {
+          "corrected": "R2 raw bytes round-trip",
+          "result": "PASS"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G12",
+      "gate_name": "synthetic quoting/escaping/newline fixture round-trips (mixed CRLF/LF, embedded quotes, quoted commas)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "byte-exact reconstruction of the synthetic original; quoting preserved in decoded cells",
+      "denominator": "1 synthetic fixture (4 rows)",
+      "independent_source_of_truth": "the synthetic original file bytes",
+      "why_non_circular": "Python decode of the Node-encoded fixture (cross-implementation)",
+      "failure_case_detected": "any quoting/newline/escaping loss fails the gate",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G13",
+      "gate_name": "CLAIM_MATRIX validity: 24 rows, one taxonomy status per row, tally {CONFIRMED 17, REJECTED 7}, real source hashes",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "24 rows; statuses from the 5-value taxonomy; unique claim ids",
+      "denominator": "24 claims",
+      "independent_source_of_truth": "the emitted CSV itself (strict parse)",
+      "why_non_circular": "the checker parses with the strict Python csv module, independent of the emitter",
+      "failure_case_detected": "duplicated status, non-taxonomy value, tally drift or placeholder hash fails the gate",
+      "fixtures": [
+        {
+          "fixture": "R1 mixed-status pattern (CONFIRMED (STRONGLY_SUPPORTED))",
+          "result": "ABSENT_BY_CONSTRUCTION (single status column)"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G14",
+      "gate_name": "FINDING_DISPOSITIONS validity: 7 findings, dispositions from {ACCEPTED, REFUTED, UNRESOLVED}, each with independent evidence",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "7 rows; 7 ACCEPTED (each with R2 independent evidence)",
+      "denominator": "7 findings (F1-F5, F-PUB, R2-NEW-1)",
+      "independent_source_of_truth": "the emitted CSV + the underlying evidence gates (R2G3..R2G11)",
+      "why_non_circular": "dispositions cross-checked against the executable evidence gates, not free text",
+      "failure_case_detected": "a disposition without a matching executable verification would be flagged in review",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G15",
+      "gate_name": "SUPERSESSION_MAP completeness: 18 mapped R1 defects, each verified present in its named R1 artifact",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "18/18 R1 defect quotes confirmed present (string checks on the immutable R1 files)",
+      "denominator": "18 mapped elements",
+      "independent_source_of_truth": "the immutable R1 artifacts themselves",
+      "why_non_circular": "the checker reads R1 files independently of the map author",
+      "failure_case_detected": "a mapped defect that does not exist in the R1 artifact fails the gate (no strawman supersessions)",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G16",
+      "gate_name": "R2 corrected wording present (measured-first; nine/ten; trailing values; no unsupported byte-complete; 45-counted/9-replayed; two-executions)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "required corrected phrases present; unsupported phrases absent",
+      "denominator": "PROPOSED_DOC_CORRECTIONS_R2.md",
+      "independent_source_of_truth": "the R2 proposals document + the evidence gates",
+      "why_non_circular": "string checks are mechanical; semantic adequacy is HUMAN_REVIEWED (HR-1)",
+      "failure_case_detected": "the OLD R1 wording fixtures (delta triples / byte-complete / ten-exact-zero) are detected in R2G8/R2G15 and must be ABSENT here",
+      "fixtures": [
+        {
+          "fixture": "R1 P4-3 \"byte-complete\" wording",
+          "invariant": "absent from R2 proposals",
+          "result": "FAIL_DETECTED_IN_R1 (R2G15), ABSENT_IN_R2 (PASS)"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G17",
+      "gate_name": "R1 historical artifacts immutable during R2 (10 key hashes re-verified)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "10/10 R1 artifact SHA256 unchanged",
+      "denominator": "10 R1 artifacts",
+      "independent_source_of_truth": "the auditor-posted verification.json expected hashes (independent record)",
+      "why_non_circular": "recomputed now vs the post-audit record \u2014 detects any R2-side tampering with history",
+      "failure_case_detected": "any R1 file modified by this run would fail the gate",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "R2G18",
+      "gate_name": "artifact_index.csv integrity: every listed file exists with its recorded SHA256 (3 documented exclusions: the manifest itself, the final gate output, the final ledger)",
+      "gate_type": "EXECUTABLE",
+      "measured_quantity": "53 files hash-verified; 3 documented exclusions",
+      "denominator": "artifact_index.csv rows",
+      "independent_source_of_truth": "the actual files on disk + the Git publication (which pins all files byte-exactly, including the excluded trio)",
+      "why_non_circular": "recomputed hashes vs the manifest; a file cannot contain the hash of a checker output written after it or of itself (R1 self-exclusion precedent, extended)",
+      "failure_case_detected": "a placeholder hash, missing file or modified file fails the gate",
+      "fixtures": [],
+      "pass": true
+    },
+    {
+      "gate_id": "HR-1",
+      "gate_name": "Semantic adequacy of the corrected wordings (nine/ten, trailing values, measured-first, evidence-graded)",
+      "gate_type": "HUMAN_REVIEWED",
+      "measured_quantity": "reviewer judgment",
+      "denominator": "PROPOSED_DOC_CORRECTIONS_R2.md",
+      "independent_source_of_truth": "independent post-audit",
+      "why_non_circular": "wording adequacy cannot be machine-proved; R2G16 checks only the mechanical presence",
+      "failure_case_detected": "n/a (human review)",
+      "fixtures": [],
+      "pass": false
+    },
+    {
+      "gate_id": "HR-2",
+      "gate_name": "Acceptance of the finding dispositions and supersession map",
+      "gate_type": "HUMAN_REVIEWED",
+      "measured_quantity": "reviewer judgment",
+      "denominator": "FINDING_DISPOSITIONS.csv + SUPERSESSION_MAP.csv",
+      "independent_source_of_truth": "independent post-audit",
+      "why_non_circular": "mechanical checks (R2G14/R2G15) verify structure and quote presence only",
+      "failure_case_detected": "n/a (human review)",
+      "fixtures": [],
+      "pass": false
+    },
+    {
+      "gate_id": "HR-3",
+      "gate_name": "Proposal application decision (wiki edits remain PROPOSALS; nothing applied)",
+      "gate_type": "HUMAN_REVIEWED",
+      "measured_quantity": "reviewer decision after the next independent post-audit",
+      "denominator": "P1R2..P8R2",
+      "independent_source_of_truth": "human + external auditor",
+      "why_non_circular": "this run deliberately does not apply any proposal",
+      "failure_case_detected": "n/a (human review)",
+      "fixtures": [],
+      "pass": false
+    },
+    {
+      "gate_id": "HR-4",
+      "gate_name": "Scope discipline: no morph research, no wiki application, no canonical update, no runtime work, no milestone promotion",
+      "gate_type": "HUMAN_REVIEWED",
+      "measured_quantity": "reviewer judgment over the run package",
+      "denominator": "whole run",
+      "independent_source_of_truth": "independent post-audit",
+      "why_non_circular": "structural evidence: outputs confined to the run dir + the single authorized repo publication path",
+      "failure_case_detected": "n/a (human review)",
+      "fixtures": [],
+      "pass": false
+    }
+  ],
+  "executable_failures": [],
+  "overall": "PASS"
+}

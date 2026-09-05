@@ -1,0 +1,5 @@
+﻿EXECUTION 1 (hash 21F40C8E0DA21B444E7C2AE0DD14425BA6EFEE0BCCEDD7CBB4F2B9EB6D927EED, recorded before execution): CRASHED at the R39 sidecar lookup - the R39 manifest's UTF-8 BOM was kept in the header-name derivation, making head[0]=BOM'artifact and pathCol=-1 (empty artifact_field). No RECOUNTS.json written; sidecar outputs from this execution were superseded by EXECUTION 2.
+EXECUTION 2 (after BOM-strip fix; historical sources untouched): control_r2.cjs SHA256 (after last edit, before execution): A1EDA2AE3E4D139B15346FD4C9065646B730648E5048100D2C716D0F73E18D79
+NOTE: Node utf8 decode does not strip the BOM; R1's .trim() stripped it accidentally. R2 strips it ONLY for header-name parsing; raw_row_base64 preserves the exact original bytes including the BOM.
+EXECUTION 3 (after sidecar header-row field fix: removed a stray 22nd field in the manifest-header-row entry — caught by the R2G10 gate; historical sources untouched): control_r2.cjs SHA256 (after last edit, before execution): 666C378DA43DD23B961252BDC091BAF9B2C7DF6B32268D002ED916B20018B59E
+NOTE: the fix affects ONLY the sidecar CSV layout (21 columns everywhere); RECOUNTS.json content is unaffected.
