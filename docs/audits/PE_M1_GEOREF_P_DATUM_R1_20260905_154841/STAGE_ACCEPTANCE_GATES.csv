@@ -1,0 +1,9 @@
+gate_id,description,threshold,actual,verdict
+G1,read-only discipline (zero originals touched; zero runtime assets),enforced,terrain.bnt/Textures.bnt/Entropia.exe reads only; sandbox exe read-only,PASS
+G2,terrain.bnt 9.3.5 header census full denominator,58451 entries,58451/58451 parsed 0 bad; 58450 standard + 1 overview,PASS
+G3,header-not-grid falsification,unique-per-tile if grid,6,747 duplicate (x,y) pairs; x unique=39; y unique=6200,PASS
+G4,global field independent recomputation,land ~79.2% (iter029),79.6% land >0m; range -639.43..+638.91 m fits (t-128)x5,PASS
+G5,+50.0 datum byte-lock,instruction-level,FADD qword [0x00A81D20] in both slot-fill callers 0x94839A/0x949181; format 50.0f @0x00A7AFA8; packer {value,format} 2xf32,PASS
+G6,water 10.0f re-verify,bytes @0x00A7B128,00 00 20 41 = f32 10.0 exact,PASS
+G7,no-conflict with the parallel runtime session,zero overlap,zero runtime assets touched; second session's track untouched,PASS
+G8,no payloads published,identity metadata only,429259 TGA derivative = LOCAL_ONLY with SHA + reproduction,PASS
