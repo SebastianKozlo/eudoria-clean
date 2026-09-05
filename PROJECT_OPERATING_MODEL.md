@@ -15,7 +15,7 @@ provenance, hygiene, no-original-payload rules UNCHANGED and binding).
 | Party | Role | Cadence |
 |---|---|---|
 | **HUMAN** | Strategic decisions, milestone authorization, relay to Desktop, FINAL closure (`MILESTONE_CLOSED` / `NEXT_MILESTONE_AUTHORIZED`), `EARLY_DESKTOP_ESCALATION` | always |
-| **PE-MASTER** (OpenCode agent, GLM 5.3 max, Codex-calibrated, read-only, no subagents) | INDEPENDENT adversarial run-level auditor: audits every completed run FROM RAW EVIDENCE ON DISK + repo; verdicts; designs the next experiment; pre-checks the milestone gate package; verifies Desktop findings and orders corrections. Never executes. | every significant run (launched by pe-master-auditor via Task, or directly by the human) |
+| **PE-MASTER** (OpenCode agent, GLM 5.3 max, ChatGPT-Desktop-calibrated DEEP auditor, read-only, no subagents) | INDEPENDENT deep adversarial run-level auditor: audits every completed run COMPLETELY — reads every code file the run touched (full commit-range diff), every evidence file it analyzed, cross-compares against the prior canonical record, checks consistency and errors at line level, verifies physical provenance (file identities, SHAs, target bytes); verdicts; designs the next experiment; pre-checks the milestone gate package; verifies Desktop findings and orders corrections. Never executes. Coverage honesty mandatory (states what was NOT checked). | every significant run (launched by pe-master-auditor via Task, or directly by the human) |
 | **pe-master-auditor + pe-reconstruction** (execution team) | ALL execution: forensics, Ghidra, RE, scripts, experiments, implementation, tests, regression; the auto loop; internal pre-push QC; commits + pushes; package writing; `AUDIT_ENTRYPOINT.md` maintenance; persists PE-MASTER verdicts; implements ordered corrections | continuous inside the milestone |
 | **ChatGPT Desktop** | MILESTONE-LEVEL deep auditor (cross-engine independent check; reads `D:\Eudoria_Reconstruction` physical evidence + GitHub): full milestone post-audit, focused revalidation, designs the next milestone charter; recommendations get implemented and verified by PE-MASTER | milestone ends only (token-expensive by design) |
 
@@ -182,10 +182,16 @@ verdicts, open P0s).
 
 PE-MASTER reads BOTH the repo AND `D:\Eudoria_Reconstruction` (raw evidence
 trees, Ghidra projects, sandboxes) — its run-level audit is therefore
-STRONGER than the removed browser tier (which saw repo-only). PE-MASTER
-still must never claim verification of bytes it did not read, and must
-state what it could not check. ChatGPT Desktop owns the milestone-end
-physical revalidation + the cross-engine check.
+STRONGER than the removed browser tier (which saw repo-only). PE-MASTER's
+audit depth is COMPLETE within the run's scope: every touched code file,
+every analyzed evidence file, prior-canon cross-comparison, line-level
+machine-readable validation (JSONL line-parse, CSV schema vs generator,
+SHA re-hash), file-identity verification by metadata, and target-address/
+byte verification for runtime claims. PE-MASTER still must never claim
+verification of bytes it did not read — its verdict carries an explicit
+COVERAGE section (checked fully / census-level / NOT checked). ChatGPT
+Desktop owns the milestone-end physical revalidation + the cross-engine
+check.
 
 ## 10. STATE AT ADOPTION (2026-09-06, from disk evidence)
 
