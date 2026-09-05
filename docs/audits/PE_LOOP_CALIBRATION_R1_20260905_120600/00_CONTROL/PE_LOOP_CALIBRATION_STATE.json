@@ -1,0 +1,102 @@
+{
+  "run_id": "PE_LOOP_CALIBRATION_R1_20260905_120600",
+  "run_class": "LOOP_CALIBRATION (RUN-4 of the PE-MASTER loop directive; safe bounded task; zero canon-writes)",
+  "status": "CENSUS_DONE",
+  "phase": "AWAITING_ORCHESTRATOR_AUDIT",
+  "dispatch": 3,
+  "started_at": "2026-09-05T12:09:48-07:00",
+  "base_sha": "57a8d9635c4df93274c4e0c3da4eabbca7e1783d",
+  "base_sha_expected": "57a8d96 (verified: git log HEAD == 57a8d9635c4df93274c4e0c3da4eabbca7e1783d, worktree CLEAN)",
+  "scope": {
+    "gate_package_root": "D:/Eudoria_Reconstruction/12_WebGame/eudoria-clean/docs/audits/PE_MILESTONE_1_WORLD_SURFACE_R1_GATE",
+    "gate_package_rule": "every file recursively (19 files discovered at pre-flight); record relpath + size_bytes + sha256",
+    "run_index_dirs_root": "D:/Eudoria_Reconstruction/99_Audits",
+    "run_index_dirs": [
+      "PE_M1_VALIDATOR_COVERAGE_REPAIR_R1_20260905_012439",
+      "PE_M1_GATE_PACKAGE_COMPLETION_R1_20260905_041816",
+      "PE_M1_GATE_V4_CORRECTION_R2_20260905_101327",
+      "PE_M1_GATE_V4_1_REGISTRY_RESIDUAL_R1_20260905_110528",
+      "PE_M1_X87CW_EXPERIMENT_DESIGN_R1_20260905_115209"
+    ],
+    "run_index_named_files": [
+      "artifact_index.csv",
+      "REPORT.md",
+      "HANDOFF.md",
+      "STAGE_ACCEPTANCE_GATES.csv"
+    ],
+    "run_index_rule": "exact-name matches searched within each run dir tree (READ-ONLY; full trees NOT in scope); a named file absent = NOT_FOUND recorded + continue",
+    "cross_check_rule": "every SHA the package's own records state for a package file (GATE_INDEX entries, manifest built_from values, matrix V4/V3 fields, amendment records, MD citations) vs the fresh census hashes; a within-scope mismatch = LOUD finding; superseded-layer claims classified against the package's own append-only model; out-of-census-scope SHA references recorded as external references (not verified)",
+    "counts_rule": "files hashed per scope; totals in the census JSONs",
+    "writes_rule": "ZERO writes outside the calibration folder (this ROOT) + the repo mirror docs\\audits\\PE_LOOP_CALIBRATION_R1_20260905_120600\\** at commit time"
+  },
+  "prohibitions_active": [
+    "zero canon-writes",
+    "zero edits to any audited/completed file",
+    "zero runtime / zero client launches / zero Ghidra",
+    "no nested agents",
+    "no original payloads committed (identity metadata only: hashes/sizes/paths)"
+  ],
+  "hard_stops_active": [
+    "ANY need to write outside the calibration folders = HARD STOP",
+    "a discovered SHA mismatch in (c) is a FINDING recorded loudly, NOT a hard stop",
+    "a scope file unreadable = record + continue"
+  ],
+  "detector_defect_correction": {
+    "discovered_at": "2026-09-05T12:20:00-07:00",
+    "defect": "census_tool.py dispatch-1 MD walk used a 24-token carry window for SHA-claim path context; in sparse prose this spans 10+ lines and bled unrelated package filenames (HANDOFF.md, CORRECTION_NOTES.md, GATES/AMENDMENTS.md, RETRACTIONS.md, ROADMAP_MAPPING.md, UNRESOLVED.md) onto claims that actually refer to .pre files (external) and the V4-layer md/json/manifest values (superseded-historical per the package's own append-only record)",
+    "consequence": "7 FALSE-POSITIVE MISMATCH findings at dispatch 1 (files: CORRECTION_NOTES.md, GATES/AMENDMENTS.md, HANDOFF.md, RETRACTIONS.md, ROADMAP_MAPPING.md, UNRESOLVED.md; sources GATE_INDEX.md lines 82/161/165/166/170 + matrix V4.md line 326)",
+    "verification": "each of the 7 findings inspected line-by-line at source: GATE_INDEX.md line 82 = the completion-run GATE_INDEX.md.pre SHA (external); lines 161/228 = the V4-R2/V4.1-run .pre SHAs (external); lines 165/166/170 = the V4-layer SHAs of the V4 md/json/manifest, superseded in place by the V4.1 edit (the LIVE values at lines 252/254/256 match fresh); matrix V4.md line 326 = the run-mirror pc24_synthetic_measurement.json SHA (external). ZERO real package-file SHA breaks found in the dispatch-1 findings.",
+    "fix": "claim-locality rule: a hex associates ONLY with path tokens on its own line or the immediately preceding line (census_tool.py walk_md, commented in place). Hex-first matching (a recorded SHA equal to any fresh package hash is a MATCH regardless of context) is unchanged and was never affected by the defect.",
+    "re_dispatch": "dispatch 2 re-executes the census with the fixed detector; the dispatch-1 raw outputs are preserved in this history record (the census JSONs are overwritten by dispatch 2 as the LIVE census)"
+  },
+  "detector_defect_correction_2": {
+    "discovered_at": "2026-09-05T12:28:00-07:00",
+    "defect": "census_tool.py dispatch-2 MD walk used a FLAT same-line+prev-line candidate SET; the package's multi-artifact EVIDENCE citation lines (matrix V4.md lines 96/144/156: 6-7 external artifacts each with their own SHA plus ONE package filename per line) attributed EVERY hex on the line to the package file",
+    "consequence": "15 claims mislabeled SUPERSEDED_HISTORICAL vs GATES/AMENDMENT_ITER035_ROWS10_11.json / GATES/AMENDMENT_ITER036_CLOSURE.json at dispatch 2 (they are EXTERNAL references: iter024/iter030/iter032/iter033 artifacts, repair-run offline_rechecks/fail_closed_gates, CONSTANT_ADDRESS_LOCK, pc24_synthetic_measurement). No false MISMATCH (both amendment files have their own matching claims: CBBEEEB9 / 2B1FF548) - a classification-accuracy defect, not a detector false-alarm",
+    "verification": "matrix V4.md lines 96/144/156 read at source: the citation grammar is 'NAME (SHA256 HEX); NAME (SHA256 HEX); ...' - each hex belongs to the NEAREST name-token before it; the true amendment claims CBBEEEB9 (line 96) and 2B1FF548 (lines 144/156) are already MATCHes; the other 15 hexes on those lines cite external artifacts",
+    "fix": "positional association: a hex's primary context = the nearest usable path-like token BEFORE it on the same line; secondary = the previous line's tokens; usable-token rule (letters-only extensions, no numeric fragments) + non-package path-like tokens classified EXTERNAL_REFERENCE (bare-name external artifacts now resolve instead of UNKNOWN)",
+    "re_dispatch": "dispatch 3 re-executes the census with the positional-association detector; dispatch-2 counts preserved in dispatch_history"
+  },
+  "dispatch_history": [
+    {
+      "dispatch": 1,
+      "executed_at": "2026-09-05T12:16:35-07:00",
+      "state_sha256_at_dispatch_read": "6FE631E847834E4639A99295F783089CF9C84146636543513C7572C9C0B5DE1E",
+      "state_sha256_after_update": "B52C64D7DD95339FEE4D6A8E2961493CFBB228247C166B237992B2CD78160A2B",
+      "result": "CENSUS_DONE (counts: scope_a 19 files/917170 bytes, scope_b 10 found_hashed/10 not_found, claims 776 = MATCH 41 / SUPERSEDED_HISTORICAL 33 / MISMATCH 7 / EXTERNAL_REFERENCE 359 / UNKNOWN_UNRESOLVED 336)",
+      "outcome": "SUPERSEDED_BY_DISPATCH_2 - the 7 MISMATCH findings were verified as detector false positives (see detector_defect_correction); the census re-executed with the fixed claim-locality rule"
+    },
+    {
+      "dispatch": 2,
+      "executed_at": "2026-09-05T12:24:47-07:00",
+      "state_sha256_at_dispatch_read": "BBAC62153772D005370F14A264A2A0DFF3306FBA4980DBADE1AD8D478B55A566",
+      "state_sha256_after_update": "C5A64B858A259DF1AA13502DD6F48A0A82177317795C27B3B4CF802988499128",
+      "result": "CENSUS_DONE (counts: scope_a 19 files/917170 bytes, scope_b 10 found_hashed/10 not_found, claims 776 = MATCH 41 / SUPERSEDED_HISTORICAL 18 / MISMATCH 0 / EXTERNAL_REFERENCE 350 / UNKNOWN_UNRESOLVED 367)",
+      "outcome": "SUPERSEDED_BY_DISPATCH_3 - the 7 dispatch-1 false positives resolved (MISMATCH 0); but 15 of the 18 SUPERSEDED claims were mislabeled flat-set attributions on the multi-artifact EVIDENCE lines (see detector_defect_correction_2); the census re-executed with positional association"
+    }
+  ],
+  "updated_at": "2026-09-05T12:25:15-07:00",
+  "updated_by": "pe-reconstruction (census_tool.py, dispatch 1 completed)",
+  "files_hashed": {
+    "scope_a_gate_package": {
+      "count": 19,
+      "total_bytes": 917170,
+      "unreadable": 0
+    },
+    "scope_b_run_indexes": {
+      "slots": 20,
+      "found_hashed": 10,
+      "not_found": 10
+    },
+    "total_files_hashed": 29
+  },
+  "cross_check": {
+    "claims_extracted": 776,
+    "match": 41,
+    "superseded_historical": 3,
+    "mismatch": 0,
+    "external_reference": 638,
+    "unknown_unresolved": 94
+  },
+  "mismatch_findings": []
+}
