@@ -1,0 +1,91 @@
+{
+  "verdicts": [
+    {
+      "tag": "MILD-1",
+      "prediction": "PASS self-healed; SILENT variant flip G3D->G3E; boundary_search recovers TRUE boundary (== 766)",
+      "actual": {
+        "parse_status": "PASS",
+        "ark": {
+          "variant": "G3E",
+          "boundary_method": "boundary_search",
+          "ext_size": 120
+        },
+        "true_boundary_from_raw": 766,
+        "preamble_u32_at_true_boundary": 0
+      },
+      "match": true,
+      "notes": "boundary-recovery == 766 GATE PASS (PE-MASTER gate); ext_size=120 == N*5 consistent"
+    },
+    {
+      "tag": "MILD-2",
+      "prediction": "PASS self-healed; transient ArkAnimationError swallowed by TEXT_CRLF->G9_RTTI fallback; final variant G9_RTTI (SILENT variant flip)",
+      "actual": {
+        "parse_status": "FAIL_CLOSED",
+        "fail_block_index": 3,
+        "fail_reason_head": "FAIL CLOSED: block_type=\u0000�\u0001|�>\u0000\u0000\u0000\u0000 �n?\u0000\u0000�?\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0003\u0000\u0000\u0000\f\u0000\u0000\u0000\u0010\u0000\u0000\u0000\u0013\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0006"
+      },
+      "match": false,
+      "notes": "FINDING F-1: prediction REFUTED by execution — the parser does NOT silently absorb the node-count overshoot; it FAILS CLOSED at block 3 (loud desync failure). The G9_RTTI fallback path predicted in the matrix did NOT trigger. The actual behavior is the SAFER property (no silent corruption absorption), but the matrix prediction (and the RUN-C final-message claim 'MILD-2 -> PASS via G9_RTTI fallback') is WRONG and must be corrected. Blast radius: the witness-matrix MILD-2 predicted_outcome record; no docs/nif grammar claim is affected (the matrix is a test-plan artifact, not wiki content); no prior corpus result affected (no prior run used the corrupted variant)."
+    },
+    {
+      "tag": "MILD-3",
+      "prediction": "FAIL_CLOSED: v10 NiArkAnimationExtraData u2=0x00000003 has no P0-verified parser. FAIL CLOSED.",
+      "actual": {
+        "parse_status": "FAIL_CLOSED",
+        "fail_reason": "FAIL CLOSED: block_type=NiArkAnimationExtraData offset=605 reason=variant parse error: v10 NiArkAnimationExtraData u2=0x00000003 has no P0-verified parser. FAIL CLOSED."
+      },
+      "match": true,
+      "notes": "EXACT verbatim reason match incl. offset=605"
+    },
+    {
+      "tag": "SCRAMBLE-1",
+      "prediction": "container ValueError 'not a BNT2 archive: footer magic=b'XXXX'' before any payload parse",
+      "actual": {
+        "status": "VALUEERROR",
+        "message": "not a BNT2 archive: footer magic=b'XXXX'",
+        "expected": true
+      },
+      "match": true,
+      "notes": "positive control: intact container loads 5,596 entries; container SHA changed as predicted"
+    },
+    {
+      "tag": "SCRAMBLE-2",
+      "prediction": "FAIL_ERROR: header parse error: absurd string length 1766719488 at pos=51",
+      "actual": {
+        "parse_status": "FAIL_ERROR",
+        "fail_reason": "header parse error: absurd string length 1766719488 at pos=51"
+      },
+      "match": true,
+      "notes": "EXACT match incl. the anchor_forensics simulated value 1766719488 and pos=51"
+    },
+    {
+      "tag": "SCRAMBLE-3",
+      "prediction": "FAIL_CLOSED: non-zero block_preamble_u32=3735928559 at block 0 (first block)",
+      "actual": {
+        "parse_status": "FAIL_CLOSED",
+        "fail_block_index": 0,
+        "fail_reason": "FAIL CLOSED: block_type=NiNode offset=481 reason=non-zero block_preamble_u32=3735928559"
+      },
+      "match": true,
+      "notes": "EXACT match: NiNode offset=481, block index 0"
+    }
+  ],
+  "scoreboard": "5/6 exact predictions matched",
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "P1 (matrix-internal prediction error; no safety regression — the actual behavior is SAFER than predicted)",
+      "summary": "MILD-2 matrix prediction REFUTED: predicted silent G9_RTTI self-heal; actual = loud FAIL_CLOSED @block 3 (desync).",
+      "blast_radius": "RUN-C WITNESS_MATRIX.json MILD-2 predicted_outcome + the RUN-C final-message claim; test-plan only; zero wiki/grammar-claim impact; zero prior-corpus-result impact.",
+      "required_correction": "matrix MILD-2 predicted_outcome -> FAIL_CLOSED @first desynced block (proposed via ledger; matrix file historical — new entry in the correction ledger, not an in-place edit)"
+    }
+  ],
+  "falsification_value": "the falsification execution DID catch a wrong prediction — exactly its purpose; 5/6 predictions now execution-confirmed (incl. both MILD-1's self-heal boundary 766 and all three MUST-FAIL-LOUDLY scrambles with exact reasons)",
+  "milestone_progress": {
+    "variants_built": "6/6",
+    "predictions_matched": "5/6",
+    "findings": 1,
+    "counts": "6 witness recipes executed against frozen R61",
+    "excluded": "no render, no client runtime, no application; sandbox copies local-only; originals untouched; zero payloads in repo"
+  }
+}
