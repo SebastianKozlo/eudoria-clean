@@ -46,10 +46,17 @@
 //   [P4] THE NOISE TABLES t1/t2 (mgr+0x1864/0x2864): the engine builds
 //        them per-session from its runtime RNG (FUN_00405920, a Java-LCG
 //        0x5DEECE66D multiplier + 0xB increment, seeded at engine init).
-//        The page uses the SAME formulas (means of 20 draws: t1 ~
-//        mean(rand*0.4-0.2), t2 ~ mean(rand*0.01-0.005)) with a FIXED
-//        seed for determinism. The per-session seed is runtime state and
-//        unknowable from static data. DOCUMENTED DETERMINISM CHOICE.
+//        Since iter036 (ledger ITER_036, THE FLOAT-CONSTANT LOCK SWEEP) the
+//        page implements the engine arithmetic BYTE-EXACTLY: the constants
+//        are the BINARY f64 slots (float32-literal widenings: 0.4/0.2/0.01/
+//        0.005 as float32-then-widened, NOT the JS decimal literals), the
+//        DRAW is the engine's exact construction ((state & 0xFFFFFFFFFFFF)
+//        / 2^48, FUN_00405920's exponent stitch - 1.0), and the f32
+//        rounding points (FSTP dword at the draw/product/accumulator/final
+//        division) are replicated with Math.fround (FUN_0093cbf0
+//        @0x0093CDC0..0x0093CE5C, 9 rounding points). The per-session SEED
+//        remains the single era-bounded placeholder (runtime state,
+//        unknowable from static data). DOCUMENTED DETERMINISM CHOICE.
 //   [P5] THE ACCUMULATED LEAF ROUGHNESS (FUN_00991880's 12-slot slope
 //        formula over the quadtree leaves): evaluated at the FACTOR-cell
 //        scale (2-unit blocks) directly from the global field with the
@@ -92,36 +99,54 @@ async function sha256Hex(bytes) {
 const io = { readFile: fetchBytes, inflate: strictInflate, sha256: sha256Hex };
 
 // ---------- the era's RNG (Java-LCG, FUN_004058a0/00405920 semantics) ----------
-// state * 0x5DEECE66D + 0xB (mod 2^64); the float = the high bits packed
-// as a double in [0,1) (the engine: (bits<<4 with 0x3ff0000 exponent
-// stitching) - 1.0). [P4]: FIXED SEED.
+// state * 0x5DEECE66D + 0xB (mod 2^64). THE DRAW (iter036 byte-lock,
+// FUN_00405920 @0x00405930..0x0040595b): the engine packs the f64 with the
+// exponent stitch (OR 0x3ff0000; <<4) whose mantissa = the LOW 48 BITS of
+// the state shifted left 4, then FSUB qword [0x00a79818] (= 1.0 f64):
+// draw = (1 + low48/2^48) - 1.0 = low48 / 2^48 EXACTLY (Sterbenz).
+// The prior (state >> 11)/2^53 variant was a [P4] stand-in - SUPERSEDED.
+// [P4]: FIXED SEED (the engine seeds per-session; the construction is exact).
 const RNG_MUL = 0x5DEECE66Dn;
 const RNG_ADD = 0xBn;
 const RNG_MOD = 1n << 64n;
+const DRAW_TWO48 = 281474976710656.0;   // 2^48
 class EngineRng {
   constructor(seed = 0n) { this.s = seed & (RNG_MOD - 1n); }
   next() {
     this.s = (this.s * RNG_MUL + RNG_ADD) % RNG_MOD;
-    // the engine packs ((u16@+4 | 0x3ff0000) << 4 | (u16@+8 >> 12), low << 4)
-    // as a double = 1.xxx - 1.0. We reproduce the [0,1) draw from the top
-    // 53 bits: (state >> 11) * 2^-53 — a deterministic variant of the same
-    // generator (the exact x87 stitch differs; labeled under [P4]).
-    return Number(this.s >> 11n) / Number(1n << 53n);
+    // FUN_00405920: mantissa = (state & 0xFFFFFFFFFFFF) << 4; value = 1+m/2^52 - 1.0
+    return Number(this.s & 0xFFFFFFFFFFFFn) / DRAW_TWO48;
   }
 }
 
 // ---------- the manager noise tables (FUN_0093cbf0 ctor semantics) ----------
+// BYTE-LOCKED (iter036, ledger ITER_036): the constants are the BINARY f64
+// QWORD slots - the FLOAT32-LITERAL WIDENINGS (the exact binary values, NOT
+// the JS decimal literals which differ in the 8th+ significant digit):
+const NOISE_C04   = 0.4000000059604644775390625;      // _DAT_00a7b308 FMUL qword @0x0093cde6
+const NOISE_C02   = 0.20000000298023223876953125;     // _DAT_00a7b2d0 FSUB qword @0x0093cdf1
+const NOISE_C001  = 0.00999999977648258209228515625;  // _DAT_00a7b360 FMUL qword @0x0093ce13
+const NOISE_C0005 = 0.004999999888241291046142578125; // _DAT_00a81d18 FSUB qword @0x0093ce19
+const NOISE_DIV20 = 20.0;                              // _DAT_00a7b9e0 (FDIV/FLD qword @0x0093ce4b)
+// The engine's f32 rounding points (FSTP dword): the draw (P1/P4), the
+// product (P2/P5), the accumulator (P3/P6), and the final division store
+// (P8/P9) - all replicated with Math.fround (the 80-bit intermediates are
+// exact in f64 here: the operands are <=48 significant bits).
 function buildNoiseTables(rng) {
   const t1 = new Float32Array(1024);
   const t2 = new Float32Array(1024);
   for (let i = 0; i < 1024; i++) {
     let a = 0.0, b = 0.0;
     for (let k = 0; k < 20; k++) {
-      a += rng.next() * 0.4 - 0.2;       // _DAT_00a7b308/_DAT_00a7b2d0 (iter027)
-      b += rng.next() * 0.01 - 0.005;     // _DAT_00a7b360/_DAT_00a81d18 (iter027)
+      const d1 = Math.fround(rng.next());            // P1: FSTP dword [ESP+0x1c] @0x0093cddc
+      const p1 = Math.fround(d1 * NOISE_C04 - NOISE_C02);   // P2: FSTP dword [ESP+0x20] @0x0093cdf7
+      a = Math.fround(a + p1);                        // P3: FSTP dword [EDI] @0x0093ce01
+      const d2 = Math.fround(rng.next());            // P4: FSTP dword [ESP+0x1c] @0x0093ce0b
+      const p2 = Math.fround(d2 * NOISE_C001 - NOISE_C0005); // P5: FSTP dword [ESP+0x1c] @0x0093ce1f
+      b = Math.fround(b + p2);                       // P6: FSTP dword [ESP+0x1c] @0x0093ce2d (+P7 identity)
     }
-    t1[i] = a / 20.0;                     // _DAT_00a7b9e0 = 20.0
-    t2[i] = b / 20.0;
+    t1[i] = Math.fround(a / NOISE_DIV20);             // P8: FDIV qword + FSTP dword [EDI-0x4] @0x0093ce55
+    t2[i] = Math.fround(b / NOISE_DIV20);             // P9: FDIVR + FSTP dword [EDI+0xffc] @0x0093ce5c
   }
   return { t1, t2 };
 }
@@ -603,9 +628,27 @@ const result = {
     '[P2] detail selector grid (id 459344): MISSING locally -> constant byte 0 -> the engine tables C[0]=D[0]=458791, E[0]=458792',
     '[P3a] the ArkHeightTree leaf recursion -> the direct height sample + clamp (the leaves\' own data chain preserved in form)',
     '[P3b] the ROW-INPUT SUBSTITUTION: the engine uses the global field heights; the page uses the TILES\' OWN heights because the field-vs-tile georeferencing is UNPINNED (iter028 r=0.53 saturation; THIS SESSION measured the field at the engine addressing = -130..-125 m vs the tiles +16..+487 m — see paletteProbe)',
-    '[P4] the manager noise tables: the engine formulas with a FIXED-seed Java-LCG (the engine seeds per-session)',
+    '[P4] the manager noise tables: the SEED only (the engine seeds per-session) - since iter036 the DRAW, the constants, and the f32 rounding points are BYTE-EXACT vs the binary (FUN_00405920 + FUN_0093cbf0; the operand lock in NOISE_OPERAND_LOCK)',
     '[P5] the accumulated leaf roughness: the CONFIRMED 12-slot formula evaluated on the tile height grid at the 4-unit sample scale',
   ],
+  // THE FLOAT-CONSTANT OPERAND LOCK (iter036, ledger ITER_036 - THE CENSUS):
+  // every constant byte-locked from the sandbox binary (SHA E7785430...);
+  // the ANTI-CIRCULAR reference derives its constants FROM THIS EXPORT.
+  NOISE_OPERAND_LOCK: {
+    binary: 'Entropia.exe 9.3.5.6746 (sandbox SHA E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31)',
+    f64_slots: {
+      C04:   { va: '0x00A7B308', file_offset: '0x67B308', bytes_le: '00 00 00 A0 99 99 D9 3F', value: NOISE_C04, origin: 'float32(0.4) widened (FMUL qword @0x0093cde6)' },
+      C02:   { va: '0x00A7B2D0', file_offset: '0x67B2D0', bytes_le: '00 00 00 A0 99 99 C9 3F', value: NOISE_C02, origin: 'float32(0.2) widened (FSUB qword @0x0093cdf1)' },
+      C001:  { va: '0x00A7B360', file_offset: '0x67B360', bytes_le: '00 00 00 40 E1 7A 84 3F', value: NOISE_C001, origin: 'float32(0.01) widened (FMUL qword @0x0093ce13)' },
+      C0005: { va: '0x00A81D18', file_offset: '0x681D18', bytes_le: '00 00 00 40 E1 7A 74 3F', value: NOISE_C0005, origin: 'float32(0.005) widened (FSUB qword @0x0093ce19)' },
+      DIV20: { va: '0x00A7B9E0', file_offset: '0x67B9E0', bytes_le: '00 00 00 00 00 00 34 40', value: NOISE_DIV20, origin: 'FDIV/FLD qword @0x0093ce4b/0x0093ce4b' },
+    },
+    rng: { mul: '0x5DEECE66D', add: '0xB', draw: '(state & 0xFFFFFFFFFFFF) / 2^48',
+      evidence: 'FUN_00405920 @0x00405930..0x0040595b (OR 0x3ff0000 stitch, <<4, FSUB qword [0x00a79818]=1.0)' },
+    rounding_points: ['P1 @0x0093cddc','P2 @0x0093cdf7','P3 @0x0093ce01','P4 @0x0093ce0b','P5 @0x0093ce1f','P6 @0x0093ce2d','P8 @0x0093ce55','P9 @0x0093ce5c'],
+    loop: '20 accumulations per entry, 1024 entries; tables f32 at mgr+0x1864/0x2864',
+    seed_placeholder: 'FIXED 0x30303030 ([P4]; the engine seed is per-session runtime state)',
+  },
   notPlaceholder: [
     'the palette (Textures.bnt 421318.dat, fetched + SHA-provenance at runtime)',
     'the details (458791/458792, local)',
@@ -616,6 +659,7 @@ const result = {
   bindings: bindProvenance,
   renderQuality: stats,
   paletteProbe,
+  noiseTables: { t1: Array.from(t1).map(x => Math.fround(x)), t2: Array.from(t2).map(x => Math.fround(x)), n: 1024 },
   renderer: { threeRevision: THREE.REVISION, backend: 'WebGLRenderer', width: W, height: H,
     colorSpace: 'NoColorSpace passthrough' },
   screenshotPngSha256: hash1, screenshotDeterministic: hash1 === hash2,
