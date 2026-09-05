@@ -85,3 +85,27 @@ Models.bnt payloads (SHA256 per file):
 Evidence: `99_Audits\PE_NIF_ERA_DRIFT_R2_20260904_115051\02_results\`
 (ERA_DRIFT_2003_VS_PCG953.csv — one row per shared name;
 ERA_DRIFT_SUMMARY.json; driver SHA256 recorded, hashed before execution).
+
+## Cross-era grammar validation (ITER-35) — the FORMAT EVOLUTION TABLE
+
+All grammars confirmed on the 9.3.5 corpus were re-validated byte-exact on
+the 2003 corpus (5,426/5,426 parse closure; run
+`PE_NIF_CROSS_ERA_R35_20260904_170224`; claim table in
+`02_results\FORMAT_EVOLUTION.json`):
+
+**21 claims → 19 ERA-STABLE / 2 EVOLVED / 0 ABSENT / 0 falsifications.**
+
+| Grammar family | 2003 result | Verdict |
+|---|---|---|
+| G3B record grammar | 1,650/1,650 binary exact (100%); variable-length histogram IDENTICAL incl. the 392 B block; same flag/class enums | ERA-STABLE (ITER-6-rule failure profile EVOLVED: 180 vs 182, same 3 classes) |
+| Rare variants (G9_RTTI/G3E/BINARY/SHORT28/G3A_PREAMBLE) | identical block counts (10/4/4/35/6), 100% exact fits both eras | ERA-STABLE |
+| Texture slots (40 slots, f1 enum, ANIM frame==slot) | formula 4,665/4,665; v4 decode 761/761; all 40 slots shared; 0/23,488 exceptions; ANIM frame==slot 1,149/1,149 | ERA-STABLE |
+| Shader directives (17-name vocabulary) | CRLF grammar 1,741/1,741 CONFIRMED; vocabulary 16/17 — `BaseTexture` ABSENT-in-2003; effect files 10/11 (`1027_BaseBSRGSkin` absent) | **EVOLVED** (content-level) |
+| Morph (real-sparse var-k + quantization) | var-k 2,061 spans exact; real-record 1,180/1,457 (81.0% vs 86.2%); strict-00 signature 99.31% with the same gridk profile (2⁻¹⁵..2⁻²²) | ERA-STABLE |
+| Importer (version-routed layout + exporter strings) | constants 100%; 14 exact/10 masked patterns count-identical; same 4-string exporter vocabulary; v4 link chain 38/38 NiStringExtraData | ERA-STABLE |
+
+**Conclusion (CONFIRMED): the NIF extension formats are era-stable at the
+byte level — across a half-decade corpus gap every byte-exact grammar
+reproduces at 100% and the rare-family and importer pattern censuses are
+count-identical. The era drift is CONTENT (which directive/effect names
+and which records appear), never GRAMMAR.**
