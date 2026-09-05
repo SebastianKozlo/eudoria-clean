@@ -494,13 +494,21 @@ Other variant findings (ITER-7, same run dir):
   amendment needed; the designed regression is CANCELLED. The parser
   validates the formula end against the next-block preamble and only
   falls back to boundary search when that validation fails.
-  **Class semantics (ITER-22, `PE_NIF_G3D_CLASS_SEM_R22_20260904_144632`)**:
-  ALL three classes target SKELETON nodes (class 2: bone ×14,429 + other
-  ×721; class 3: bone ×666 + other ×52; class 1: bone ×15 + other ×2 —
-  names overlap: Bip01/Scene Root/Pelvis in classes 2 AND 3). The class
-  is NOT a node-kind flag; it is a per-record ROLE flag in the animated-
-  node list (exact 01/02/03 meaning OPEN; per-file record tables in
-  the run dir enable interleaving/depth analysis).
+  **Class semantics (ITER-22 → ITER-37,
+  `PE_NIF_G3D_CLASS_ROLE_R37_20260904_173625`)**: all three classes target
+  SKELETON nodes (class 2: bone ×14,429; class 3: bone ×666; class 1:
+  bone ×15 — names overlap). ITER-37 structural facts: records are
+  **INTERLEAVED** (class-sequences `2-3-2` ×185, `2-3-2-3-2` ×120; class-03
+  in 347/348 files); **the Scene Root record is ALWAYS LAST (348/348 — a
+  hard invariant)**; class-03 position is uniform (head/tail marker
+  REJECTED); no node-property (parent/depth/has-geometry/name) partitions
+  the classes; the 7 class-01 files are non-biped MOB rigs whose 17
+  targets are core bones (wing/sack/leg/eye — core-bone flag
+  STRONGLY_SUPPORTED); channel-role via TEXT records REJECTED (0/348
+  in-file co-occurrence, structurally impossible). **The exact 01/02/03
+  engine semantics remain UNVERIFIED — the class is
+  file-configuration-dependent, not node-intrinsic** (identical rigs carry
+  uniform-02 vs uniform-03).
 
 ### TEXT_CRLF grammar (31/31 CONFIRMED) — the record framing
 
