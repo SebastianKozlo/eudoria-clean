@@ -14,7 +14,7 @@
 
 | Field | Value |
 |---|---|
-| HEAD | `5358d96` (governance: operating model) — see LATEST RUNS below for the latest work runs |
+| HEAD | Discover via `git log` (this file cannot self-reference its own commit SHA); the LATEST RUNS table below is authoritative for work runs |
 | Current milestone | **EU935-M1 World Surface Fidelity** |
 | Milestone state | **HARD_STOPPED_AT_GATE** — V1 gate verdict REJECTED by the human (byte-proven FLOAT64 operand misread, decisions-ledger ENTRY #10); correction series done (ledger ITER_035/036/037); **V2 rejudgment = PARTIAL_PASS_CORRECTED (PROPOSED — the human + external review DECIDE)**. Nothing authorizes M2. |
 | IMMEDIATE BLOCKER | **The M1 gate remote audit package (ITER_052 / ledger ITER_038) is INCOMPLETE and UNTRACKED**: of the files promised by its `GATE_INDEX.md`, five were never built — `EVIDENCE_MANIFEST.json`, `RETRACTIONS.md`, `UNRESOLVED.md`, `ROADMAP_MAPPING.md`, `HANDOFF.md` (verified missing in BOTH the repo copy and the local canonical audit tree). The packaging session was interrupted. **A bounded completion run (consolidation from existing records only — no new forensics, no new claims) is pending human authorization.** Until then the M1 gate package is NOT ready for external audit. |
