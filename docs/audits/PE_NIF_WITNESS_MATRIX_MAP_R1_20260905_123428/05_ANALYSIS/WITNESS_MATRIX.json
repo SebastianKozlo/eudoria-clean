@@ -1,0 +1,904 @@
+{
+  "run_id": "PE_NIF_WITNESS_MATRIX_MAP_R1_20260905_123428",
+  "run_class": "RUN-C WITNESS-MATRIX MAP (offline analysis; ZERO renders; MAP ONLY)",
+  "p0_question": "Which files should serve as the WITNESS SET for future falsification testing of the R61 frozen parser and the documented grammars -- and per witness: machine-verified SHA256, predicted parse outcome (PASS/FAIL + WHY), and falsification prediction (severely-scrambled MUST fail loudly)?",
+  "context": {
+    "documentation_loop": "EU935-M2 contribution; wiki HOLD semantics released for THIS map only; NO M2 advancement",
+    "r61_baseline": "parse closure 5,596/5,596 (9.3.5 Models.bnt) + 5,426/5,426 (2003 corpus); frozen 20260828",
+    "map_only_contract": "frozen parser run READ-ONLY on RAW known-good files only; NO corrupted variant built or parsed; recipes + predictions only; no payload bytes in outputs"
+  },
+  "r61_baseline_verification": {
+    "checked": 10,
+    "match": 10,
+    "mismatches": [],
+    "contract": "10/10 hashes verified personally from physical bytes before any use"
+  },
+  "corpus_identity": {
+    "models_bnt": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+      "size": 395412868,
+      "sha256_computed": "c950a8c26f2063f4dd748d88c95bd769aac77a2f5f76face7e969be0b3d3bee0",
+      "bnt2_index_start": 395262727,
+      "bnt2_declared_count": 5596,
+      "bnt2_parsed_count": 5596
+    },
+    "corpus_2003_dir": {
+      "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1B3_REAL_PE_NIF_COMPATIBILITY_LAB_V1_20260819_010815\\02_extraction\\nif",
+      "nif_file_count": 5426
+    },
+    "note": "Models.bnt read FULLY in memory; payloads sliced by BNT2 offset; no corpus file modified; payload bytes never written to run dir"
+  },
+  "witness_classes": {
+    "known_good_witnesses": [
+      {
+        "witness_id": "KG-1",
+        "name": "424276.nif",
+        "era_version": "4.1.0.12",
+        "era": "v4",
+        "variant_family": "TEXT_CRLF",
+        "size": 28794,
+        "roles": [
+          "TEXT-records witness (NiArkAnimationExtraData TEXT_CRLF self-terminating grammar)",
+          "v4-era representative",
+          "viewport-bearing (NiArkViewportInfoExtraData) + NiFlipController/NiStringExtraData"
+        ],
+        "prior_run_crossrefs": [
+          "pcg953_nif_manifest.csv row 424276.nif (PASS)",
+          "manifest_2003.csv row 424276.nif (PASS; byte-identical across eras)",
+          "docs/nif/08-ark-proprietary.md L293 (TEXT_CRLF self-terminating grammar; M1C-era 183 catch-all corrected by R31 G9_RTTI separation)"
+        ],
+        "provenance": {
+          "pcg953_935_payload": {
+            "source": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+            "bnt2_index": 1103,
+            "bnt2_offset": 166228428,
+            "packed_size": 28794,
+            "sha256_computed": "533429333c9947c660c2a25e3bd74ea99c5013f244beed86d351612549e8beda",
+            "pcg935_audit_offset_crosscheck": 166228428,
+            "offset_agrees_with_pcg935_audit": true,
+            "manifest_match": true
+          },
+          "corpus_2003": {
+            "source": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1B3_REAL_PE_NIF_COMPATIBILITY_LAB_V1_20260819_010815\\02_extraction\\nif\\424276.nif",
+            "size": 28794,
+            "sha256_computed": "533429333c9947c660c2a25e3bd74ea99c5013f244beed86d351612549e8beda",
+            "manifest_sha256": "533429333c9947c660c2a25e3bd74ea99c5013f244beed86d351612549e8beda",
+            "manifest_match": true,
+            "byte_identical_to_935": true
+          },
+          "era_version": "4.1.0.12",
+          "variant_family": "TEXT_CRLF",
+          "prior_r61_results": {
+            "r61_2003_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "35"
+            },
+            "r61_935_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "35"
+            }
+          },
+          "read_only_confirmation": {
+            "source": "RAW known-good payload (in-memory BNT2 slice; 9.3.5 provenance)",
+            "parse_status": "PASS",
+            "version_string": "4.1.0.12",
+            "version_raw_hex": "0x401000c",
+            "user_version": 0,
+            "num_blocks_header": 35,
+            "num_blocks_parsed": 35,
+            "blocks_match_header": true,
+            "fail_reason": "",
+            "block_histogram": {
+              "NiNode": 9,
+              "NiTriShape": 7,
+              "NiTriShapeData": 7,
+              "NiTexturingProperty": 3,
+              "NiMaterialProperty": 2,
+              "NiArkViewportInfoExtraData": 1,
+              "NiArkAnimationExtraData": 1,
+              "NiArkTextureExtraData": 1,
+              "NiArkImporterExtraData": 1,
+              "NiFlipController": 1,
+              "NiStringExtraData": 1,
+              "NiZBufferProperty": 1
+            }
+          }
+        },
+        "predicted_parse_result": {
+          "status": "PASS",
+          "why": "v4 header grammar (pe_header.py v4 layout: header text -> version 0x0401000C -> NumBlocks -> inline RTTI blocks); NiArkAnimationExtraData v4 selector routes u3!=0xFFFFFFFF + non-zero-prefix to TEXT_CRLF (pe_niark_animation.py lines 95-155); TEXT grammar: CRLF -> ASCII node_count -> N x NodeDataStart records -> trailer 6B/35B/39B by byte[5] (lines 162-264; GTEXT_RAW_GRAMMAR_SPEC 31/31 CONFIRMED); R61 closure includes this file (prior 2003 R61 + 9.3.5 R61 rows both PASS)",
+          "citations": [
+            "pe_header.py (v4 layout docstring + parse_header)",
+            "pe_niark_animation.py L95-155 (v4 selector), L162-264 (_parse_text_extension)",
+            "docs/nif/08-ark-proprietary.md L293"
+          ]
+        },
+        "falsification_prediction": {
+          "mildly_wrong": "MILD-2 (node_count last ASCII digit +1): ArkAnimationError 'NodeDataStart not found for node <M>' -> G9_RTTI fallback -> PREDICTED PASS with ark_variant flipped TEXT_CRLF->G9_RTTI (PARTIALLY_KNOWN, v4_rtti_search). PRECONDITION VERIFIED from raw bytes: first known-RTTI candidate == true next-block boundary.",
+          "severely_scrambled": "SCRAMBLE-2 (version u32 -> 0xFFFFFFFF): MUST_FAIL_LOUDLY as FAIL_ERROR 'header parse error: absurd string length <computed> at pos=<computed>' (precondition + exact value computed in anchor_forensics.json)."
+        }
+      },
+      {
+        "witness_id": "KG-2",
+        "name": "426763.nif",
+        "era_version": "4.1.0.12",
+        "era": "v4",
+        "variant_family": "SHORT28",
+        "size": 10351,
+        "roles": [
+          "v4 FIXED-family (SHORT28) representative",
+          "second v4 variant family for era diversity",
+          "minimal FIXED-family falsification anchor (8B all-zero extension)"
+        ],
+        "prior_run_crossrefs": [
+          "pcg953_nif_manifest.csv row 426763.nif (PASS)",
+          "manifest_2003.csv row 426763.nif (PASS; byte-identical across eras)",
+          "docs/nif/08-ark-proprietary.md L291 (SHORT28: fixed 8B = 8x00, verified 35/35 ITER-31)"
+        ],
+        "provenance": {
+          "pcg953_935_payload": {
+            "source": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+            "bnt2_index": 3388,
+            "bnt2_offset": 291644402,
+            "packed_size": 10351,
+            "sha256_computed": "bb44cdf6610cee72ab4b79abfca633a01206caded647443729ec9df103225982",
+            "pcg935_audit_offset_crosscheck": 291644402,
+            "offset_agrees_with_pcg935_audit": true,
+            "manifest_match": true
+          },
+          "corpus_2003": {
+            "source": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1B3_REAL_PE_NIF_COMPATIBILITY_LAB_V1_20260819_010815\\02_extraction\\nif\\426763.nif",
+            "size": 10351,
+            "sha256_computed": "bb44cdf6610cee72ab4b79abfca633a01206caded647443729ec9df103225982",
+            "manifest_sha256": "bb44cdf6610cee72ab4b79abfca633a01206caded647443729ec9df103225982",
+            "manifest_match": true,
+            "byte_identical_to_935": true
+          },
+          "era_version": "4.1.0.12",
+          "variant_family": "SHORT28",
+          "prior_r61_results": {
+            "r61_2003_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "17"
+            },
+            "r61_935_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "17"
+            }
+          },
+          "read_only_confirmation": {
+            "source": "RAW known-good payload (in-memory BNT2 slice; 9.3.5 provenance)",
+            "parse_status": "PASS",
+            "version_string": "4.1.0.12",
+            "version_raw_hex": "0x401000c",
+            "user_version": 0,
+            "num_blocks_header": 17,
+            "num_blocks_parsed": 17,
+            "blocks_match_header": true,
+            "fail_reason": "",
+            "block_histogram": {
+              "NiNode": 3,
+              "NiStringExtraData": 2,
+              "NiTriShape": 2,
+              "NiTriShapeData": 2,
+              "NiArkViewportInfoExtraData": 1,
+              "NiArkAnimationExtraData": 1,
+              "NiArkTextureExtraData": 1,
+              "NiArkImporterExtraData": 1,
+              "NiTexturingProperty": 1,
+              "NiMaterialProperty": 1,
+              "NiZBufferProperty": 1,
+              "NiAlphaProperty": 1
+            }
+          }
+        },
+        "predicted_parse_result": {
+          "status": "PASS",
+          "why": "v4 header grammar; NiArkAnimationExtraData v4 selector: u3==0xFFFFFFFF && u2>=4 && peek[7]==0x00 -> SHORT28 fixed 8B extension (pe_niark_animation.py lines 117-121); docs L291 'fixed 8 B = 8x00, verified 35/35 (ITER-31)'; raw bytes re-verified: ext first 8 bytes all zero (anchor_forensics.json)",
+          "citations": [
+            "pe_niark_animation.py L117-121",
+            "docs/nif/08-ark-proprietary.md L291"
+          ]
+        },
+        "falsification_prediction": {
+          "mildly_wrong": "RECIPE-ALTERNATE (peek[7] 0x00->0x01 single byte at ext_start+7): selector flips SHORT28->FIXED_B_61, reads 41B instead of 8B -> +33B over-consume -> v4 inline-RTTI desync -> predicted FAIL (unknown block type or StreamError). Recorded as alternate; NOT built, NOT parsed this run.",
+          "severely_scrambled": "SCRAMBLE-2 pattern also applies (version u32 anchor) -- same MUST_FAIL_LOUDLY class as KG-1."
+        }
+      },
+      {
+        "witness_id": "KG-3",
+        "name": "500078.nif",
+        "era_version": "10.1.0.0",
+        "era": "v10",
+        "variant_family": "G3B",
+        "size": 57642,
+        "roles": [
+          "G3B-bearing witness (binary ArkAnimation record grammar)",
+          "character witness: ANIMATION_SKELETON, full Bip01 rig (DUNGMASTER)",
+          "event-block TEXT-records carrier: the documented 392 B record (13 event strings, NiTextKeyExtraData 25 keys)",
+          "v10-era representative"
+        ],
+        "prior_run_crossrefs": [
+          "PE_KEYFRAME_FORMAT_R1_20260905_220000 keyframe_inventory.csv: 500078 = ANIMATION_SKELETON, 38 kf controllers, Bip01* bone names",
+          "docs/nif/08-ark-proprietary.md L497 (500078 392 B record: end, morph: 1, 11x start -name <anim> -loop; DUNGMASTER set) + L457-464 (G3B record grammar, ITER-30, byte-exact 1682/1682)",
+          "pcg953_nif_manifest.csv + manifest_2003.csv rows 500078.nif (PASS, identical SHA)"
+        ],
+        "provenance": {
+          "pcg953_935_payload": {
+            "source": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+            "bnt2_index": 4488,
+            "bnt2_offset": 356636039,
+            "packed_size": 57642,
+            "sha256_computed": "d26ad81161122f3ef1f3444ca495723c43a0e8892722efb78dbce7a387779df2",
+            "pcg935_audit_offset_crosscheck": 356636039,
+            "offset_agrees_with_pcg935_audit": true,
+            "manifest_match": true
+          },
+          "corpus_2003": {
+            "source": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1B3_REAL_PE_NIF_COMPATIBILITY_LAB_V1_20260819_010815\\02_extraction\\nif\\500078.nif",
+            "size": 57642,
+            "sha256_computed": "d26ad81161122f3ef1f3444ca495723c43a0e8892722efb78dbce7a387779df2",
+            "manifest_sha256": "d26ad81161122f3ef1f3444ca495723c43a0e8892722efb78dbce7a387779df2",
+            "manifest_match": true,
+            "byte_identical_to_935": true
+          },
+          "era_version": "10.1.0.0",
+          "variant_family": "G3B",
+          "prior_r61_results": {
+            "r61_2003_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "121"
+            },
+            "r61_935_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "121"
+            }
+          },
+          "read_only_confirmation": {
+            "source": "RAW known-good payload (in-memory BNT2 slice; 9.3.5 provenance)",
+            "parse_status": "PASS",
+            "version_string": "10.1.0.0",
+            "version_raw_hex": "0xa010000",
+            "user_version": 0,
+            "num_blocks_header": 121,
+            "num_blocks_parsed": 121,
+            "blocks_match_header": true,
+            "fail_reason": "",
+            "block_histogram": {
+              "NiNode": 40,
+              "NiKeyframeController": 38,
+              "NiKeyframeData": 38,
+              "NiArkAnimationExtraData": 1,
+              "NiTextKeyExtraData": 1,
+              "NiArkImporterExtraData": 1,
+              "NiArkTextureExtraData": 1,
+              "NiArkViewportInfoExtraData": 1
+            }
+          }
+        },
+        "predicted_parse_result": {
+          "status": "PASS",
+          "why": "v10 header grammar (pe_header.py v10 layout: text -> version 0x0A010000 -> user_version -> NumBlocks -> NumBlockTypes u16 + type table + BlockTypeIndex u16[] + NumGroups); every block framed by 4-byte preamble u32=0 (pe_block_reader.py L269-282); NiArkAnimationExtraData v10 u2=2 family -> u3=0 + binary first bytes -> G3B boundary search (pe_niark_animation.py L782-810); the G3B ext is ONE record [u32 size][u8 02][u8 flag][u32 X][u8 Y][5xf32][u8 class][u8 count][strings] (docs L457-464); NiTextKeyExtraData v10 (C11-B); NiKeyframeController/NiKeyframeData (C12-B); prior R61 rows PASS both eras",
+          "citations": [
+            "pe_header.py (v10 layout)",
+            "pe_block_reader.py L269-282 (preamble contract)",
+            "pe_niark_animation.py L782-810 (G3B route)",
+            "docs/nif/08-ark-proprietary.md L457-464, L497"
+          ]
+        },
+        "falsification_prediction": {
+          "mildly_wrong": "MILD-3 (u2 LSB 0x02->0x03): MUST FAIL LOUDLY as FAIL_CLOSED 'variant parse error: v10 NiArkAnimationExtraData u2=0x00000003 has no P0-verified parser. FAIL CLOSED.' -- the variant-closed failsafe contract.",
+          "severely_scrambled": "SCRAMBLE-3 (first v10 block preamble u32 -> 0xDEADBEEF): MUST_FAIL_LOUDLY as FAIL_CLOSED 'non-zero block_preamble_u32=3735928559' at block 0."
+        }
+      },
+      {
+        "witness_id": "KG-4",
+        "name": "146709.nif",
+        "era_version": "10.1.0.0",
+        "era": "v10",
+        "variant_family": "G3D",
+        "size": 41473,
+        "roles": [
+          "G3D-bearing witness (formula byte[1]*5 node-reference list)",
+          "character witness: class-01 non-biped mob rig (skinned, 18 bones)",
+          "MILD-1 self-heal recipe carrier (G3D->G3E boundary-search fallback)"
+        ],
+        "prior_run_crossrefs": [
+          "PE_NIF_G3D_CLASS_ROLE_R37_20260904_173625 REPORT.md L75-77: Class-01 files (7/7): 137260, 146709, 205850, 353140, 459889, 501549, 546608; L86: 'class-01 = core-bone flag on small non-biped mob rigs'",
+          "PE_NIF_G3D_CLASS_R15_COR_20260904_142037 (class census)",
+          "docs/nif/08-ark-proprietary.md L316 (G3D: node-reference list, 5-byte records [00][class 01|02|03][u16 block_index][00]; 348/348 CONFIRMED)"
+        ],
+        "provenance": {
+          "pcg953_935_payload": {
+            "source": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+            "bnt2_index": 3534,
+            "bnt2_offset": 296007946,
+            "packed_size": 41473,
+            "sha256_computed": "135d20f27657bd7720ab56d0eed00e78ede25fb8e88d461351be75a852417194",
+            "pcg935_audit_offset_crosscheck": 296007946,
+            "offset_agrees_with_pcg935_audit": true,
+            "manifest_match": true
+          },
+          "corpus_2003": {
+            "source": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1B3_REAL_PE_NIF_COMPATIBILITY_LAB_V1_20260819_010815\\02_extraction\\nif\\146709.nif",
+            "size": 41473,
+            "sha256_computed": "135d20f27657bd7720ab56d0eed00e78ede25fb8e88d461351be75a852417194",
+            "manifest_sha256": "135d20f27657bd7720ab56d0eed00e78ede25fb8e88d461351be75a852417194",
+            "manifest_match": true,
+            "byte_identical_to_935": true
+          },
+          "era_version": "10.1.0.0",
+          "variant_family": "G3D",
+          "prior_r61_results": {
+            "r61_2003_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "79"
+            },
+            "r61_935_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "79"
+            }
+          },
+          "read_only_confirmation": {
+            "source": "RAW known-good payload (in-memory BNT2 slice; 9.3.5 provenance)",
+            "parse_status": "PASS",
+            "version_string": "10.1.0.0",
+            "version_raw_hex": "0xa010000",
+            "user_version": 0,
+            "num_blocks_header": 79,
+            "num_blocks_parsed": 79,
+            "blocks_match_header": true,
+            "fail_reason": "",
+            "block_histogram": {
+              "NiNode": 30,
+              "NiTriShape": 19,
+              "NiTriShapeData": 19,
+              "NiMaterialProperty": 2,
+              "NiArkAnimationExtraData": 1,
+              "NiArkImporterExtraData": 1,
+              "NiArkTextureExtraData": 1,
+              "NiTexturingProperty": 1,
+              "NiArkViewportInfoExtraData": 1,
+              "NiZBufferProperty": 1,
+              "NiSkinInstance": 1,
+              "NiSkinData": 1,
+              "NiSkinPartition": 1
+            }
+          }
+        },
+        "predicted_parse_result": {
+          "status": "PASS",
+          "why": "v10 header + preamble grammar; NiArkAnimationExtraData v10 u2=2 family -> u3!=0 with byte0=0x01 -> G3D formula ext_size = byte[1]*5 (pe_niark_animation.py L817-849); ext = N 5-byte node-reference records; formula boundary validated against next-block preamble (is_valid_boundary); NiSkinInstance/NiSkinData (C19/C20) + NiSkinPartition (C21) parse the 18-bone rig; prior R61 rows PASS",
+          "citations": [
+            "pe_niark_animation.py L817-849 (G3D formula)",
+            "docs/nif/08-ark-proprietary.md L316",
+            "pe_standard_blocks.py (parse_niskin_instance / parse_niskin_data / parse_niskin_partition)"
+          ]
+        },
+        "falsification_prediction": {
+          "mildly_wrong": "MILD-1 (u3 byte1 N->N+1): formula boundary misses the next-block preamble -> G3E boundary-search fallback -> PREDICTED PASS with ark_variant flipped G3D->G3E (boundary_method formula->boundary_search). PRECONDITION VERIFIED from raw bytes: _find_v10_block_boundary(raw, ext_start) == true boundary (anchor_forensics.json).",
+          "severely_scrambled": "SCRAMBLE-3 pattern applies (preamble anchor)."
+        }
+      },
+      {
+        "witness_id": "KG-5",
+        "name": "592572.nif",
+        "era_version": "10.1.0.0",
+        "era": "v10",
+        "variant_family": "G3D",
+        "size": 159622,
+        "roles": [
+          "morph-bearing witness (NiVertexMorphExtraData, N=1294 documented pairing)",
+          "clothing witness: torso_xtra BASE/BUMP avatar body-part mesh",
+          "era-drift datum: 9.3.5-only (NOT in the 2003 corpus)"
+        ],
+        "prior_run_crossrefs": [
+          "docs/nif/08-ark-proprietary.md L146 (NiVertexMorphExtraData record model DECODED, ITER-4: 'vertex count N ... CONFIRMED when the correct mesh is paired: 592572.nif 1294 == 1294')",
+          "docs/nif/09-semantics.md L191 area (morph span scope limits; 592572 bi=65 si=45 mscan_ok_m=[30]; the 334-unfit-residual caveat lineage)",
+          "PE_NIF_G3D_CLASS_R15_COR / G3D_CLASS_SEM_R22 / CLASS_SEQUENCES_R37 census files"
+        ],
+        "provenance": {
+          "pcg953_935_payload": {
+            "source": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+            "bnt2_index": 2139,
+            "bnt2_offset": 217319239,
+            "packed_size": 159622,
+            "sha256_computed": "2ea8b23f5e45cc613debc799224fdda800336fe5bd4087c3f14ed5eeac3bf209",
+            "pcg935_audit_offset_crosscheck": 217319239,
+            "offset_agrees_with_pcg935_audit": true,
+            "manifest_match": true
+          },
+          "corpus_2003": "NOT_PRESENT_IN_2003_CORPUS",
+          "era_version": "10.1.0.0",
+          "variant_family": "G3D",
+          "prior_r61_results": {
+            "r61_2003_run": null,
+            "r61_935_run": {
+              "parse_status": "PASS",
+              "blocks_parsed": "71"
+            }
+          },
+          "read_only_confirmation": {
+            "source": "RAW known-good payload (in-memory BNT2 slice; 9.3.5 provenance)",
+            "parse_status": "PASS",
+            "version_string": "10.1.0.0",
+            "version_raw_hex": "0xa010000",
+            "user_version": 0,
+            "num_blocks_header": 71,
+            "num_blocks_parsed": 71,
+            "blocks_match_header": true,
+            "fail_reason": "",
+            "block_histogram": {
+              "NiNode": 57,
+              "NiArkAnimationExtraData": 1,
+              "NiArkImporterExtraData": 1,
+              "NiArkTextureExtraData": 1,
+              "NiTexturingProperty": 1,
+              "NiArkViewportInfoExtraData": 1,
+              "NiZBufferProperty": 1,
+              "NiTriShape": 1,
+              "NiArkShaderExtraData": 1,
+              "NiVertexMorphExtraData": 1,
+              "NiAlphaProperty": 1,
+              "NiMaterialProperty": 1,
+              "NiTriShapeData": 1,
+              "NiSkinInstance": 1,
+              "NiSkinData": 1
+            }
+          }
+        },
+        "predicted_parse_result": {
+          "status": "PASS",
+          "why": "v10 grammar + G3D formula ext (as KG-4) + NiVertexMorphExtraData parsed by the C24 boundary-search parser (PARTIALLY_KNOWN semantics, EXACT boundary; pe_standard_blocks.py parse_nivertexmorph_extra_data); the documented decoded record model (docs L146) is the WIKI layer on top of the parser's boundary: 0x01 const + u32 N + u16 tag + per-vertex [u16 tag][W x f32] records; prior R61 row PASS (9.3.5)",
+          "citations": [
+            "pe_standard_blocks.py (parse_nivertexmorph_extra_data, C24)",
+            "docs/nif/08-ark-proprietary.md L146-158",
+            "docs/nif/09-semantics.md (morph span scope limits)"
+          ]
+        },
+        "falsification_prediction": {
+          "mildly_wrong": "MILD-1 pattern applies to its G3D ext (same code path as KG-4).",
+          "severely_scrambled": "SCRAMBLE-3 pattern applies (preamble anchor). Morph-specific: any future morph-grammar change MUST preserve the 1294 vertex-count pairing (docs L146) and the block boundary EXACT status -- a witness against silent morph-parser regressions."
+        }
+      }
+    ],
+    "mildly_wrong_recipes": [
+      {
+        "recipe_id": "MILD-1",
+        "class": "mildly_wrong_single_byte",
+        "source_witness": "146709.nif (KG-4; applies byte-identical to both corpus provenances)",
+        "structural_anchor": "NiArkAnimationExtraData u3 byte1 = G3D formula count N (ext_size = N*5)",
+        "exact_corruption": {
+          "byte_offset_abs_in_payload": 639,
+          "before_hex": "0x18",
+          "after_hex": "0x19",
+          "before_value": 24,
+          "after_value": 25,
+          "semantics": "G3D node-reference count N -> N+1 (formula ext (N+1)*5 overshoots the true next-block preamble by 5 bytes)"
+        },
+        "predicted_outcome": {
+          "status": "PASS (self-healed)",
+          "failure_mode": "none loud; SILENT variant flip",
+          "mechanism": "u3 byte0 stays 0x01 -> G3D branch; formula_ext_size=(N+1)*5; is_valid_boundary check at ext_start+(N+1)*5 fails (u32 != 0 there -- verified from raw bytes); code falls to the G3E else-branch: _find_v10_block_boundary(data, ext_start) recovers the TRUE boundary (verified: == ext_start+N*5 with preamble u32==0); parse completes",
+          "expected_field_changes": {
+            "ark_variant": "G3D -> G3E",
+            "ark_anim_boundary_method": "formula -> boundary_search",
+            "semantic_status": "PARTIALLY_KNOWN (already was)"
+          },
+          "falsification_value": "if a future parser version hard-fails on formula misalignment or changes the fallback, this witness flips from PASS to FAIL -- detects silent changes to the documented self-heal path"
+        },
+        "why_the_parser_should_still_handle_it": "the G3D branch does not trust the formula blindly: it validates the computed end against the next v10 block preamble and falls back to the shared boundary search (the same search that handles G3B/G3E)",
+        "code_path_citations": [
+          "pe_niark_animation.py L817-849 (G3D formula + is_valid_boundary check), L850-862 (else -> G3E boundary search), L516-589 (_find_v10_block_boundary)"
+        ],
+        "precondition_verification": {
+          "u3_u32": 6145,
+          "u3_byte0": "0x1",
+          "u3_byte1_N": 24,
+          "u3_byte1_abs_offset": 639,
+          "formula_ext_size_Nx5": 120,
+          "ext_start_abs": 646,
+          "true_boundary_abs": 766,
+          "true_boundary_u32": 0,
+          "true_boundary_is_preamble_zero": true,
+          "corrupted_formula_end_abs": 771,
+          "corrupted_formula_end_u32": 1107296256,
+          "corrupted_formula_end_is_nonzero": true,
+          "g3e_recovery_search_from_ext_start": 766,
+          "g3e_recovers_true_boundary": true,
+          "next_block_type": "NiNode",
+          "docs_note": "docs/nif/08 L316: G3D node-reference list, 5-byte records [00][class 01|02|03][u16 block_index][00], 348/348 CONFIRMED"
+        }
+      },
+      {
+        "recipe_id": "MILD-2",
+        "class": "mildly_wrong_single_byte",
+        "source_witness": "424276.nif (KG-1; applies byte-identical to both corpus provenances)",
+        "structural_anchor": "TEXT_CRLF node_count line: last ASCII digit",
+        "exact_corruption": {
+          "byte_offset_abs_in_payload": 306,
+          "before_hex": "0x32",
+          "after_hex": "0x33",
+          "before_value": "2",
+          "after_value": "3",
+          "semantics": "declared node count M -> M+1 (one more NodeDataStart record is demanded than exists)",
+          "precondition": "last digit must be < '9' for the +1 recipe; otherwise use the -1 variant (recorded; NOT the case for this file -- actual digits recorded in anchor_forensics.json)"
+        },
+        "predicted_outcome": {
+          "status": "PASS (self-healed)",
+          "failure_mode": "transient ArkAnimationError swallowed by the TEXT_CRLF->G9_RTTI fallback; final result SILENT variant flip",
+          "mechanism": "_parse_text_extension raises ArkAnimationError('TEXT: NodeDataStart not found for node <M>') at the extra node iteration (marker find happens first in every loop iteration); _parse_v4_variant catches ArkAnimationError and falls back to _parse_v4_rtti_boundary; the scan finds the TRUE next-block RTTI sized-string (verified from raw bytes: first known-type candidate == true boundary) -> boundary recovered -> parse completes",
+          "expected_field_changes": {
+            "ark_variant": "TEXT_CRLF -> G9_RTTI",
+            "ark_anim_boundary_method": "-> v4_rtti_search",
+            "semantic_status": "PARTIALLY_KNOWN"
+          },
+          "falsification_value": "documents the tolerance boundary of the TEXT grammar + the G9 catch-all; a future strict grammar (reject instead of fallback) flips this witness to FAIL_CLOSED -- the exact loudness evolution is itself worth falsifying"
+        },
+        "why_the_parser_should_still_handle_it": "the v4 selector treats TEXT_CRLF as try-first with G9 boundary-search fallback (pe_niark_animation.py L146-155); the fallback is the P0-verified route for 10 G9_RTTI files",
+        "code_path_citations": [
+          "pe_niark_animation.py L219-222 (marker find + raise), L146-155 (TEXT_CRLF try / G9 fallback), L389-424 (_parse_v4_rtti_boundary scan)"
+        ],
+        "precondition_verification": {
+          "first_known_rtti_candidate_abs": 537,
+          "candidate_is_true_next_block_boundary": true,
+          "note": "replicates pe_niark_animation._parse_v4_rtti_boundary scan (lines 403-410) on the RAW payload; equal values mean the MILD-2 corrupted parse recovers the TRUE boundary via G9"
+        }
+      },
+      {
+        "recipe_id": "MILD-3",
+        "class": "mildly_wrong_single_byte_must_reject",
+        "source_witness": "500078.nif (KG-3; applies byte-identical to both corpus provenances)",
+        "structural_anchor": "NiArkAnimationExtraData u2 LSB = v10 variant family selector (0x00000002 = u2=2 family)",
+        "exact_corruption": {
+          "byte_offset_abs_in_payload": 625,
+          "before_hex": "0x02",
+          "after_hex": "0x03",
+          "before_value": "u2 = 0x00000002 (G3B family)",
+          "after_value": "u2 = 0x00000003 (no P0-verified parser)",
+          "semantics": "family selector corruption: u2 is the FIRST dispatch decision of the v10 ArkAnimation grammar"
+        },
+        "predicted_outcome": {
+          "status": "FAIL_CLOSED",
+          "failure_mode": "ArkAnimationError -> FailClosedError -> parse_status=FAIL_CLOSED, fail_block_index=<ark block>, fail_block_type=NiArkAnimationExtraData, boundary UNSAFE",
+          "predicted_fail_reason_exact": "FAIL CLOSED: block_type=NiArkAnimationExtraData offset=<payload_start_abs> reason=variant parse error: v10 NiArkAnimationExtraData u2=0x00000003 has no P0-verified parser. FAIL CLOSED.",
+          "mechanism": "_parse_v10_variant: u2u != 0xFFFFFFFF and u2u != 0x00000002 -> raise ArkAnimationError (V10_UNKNOWN_U2 branch); dispatch_block's generic except converts it to FailClosedError ('variant parse error: ...'); the reader records FAIL_CLOSED and stops",
+          "falsification_value": "the R61 grammar is VARIANT-CLOSED by design: only u2=0xFFFFFFFF (Mode1/Mode2) and u2=2 (G3A-G3E) have P0-verified layouts. If this witness ever parses as PASS, the failsafe contract has been broken."
+        },
+        "why_the_parser_must_reject": "per the frozen failsafe contract, unknown variant families FAIL CLOSED rather than guessing a layout (R61 closure property: 5,596/5,596 with zero guessed layouts)",
+        "code_path_citations": [
+          "pe_niark_animation.py L647-653 (V10_UNKNOWN_U2 ArkAnimationError), L44-46 (ArkAnimationError class)",
+          "pe_block_reader.py L356-362 (variant parse error -> FailClosedError)",
+          "pe_nif_reader.py L88-106 (FailClosedError -> FAIL_CLOSED recording)"
+        ],
+        "precondition_verification": {
+          "ark_u2_computed": 2,
+          "ark_u2_is_2": true,
+          "ark_variant_from_parse": {
+            "ark_variant": "G3B",
+            "ark_anim_count": 388,
+            "ark_anim_flag": 1,
+            "ark_anim_ext_size": 392,
+            "ark_anim_boundary_method": "boundary_search"
+          }
+        }
+      }
+    ],
+    "severely_scrambled_recipes": [
+      {
+        "recipe_id": "SCRAMBLE-1",
+        "class": "severely_scrambled_container",
+        "source": "byte-copy of pcg_install Models.bnt (395,412,868 B; SHA256 recorded in corpus_identity.json). NEVER the original -- the recipe is defined for a sandbox copy (source-tree safety rule).",
+        "structural_anchor_destroyed": "BNT2 footer magic (last 4 bytes of the archive)",
+        "exact_corruption": {
+          "byte_offset_in_container_copy": "file_size-4 (absolute)",
+          "before_hex": "42 4E 54 32 ('BNT2')",
+          "after_hex": "58 58 58 58 ('XXXX')",
+          "determinism": "fixed 4-byte overwrite; no other byte touched"
+        },
+        "falsification_prediction": "MUST_FAIL_LOUDLY: the BNT2 index loader raises ValueError(\"not a BNT2 archive: footer magic=b'XXXX'\") BEFORE any NIF parsing -- all 5,596 payloads become unreachable; the container SHA256 also changes (detectable pre-parse).",
+        "why_the_parse_must_fail_loudly": "the footer magic is the outermost structural anchor of the 9.3.5 corpus: without it the index_start pointer is uninterpretable and NO payload can be located",
+        "code_path_citations": [
+          "audit_pcg935_nif_r1.py L83-84 (container gate in load_bnt2, the R61-era extraction contract)",
+          "BNT2 format: marker + footer index (pe-bnt-tdf skill)"
+        ]
+      },
+      {
+        "recipe_id": "SCRAMBLE-2",
+        "class": "severely_scrambled_header_version",
+        "source_witness": "424276.nif payload copy (KG-1; v4.1.0.12)",
+        "structural_anchor_destroyed": "NIF version selector field (the u32 that routes ALL downstream grammar mode flags)",
+        "exact_corruption": {
+          "byte_offset_abs_in_payload": 41,
+          "before_hex": "0c000104",
+          "after_hex": "ff ff ff ff",
+          "before_value": "0x0401000C (4.1.0.12)",
+          "after_value": "0xFFFFFFFF (major=255)",
+          "determinism": "fixed 4-byte overwrite at the machine-verified version offset"
+        },
+        "falsification_prediction": "MUST_FAIL_LOUDLY as FAIL_ERROR 'header parse error: absurd string length <computed> at pos=<computed>' -- exact simulated values recorded in anchor_forensics.json (scramble2_prediction_inputs); the failure occurs in parse_header BEFORE any block is dispatched.",
+        "why_the_parse_must_fail_loudly": "parse_version(0xFFFFFFFF) sets type_table=True (raw >= 0x05000001 boundary) while is_v10 stays False -- the header reader then consumes the v4 block area as a v10 type table; the first sized-string length is block data (computed garbage > 1,000,000) and pe_stream's absurd-length guard aborts deterministically",
+        "code_path_citations": [
+          "pe_version.py L57-58 (type_table boundary), L46-93 (mode flags)",
+          "pe_header.py L75-80 (NumBlockTypes + block_types loop)",
+          "pe_stream.py L121-127 (sized_string absurd-length guard)",
+          "pe_nif_reader.py L55-60 (header error -> FAIL_ERROR)"
+        ],
+        "precondition_verification": {
+          "corrupted_version": "0xFFFFFFFF",
+          "sim_num_block_types_u16_at_nl_plus_9": 6,
+          "sim_first_sized_string_len_at_nl_plus_11": 1766719488,
+          "sim_absurd_length_error": "absurd string length 1766719488 at pos=51"
+        }
+      },
+      {
+        "recipe_id": "SCRAMBLE-3",
+        "class": "severely_scrambled_block_framing",
+        "source_witness": "500078.nif payload copy (KG-3; v10)",
+        "structural_anchor_destroyed": "the v10 4-byte block record separator (preamble u32=0) that frames EVERY block",
+        "exact_corruption": {
+          "byte_offset_abs_in_payload": 481,
+          "before_hex": "00 00 00 00",
+          "after_hex": "ef be ad de (0xDEADBEEF)",
+          "determinism": "fixed 4-byte overwrite at the machine-verified first-block preamble offset"
+        },
+        "falsification_prediction": "MUST_FAIL_LOUDLY as FAIL_CLOSED 'FAIL CLOSED: block_type=<first block type> offset=<data_start_offset> reason=non-zero block_preamble_u32=3735928559' -- fail_block_index=0, boundary UNSAFE; the reader records the failed block and stops.",
+        "why_the_parse_must_fail_loudly": "for 10.0.0.0 <= v < 10.2.0.0 every block is framed by a 4-byte u32=0 separator; dispatch_block treats ANY non-zero preamble as parser desynchronization and fails closed immediately -- this is the single loudest in-file anchor in the v10 grammar",
+        "code_path_citations": [
+          "pe_version.py L76 (has_block_preamble)",
+          "pe_block_reader.py L269-282 (preamble read + non-zero -> FailClosedError)",
+          "pe_nif_reader.py L88-106 (FAIL_CLOSED recording)"
+        ],
+        "precondition_verification": {
+          "preamble_offset_abs": 481,
+          "raw_u32_hex": "00000000",
+          "is_zero": true
+        }
+      }
+    ],
+    "character_clothing_witnesses": {
+      "identifiability_note": "the corpus manifests carry no explicit character/clothing type column; identification was made via prior run data (keyframe inventory + G3D class-role census) + manifest texture/skinning columns, per the RUN-C instruction ('use prior run data where named')",
+      "character_witnesses": [
+        {
+          "name": "500078.nif",
+          "status": "PRIMARY WITNESS (KG-3)",
+          "identification": "ANIMATION_SKELETON, full Bip01 rig (Bip01, Pelvis, Spine*, Neck*, Head, HeadNub, Ponytail*, Clavicle, UpperArm, Forearm...), 38 NiKeyframeControllers, DUNGMASTER anim set",
+          "source": "PE_KEYFRAME_FORMAT_R1_20260905_220000\\03_EVIDENCE\\keyframe_inventory.csv"
+        },
+        {
+          "name": "146709.nif",
+          "status": "PRIMARY WITNESS (KG-4)",
+          "identification": "class-01 G3D file (7/7 list: 137260, 146709, 205850, 353140, 459889, 501549, 546608) -- core-bone flag on small NON-BIPED mob rig; skinned_meshes=1, max_bones=18",
+          "source": "PE_NIF_G3D_CLASS_ROLE_R37_20260904_173625 REPORT.md L75-86"
+        },
+        {
+          "name": "137260.nif",
+          "status": "ALTERNATE (character)",
+          "identification": "class-01 G3D mob rig (same 7/7 list); skinned_meshes=1, max_bones=49; byte-identical in both corpora (re-hashed personally this run)",
+          "source": "PE_NIF_G3D_CLASS_ROLE_R37_20260904_173625 REPORT.md L75-77",
+          "provenance": {
+            "pcg953_935_payload": {
+              "source": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+              "bnt2_index": 3538,
+              "bnt2_offset": 296590187,
+              "packed_size": 105812,
+              "sha256_computed": "7450b9f1afb92addb8f3027b18e56133d344a162b5c4cc771cb5a79a3522ab42",
+              "pcg935_audit_offset_crosscheck": 296590187,
+              "offset_agrees_with_pcg935_audit": true,
+              "manifest_match": true
+            },
+            "corpus_2003": {
+              "source": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1B3_REAL_PE_NIF_COMPATIBILITY_LAB_V1_20260819_010815\\02_extraction\\nif\\137260.nif",
+              "size": 105812,
+              "sha256_computed": "7450b9f1afb92addb8f3027b18e56133d344a162b5c4cc771cb5a79a3522ab42",
+              "manifest_sha256": "7450b9f1afb92addb8f3027b18e56133d344a162b5c4cc771cb5a79a3522ab42",
+              "manifest_match": true,
+              "byte_identical_to_935": true
+            },
+            "era_version": "10.1.0.0",
+            "variant_family": "G3D",
+            "prior_r61_results": {
+              "r61_2003_run": {
+                "parse_status": "PASS",
+                "blocks_parsed": "189"
+              },
+              "r61_935_run": {
+                "parse_status": "PASS",
+                "blocks_parsed": "189"
+              }
+            },
+            "read_only_confirmation": {
+              "source": "RAW known-good payload (in-memory BNT2 slice; 9.3.5 provenance)",
+              "parse_status": "PASS",
+              "version_string": "10.1.0.0",
+              "version_raw_hex": "0xa010000",
+              "user_version": 0,
+              "num_blocks_header": 189,
+              "num_blocks_parsed": 189,
+              "blocks_match_header": true,
+              "fail_reason": "",
+              "block_histogram": {
+                "NiNode": 73,
+                "NiTriShape": 52,
+                "NiTriShapeData": 52,
+                "NiArkAnimationExtraData": 1,
+                "NiArkImporterExtraData": 1,
+                "NiArkTextureExtraData": 1,
+                "NiTexturingProperty": 1,
+                "NiArkViewportInfoExtraData": 1,
+                "NiMaterialProperty": 1,
+                "NiZBufferProperty": 1,
+                "NiAlphaProperty": 1,
+                "NiStencilProperty": 1,
+                "NiSkinInstance": 1,
+                "NiSkinData": 1,
+                "NiSkinPartition": 1
+              }
+            }
+          }
+        }
+      ],
+      "clothing_witnesses": [
+        {
+          "name": "592572.nif",
+          "status": "PRIMARY WITNESS (KG-5)",
+          "identification": "avatar body-part/clothing mesh: torso_xtra BASE + BUMP textures; morph-bearing (NiVertexMorphExtraData N=1294); 9.3.5-only (era drift)",
+          "source": "pcg953_nif_manifest.csv textures column + docs/nif/08 L146"
+        },
+        {
+          "name": "574703.nif",
+          "status": "ALTERNATE (clothing)",
+          "identification": "avatar body-part set: calf/foot/forearm/glasses/hand/head_up/leg/torso/upperarm BASE+BUMP (9 skinned morph parts, max_bones=24)",
+          "source": "pcg953_nif_manifest.csv (morph=9, skinned=9, bones=24)",
+          "provenance": {
+            "pcg953_935_payload": {
+              "source": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+              "bnt2_index": 2141,
+              "bnt2_offset": 218208914,
+              "packed_size": 749921,
+              "sha256_computed": "7b8e78b4b5f2b797fdd21465d054d01282d9c062b407900eda924d19aee6a908",
+              "pcg935_audit_offset_crosscheck": 218208914,
+              "offset_agrees_with_pcg935_audit": true,
+              "manifest_match": true
+            },
+            "corpus_2003": {
+              "source": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1B3_REAL_PE_NIF_COMPATIBILITY_LAB_V1_20260819_010815\\02_extraction\\nif\\574703.nif",
+              "size": 749921,
+              "sha256_computed": "7b8e78b4b5f2b797fdd21465d054d01282d9c062b407900eda924d19aee6a908",
+              "manifest_sha256": "7b8e78b4b5f2b797fdd21465d054d01282d9c062b407900eda924d19aee6a908",
+              "manifest_match": true,
+              "byte_identical_to_935": true
+            },
+            "era_version": "10.1.0.0",
+            "variant_family": "G3D",
+            "prior_r61_results": {
+              "r61_2003_run": {
+                "parse_status": "PASS",
+                "blocks_parsed": "141"
+              },
+              "r61_935_run": {
+                "parse_status": "PASS",
+                "blocks_parsed": "141"
+              }
+            },
+            "read_only_confirmation": {
+              "source": "RAW known-good payload (in-memory BNT2 slice; 9.3.5 provenance)",
+              "parse_status": "PASS",
+              "version_string": "10.1.0.0",
+              "version_raw_hex": "0xa010000",
+              "user_version": 0,
+              "num_blocks_header": 141,
+              "num_blocks_parsed": 141,
+              "blocks_match_header": true,
+              "fail_reason": "",
+              "block_histogram": {
+                "NiNode": 54,
+                "NiTexturingProperty": 9,
+                "NiTriShape": 9,
+                "NiArkShaderExtraData": 9,
+                "NiVertexMorphExtraData": 9,
+                "NiAlphaProperty": 9,
+                "NiMaterialProperty": 9,
+                "NiTriShapeData": 9,
+                "NiSkinInstance": 9,
+                "NiSkinData": 9,
+                "NiArkAnimationExtraData": 1,
+                "NiArkImporterExtraData": 1,
+                "NiArkTextureExtraData": 1,
+                "NiArkViewportInfoExtraData": 1,
+                "NiZBufferProperty": 1,
+                "NiStencilProperty": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "574845.nif",
+          "status": "ALTERNATE (clothing)",
+          "identification": "avatar body-part set: calf/face/foot/forearm/hand/leg/torso/upperarm BASE+BUMP (8 skinned morph parts, max_bones=24)",
+          "source": "pcg953_nif_manifest.csv (morph=8, skinned=8, bones=24)",
+          "provenance": {
+            "pcg953_935_payload": {
+              "source": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+              "bnt2_index": 2140,
+              "bnt2_offset": 217478861,
+              "packed_size": 730053,
+              "sha256_computed": "087464f4587e32a118de2d1f6dddebcce911ac154d0fe676d9ad499638f35e43",
+              "pcg935_audit_offset_crosscheck": 217478861,
+              "offset_agrees_with_pcg935_audit": true,
+              "manifest_match": true
+            },
+            "corpus_2003": {
+              "source": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_M1B3_REAL_PE_NIF_COMPATIBILITY_LAB_V1_20260819_010815\\02_extraction\\nif\\574845.nif",
+              "size": 730053,
+              "sha256_computed": "087464f4587e32a118de2d1f6dddebcce911ac154d0fe676d9ad499638f35e43",
+              "manifest_sha256": "087464f4587e32a118de2d1f6dddebcce911ac154d0fe676d9ad499638f35e43",
+              "manifest_match": true,
+              "byte_identical_to_935": true
+            },
+            "era_version": "10.1.0.0",
+            "variant_family": "G3D",
+            "prior_r61_results": {
+              "r61_2003_run": {
+                "parse_status": "PASS",
+                "blocks_parsed": "131"
+              },
+              "r61_935_run": {
+                "parse_status": "PASS",
+                "blocks_parsed": "131"
+              }
+            },
+            "read_only_confirmation": {
+              "source": "RAW known-good payload (in-memory BNT2 slice; 9.3.5 provenance)",
+              "parse_status": "PASS",
+              "version_string": "10.1.0.0",
+              "version_raw_hex": "0xa010000",
+              "user_version": 0,
+              "num_blocks_header": 131,
+              "num_blocks_parsed": 131,
+              "blocks_match_header": true,
+              "fail_reason": "",
+              "block_histogram": {
+                "NiNode": 54,
+                "NiTexturingProperty": 8,
+                "NiTriShape": 8,
+                "NiArkShaderExtraData": 8,
+                "NiVertexMorphExtraData": 8,
+                "NiAlphaProperty": 8,
+                "NiMaterialProperty": 8,
+                "NiTriShapeData": 8,
+                "NiSkinInstance": 8,
+                "NiSkinData": 8,
+                "NiArkAnimationExtraData": 1,
+                "NiArkImporterExtraData": 1,
+                "NiArkTextureExtraData": 1,
+                "NiArkViewportInfoExtraData": 1,
+                "NiZBufferProperty": 1
+              }
+            }
+          }
+        }
+      ],
+      "not_identifiable_record": "NONE required -- all witness files above were identified via prior run data; no NOT_IDENTIFIABLE_FROM_MANIFEST entry was needed (the manifest alone would NOT have sufficed: no type column -- this is the exact reason prior-run cross-referencing was mandated)"
+    }
+  },
+  "counts": {
+    "known_good_witnesses": 5,
+    "mildly_wrong_recipes": 3,
+    "severely_scrambled_recipes": 3,
+    "character_witnesses": 2,
+    "clothing_witnesses": 1,
+    "alternate_witnesses_rehashed": 3,
+    "era_mix": {
+      "v4_era_known_good": 2,
+      "v10_era_known_good": 3,
+      "corpus_era_mix": "4/5 primary witnesses byte-identical across 2003 + 9.3.5 corpora (dual provenance hashed personally); 1 witness 9.3.5-only"
+    }
+  },
+  "milestone_progress": {
+    "M1": "PARTIAL \u00e2\u20ac\u201d P0-1 x87 CW experiment DESIGN READY (awaiting review+GO); witness matrix + scrambled falsification MAP = THIS RUN (delivered); next queue: georef/P-DATUM, then P-CELLSTREAM/P-CLIMATE",
+    "M2": "NOT_ADVANCED \u00e2\u20ac\u201d EU935-M2 contribution only (wiki HOLD semantics released for THIS map); zero M2 advancement claims",
+    "documentation_loop": "NIF doc loop RUN-C contribution complete; the falsification EXECUTION run (building+testing the 6 recipe variants in a sandbox) is the proposed NEXT run, GATED on explicit authorization",
+    "map_only": "no corrupted variant built or parsed; frozen parser used READ-ONLY on raw known-good files only"
+  }
+}
