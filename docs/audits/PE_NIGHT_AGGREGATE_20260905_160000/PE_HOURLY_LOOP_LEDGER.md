@@ -45,3 +45,13 @@ the debug-run divergence documented (the no-debugger trace = the ground truth).
 The display predicate: the trace conclusion stands (the display enum -> the -1);
 the exact in-module check = the remaining bound (the ProcMon-on-debug-run or the
 instruction-level trace = the H3 candidates).
+
+## HOUR 3 — COMPLETED: the DInput route REFUTED (the honest negative)
+
+N-10 (06_REPORT\FINDING_N10_H3_DINPUT_REFUTED.md): the DInput chain decoded (FUN_00864ae0:
+DirectInput8Create < 0 -> the abort; the IID {BF798030-483A-4DA2-AA99-5D64ED369700} verbatim
+from the binary); the empirical 32-bit probe: ALL the client's DInput calls SUCCEED on this
+machine (create S_OK; CreateDevice mouse/keyboard S_OK; EnumDevices S_OK) => the input
+hypothesis REFUTED. The instrument lessons (the hallucinated-GUID trap; the vtable +0xC =
+CreateDevice; VA-vs-RVA). The predicate hunt continues (the WMV reader / the Bink surface
+pre-init = the H4 candidates; the GetDC/GetDeviceCaps empirical probes).
