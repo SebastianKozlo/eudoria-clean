@@ -166,3 +166,13 @@ enum = the OS-internal enumeration behind binkw32's display query; the failing v
 HardwareInformation.MemorySize (MISSING on the RDP adapter). STRONGLY_SUPPORTED; the
 exact in-binkw32 check = UNVERIFIED. The reusable Ghidra project: ghidra_proj\
 PE935_DISPLAY_ENUM_R1 (the analyzed program retained; -process -noanalysis for queries).
+
+## FINDING N-6 (append) — THE TEZ<->FIELD FRAME PINNED + a canon correction
+
+See 06_REPORT\FINDING_N6_TEZ_FRAME.md. Summary: the TEZ record layout corrected
+(the rect coords are SIGNED INT32, not floats; [4xi32][f32 height][4xf32 blends 0..1][3xu32 flags]);
+all 1,020 records measured: X -32,144..+31,896, Z -31,664..+16,964, heights -35.5..+645.1 —
+100% inside the global-field frame; the magnitudes match the 24007.vfs historical locations.
+CANON CORRECTION: the prior "up to 524,287 (2^19-1, the world boundary)" = a MISPARSE
+(no separate 2^19 world frame exists in the TEZ data). The RUN-3 georef honest bound
+"the TEZ<->field relation" is CLOSED: one shared world frame (TEZ ⊂ field).
