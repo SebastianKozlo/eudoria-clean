@@ -9,3 +9,5 @@ SUPERSEDED (review-layer claims):
 
 STANDING (unchanged): the +65 disjoint fits (H5a 39 + H5c 26) and the arithmetic 2,093+65 = 2,158/2,427 (88.88%) are real-record facts; their GRAMMAR-VALIDATION status is downgraded to CANDIDATE pending PE_NIF_MORPH_GRAMMAR_REVALIDATION_R1_20260906_140500. H3/H4 REJECTED_BY_OVERFITTING_CONTROL; H6/H8 refutations; the honest BLOCKED-SEGMENTATION bounds; the executor report's own honesty ("deterministic OC is a formal re-validation whose real protection is the u+2/u-2 negative control"). Wiki HOLD stands.
 Executor limitation-disclosure is NOT proof that the executor's predicates were correct.
+## RESOLUTION (2026-09-06, RUN A = PE_NIF_MORPH_GRAMMAR_REVALIDATION_R1_20260906_140500)
+The CANDIDATE status above is RESOLVED: (a) H5a + H5c2 = RETROSPECTIVE_VALIDATED (held-out file-side 14.0x / 20.0x NC separations; repeatability 39/26 exact); (b) H7's join-mechanism = NON_PASS NC_INSUFFICIENT_SEPARATION (1.10x < the pre-registered 5x; the per-unit non-adjacent-join NC reproduces 91% of the held-out rate) — the 74 remain join-compatible, the mechanism UNVALIDATED. See CORRECTION_LEDGER entries G/H and commit cdfb6ff.

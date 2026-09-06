@@ -337,3 +337,23 @@ PE_M1_X87CW_AUTOMATION_R1 measurement verdict OPEN-BREAKPOINT_UNREACHED_WITHIN_B
 - finding: grading defect — K2/K3 PE_MASTER_REVIEWs issued MASTER_ACCEPTED at own NOT_CHECKED load-bearing items (raw per-span bytes; permutation numbers).
 - correction: Loop aggregate re-adjudicated MASTER_REVALIDATION_REQUIRED (K1 stands; K2/K3 review-layer superseded); fresh-context internal QC binding for the correction campaign.
 - evidence: K2/K3 PE_MASTER_REVIEW.md COVERAGE sections; post-audit REPORT.md F6.
+
+---
+## LED-ENTRY: G — K2 H7 mechanism retraction: PE_NIF_MORPH_RESIDUAL_DEEPDIVE_R1 (03b00cc) H7 "false-tag-split CONFIRMED (74 join-explained)" status RETRACTED by RUN A
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop bd17344b-a054-4cf4-be8d-5f0b250e8509, RUN A PE_NIF_MORPH_GRAMMAR_REVALIDATION_R1_20260906_140500, canonical-update batch P2) — appended by pe-master-auditor (PERSIST_PUBLISH)
+- superseded_claim: PE_NIF_MORPH_RESIDUAL_DEEPDIVE_R1 (03b00cc) — the H7 "false-tag-split CONFIRMED (74 join-explained)" status
+- finding: the H7 "false-tag-split CONFIRMED (74 join-explained)" status is RETRACTED by RUN A (PE_NIF_MORPH_GRAMMAR_REVALIDATION_R1_20260906_140500): with the denominator-matched per-unit non-adjacent-join NC, the held-out join rate 40/124 = 0.3226 vs NC 30/102 = 0.2941 = 1.10x < the pre-registered 5x (NON_PASS NC_INSUFFICIENT_SEPARATION). The 74 spans remain join-COMPATIBLE observations (74/74 repeatability); the false-tag-split MECHANISM is UNVALIDATED. K2's one-per-file NC (~6%) was too weak — post-audit F1's prediction confirmed.
+- correction: the residual-325 decomposition is now "74 join-compatible (mechanism unvalidated) + 251 unexplained".
+- evidence: RUN A 05_ANALYSIS/RETROSPECTIVE_RESULTS.json; commit cdfb6ff.
+
+---
+## LED-ENTRY: H — K2 +65 upgrade: the +65 fits (H5a 39 + H5c2 26) CANDIDATE -> RETROSPECTIVE_VALIDATED (advisory) by RUN A
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop bd17344b-a054-4cf4-be8d-5f0b250e8509, RUN A PE_NIF_MORPH_GRAMMAR_REVALIDATION_R1_20260906_140500, canonical-update batch P2) — appended by pe-master-auditor (PERSIST_PUBLISH)
+- superseded_claim: PE_NIF_MORPH_RESIDUAL_DEEPDIVE_R1 (03b00cc) — the +65 fits (H5a 39 + H5c2 26) "CANDIDATE pending the grammar revalidation campaign" status
+- finding: the +65 fits (H5a 39 + H5c2 26): CANDIDATE -> RETROSPECTIVE_VALIDATED (advisory) by RUN A: the frozen grammars hold on the file-grouped 50/50 retrospective split (H5a held-out 14 fits rate 0.0859 vs NC 0.006135 = 14.0x; H5c2 20 fits 0.1227 = 20.0x); repeatability exact (39/26 vs K2). Explicitly RETROSPECTIVE (the grammars were selected on these populations in K2), NOT unseen-data validation.
+- correction: the coverage 2,158/2,427 = 88.88% carries this status.
+- evidence: RUN A RETROSPECTIVE_RESULTS.json; commit cdfb6ff.
