@@ -95,6 +95,39 @@ predicate stays UNVERIFIED — the remaining static-RE bound).
 - My 13-minute night report violated the night order's intent (the checklist-vs-night
   error the human caught); this run is the corrected continuation.
 
+## FINDING N-4 — THE +50.0 SEMANTIC DIRECTION NARROWED (the georef open bound)
+
+The caller-of-caller byte analysis (read-only):
+
+- The three slot-fill functions containing the packer calls: **0x00948080** (callers
+  0x00948470, 0x0094865C), **0x00948300** (caller 0x0094871C), **0x00949000**
+  (caller **0x0044D3D5** — the low .text engine-core region).
+- The value fed to the `FADD qword [0x00A81D20]` (+50.0) is produced by the
+  WAVE/WATER constant cluster, now byte-located: **f64 0.5 @0x00A79A08** (an FSUB
+  target in the slot-fill context), **f32 2.0 @0x00A97CC8**, **f64 512.0 @0x00A97C88**
+  (an FCOMP clamp) — the neighbors of the canon 73.0 @0x00A97C90 / 53.0 @0x00A97C98
+  / water 10.0f @0x00A7B128 (all re-verified tonight).
+- DIRECTION (byte-established): a wave/water-cluster-computed height gets **+50.0
+  added** before the slot packer stores `{value, 50.0f}` — i.e., **the +50.0 = the
+  datum-plane shift applied at the ArkHeightTree leaf-slot build**; the slot heights
+  are expressed in a +50.0-referenced frame.
+- THE REMAINING BOUND (honest): the exact composition of that frame with the water
+  level 10.0f and the (t-128)x5 field frame (which absolute world height the +50.0
+  plane sits at) needs the Ghidra decompile of 0x00948300/0x00949000 + their callers
+  (0x0094871C / 0x0044D3D5). STRONGLY_SUPPORTED, not CONFIRMED.
+
+## INSTRUMENT LESSON (my own va2off bug — for the QC ledger)
+
+The first constant-read attempt in this run produced uniform garbage (all f32 =
+8.32e-38, all f64 = 1.168e+87): the inlined va2off had its `va` PARAMETER SHADOWED by
+the section-loop variable (`vsize, va, rsize, raw = ...`), making rva a constant
+(the last section's VA) for every call. Detected by the uniform-value signature +
+the contradiction with the stage-b/B2 results (which used separate functions and
+are UNAFFECTED — their reads re-verified correct). LESSON: never inline the
+section-parse loop into a VA-parameterized helper; name the loop variable
+differently (sva) or use a separate function. All values in this report are from
+the fixed reader.
+
 ## MILESTONE_PROGRESS vector
 
 ```
@@ -104,12 +137,17 @@ display_enum: the environment side CLOSED (the degenerate RDP adapter set measur
               exact predicate UNVERIFIED (needs Ghidra)"
 manifest:     the contradiction settled byte-level (.rsrc: 3/14/16 only; no 24);
               the MSVCR80 mechanism = WIN_SXS_STORE_FALLBACK (empirical)
+plus50:       the direction NARROWED — the wave/water-cluster value + 50.0 (f64
+              @0x00A81D20) -> the slot {value, 50.0f}; new byte-locks: 0.5 f64
+              @0x00A79A08, 2.0 f32 @0x00A97CC8, 512.0 f64 @0x00A97C88; the slot-fill
+              functions 0x00948080/0x00948300/0x00949000 + their callers mapped;
+              the final frame composition = the Ghidra bound
 files:        the trace CSV independently read (2,193 rows; the full Load Image
               census 77); the exe import census (24 DLLs, zero display APIs);
               the string census ("Direct3DCreate9" @0xA87CC0 only)
 excluded:     zero client runtime; zero wiki edits; NO M2; era 9.3.5
 NOT_CHECKED:  the exact -1 predicate; the enum's in-process caller; the R-channel;
-              the +50.0 semantic direction; the TEZ<->field relation
+              the final +50.0 frame composition; the TEZ<->field relation
 ```
 
 RUN_STATUS = COMPLETED
