@@ -55,3 +55,15 @@ machine (create S_OK; CreateDevice mouse/keyboard S_OK; EnumDevices S_OK) => the
 hypothesis REFUTED. The instrument lessons (the hallucinated-GUID trap; the vtable +0xC =
 CreateDevice; VA-vs-RVA). The predicate hunt continues (the WMV reader / the Bink surface
 pre-init = the H4 candidates; the GetDC/GetDeviceCaps empirical probes).
+
+## HOUR 4 — COMPLETED: the display trail mapped (N-11)
+
+The display-API probe (GetDC/GetDeviceCaps/GetSystemMetrics/EnumDisplayDevices all OK;
+the v1 CreateDCA-fail claim RETRACTED as my marshaling artifact); the Bink route =
+DirectDraw (found the runtime strings) BUT ddraw NEVER loaded => the death PRECEDES all
+the graphics-DLL routes; the orchestrator decoded (FUN_004172a0: the ctor sequence incl.
+PhysX-with-MessageBox + the ~10-gate chain, any FALSE = the abort); THE DisplaySubsystem
+CLASS FOUND (FUN_0048aef0 ctor + vtable + the OS-probe); dpvs.dll = UPX-PACKED (unpacked
+cleanly; KERNEL32-only imports + a user32 string => the ordinal-resolution suspect).
+THE H5 LEADS: the DisplaySubsystem vtable methods; the DPVS Library init (the 0x7C5xxx
+cluster); dpvs's ordinal-resolved user32 call.
