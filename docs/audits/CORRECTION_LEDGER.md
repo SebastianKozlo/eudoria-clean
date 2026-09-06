@@ -234,3 +234,46 @@ PE_M1_X87CW_AUTOMATION_R1 measurement verdict OPEN-BREAKPOINT_UNREACHED_WITHIN_B
 
 (Executor's own QC lessons recorded with the retraction: (1) the status code 0xC0000135 was read but NEVER DECODED before the session was interpreted â€” every exit code must be decoded before interpretation; (2) the harness v2 timeout branch OVERWROTE window_closed_by (target_exit -> timeout_no_events) â€” the close marker must never be overwritten; (3) the import-table walk (now done) shows a THIRD missing import: d3dx9_30.dll â€” the repair must close the whole import set, not the two named.)
 
+---
+## LED-ENTRY: iter029 429259.dat payload SHA pin defective (PE-MASTER physical re-hash)
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop 0ed3ca19-99c6-4af0-974b-f64fc2842c76, iteration 1; RUN-3 review) — appended by pe-master-auditor (PE_MASTER_VERDICT_PERSISTENCE_BATCH_R1)
+- superseded_claim: "PCG 9.3.5 Textures.bnt entry 429259.dat payload SHA256 = 23D7742EBA6FFB1FDA2F8A58BD0EB95AFDBE055CE23437FF5B47C5A0163A1ED0" (source: docs/forensics/iter029-worldtex-delivery-channel-re.md §(a) + iter029 evidence)
+- finding: the physical payload (index 71, offset 6,920,273, size 198,191) hashes to 0BADB42EC131EE53C49E63EADEE529AA18A68A31D0CF16A57694488FF3333412 (PE-MASTER physical re-hash 2026-09-06; RUN-3's independent pin concurs; the local 01_RAW\global_height_429259.tga copy is byte-identical to the payload).
+- correction: the canonical 429259.dat payload SHA256 for the PCG 9.3.5 Textures.bnt is 0BADB42E...; the 23D7742E... figure is a defective pin (likely a different representation hashed); NO measurement conclusion of iter029 is affected (identity pin only); future hash sweeps must use 0BADB42E... for this payload.
+- severity: P2, identity pin only
+- evidence: PE-MASTER physical re-hash 2026-09-06 (RUN-3 pins + the local 01_RAW\global_height_429259.tga byte-identity); RUN-3's independent pin; PE_MASTER_REVIEW.md (PE_M1_GEOREF_P_DATUM_R1_20260905_154841), finding F-R2
+
+---
+## LED-ENTRY: RUN-3 "terrain.bnt entries sequentially named" premise REFUTED (filename-xy grid confirmed)
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop 0ed3ca19-99c6-4af0-974b-f64fc2842c76, iteration 1; RUN-3 review) — appended by pe-master-auditor (PE_MASTER_VERDICT_PERSISTENCE_BATCH_R1)
+- superseded_claim: "the 9.3.5 terrain.bnt entries are SEQUENTIALLY named (00000000.tdf..) and their headers do NOT carry the world placement → the tile→world key must come from the runtime's zone/cell tables" (source: PE_M1_GEOREF_P_DATUM_R1_20260905_154841 stage_a_headers.py docstring + 00_FINAL_REPORT.md BLOCKED-UNKNOWN section)
+- finding: PE-MASTER physical name census (2026-09-06): the 58,451 PCG terrain.bnt names are filename-XY hex — 51,920 regular (x∈[0..219], y∈[0..235], the SAME convention as JUL 2003, fully populated, 0 duplicates), 6,530 special rows (y∈[0xff1a..0xffff], x∈[0..217]), 1 sentinel (7ffe7ffe.tdf, same as JUL); decisive: name-integers 255/236 absent, 65,536 present; not dense-sequential.
+- correction: the DATA-level per-tile grid key IS locally available in both eras (the name-xy grid; reinforced by 51,147/51,920 same-name tiles with byte-identical height blocks); the per-tile-keying BLOCKED-UNKNOWN re-scopes to the ENGINE-side keying mechanism only (which source the 9.3.5 runtime consumes — the FUN_0093f800 RB-tree lead stands as the open question); the TDF-header conclusion (x/y = zone/layer IDs, 6,747 duplicate pairs) is UNAFFECTED and CONFIRMED. Historical run files stay byte-identical; the entrypoint wording updated in the same batch.
+- severity: P1, premise refuted; re-scopes a BLOCKED-UNKNOWN
+- evidence: PE-MASTER physical name census 2026-09-06 (the PE_M1_GEOREF_P_DATUM_R1_20260905_154841 package + terrain.bnt); PE_MASTER_REVIEW.md (PE_M1_GEOREF_P_DATUM_R1_20260905_154841), finding F-R1
+
+---
+## LED-ENTRY: RUN-F artifact_index.csv SHA256_DRIVER.txt row STALE (manifest self-reference)
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop 0ed3ca19-99c6-4af0-974b-f64fc2842c76, iteration 1; RUN-F review) — appended by pe-master-auditor (PE_MASTER_VERDICT_PERSISTENCE_BATCH_R1)
+- superseded_claim: the artifact_index.csv row hash for 00_CONTROL/SHA256_DRIVER.txt (RUN-F package)
+- finding: the row is STALE: build_index.py indexed SHA256_DRIVER.txt, and the file was subsequently appended with build_index.py's own hash line (the manifest-self-reference L12 variant); PE-MASTER re-hash 2026-09-06: 8/9 rows OK; the driver hashes recorded INSIDE SHA256_DRIVER.txt are correct (census_revalidation.py f0bdbc8e..., build_index.py d02b5b8d...).
+- correction: future re-hash sweeps over the RUN-F package must treat the SHA256_DRIVER.txt row as the documented self-referential exclusion (or re-index); no data result affected.
+- severity: P3, manifest hygiene only
+- evidence: PE-MASTER artifact_index re-hash 2026-09-06 (8/9 OK + 1 stale row); PE_MASTER_REVIEW.md (PE_NIF_BLOCK_CENSUS_REVALIDATION_R1_20260905_140816), finding (b)
+
+---
+## LED-ENTRY: RUN-E 01_RAW/FALSIFICATION_RESULTS.json verdicts layer clarification (authoritative layer = 05_ANALYSIS/VERDICTS.json)
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop 0ed3ca19-99c6-4af0-974b-f64fc2842c76, iteration 1; RUN-E review) — appended by pe-master-auditor (PE_MASTER_VERDICT_PERSISTENCE_BATCH_R1)
+- superseded_claim: none (a layer-clarification, no claim was wrong)
+- finding: 01_RAW/FALSIFICATION_RESULTS.json contains the first driver's BUGGY verdict array (predictions_matched "2/6", falsification_proven=false) — self-disclosed in RUN-E's report; the authoritative verdict layer is 05_ANALYSIS/VERDICTS.json (5/6, verdicts_fixed.py).
+- correction (standing): readers must cite VERDICTS.json for the falsification outcome; PE-MASTER re-execution (2026-09-06) confirms all 6 outcomes; the raw artifact stays byte-identical as the honest instrument record.
+- severity: P3, standing reader guidance
+- evidence: RUN-E report self-disclosure; both driver hashes in 00_CONTROL/SHA256_DRIVER.txt; PE-MASTER re-execution 2026-09-06 (all outcomes reproduced); PE_MASTER_REVIEW.md (PE_NIF_WITNESS_FALSIFICATION_R1_20260905_131214), finding (b)
