@@ -1,0 +1,24 @@
+=== ORIGINAL APPLICATION RUN (first execution, captured from executor session 2026-09-06) ===
+Command: python docs/audits/PE_NIF_WIKI_WORDING_F2_DELTATRIPLES_R1_20260906/00_CONTROL/edit_f2_delta.py
+Exit code: 0
+Raw output (verbatim):
+ANCHOR docs/nif/02-block-registry.md
+  old_occurrences=1 old_hex_len=80
+  RESULT=APPLIED new_occurrences=1 old_occurrences_after=0
+ANCHOR docs/nif/10-containers-corpus.md
+  old_occurrences=1 old_hex_len=39
+  RESULT=APPLIED new_occurrences=1 old_occurrences_after=0
+ANCHOR docs/nif/09-semantics.md
+  old_occurrences=1 old_hex_len=24
+  RESULT=APPLIED new_occurrences=1 old_occurrences_after=0
+SUMMARY: ALL_APPLIED
+  ('docs/nif/02-block-registry.md', 'APPLIED', 1)
+  ('docs/nif/10-containers-corpus.md', 'APPLIED', 1)
+  ('docs/nif/09-semantics.md', 'APPLIED', 1)
+
+NOTE: The same script re-executed AFTER the edits (see edit_idempotence_check_postedit.txt)
+reports old_occurrences=0 for all three anchors and refuses to write (ANCHOR_NOT_UNIQUE
+guard) — byte-level proof that (a) no double-application is possible with this script and
+(b) the old fragments are absent post-edit. The byte-safe mechanism: files read/written as
+BYTES; fragments UTF-8-encoded; exactly-once enforced before replace; write happens only
+after post-replace 0x-old/1x-new verification.
