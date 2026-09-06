@@ -1,0 +1,179 @@
+{
+ "standing": "Standing sentence: no semantic claims; the +65 H5a/H5c2 status = RETROSPECTIVE_VALIDATED (RUN A); the H7 join-mechanism = UNVALIDATED (RUN A) - this run makes NO H7-based claims; the residual-325 population is OUT OF SCOPE (stays mechanism-unexplained; a diagnostic note only, no new claims). Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+ "spec": "MANIFEST_SCHEMA_SPEC.md (RUN B spec; dogfooding)",
+ "manifest": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_NIF_MORPH_WIDERECORD_R1_20260906_170000\\artifact_index.csv",
+ "documented_exclusions": [
+  "artifact_index.csv (self-hash impossible; documented precedent)",
+  "05_ANALYSIS/MANIFEST_VALIDATION.json (circular: records the validation of this manifest; written last)"
+ ],
+ "pre_validation_in_memory": {
+  "gate_pass": true,
+  "ordinary_rows": 19,
+  "note": "executed BEFORE the final gates CSV write; the gates CSV row was added afterwards with the hash of its final on-disk bytes"
+ },
+ "post_write_physical_validation": {
+  "gate_pass": true,
+  "ordinary_rows": 21,
+  "external_rows": 12,
+  "findings": []
+ },
+ "negative_tests": {
+  "standing": "Standing sentence: no semantic claims; the +65 H5a/H5c2 status = RETROSPECTIVE_VALIDATED (RUN A); the H7 join-mechanism = UNVALIDATED (RUN A) - this run makes NO H7-based claims; the residual-325 population is OUT OF SCOPE (stays mechanism-unexplained; a diagnostic note only, no new claims). Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+  "spec": "MANIFEST_SCHEMA_SPEC.md validation gate negative tests",
+  "tests": [
+   {
+    "case": "a_unquoted_comma",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,a role, with unquoted comma,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_MANIFEST_ROW",
+      [
+       "00_CONTROL/CONTRACT.md",
+       "a role",
+       " with unquoted comma",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+     ]
+    ]
+   },
+   {
+    "case": "b_missing_newline_between_records",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00_CONTROL/PREREG_MARKER.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_MANIFEST_ROW",
+      [
+       "00_CONTROL/CONTRACT.md",
+       "gen",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00_CONTROL/PREREG_MARKER.txt",
+       "gen",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+     ]
+    ]
+   },
+   {
+    "case": "c_missing_file",
+    "rows": [
+     "00_CONTROL/NONEXISTENT_FILE.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MISSING_FILE",
+      "00_CONTROL/NONEXISTENT_FILE.txt"
+     ]
+    ]
+   },
+   {
+    "case": "d_malformed_hash",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,deadbeef"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_HASH",
+      "deadbeef"
+     ]
+    ]
+   },
+   {
+    "case": "e_unsupported_symbolic_path_shape",
+    "rows": [
+     "Z:\\absolute\\path.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "UNSUPPORTED_PATH_SHAPE",
+      "Z:\\absolute\\path.txt"
+     ]
+    ]
+   },
+   {
+    "case": "f_duplicate_row",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "HASH_MISMATCH",
+      "00_CONTROL/CONTRACT.md",
+      "404f73687913a5ee934ce123b6bd9588bc2427dfd7b73b2f217f1b21f6ff5f3e",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     ],
+     [
+      "DUPLICATE_ROW",
+      "00_CONTROL/CONTRACT.md"
+     ]
+    ]
+   }
+  ],
+  "all_six_fail_the_gate": true
+ },
+ "manifest_gate_verdict": "PASS",
+ "qc1_correction_revalidation_20260906": {
+  "date": "2026-09-06",
+  "trigger": "QC1 correction (documentation amendments only, per INTERNAL_QC_R1 D1-D6; NO re-run; driver and raw evidence untouched)",
+  "standing": "Standing sentence: no semantic claims; the +65 H5a/H5c2 status = RETROSPECTIVE_VALIDATED (RUN A); the H7 join-mechanism = UNVALIDATED (RUN A) - this run makes NO H7-based claims; the residual-325 population is OUT OF SCOPE (stays mechanism-unexplained; a diagnostic note only, no new claims). Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+  "manifest_changes": {
+   "ordinary_rows_added": [
+    "01_RAW/ARTIFACT_CLASS_NOTES.md"
+   ],
+   "row_hashes_replaced": [
+    "06_REPORT/00_FINAL_REPORT.md: 82f5ee8ec763937f93fc0f3362b908c6b34215d7cd9e625ed632ab247534b617 -> ae1b8a818ac48cf2eb14e8051ccdc7987f73f4ae181c0d2f8deca5da366657cb (QC1 AMENDMENT section appended per D1-D4; pre-edit byte-exact backup at 00_CONTROL/PRE_EDIT_QC1/00_FINAL_REPORT.md.pre)"
+   ]
+  },
+  "validator": "qc1_manifest_revalidation.py (independent validator, Python standard csv module; NOT the run driver; negative tests a-f re-executed on this validator)",
+  "gate_pass": true,
+  "ordinary_rows": 22,
+  "external_rows": 12,
+  "findings": [],
+  "negative_tests_rerun": "a-f re-executed: 6/6 gate_failed_as_required = true; all_six_fail_the_gate = true",
+  "package_census": {
+   "total_files_on_disk_at_validation": 26,
+   "manifested_ordinary": 22,
+   "files_not_manifested_documented": {
+    "artifact_index.csv": "self-hash impossible; documented precedent",
+    "05_ANALYSIS/MANIFEST_VALIDATION.json": "circular: records the validation of this manifest",
+    "00_CONTROL/INTERNAL_QC_R1.md": "the internal QC's own record file (QC-authored; executor read-only)",
+    "00_CONTROL/PRE_EDIT_QC1/00_FINAL_REPORT.md.pre": "pre-edit byte-exact backup of the report before the QC1 amendment (RUN A PRE_EDIT precedent)",
+    "00_CONTROL/QC1_CORRECTION_LOG.md": "this correction's log; written AFTER this validation snapshot (correction step 5); brings package total to 27 files"
+   }
+  },
+  "manifest_sha256_at_this_validation": "95b3ce98259b68eb465036a30de0b4d68dfe08a9986de57e067c40b09834505f",
+  "manifest_gate_verdict_after_qc1": "PASS"
+ },
+ "persistence_manifest_revalidation_20260906": {
+  "date": "2026-09-06",
+  "trigger": "RUN C persistence (PERSIST_PUBLISH, PE-MASTER loop bd17344b iteration 3): PE_MASTER_REVIEW.md (MASTER_ACCEPTED advisory) persisted; the package copied into the repo docs/audits tree (28 files, per-file SHA-identical); two ordinary rows appended to the manifest (PE_MASTER_REVIEW.md + 00_CONTROL/INTERNAL_QC_R1.md)",
+  "validator": "persist_manifest_revalidation.py (independent validator by pe-master-auditor, Python 3.12.10 standard csv module; NOT the run driver; NOT the run manifest builder; negative tests a-f executed on this validator)",
+  "validated_copies": "BOTH (the 99_Audits RC dir and the repo docs/audits tree copy); byte-identical manifests",
+  "gate_pass": true,
+  "ordinary_rows": 24,
+  "external_rows": 12,
+  "findings": [],
+  "negative_tests_rerun": "a-f executed: 6/6 gate_failed_as_required = true; all_six_fail_the_gate = true",
+  "package_census": {
+   "total_files_on_disk_at_validation": 28,
+   "manifested_ordinary": 24,
+   "files_not_manifested_documented": {
+    "artifact_index.csv": "self-hash impossible; documented precedent",
+    "05_ANALYSIS/MANIFEST_VALIDATION.json": "circular: records the validation of this manifest",
+    "00_CONTROL/QC1_CORRECTION_LOG.md": "control-plane correction log; written after the QC1 validation snapshot; documented non-manifested (QC1 log section 4)",
+    "00_CONTROL/PRE_EDIT_QC1/00_FINAL_REPORT.md.pre": "pre-edit byte-exact backup of the report before the QC1 amendment (RUN A PRE_EDIT precedent)"
+   }
+  },
+  "manifest_sha256_at_this_validation": "90afd501ea851d008f25a5d604005a9186f5deffe09d02755fe229308e4dd685",
+  "manifest_gate_verdict_after_persistence": "PASS"
+ }
+}

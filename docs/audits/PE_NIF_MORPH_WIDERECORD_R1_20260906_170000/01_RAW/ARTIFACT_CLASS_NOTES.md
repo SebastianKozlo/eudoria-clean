@@ -1,0 +1,3 @@
+# Artifact class notes (per INTERNAL_QC_R1 D5/D6)
+- WIDE_NC_TRIALS.jsonl rows are per-record NEGATIVE-CONTROL evidence (result-class: BYTE_MATCH-class trials; they carry hit/reason/denominator fields and no corpus result_class by design — this note supplies the standing sentence for the file): no semantic claims; the +65 status = RETROSPECTIVE_VALIDATED (RUN A); the H7 mechanism = UNVALIDATED (RUN A); no residual-325 claims; no H7-based claims.
+- NEGATIVE_FIXTURES_GEXEC.json is a TOOLING artifact (the G-EXEC gate's eight synthetic fixtures) — its result_class field value "G-EXEC" denotes tooling, not one of the four corpus result classes; the aux control files in 01_RAW share this tooling status.

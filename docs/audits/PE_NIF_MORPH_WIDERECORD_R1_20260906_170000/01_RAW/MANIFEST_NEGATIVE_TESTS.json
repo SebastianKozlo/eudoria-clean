@@ -1,0 +1,103 @@
+{
+ "standing": "Standing sentence: no semantic claims; the +65 H5a/H5c2 status = RETROSPECTIVE_VALIDATED (RUN A); the H7 join-mechanism = UNVALIDATED (RUN A) - this run makes NO H7-based claims; the residual-325 population is OUT OF SCOPE (stays mechanism-unexplained; a diagnostic note only, no new claims). Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+ "spec": "MANIFEST_SCHEMA_SPEC.md validation gate negative tests",
+ "tests": [
+  {
+   "case": "a_unquoted_comma",
+   "rows": [
+    "00_CONTROL/CONTRACT.md,a role, with unquoted comma,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   ],
+   "gate_failed_as_required": true,
+   "findings": [
+    [
+     "MALFORMED_MANIFEST_ROW",
+     [
+      "00_CONTROL/CONTRACT.md",
+      "a role",
+      " with unquoted comma",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     ]
+    ]
+   ]
+  },
+  {
+   "case": "b_missing_newline_between_records",
+   "rows": [
+    "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00_CONTROL/PREREG_MARKER.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   ],
+   "gate_failed_as_required": true,
+   "findings": [
+    [
+     "MALFORMED_MANIFEST_ROW",
+     [
+      "00_CONTROL/CONTRACT.md",
+      "gen",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00_CONTROL/PREREG_MARKER.txt",
+      "gen",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     ]
+    ]
+   ]
+  },
+  {
+   "case": "c_missing_file",
+   "rows": [
+    "00_CONTROL/NONEXISTENT_FILE.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   ],
+   "gate_failed_as_required": true,
+   "findings": [
+    [
+     "MISSING_FILE",
+     "00_CONTROL/NONEXISTENT_FILE.txt"
+    ]
+   ]
+  },
+  {
+   "case": "d_malformed_hash",
+   "rows": [
+    "00_CONTROL/CONTRACT.md,gen,deadbeef"
+   ],
+   "gate_failed_as_required": true,
+   "findings": [
+    [
+     "MALFORMED_HASH",
+     "deadbeef"
+    ]
+   ]
+  },
+  {
+   "case": "e_unsupported_symbolic_path_shape",
+   "rows": [
+    "Z:\\absolute\\path.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   ],
+   "gate_failed_as_required": true,
+   "findings": [
+    [
+     "UNSUPPORTED_PATH_SHAPE",
+     "Z:\\absolute\\path.txt"
+    ]
+   ]
+  },
+  {
+   "case": "f_duplicate_row",
+   "rows": [
+    "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   ],
+   "gate_failed_as_required": true,
+   "findings": [
+    [
+     "HASH_MISMATCH",
+     "00_CONTROL/CONTRACT.md",
+     "404f73687913a5ee934ce123b6bd9588bc2427dfd7b73b2f217f1b21f6ff5f3e",
+     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    [
+     "DUPLICATE_ROW",
+     "00_CONTROL/CONTRACT.md"
+    ]
+   ]
+  }
+ ],
+ "all_six_fail_the_gate": true
+}

@@ -357,3 +357,13 @@ PE_M1_X87CW_AUTOMATION_R1 measurement verdict OPEN-BREAKPOINT_UNREACHED_WITHIN_B
 - finding: the +65 fits (H5a 39 + H5c2 26): CANDIDATE -> RETROSPECTIVE_VALIDATED (advisory) by RUN A: the frozen grammars hold on the file-grouped 50/50 retrospective split (H5a held-out 14 fits rate 0.0859 vs NC 0.006135 = 14.0x; H5c2 20 fits 0.1227 = 20.0x); repeatability exact (39/26 vs K2). Explicitly RETROSPECTIVE (the grammars were selected on these populations in K2), NOT unseen-data validation.
 - correction: the coverage 2,158/2,427 = 88.88% carries this status.
 - evidence: RUN A RETROSPECTIVE_RESULTS.json; commit cdfb6ff.
+
+---
+## LED-ENTRY: I — K2 post-hoc wide-record candidate RESOLVED by RUN C (PE_NIF_MORPH_WIDERECORD_R1_20260906_170000): W1 [u16 idx][32xf32] PASS (12/269) + W3 superset (13/269) = +13 RETROSPECTIVE_VALIDATED with mandatory bounds; W2 (var-k k 9..24) REFUTED
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop bd17344b-a054-4cf4-be8d-5f0b250e8509, RUN C PE_NIF_MORPH_WIDERECORD_R1_20260906_170000, persistence batch) — appended by pe-master-auditor (PERSIST_PUBLISH)
+- superseded_claim: PE_NIF_MORPH_RESIDUAL_DEEPDIVE_R1 (03b00cc) — the K2 post-hoc wide-record candidate status ("the wide-record [idx][32xf32] class = the pre-registered next candidate")
+- finding: the K2 post-hoc wide-record candidate RESOLVED by RUN C (PE_NIF_MORPH_WIDERECORD_R1_20260906_170000): W1 [u16 idx][32xf32] PASS (12/269) and W3 superset (13/269) — the +13 spans RETROSPECTIVE_VALIDATED with mandatory bounds (family-concentrated 12/13 in 548296.nif bi=75; side B only; the 0-hit NC partly structural); W2 (var-k k 9..24) REFUTED (0/269 vs NC 5/538).
+- correction: coverage 2,171/2,427 = 89.45% (2,093 canon + 65 RUN A + 13 RUN C); remaining no-fit 256.
+- evidence: RUN C WIDE_RESULTS.json + the QC1 AMENDMENT; commit: this C1 persistence commit (a commit cannot embed its own SHA; the real C1 SHA is carried in the AUDIT_ENTRYPOINT RUN C row Commit cell — backfilled by commit C2 — and verbatim in the C2 commit message; discoverable via `git log -1 -- docs/audits/PE_NIF_MORPH_WIDERECORD_R1_20260906_170000/`).
