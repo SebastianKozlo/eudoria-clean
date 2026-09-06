@@ -74,5 +74,80 @@
   "negative_tests_all_fail_as_required": true,
   "result": "PASS",
   "failures": [],
-  "post_c3_note": "commit C3 later updates STAGE_ACCEPTANCE_GATES.csv (the G4 remote-verification record) and refreshes this manifest's gates-row hash (2 path-limited paths); the post-C3 manifest is re-validated by the same deterministic gate and the re-validation is recorded in 00_CONTROL/B3_EXECUTION_LOG.md (99_Audits master copy); this record pins the C1-time manifest hash above."
+  "post_c3_note": "commit C3 later updates STAGE_ACCEPTANCE_GATES.csv (the G4 remote-verification record) and refreshes this manifest's gates-row hash (2 path-limited paths); the post-C3 manifest is re-validated by the same deterministic gate and the re-validation is recorded in 00_CONTROL/B3_EXECUTION_LOG.md (99_Audits master copy); this record pins the C1-time manifest hash above.",
+  "revalidation_entries": [
+    {
+      "validated_at_utc": "2026-09-06T15:07:40.645311+00:00",
+      "trigger": "PE-MASTER verdict persistence (loop bd17344b RUN B): 2 ordinary rows appended to artifact_index.csv (00_CONTROL/INTERNAL_QC_R1.md fresh_internal_qc_record; PE_MASTER_REVIEW.md pe_master_review); re-validation before commit",
+      "parser": "Python 3.12.10 csv module (RFC-4180 reader; comment lines are a schema feature skipped at line level)",
+      "validator_script": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\pe_nif_ladder_persist_b\\revalidate_manifest_run_b.py",
+      "validator_script_sha256": "fd403a0eb72fb2bca3187d0bc0a54480f43f8e2515a343c84f18637c3d08d66c",
+      "gate_function_provenance": "gate() and the 6 negative fixtures copied verbatim from C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\pe_nif_ladder_b3\\validate_manifest.py (validator_script_sha256 of the C1-time record above = 2ff3f4a5e8c4f195e288070bfd95d8d0924aa01bc268ccdfb920bcdc0a827ee9; re-verified byte-identical immediately before this run)",
+      "manifest_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIF_LADDER_CORRECTIONS_R1_20260906_134500\\artifact_index.csv",
+      "manifest_sha256_at_validation": "ed58b1dd74e6d6e4e2b6afb41e53da2c53057f81681a937463de79cb2fb9f029",
+      "package_root": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIF_LADDER_CORRECTIONS_R1_20260906_134500",
+      "ordinary_rows_checked": 15,
+      "external_source_rows_checked": 6,
+      "comment_lines": 3,
+      "assertions": [
+        "ordinary rows: exactly 3 fields",
+        "sha256 matches ^[0-9a-fA-F]{64}$",
+        "artifact path package-relative and exists in the package",
+        "physical SHA256 equals the row hash",
+        "no duplicate artifact paths / source_ids",
+        "external rows match the 5-field sub-schema (kind=external_source, era non-empty, physical_path exists, hash match)",
+        "manifest self-exclusion of artifact_index.csv respected",
+        "no unlisted package files except the disclosed self-reference set {artifact_index.csv, 00_CONTROL/MANIFEST_VALIDATION.json, 00_CONTROL/B3_EXECUTION_LOG.md}"
+      ],
+      "negative_tests": {
+        "a_unquoted_comma": {
+          "expected": "FAIL",
+          "got": "FAIL",
+          "failure_classes": [
+            "row 2: ordinary row has 4 fields (expected 3): ['GOOD.md', 'execution', ' log', '106675dc1490d5cdd6d1f0410731316ce93fc964c6cf6726e2b0d53e19688feb']"
+          ]
+        },
+        "b_missing_newline": {
+          "expected": "FAIL",
+          "got": "FAIL",
+          "failure_classes": [
+            "row 2: ordinary row has 5 fields (expected 3): ['GOOD.md', 'r1', '106675dc1490d5cdd6d1f0410731316ce93fc964c6cf6726e2b0d53e19688febGOOD.md', 'r2', '106675dc1490d5cdd6d1f0410731316ce93fc964c6cf6726e2b0d53e19688feb']",
+            "external header row absent"
+          ]
+        },
+        "c_missing_file": {
+          "expected": "FAIL",
+          "got": "FAIL",
+          "failure_classes": [
+            "row 3: artifact missing from package: 'GHOST.md'"
+          ]
+        },
+        "d_malformed_hash": {
+          "expected": "FAIL",
+          "got": "FAIL",
+          "failure_classes": [
+            "row 2: sha256 not 64-hex: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'"
+          ]
+        },
+        "e_symbolic_path": {
+          "expected": "FAIL",
+          "got": "FAIL",
+          "failure_classes": [
+            "row 3: artifact not package-relative: 'C:\\\\absolute\\\\outside.md'",
+            "row 3: artifact missing from package: 'C:\\\\absolute\\\\outside.md'"
+          ]
+        },
+        "f_duplicate_row": {
+          "expected": "FAIL",
+          "got": "FAIL",
+          "failure_classes": [
+            "row 3: duplicate artifact 'GOOD.md'"
+          ]
+        }
+      },
+      "negative_tests_all_fail_as_required": true,
+      "result": "PASS",
+      "failures": []
+    }
+  ]
 }
