@@ -1,0 +1,271 @@
+=== ___tmainCRTStartup @0x0095d750
+
+/* WARNING: Function: __SEH_prolog4 replaced with injection: SEH_prolog4 */
+/* WARNING: Function: __SEH_epilog4 replaced with injection: EH_epilog3 */
+/* Library Function - Single Match
+    ___tmainCRTStartup
+   
+   Library: Visual Studio 2008 Release */
+
+int ___tmainCRTStartup(void)
+
+{
+  byte bVar1;
+  LONG LVar2;
+  BOOL BVar3;
+  int iVar4;
+  bool bVar5;
+  byte *pbVar6;
+  _STARTUPINFOA local_6c;
+  byte *local_24;
+  uint local_20;
+  undefined4 uStack_c;
+  undefined4 local_8;
+  
+  uStack_c = 0x95d75c;
+  bVar5 = false;
+  local_20 = 0;
+  local_8 = 0;
+  GetStartupInfoA(&local_6c);
+  local_8 = 1;
+  iVar4 = *(int *)((int)Self + 4);
+  do {
+    LVar2 = InterlockedCompareExchange((LONG *)&DAT_00ba96d4,iVar4,0);
+    if (LVar2 == 0) {
+LAB_0095d7b3:
+      if (DAT_00ba96d0 == 1) {
+        _amsg_exit(0x1f);
+      }
+      else if (DAT_00ba96d0 == 0) {
+        DAT_00ba96d0 = 1;
+        iVar4 = _initterm_e(&DAT_00a79534,&DAT_00a79544);
+        if (iVar4 != 0) {
+          return 0xff;
+        }
+      }
+      else {
+        DAT_00ba8e68 = 1;
+      }
+      if (DAT_00ba96d0 == 1) {
+        _initterm(&DAT_00a75a68,&DAT_00a79530);
+        DAT_00ba96d0 = 2;
+      }
+      if (!bVar5) {
+        InterlockedExchange((LONG *)&DAT_00ba96d4,0);
+      }
+      if ((DAT_00ba96d8 != (code *)0x0) &&
+         (BVar3 = __IsNonwritableInCurrentImage((PBYTE)&DAT_00ba96d8), BVar3 != 0)) {
+        (*DAT_00ba96d8)(0,2,0);
+      }
+      pbVar6 = *(byte **)_acmdln_exref;
+      while ((bVar1 = *pbVar6, local_24 = pbVar6, 0x20 < bVar1 || ((bVar1 != 0 && (local_20 != 0))))
+            ) {
+        if (bVar1 == 0x22) {
+          local_20 = (uint)(local_20 == 0);
+        }
+        iVar4 = _ismbblead((uint)bVar1);
+        if (iVar4 != 0) {
+          pbVar6 = pbVar6 + 1;
+        }
+        pbVar6 = pbVar6 + 1;
+      }
+      for (; (*local_24 != 0 && (*local_24 < 0x21)); local_24 = local_24 + 1) {
+      }
+      if (((byte)local_6c.dwFlags & 1) == 0) {
+        local_6c.wShowWindow = 10;
+      }
+      DAT_00ba8e64 = FUN_00401000(0x400000,0,local_24,local_6c.wShowWindow);
+      if (DAT_00ba8e58 != 0) {
+        if (DAT_00ba8e68 == 0) {
+          _cexit();
+        }
+        return DAT_00ba8e64;
+      }
+                    /* WARNING: Subroutine does not return */
+      exit(DAT_00ba8e64);
+    }
+    if (LVar2 == iVar4) {
+      bVar5 = true;
+      goto LAB_0095d7b3;
+    }
+    Sleep(1000);
+  } while( true );
+}
+
+
+tmain calls 14 functions:
+   -> FUN_00401000 @00401000
+   -> __SEH_prolog4 @0095dfec
+   -> __SEH_epilog4 @0095e031
+   -> _amsg_exit @0095e090
+   -> __IsNonwritableInCurrentImage @0095e170
+   -> _initterm @0095e22c
+   -> _initterm_e @0095e232
+   -> Sleep @EXTERNAL:00000019
+   -> GetStartupInfoA @EXTERNAL:00000056
+   -> InterlockedCompareExchange @EXTERNAL:00000058
+   -> InterlockedExchange @EXTERNAL:0000005d
+   -> _ismbblead @EXTERNAL:0000016a
+   -> _cexit @EXTERNAL:0000016d
+   -> exit @EXTERNAL:000001c9
+   candidate _amsg_exit @0095e090 size=6
+   candidate _initterm @0095e22c size=6
+   candidate _cexit @EXTERNAL:0000016d size=0
+   candidate GetStartupInfoA @EXTERNAL:00000056 size=0
+   candidate InterlockedCompareExchange @EXTERNAL:00000058 size=0
+   candidate exit @EXTERNAL:000001c9 size=0
+   candidate _initterm_e @0095e232 size=6
+   candidate FUN_00401000 @00401000 size=516
+   candidate InterlockedExchange @EXTERNAL:0000005d size=0
+   candidate Sleep @EXTERNAL:00000019 size=0
+   candidate _ismbblead @EXTERNAL:0000016a size=0
+WINMAIN-CANDIDATE = FUN_00401000 @00401000 (size 516)
+=== WINMAIN @0x401000 : FUN_00401000
+
+void FUN_00401000(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+
+{
+  bool bVar1;
+  char cVar2;
+  allocator<char> *paVar3;
+  LPSTR pCVar4;
+  char *pcVar5;
+  uint uVar6;
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_> *pbVar7;
+  void *pvVar8;
+  undefined4 *puVar9;
+  __time64_t _Var10;
+  undefined4 uVar11;
+  undefined auStack_50 [3];
+  allocator<char> aStack_4d;
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+  abStack_4c [24];
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+  abStack_34 [24];
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+  abStack_1c [24];
+  uint local_4;
+  
+  local_4 = DAT_00b9d8d0 ^ (uint)auStack_50;
+  _Var10 = _time64((__time64_t *)0x0);
+  srand((uint)_Var10);
+  paVar3 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&aStack_4d);
+  stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+            (abStack_1c,paVar3);
+  stlp_std::allocator<char>::~allocator<char>(&aStack_4d);
+  paVar3 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&aStack_4d);
+  pCVar4 = GetCommandLineA();
+  stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+            (abStack_34,pCVar4,paVar3);
+  stlp_std::allocator<char>::~allocator<char>(&aStack_4d);
+  bVar1 = stlp_std::
+          basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+          empty(abStack_34);
+  if (!bVar1) {
+    pcVar5 = stlp_std::
+             basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+             operator[](abStack_34,0);
+    if (*pcVar5 == '\"') {
+      uVar6 = stlp_std::
+              basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              ::find(abStack_34,"\"",1);
+      if (uVar6 == 0xffffffff) goto LAB_00401105;
+      uVar11 = 1;
+    }
+    else {
+      uVar6 = stlp_std::
+              basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              ::find(abStack_34," ",0);
+      if (uVar6 == 0xffffffff) {
+        stlp_std::
+        basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+        operator=(abStack_1c,abStack_34);
+        goto LAB_00401105;
+      }
+      uVar11 = 0;
+    }
+    pbVar7 = (basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              *)stlp_std::
+                basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+                ::substr(abStack_34,abStack_4c,uVar11,uVar6 - 1);
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::operator=(abStack_1c,pbVar7);
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_4c);
+  }
+LAB_00401105:
+  paVar3 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&aStack_4d);
+  stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+            (abStack_4c,"Entropia",paVar3);
+  FUN_00408850(abStack_4c);
+  stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+  ~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>(abStack_4c)
+  ;
+  stlp_std::allocator<char>::~allocator<char>(&aStack_4d);
+  cVar2 = FUN_00407270(0);
+  if (cVar2 != '\0') {
+    FUN_00406ec0();
+    paVar3 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&aStack_4d);
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_4c,"",paVar3);
+    FUN_00406a70(abStack_4c);
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_4c);
+    stlp_std::allocator<char>::~allocator<char>(&aStack_4d);
+    FUN_00406560(0xffffffff);
+    pvVar8 = operator_new(0x48);
+    if (pvVar8 == (void *)0x0) {
+      puVar9 = (undefined4 *)0x0;
+    }
+    else {
+      puVar9 = (undefined4 *)FUN_00402e90(param_1);
+    }
+    FUN_00404e50(param_3);
+    FUN_004055f0(abStack_1c);
+    if (puVar9 != (undefined4 *)0x0) {
+      (**(code **)*puVar9)(1);
+    }
+  }
+  FUN_00407480();
+  stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+  ~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>(abStack_34)
+  ;
+  stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+  ~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>(abStack_1c)
+  ;
+  ___security_check_cookie_4();
+  return;
+}
+
+
+WinMain calls 24 functions:
+   -> FUN_00402e90 @00402e90
+   -> FUN_00404e50 @00404e50
+   -> FUN_004055f0 @004055f0
+   -> FUN_00406560 @00406560
+   -> FUN_00406a70 @00406a70
+   -> FUN_00406ec0 @00406ec0
+   -> FUN_00407270 @00407270
+   -> FUN_00407480 @00407480
+   -> FUN_00408850 @00408850
+   -> operator_new @0095d3c4
+   -> @__security_check_cookie@4 @0095d3ca
+   -> GetCommandLineA @EXTERNAL:00000054
+   -> allocator<char> @EXTERNAL:0000014f
+   -> basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_> @EXTERNAL:00000150
+   -> ~allocator<char> @EXTERNAL:00000151
+   -> basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_> @EXTERNAL:00000152
+   -> empty @EXTERNAL:00000153
+   -> operator[] @EXTERNAL:00000154
+   -> find @EXTERNAL:00000155
+   -> substr @EXTERNAL:00000156
+   -> operator= @EXTERNAL:00000157
+   -> ~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_> @EXTERNAL:00000158
+   -> _time64 @EXTERNAL:000001b3
+   -> srand @EXTERNAL:000001b5

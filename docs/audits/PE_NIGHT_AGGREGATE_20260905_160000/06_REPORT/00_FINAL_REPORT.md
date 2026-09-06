@@ -152,3 +152,17 @@ NOT_CHECKED:  the exact -1 predicate; the enum's in-process caller; the R-channe
 
 RUN_STATUS = COMPLETED
 HARD_STOP_REASON = NONE (the night continues to the next bounded item per the human's challenge)
+
+## FINDING N-5 (append) — THE DISPLAY PREDICATE STATIC RE (the Ghidra chain)
+
+See 06_REPORT\FINDING_N5_DISPLAY_PREDICATE_RE.md for the full record. Summary:
+the client boot chain decompiled end-to-end (WinMain @0x401000 -> RUN @0x4055f0 ->
+the window -> WSAStartup -> the deep-init @0x405150 -> the message loop @0x402910 ->
+the LOOP-STEP @0x417030); the -1 mechanism = the DPVS teardown-exit (FUN_007c5310,
+the ONLY exit() caller; the device-state-bit watcher FUN_007b7d50 = the drop trigger);
+mac3r = the Massive Inc. ADVERTISING client (a canon correction — NOT the renderer);
+binkw32 = the ONLY display-capable loaded module (the intro-video route); the display
+enum = the OS-internal enumeration behind binkw32's display query; the failing value =
+HardwareInformation.MemorySize (MISSING on the RDP adapter). STRONGLY_SUPPORTED; the
+exact in-binkw32 check = UNVERIFIED. The reusable Ghidra project: ghidra_proj\
+PE935_DISPLAY_ENUM_R1 (the analyzed program retained; -process -noanalysis for queries).

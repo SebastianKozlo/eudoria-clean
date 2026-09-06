@@ -1,0 +1,45 @@
+=== THE-GATE-FUN_00407270 @0x407270 : FUN_00407270
+
+uint FUN_00407270(char param_1)
+
+{
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_> *this;
+  char *lpName;
+  HANDLE hHandle;
+  DWORD DVar1;
+  uint uVar2;
+  
+  this = (basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_> *)
+         FUN_0040b070();
+  lpName = stlp_std::
+           basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+           c_str(this);
+  hHandle = CreateMutexA((LPSECURITY_ATTRIBUTES)0x0,1,lpName);
+  DVar1 = GetLastError();
+  if (DVar1 == 0xb7) {
+    uVar2 = 0;
+    if (param_1 != '\0') {
+      WaitForSingleObject(hHandle,0xffffffff);
+      uVar2 = CloseHandle(hHandle);
+    }
+    return uVar2 & 0xffffff00;
+  }
+  return (uint)(param_1 == '\0');
+}
+
+
+gate calls 6 functions:
+   -> FUN_0040b070 @0040b070
+   -> GetLastError @EXTERNAL:0000002a
+   -> CreateMutexA @EXTERNAL:0000004f
+   -> WaitForSingleObject @EXTERNAL:00000051
+   -> CloseHandle @EXTERNAL:00000052
+   -> c_str @EXTERNAL:0000014e
+=== GATE-CALLEE @0x40b070 : FUN_0040b070
+
+int __fastcall FUN_0040b070(int param_1)
+
+{
+  return param_1 + 0x14;
+}
+
