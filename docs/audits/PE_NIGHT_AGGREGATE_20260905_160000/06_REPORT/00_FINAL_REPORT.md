@@ -185,3 +185,19 @@ NOT a biome/palette class mask (no discrete class structure; Pearson(R,h) = -0.7
 the inversion artifact; the 2x2-block constancy = 38.3%); one 129x129 corner carries
 R=93 constant at heights 147-171 (decoupled — UNVERIFIED, recorded). The [P-CLIMATE]
 palette-selector search space narrows (it is NOT in this texture's channels).
+
+## FINDING N-8 (append) — THE EXPANDED CELLSTREAM NEGATIVES
+
+See 06_REPORT\FINDING_N8_EXPANDED_NEGATIVES.md. Summary: the grid-shape scan over ALL
+26 local 9.3.5 containers / 179,774 BNT entries: 70 size-coincidence hits (compressed
+TDFs at 4,225-4,243 B packed = the expected ~0.04% coincidence tail), ZERO actual grid
+data. The RUN-4 BLOCKED-UNKNOWN verdict stands with the COMPLETE-CORPUS exhaustive
+negative (the 65x65 climate / 129x129 detail grids are non-local; post-M1 acquisition
+paths unchanged).
+
+=== THE SESSION TOTAL (the "dzialaj dalej" continuation) ===
+N-5: the display predicate static RE (the boot chain, the -1 exit mechanism, the mac3r
+     canon correction, the binkw32 display route)
+N-6: the TEZ<->field frame PINNED + the layout/canon correction (i32 coords, no 2^19 frame)
+N-7: the R-channel decoded (the inverted height byte; not a palette mask)
+N-8: the expanded cellstream negatives (the complete-corpus grid scan)
