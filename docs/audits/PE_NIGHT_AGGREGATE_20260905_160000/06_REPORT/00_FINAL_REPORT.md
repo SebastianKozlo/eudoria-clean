@@ -176,3 +176,12 @@ all 1,020 records measured: X -32,144..+31,896, Z -31,664..+16,964, heights -35.
 CANON CORRECTION: the prior "up to 524,287 (2^19-1, the world boundary)" = a MISPARSE
 (no separate 2^19 world frame exists in the TEZ data). The RUN-3 georef honest bound
 "the TEZ<->field relation" is CLOSED: one shared world frame (TEZ ⊂ field).
+
+## FINDING N-7 (append) — THE R-CHANNEL OF 429259
+
+See 06_REPORT\FINDING_N7_R_CHANNEL.md. Summary: R ~= 255 - B (the INVERTED HIGH BYTE
+OF THE HEIGHT; R+B mode 254-255) for ~75% of the texels — an auxiliary inverted copy,
+NOT a biome/palette class mask (no discrete class structure; Pearson(R,h) = -0.711 =
+the inversion artifact; the 2x2-block constancy = 38.3%); one 129x129 corner carries
+R=93 constant at heights 147-171 (decoupled — UNVERIFIED, recorded). The [P-CLIMATE]
+palette-selector search space narrows (it is NOT in this texture's channels).
