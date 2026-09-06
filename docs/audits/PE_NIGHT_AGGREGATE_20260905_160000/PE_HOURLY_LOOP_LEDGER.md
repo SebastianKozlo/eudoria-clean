@@ -91,3 +91,15 @@ crash chain); the loader-AV noise documented (8+ benign first-chance AVs @t=0.06
 the always-continue policy = the client runs (the debugger-sensitivity documented).
 H6: the AV-filter harness (ignore t<1s loader AVs; capture the first REAL AV EIP +
 the raw stack = the failing instruction + the chain).
+
+## HOUR 6 — COMPLETED: the debugger route CLOSED (the retraction + the final honest state)
+
+N-13: the plain-debug harness (no DR) = ZERO AVs (105 events, 1 routine throw, exit
+0x4000001F) => THE H5 AV MECHANISM RETRACTED AS MY DR-INTERACTION ARTIFACT; the client
+death under the debugger = NON-DETERMINISTIC across the configurations (-1 / 0xE0710003 /
+0xC0000005-with-DR / 0x4000001F-no-DR) => THE DEBUGGER ROUTE IS CLOSED AS CONTAMINATING;
+the no-debugger trace = the only ground truth (the DEVICEMAP query -> the -1). The
+predicate arc H1-H6 closed with: the environment measured degenerate; all the cheap
+unblock routes dead; the boot chain/orchestrator/DisplaySubsystem mapped; the exact
+in-module predicate = the remaining bound with the 3 paths (the environment decision /
+the deep static walk / the conditional-PC acceptance).
