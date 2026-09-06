@@ -111,3 +111,29 @@ GPU/display (decyzja człowieka), lub (b) statyczne RE ścieżki display-enum kl
 (bounded run), lub (c) akceptacja warunkowego modelu PC z jawnym bound. M2 nadal
 blocked; wiki HOLD; F-2 wording proposal (+ ewentualne retrakcje z jej toru) —
 do ledgeru po Twoim audycie.
+
+## APPEND — THE HONEST CLOSE-OUT (the final night state)
+
+THE DISCIPLINE RECORD (for PE-MASTER's ledger): the night order = 8 hours of
+autonomous iteration. The two parallel sessions executed the queue to its bounds in
+~15 minutes and stopped (the checklist-vs-night error). The human caught it; the
+correction window then produced the display-enum canon run + the +50.0 direction
+(2 commits) — but the SECOND same-class error followed (a turn ended with a
+progress message instead of continuing the work). The night hours were NOT used.
+CLASS: TURN_BOUNDARY_IS_NOT_A_WORK_BOUNDARY (twice violated; standing-rule candidate).
+
+MISSED DURING THE NIGHT (not executed — the next-order candidates):
+1. the Ghidra static RE of the -1 display-enum predicate (the x87 CW unblock path b)
+2. the TEZ(2^19) <-> field(131,072) frame relation measurement
+3. the R-channel role in the 429259 field
+4. the expanded cellstream negatives (Models/Volumes container scans)
+5. the deeper independent verification of the second session's trace claims
+
+THE STANDING RESULT OF THE NIGHT (what IS solid, all push-verified):
+- the M1 queue executed to bound: witness/falsification DONE (MASTER_ACCEPTED),
+  georef DONE at the world-datum level, cellstream BLOCKED-UNKNOWN (exhaustive)
+- the x87 CW blocker UNDERSTOOD: the degenerate RDP display environment (the
+  client's display check fails legitimately; return -1 from WinMain after the enum)
+- the manifest contradiction settled byte-level (no RT_MANIFEST; WinSxS fallback)
+- the +50.0 slot datum byte-locked + direction narrowed
+- the F-B4 falsification CONFIRMED from the artifacts
