@@ -1,0 +1,84 @@
+{
+ "run": "PE_NIF_MORPH_RESIDUAL_DEEPDIVE_R1_20260906_033209",
+ "era": "PCG_9_3_5 primary",
+ "registered_before_any_phase1_phase2_test": true,
+ "populations": {
+  "P1_nofit334": "the 334 classifier-real (rr) spans with var_ok=0: 62 alt-fit + 272 none",
+  "P2_residual333": "R21-unknown spans (fail greedy+r19+backtrack); 325 of them also fail R20 shift-scan"
+ },
+ "hypotheses": [
+  {
+   "id": "H1",
+   "name": "alternative head grammars (the 62 recorded g1/g2/mscan fits)",
+   "test": "re-derive the 62 spans' exact grammars; per-record pair-scan locates WHERE an ~1.0 weight sum lives inside their fixed-m records; derived grammar H1d = weights-at-tail [u16 idx][9xf32 deltas][kxf32 weights sum~1 tol 1e-4], k 1..8, idx<N",
+   "predicate": "CONFIRMED-increases-coverage IFF H1d parses >=10 of the 272 no-alt spans byte-exact AND >=5x its negative-control rate at starts u+2/u-2 AND passes the 50/50 overfitting control; otherwise REJECTED/INCONCLUSIVE with counts"
+  },
+  {
+   "id": "H2",
+   "name": "k-range extension + weight-sum tolerance variants",
+   "test": "H2a: k in 9..16 (kmax 16 scan reported at k>=9 first-fit), tol 1e-4; H2b: k 1..8, tol 1e-3; H2c: k 1..8, tol 1e-2 (the contract's 0.99..1.01)",
+   "predicate": "a variant is CONFIRMED-increases-coverage IFF it fits >=5 of the 334 byte-exact AND >=5x its negative-control rate at u+2/u-2 AND passes 50/50; else REJECTED with counts"
+  },
+  {
+   "id": "H3",
+   "name": "mixed head/payload phase (span starts mid-record)",
+   "test": "var-k (canon params) from start u+delta, delta in [-15,+15]\\{0}; prefix bytes attributed to the uniform tail",
+   "predicate": "CONFIRMED-increases-coverage IFF >=10 of the 334 fit at some delta AND >=60% of fitting spans concentrate at <=3 delta values AND canonical-delta grammar (learned on the FIT half only) validates byte-exact on >=50% of the held-out half; else REJECTED/INCONCLUSIVE with the delta histogram"
+  },
+  {
+   "id": "H4",
+   "name": "W-misestimation re-decode (R33: Wm unreliable on heterogeneous blocks)",
+   "test": "var-k from u' in [u-64,u+64] step 4 (u'==u mod 4); window shrunk to +/-16 if es_len>4096 (compute bound)",
+   "predicate": "CONFIRMED-increases-coverage IFF >=10 of the 334 fit at some u'!=u AND >=60% of (u'-u) concentrate at <=3 values AND canonical-delta validation on the held-out half >=50%; else REJECTED/INCONCLUSIVE with the histogram"
+  },
+  {
+   "id": "H5a",
+   "name": "truncated-tail grammar (span ends mid-record)",
+   "test": "var-k from u allowing final leftover 1..41 bytes whose head (>=2 bytes) is idx<N",
+   "predicate": "CONFIRMED-increases-coverage IFF >=17 (5%) of the 334 parse with leftover r AND the r histogram NOT dominated by r=41 AND >=5x negative control at u+2/u-2 AND 50/50; else REJECTED with counts"
+  },
+  {
+   "id": "H5b",
+   "name": "mscan extension m in 33..64",
+   "test": "fixed-m [u16 idx<N][m x f32 all-clean], m 33..64, on the 334",
+   "predicate": "CONFIRMED-increases-coverage IFF >=5 of the 334 fit byte-exact AND >=5x negative control at u+2/u-2 AND 50/50; else REJECTED with counts"
+  },
+  {
+   "id": "H5c",
+   "name": "idx-bound relaxation (N misread / foreign vertex set)",
+   "test": "H5c1: var-k idx<2N; H5c2: var-k idx<0x8000",
+   "predicate": "a variant is CONFIRMED-increases-coverage IFF it fits >=5 of the 334 byte-exact AND >=5x negative control at u+2/u-2 AND 50/50; else REJECTED with counts"
+  },
+  {
+   "id": "H5d",
+   "name": "delta-count variants (3/6/12 delta floats per record)",
+   "test": "var-k with ndelta in {3,6,12}, k 1..8, tol 1e-4",
+   "predicate": "a single ndelta is CONFIRMED-increases-coverage IFF it fits >=5 of the 334 byte-exact AND >=5x negative control at u+2/u-2 AND 50/50; else REJECTED with counts"
+  },
+  {
+   "id": "H6",
+   "name": "residual phase-shift scan (Family A / Family B at some shift)",
+   "test": "H6a: greedy walk from every start in [max(0,u-128), min(len-18,u+128)] (dp>8192 skipped+recorded); H6b: Family B unit model start in [Wm-64,Wm+64] step 2 x m 1..12",
+   "predicate": "CONFIRMED-increases-coverage IFF >=20 of the 325 fit at some shift AND >=50% of fitting spans share <=3 shift values AND canonical-shift validation (fit-half-learned) on the held-out half; if fits are diffuse: REJECTED_as_coincidental with the per-start fit base rate as the negative control"
+  },
+  {
+   "id": "H7",
+   "name": "false-tag-split / adjacency contamination",
+   "test": "H7a: prev-join (prev dp + current span incl. leading tag) greedy from u; H7b: next-join (dp + next span incl. leading tag) greedy from u; H7c: full-block re-join (original rest) greedy from Wm-2 on rest[2:] (blocks with rest>32768 skipped+recorded)",
+   "predicate": "CONFIRMED-increases-coverage IFF >=10% of the 325 are join-explained (any sub-test) AND the non-adjacent-join negative control does NOT reproduce >=50% of that rate; else REJECTED with counts"
+  },
+  {
+   "id": "H8",
+   "name": "third family candidate: pure fixed-stride float array",
+   "test": "dp as [n x f32] (len%4==0), all floats clean, >=95% non-denormal, on all 333",
+   "predicate": "CONFIRMED-increases-coverage IFF >=30 of the 333 are pure float arrays; else REJECTED (documented death of the third-family candidate)"
+  }
+ ],
+ "negative_controls": {
+  "NC1_phase1": "every Phase-1 grammar additionally evaluated at deliberately-wrong starts u+2 and u-2 on the same spans; acceptance requires >=5x separation",
+  "NC2_h6_baserate": "per-start fit rate across the whole scanned window is the coincidence base rate for H6a",
+  "NC3_h7": "non-adjacent join control (residual span joined with a random non-neighbor span of the same file, seeded 20260906)"
+ },
+ "overfitting_control": "for every coverage-increasing grammar: newly-fitting spans split 50/50 (sorted keys, alternating); canonical parameters learned on the FIT half only; byte-exact validation on the other half; deterministic grammars must re-validate exactly, canonical-param grammars on >=50% of the held-out half; OC FAIL -> REJECTED_BY_OVERFITTING_CONTROL",
+ "final_state": "NEW real-record coverage X/2427 (from 2093) + residual census Y (from 325); if nothing increases coverage: the documented falsification list + BLOCKED-SEGMENTATION (a VALID outcome)"
+}
