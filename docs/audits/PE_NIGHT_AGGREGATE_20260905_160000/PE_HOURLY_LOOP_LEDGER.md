@@ -80,3 +80,14 @@ ArkObjectService/ArkClientObjectManagerImpl, PhysX, the string-config holder, th
 protection); THE DISPLAY QUERY = IN THE GATE CHAIN (the timing); the H6 plan = the
 GATE BINARY-SEARCH DEBUG (DR0/1/2 on the first/mid/last gates -> the last-hit gate ->
 decompile its callees = THE PREDICATE).
+
+## HOUR 5 — COMPLETED: the death mechanism = an AV caught by the client SEH (N-12)
+
+The DisplaySubsystem vtable mapped (0xA7B988: 3 methods + the data); the gate-bisection
+run 1: NO gate hits (the death precedes the gates); THE DECISIVE: the debug exit =
+0xC0000005 ACCESS VIOLATION => the -1 (no-debugger) = the client OWN crash-handler exit
+(the AV in the display-data path on the degenerate RDP display; the SUEF-neutralized
+crash chain); the loader-AV noise documented (8+ benign first-chance AVs @t=0.063);
+the always-continue policy = the client runs (the debugger-sensitivity documented).
+H6: the AV-filter harness (ignore t<1s loader AVs; capture the first REAL AV EIP +
+the raw stack = the failing instruction + the chain).
