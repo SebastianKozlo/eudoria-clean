@@ -1,0 +1,33 @@
+=== FRAME-A @0x40943f: the instructions around the return address
+  0040942a  CMP AL,0x1   [FUN_00409400@00409400]
+  0040942c  PUSH ESI   [FUN_00409400@00409400]
+  0040942d  JNZ 0x0040944b   [FUN_00409400@00409400]
+  0040942f  MOV ECX,dword ptr [ESP + 0x1c]   [FUN_00409400@00409400]
+  00409433  CALL dword ptr [0x00a75a04]   [FUN_00409400@00409400]
+  00409439  PUSH ESI   [FUN_00409400@00409400]
+  0040943a  CALL 0x0095db40   [FUN_00409400@00409400]
+  0040943f  ADD ESP,0x4   [FUN_00409400@00409400]
+=== FRAME-B @0x40b6d4: the instructions around the return address
+  0040b6be  CALL dword ptr [0x00a75a50]   [FUN_0040b0b0@0040b0b0]
+  0040b6c4  PUSH EAX   [FUN_0040b0b0@0040b0b0]
+  0040b6c5  LEA EDX,[ESP + 0x28]   [FUN_0040b0b0@0040b0b0]
+  0040b6c9  PUSH EDX   [FUN_0040b0b0@0040b0b0]
+  0040b6ca  LEA ECX,[ESP + 0x74]   [FUN_0040b0b0@0040b0b0]
+  0040b6ce  CALL dword ptr [0x00a75a54]   [FUN_0040b0b0@0040b0b0]
+  0040b6d4  PUSH 0x1   [FUN_0040b0b0@0040b0b0]
+  0040b6d6  PUSH EAX   [FUN_0040b0b0@0040b0b0]
+=== the call before A @0040943a -> flows ['0095db40']
+   TARGET FUNCTION: operator_delete[] @0095db40
+
+void __cdecl operator_delete__(void *param_1)
+
+{
+                    /* WARNING: Could not recover jumptable at 0x0095db40. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+  operator_delete__(param_1);
+  return;
+}
+
+
+=== the call before B @0040b6ce -> flows ['EXTERNAL:00000156']
+   TARGET FUNCTION: substr @EXTERNAL:00000156

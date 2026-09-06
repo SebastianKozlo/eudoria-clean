@@ -1,0 +1,47 @@
+# PE_HOURLY_LOOP — the hourly loop ledger (started by the human's order 2026-09-06)
+
+The discipline: each hour = bounded work units -> package -> commit -> checkpoint ->
+continue. The state file = this ledger + the repo commits.
+
+## HOUR 1 — the intro-video config-hunt (the x87 CW unblock test prep)
+
+**STATUS: COMPLETED (the honest negative — all the cheap unblock routes exhausted)**
+
+1. The CLI switch census: NO classic switches (-nologo/-windowed/etc. ABSENT; only
+   word-fragment noise) — the switch route DEAD.
+2. `wd\Data\Data.ini` = `[Export] Version=9030501` ONLY (no display/video options).
+3. The MindArk registry keys EXIST on this machine (HKLM\SOFTWARE\WOW6432Node\MindArk\
+   Project Entropia: Installer=NX4NMX8E, the install path, the start-menu folder, the
+   installer language; HKCU\Software\MindArk\Project Entropia: the [Language] subkey) —
+   the client's lazy registry reads would find real values; NO display options there.
+4. 30 .bik files exist (`wd\Data\Video\NNNNN.bik`); the RTTI class
+   `.?AVArkDiscipleIntroductionUI@@` @0x77FF44 = the intro UI; the ".bik" string
+   @0x67A70C = the extension-format string.
+5. **THE DECISIVE NEGATIVE: ZERO .bik opens in the death trace** — the client dies
+   BEFORE any BinkOpen file call (the display enum = pure CPU, no file I/O) —
+   the missing-intro-video trick = DEAD (nothing video-file-related was reached).
+6. CONSEQUENCE: the cheap unblock routes are exhausted; the x87 CW unblock =
+   (a) a real display environment (the human's environment decision), or
+   (b) the exact-predicate identification via a bounded DIAGNOSTIC DEBUG of the
+   death run (H2: the qualified Backend-E harness + a breakpoint at the DPVS-exit
+   FUN_007c5310 -> the call stack at the exit = the exact failing path).
+
+## HOUR 2 — the death-run diagnostic debug (PLANNED)
+
+The bounded diagnostic: spawn Entropia.exe under DEBUG_ONLY_THIS_PROCESS (the
+qualified harness pattern), breakpoint at FUN_007c5310 @0x007C5310 (the ONLY exit()
+caller) + optionally at the display-API boundaries; capture the call stack + the
+register state at the breakpoint -> the exact failing call chain. ZERO code patches;
+observation only; the kill + the orphan census per the standing discipline.
+
+## HOUR 2 — COMPLETED: the death-run diagnostic debug (the instrument + the findings)
+
+N-9 (06_REPORT\FINDING_N9_DEATH_DIAG.md): the SUEF neutralizer canon fact (FUN_00406da0
+patches SetUnhandledExceptionFilter with xor eax,eax; ret 4); the boot registry chain =
+LAZY (zero client-registry I/O in the death trace); a routine C++ (STL) exception in
+the "Installer"-read chain (first-chance captured; NOT the fatal event); the -1-exit
+EAX-residue theory WITHDRAWN (a parsing artifact — the 64-bit DEBUG_EVENT union at +16);
+the debug-run divergence documented (the no-debugger trace = the ground truth).
+The display predicate: the trace conclusion stands (the display enum -> the -1);
+the exact in-module check = the remaining bound (the ProcMon-on-debug-run or the
+instruction-level trace = the H3 candidates).
