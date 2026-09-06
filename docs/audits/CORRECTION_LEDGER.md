@@ -367,3 +367,13 @@ PE_M1_X87CW_AUTOMATION_R1 measurement verdict OPEN-BREAKPOINT_UNREACHED_WITHIN_B
 - finding: the K2 post-hoc wide-record candidate RESOLVED by RUN C (PE_NIF_MORPH_WIDERECORD_R1_20260906_170000): W1 [u16 idx][32xf32] PASS (12/269) and W3 superset (13/269) — the +13 spans RETROSPECTIVE_VALIDATED with mandatory bounds (family-concentrated 12/13 in 548296.nif bi=75; side B only; the 0-hit NC partly structural); W2 (var-k k 9..24) REFUTED (0/269 vs NC 5/538).
 - correction: coverage 2,171/2,427 = 89.45% (2,093 canon + 65 RUN A + 13 RUN C); remaining no-fit 256.
 - evidence: RUN C WIDE_RESULTS.json + the QC1 AMENDMENT; commit: this C1 persistence commit (a commit cannot embed its own SHA; the real C1 SHA is carried in the AUDIT_ENTRYPOINT RUN C row Commit cell — backfilled by commit C2 — and verbatim in the C2 commit message; discoverable via `git log -1 -- docs/audits/PE_NIF_MORPH_WIDERECORD_R1_20260906_170000/`).
+
+---
+## LED-ENTRY: J — the K1 caveat quantified by RUN D (PE_935_TEXANCHOR_CENSUS_R1_20260906_175500, era 9.3.5, OBSERVED)
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop bd17344b-a054-4cf4-be8d-5f0b250e8509, RUN D PE_935_TEXANCHOR_CENSUS_R1_20260906_175500, persistence batch) — appended by pe-master-auditor (PERSIST_PUBLISH)
+- superseded_claim: none (the K1 caveat is QUANTIFIED by RUN D, not superseded; recorded, not retracted)
+- finding: the K1 caveat quantified by RUN D (PE_935_TEXANCHOR_CENSUS_R1_20260906_175500, era 9.3.5, OBSERVED): the mesh->texture structural association beyond ID-membership = 19,705/24,508 = 80.4023% name-anchored (CI95 [79.8997, 80.8977]); slot-suffix consistency 100% (definitional); the cross-file NC 0.67% -> 120x; the non-anchored ~19.6% concentrated in ENVIRONMENT (0/1,694) and ANIM0-31 (0/1,157) — a distinct naming convention, recorded not retracted; the K1 resolution stands untouched.
+- correction: the KROK-1 caveat text now carries the RUN D measurement (the AUDIT_ENTRYPOINT KROK-1 row refined in the same persistence commit); the caveat is now quantitative (~80.4% name-anchored; the non-anchored ~19.6% ENVIRONMENT/ANIM-concentrated); nothing retracted; the K1 resolution stands untouched.
+- evidence: RUN D ANCHOR_RESULTS.json + the fresh QC re-derivation; commit (this commit; SHA discoverable via git log).
