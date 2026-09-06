@@ -67,3 +67,16 @@ CLASS FOUND (FUN_0048aef0 ctor + vtable + the OS-probe); dpvs.dll = UPX-PACKED (
 cleanly; KERNEL32-only imports + a user32 string => the ordinal-resolution suspect).
 THE H5 LEADS: the DisplaySubsystem vtable methods; the DPVS Library init (the 0x7C5xxx
 cluster); dpvs's ordinal-resolved user32 call.
+
+## HOUR 5 — COMPLETED: the subsystem forest mapped + the PROTECTION decoded (N-12)
+
+The DisplaySubsystem vtable (3 methods: the dtor/accessor/registration; the class =
+a settings holder, NOT the query owner); THE PROTECTION SUBSYSTEM DECODED: FUN_00419390
+= the obfuscated API resolver (the cipher s[i] ^= i+0x51; the decoded strings:
+kernel32.dll + CreateMutexA + CloseHandle + IsDebuggerPresent + CreateFileMappingA +
+FindWindowA => the client anti-debug/protection canon; explains the missing strings!);
+the subsystem classes all identified (DisplaySubsystem, WorldSubsystem [FUN_0048e170],
+ArkObjectService/ArkClientObjectManagerImpl, PhysX, the string-config holder, the
+protection); THE DISPLAY QUERY = IN THE GATE CHAIN (the timing); the H6 plan = the
+GATE BINARY-SEARCH DEBUG (DR0/1/2 on the first/mid/last gates -> the last-hit gate ->
+decompile its callees = THE PREDICATE).
