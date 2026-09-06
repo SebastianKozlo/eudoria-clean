@@ -1,0 +1,134 @@
+{
+ "standing": "Standing sentence: no semantic claims; class -256/field1 MEANING remains unknown; the -256=>zero-entry association remains ONE-WAY. Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / ERA_TRANSFER_DIAGNOSTIC / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+ "spec": "RUN B MANIFEST_SCHEMA_SPEC.md (dogfooding)",
+ "manifest": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_NIF_MORPH_GRAMMAR_REVALIDATION_R1_20260906_140500\\artifact_index.csv",
+ "documented_exclusions": [
+  "artifact_index.csv (self-hash impossible; L12 precedent)",
+  "05_ANALYSIS/MANIFEST_VALIDATION.json (circular: records the validation of this manifest; written last)"
+ ],
+ "pre_validation_in_memory": {
+  "gate_pass": true,
+  "ordinary_rows": 26,
+  "note": "executed BEFORE the final gates CSV write; the gates CSV row was added afterwards with the hash of its final on-disk bytes"
+ },
+ "post_write_physical_validation": {
+  "gate_pass": true,
+  "ordinary_rows": 27,
+  "external_rows": 22,
+  "findings": []
+ },
+ "negative_tests": {
+  "standing": "Standing sentence: no semantic claims; class -256/field1 MEANING remains unknown; the -256=>zero-entry association remains ONE-WAY. Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / ERA_TRANSFER_DIAGNOSTIC / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+  "spec": "MANIFEST_SCHEMA_SPEC.md validation gate negative tests",
+  "tests": [
+   {
+    "case": "a_unquoted_comma",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,a role, with unquoted comma,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_MANIFEST_ROW",
+      [
+       "00_CONTROL/CONTRACT.md",
+       "a role",
+       " with unquoted comma",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+     ]
+    ]
+   },
+   {
+    "case": "b_missing_newline_between_records",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00_CONTROL/PREREG_MARKER.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_MANIFEST_ROW",
+      [
+       "00_CONTROL/CONTRACT.md",
+       "gen",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00_CONTROL/PREREG_MARKER.txt",
+       "gen",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+     ]
+    ]
+   },
+   {
+    "case": "c_missing_file",
+    "rows": [
+     "00_CONTROL/NONEXISTENT_FILE.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MISSING_FILE",
+      "00_CONTROL/NONEXISTENT_FILE.txt"
+     ]
+    ]
+   },
+   {
+    "case": "d_malformed_hash",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,deadbeef"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_HASH",
+      "deadbeef"
+     ]
+    ]
+   },
+   {
+    "case": "e_unsupported_symbolic_path_shape",
+    "rows": [
+     "Z:\\absolute\\path.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "UNSUPPORTED_PATH_SHAPE",
+      "Z:\\absolute\\path.txt"
+     ]
+    ]
+   },
+   {
+    "case": "f_duplicate_row",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "HASH_MISMATCH",
+      "00_CONTROL/CONTRACT.md",
+      "02f32099ad7d9a528a6bc08c46e6c4f55c8218a06fbb482b5be529e76dc34f95",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     ],
+     [
+      "DUPLICATE_ROW",
+      "00_CONTROL/CONTRACT.md"
+     ]
+    ]
+   }
+  ],
+  "all_six_fail_the_gate": true
+ },
+ "post_review_persistence_validation": {
+  "date": "2026-09-06",
+  "context": "loop bd17344b batch P1 persistence: PE_MASTER_REVIEW.md (SHA256 d786aa9d872b5c7c70d1736f5a660ee3c2a3b234ed77c884d5f135090a74a7af) and 00_CONTROL/INTERNAL_QC_R1.md (SHA256 0cb21dc3ae517c18e4da50f3756020d2c5f71196bc3e69cac6f0d9c39c266540) appended as ordinary rows (27 -> 29); the manifest re-validated per RUN B MANIFEST_SCHEMA_SPEC by an independent standard-CSV validator (python csv.reader, RFC-4180) on BOTH copies (repo + RA), external sources physically re-hashed, 4 synthetic negative fixtures (missing file / malformed hash / duplicate row / hash mismatch) each FAIL the gate as required",
+  "gate_pass": true,
+  "ordinary_rows": 29,
+  "external_rows": 22,
+  "findings": [],
+  "manifest_sha256_after_append": "66baea67efbf57a773ba04c2b59c6a8aea6620170c4444de65897f8fa5223f3d",
+  "copies_identical": true
+ },
+ "manifest_gate_verdict": "PASS"
+}
