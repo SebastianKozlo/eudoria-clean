@@ -377,3 +377,13 @@ PE_M1_X87CW_AUTOMATION_R1 measurement verdict OPEN-BREAKPOINT_UNREACHED_WITHIN_B
 - finding: the K1 caveat quantified by RUN D (PE_935_TEXANCHOR_CENSUS_R1_20260906_175500, era 9.3.5, OBSERVED): the mesh->texture structural association beyond ID-membership = 19,705/24,508 = 80.4023% name-anchored (CI95 [79.8997, 80.8977]); slot-suffix consistency 100% (definitional); the cross-file NC 0.67% -> 120x; the non-anchored ~19.6% concentrated in ENVIRONMENT (0/1,694) and ANIM0-31 (0/1,157) — a distinct naming convention, recorded not retracted; the K1 resolution stands untouched.
 - correction: the KROK-1 caveat text now carries the RUN D measurement (the AUDIT_ENTRYPOINT KROK-1 row refined in the same persistence commit); the caveat is now quantitative (~80.4% name-anchored; the non-anchored ~19.6% ENVIRONMENT/ANIM-concentrated); nothing retracted; the K1 resolution stands untouched.
 - evidence: RUN D ANCHOR_RESULTS.json + the fresh QC re-derivation; commit (this commit; SHA discoverable via git log).
+
+---
+## LED-ENTRY: K — the wide-record class bounded in the residual-325 by RUN E (PE_935_WIDERECORD_RESIDUAL325_R1_20260906_190500, era 9.3.5)
+
+- date: 2026-09-06
+- issued_by: PE-MASTER (loop bd17344b-a054-4cf4-be8d-5f0b250e8509, RUN E PE_935_WIDERECORD_RESIDUAL325_R1_20260906_190500, persistence batch) — appended by pe-master-auditor (PERSIST_PUBLISH)
+- superseded_claim: none (the residual-325 wide-record status is BOUNDED by RUN E, not superseded; recorded, not retracted)
+- finding: W1/W3 ZERO_FITS on the 325 (0/325 each; NC 0/650) — the wide-record class is absent/rare in the R21-unknown residual. The positive control: RUN C's 12 known W1-fit keys re-verified FIT through RUN E's procedure by the fresh QC (12/12, two implementations) — the zero is a population property.
+- correction: the coverage 2,171/2,427 = 89.45% stands; the residual 325 remains the heterogeneous bucket (the K2 falsification list + the H7 mechanism-unvalidated + this wide-record bound).
+- evidence: RUN E WIDE325_RESULTS.json + INTERNAL_QC_R1.md; commit (this commit; SHA discoverable via git log).

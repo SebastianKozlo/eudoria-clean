@@ -1,0 +1,125 @@
+{
+ "standing": "Standing sentence: no semantic claims; the +65 (RUN A) = RETROSPECTIVE_VALIDATED; the +13 (RUN C) = RETROSPECTIVE_VALIDATED with the family-concentration bounds; the H7 join-mechanism = UNVALIDATED (RUN A) - NO H7-based claims; the residual-325 remains the heterogeneous bucket this run only PROBES. Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+ "result_class": "G-EXEC",
+ "fixtures": [
+  {
+   "id": 1,
+   "name": "zero successes both sides",
+   "expected": "ZERO_FITS",
+   "verdict": {
+    "grammar": "FIXTURE1",
+    "gate": "G-WIDE325",
+    "non_pass_class": "ZERO_FITS",
+    "result": "NON_PASS",
+    "detail": {
+     "full_325_fits": 0,
+     "threshold": 5
+    }
+   }
+  },
+  {
+   "id": 2,
+   "name": "empty population",
+   "expected": "EMPTY_GROUP",
+   "verdict": {
+    "grammar": "FIXTURE2",
+    "gate": "G-WIDE325",
+    "non_pass_class": "EMPTY_GROUP",
+    "result": "NON_PASS",
+    "detail": "population empty"
+   }
+  },
+  {
+   "id": 3,
+   "name": "only-previously-selected successes",
+   "expected": "ONLY_PREVIOUSLY_SELECTED (d8 guard)",
+   "verdict": {
+    "grammar": "FIXTURE3",
+    "gate": "G-WIDE325",
+    "non_pass_class": "ONLY_PREVIOUSLY_SELECTED",
+    "result": "NON_PASS",
+    "detail": {
+     "fits": 6,
+     "note": "every fitting member flagged previously_selected - cannot establish the class in the NEW residual"
+    }
+   }
+  },
+  {
+   "id": 4,
+   "name": "a duplicate present in both groups",
+   "expected": "DUPLICATE_KEYS",
+   "verdict": {
+    "grammar": "FIXTURE4",
+    "gate": "G-WIDE325",
+    "non_pass_class": "DUPLICATE_KEYS",
+    "result": "NON_PASS",
+    "detail": [
+     [
+      "synthetic_A_000.nif",
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "id": 5,
+   "name": "unequal denominators",
+   "expected": "DENOMINATOR_MISMATCH",
+   "verdict": {
+    "grammar": "FIXTURE5",
+    "gate": "G-WIDE325",
+    "non_pass_class": "DENOMINATOR_MISMATCH",
+    "result": "NON_PASS",
+    "detail": {
+     "nc_trials": 63,
+     "members_x_2": 64
+    }
+   }
+  },
+  {
+   "id": 6,
+   "name": "a corrupted record",
+   "expected": "CORRUPTED_RECORD",
+   "verdict": {
+    "grammar": "FIXTURE6",
+    "gate": "G-WIDE325",
+    "non_pass_class": "CORRUPTED_RECORD",
+    "result": "NON_PASS",
+    "detail": "{'key': ['x.nif', 0, 0], 'side': 'B', 'unit': 'u'}"
+   }
+  },
+  {
+   "id": 7,
+   "name": "a malformed manifest row",
+   "expected": "MALFORMED_MANIFEST_ROW",
+   "verdict": {
+    "result": "NON_PASS",
+    "non_pass_class": "MALFORMED_MANIFEST_ROW",
+    "findings": [
+     [
+      "MALFORMED_MANIFEST_ROW",
+      [
+       "00_CONTROL/CONTRACT.md",
+       "a role",
+       " with unquoted comma",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "id": 8,
+   "name": "a missing input file",
+   "expected": "MISSING_INPUT_FILE",
+   "verdict": {
+    "result": "NON_PASS",
+    "non_pass_class": "MISSING_INPUT_FILE",
+    "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_WIDERECORD_RESIDUAL325_R1_20260906_190500\\NONEXISTENT_INPUT_FILE.json"
+   }
+  }
+ ],
+ "all_eight_fail_closed": true,
+ "gexec_verdict": "PASS"
+}

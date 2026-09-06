@@ -1,0 +1,152 @@
+{
+ "standing": "Standing sentence: no semantic claims; the +65 (RUN A) = RETROSPECTIVE_VALIDATED; the +13 (RUN C) = RETROSPECTIVE_VALIDATED with the family-concentration bounds; the H7 join-mechanism = UNVALIDATED (RUN A) - NO H7-based claims; the residual-325 remains the heterogeneous bucket this run only PROBES. Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+ "spec": "MANIFEST_SCHEMA_SPEC.md (RUN B spec; dogfooding)",
+ "manifest": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_WIDERECORD_RESIDUAL325_R1_20260906_190500\\artifact_index.csv",
+ "documented_exclusions": [
+  "artifact_index.csv (self-hash impossible; documented precedent)",
+  "05_ANALYSIS/MANIFEST_VALIDATION.json (circular: records the validation of this manifest; written last)"
+ ],
+ "pre_validation_in_memory": {
+  "gate_pass": true,
+  "ordinary_rows": 18,
+  "note": "executed BEFORE the final gates CSV write; the gates CSV row was added afterwards with the hash of its final on-disk bytes"
+ },
+ "post_write_physical_validation": {
+  "gate_pass": true,
+  "ordinary_rows": 21,
+  "external_rows": 11,
+  "findings": []
+ },
+ "negative_tests": {
+  "standing": "Standing sentence: no semantic claims; the +65 (RUN A) = RETROSPECTIVE_VALIDATED; the +13 (RUN C) = RETROSPECTIVE_VALIDATED with the family-concentration bounds; the H7 join-mechanism = UNVALIDATED (RUN A) - NO H7-based claims; the residual-325 remains the heterogeneous bucket this run only PROBES. Result classes: BYTE_MATCH / REPEATABILITY / RETROSPECTIVE_VALIDATION / RUNTIME_SEMANTICS (= explicitly NOT_TESTED here, out of scope).",
+  "spec": "MANIFEST_SCHEMA_SPEC.md validation gate negative tests",
+  "tests": [
+   {
+    "case": "a_unquoted_comma",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,a role, with unquoted comma,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_MANIFEST_ROW",
+      [
+       "00_CONTROL/CONTRACT.md",
+       "a role",
+       " with unquoted comma",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+     ]
+    ]
+   },
+   {
+    "case": "b_missing_newline_between_records",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00_CONTROL/PREREG_MARKER.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_MANIFEST_ROW",
+      [
+       "00_CONTROL/CONTRACT.md",
+       "gen",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00_CONTROL/PREREG_MARKER.txt",
+       "gen",
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+     ]
+    ]
+   },
+   {
+    "case": "c_missing_file",
+    "rows": [
+     "00_CONTROL/NONEXISTENT_FILE.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MISSING_FILE",
+      "00_CONTROL/NONEXISTENT_FILE.txt"
+     ]
+    ]
+   },
+   {
+    "case": "d_malformed_hash",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,deadbeef"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "MALFORMED_HASH",
+      "deadbeef"
+     ]
+    ]
+   },
+   {
+    "case": "e_unsupported_symbolic_path_shape",
+    "rows": [
+     "Z:\\absolute\\path.txt,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "UNSUPPORTED_PATH_SHAPE",
+      "Z:\\absolute\\path.txt"
+     ]
+    ]
+   },
+   {
+    "case": "f_duplicate_row",
+    "rows": [
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "00_CONTROL/CONTRACT.md,gen,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "gate_failed_as_required": true,
+    "findings": [
+     [
+      "HASH_MISMATCH",
+      "00_CONTROL/CONTRACT.md",
+      "da2843436e02d0148de8546e7e26a1a07afdb43699a61136dcbe09d705fdd7fd",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     ],
+     [
+      "DUPLICATE_ROW",
+      "00_CONTROL/CONTRACT.md"
+     ]
+    ]
+   }
+  ],
+  "all_six_fail_the_gate": true
+ },
+ "manifest_gate_verdict": "PASS",
+ "persistence_manifest_revalidation_20260906": {
+  "date": "2026-09-06",
+  "trigger": "RUN E persistence (PERSIST_PUBLISH, PE-MASTER loop bd17344b-a054-4cf4-be8d-5f0b250e8509 iteration 5): PE_MASTER_REVIEW.md (MASTER_ACCEPTED advisory) persisted; the package copied into the repo docs/audits tree (25 files, per-file SHA-identical); two ordinary rows appended to the manifest (PE_MASTER_REVIEW.md + 00_CONTROL/INTERNAL_QC_R1.md)",
+  "validator": "persist_manifest_revalidation_rune.py (independent validator by pe-master-auditor, Python 3.12.10 standard csv module; NOT the run driver; NOT the run manifest builder; negative tests a-f executed on this validator)",
+  "validated_copies": "BOTH (the 99_Audits RE dir and the repo docs/audits tree copy); byte-identical manifests",
+  "gate_pass": true,
+  "ordinary_rows": 23,
+  "external_rows": 11,
+  "findings": [],
+  "negative_tests_rerun": "a-f executed: 6/6 gate_failed_as_required = true; all_six_fail_the_gate = true",
+  "manifest_changes": {
+   "ordinary_rows_added": [
+    "PE_MASTER_REVIEW.md",
+    "00_CONTROL/INTERNAL_QC_R1.md"
+   ],
+   "row_hashes_replaced": []
+  },
+  "package_census": {
+   "total_files_on_disk_at_validation": 25,
+   "manifested_ordinary": 23,
+   "files_not_manifested_documented": {
+    "artifact_index.csv": "self-hash impossible; documented circular exclusion (spec precedent L9)",
+    "05_ANALYSIS/MANIFEST_VALIDATION.json": "circular: records the validation of this manifest; written last"
+   }
+  },
+  "manifest_sha256_at_this_validation": "0d4095570ec40d9961cf1a070c0e99143187a27710705274d779139d05e2f394",
+  "manifest_gate_verdict_after_persistence": "PASS"
+ }
+}
