@@ -1,0 +1,223 @@
+{
+    "run_id":  "PE_935_EXTERNAL_SOURCES_MATRIX_R1_20260913",
+    "row_count":  24,
+    "coverage_note":  "23 contract claims -\u003e 24 rows (D2 split: D2a WarEmu code CONFIRMED, D2b RoR post UNVERIFIED)",
+    "rows":  [
+                 {
+                     "id":  "A1",
+                     "claim":  "Worthplaying 2002-04-08 presents Kaja Hoegberg as World Creator; world-editor quote: heightfield, terrain textures, vegetation, placing them including the cities",
+                     "source":  "https://www.worthplaying.com/article/2002/4/8/news/3124-project-entropia-global-news/ (LIVE 2026-09-13)",
+                     "observation":  "Article live (by Thomas, April 8, 2002); MindArk Global News republication. Section 5: \u0027Today we meet.. Kajsa Hoegberg.\u0027 \u0027KH: I am a World Creator.\u0027 \u0027KH: Mostly, I work with the high field and textures in the world editor, adding all sorts of vegetation and placing them, including the cities.\u0027",
+                     "limitation":  "Name in source is KAJSA (claim wrote Kaja); source says \u0027high field\u0027 (height-field transcription). Worthplaying is a third-party republisher of MindArk\u0027s newsletter - verbatim fidelity unverifiable from this page. MANDATED: world editor proves the AUTHORING PROCESS of placement; does NOT prove whether the result shipped in client, server, or both.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: supports H_CLIENT (authored static placement in client corpus) as a RESEARCH DIRECTION for EU935; NOT evidence of any EU935 data location or format.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "A2",
+                     "claim":  "CGW June 2003 \u0027Economy of Scale\u0027: separate artists for \u0027static objects and environments\u0027; buildings in LightWave; models/animations in 3ds Max",
+                     "source":  "https://www.cgw.com/Publications/CGW/2003/Volume-26-Issue-6-June-2003-/Economy-of-Scale.aspx (LIVE 403; WAYBACK capture 2025-10-05, read 2026-09-13)",
+                     "observation":  "\u0027Economy of Scale\u0027 by Lisa Taylor, CGW Vol.26 Issue 6 (June 2003): \u0027two 3D artists who build static objects and environments\u0027; \u0027Discreet 3ds max Version 4 and Character Studio Version 3\u0027 [for creatures]; \u0027NewTek LightWave 6.0 for constructing some of the buildings in Calypso\u0027s major city.\u0027",
+                     "limitation":  "Source narrows: LightWave = SOME buildings of the MAJOR CITY; 3ds Max cited for creature model/animation. Article separates asset creation from world assembly but says nothing about placement-data location. Wayback proxy access.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: asset-team separation corroborates the model-catalogue vs world-placement RESEARCH PATTERN; NOT proof of EU935 format or storage.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "B1",
+                     "claim":  "DAoC-MapCreator reads nifs.csv then fixtures.csv; fixture fields [0] id, [1] NIF id, [2] name, [3..5] X/Y/Z, [6] angle, [7] scale, [11] on-ground, [12] flip, [15..18] 3D angle + axis X/Y/Z",
+                     "source":  "Merec/DAoC-MapCreator commit 073a5940128be0e3f3bb57df0468d946b560c7f1 (2020-05-02), MapCreator/Classes/MapCreation/Fixtures/FixturesLoader.cs L75-76, L84-96, L99-125",
+                     "observation":  "L75-76 reads nifs.csv then fixtures.csv; L105-122 maps fields[0]=Id, [1]=NifId, [2]=TextualName, [3]=X, [4]=Y, [5]=Z, [6]=A, [7]=Scale, [11]=OnGround, [12]=Flip, [15]=Angle3D, [16]=AxisX3D, [17]=AxisY3D, [18]=AxisZ3D - ALL indices match.",
+                     "limitation":  "One community parser of DAoC client data; evidences the DAoC FORMAT only. DAoC format must NOT be transferred to EU935. MapCreator is a 2D map renderer (Z rotation + scale), not a 3D world compositor.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: fixture-record grammar {id, model-id, name, XYZ, angle, scale, flags, axis-angle} is a SEARCH PATTERN for candidate EU935 placement records.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "B2",
+                     "claim":  "DaocNavMesh: nifs.csv (ID-\u003efilename) + fixtures.csv (nif_id, XYZ, rotation, scale, collision, unique_id) -\u003e translation x rotation x scale x zone offset -\u003e WORLD MATRIX -\u003e load NIF",
+                     "source":  "jeremv42/DaocNavMesh commit 206c3287770eb55ad56d3477a052375c49393281 (2025-08-04), src/daoc/world/Zone.cpp L85-119, L122-128, L197-215, L218-244",
+                     "observation":  "nifs[stoi(csv[i][0])]=csv[i][2] (L87). fixtures: row[3..5]=XYZ, row[11]=on-ground, row[7]=scale/100, row[6]=angle, row[15..18]=axis-angle, row[0]=id, row[1]=nif_id, row[8]=collide, row[9]=radius, row[14]=unique_id (L94-114). World matrix per fixture = T x R x S (L124-127), scale Y NEGATED; NIF loaded via Niflib::ReadNifTree (L204). ORDER CORRECTION: zone offset is applied SEPARATELY at traversal as the OUTERMOST pre-multiplication (L221: translate(offset_x*8192, offset_y*8192, 0); L243: world * fix.world) =\u003e final = T_zone x (T x R x S), NOT a trailing factor after scale.",
+                     "limitation":  "Claimed component list confirmed; the claimed composition ORDER (\u0027x zone offset\u0027 as trailing term) does NOT match the code - the substance stands, order corrected. DAoC format != Entropia format.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: T x R x S with zone offset at traversal is a SEARCH PATTERN for NetImmerse-era static instance transform composition; NOT transferable semantics.",
+                     "status":  "STRONGLY_SUPPORTED"
+                 },
+                 {
+                     "id":  "B3",
+                     "claim":  "OpenDAoC-BuildNav independently reads fixtures.csv (nifid, XYZ, rotation, scale) and builds the transform BEFORE adding the NIF",
+                     "source":  "OpenDAoC/OpenDAoC-BuildNav commit 291149188c0a67db00357f84518cf7b0309ffbb9 (2026-07-18), Client/ZoneExporter/Zone2Obj.cs L184-274, L277-318",
+                     "observation":  "L184 reads fixtures.csv; L195-224 parses fixture[0..18] (same grammar as B1); L239-246 builds worldMatrix = I; *= CreateScale(scale,-scale,scale); *= axis-angle/rotZ; *= CreateTranslation(xyz + Zone.OffsetVector) BEFORE AddModelToObj (L269). Zone offset added INTO the translation vector (vs DaocNavMesh pre-multiplication - same effect, different mechanism).",
+                     "limitation":  "BuildNav is a DECLARED FORK of thekroko/uthgard-opensource buildnav (README) - not first-hand; see B5. DAoC format != Entropia.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: independent confirmation of the same fixture grammar + transform-before-attach pipeline as a SEARCH PATTERN.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "B4",
+                     "claim":  "daoctocrysis: nifs.csv + fixtures.csv pair described as \u0027model and location data\u0027 for NetImmerse-\u003eCryEngine zone conversion",
+                     "source":  "mharj/daoctocrysis commit 3e98846c51ba6ee8e065fb4b27c03c6f2adcec6e (2010-05-30), main_window.cpp L227-233, L338-383",
+                     "observation":  "L227 comment \u0027// model and location data\u0027 introduces nifs.csv (L228) + fixtures.csv (L233). Fixture rows converted: XYZ rescaled /65536*1024 + region offsets, z /64, scale /100 (L371-374); instances written to .veg CryEngine vegetation XML with VegetationObject FileName = converted CGF model (L353); heightmap compositing from terrain.pcx/offset.pcx; NIF-\u003eCGF mapping.",
+                     "limitation":  "\u0027model and location data\u0027 is a code comment (author\u0027s label, accurate). Tool converts zones to CryEngine VEGETATION layers; demonstrates the pair\u0027s role, not Entropia\u0027s formats.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: 2010 precedent of whole-zone cross-engine conversion driven by the nifs+fixtures pair - a SEARCH PATTERN for EU935 static-world export.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "B5",
+                     "claim":  "Kinship: do the DAoC repos share code (fork/copy)? Which are NOT independent sources?",
+                     "source":  "All four repos + thekroko/uthgard-opensource (GitHub API + code inspection, 2026-09-13)",
+                     "observation":  "NO GitHub fork relationship among the four (C# 2014-17 SharpDX+Niflib.NET; C++20 2024 glm+own Niflib; C# 2025 System.Numerics+own NiFile; C++/Qt 2010 MagickWand). OpenDAoC-BuildNav is a DECLARED FORK of thekroko/uthgard-opensource pathing/buildnav (README verbatim; upstream verified as \u0027Portions of Uthgard - a Dawn Of Light freeshard\u0027). BuildNav = ONE lineage with Uthgard, NOT a copy of MapCreator. Agreement on non-obvious field layout = mutual corroboration of the DAoC format reading; knowledge genealogy (later author learning from earlier repo) cannot be excluded.",
+                     "limitation":  "Based on READMEs/metadata/code inspection, not a full provenance audit. Corroboration concerns the DAoC client format only.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: calibrates the independent weight of the DAoC precedent as a RESEARCH PATTERN (3 lineages + 1 Uthgard-BuildNav lineage); zero weight as Entropia evidence.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "B6",
+                     "claim":  "DAoC-MapCreator also reads Treemap.csv and tree_clusters.csv (separate tree/vegetation path from fixtures; tree_clusters holds local XYZ of tree instances in a cluster)",
+                     "source":  "Merec/DAoC-MapCreator commit 073a5940128be0e3f3bb57df0468d946b560c7f1, FixturesLoader.cs L127-174; DaocNavMesh TreeCluster.cpp L11-44 (independent)",
+                     "observation":  "L130-134: Treemap.csv from zones\\trees\\treemap.mpk + tree_clusters.csv from zones\\trees\\tree_clusters.mpk - separate global archives vs per-zone nifs/fixtures. L151-174: TreeClusterRow name=fields[0], tree=fields[1], LOCAL XYZ TRIPLETS from i=2 step 3; instances applied L390-415. DaocNavMesh reads the same tree_clusters.csv independently (L11-44).",
+                     "limitation":  "NUANCE: tree data FILES are separate, but tree clusters are still INSTANTIATED via fixtures.csv rows (fixture.IsTree/IsTreeCluster by NIF filename, L374-392) - vegetation model+local-offset data separate, cluster WORLD placement still from a fixture row. DAoC != Entropia.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: precedent for separating PROCEDURAL/VEGETATION placement data from building fixtures - parallels EU935 vegetation-climate as a separate track.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "C1",
+                     "claim":  "OpenMW (tables-world) instance table: Object ID, Pos X/Y/Z, Rot X/Y/Z, Scale",
+                     "source":  "https://openmw.readthedocs.io/en/stable/manuals/openmw-cs/tables-world.html (LIVE 2026-09-13)",
+                     "observation":  "Instances section verbatim: \u0027An instance is created every time an object is placed into a cell...\u0027 with fields Cell, OriginalCell, Object ID, Pos X Y Z, Rot X Y Z, Scale, Owner, Soul, Faction...",
+                     "limitation":  "Documentation of OpenMW-CS\u0027s schema for Morrowind content - ONE engine\u0027s data model; not a universal Gamebryo-era standard; not Entropia\u0027s schema.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: {object-id, pos, rot, scale} instance grammar as a SEARCH PATTERN for EU935 candidate records.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "C2",
+                     "claim":  "MWSE object-lifetimes distinguishes base object vs tes3reference (reference = position/rotation/scale; base may have 0/1/many instances)",
+                     "source":  "https://mwse.github.io/MWSE/guides/object-lifetimes/ (LIVE 2026-09-13)",
+                     "observation":  "Verbatim: \u0027A base object, inheriting from the tes3baseObject class... When an object is dragged to the Render Window, a reference (tes3reference) is created. The tes3reference structure holds the data for an object placed in certain cell... Those are position, rotation, scale... There may be zero, one or more tes3references of a base object placed in the game world.\u0027",
+                     "limitation":  "MWSE describes the MORROWIND runtime object model; evidence for Morrowind\u0027s architecture, not a universal standard, not Entropia.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: definition-vs-instance (0/1/N) split as a RESEARCH PATTERN.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "C3",
+                     "claim":  "openmw-trav lua overview: base record holds asset links WITHOUT location; instance has position",
+                     "source":  "https://openmw-trav.readthedocs.io/en/mwdialogue-bindings/reference/lua-scripting/overview.html (LIVE 2026-09-13)",
+                     "observation":  "Verbatim: \u0027Game object - Any object that exists in the game world and has a specific location.\u0027 \u0027Record - Persistent information about an object. Includes starting stats and links to assets, but does not have a location. Game objects are instances of records.\u0027 Plus terminology caution: \u0027In MWSE game objects are references and records are objects.\u0027",
+                     "limitation":  "openmw-trav.readthedocs.io hosts the mwdialogue-bindings branch docs of trav55/openmw (fork/branch doc set), not the primary openmw domain. One engine\u0027s scripting model; NOT a mandatory architecture of all Gamebryo games (contract C-LIMITATION); not Entropia evidence.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: record-without-location vs instance-with-location as the EU935 template-vs-instance SEARCH PATTERN.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "D1",
+                     "claim":  "Dawn of Light: NPC-creation packet contains Heading-\u003eZ-\u003eX-\u003eY-\u003eModel (world transform + model ID runtime). Which object classes are handled?",
+                     "source":  "Dawn-of-Light/DOLSharp commit 776619f88d2d5ce52f09ab956194fd519a41f985 (2026-06-04), GameServer/packets/Server/PacketLib168.cs L1038-1065 (SendNPCCreate), IPacketLib.cs L120-127",
+                     "observation":  "NPCCreate = 0xDA; packet: ObjectID, speed, Heading, Z, X, Y, speedZ, Model, Size, Level, flags, name, guild (L1058-1065) - claimed sequence confirmed verbatim. CREATE CENSUS: SendNPCCreate(GameNPC) 0xDA; SendObjectCreate(GameObject) 0xD9 (GameStaticItem/GameKeepBanner/GameStaticItemTimed/WorldInventoryItem/IDoor); SendPlayerCreate 0xD4; SendMovingObjectCreate 0x12; SendHouse(House) HouseCreate=0xD1 - player HOUSING. Static city buildings NOT in the server packet family (DAoC static world is client-side fixtures.csv - group B).",
+                     "limitation":  "EMULATOR reimplementation of DAoC protocol - evidence of what a DAoC-compatible server sends, not Mythic\u0027s original code. Precedent for NPC/dynamic/housing network placement; NOT evidence that static cities are network-placed (in DAoC they are not).",
+                     "relevance_to_eu935":  "HYPOTHETICAL: {transform + model ID} packet grammar is the SEARCH PATTERN for EU935 runtime create-object - applicable to DYNAMIC entities; explicitly NOT a static-building precedent.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "D2a",
+                     "claim":  "WarEmu: F_CREATE_STATIC=0x71, F_CREATE_MONSTER=0x72; F_CREATE_STATIC composes OID, WorldO, WorldZ, WorldX, WorldY, DisplayID...; F_CREATE_MONSTER: OID, Heading, WorldPosition.Z/X/Y, SpeedZ, Model1, MinScale, Level, Faction",
+                     "source":  "WarEmu/WarEmu branch \u0027update\u0027 commit 3e69ff657325e93cbe0a3955c56cdba6bdac5c5e (2014-08-26), WorldServer/NetWork/Opcodes.cs L88-89; WorldServer/World/Objects/GameObject.cs L74-103; Creature.cs L146-159",
+                     "observation":  "Opcodes verbatim L88-89. F_CREATE_STATIC: OID, 0, WorldO, WorldZ, WorldX, WorldY, DisplayID, unks, loot flag, name (GameObject.cs L74-103). F_CREATE_MONSTER: OID, 0, Heading, Z, X, Y, SpeedZ, Model1, MinScale, Level, Faction (Creature.cs L146-159) - exact.",
+                     "limitation":  "EMULATOR packet reimplementation (WAR 1.4.8), not Mythic/EA code. Unlabeled fields stay Unk in code. Precedent for the packet GRAMMAR only.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: {OID + world transform + display/model ID (+ scale/level/faction)} grammar is the SEARCH PATTERN for an EU935 network create-object decoder (separate runtime track from the client-static template-\u003eA-\u003eMODEL path).",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "D2b",
+                     "claim":  "Return of Reckoning post (viewtopic.php?p=15035) describes WAR packet structures RE\u0027d from retained packet logs of live servers (no original server code)",
+                     "source":  "https://www.returnofreckoning.com/forum/viewtopic.php?p=15035",
+                     "observation":  "NOT QUOTABLE. Attempts 2026-09-13: live 403; Wayback web/2024 404; Wayback web/2 404; Wayback availability API 429; Wayback CDX EMPTY (zero captures); Playwright browser ECONNREFUSED; Bing search no RoR results.",
+                     "limitation":  "Post content cannot be verified; the RoR methodology narrative stays UNVERIFIED (D2a code claims are independently CONFIRMED and do not depend on it).",
+                     "relevance_to_eu935":  "None (unverified secondary narrative).",
+                     "status":  "UNVERIFIED"
+                 },
+                 {
+                     "id":  "D3",
+                     "claim":  "(CRITICAL trap) Establish from CODE what F_CREATE_STATIC actually creates - does the name prove city placement?",
+                     "source":  "WarEmu code, same commit as D2a (GameObject.cs, GameObject_spawn.cs, World/Objects census)",
+                     "observation":  "GameObject : Unit is the ONLY sender of F_CREATE_STATIC; class carries LOOT generation, QUEST interaction (QUEST_USE_GO), Tok unlocks, Faction/Rank/Level from Spawn.Proto, scripts; embedded real-packet hex comment decodes to \u0027Empire Bar Door\u0027. Spawn source = emulator WORLD DATABASE (GameObject_spawn : DataObject, TableName=\u0027gameobject_spawns\u0027, DatabaseName=\u0027World\u0027). Census: Object-\u003eGameObject/Door(empty)/ChapterObject/PQuestObject/Item; Unit-\u003eCreature/Player. CODE SHOWS: F_CREATE_STATIC creates DB-driven INTERACTIVE objects (doors, lootable props, quest objects). CODE DOES NOT SHOW: any static-city geometry path; name \u0027STATIC\u0027 = non-monster interactive object; no evidence WAR authored static world comes from the server.",
+                     "limitation":  "Conclusive for the WarEmu codebase ONLY; nothing about WAR\u0027s original server (not public).",
+                     "relevance_to_eu935":  "HYPOTHETICAL but DECISIVE for EU935 direction: network-create precedent covers DYNAMIC/interactive entities (+DAoC housing); does NOT support network-first for authored static cities - consistent with DAoC client-side fixtures.csv and ERRATA_R2 H_CLIENT-priority-as-research-direction.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "E1",
+                     "claim":  "EU forum post \u0027Verification data for Entropia Universe 10.4.0.36604\u0027 (Nov 2009): authorship? templates.vfs=610576B; Sectors.xbc=129B; ResourcePaths.xbc; Objects/Parameters/Terrain0/1/Planets.pak; textures/videos/names/strings.vfs",
+                     "source":  "https://forum.entropiauniverse.com/t/verification-data-for-entropia-universe-10-4-0-36604/144631 (LIVE 2026-09-13)",
+                     "observation":  "AUTHORSHIP: forum user \u0027Wody\u0027, posted November 25, 2009 2:56pm - player-generated QuickSFV CRC manifest, NOT MindArk. ALL values verbatim: templates.vfs=610576 B; Sectors.xbc=129 B; ResourcePaths.xbc=64028 B; Objects.pak x4 (75091884/58448644/65028231/119935055); Parameters.pak x5; Terrain0.pak=1197363457 B; Terrain1.pak=1252214116 B; Planets.pak=11608310 B; textures.vfs=1552 B; videos.vfs=3856 B; names.vfs=499216 B; strings.vfs=422608 B.",
+                     "limitation":  "SFV = size+CRC listing of one player\u0027s 10.4 install: existence+size only, nothing about contents/roles. See E2.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: templates.vfs persisting 9.3.5-\u003e10.4 supports the \u0027MindArk template layer above the engine\u0027 hypothesis (FILE continuity); format/field semantics across versions UNVERIFIED (no 10.4 parsing in this run).",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "E2",
+                     "claim":  "(mandated LIMITATION) 129 bytes of Sectors.xbc is NOT proof of a complete placement table; filename continuity != format/ID/semantics continuity; user post != official specification",
+                     "source":  "derived from E1 source",
+                     "observation":  "LIMITATION VALID + premise-verified: Sectors.xbc=129 B confirmed in the SFV; a 129-byte file cannot hold a complete world placement table; the post is a player CRC manifest (Wody); templates.vfs in both 9.3.5 and 10.4 evidences only FILENAME continuity - 10.4 record layout/semantics unverified here.",
+                     "limitation":  "n/a (this row IS the limitation)",
+                     "relevance_to_eu935":  "Guards EU935 against three over-reads: Sectors.xbc != placement table; 10.4 != 9.3.5 format proof; forum post != spec.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "E3",
+                     "claim":  "(boundary directive) Do NOT interact with EU1030 session work",
+                     "source":  "n/a",
+                     "observation":  "Boundary RESPECTED: this run read ONLY the public E1 forum page and the other listed external sources; no local EU 10.x/EU1030 files touched, no EU1030 artifacts read or modified, nothing outside the A-F list investigated.",
+                     "limitation":  "n/a",
+                     "relevance_to_eu935":  "Keeps the 9.3.5-track and any 10.x-track evidence separate (era isolation).",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "F1",
+                     "claim":  "PerlMonks post 2005-12-02 (node_id=513557): operations on Models.bnt/50.bnt/Textures.bnt with concrete offsets; practical binary RE without BNT semantics",
+                     "source":  "https://www.perlmonks.org/?node_id=513557 (LIVE blocked JS challenge; WAYBACK capture 2017-03-07, read 2026-09-13)",
+                     "observation":  "Node \u0027File reading with sysseek and sysread\u0027 by PhilHibbs, Dec 02, 2005 10:59 UTC: processes Windows FC /B output for Models.bnt (offsets 05063755, 0875CF55, 09DC0155, 0B209955, 0DE8AD55, 0DF4ED55), 50.bnt (03040155), Textures.bnt (088C1355, 10F45955, 1155A355, 181FDB55); pure Perl I/O question (\u0027+\u003c\u0027 vs \u0027\u003e\u003e\u0027); ZERO BNT semantics.",
+                     "limitation":  "Comparison target = the author\u0027s OWN MODIFIED copies (C:\\DATA\\...) - modding, not format documentation. Single Wayback capture as access proxy.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: historical context - community binary work on the PE BNT corpus ~21 years before the current project; NO bearing on EU935 semantics.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "F2",
+                     "claim":  "xennex @ XeNTaX 2007-01-24/25: BNT2 structure [int32 StartOffset][\u0027BNT2\u0027][numberOfFiles][name until 0x0A][size][offset][int64 UNKNOWN]; int64-as-ID experiment crashed the client after swap",
+                     "source":  "XeNTaX community backup https://github.com/XeNTaXBackup/XeNTaXBackup.github.io commit 2c6074a1bcb085e77f527fcf620620a4ee1e76da, markdown/Problem mit Entropia Universe Archive_2446.md",
+                     "observation":  "BOTH posts verbatim: #1 (xennex 2007-01-24T16:14:54 German) and #2 (2007-01-25T08:46:55 English): int32 Startoffset; char[4] BNT2; seek; int32 numberOfFiles; per file: filename until chr=10, int32 size, int32 offset, int64 UNKNOWN. Crash experiment verbatim: tried int64 as file ID, replaced a file and wrote with that ID -\u003e game crashed; \u0027i don\u0027t known what the int64 value is(Not file ID)\u0027.",
+                     "limitation":  "Community scrape of dead xentax.com (post metadata embedded); preserved thread shows NO ANSWER; xennex\u0027s structure was never publicly completed in the thread.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: 2007-era community BNT2 index knowledge predates the project; consistent with, NOT a substitute for, the project\u0027s own verified BNT2 reader (era-separated).",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "F3",
+                     "claim":  "Desy PEBNTView 1.0 @ elitepvpers 2008: tool that UNPACKS AND CREATES BNT (C# port of older tool)",
+                     "source":  "https://www.elitepvpers.com/forum/general-gaming-discussion/146172-entropia-universe-project-entropia-pebntview.html",
+                     "observation":  "NOT READABLE. Attempts 2026-09-13: live https 403; live http 403; Wayback web/2 403; Wayback web/2009 403; Wayback CDX exact 403/empty; CDX wildcard 146172* EMPTY (no captures); archive.ph 404; Bing \u0027PEBNTView entropia\u0027 no relevant results.",
+                     "limitation":  "elitepvpers thread (tool description, BNT-create capability, C#-port claim) unverifiable - claim rests on a now-unreachable primary source. NOT RUN: the tool was never executed (contract).",
+                     "relevance_to_eu935":  "None until source becomes readable; historical community-tool context only (NO effect on EU935 canon).",
+                     "status":  "UNVERIFIED"
+                 },
+                 {
+                     "id":  "F4",
+                     "claim":  "sinkillerj @ XeNTaX 2020-01: \u0027decode the game enough to recreate the old world\u0027; had BNT/textures/NIF/terrain; stuck on NiArkAnimationExtraData and TDF/TEZ; old NifSkope 1.x opened part of the NIFs",
+                     "source":  "XeNTaX community backup (same repo/commit as F2), markdown/Classic Entropia Universe Models (Gamebryo NIF)_21558.md",
+                     "observation":  "ALL verbatim: sinkillerj 2020-01-03: \u0027Ultimately my goal is to decode the game enough to recreate the old world. Dragon Unpacker has no problem with the BNT archives... TGA and DDS disguised as DAT... NifSkope refuses to open them due to the unknown block type NiArkAnimationExtraData... terrain... chunks of TDF files\u0027; 2020-01-04: \u0027any version of NifSkope 1 appears to work, including... 1.2.0 Alpha 2, some files stil have issues... one of the TEZ files from TerrainEditZones... I\u0027m not quite sure how they correlate yet.\u0027 shakotay2: old NifSkope loads them; \u0027unknown ints in the NiArkAnimationExtraData node, yes\u0027.",
+                     "limitation":  "Community-scrape provenance (4 posts preserved; live thread may have had more). Thread ENDS at asset extraction/viewing - NO placement/protocol/runtime RE preserved.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: closest public PREDECESSOR of the world-recreation goal, ending at NIF viewing + unresolved TDF/TEZ - historical context; NOT a priority claim (see F6).",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "F5",
+                     "claim":  "NifTools/PyFFI: NiArkAnimationExtraData = \u0027Unknown node\u0027; NiArkImporterExtraData: importerName + unknown ints/bytes/floats",
+                     "source":  "https://www.niftools.org/pyffi/pyffi/formats/nif.html (LIVE 2026-09-13)",
+                     "observation":  "NiArkAnimationExtraData: bases NiExtraData, docstring \u0027Unknown node.\u0027, fields unknown_bytes + unknown_ints. NiArkImporterExtraData: \u0027Unknown node.\u0027, importer_name (\u0027Contains a string like \\Gamebryo_1_1\\ or \\4.1.0.12\\\u0027), unknown_bytes, unknown_floats, unknown_int_1, unknown_int_2. Family: NiArkShaderExtraData/NiArkTextureExtraData/NiArkViewportInfoExtraData + ArkTexture.",
+                     "limitation":  "MANDATED: STRUCTURAL oracle, NOT semantic - field-boundary structure with exactly ONE semantic label (importer_name). unknown_* names must never be inherited as semantics. Older NifLib C++ field counts (4xint+37xbyte etc.) are OUTSIDE this run\u0027s claim list - not separately verified.",
+                     "relevance_to_eu935":  "HYPOTHETICAL: independent structural cross-check for the project\u0027s NIF parser field boundaries; NOT a semantic source.",
+                     "status":  "CONFIRMED"
+                 },
+                 {
+                     "id":  "F6",
+                     "claim":  "(methodological directive) Do NOT claim discovery priority from absence of results",
+                     "source":  "n/a",
+                     "observation":  "DIRECTIVE FULFILLED - explicit methodological note recorded in the final report: absence of public prior art is NOT proof of first discovery; private RE may have existed; no priority claims made in this run.",
+                     "limitation":  "n/a",
+                     "relevance_to_eu935":  "Protects EU935 conclusions from over-claiming.",
+                     "status":  "CONFIRMED"
+                 }
+             ]
+}
