@@ -1,0 +1,141 @@
+Kontynuuj badania EU 9.3.5 na podstawie nowego audytu Desktop. Masz moje GO na korekty dowodowe i następujące po nich badanie statyczne. Pracuj do uzyskania sprawdzalnego wyniku albo konkretnej, udokumentowanej granicy. Nie kończ na planie. Nie uruchamiaj klienta, Fridy, x32dbg, mock-serwera ani połączeń z serwerem gry w ramach tego zlecenia.
+
+Celem jest odzyskanie prawdziwego mechanizmu i źródła placementu budynków. Nie zakładaj ani lokalnego, ani sieciowego pochodzenia. Nie zastępuj dowodu dodatniego wnioskiem z braku trafień.
+
+REPO I WEJŚCIA
+
+Repo: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean
+GitHub: SebastianKozlo/eudoria-clean, master.
+Audytowana podstawa merytoryczna: 2a2ba8ddc864d16b0b31e6ef7928e0e2af922633.
+Po niej może być commit publikujący wyłącznie audyt Desktop. Ustal świeży HEAD i remote; nie cofaj checkoutu. Jeśli doszły inne prace, opisz ich zakres i wpływ na świadków, nie nadpisuj ich.
+
+Przeczytaj instrukcje repo i aktualny AUDIT_ENTRYPOINT.md. Stare checkpointy PE2/2003 nie zastępują badanych bajtów 9.3.5.
+
+Audyt Desktop i jego własna sonda:
+docs/audits/PE_935_STATIC_PLACEMENT_DESKTOP_AUDIT_R1_20260913/REPORT.md
+docs/audits/PE_935_STATIC_PLACEMENT_DESKTOP_AUDIT_R1_20260913/probe.mjs
+docs/audits/PE_935_STATIC_PLACEMENT_DESKTOP_AUDIT_R1_20260913/probe.json
+Lokalna kopia pomocnicza:
+C:\Users\User\Documents\ChatGPT\PE\audit-eu935-static-placement-2a2ba8d\AUDYT.md
+
+Źródłowe pakiety w docs/audits/:
+- PE_935_CONSUMER_TRACE_CLAIMS_JOIN_R1_20260913 — ERRATA_R2, pełny join;
+- PE_935_STATIC_INSTANCE_TRACE_R1_20260913 — REPORT, QC, klasyfikacja 38 miejsc, GA*;
+- PE_935_PLACEMENT_SOURCE_TRACE_R1_20260913 — REPORT, QC, Z4, ZS*, S14;
+- PE_935_STATIC_PLACEMENT_ROUND1_20260913 — ROUND_REPORT i manifest nakładki;
+- PE_935_EXTERNAL_SOURCES_MATRIX_R1_20260913 — tylko jako zewnętrzne wzorce, nie dowód EU935.
+
+Oryginały, READ-ONLY:
+D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+D:\Eudoria_Reconstruction\pcg_install\Data\Parameters\templates.vfs
+SHA256 BE57818C7516F8C6C8A68DF427591567DD0E5A421934AC24ADA57E8261F65B77
+Archiwa Models/Volumes/Portals pod tym samym pcg_install\Data; piny w probe.json.
+
+ORGANIZACJA
+
+pe-master nadzoruje i samodzielnie sprawdza twierdzenia. pe-reconstruction wykonuje ograniczone badania i narzędzia w nowym katalogu runu. pe-master-auditor wykonuje niezależne QC oraz formalizuje erratę. Zachowaj jeden poziom delegacji, jednego writera Git i jednego writera projektu Ghidry. Ten prompt nie uruchamia żadnego istniejącego automatycznego loopa.
+
+Nowe katalogi, sprawdzone jako nieistniejące podczas audytu Desktop; sprawdź kolizję ponownie przed utworzeniem:
+A: D:\Eudoria_Reconstruction\99_Audits\PE_935_RECEIVER_PROVENANCE_CORRECTIONS_R1_20260913\
+B: D:\Eudoria_Reconstruction\99_Audits\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\
+Jeśli nazwa zajęta, wybierz nowy jednoznaczny sufiks i zapisz zmianę we wszystkich odsyłaczach. Nie wykorzystuj ponownie ukończonego katalogu.
+Raport końcowy A: A\06_REPORT\REPORT.md.
+Raport końcowy B: B\06_REPORT\REPORT.md.
+Każdy pakiet ma również HANDOFF.md, STAGE_ACCEPTANCE_GATES.csv, artifact_index.csv i manifest hashy w jawnie opisanych lokalizacjach.
+
+FAZA A — NAJPIERW KOREKTA PODSTAWY, WŁASNYMI PRÓBAMI
+
+Rozstrzygnij pięć findings Desktop. Każdy otrzymuje disposition, własny dowód i listę zdań wymagających zastąpienia. Nie przyjmuj audytu na autorytet; ewentualny sprzeciw musi wskazywać konkretny błąd w bajtach, ABI lub przepływie.
+
+F1. Typ odbiorcy wspólnego gettera:
+- Desktop odczytał vtable 0x00A86850 → COL 0x00AA7F28 → TD 0x00B8D068, RTTI .?AVArkObjectClass@@; slot1 = FUN_0070BF50.
+- FUN_0070BF50 przekazuje własny this jako pierwszy argument FUN_00726E70.
+- Konstruktor ArkObjectClass zapisuje argument do +8 @0x0070CFC1.
+- FUN_007CE1E0 = 8B4108C3; CALL @0x00726EB7 i store @0x00726EBC kopiują +8 argumentu do ArkObject+0x28.
+- To nie dowodzi, że argument jest rekordem templates.vfs, a wynik modelem A.
+Odtwórz pełny ABI tej fabryki i konstruktora, ustal role class+8 i object+0x28. Prześledź writer DAT_00BA58CC z przykładu ArkSurgeonObject. Oddziel: rekord templates.vfs, ArkObjectClass, ArkObject, CWO, kontener/wrapper atrybutów i instancja modelu. Nie nadaj im wspólnego typu z powodu podobnych offsetów lub tego samego stuba.
+
+F2. Błędny konsument D:
+- W FUN_008553D0 selektor gałęzi 0x4E38 czyta +8: CALL @0x008557FD → FUN_007CE1E0, następnie ESI−4/switch.
+- Nie jest to selektor D@+0x10. Wcześniejszy CALL FUN_0048ADA0 nie zasila tego switcha.
+- D rzeczywistego template'u 4508: offset pliku 96528, 0x42F9E1CB, f32=124.94100189208984. Semantyka UNKNOWN.
+Sprawdź odbiorców najważniejszych wywołań +8/+0x10. Licznik callerów stuba nie jest licznikiem konsumentów A/D. Nie próbuj udowadniać naraz wszystkich 808 kandydatów +8. Skup się na świadkach użytych w raportach oraz jednym poprawnie wyprowadzonym odbiorcy templates.vfs jako kontroli pozytywnej i ArkObjectClass/wrapperze jako kontroli odróżniającej.
+
+F3. Zbyt mocne negatywy:
+Usuń w nowej erracie przejścia „brak 13 surowych ID w .prt → brak placementu” oraz „brak kluczy LE32 w 27 VFS → FILE wykluczony”. Poprawne statusy: brak tych wzorców w zadeklarowanym zakresie; semantyka pozostałych kodowań otwarta. 27 plików nie oznacza 27 rodzin formatu. Brak pliku 20006.vfs nie dowodzi, że param-set 20006 musi pochodzić z sieci ani że nazwa pliku powinna być równa ID.
+
+F4. Nieuprawnione odrzucenie 38 call-site'ów:
+Tabela zawiera ogólny MODEL_MACHINERY i nierozstrzygnięte OTHER/UNKNOWN. Szczególnie FUN_00567170, FUN_005B5F90 i FUN_006CB6F0 pozostają kandydatami. „0 dowiedzionych jako dedykowane STATIC_WORLD” nie oznacza „budynki nie mogą przejść przez te funkcje”. Rozdziel rolę funkcji od klasy danych, które może obsługiwać.
+
+F5. Pochodzenie transformu:
+qc_b2_exclusive.py wykrywa obecność wywołań, nie dataflow. Sąsiadujący getter/check/writer atrybutów nie dowodzi, że argument settera z niego pochodzi. Nie używaj 3×CC jako jedynego wyznacznika granic funkcji.
+Rozlicz rzeczywiście śledzone ścieżki, brakującą pozycję w „10+4 z 15” i 11/26 callerów konstruktora bez zbadanej semantyki. Dopóki nie ma dowodu pełnego pokrycia, używaj „w zbadanych ścieżkach”, nie „wyłącznie”. Każde istotne źródło wartości musi mieć: receiver, definicję, przeniesienia, gałąź, store/argument docelowy, granicę dowodu. Nie trzeba najpierw skończyć całego census-u, aby badać jeden konkretny szew, ale nie wolno wtedy ogłaszać globalnego wykluczenia.
+
+Przy okazji popraw w erracie:
+- zapis vft 0x006FA8BD/+0xD; LE 296445=FD850400;
+- ArkObject vft store @0x00726EA1, store +0x28 @0x00726EBC;
+- executor już skanował 13 kotwic .prt na wszystkich offsetach; aligned-only dotyczyło innej metryki;
+- bezpośredni CALL count=0 nie dowodzi braku wywołań wirtualnych;
+- 3618/3618 coverage A vs 3618/5596 coverage całego korpusu;
+- historyczne manifesty i nakładka closure muszą mieć jawny porządek walidacji.
+
+Nie zmieniaj historycznych dumpów i ukończonych raportów w miejscu. Utwórz erratę z SUPERSESSION ledger: stare twierdzenie → nowa kwalifikacja → źródło → własny kontrtest. Zachowaj prawidłowy join i tożsamość wejść. Nie wycofuj całej pracy tylko dlatego, że część interpretacji była błędna.
+
+Bramka A: materialne twierdzenia skorygowane lub obronione konkretnym dowodem; macierz typów odbiorców; własne odtworzenie F1/F2; kontrola negatywna pokazująca, że nowa metoda odróżnia wspólny getter użyty na innym typie. Same zielone testy i hashe nie zamykają semantyki.
+
+FAZA B — JEDEN RZECZYWISTY SZEW DO ŹRÓDŁA DANYCH
+
+Po korektach kontynuuj autonomicznie statyczne badanie. Pytanie główne: skąd trafia konkretna wartość pozycji/rotacji do właściwego kontenera i jak odnosi się do tej samej instancji oraz modelu?
+
+1. Zidentyfikuj odbiorców w FUN_00567770/FUN_00567C50, źródła w FUN_00846840/FUN_00854720 oraz rozwiązywanie kontenera przez FUN_008544D0. Odtwórz rzeczywiste klucze, typy i poziomy wskaźników, zamiast uznać każdy float3 za world XYZ.
+
+2. Znajdź producenta/writera kontenera lub jego deserializację, także insert/copy/replace omijający helper FUN_00845F70. Oddziel źródło pierwotne od późniejszej propagacji wartości. Wspólny kontener nie dowodzi wspólnego źródła.
+
+3. Wróć do ogólnych kandydatów FUN_00567170, FUN_005B5F90 i FUN_006CB6F0. Próbuj połączyć identyfikator definicji, konkretny rekord derived i instancję modelu przez ten sam pointer/key i jawne transfery. Nie sklejaj diagramu z sąsiadujących adresów lub podobnych klas. Jeśli w jednym szwie brakuje targetu virtual-call, pokaż slot, możliwe typy i miejsce wymagające rozstrzygnięcia.
+
+4. Jeżeli ślad wskazuje Parameters VFS, wybierz jedną uzasadnioną rodzinę po dowodzie czytnika. Oddziel zewnętrzny kontener ArkVFS od gramatyki payloadu. Dopiero wtedy zbuduj minimalny parser badawczy w B\00_CONTROL. Wymagaj dokładnego rozliczenia bajtów, granic rekordów i nieznanych pól oraz zgodności z czytnikiem klienta. Pełna tożsamość round-trip opaque blobu nie oznacza zrozumienia pól.
+
+5. Poszukiwanie kluczy 0x6A4/0x6A5/0x6A8/0x6A9/0x6AC/0x23 traktuj jako pomocniczy locator. Pozytyw musi mieć rolę pola potwierdzoną kodem. Negatyw bez znajomości sposobu kodowania kończy się ANCHORS_ABSENT_SEMANTICS_OPEN. Nie narzucaj formatu fixture-table ani u32 LE każdemu plikowi.
+
+6. Jeżeli rzeczywisty przepływ prowadzi do komunikatów, kontynuuj statycznie ten ślad. Potwierdzony dispatcher 0xB9 nie dowodzi pełnej gramatyki payloadu ani źródła wcześniejszego zasilenia atrybutów. Zapisz konkretne read-cursor operacje, pola, następne wywołania i granice wirtualne. Brak callerów bezpośrednich nie zamyka badania. Nie startuj runtime w tej rundzie.
+
+7. Dla dowolnego kandydata placementu rozdziel: model-local, parent-local/cell-relative i world transform. Wymagaj konsumenta oraz reguły kompozycji; dopiero potem osi, jednostek i ewentualnego offsetu regionu. Dla 4508/296445 nie twórz przykładowych XYZ jako rzekomo odzyskanej lokalizacji. Synthetic instance = test mechanizmu, nigdy historical placement.
+
+Wybór szwu i jego pozytywny/negatywny wynik powinny być konkretne. Nie rozszerzaj tej rundy do kilkudziesięciu niepowiązanych dekompilacji. Po rozstrzygnięciu wybranej krawędzi dostarcz wynik i wskaż następny eksperyment, zamiast rozpoczynać inny etap bez związku z pytaniem.
+
+ZEWNĘTRZNE WZORCE — TYLKO W RAZIE KONKRETNEJ POTRZEBY
+
+Gamebryo ery może pomóc rozpoznać AttachChild, parent/world/local i propagację transformów. xOBSE/CommonLibSSE mogą podpowiedzieć relację referencja–węzeł–owner; NiRoom/NiPortal rozdzielenie obiektów i geometrii portalu. NifTools pomaga w granicach NiArk. Nie przenoś offsetów, ABI, semantyki klas Bethesdy ani formatów DAoC do EU935. Każdy taki wpis oznacz EXTERNAL_ORACLE_ONLY/POTENTIAL_FINGERPRINT oraz podaj warunek falsyfikacji. Preferuj posiadane źródła właściwej ery. Nie kopiuj kodu proprietary Gamebryo do publicznego repo.
+
+WERYFIKACJA I UCZCIWE STATUSY
+
+- Własne bajty EXE z pinem SHA + VA→offset + granica instrukcji; dla krawędzi również receiver/dataflow. Sam prolog funkcji nie potwierdza opisu całego ciała.
+- Pozytyw + kontrola rozróżniająca z innego typu/rekordu + drugi rzeczywisty przypadek, jeśli twierdzenie ma być ogólne.
+- Nowy parser: truncation, uszkodzony count/offset, niewspierana wersja, błędny endian jako przypadki zgodne z jego kontraktem. NaN/Inf/overflow muszą być jawne w bramkach przypisujących znaczenie numeryczne; niech UNKNOWN zostaje UNKNOWN.
+- Własne wykonanie, odczyt starego artefaktu i cudza deklaracja wykonania to trzy różne poziomy atrybucji.
+- Statusy dowodów: CONFIRMED / STRONGLY_SUPPORTED / PLAUSIBLE / UNVERIFIED / REJECTED. Statusy operacyjne osobno, np. FORMAT_UNDECODABLE, RECEIVER_UNRESOLVED, SEAM_UNRESOLVED, ANCHORS_ABSENT_SEMANTICS_OPEN.
+- Nie ogłaszaj STATIC_INSTANCE_MECHANISM_CONFIRMED, dopóki brakuje połączenia właściwego rekordu z właściwą instancją modelu. Nie ogłaszaj źródła historycznych pozycji na podstawie samego mechanizmu ich przenoszenia.
+
+GRANICE
+
+READ-ONLY: oryginalne archiwa i EXE, źródła silnika, oracle, R61/importer/nif, ukończone runy. Nie zmieniaj viewerów/rendererów ani portów 9350/8000. Obce experiments/ i src/game/ pozostają nietknięte. Nie wykonuj git reset/clean/add -A, force-push, zmian globalnego kanonu/MAPRE ani zapisu do Obsidian. Projekt Ghidry tylko w nowej kopii runu, po kontroli locka.
+
+HARD STOP: kolizja z aktywnym writerem, niezgodny hash wejścia bez rozstrzygniętej ery, potrzeba uruchomienia klienta/sieci lub modyfikacji oryginału. Brak dowodu oznacza jawny wynik częściowy i dokładną granicę, nie wymuszenie PASS.
+
+PUBLIKACJA — JEST MOJE STAŁE GO
+
+Każdy ukończony etap A i B ma być commitowany i wypchnięty do GitHub, aby ChatGPT miał dostęp. Publikuj nowy pakiet pod docs/audits/<RUN_ID>/, jego metadane i krótki wiersz AUDIT_ENTRYPOINT.md. Zachowaj historyczne materiały. Bez binariów klienta, archiwów gry, baz Ghidry i całych źródeł silnika.
+
+Przed commitem: jawna lista własnych ścieżek, diff, hash po finalnej edycji, kontrola manifestu, sprawdzenie obcych zmian. Jeden writer. Po push: rzeczywisty odczyt remote SHA i porównanie. Jeśli push się nie uda, podaj LOCAL_ONLY i błąd, nie „opublikowane”. Nie pytaj ponownie o zgodę na standardową publikację tego zleconego pakietu.
+
+W raporcie końcowym dostarcz:
+1. F1–F5: disposition, własny test, wynik, dowód, poprawione twierdzenie.
+2. Macierz klas/struktur: pochodzenie receivera, layout, getter, rzeczywista rola lub UNKNOWN.
+3. Jedną mapę badanego przepływu z oznaczeniem każdej udowodnionej i nieudowodnionej krawędzi.
+4. Twierdzenie → źródło → własny pomiar → kontrola → wynik → artefakt.
+5. Precyzyjne liczebności, pokrycie i wyłączenia, bez zamiany liczników w dowód semantyki.
+6. Oddzielne odpowiedzi: co identyfikuje model, jak powstaje instancja, skąd jest transform, czy odzyskano autentyczne pozycje 296445.
+7. Commit, remote SHA, stan Git, opublikowane linki i dokładny następny eksperyment.
+
+Dobry wynik tej rundy może być częściowy. Ma rzeczywiście zmniejszyć niewiadomą albo wyeliminować błędny trop, a nie tylko powiększyć pakiet i liczbę etykiet PASS.
