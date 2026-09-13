@@ -1,0 +1,277 @@
+{
+  "run_id": "PE_935_CONSUMER_TRACE_CLAIMS_JOIN_R1_20260913",
+  "stage": "Z2_full_join_a_models",
+  "driver": "z2_join_a_models.py",
+  "driver_sha256": "F47A840AD5B8B59F1E7C61CF7A99679212B934BDAA085A5E1B911BC0F68FE57B",
+  "era": "EU 9.3.5 (pcg_install)",
+  "inputs": {
+    "templates_vfs": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Parameters\\templates.vfs",
+      "sha256": "BE57818C7516F8C6C8A68DF427591567DD0E5A421934AC24ADA57E8261F65B77",
+      "size_bytes": 560788
+    },
+    "models_bnt": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+      "size_bytes": 395412868,
+      "sha256": "C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0",
+      "trailer_index_start": 395262727,
+      "entry_count": 5596,
+      "duplicate_names": [],
+      "index_blob_bytes": 150141
+    },
+    "volumes_bnt": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Volumes\\Volumes.bnt",
+      "size_bytes": 3746375,
+      "sha256": "6AD8BA3C5AD6F7534F91C1956A0E36485A49BBEF3FFA918CBDDC0C68EDBABC09",
+      "trailer_index_start": 3696320,
+      "entry_count": 1865,
+      "duplicate_names": [],
+      "index_blob_bytes": 50055
+    },
+    "s2_csv_r1": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_TEMPLATE_CONSUMER_TRACE_R1_20260912\\01_RAW\\S2_TEMPLATES_TRUE_WALK.csv"
+  },
+  "walk": {
+    "record_count": 5438,
+    "stop": "EOF",
+    "last_record_end": 560788,
+    "file_size": 560788,
+    "crc_fail_count": 0,
+    "stride_base": 36,
+    "s2_csv_consistency": "IDENTICAL (5438/5438 rows: offset/id/size/ver/crc32/crc_ok/id2/A/B/C)"
+  },
+  "denominators": {
+    "template_records_total": 5438,
+    "unique_template_ids_T": 5438,
+    "duplicate_template_ids": [],
+    "unique_A_nonzero": 3618,
+    "A_zero_record_count": 0,
+    "A_zero_sample_ids": [],
+    "unique_B_all_incl_zero": 1667,
+    "unique_B_nonzero": 1666,
+    "B_zero_record_count": 3746,
+    "max_A": 592853,
+    "min_A": 53,
+    "models_bnt_numeric_nif_ids": 5596,
+    "models_bnt_max_nif_id": 592853,
+    "models_bnt_min_nif_id": 53,
+    "volumes_bnt_numeric_bvi_ids": 1865,
+    "volumes_bnt_max_bvi_id": 592854,
+    "volumes_bnt_min_bvi_id": 650
+  },
+  "join_A_to_nif": {
+    "unique_nonzero_A": 3618,
+    "hits": 3618,
+    "misses": 0,
+    "miss_A_values_with_template_ids": [],
+    "per_record": {
+      "records_with_nonzero_A": 5438,
+      "record_hits": 5438,
+      "record_misses": 0,
+      "miss_records_template_id_A": []
+    },
+    "multiples": {
+      "duplicate_names_in_models_index": [],
+      "duplicate_names_count": 0,
+      "one_name_multiple_entries_possible": false,
+      "template_side_A_shared_by_multiple_templates": 253,
+      "note": "models.bnt index has unique names -> each A maps to at most 1 entry; multiple templates may share one A (template-side multiplicity, reported)"
+    },
+    "range_analysis": {
+      "A_beyond_max_nif_id": 0,
+      "A_beyond_max_list": [],
+      "A_below_min_nif_id": 0,
+      "A_in_range_but_missing": 0,
+      "A_in_range_missing_list": []
+    },
+    "recompute_g1": {
+      "method1_membership_name_set": 3618,
+      "method2_set_intersection_int_ids": 3618,
+      "identical": true
+    }
+  },
+  "bonus_join_B_to_bvi": {
+    "unique_nonzero_B": 1666,
+    "hits": 1666,
+    "misses": 0,
+    "miss_B_values_with_template_ids": [],
+    "per_record": {
+      "records_with_nonzero_B": 1692,
+      "record_hits": 1692,
+      "record_misses": 0,
+      "miss_records_template_id_B": []
+    },
+    "duplicate_names_in_volumes_index": []
+  },
+  "models_bnt_census": {
+    "extension_census": {
+      ".nif": 5596
+    },
+    "non_numeric_nif_names_count": 0,
+    "non_numeric_nif_names_sample": []
+  },
+  "volumes_bnt_census": {
+    "extension_census": {
+      ".bvi": 1865
+    },
+    "non_numeric_bvi_names_count": 0,
+    "non_numeric_bvi_names_sample": []
+  },
+  "endianness_control": {
+    "round_trip_pack_unpack_failures": 0,
+    "raw_byte_anchor_4508": {
+      "file_offset": 96516,
+      "bytes_hex": "fd850400",
+      "le_value": 296445,
+      "be_value": 4253352960,
+      "pack_round_trip_identical": true
+    },
+    "be_interpreted_join_hits": 1,
+    "be_hits_detail": [
+      {
+        "A": 592128,
+        "be_interpreted": 592128,
+        "name": "592128.nif"
+      }
+    ],
+    "be_note": "join pod interpretacją big-endian daje 1 trafień z 3618 unikalnych A (vs LE: 3618/3618) — LE to jedyna interpretacja zgodna z CAŁOŚCIĄ indeksu; pojedyncze trafienia BE to zbiegi okoliczności (A o bajtach dających przypadkiem prawidłowy id), nie dowód interpretacji BE"
+  },
+  "negative_control_A": {
+    "seed": 20260913,
+    "offset": 1000000,
+    "rows": [
+      {
+        "base_a": 78478,
+        "synthetic_a": 1078478,
+        "name": "1078478.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 509042,
+        "synthetic_a": 1509042,
+        "name": "1509042.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 549118,
+        "synthetic_a": 1549118,
+        "name": "1549118.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 166421,
+        "synthetic_a": 1166421,
+        "name": "1166421.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 189877,
+        "synthetic_a": 1189877,
+        "name": "1189877.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 576789,
+        "synthetic_a": 1576789,
+        "name": "1576789.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 582436,
+        "synthetic_a": 1582436,
+        "name": "1582436.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 552678,
+        "synthetic_a": 1552678,
+        "name": "1552678.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 567391,
+        "synthetic_a": 1567391,
+        "name": "1567391.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 322443,
+        "synthetic_a": 1322443,
+        "name": "1322443.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 333065,
+        "synthetic_a": 1333065,
+        "name": "1333065.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 380871,
+        "synthetic_a": 1380871,
+        "name": "1380871.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 293359,
+        "synthetic_a": 1293359,
+        "name": "1293359.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 45350,
+        "synthetic_a": 1045350,
+        "name": "1045350.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 308534,
+        "synthetic_a": 1308534,
+        "name": "1308534.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 349582,
+        "synthetic_a": 1349582,
+        "name": "1349582.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 591142,
+        "synthetic_a": 1591142,
+        "name": "1591142.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 173908,
+        "synthetic_a": 1173908,
+        "name": "1173908.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 489877,
+        "synthetic_a": 1489877,
+        "name": "1489877.nif",
+        "present_in_models_bnt": false
+      },
+      {
+        "base_a": 525934,
+        "synthetic_a": 1525934,
+        "name": "1525934.nif",
+        "present_in_models_bnt": false
+      }
+    ],
+    "all_absent": true,
+    "positive_pins_present": true,
+    "negative_pins_absent_models": true,
+    "negative_pins_absent_volumes": true
+  },
+  "claim_C_verdict": "FULL_MAPPING",
+  "domain_reverse_context": {
+    "note": "join jest kierunku A->N (twierdzenie C); poniżej kontekst odwrotny (ile wpisów archiwum nie jest referencjonowane przez pola A/B template'ów)",
+    "models_nif_ids_not_referenced_by_any_A": 1978,
+    "volumes_bvi_ids_not_referenced_by_any_B": 199,
+    "A_domain_is_subset_of_N_domain": true,
+    "B_nonzero_domain_is_subset_of_BVI_domain": true
+  },
+  "errors": []
+}
