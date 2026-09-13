@@ -1,0 +1,34 @@
+// body=0x004023C0-0x00402454
+
+void FUN_004023c0(int *param_1,code *param_2)
+
+{
+  HANDLE hHandle;
+  void *local_c;
+  undefined *puStack_8;
+  undefined4 local_4;
+  
+  local_4 = 0xffffffff;
+  puStack_8 = &LAB_00992b20;
+  local_c = ExceptionList;
+  ExceptionList = &local_c;
+  if (*param_1 != -0x3ea8cf1e) {
+    hHandle = (HANDLE)FUN_00402180(param_1,DAT_00b9d8d0 ^ (uint)&stack0xffffffe8);
+    local_4 = 0;
+    WaitForSingleObject(hHandle,0xffffffff);
+    local_4 = CONCAT31(local_4._1_3_,1);
+    if (*param_1 != -0x3ea8cf1e) {
+      (*param_2)();
+      LOCK();
+      *param_1 = -0x3ea8cf1e;
+      UNLOCK();
+    }
+    ReleaseMutex(hHandle);
+    if ((hHandle != (HANDLE)0x0) && (hHandle != (HANDLE)0xffffffff)) {
+      CloseHandle(hHandle);
+    }
+  }
+  ExceptionList = local_c;
+  return;
+}
+

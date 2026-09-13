@@ -1,0 +1,138 @@
+// body=0x00972DF0-0x00973050
+
+void __thiscall
+FUN_00972df0(basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+             *param_1_00,
+            basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+            *param_1,undefined4 *param_2,undefined4 param_3)
+
+{
+  char cVar1;
+  uint uVar2;
+  DWORD dwDesiredAccess;
+  char *lpFileName;
+  DWORD DVar3;
+  BOOL BVar4;
+  allocator<char> *paVar5;
+  int iVar6;
+  bool bVar7;
+  LPSECURITY_ATTRIBUTES lpSecurityAttributes;
+  DWORD dwFlagsAndAttributes;
+  HANDLE pvVar8;
+  undefined auStack_48 [3];
+  allocator<char> aStack_45;
+  DWORD DStack_44;
+  undefined4 local_40;
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_> *local_3c;
+  char acStack_38 [8];
+  undefined4 auStack_30 [2];
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+  abStack_28 [24];
+  uint local_10;
+  void *local_c;
+  undefined *puStack_8;
+  undefined4 uStack_4;
+  
+  uStack_4 = 0xffffffff;
+  puStack_8 = &LAB_00a4a3d2;
+  local_c = ExceptionList;
+  local_10 = DAT_00b9d8d0 ^ (uint)auStack_48;
+  uVar2 = DAT_00b9d8d0 ^ (uint)&stack0xffffffa8;
+  ExceptionList = &local_c;
+  local_40 = param_3;
+  *(undefined4 *)(param_1_00 + 0x88) = *param_2;
+  *(undefined4 *)(param_1_00 + 0x8c) = param_2[1];
+  *(undefined4 *)(param_1_00 + 0x90) = param_2[2];
+  *(undefined4 *)(param_1_00 + 0x94) = *param_2;
+  *(undefined4 *)(param_1_00 + 0x98) = param_2[1];
+  local_3c = param_1_00 + 0x1c;
+  *(undefined4 *)(param_1_00 + 0x9c) = param_2[2];
+  FUN_00413440(uVar2);
+  if (*(int *)(param_1_00 + 0x18) != -1) goto LAB_00973025;
+  stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+  operator=(param_1_00,param_1);
+  bVar7 = (*(uint *)(param_1_00 + 0x90) >> 3 & 1) == 0;
+  if (bVar7) {
+    dwDesiredAccess = 0xc0000000;
+    DVar3 = 4;
+  }
+  else {
+    dwDesiredAccess = 0x80000000;
+    DVar3 = 3;
+  }
+  uVar2 = (uint)!bVar7;
+  pvVar8 = (HANDLE)0x0;
+  dwFlagsAndAttributes = 0x10000080;
+  lpSecurityAttributes = (LPSECURITY_ATTRIBUTES)0x0;
+  lpFileName = stlp_std::
+               basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+               ::c_str(param_1_00);
+  pvVar8 = CreateFileA(lpFileName,dwDesiredAccess,uVar2,lpSecurityAttributes,DVar3,
+                       dwFlagsAndAttributes,pvVar8);
+  *(HANDLE *)(param_1_00 + 0x18) = pvVar8;
+  if (pvVar8 != (HANDLE)0xffffffff) {
+    DVar3 = GetFileSize(pvVar8,(LPDWORD)0x0);
+    if (DVar3 == 0) {
+      cVar1 = FUN_00971680();
+LAB_00973018:
+      if (cVar1 != '\0') goto LAB_00973025;
+    }
+    else {
+      DStack_44 = 0;
+      BVar4 = ReadFile(*(HANDLE *)(param_1_00 + 0x18),acStack_38,8,&DStack_44,(LPOVERLAPPED)0x0);
+      bVar7 = BVar4 == 1 && DStack_44 == 8;
+      if (BVar4 == 1 && DStack_44 == 8) {
+        paVar5 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&aStack_45);
+        uStack_4 = 0;
+        stlp_std::
+        basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+        basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+                  (abStack_28,paVar5);
+        uStack_4 = CONCAT31(uStack_4._1_3_,2);
+        stlp_std::allocator<char>::~allocator<char>(&aStack_45);
+        stlp_std::
+        basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+        _M_assign(abStack_28,acStack_38,(char *)auStack_30);
+        cVar1 = FUN_00408b60(abStack_28,"ArkVFS01");
+        if (cVar1 == '\0') {
+          cVar1 = FUN_00408b60(abStack_28,"ArkVFS02");
+          if (cVar1 == '\0') {
+            bVar7 = false;
+          }
+          else {
+            *(undefined4 *)(param_1_00 + 0xa0) = 2;
+            iVar6 = FUN_00971660();
+            DVar3 = iVar6 - 8;
+            BVar4 = ReadFile(*(HANDLE *)(param_1_00 + 0x18),auStack_30,DVar3,&DStack_44,
+                             (LPOVERLAPPED)0x0);
+            bVar7 = BVar4 == 1 && DStack_44 == DVar3;
+            if (BVar4 == 1 && DStack_44 == DVar3) {
+              *(undefined4 *)(param_1_00 + 0x8c) = auStack_30[0];
+            }
+          }
+        }
+        else {
+          *(undefined4 *)(param_1_00 + 0xa0) = 1;
+          *(undefined4 *)(param_1_00 + 0x8c) = 0x80;
+          *(undefined4 *)(param_1_00 + 0x90) = 0;
+        }
+        uStack_4 = 0xffffffff;
+        stlp_std::
+        basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>::
+        ~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+                  (abStack_28);
+        if (bVar7) {
+          cVar1 = FUN_00972ad0(local_40);
+          goto LAB_00973018;
+        }
+      }
+    }
+  }
+  FUN_00971cd0();
+LAB_00973025:
+  FUN_00413450();
+  ExceptionList = local_c;
+  ___security_check_cookie_4();
+  return;
+}
+
