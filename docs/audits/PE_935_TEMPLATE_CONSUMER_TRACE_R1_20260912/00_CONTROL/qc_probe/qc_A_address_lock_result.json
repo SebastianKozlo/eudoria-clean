@@ -1,0 +1,362 @@
+{
+  "probe": "qc_A_address_lock",
+  "exe_size": 8015872,
+  "checks": [
+    {
+      "label": "parser A->+0x08 @0x00730CE6",
+      "va": "00730CE6",
+      "section": ".text",
+      "expected": "89 47 08",
+      "note": "MOV [EDI+0x8],EAX",
+      "got": "89 47 08",
+      "result": "PASS"
+    },
+    {
+      "label": "parser B->+0x04 @0x00730D14",
+      "va": "00730D14",
+      "section": ".text",
+      "expected": "89 47 04",
+      "note": "MOV [EDI+0x4],EAX",
+      "got": "89 47 04",
+      "result": "PASS"
+    },
+    {
+      "label": "parser C->+0x0C @0x00730D42",
+      "va": "00730D42",
+      "section": ".text",
+      "expected": "89 47 0c",
+      "note": "MOV [EDI+0xC],EAX",
+      "got": "89 47 0c",
+      "result": "PASS"
+    },
+    {
+      "label": "parser D f32 FSTP +0x10 @0x00730D70",
+      "va": "00730D70",
+      "section": ".text",
+      "expected": "d9 5f 10",
+      "note": "FSTP [EDI+0x10]",
+      "got": "d9 5f 10",
+      "result": "PASS"
+    },
+    {
+      "label": "parser F u32 ->+0x2C @0x00730DB6",
+      "va": "00730DB6",
+      "section": ".text",
+      "expected": "89 57 2c",
+      "note": "MOV [EDI+0x2C],EDX",
+      "got": "89 57 2c",
+      "result": "PASS"
+    },
+    {
+      "label": "getter A [ECX+0x08] @0x007CE1E0",
+      "va": "007CE1E0",
+      "section": ".text",
+      "expected": "8b 41 08 c3",
+      "note": "MOV EAX,[ECX+8]; RET",
+      "got": "8b 41 08 c3",
+      "result": "PASS"
+    },
+    {
+      "label": "stride head @0x00979D00",
+      "va": "00979D00",
+      "section": ".text",
+      "expected": "8b 41 04 85 c0 74 14 8b 49 14 83 c0 0f 33 d2 f7 f1 83 c0 01 0f af c1 83 c0 f0 c3",
+      "note": "MOV EAX,[ECX+4];TEST;JZ;MOV ECX,[ECX+0x14];ADD EAX,0xF;XOR EDX,EDX;DIV ECX;ADD EAX,1;IMUL EAX,ECX;ADD EAX,-0x10;RET",
+      "got": "8b 41 04 85 c0 74 14 8b 49 14 83 c0 0f 33 d2 f7 f1 83 c0 01 0f af c1 83 c0 f0 c3",
+      "result": "PASS"
+    },
+    {
+      "label": "crc32 head @0x004063D0",
+      "va": "004063D0",
+      "section": ".text",
+      "expected": "81 ec 00 04 00 00 53 8b 9c 24 0c 04 00 00 56 57",
+      "note": "SUB ESP,0x400; PUSH EBX; MOV EBX,[ESP+0x40C]; PUSH ESI; PUSH EDI",
+      "got": "81 ec 00 04 00 00 53 8b 9c 24 0c 04 00 00 56 57",
+      "result": "PASS"
+    },
+    {
+      "label": "crc32 init ffffffff @0x0040640F",
+      "va": "0040640F",
+      "section": ".text",
+      "expected": "83 c9 ff",
+      "note": "OR ECX,0xFFFFFFFF (init)",
+      "got": "83 c9 ff",
+      "result": "PASS"
+    },
+    {
+      "label": "crc32 loop body @0x00406416",
+      "va": "00406416",
+      "section": ".text",
+      "expected": "0f b6 02 33 c1 25 ff 00 00 00 c1 e9 08 33 4c 84 0c 83 c2 01 83 ee 01 75 e7",
+      "note": "MOVZX EAX,[EDX];XOR EAX,ECX;AND EAX,0xFF;SHR ECX,8;XOR ECX,[ESP+EAX*4+0xC];...",
+      "got": "0f b6 02 33 c1 25 ff 00 00 00 c1 e9 08 33 4c 84 0c 83 c2 01 83 ee 01 75 e7",
+      "result": "PASS"
+    },
+    {
+      "label": "crc32 final NOT @0x00406430",
+      "va": "00406430",
+      "section": ".text",
+      "expected": "f7 d1 5e 89 0b",
+      "note": "NOT ECX; POP ESI; MOV [EBX],ECX",
+      "got": "f7 d1 5e 89 0b",
+      "result": "PASS"
+    },
+    {
+      "label": "register/map insert prolog @0x0072F8D0",
+      "va": "0072F8D0",
+      "section": ".text",
+      "expected": "55 8b ec",
+      "note": "STLport _Rb_tree insert prolog (PUSH EBP; MOV EBP,ESP)",
+      "got": "53 8b 5c",
+      "result": "FAIL"
+    },
+    {
+      "label": "insert key getter @0x004123D0",
+      "va": "004123D0",
+      "section": ".text",
+      "expected": "8b 01 c3",
+      "note": "MOV EAX,[ECX]; RET",
+      "got": "8b 01 c3",
+      "result": "PASS"
+    },
+    {
+      "label": "pump type-const 0x66 @FUN_006c9700",
+      "va": "006C9700",
+      "section": ".text",
+      "scan_bytes": "6aff681357a00064a1000000005083ec0c5657a1d0d8b90033c4508d44241864a3000000008b7c24308b4c242c8b4424286a0157518d54241c52c74424206600",
+      "mov_imm66_va": null,
+      "expected": "C7 44 24 ?? 66 00 00 00 (MOV dword [ESP+x], 0x66)",
+      "result": "FAIL"
+    },
+    {
+      "label": "pump calls FUN_00415670/FUN_00823c10",
+      "call_00415670_va": "006C9746",
+      "call_00823c10_va": "006C974D",
+      "result": "PASS"
+    },
+    {
+      "label": "loader PUSH templates-path @0x0072FAAC",
+      "va": "0072FAAC",
+      "section": ".text",
+      "expected": "68 30 6d a8 00",
+      "note": "PUSH 0xA86D30",
+      "got": "68 30 6d a8 00",
+      "result": "PASS"
+    },
+    {
+      "label": "lookup sentinel @0x0072F5A5",
+      "va": "0072F5A5",
+      "section": ".text",
+      "expected": "b8 00 58 ba 00",
+      "note": "MOV EAX,0xBA5800",
+      "got": "b8 00 58 ba 00",
+      "result": "PASS"
+    },
+    {
+      "label": "lookup value +0x14 @0x0072F59E",
+      "va": "0072F59E",
+      "section": ".text",
+      "expected": "83 c0 14",
+      "note": "ADD EAX,0x14",
+      "got": "83 c0 14",
+      "result": "PASS"
+    },
+    {
+      "label": "validation CMP slots @0x0072FCE0",
+      "va": "0072FCE0",
+      "section": ".text",
+      "expected": "83 39 00 / 83 79 08 00 / 83 79 04 00 / 83 79 0c 00 all present",
+      "got": "833900741883790800750c83790400750683790c007406b801000000c333c0c333c039412c0f9fc0c3ccccccccccccccd9442404d95910c20400cccccccccccc",
+      "result": "PASS"
+    },
+    {
+      "label": "singleton MOV EAX,[0xBA1824] @0x0043A550",
+      "va": "0043A550",
+      "section": ".text",
+      "expected": "a1 24 18 ba 00",
+      "note": "registry singleton slot",
+      "got": "6a ff 68 8b c6",
+      "result": "FAIL"
+    },
+    {
+      "label": "getter B [ECX+4] @0x00746550",
+      "va": "00746550",
+      "section": ".text",
+      "expected": "8b 41 04 c3",
+      "note": "MOV EAX,[ECX+4]; RET",
+      "got": "8b 41 04 c3",
+      "result": "PASS"
+    },
+    {
+      "label": "getter C [ECX+0xC] @0x006B22D0",
+      "va": "006B22D0",
+      "section": ".text",
+      "expected": "8b 41 0c c3",
+      "note": "MOV EAX,[ECX+0xC]; RET",
+      "got": "8b 41 0c c3",
+      "result": "PASS"
+    },
+    {
+      "label": "rec offset seek @0x00979D20",
+      "va": "00979D20",
+      "section": ".text",
+      "expected": "8b 41 10 83 c0 10 c3",
+      "note": "MOV EAX,[ECX+0x10]; ADD EAX,0x10; RET",
+      "got": "8b 41 10 83 c0 10 c3",
+      "result": "PASS"
+    },
+    {
+      "label": "string Parameters\\templates.vfs",
+      "va": "00A86D30",
+      "section": ".rdata",
+      "expected": "Parameters\\templates.vfs",
+      "got": "Parameters\\templates.vfs",
+      "result": "PASS"
+    },
+    {
+      "label": "string .nif",
+      "va": "00A7A774",
+      "section": ".rdata",
+      "expected": ".nif",
+      "got": ".nif",
+      "result": "PASS"
+    },
+    {
+      "label": "string .bvi",
+      "va": "00A7A734",
+      "section": ".rdata",
+      "expected": ".bvi",
+      "got": ".bvi",
+      "result": "PASS"
+    },
+    {
+      "label": "string .tdf",
+      "va": "00A7A73C",
+      "section": ".rdata",
+      "expected": ".tdf",
+      "got": ".tdf",
+      "result": "PASS"
+    },
+    {
+      "label": "string .amu",
+      "va": "00A7A744",
+      "section": ".rdata",
+      "expected": ".amu",
+      "got": ".amu",
+      "result": "PASS"
+    },
+    {
+      "label": "string .vfs",
+      "va": "00A86820",
+      "section": ".rdata",
+      "expected": ".vfs",
+      "got": ".vfs",
+      "result": "PASS"
+    },
+    {
+      "label": "string BNT2",
+      "va": "00A9BF2C",
+      "section": ".rdata",
+      "expected": "BNT2",
+      "got": "BNT2",
+      "result": "PASS"
+    },
+    {
+      "label": "string ArkVFS02 @0x00A9C4D8",
+      "va": "00A9C4D8",
+      "section": ".rdata",
+      "expected": "ArkVFS02",
+      "got": "ArkVFS02",
+      "result": "PASS"
+    },
+    {
+      "label": "string ArkVFS02 @0x00A9C4E4",
+      "va": "00A9C4E4",
+      "section": ".rdata",
+      "expected": "ArkVFS02",
+      "got": "ArkVFS02",
+      "result": "PASS"
+    },
+    {
+      "label": "string ArkVFS01 @0x00A9C4F0",
+      "va": "00A9C4F0",
+      "section": ".rdata",
+      "expected": "ArkVFS01",
+      "got": "ArkVFS01",
+      "result": "PASS"
+    },
+    {
+      "label": "consumer FUN_006b4c50 calls getter+pump",
+      "call_getter_A": "006B4C82",
+      "call_pump": "006B4D3A",
+      "expected": "at least one CALL 007CE1E0 and one CALL 006C9700 in first 0x300 bytes",
+      "result": "PASS"
+    },
+    {
+      "label": "dispatcher virtual calls [+4]/[+0x38] @0x00823C10",
+      "call_vt4": null,
+      "call_vt38": null,
+      "result": "FAIL"
+    }
+  ],
+  "errors": [
+    "byte mismatch at 0072F8D0 (register/map insert prolog @0x0072F8D0): expected 55 8b ec got 53 8b 5c",
+    "no MOV [ESP+x],0x66 pattern in first 0x40 bytes of FUN_006c9700",
+    "byte mismatch at 0043A550 (singleton MOV EAX,[0xBA1824] @0x0043A550): expected a1 24 18 ba 00 got 6a ff 68 8b c6",
+    "dispatcher virtual call scan: vt4@None vt38@None"
+  ],
+  "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+  "pe": {
+    "e_lfanew": 288,
+    "machine": "014C",
+    "num_sections": 5,
+    "magic": "010B",
+    "image_base": "00400000",
+    "dll_characteristics": "0000",
+    "aslr_dynamic_base": false,
+    "sections": [
+      {
+        "name": ".text",
+        "vsize": 6764005,
+        "vaddr": "00001000",
+        "rsize": 6766592,
+        "rptr": 4096
+      },
+      {
+        "name": ".rdata",
+        "vsize": 1009001,
+        "vaddr": "00675000",
+        "rsize": 1011712,
+        "rptr": 6770688
+      },
+      {
+        "name": ".data",
+        "vsize": 251620,
+        "vaddr": "0076C000",
+        "rsize": 212992,
+        "rptr": 7782400
+      },
+      {
+        "name": ".tls",
+        "vsize": 10,
+        "vaddr": "007AA000",
+        "rsize": 4096,
+        "rptr": 7995392
+      },
+      {
+        "name": ".rsrc",
+        "vsize": 15444,
+        "vaddr": "007AB000",
+        "rsize": 16384,
+        "rptr": 7999488
+      }
+    ]
+  },
+  "sentinel_check": {
+    "data_raw_end_va": "00BA0000",
+    "data_virtual_end_va": "00BA96E4",
+    "sentinel_va": "00BA5800",
+    "sentinel_in_bss": true,
+    "claim": "sentinel 0x00BA5800 lies in .data bss (virtual beyond raw)"
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "probe": "qc_A2_address_lock",
+  "checks": [
+    {
+      "label": "pump MOV [ESP+0x20],0x66 @0x006C973A",
+      "va": "006C973A",
+      "expected": "c7 44 24 20 66 00 00 00",
+      "got": "c744242066000000",
+      "result": "PASS"
+    },
+    {
+      "label": "pump MOV [ESP+0x24],EAX(id) @0x006C9742",
+      "va": "006C9742",
+      "expected": "89 44 24 24",
+      "got": "89442424",
+      "result": "PASS"
+    },
+    {
+      "label": "pump CALL FUN_00415670 @0x006C9746",
+      "va": "006C9746",
+      "expected": "e8 25 bf d4 ff",
+      "got": "e825bfd4ff",
+      "result": "PASS"
+    },
+    {
+      "label": "pump CALL FUN_00823c10 @0x006C974D",
+      "va": "006C974D",
+      "expected": "e8 be a4 15 00",
+      "got": "e8bea41500",
+      "result": "PASS"
+    },
+    {
+      "label": "dispatcher MOV ECX,[EDI+0x24] @0x00823C6C",
+      "va": "00823C6C",
+      "expected": "8b 4f 24",
+      "got": "8b4f24",
+      "result": "PASS"
+    },
+    {
+      "label": "dispatcher vtable[+4] load+call @0x00823C75",
+      "va": "00823C75",
+      "expected": "8b 01 8b 50 04 ff d2",
+      "got": "8b018b5004ffd2",
+      "result": "PASS"
+    },
+    {
+      "label": "dispatcher vtable[+0x38] load+call @0x00823C7F",
+      "va": "00823C7F",
+      "expected": "8b 01 8b 50 38 55 ff d2",
+      "got": "8b018b503855ffd2",
+      "result": "PASS"
+    },
+    {
+      "label": "singleton MOV EAX,[0x00BA1824] @0x0043A571",
+      "va": "0043A571",
+      "expected": "a1 24 18 ba 00",
+      "got": "a12418ba00",
+      "result": "PASS"
+    },
+    {
+      "label": "singleton store MOV [0x00BA1824],EAX @0x0043A59B",
+      "va": "0043A59B",
+      "expected": "a3 24 18 ba 00",
+      "got": "a32418ba00",
+      "result": "PASS"
+    },
+    {
+      "label": "singleton new(0x18) PUSH @0x0043A57A",
+      "va": "0043A57A",
+      "expected": "6a 18",
+      "got": "6a18",
+      "result": "PASS"
+    },
+    {
+      "label": "singleton ctor CALL FUN_0052a260 @0x0043A596",
+      "va": "0043A596",
+      "expected": "e8 c5 fc 0e 00",
+      "got": "e8c5fc0e00",
+      "result": "PASS"
+    },
+    {
+      "label": "insert head PUSH EBX;MOV EBX,[ESP+0xC] @0x0072F8D0",
+      "va": "0072F8D0",
+      "expected": "53 8b 5c 24 0c 55 56 8b f1 8b 6e 04 85 ed 57 8b fe",
+      "got": "538b5c240c55568bf18b6e0485ed578bfe",
+      "result": "PASS"
+    },
+    {
+      "label": "insert key CMP EAX,[EBP+0x10] @0x0072F8E7",
+      "va": "0072F8E7",
+      "expected": "3b 45 10",
+      "got": "3b4510",
+      "result": "PASS"
+    },
+    {
+      "label": "consumer FUN_006b4c50 call census (window 0x600)",
+      "getter_007ce1e0_calls": [
+        "006B4C82",
+        "006B4C93"
+      ],
+      "pump_006c9700_calls": [
+        "006B4D3A",
+        "006B4DCB"
+      ],
+      "claim": "getter x2, pump x2",
+      "result": "PASS"
+    },
+    {
+      "label": "avatar-factory CALL FUN_007ce1e0 @0x0043EBA5",
+      "va": "0043EBA5",
+      "expected": "e8 36 d3 39 00",
+      "got": "e836f63800",
+      "result": "FAIL"
+    },
+    {
+      "label": "lookup head @0x0072F580",
+      "va": "0072F580",
+      "expected": "55 8b ec 51 51 53 56 57",
+      "got": "51568bf18d44240c",
+      "result": "FAIL"
+    },
+    {
+      "label": "lookup calls RB-find FUN_004d1430",
+      "sites": [
+        "0072F590"
+      ],
+      "result": "PASS"
+    },
+    {
+      "label": "loader FUN_0072fa30 calls FUN_00972df0",
+      "sites": [
+        "0072FAF1"
+      ],
+      "result": "PASS"
+    },
+    {
+      "label": "VFS open calls strcmp x2 + indexwalk",
+      "strcmp_sites": [
+        "00972F67",
+        "00972F99"
+      ],
+      "indexwalk_sites": [
+        "0097300A"
+      ],
+      "result": "PASS"
+    },
+    {
+      "label": "record read calls CRC32 + getterC-as-helper",
+      "crc_sites": [
+        "00971B58"
+      ],
+      "helper_sites": [
+        "00971B45",
+        "00971B62"
+      ],
+      "result": "PASS"
+    },
+    {
+      "label": "parser calls subparsers (strings/u32 lists)",
+      "sub1": [
+        "00730D8D"
+      ],
+      "sub2": [
+        "00730D98"
+      ],
+      "result": "PASS"
+    },
+    {
+      "label": "ctor FLDZ;FSTP [EAX+0x10] in FUN_00730700 first 0x100",
+      "found": false,
+      "result": "FAIL"
+    }
+  ],
+  "errors": [
+    "mismatch avatar-factory CALL FUN_007ce1e0 @0x0043EBA5 @0043EBA5",
+    "mismatch lookup head @0x0072F580 @0072F580"
+  ],
+  "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+}
