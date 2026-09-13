@@ -195,6 +195,11 @@ STRONGLY_SUPPORTED).
 
 ## SELF_CHECK (własny, niezależny audyt PE-MASTER)
 - Pełny census 38/38 call-site'ów re-weryfikowany bajtowo (S9: 0 mismatch) ✓
+  (ADNOTACJA QC P3-1, dodana w CLOSURE ROUND1): blok `models_bnt_name_check` w
+  S9_BYTE_VERIFY.json to skan z błędnym terminatorem (wyniki void — wewnętrzna
+  sprzeczność z E.7; racja po stronie E.7, QC potwierdził niezależnie); census
+  38/38 call-site'ów dotyczy odrębnego bloku i pozostaje w mocy — patrz
+  AMENDMENT (QC) na końcu raportu.
 - Round-trip ID przed skanem: 8/8 ✓; skan .text kompletny (3/0/0 hitów) ✓
 - Drugi przypadek ogólności: siblingi 4752 (A=126740)/2249 (A=278453) — obecni w skanach
   negatywnych (istnieją w Models.bnt: 395,268,719/395,268,746 = 1 hit każdy) ✓
@@ -207,3 +212,67 @@ STRONGLY_SUPPORTED).
 - Pułapki wyłapane i udokumentowane: kolizja offsetów pending-attach vs NiAVObject (FUN_006f2af0),
   layout rekordu placementu (+0x08 pozycja) vs template rejestru (+0x08 A) — rozdzielone
   dowodem join A→.nif z poprzedniego runu ✓
+
+---
+
+## AMENDMENT (QC) — PE_935_ROUND_QC_STATIC_PLACEMENT_R1_20260913 (dopisek CLOSURE 2026-09-13)
+
+Sekcja dopisana w rundzie domykającej PE_935_STATIC_PLACEMENT_ROUND1_CLOSURE_20260913
+na podstawie werdyktu INTERNAL_QC (QC_PASS: 0×P0/P1, 3×P3 — poprawy dokumentacyjne;
+`06_REPORT\QC_REPORT.md` tego runu, RUN A). Każda pozycja: CYTAT oryginału +
+POPRAWKA + odsyłacz do punktu QC. Evidence runu NIETYKANE: S9_BYTE_VERIFY.json,
+VA_EVIDENCE_REGISTRY.md i pozostałe pliki executora pozostają bajtowo niezmienione
+(hashe przed/po w MANIFEST_SHA256.csv rundy closure); korekty są dopiskiem w
+warstwie raportu.
+
+### AMENDMENT (QC) — P3-1 [RUN A]: blok models_bnt_name_check w S9_BYTE_VERIFY.json (skan z błędnym terminatorem)
+- CYTAT (REPORT §SELF_CHECK, przed korektą): "- Pełny census 38/38 call-site'ów
+  re-weryfikowany bajtowo (S9: 0 mismatch) ✓"
+- POPRAWKA (adnotacja przy wzmiance S9): blok `models_bnt_name_check` w
+  `01_RAW\S9_BYTE_VERIFY.json` ("296445.nif": count 0 / first_offset -1; analogicznie
+  460563/460564) używał BŁĘDNEGO TERMINATORA — to nieudany skan nazw, wewnętrznie
+  sprzeczny z kalibracją `03_EVIDENCE\VA_EVIDENCE_REGISTRY.md` E.7
+  ("296445.nif@395,268,773 = 1 hit, 126740.nif@395,268,719 = 1,
+  278453.nif@395,268,746 = 1"). RACJA PO STRONIE E.7 — QC potwierdził niezależnym
+  skanem Models.bnt (395,412,868 B, terminator LF): 3/3 offsety zgodne z E.7;
+  460563.nif = 0 hitów. Wiążącym skanem nazw jest skan z terminatorem 0x0A
+  udokumentowany w E.7; census call-site'ów 38/38 (0 mismatch) to ODRĘBNY blok S9
+  i pozostaje w mocy.
+- ODSYŁACZ QC: QC_REPORT.md (RUN A), finding P3-1; rewalidacja: własny skan LF —
+  3/3 + negatyw 460563=0.
+
+### AMENDMENT (QC) — P3-2 [RUN A]: 2 wiersze rejestru VA cytują bajty "przy VA" zamiast dokładnego VA instrukcji
+- CYTAT (03_EVIDENCE\VA_EVIDENCE_REGISTRY.md, wiersz E.3 — evidence bez zmian,
+  korekta wyłącznie tutaj): "| ctor ArkModelResourceInstanceRef | 0x006FA8B0 |
+  `c7 00 b8 64 a8 00` MOV [EAX],0xa864b8; `89 48 08` MOV [EAX+8],ECX; RET 4 |
+  GA3_CTOR_ArkModelResourceInstanceRef_006FA8B0.txt |"
+- POPRAWKA (doprecyzowanie "bajty przy VA"): podane bajty NIE leżą pod VA 0x006FA8B0
+  (bajty przy entry 0x006FA8B0 to `8b c1 8b 4c 24 04`); cytowana instrukcja
+  `c7 00 b8 64 a8 00` (zapis vft 0x00A864B8) stoi **@0x006FA8BC — vft @+0xC w body
+  ctora**; `89 48 08` (item@+0x08) dalej w body. Substancja twierdzenia (vft
+  0x00A864B8, licznik@+0x04, item@+0x08, RET 4) — potwierdzona bajtowo przez QC
+  (qc_probe\qc_region_dump.py).
+- CYTAT (03_EVIDENCE\VA_EVIDENCE_REGISTRY.md, wiersz E.2 — evidence bez zmians):
+  "| wywołanie w FUN_00567770 (ECX=lokal @ESP+0xB4) | 0x00567906 | `8d 8c 24 b4 00
+  00 00` … (kontekst @0x005678F0: 4× LEA ECX,[ESP+0xB4] + CALL-y) | S9-read +
+  GA8_PSEUDO_00567770.txt (GA5) |"
+- POPRAWKA: LEA ECX,[ESP+0xB4] (`8d 8c 24 b4 00 00 00`) stoi **@0x005678FF**; pod
+  VA 0x00567906 leży `e8 85 96 1c 00` = **CALL FUN_00730f90 (setter pozycji) —
+  CALL @+7** względem LEA. Substancja (rekord lokalny @ESP+0xB4 zasilony do
+  settera pozycji rekordu placementu) — potwierdzona bajtowo przez QC.
+- ODSYŁACZ QC: QC_REPORT.md (RUN A), finding P3-2; rewalidacja: dumpy regionów
+  (qc_probe\qc_region_dump.py).
+
+### AMENDMENT (QC) — P3-3 [RUN A]: wiersz rejestru VA cytuje nieistniejący artefakt GA8_PSEUDO_00567770.txt
+- CYTAT (03_EVIDENCE\VA_EVIDENCE_REGISTRY.md, wiersz E.2, kolumna artefakt —
+  evidence bez zmian): "S9-read + GA8_PSEUDO_00567770.txt (GA5)"
+- POPRAWKA (zastąpienie odsyłacza): artefakt `GA8_PSEUDO_00567770.txt` NIE ISTNIEJE
+  w 01_RAW\ghidra_output (istnieje GA5_PSEUDO_00567770.txt). Treść twierdzenia
+  (LEA ECX,[ESP+0xB4] + CALL-e setterów w FUN_00567770) jest PRAWDA — obowiązujące
+  odsyłania: (i) dumpy QC (qc_probe\qc_region_dump.py, okno 0x005678E0-0x00567940:
+  wiele LEA ECX,[ESP+0xB4] + CALL-e do f60/f90/fb0/fd0; QC_REPORT.md A6/P3-3) oraz
+  (ii) disasmy ZS2 runu PE_935_PLACEMENT_SOURCE_TRACE_R1_20260913 (cross-run, to
+  samo binarium SHA E7785430…): ZS2_DISASM_FUN_00567770_attr_reads.txt /
+  ZS2_DISASM_FUN_00567770_setter_calls.txt.
+- ODSYŁACZ QC: QC_REPORT.md (RUN A), finding P3-3; rewalidacja: Glob 0 plików
+  GA8_PSEUDO_00567770*; dump regionu potwierdza treść.

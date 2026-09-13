@@ -23,8 +23,13 @@
   3 kanały zskanowane (FILE: store "Data\Parameters\" + parsery VFS, ale brak
   pliku-placementów w census; NETWORK: CommunicationSubsystem→executor→case 0xB9
   →builder istnieje, lecz warstwa pakietowa = protokół połączenia, a producent 0xB9
-  jest rejestrowany dynamicznie; DERIVED/LOCAL: 53 call-site'y settera w kodzie
-  world-object) — **UNKNOWN-with-exact-boundary; H3 nieudowodnione, H1 bez pozytywu,
+  jest rejestrowany dynamicznie [siła dowodu — korekta QC P3-3 [RUN B]:
+  nieosiągalność-xrefem CONFIRMED (71 imm 0xB9 sklasyfikowane, 0 zasilających);
+  rejestracja dynamiczna STRONGLY_SUPPORTED (bind-hunt 0 konstrukcji; RTTI
+  mf1<CommunicationSubsystem,ArkChannelID> @0x00B6D271) — patrz AMENDMENT (QC)];
+  DERIVED/LOCAL: 53 call-site'y settera — 48 w kodzie world-object, 5 poza nim
+  (w tym handler 0xB9; korekta QC P2-1 [RUN B] — patrz AMENDMENT (QC)) —
+  **UNKNOWN-with-exact-boundary; H3 nieudowodnione, H1 bez pozytywu,
   H2 udowodniona jako propagacja, H4 nie wykluczone (0xB9 = główny kandydat)**.
 - **Kluczowe nowe VA** (tego runu):
   - Z1: FUN_00845F70 (setter atrybutów; 53 callerów), FUN_00413440/50 (locki),
@@ -55,3 +60,20 @@
 - **Commit**: path-limited docs/audits/PE_935_PLACEMENT_SOURCE_TRACE_R1_20260913/
   (350 plików; GHIDRA_LOCAL LOCAL-ONLY pod manifestem) + AUDIT_ENTRYPOINT.md
   (+1 wiersz, 0 usunięć); SHA + push-status: patrz commit `git log -1`.
+
+---
+
+## AMENDMENT (QC) — PE_935_ROUND_QC_STATIC_PLACEMENT_R1_20260913 (dopisek CLOSURE 2026-09-13)
+
+Korekty WERDYKT-ŹRÓDŁO wykonane per INTERNAL_QC (QC_PASS, RUN B; pełne cytaty:
+06_REPORT\REPORT.md sekcja AMENDMENT (QC) tego runu + QC_REPORT.md):
+- P3-3 [RUN B]: klauzula "producent 0xB9 jest rejestrowany dynamicznie" otrzymała
+  etykiety siły dowodu (nieosiągalność-xrefem: CONFIRMED — 71 imm 0xB9
+  sklasyfikowane, 0 zasilających; rejestracja dynamiczna: STRONGLY_SUPPORTED —
+  bind-hunt 0 konstrukcji, RTTI mf1<CommunicationSubsystem,ArkChannelID>
+  @0x00B6D271) — rejestracja dynamiczna to WNIOSZEK (RTTI + brak statycznych
+  xrefów), nie prześledzony fakt.
+- P2-1 [RUN B]: echo "53 call-site'y settera w kodzie world-object" doprecyzowane
+  (48 w world-object (0x0043–0x0051) + 5 poza, w tym handler 0xB9 — WZBOGACA H4);
+  census 53/53 VA identyczny między QC a ZS3_CALLERS.json.
+Evidence i bramki bez zmian.

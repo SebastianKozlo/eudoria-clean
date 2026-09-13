@@ -1,0 +1,5 @@
+VERDICT: MASTER_ACCEPTED (advisory; PROVISIONAL_UNTIL_QUALIFIED; CANONICAL_GATE_EFFECT=NONE)
+RUN: PE_935_EXTERNAL_SOURCES_MATRIX_R1_20260913. Auditor: PE-MASTER.
+- Kontr-check celowany PE-MASTER z zachowanych klonów (repozytoria rzeczywiste): DAoC-MapCreator FixturesLoader.cs czyta dosłownie nifs.csv+fixtures.csv (+TreeRow/TreeClusterRow osobno) ✓; WarEmu Opcodes.cs F_CREATE_STATIC=0x71 verbatim ✓; GameObject.SendMeTo pisze Oid/WorldO/WorldZ/WorldX, hierarchia GameObject:Unit z rodzeństwem Door/Item/PQuestObject/ChapterObject/Creature/Player ✓ → rozstrzygnięcie pułapki D POTWIERDZONE: F_CREATE_STATIC = interaktywne encje serwerowe (drzwi/questy/loot), NIE miasta; statyki w WAR/DAoC client-side.
+- Macierz 24 wierszy (21 CONFIRMED z cytatami/commitami, 1 SS, 2 UNVERIFIED z udokumentowanymi próbami — RoR post, PEBNTView). B5 pokrewieństwo rozstrzygnięte. Notka F6 o pierwszeństwie zapisana.
+- Kierunek badawczy: H_CLIENT dla statyków = wsparty wzorcem (NIE dowodem); network-create = precedens encji dynamicznych.

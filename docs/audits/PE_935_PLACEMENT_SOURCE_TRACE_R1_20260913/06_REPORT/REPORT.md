@@ -28,7 +28,7 @@ rozstrzygnąć się nie da):
 3. **Kanał FILE istnieje** (store "Data\Parameters\" FUN_0094dfc0/FUN_0094fe00
    + parsery VFS z identycznym systemem kursora co kolejki komunikatów), ale:
    brak lokalnego pliku-placementów statyków (Portals.bnt/.prt — patrz pkt 3:
-   czysty cell-graph dPVS; census Data\Parameters: 20 plików .vfs parametrów,
+   czysty cell-graph dPVS; census Data\Parameters: 27 plików .vfs parametrów,
    **20006.vfs nie istnieje** mimo 29 użyc ID 20006 w .text; 20xxx.vfs
    nie rozstrzygnięte jako nośnik transformów statyków — szew
    parser→drzewo nie domknięty).
@@ -40,10 +40,18 @@ rozstrzygnąć się nie da):
    (builder!)**; warstwa pakietowa (ArkStaticPacket, FUN_008310d0: ntohl,
    chunki 0xFE, acki 0xFF) = **protokół połączenia/kanałów — zero dekodowania
    transformów świata**. Producent payloadu 0xB9 = handler rejestrowany
-   dynamicznie (boost::bind) — statycznie nieosiągalny xrefem (granica jawna).
+   dynamicznie (boost::bind) — etykiety siły dowodu (korekta QC P3-3 [RUN B]):
+   nieosiągalność-xrefem: CONFIRMED (71 imm 0xB9 sklasyfikowane, 0 zasilających);
+   dynamiczna rejestracja: STRONGLY_SUPPORTED (bind-hunt 0 konstrukcji; RTTI
+   mf1<CommunicationSubsystem,ArkChannelID> @0x00B6D271) (granica jawna).
 5. **Kanał POCHODNY/LOKALNY (H2) udowodniony jako warstwa propagacji**:
-   FUN_00845f70 (setter atrybutu) ma 53 call-site'y — WSZYSTKIE w kodzie
-   world-object klienta (0x0043–0x0051), ZERO w rodzinie sieciowej; m.in.
+   FUN_00845f70 (setter atrybutu) ma 53 call-site'y, z czego 48 w rodzinie
+   world-object (0x0043–0x0051), 5 poza nią — w tym 0x005B7376 w FUN_005b72c0
+   (handler 0xB9!) i 0x005B6F95 w FUN_005b6890, 2 w attr-dispatch FUN_00847270,
+   1 w FUN_0056984B — WZBOGACA to kandydaturę 0xB9/H4 (handler 0xB9 sam pisze
+   atrybuty); klasyfikacja per-funkcja: ZERO writerów z podsystemu sieci
+   (executor/communicator/packets) — wniosek semantyczny bez zmian (korekta QC
+   P2-1 [RUN B]); m.in.
    FUN_00514ef0 pisze {0x2b,0x2c} (para X/Y) i woła builder, FUN_004387a0
    ustawia rodzinę 0x6a5, FUN_005146b0 propaguje, FUN_0043f4b0 po zmianie
    attr 0x39(model-id)/0x42(0x66) ATTACHUJE model ze skALĄ 1.0.
@@ -89,13 +97,16 @@ readerowi; pełne: 02_ANALYSIS\Z3_portals.md):
 - fabryka ArkPortalResourceItemFactory (vtable 0x00A91C88) slot1 FUN_0084b270
   → item-ctor FUN_00852a90 (CellGraph@+0x10, 0x58 B) → FUN_0084f7a0(payload);
 - parser grafu FUN_00852750: u16→[graph+0xac], sub-blok FUN_008539f0
-  (boundsy AABB f32 — próbka 382811: -6.001/+6.001, -2.437/+2.4966,
-  -0.000388/+3.812), u32 liczba komórek, pętla: u32 id → komórka 0x90 B
+  (boundsy AABB f32 — próbka 382811, wartości zmierzone przez QC: -6.005/+6.005,
+   -2.374/+2.498, +3.812; korekta transkrypcji per QC P3-1 [RUN B]), u32 liczba
+   komórek, pętla: u32 id → komórka 0x90 B
   (ArkPortalCell, vtable slot1 FUN_00852A30: bajt-tag → sub-bloki);
-- indeks BNT skalibrowany: stopka [int32 index=73218]['BNT2'], wpisy
-  {name\n, size, offset, int64} — **276/276 .prt**, 0 naruszeń granic,
-  rozmiary 42–1990 B; próbki kontraktowe: 18 wpisów w oknie 505k–510k
-  ( enumerated), outliery 382811/422806/592739/592741 — wszystkie istnieją;
+    - indeks BNT skalibrowany: stopka [int32 index=73218]['BNT2'], indeks =
+   [u32 licznik 276 @73218] + wpisy {name\n, size, offset, int64} (nagłówek
+   licznika — korekta QC P2-2 [RUN B]) — **276/276 .prt**, 0 naruszeń granic,
+   rozmiary 42–1990 B; próbki kontraktowe: 19 wpisów w oknie 505k–510k
+   (z 507165; korekta QC P2-2 [RUN B]), outliery 382811/422806/592739/592741 —
+   wszystkie istnieją;
   finiteness nagłówków OK.
 **Rola: wyłącznie cell-graph dPVS — NIE nośnik placementów.** Dowód strukturalny
 negatywny: skan wszystkich 276 payloadów: **0 trafień** template'ów (4508/4752/
@@ -189,3 +200,93 @@ transformu (3 kanały-skanowane — pkt 1); (b) rekord-placement→węzeł NIF;
   pola klas, koincydencje instrukcji) wykluczone z powodami.
 - Brak modyfikacji oryginałów: Portals.bnt/Entropia.exe/Parameters —
   wszystkie skrypty tylko czytają (READ-ONLY).
+
+---
+
+## AMENDMENT (QC) — PE_935_ROUND_QC_STATIC_PLACEMENT_R1_20260913 (dopisek CLOSURE 2026-09-13)
+
+Sekcja dopisana w rundzie domykającej PE_935_STATIC_PLACEMENT_ROUND1_CLOSURE_20260913
+na podstawie werdyktu INTERNAL_QC (QC_PASS: 0×P0/P1, 2×P2 + 3×P3 — poprawy
+dokumentacyjne; `06_REPORT\QC_REPORT.md` tego runu, RUN B). Każda pozycja: CYTAT
+oryginału (przed korektą) + POPRAWKA + odsyłacz do punktu QC. Evidence runu
+NIETYKANE: S14_VA_EVIDENCE.json, S12_PRT_CONTENT_CHECK.json, VA_EVIDENCE_REGISTRY.md
+i pozostałe pliki executora pozostają bajtowo niezmienione (hashe przed/po w
+MANIFEST_SHA256.csv rundy closure); korekty są dopiskiem w warstwie raportu/analizy.
+Żaden werdykt bramek G1–G6 nie ulega zmianie (QC B11).
+
+### AMENDMENT (QC) — P2-1 [RUN B]: fałszywe zdanie o zasięgu censusu FUN_00845f70 (d)
+- CYTAT (REPORT §1 pkt 5, przed korektą): "FUN_00845f70 (setter atrybutu) ma
+  53 call-site'y — WSZYSTKIE w kodzie world-object klienta (0x0043–0x0051), ZERO
+  w rodzinie sieciowej; m.in. …"
+- CYTAT (02_ANALYSIS\Z1_producer.md §2(iii), przed korektą): "Pisarze atrybutów
+  (FUN_00845f70, 53 call-site'y — WSZYSTKIE w kodzie world-object klienta
+  0x0043–0x0051; ZERO w rodzinie sieciowej 0x0082–0x0084):"
+- POPRAWKA (narracja §1 pkt 5 oraz Z1 §2(iii) zastąpione): "53 call-site'y, z czego
+  48 w rodzinie world-object (0x0043–0x0051), 5 poza nią — w tym 0x005B7376 w
+  FUN_005b72c0 (handler 0xB9!) i 0x005B6F95 w FUN_005b6890, 2 w attr-dispatch
+  FUN_00847270, 1 w FUN_0056984B — WZBOGACA to kandydaturę 0xB9/H4 (handler 0xB9
+  sam pisze atrybuty)"; klasyfikacja per-funkcja bez zmian (0 z 53 callerów nie
+  należy do executor/communicator/packets). Fizyczny census: 53/53 VA identyczny
+  między QC a ZS3_CALLERS.json.
+- SKUTEK: zdanie zasięgowe było fałszywe (5/53 site'ów poza 0x0043–0x0051, w tym
+  2 w 0x0082–0x0084 funkcjonalnie należące do maszyny atrybutów, nie sieci);
+  korekta WZBOGACA wynik H4. Werdykt UNKNOWN-with-exact-boundary — bez zmian.
+- ODSYŁACZ QC: QC_REPORT.md (RUN B), finding P2-1; rewalidacja: porównanie zbioru
+  53 VA (census QC vs ZS3_CALLERS.json — identyczne).
+
+### AMENDMENT (QC) — P2-2 [RUN B]: parse indeksu Portals.bnt pominął 4-bajtowy nagłówek licznika (e)
+- CYTAT (02_ANALYSIS\Z3_portals.md §2, przed korektą): "wpisy `{nazwa\n(0x0A),
+  int32 size, int32 offset, int64 aux}` ×276 — **276/276 wpisów .prt** … 275
+  unikalnych id + 1 duplikat (count 276 vs 275 — zduplikowane id w indeksie,
+  zgodne z kontraktem "outliery")" oraz "w oknie 505000–510000 istnieje dokładnie
+  18 wpisów (…)"
+- POPRAWKA: indeks Portals.bnt MA 4-bajtowy nagłówek licznika — u32 276 @73218;
+  wpisy zaczynają się @73222. Po korekcie: **276 unikalnych numerycznych id,
+  0 duplikatów**; okno 505k–510k = **19 wpisów** (dopisany 507165; pierwotny
+  parse wchłonął licznik w nazwę pierwszego wpisu `\x14\x01\x00\x00507165.prt`).
+  Poprawiono też echo w REPORT §3 (format indeksu z nagłówkiem; "18 wpisów" →
+  "19 wpisów"). Twierdzenia NOŚNE bez zmian: 276/276 .prt, 0 naruszeń granic,
+  min/mediana/max 42/212/1990, outliery istnieją, negatyw 13×0 anchorów
+  KOMPLETNY (pola size/offset pierwszego wpisu parsują się poprawnie w obu
+  wariantach — pokrycie payloadów identyczne; QC dodatkowo domknął caveat
+  "aligned-only" skanem po WSZYSTKICH offsetach).
+- ODSYŁACZ QC: QC_REPORT.md (RUN B), finding P2-2 + punkt B8; rewalidacja:
+  qc_b8_portals.py (pełny niezależny parse z nagłówkiem).
+
+### AMENDMENT (QC) — P3-1 [RUN B]: transkrypcja AABB próbki 382811.prt (f)
+- CYTAT (02_ANALYSIS\Z3_portals.md §2 + REPORT §3, przed korektą): "np. 382811:
+  f32-pary -6.001/+6.001, -2.437/+2.4966, -0.000388/+3.812 = AABB min/max"
+- POPRAWKA: wartości ZMIERZONE (niezależny skan QC, payload 140 B, wszystkie
+  offsety): **-6.005/+6.005, -2.374/+2.498, +3.812**. Struktura (f32-pary
+  AABB-like w sub-bloku grafu) — prawdziwa; żadna bramka nie zależy od tych
+  konkretnych liczb.
+- ODSYŁACZ QC: QC_REPORT.md (RUN B), finding P3-1 + punkt B8; rewalidacja:
+  qc_b8_portals.py (f32-skan próbki po wszystkich offsetach).
+
+### AMENDMENT (QC) — P3-2 [RUN B]: liczba plików .vfs parametrów (g)
+- CYTAT (REPORT §1 pkt 3, przed korektą): "census Data\Parameters: 20 plików
+  .vfs parametrów" (echo w 02_ANALYSIS\Z1_producer.md §2(i): "census
+  Data\Parameters — 20 plików, brak 20006")
+- POPRAWKA: Data\Parameters zawiera **27 plików .vfs**: 18× 20xxx (20001, 20002,
+  20005, 20007, 20009, 20011, 20012, 20014, 20015, 20016, 20017, 20030, 20033,
+  20034, 20037, 20039, 20040, 20043) + 24007 + 8 nazwanych (AmbientAudioZones,
+  EnvironmentZones, hierarchy, materials, sids, templates, textures, videos).
+  Żadna naturalna metodologia zliczania nie daje 20. Twierdzenia nośne (brak
+  20006.vfs; istnienie 20001/20002/20005/20007/24007.vfs) — potwierdzone
+  dokładnie, bez zmian.
+- ODSYŁACZ QC: QC_REPORT.md (RUN B), finding P3-2 + punkty B7/B9; rewalidacja:
+  własne listowanie katalogu (wynik w handoff QC).
+
+### AMENDMENT (QC) — P3-3 [RUN B]: etykieta siły dowodu dla "producent 0xB9 rejestrowany dynamicznie (boost::bind)" (h)
+- CYTAT (REPORT §1 pkt 4, przed korektą): "Producent payloadu 0xB9 = handler
+  rejestrowany dynamicznie (boost::bind) — statycznie nieosiągalny xrefem (granica
+  jawna)." (echo w HANDOFF WERDYKT-ŹRÓDŁO: "producent 0xB9 jest rejestrowany
+  dynamicznie")
+- POPRAWKA (etykiety siły dowodu dopisane do narracji §1 pkt 4 i HANDOFF):
+  nieosiągalność-xrefem: **CONFIRMED** (71 imm 0xB9 sklasyfikowane, 0 zasilających);
+  dynamiczna rejestracja: **STRONGLY_SUPPORTED** (bind-hunt 0 konstrukcji; RTTI
+  mf1<CommunicationSubsystem,ArkChannelID> @0x00B6D271). Rejestracja dynamiczna
+  pozostaje WNIOSKIEM (RTTI verbatim + brak statycznych xrefów), nie
+  prześledzonym faktem; granica UNKNOWN-with-exact-boundary — bez zmian.
+- ODSYŁACZ QC: QC_REPORT.md (RUN B), finding P3-3 + punkt B6; rewalidacja:
+  qc_b6_bound.py + ZS2_BIND_HUNT.json.

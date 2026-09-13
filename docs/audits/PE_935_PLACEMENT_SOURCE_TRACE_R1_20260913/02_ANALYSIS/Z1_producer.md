@@ -51,8 +51,9 @@ Semantyka typów atrybutów transformu: pary {0x6a4,0x6a5} / {0x6a8,0x6a9} / {0x
   rodzina używa **tego samego helpera kursora FUN_0040de60** co czytniki kolejek komunikatów.
 - Argumenty param-setów w .text: 0x4E25 (20005; 8 trafień), 0x4E27 (20007; 10), 0x4E22 (20002),
   0x4E21 (20001) — **pliki 20001/20002/20005/20007.vfs istnieją lokalnie**; 0x4E26 (20006)
-  — 29 trafień, ale **plik 20006.vfs NIE istnieje** (census Data\Parameters — 20 plików,
-  brak 20006). 24007 (0x5DC7) — 32 trafienia, plik 24007.vfs istnieje.
+  — 29 trafień, ale **plik 20006.vfs NIE istnieje** (census Data\Parameters — 27 plików
+  .vfs: 18× 20xxx + 24007 + 8 nazwanych — korekta QC P3-2 [RUN B]; brak 20006).
+  24007 (0x5DC7) — 32 trafienia, plik 24007.vfs istnieje.
 - STRONA ODCZYTU atrybutów plikowych jest dowiedziona; **nie domknięto** szwu
   parser→mapa-walkerów dla atrybutów transformu statyków (wstrzyknięcie zawartości
   pliku do drzewa atrybutów encji — patrz GRANICA niżej).
@@ -85,8 +86,12 @@ Semantyka typów atrybutów transformu: pary {0x6a4,0x6a5} / {0x6a8,0x6a9} / {0x
   sieci do atrybutów** (H3 dla statyków = NIEUDOWODNIONE, nie wykluczone).
 
 ### (iii) MECHANIZM POCHODNY/RPC/EVENT (H2) — ISTNIEJE, VA-locked
-- Pisarze atrybutów (FUN_00845f70, 53 call-site'y — WSZYSTKIE w kodzie world-object
-  klienta 0x0043–0x0051; ZERO w rodzinie sieciowej 0x0082–0x0084):
+- Pisarze atrybutów (FUN_00845f70, 53 call-site'y, z czego 48 w rodzinie world-object
+  (0x0043–0x0051), 5 poza nią — w tym 0x005B7376 w FUN_005b72c0 (handler 0xB9!)
+  i 0x005B6F95 w FUN_005b6890, 2 w attr-dispatch FUN_00847270, 1 w FUN_0056984B —
+  WZBOGACA to kandydaturę 0xB9/H4 (handler 0xB9 sam pisze atrybuty); klasyfikacja
+  per-funkcja: ZERO writerów z podsystemu sieci (executor/communicator/packets) —
+  wniosek semantyczny bez zmian; korekta QC P2-1 [RUN B]):
   - FUN_00514ef0 (handler z tabeli .rdata 0x00A7D764 — patrz Z2): pisze **0x2b/0x2c
     (para X/Y!)** przez FUN_00845f70 + 0x3f1/0x3f5 → woła FUN_004387a0 (setter 0x6a5)
     → FUN_004641f0 → **FUN_00567c50** (łańcuch builderowy).
@@ -135,3 +140,19 @@ nie domknięty instrukcyjnie do granicy). Co jest dowiedzione STATIC-PROOF:
   danych; H2 (pochodne/propagacja) — dowiedziona jako warstwa, ale to propagacja
   **istniejących już** wartości; H3 (sieć) — kanał istnieje, transform-dekod
   nieudowodniony; H4 — nie wykluczony (0xB9 = główny otwarty kandydat).
+
+---
+
+## AMENDMENT (QC) — PE_935_ROUND_QC_STATIC_PLACEMENT_R1_20260913 (dopisek CLOSURE 2026-09-13)
+
+Korekty §2(i) i §2(iii) wykonane per INTERNAL_QC (QC_PASS, RUN B; pełne cytaty i
+odsyłacze: 06_REPORT\REPORT.md sekcja AMENDMENT (QC) tego runu + QC_REPORT.md):
+- P2-1 [RUN B] (§2(iii)): zdanie zasięgowe censusu FUN_00845f70 zastąpione atrybucją
+  per-funkcja (48 w world-object (0x0043–0x0051) + 5 poza, w tym handler 0xB9
+  FUN_005b72c0/FUN_005b6890 i attr-dispatch FUN_00847270 — WZBOGACA H4); census
+  53/53 VA identyczny między QC a ZS3_CALLERS.json; klasyfikacja per-funkcja
+  (ZERO writerów z executor/communicator/packets) bez zmian.
+- P3-2 [RUN B] (§2(i)): "20 plików" → 27 plików .vfs (18× 20xxx + 24007 + 8
+  nazwanych); brak 20006.vfs — bez zmian (potwierdzone dokładnie).
+Evidence runu NIETYKANE (S5_IMMEDIATE_SCAN.json, ZS1_S5_VALIDATION.json i pozostałe
+bez zmian — hashe przed/po w MANIFEST_SHA256.csv rundy closure).
