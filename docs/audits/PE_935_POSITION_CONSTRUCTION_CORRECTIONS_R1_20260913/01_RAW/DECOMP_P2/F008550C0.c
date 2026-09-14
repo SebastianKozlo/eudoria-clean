@@ -1,0 +1,146 @@
+// DECOMPILED (Ghidra 11.2.1) from Entropia.exe
+// function entry 0x8550c0L (requested via site 0x8550c0)
+
+undefined4 * __fastcall FUN_008550c0(undefined4 *param_1)
+
+{
+  undefined4 *puVar1;
+  allocator<char> *paVar2;
+  undefined4 uVar3;
+  uint uVar4;
+  allocator<char> local_31;
+  uint local_30;
+  undefined4 *local_2c;
+  void *local_28;
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+  abStack_24 [24];
+  void *local_c;
+  undefined *puStack_8;
+  undefined4 local_4;
+  
+  local_4 = 0xffffffff;
+  puStack_8 = &LAB_00a29443;
+  local_c = ExceptionList;
+  ExceptionList = &local_c;
+  uVar4 = 0;
+  local_30 = 0;
+  *param_1 = 0;
+  param_1[1] = 0;
+  local_2c = param_1;
+  FUN_00854c00(100,&local_31,&local_31,&local_31);
+  puVar1 = param_1 + 0xb;
+  *puVar1 = 0;
+  *(undefined *)puVar1 = 0;
+  param_1[0xc] = 0;
+  param_1[0xd] = puVar1;
+  param_1[0xe] = puVar1;
+  param_1[0xf] = 0;
+  *(allocator<char> *)(param_1 + 0x10) = local_31;
+  param_1[0x16] = 0;
+  param_1[0x17] = 0;
+  local_4._0_1_ = 1;
+  local_4._1_3_ = 0;
+  param_1[0x18] = 0;
+  param_1[0x13] = 0;
+  param_1[0x19] = 0;
+  param_1[0x15] = 0;
+  param_1[0x1a] = 0;
+  param_1[0x1b] = 0;
+  param_1[0x1c] = 0;
+  param_1[0x1d] = 0;
+  param_1[0x1e] = 0;
+  param_1[0x1f] = 0;
+  param_1[0x20] = 0;
+  param_1[0x21] = 0;
+  local_28 = operator_new(0x20);
+  if (local_28 == (void *)0x0) {
+    uVar3 = 0;
+  }
+  else {
+    paVar2 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&local_31);
+    uVar4 = 3;
+    local_4 = CONCAT31(local_4._1_3_,3);
+    local_30 = 1;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_24,"",paVar2);
+    local_4 = 4;
+    local_30 = 3;
+    uVar3 = FUN_00413590(abStack_24,1);
+  }
+  param_1[0x11] = uVar3;
+  local_4 = 5;
+  if ((uVar4 & 2) != 0) {
+    uVar4 = uVar4 & 0xfffffffd;
+    local_30 = uVar4;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_24);
+  }
+  local_4 = 1;
+  if ((uVar4 & 1) != 0) {
+    uVar4 = uVar4 & 0xfffffffe;
+    stlp_std::allocator<char>::~allocator<char>(&local_31);
+  }
+  local_28 = operator_new(0x20);
+  if (local_28 == (void *)0x0) {
+    uVar3 = 0;
+  }
+  else {
+    paVar2 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&local_31);
+    local_30 = uVar4 | 4;
+    local_4 = CONCAT31(local_4._1_3_,8);
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_24,"",paVar2);
+    uVar4 = uVar4 | 0xc;
+    local_4 = 9;
+    local_30 = uVar4;
+    uVar3 = FUN_00413590(abStack_24,1);
+  }
+  param_1[0x12] = uVar3;
+  local_4 = 10;
+  if ((uVar4 & 8) != 0) {
+    uVar4 = uVar4 & 0xfffffff7;
+    local_30 = uVar4;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_24);
+  }
+  local_4 = 1;
+  if ((uVar4 & 4) != 0) {
+    uVar4 = uVar4 & 0xfffffffb;
+    stlp_std::allocator<char>::~allocator<char>(&local_31);
+  }
+  local_28 = operator_new(0x20);
+  if (local_28 == (void *)0x0) {
+    uVar3 = 0;
+  }
+  else {
+    paVar2 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&local_31);
+    local_30 = uVar4 | 0x10;
+    local_4 = CONCAT31(local_4._1_3_,0xd);
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_24,"",paVar2);
+    uVar4 = uVar4 | 0x30;
+    local_4 = 0xe;
+    local_30 = uVar4;
+    uVar3 = FUN_00413590(abStack_24,1);
+  }
+  param_1[0x14] = uVar3;
+  local_4 = 0xf;
+  if ((uVar4 & 0x20) != 0) {
+    uVar4 = uVar4 & 0xffffffdf;
+    local_30 = uVar4;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_24);
+  }
+  if ((uVar4 & 0x10) != 0) {
+    stlp_std::allocator<char>::~allocator<char>(&local_31);
+  }
+  ExceptionList = local_c;
+  return param_1;
+}
+

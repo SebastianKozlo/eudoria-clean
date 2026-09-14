@@ -1,0 +1,51 @@
+# OWN DECODE (capstone x86-32) from physical EXE
+# entry=00856190 end_detected=0x856211 size=129
+# file=D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+00856190  83ec10                   sub      esp, 0x10
+00856193  53                       push     ebx
+00856194  57                       push     edi
+00856195  8b7c241c                 mov      edi, dword ptr [esp + 0x1c]
+00856199  837f7400                 cmp      dword ptr [edi + 0x74], 0
+0085619D  8bd9                     mov      ebx, ecx
+0085619F  7454                     je       0x8561f5
+008561A1  8b4b44                   mov      ecx, dword ptr [ebx + 0x44]
+008561A4  56                       push     esi
+008561A5  e896d2bbff               call     0x413440
+008561AA  8bcf                     mov      ecx, edi
+008561AC  e87fdfbbff               call     0x414130
+008561B1  8944240c                 mov      dword ptr [esp + 0xc], eax
+008561B5  8b4324                   mov      eax, dword ptr [ebx + 0x24]
+008561B8  8d7310                   lea      esi, [ebx + 0x10]
+008561BB  83c001                   add      eax, 1
+008561BE  50                       push     eax
+008561BF  8bce                     mov      ecx, esi
+008561C1  897c2414                 mov      dword ptr [esp + 0x14], edi
+008561C5  e8c6feffff               call     0x856090
+008561CA  8d4c240c                 lea      ecx, [esp + 0xc]
+008561CE  51                       push     ecx
+008561CF  8d542418                 lea      edx, [esp + 0x18]
+008561D3  52                       push     edx
+008561D4  8bce                     mov      ecx, esi
+008561D6  e8b5ebffff               call     0x854d90
+008561DB  807c241800               cmp      byte ptr [esp + 0x18], 0
+008561E0  5e                       pop      esi
+008561E1  751c                     jne      0x8561ff
+008561E3  8b07                     mov      eax, dword ptr [edi]
+008561E5  8b10                     mov      edx, dword ptr [eax]
+008561E7  6a01                     push     1
+008561E9  8bcf                     mov      ecx, edi
+008561EB  ffd2                     call     edx
+008561ED  8b4b44                   mov      ecx, dword ptr [ebx + 0x44]
+008561F0  e85bd2bbff               call     0x413450
+008561F5  5f                       pop      edi
+008561F6  32c0                     xor      al, al
+008561F8  5b                       pop      ebx
+008561F9  83c410                   add      esp, 0x10
+008561FC  c20400                   ret      4
+008561FF  8b4b44                   mov      ecx, dword ptr [ebx + 0x44]
+00856202  e849d2bbff               call     0x413450
+00856207  5f                       pop      edi
+00856208  b001                     mov      al, 1
+0085620A  5b                       pop      ebx
+0085620B  83c410                   add      esp, 0x10
+0085620E  c20400                   ret      4

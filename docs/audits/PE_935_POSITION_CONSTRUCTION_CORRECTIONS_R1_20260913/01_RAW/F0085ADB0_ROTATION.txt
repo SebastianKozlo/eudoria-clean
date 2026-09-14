@@ -1,0 +1,65 @@
+# OWN DECODE (capstone x86-32) from physical EXE
+# entry=0085ADB0 end_detected=0x85ae63 size=179
+# file=D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+0085ADB0  83ec64                   sub      esp, 0x64
+0085ADB3  53                       push     ebx
+0085ADB4  8bd9                     mov      ebx, ecx
+0085ADB6  8b430c                   mov      eax, dword ptr [ebx + 0xc]
+0085ADB9  85c0                     test     eax, eax
+0085ADBB  0f849b000000             je       0x85ae5c
+0085ADC1  83782003                 cmp      dword ptr [eax + 0x20], 3
+0085ADC5  d9e8                     fld1     
+0085ADC7  55                       push     ebp
+0085ADC8  8b6c2470                 mov      ebp, dword ptr [esp + 0x70]
+0085ADCC  740e                     je       0x85addc
+0085ADCE  55                       push     ebp
+0085ADCF  ddd8                     fstp     st(0)
+0085ADD1  8d4c2418                 lea      ecx, [esp + 0x18]
+0085ADD5  e8f61f1100               call     0x96cdd0
+0085ADDA  eb26                     jmp      0x85ae02
+0085ADDC  d9542414                 fst      dword ptr [esp + 0x14]
+0085ADE0  d9ee                     fldz     
+0085ADE2  d9542418                 fst      dword ptr [esp + 0x18]
+0085ADE6  d954241c                 fst      dword ptr [esp + 0x1c]
+0085ADEA  d9542420                 fst      dword ptr [esp + 0x20]
+0085ADEE  d9542428                 fst      dword ptr [esp + 0x28]
+0085ADF2  d954242c                 fst      dword ptr [esp + 0x2c]
+0085ADF6  d95c2430                 fstp     dword ptr [esp + 0x30]
+0085ADFA  d9542424                 fst      dword ptr [esp + 0x24]
+0085ADFE  d95c2434                 fstp     dword ptr [esp + 0x34]
+0085AE02  8b4b0c                   mov      ecx, dword ptr [ebx + 0xc]
+0085AE05  56                       push     esi
+0085AE06  57                       push     edi
+0085AE07  8d442410                 lea      eax, [esp + 0x10]
+0085AE0B  50                       push     eax
+0085AE0C  e8af120000               call     0x85c0c0
+0085AE11  d9e8                     fld1     
+0085AE13  b909000000               mov      ecx, 9
+0085AE18  8d74241c                 lea      esi, [esp + 0x1c]
+0085AE1C  8d7c2440                 lea      edi, [esp + 0x40]
+0085AE20  f3a5                     rep movsd dword ptr es:[edi], dword ptr [esi]
+0085AE22  8b08                     mov      ecx, dword ptr [eax]
+0085AE24  894c2464                 mov      dword ptr [esp + 0x64], ecx
+0085AE28  8b5004                   mov      edx, dword ptr [eax + 4]
+0085AE2B  8b4b0c                   mov      ecx, dword ptr [ebx + 0xc]
+0085AE2E  89542468                 mov      dword ptr [esp + 0x68], edx
+0085AE32  8b4008                   mov      eax, dword ptr [eax + 8]
+0085AE35  8944246c                 mov      dword ptr [esp + 0x6c], eax
+0085AE39  d95c2470                 fstp     dword ptr [esp + 0x70]
+0085AE3D  83792000                 cmp      dword ptr [ecx + 0x20], 0
+0085AE41  5f                       pop      edi
+0085AE42  5e                       pop      esi
+0085AE43  7416                     je       0x85ae5b
+0085AE45  6a01                     push     1
+0085AE47  8d54243c                 lea      edx, [esp + 0x3c]
+0085AE4B  52                       push     edx
+0085AE4C  e88f1f0000               call     0x85cde0
+0085AE51  8b03                     mov      eax, dword ptr [ebx]
+0085AE53  8b502c                   mov      edx, dword ptr [eax + 0x2c]
+0085AE56  55                       push     ebp
+0085AE57  8bcb                     mov      ecx, ebx
+0085AE59  ffd2                     call     edx
+0085AE5B  5d                       pop      ebp
+0085AE5C  5b                       pop      ebx
+0085AE5D  83c464                   add      esp, 0x64
+0085AE60  c20400                   ret      4

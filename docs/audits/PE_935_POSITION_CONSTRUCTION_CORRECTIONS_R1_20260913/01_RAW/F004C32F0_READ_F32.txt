@@ -1,0 +1,30 @@
+# OWN DECODE (capstone x86-32) from physical EXE
+# entry=004C32F0 end_detected=0x4c3334 size=68
+# file=D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+004C32F0  56                       push     esi
+004C32F1  8b742408                 mov      esi, dword ptr [esp + 8]
+004C32F5  807e1100                 cmp      byte ptr [esi + 0x11], 0
+004C32F9  7423                     je       0x4c331e
+004C32FB  8b460c                   mov      eax, dword ptr [esi + 0xc]
+004C32FE  8d4804                   lea      ecx, [eax + 4]
+004C3301  3b4e08                   cmp      ecx, dword ptr [esi + 8]
+004C3304  7718                     ja       0x4c331e
+004C3306  8b16                     mov      edx, dword ptr [esi]
+004C3308  d90410                   fld      dword ptr [eax + edx]
+004C330B  8b44240c                 mov      eax, dword ptr [esp + 0xc]
+004C330F  6a04                     push     4
+004C3311  d918                     fstp     dword ptr [eax]
+004C3313  8bce                     mov      ecx, esi
+004C3315  e846abf4ff               call     0x40de60
+004C331A  8bc6                     mov      eax, esi
+004C331C  5e                       pop      esi
+004C331D  c3                       ret      
+004C331E  d9ee                     fldz     
+004C3320  8b4c240c                 mov      ecx, dword ptr [esp + 0xc]
+004C3324  d919                     fstp     dword ptr [ecx]
+004C3326  807e1100                 cmp      byte ptr [esi + 0x11], 0
+004C332A  7404                     je       0x4c3330
+004C332C  c6461100                 mov      byte ptr [esi + 0x11], 0
+004C3330  8bc6                     mov      eax, esi
+004C3332  5e                       pop      esi
+004C3333  c3                       ret      

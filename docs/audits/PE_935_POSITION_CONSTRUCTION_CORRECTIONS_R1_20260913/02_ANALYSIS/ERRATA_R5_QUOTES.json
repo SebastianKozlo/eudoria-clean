@@ -1,0 +1,196 @@
+{
+ "quotes": {
+  "REPORT_30": {
+   "30": "instancji +0x44..0x4C), klucz u32 z tego samego kursora (rekord[0]) jest"
+  },
+  "REPORT_27_34": {
+   "27": "**Na kanale instancji RUCHOMYCH: konkretna wartość pozycji przybywa w bajtach",
+   "28": "KURSORA KOMUNIKATU (deserializacja FUN_007453D0 z sub-pakietu kursora: vec3",
+   "29": "12 B → setter f90 → rekord placementu +8/+0xC/+0x10 → ctor kopiuje do",
+   "30": "instancji +0x44..0x4C), klucz u32 z tego samego kursora (rekord[0]) jest",
+   "31": "JEDNOCZEŚNIE kluczem węzła mapy jak i kopią w instancji (+0x74), a klasą",
+   "32": "wartości mapy jest instancja MovableObject/ClientMovableObject (RTTI) —",
+   "33": "upstream bajtów kursora (kolejka sieciowa vs lokalna) pozostaje NIEUDOWODNIONY,",
+   "34": "a STATYKI (4508/296445) NIE zostały objęte tym kanałem w tym runie.**"
+  },
+  "REPORT_52": {
+   "52": "| S6 | FUN_007453D0: klucz u32 (TOP-kursor, read @0x007453EF)→rec+0; para param-set 2×u32 (FUN_004124B0 @0x0074540F)→rec+4/+8; sub-kursor (FUN_007343E0 @0x00745419, u16-header); wariant u16 @0x00745435→rec+0x34; POZYCJA vec3 12B (FUN_00412430 @0x0074545A)→**rec+0x38**; ROTACJA vec3 @0x00745465→rec+0x44; wektor-2: u32@0x0074547C→rec+0x50, u32@0x007454AA→rec+0x54, f32(FLD/FSTP)@0x007454D9→rec+0x58; bajt@0x00745508→rec+0x5C (korekta pól [SE-R4-6]) | pełny dekod, konwencja kursora: data@+0/size@+8/offset@+0xC/flaga@+0x11, odczyt=data+offset, fail-closed per pole, advance=FUN_0040DE60 | **PROVEN** |"
+  },
+  "REPORT_54": {
+   "54": "| S8 | create FUN_004C46C0(placement, u16-wariant, string, 1) @0x004C4952 (MOVZX u16 @0x004C493C) → new(0x128) @0x004C4792 → ctor FUN_00528E50 @0x004C47C1 → base FUN_0085B1B0 @0x00528E8D | korekta wariantu [SE-R4-6]: u16@rec+0x34, NIE bajt@+0x5C | **PROVEN** |"
+  },
+  "REPORT_55": {
+   "55": "| S9 | ctor: `[+0]=vtable 0x00A91E4C` (imm @0x0085B1C3); `[+8]=wariant`; transform FUN_007345C0; **`[+0x74]=[record+0]`** (FUN_004123D0 @0x0085B20A); `[+0x78]=[record+4]`; **`[+0x44..0x4C]=[record+8..0x10]`** (FUN_00746560); **`[+0x88/+0x8C]=[record+0x20/+0x24]`** (FUN_00746570); `[+0x98]=1.0f`; +0x50..0x58=globalne 0x00BA921C/20/24; pochodny: `[ESI]=0x00A7DCB0` (imm @0x00528EA4) + lookup kluczowy FUN_005247C0→`[+0xC0]` | własny dekod obu ctorów | **PROVEN** (wiązanie modelu: §6.5 OPEN) |"
+  },
+  "REPORT_97": {
+   "97": "| Pozycja z kursora → placement+8..0x10 → instancja+0x44..0x4C | dekod S6-S9 | VA każdej operacji odczytu/kopii | ścieżka EXISTING używa tego samego pola (FUN_0085B3E0 @0x004C4875); Y2/bajt@+0x5C = read-but-unused (skan 0 odwołań) | **CONFIRMED** (z korektą pól [SE-R4-6]) | QC_REPORT §1c/d; ERRATA_R4 |"
+  },
+  "REPORT_99": {
+   "99": "| Źródło insertów = komunikaty (VFS=negatyw) | census funnelu + kontrola pozytywna VFS→rejestr definicji | 1+6+8 callerów — 0 z 0x0094xxxx | bounded: E8-direct only; payload parserów poza zakresem (jawne) | **CONFIRMED** (bounded) | QC_REPORT §1m |"
+  },
+  "REPORT_120_124": {
+   "120": "**(c) Skąd jest TRANSFORM (movable)?** — z bajtów KURSORA komunikatu (S6:",
+   "121": "sub-pakiet vec3 12 B → f90). Upstream kursora = NIEUDOWODNIONY (sieć vs lokalna",
+   "122": "kolejka — §6.1); NIE ogłaszamy „z sieci\". **Dla STATYKÓW: NADAL UNKNOWN**",
+   "123": "(atrybut-drzewo jako warstwa propagacji H2 — bez zmian; kandydaci",
+   "124": "FUN_00567170/FUN_005B5F90/FUN_006CB6F0 bez zmian)."
+  },
+  "REPORT_138_140": {
+   "138": "3. **Statyki vs movable** — kanał z §2 dowiedziony TYLKO dla klasy wartości",
+   "139": "   MovableObject/ClientMovableObject; statyki (4508/296445) NIE wykazane w tym",
+   "140": "   kanale (0/38 STATIC_WORLD z RUN3 bez zmian; kandydaci bez zmian)."
+  },
+  "REPORT_171": {
+   "171": "dispatcherа: 0x25 wpisów (0xA2..0xC7), jump-table: **22** wpisów · GB6:"
+  },
+  "REPORT_191_193": {
+   "191": "GB2-INSERT-SEAM **PASS** · GB3-KEY-MODEL **PASS** · GB4-DATA-SOURCE **PASS**",
+   "192": "(z korektą [SE-R4-5]: zbiór typów {0xB0,0xC6,0xC7,0xB2}; wiersz CSV był",
+   "193": "poprawny) · GB5-PARSER **NOT_APPLICABLE** ✓ (słusznie — ślad insertu nie"
+  },
+  "QC_46_57": {
+   "46": "- sub-kursor: FUN_007343E0 @0x00745419 (u16-header sub-pakietu → zagnieżdżony",
+   "47": "  kursor @rec+0xC);",
+   "48": "- WARIANT u16: read `MOV AX,[ECX+EAX]` **@0x00745435** → `[rec+0x34]`",
+   "49": "  @0x0074543D (z SUB-kursora);",
+   "50": "- POZYCJA vec3 3×dword (FUN_00412430 @0x0074545A, 12 B, advance 12) →",
+   "51": "  **`[rec+0x38..0x43]`** — TO pole (nie +0x50..0x58!) zasilu f90 (z SUB-kursora);",
+   "52": "- ROTacja vec3 3×dword (FUN_00412430 @0x00745465) → `[rec+0x44..0x4F]` → fb0;",
+   "53": "- wektor drugi: X u32 read **@0x0074547C** → `[rec+0x50]`; Y u32 read",
+   "54": "  **@0x007454AA** → `[rec+0x54]`; Z **f32** (FLD `D9 04 10` @0x007454D9 / FSTP",
+   "55": "  `D9 5F 58` @0x007454E1) → `[rec+0x58]` (z SUB-kursora);",
+   "56": "- bajt końcowy u8: read `MOVZX EAX,BYTE [EAX+EDX]` **@0x00745508** →",
+   "57": "  `[rec+0x5C]` @0x00745510 (z SUB-kursora)."
+  },
+  "QC_75_77": {
+   "75": "CALL slot @0x004C4871), FUN_0085B750, **FUN_0085B3E0(istniejąca_wartość,",
+   "76": "&[rec+0x38], 1) @0x004C4875** (set-pozycji na istniejącej instancji — ZGODNE z",
+   "77": "f90: to samo źródło!), FUN_0085ADB0(&[rec+0x44]). Y2=[rec+0x54] i"
+  },
+  "ERRATA_R4_73_77": {
+   "73": "  (FUN_007343E0 @0x00745419): **wariant u16** (read @0x00745435 → rec+0x34),",
+   "74": "  **POZYCJĘ vec3 3×dword** (FUN_00412430 @0x0074545A, 12 B → rec+0x38),",
+   "75": "  **ROTACJĘ vec3** (@0x00745465 → rec+0x44), wektor-2 (u32@0x0074547C →",
+   "76": "  rec+0x50, u32@0x007454AA → rec+0x54, f32 FLD/FSTP @0x007454D9 → rec+0x58),",
+   "77": "  bajt końcowy (read @0x00745508 → rec+0x5C). Setter **f90 zapisuje pozycję"
+  },
+  "ERRATA_R4_97": {
+   "97": "  FUN_007343E0 (sub-kursor u16-header)."
+  },
+  "ERRATA_R4_102_104": {
+   "102": "  (4) kontrola odróżniająca: ta sama para setter-arg w ścieżce EXISTING",
+   "103": "  (FUN_0085B3E0(istniejąca, &[rec+0x38], 1) @0x004C4875) — spójność pola",
+   "104": "  pozycji pomiędzy ścieżkami create/update."
+  },
+  "ERRATA_R4_127_128": {
+   "127": "  lock, **+8 wariant (u16 z komunikatu)**, +0x14..0x3B transform 3×3+flaga",
+   "128": "  (FUN_007345C0), +0x3C dziecko, **+0x44..0x4C POZYCJA = `[placement+8..0x10]`**"
+  },
+  "ERRATA_R4_199_201": {
+   "199": "  callerа (FUN_004B1C70 = handler 0xB2, nie handler 0xB9). Bramka CSV GB4",
+   "200": "  executora („case 0xB0/0xC6/0xC7→processory placementu\") była poprawna —",
+   "201": "  błąd tylko w warstwie SEAM_FLOW_MAP/RESEARCH_FINDINGS §1."
+  },
+  "ERRATA_R4_225_229": {
+   "225": "- **KONTRTEST:** ścieżka EXISTING tej samej funkcji używa tego samego pola",
+   "226": "  (FUN_0085B3E0(istniejąca, &[rec+0x38], 1) @0x004C4875) — spójność",
+   "227": "  create/update; FUN_00412430 własny dekod (`3× MOV; [ESP+4]=0xC; JMP",
+   "228": "  FUN_0040DE60` = vec3-reader 12 B; fail-path FLDZ→0.0f), FUN_004124B0 =",
+   "229": "  para 2×u32 (8 B)."
+  },
+  "HANDOFF_18_28": {
+   "18": "Na kanale instancji RUCHOMYCH pozycja przybywa w bajtach KURSORA KOMUNIKATU",
+   "19": "(typów 0xB0/0xC6/0xC7 — case'y dispatchera FUN_004B18D0 — oraz 0xB2 —",
+   "20": "special-case w Execute FUN_004B2950; **0xB9 NIE deserializuje pozycji**),",
+   "21": "FUN_007453D0 czyta z sub-pakietu klucz u32 + wariant u16 + POZYCJĘ vec3 12B +",
+   "22": "rotację + wektor-drugi, setter f90 pisze pozycję do rekordu placementu",
+   "23": "+8/+0xC/+0x10, ctor kopiuje ją do instancji MovableObject/ClientMovableObject",
+   "24": "+0x44..0x4C i klucz (rekord[0]) do +0x74, a insert FUN_00856190 wstawia parę",
+   "25": "{klucz=[value+0x74]=rekord[0], instancja} do STLport hash_map@mgr+0x10 —",
+   "26": "JEDEN klucz wiąże komunikat, rekord, węzeł i instancję; upstream bajtów",
+   "27": "kursora (sieć vs lokalna kolejka) NIEUDOWODNIONY; STATYKI (4508/296445) NIE",
+   "28": "objęte tym kanałem; pozycje 296445 NIEODZYSKANE."
+  },
+  "GATES_5": {
+   "5": "GB4-DATA-SOURCE,PASS,1,Zrodlo insertu = KOMUNIKATY: dispatcher FUN_004B18D0 switch(typ) case 0xB9->FUN_005B72C0 @0x004B1A16 (pin E8 A5 58 10 00) case 0xB0/0xC6/0xC7->processory placementu; read-cursor ops FUN_00752700 (u32 u32 u8 u8) FUN_00752640 (u32 u32 u8) fail-closed per pole; deserializat FUN_007453D0 {klucz@+0 pozycja-vec3@+0x50..0x58 wariant@+0x5C}; VFS=NEGATYW (funnel insertu bez krawedzi z parserow; FUN_00730C90->FUN_0072FA30=rejestr definicji; FUN_0094BD30/0094F350 bez krawedzi),Piny T6 (dispatch case 0xB9; read-cursor heads; deserializer head) + dekompilaty (F004B18D0/F00752700/F00752640/F007453D0/F0072FA30) + censusy GH1/GH3,Dowod zbudowany od odczytu bajtow komunikatu (kursor) przez deserializat do insertu — kazde ogniwe wlasny odczyt; negatyw VFS = bounded census funnelu (pelne listy VA),Hipotetyczny falszywy pozytyw (parser VFS zasilajacy mape) wykluczony: census funnelu insertu 1+6+8 callery — 0 w regionach parserow; records： klucz i pozycja przybywaja z JEDNEGO kursora (jeden rekord),Co wypelnia kursor upstream (receive-queue vs plik) — granica UNPROVEN (2 callerow dispatcher: 0x004B1BE6-region / FUN_004B2950=vtable @0x00A7C200)"
+  },
+  "GATES_11": {
+   "11": "QC-3-FIELD-ATTRIBUTION,PASS_WITH_CORRECTION,1,f90 arg = LEA ECX,[ESP+0x48] @0x004C48EB = &[rec+0x38] (FUN_00412430 vec3-reader 12B @0x0074545A z sub-kursora); wariant do create = MOVZX WORD [ESP+0x44] @0x004C493C = u16@rec+0x34; trójka @+0x50..0x58 = wektor-drugi (X2->[placement+4] FUN_00797280 + string tworzenia; Z2->slot5->[value+0x98] FUN_0085B010); Y2 i bajt@+0x5C read-but-unused (skan [ESP+0x64]/[ESP+0x6C] = 0 trafien),Wlasny dekod pelnej ramki FUN_004C47F0 + cial FUN_004124B0/30/Dekompilat executora (FUN_00730f90(local_78); create(local_50,local_7c,...)) potwierdza korekte - rozjazd byl w warstwie opisowej SEAM_FLOW_MAP par.5,P2-2 -> ERRATA_R4 [SE-R4-6]; wynik glowny (pozycja z kursora -> instancja) bez zmiany"
+  },
+  "SEAM_FLOW_MAP_29": {
+   "29": "- +0x14..+0x3B = macierz transformu 3×3 f32 + flaga word @+0x24 (FUN_007345C0: 9×FST zerowych + MOV WORD [EAX+0x24],0)"
+  },
+  "SEAM_FLOW_MAP_46": {
+   "46": "  ├─ jeśli wariant∈{3,4,5,6,7}: FUN_004154F0(mgr) → FUN_00853A80(mgr, 2×f32) → max(rekord[4], wynik)"
+  },
+  "SEAM_FLOW_MAP_68": {
+   "68": "- FUN_004C47F0 (processor placementu, 4 callerów = ww. handlery): FUN_00745360(init struktury) → **FUN_007453D0(rekord, KURSOR) = deserializacja**: rekord+0 = KLUCZ u32; +0x34 u16; +0x50/+0x54/+0x58 = POZYCJA vec3 (3×u32, advance 4); +0x5C = WARIANT bajt (advance 1); każdy odczyt fail-closed (flaga@kursor+0x11) → resolver(klucz) → gdy brak: settery f90(pozycja→rekord+8/+0xC/+0x10), fb0, fd0(param-set→rekord+0x20) → FUN_004C46C0(rekord, wariant) → INSERT → composer."
+  },
+  "RESEARCH_20": {
+   "20": "**Konkretna wartość pozycji/rotacji trafia do kontenera z KOMUNIKATU: kursor podkomunikatu (typy 0xB0/0xB9/0xC6/0xC7, dispatcher FUN_004B18D0) jest deserializowany (FUN_007453D0: klucz u32@+0, transforma, pozycja vec3 u32×3@+0x50..0x58, wariant bajt@+0x5C; read-cursory FUN_00752700/26 40), settery zapisują pozycję do rekordu placementu (FUN_00730F90: rekord+8/+0xC/+0x10 = XYZ), ctor klasy wartości kopiuje rekord do pól instancji (KLUCZ=rekord[0]→+0x74, POZYCJA=rekord+8..0x10→+0x44..0x4C, WARIANT→+8, ID-param-setu=rekord+0x20→+0x88), a INSERT (FUN_00856190) wstawia parę {klucz=rekord[0], wskaźnik instancji} do STLport hash_map@mgr+0x10 (węzeł {next, klucz@+4, wartość@+8}) — TEN SAM klucz (rekord[0]) jest więc kluczem węzła ORAZ kopią w polu instancji+0x74, co wiąże komunikat, rekord, węzeł i instancję; klasą wartości jest MovableObject/ClientMovableObject (RTTI), a NIE klasa parametrów.**"
+  },
+  "RESEARCH_73": {
+   "73": "(b) **POZYTYW: komunikaty**. Dispatcher **FUN_004B18D0(typ_komunikatu, kursor)** — case 0xB9 → FUN_005B72C0 @0x004B1A16 (pin E8 A5 58 10 00), case 0xB0 → FUN_004574F0, 0xC6 → FUN_004B0AB0, 0xC7 → FUN_004B1670, 0xBC → advance(4)+FUN_00458030. Read-cursor ops (z kontraktu „FUN_00752700/40/26 40\"): **FUN_00752700(kursor→u32,u32,u8,u8)** i **FUN_00752640(kursor→u32,u32,u8)** — każdy odczyt: bounds-check ([kursor+8]<[kursor+0xC]+n), zapis z flagą fail-closed @kursor+0x11, advance FUN_0040DE60(n). Handler 0xB9: subtyp (FUN_007527F0) → read-cursor → {KEY,KEY2,bajty} → walker(KEY/KEY2) → distance-gate (FUN_004b2a20 vs FUN_0085aff0×[0x00A79E28]) → FUN_005B6890(KEY, 0x42/0x39, payload) / FUN_005B6370→FUN_005B5F90 → **driver(KEY)**. Processor placementu FUN_004C47F0: **FUN_007453D0(rekord, kursor)** — deserializata: **rekord+0=KLUCZ u32; +0x34=u16; +0x50/+0x54/+0x58=POZYCJA vec3; +0x5C=WARIANT bajt** (+sub-struktury transformu) — klucz i pozycja przybywają RAZEM w jednym rekordzie z kursora."
+  },
+  "AUDYT_55": {
+   "55": "Własne piny: źródłowa trzecia składowa `MOV ECX,[EAX+0x10]` przy `004C4706`; jej kopia `[ESP+0x18]` przy `004C4710`; CALL do 00853A80 przy **004C476E**; porównanie x87 i warunkowy `FSTP [ESP+0x18]` przy **004C4789**; dopiero potem CALL konstruktora przy **004C47C1**. Rekord callera nie jest nadpisywany — zmiana dotyczy kopii podanej konstruktorowi."
+  },
+  "DESKTOP_REPORT_55": {
+   "55": "Własne piny: źródłowa trzecia składowa `MOV ECX,[EAX+0x10]` przy `004C4706`; jej kopia `[ESP+0x18]` przy `004C4710`; CALL do 00853A80 przy **004C476E**; porównanie x87 i warunkowy `FSTP [ESP+0x18]` przy **004C4789**; dopiero potem CALL konstruktora przy **004C47C1**. Rekord callera nie jest nadpisywany — zmiana dotyczy kopii podanej konstruktorowi."
+  },
+  "R_REPORT_121": {
+   "121": "| 1 | **Rekord templates.vfs** | rejestr RB; lookup FUN_0072F580 (rb-find FUN_004D1430 @0x72F590; **hit→`83 C0 14` @0x72F59E**; miss→0x00BA5800); FUN_006C3F50: ECX=EDI po lookup @0x006C3F62 | parser `89 47 08` @0x00730CE6; **+8=A (id pliku .nif)**; B@+4, C@+0xC, D_f32@+0x10 (file: A@record+0x14, D@record+0x20) | FUN_006C3F50 @0x006C3F74; FUN_006B4C50 @0x006B4C82/0x006B4C93; slot-gettery FUN_006C2840/70→tabela 0x00A858B4/B C→FUN_0043A550 | **id modelu NIF** (join A→`<A>.nif` 3618/3618 — RUN1) |"
+  },
+  "R_REPORT_124": {
+   "124": "| 4 | **Wartość mapy managera parametrów** | walker FUN_0085B840→singleton FUN_004154F0→[0x00BA12E8] (0x8C); resolver FUN_008544D0: mapa mgr+0x10, lock mgr+0x44, rb-find FUN_00971780, **[hit+8]** @0x008544F9; walker-current FUN_0085B860: *out=[walker+0] | **+8=small int (wariant 4..7)**; +0=vtable (potwierdzone @0x00855B2F-3F: MOV EDX,[ECX]; MOV EAX,[EDX+8]; CALL EAX); +4=nullable CS-ptr (FUN_0085B190); +0x10 czytane getterem D w innej gałęzi; +0x44..+0x4C f32 | FUN_008553D0 @0x008557FD (gałąź 0x4E38) | **znacznik wariantu konstruktora**; NAZWA KLASY: **RECEIVER_UNRESOLVED** |"
+  },
+  "R_REPORT_216_219": {
+   "216": "4. **Czy odzyskano autentyczne pozycje 296445? NIE.** Historyczne pozycje placementu",
+   "217": "   NIE zostały odzyskane; transform 296445@4508 (D=124.941) istnieje w danych",
+   "218": "   (zweryfikowane bajtowo), ale jego semantyka liczbowa i związek z historycznymi",
+   "219": "   pozycjami świata pozostają NIE ROZSTRZYGNIĘTE."
+  },
+  "ERRATA_R3_70_71": {
+   "70": "  parser `89 47 08` @0x00730CE6 → rejestr RB (lookup FUN_0072F580: rb-find",
+   "71": "  FUN_004D1430 @0x72F590; **hit → `83 C0 14` @0x72F59E** = rekord@hit+0x14; miss →"
+  },
+  "ERRATA_R3_127_128": {
+   "127": "  (QC_F2_SELECTOR.json); resolver FUN_008544D0: lock mgr+0x44, mapa mgr+0x10, rb-find",
+   "128": "  FUN_00971780, **`8B 70 08` MOV ESI,[EAX+8] @0x008544F9** = wartość=[hit+8];"
+  },
+  "ENTRYPOINT_31": {
+   "31": "| (this commit; discover with `git log -1 -- docs/audits/PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913`) | PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913 (RUN_CLASS LOAD_BEARING; the attribute-origin SEAM on the parameter map; executor pe-reconstruction, direct PE-MASTER dispatch; INTERNAL_QC + ERRATA_R4 formalization + publication by pe-master-auditor; NO_NESTED_TASKS; STATIC-ONLY — the client never ran) | `PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913/` | The parameter-map seam closed on EU 9.3.5 (S0 fail-closed: SHA E7785430... + templates.vfs BE57818C...): **the map VALUE = an instance of MovableObject/ClientMovableObject** (own RTTI chains: vtable 0x00A91E4C -> COL 0x00AB33D0 -> TD 0x00B7997C -> `.?AVMovableObject@@`; derived 0x00A7DCB0 -> `.?AVClientMovableObject@@`; slot-0 FUN_0085B7F0 unique — 1 DWORD hit in ALL sections; RECEIVER_UNRESOLVED #1 of Phase A CLOSED per ERRATA_R4 [SE-R4-2]); **the INSERT FUN_00856190 is VA-locked** (key = FUN_00414130(value) = [value+0x74] = rekord[0]; rehash FUN_00856090; pair{key,value}; find-or-create FUN_00854D90 -> node {next=0, key@+4, value@+8} via __node_alloc 0xC; duplicate -> slot0 PUSH 1 = deleting dtor; the ONLY creator FUN_004C46C0: new(0x128) @0x004C4792 -> ctor FUN_00528E50 @0x004C47C1 -> insert @0x004C47DA; census funnel 1+6+8 all real); **the position arrives in the MESSAGE-CURSOR bytes** — types {0xB0, 0xC6, 0xC7 (dispatcher FUN_004B18D0 cases) + **0xB2 (special-case gate in Execute FUN_004B2950 -> FUN_004B1C70 -> FUN_004C47F0 @0x004B1DBC; NOT 0xB9 — QC correction [SE-R4-5])**} -> processor FUN_004C47F0 -> deserializer FUN_007453D0 (key u32 from the TOP cursor @0x007453EF; param-set pair 2xu32 via FUN_004124B0; sub-packet via FUN_007343E0: variant u16 @0x00745435 -> rec+0x34, **POSITION vec3 12B via FUN_00412430 @0x0074545A -> rec+0x38 [QC correction SE-R4-6: NOT the +0x50..0x58 triple — that is the SECOND vector: X2 -> placement+4 + creation-name; Z2 f32 -> slot5 -> value+0x98]**, rotation vec3 -> rec+0x44, trailing byte unused) -> setter f90 @0x004C48F4 -> placement+8/+0xC/+0x10 -> ctor copies to instance +0x44..0x4C, key -> +0x74, param-set -> +0x88 -> insert into STLport hash_map@mgr+0x10 (mgr = singleton [0x00BA12E8]; 100 buckets; DIV key%(n-1) [SE-R4-7a: DIV not IDIV]; chain-end = next-bucket head); **ONE key binds message/record/node/instance** (cursor @0x007453EF -> rec+0 -> placement+0 -> value+0x74 -> node+4); the round-1 claim \"0xB9 carries KEYS not transforms\" RETAINED for the 0xB9 type itself (handler FUN_005B72C0 consumes {skip4, u16 subtype, {u32,u32,u8,u8}/{u32,u32,u8}} — no FUN_004C47F0 call; the round-1 read was COMPLETE for that handler) while the family-level \"no direct transform->+0x08 counterexample\" is SUPERSEDED (ERRATA_R4 [SE-R4-1]: the sibling types DO carry the position straight into +8..0x10); the 0xB9 channel = keys/propagation (driver FUN_00567C50(key) @0x005B7567 -> builder FUN_00567770 composes the position FROM ATTRIBUTES and registers a NEW handle via FUN_00457930); D-getter receivers in the driver resolved per-site ([SE-R4-4]: arg3-state-record @0x00567D16/0x00567D46, this-queue @0x00567F72); singleton CMP [0x00BA1260]+8 vs key @0x00567CC4 (avatar-own-key = HYPOTHESIS); VFS->param-map NEGATIVE bounded (parsers FUN_0094BD30/F350 2+2 callers all in 0x0094xxxx; the positive control VFS->definition-registry reproduced own-bytes); **boundaries held: cursor UPSTREAM unproven (network vs local queue OPEN; 2 dispatcher callers; vtable 0x00A7C200 = `.?AVArkClientPacketExecutor@@` per RTTI QC), axes/units +0x44 UNRESOLVED (needs slot3 FUN_0085B6A0 + FUN_008599A0), STATICS (4508/296445) NOT covered by the movable channel (OPEN; the 296445 positions NOT recovered; D@4508 = 124.941 ANCHORS_ABSENT_SEMANTICS_OPEN unchanged), the movable->model binding = the +0xC0 sub-object (FUN_005247C0) undeoded; the ONE next experiment = cursor-upstream decode (ArkClientPacketExecutor vtable callers + ring FUN_004B1890/FUN_004B1B70 origin) in parallel with slot3/FUN_008599A0**; INTERNAL_QC QC_PASS by pe-master-auditor (fresh context, own PE parser + 45 own censuses + own switch decode + own RTTI + GB6 repeat 1385/1385 per-file identical; 0xP0/P1, 2xP2 + 4xP3 documentation-class all formalized in ERRATA_R4 [SE-R4-1..7] + the final REPORT; evidence 01_RAW/02_ANALYSIS untouched — hash before==after; RESEARCH_FINDINGS.md preserved verbatim); GHIDRA_LOCAL stays LOCAL-ONLY under its SHA manifests | PENDING (the PE-MASTER loop audit; internal QC_PASS — auditor pe-master-auditor, fresh context, own byte probes 00_CONTROL\\qc_probe; advisory) |"
+  }
+ },
+ "published_match": [
+  {
+   "local": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\06_REPORT\\REPORT.md",
+   "repo": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\REPORT.md",
+   "identical": "repo-path-missing"
+  },
+  {
+   "local": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_ORIGIN_SEAM_DESKTOP_AUDIT_R1_20260913\\AUDYT.md",
+   "repo": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_ORIGIN_SEAM_DESKTOP_AUDIT_R1_20260913\\AUDYT.md",
+   "identical": true
+  },
+  {
+   "local": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_RECEIVER_PROVENANCE_CORRECTIONS_R1_20260913\\06_REPORT\\REPORT.md",
+   "repo": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_RECEIVER_PROVENANCE_CORRECTIONS_R1_20260913\\REPORT.md",
+   "identical": "repo-path-missing"
+  }
+ ],
+ "file_line_counts": {
+  "REPORT": 199,
+  "QC_REPORT": 331,
+  "ERRATA_R4": 266,
+  "HANDOFF": 100,
+  "GATES": 16,
+  "SEAM_FLOW_MAP": 82,
+  "RESEARCH": 139,
+  "AUDYT": 118,
+  "DESKTOP_REPORT": 118,
+  "R_REPORT": 250,
+  "ERRATA_R3": 410,
+  "ENTRYPOINT": 103
+ }
+}

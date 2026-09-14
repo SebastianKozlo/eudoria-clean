@@ -1,0 +1,40 @@
+# OWN DECODE (capstone x86-32) from physical EXE
+# entry=00412430 end_detected=0x4124a2 size=114
+# file=D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+00412430  83ec0c                   sub      esp, 0xc
+00412433  80791100                 cmp      byte ptr [ecx + 0x11], 0
+00412437  7435                     je       0x41246e
+00412439  8b510c                   mov      edx, dword ptr [ecx + 0xc]
+0041243C  8d420c                   lea      eax, [edx + 0xc]
+0041243F  3b4108                   cmp      eax, dword ptr [ecx + 8]
+00412442  772a                     ja       0x41246e
+00412444  8b01                     mov      eax, dword ptr [ecx]
+00412446  03c2                     add      eax, edx
+00412448  8b542410                 mov      edx, dword ptr [esp + 0x10]
+0041244C  56                       push     esi
+0041244D  8b30                     mov      esi, dword ptr [eax]
+0041244F  8932                     mov      dword ptr [edx], esi
+00412451  8b7004                   mov      esi, dword ptr [eax + 4]
+00412454  897204                   mov      dword ptr [edx + 4], esi
+00412457  8b4008                   mov      eax, dword ptr [eax + 8]
+0041245A  894208                   mov      dword ptr [edx + 8], eax
+0041245D  5e                       pop      esi
+0041245E  83c40c                   add      esp, 0xc
+00412461  c74424040c000000         mov      dword ptr [esp + 4], 0xc
+00412469  e9f2b9ffff               jmp      0x40de60
+0041246E  d9ee                     fldz     
+00412470  8b442410                 mov      eax, dword ptr [esp + 0x10]
+00412474  d91424                   fst      dword ptr [esp]
+00412477  8b1424                   mov      edx, dword ptr [esp]
+0041247A  d9542404                 fst      dword ptr [esp + 4]
+0041247E  8910                     mov      dword ptr [eax], edx
+00412480  d95c2408                 fstp     dword ptr [esp + 8]
+00412484  8b542404                 mov      edx, dword ptr [esp + 4]
+00412488  895004                   mov      dword ptr [eax + 4], edx
+0041248B  8b542408                 mov      edx, dword ptr [esp + 8]
+0041248F  895008                   mov      dword ptr [eax + 8], edx
+00412492  80791100                 cmp      byte ptr [ecx + 0x11], 0
+00412496  7404                     je       0x41249c
+00412498  c6411100                 mov      byte ptr [ecx + 0x11], 0
+0041249C  83c40c                   add      esp, 0xc
+0041249F  c20400                   ret      4

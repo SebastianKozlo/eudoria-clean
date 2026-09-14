@@ -1,0 +1,71 @@
+{
+  "run": "PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913",
+  "era": "EU 9.3.5 (pcg_install)",
+  "mode": "STATIC-ONLY (engine-client execution layer ABSENT)",
+  "binaries": {
+    "Entropia.exe": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe",
+      "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "size": 8015872,
+      "pe": {
+        "machine": "0x014C (i386)",
+        "opt_magic": "0x10B (PE32)",
+        "image_base": "0x00400000",
+        "aslr": false,
+        "dll_chars": "0x",
+        "text_rva": "0x1000",
+        "text_raw": "0x1000"
+      },
+      "verified_by": "s0_era.py (own PE parse + 17 VA->offset spot-checks with byte pins) - PASS exit 0"
+    },
+    "templates.vfs": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Parameters\\templates.vfs",
+      "sha256": "BE57818C7516F8C6C8A68DF427591567DD0E5A421934AC24ADA57E8261F65B77",
+      "size": 560788,
+      "verified_by": "s0_era.py hash+size check - PASS"
+    }
+  },
+  "repo": {
+    "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean",
+    "BASE_SHA": "e30f99fdb3c7913c3c4fa6ee1571e505955192d1",
+    "status_at_return": "HEAD==BASE_SHA, zero executor commits, foreign untracked experiments/ untouched"
+  },
+  "contract": {
+    "path": "99_Audits\\PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913\\00_CONTROL\\RUN_CONTRACT.md",
+    "sha256": "BAB59EEC7B8A0553FE1808F18320A2CD0A83AE832332E0BC2E71E353BB3DE3D4",
+    "size": 53560,
+    "lines": 776
+  },
+  "ghidra_local": {
+    "source": "99_Audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\00_CONTROL\\GHIDRA_LOCAL",
+    "source_manifest_verified": "GHIDRA_LOCAL_MANIFEST_final.csv of the source package: 10/10 SHA match",
+    "own_copy": "99_Audits\\PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913\\00_CONTROL\\GHIDRA_LOCAL",
+    "at_copy_manifest": "GHIDRA_LOCAL_MANIFEST_at_copy.csv (10/10 identical to source FINAL)",
+    "final_manifest": "GHIDRA_LOCAL_MANIFEST_final.csv (db.73/db.74 checkpoints added by this run's analyzeHeadless tours)",
+    "tool": "Ghidra 11.2.1 PUBLIC (analyzeHeadless), project PE935_DISPLAY_ENUM_R1, program Entropia.exe"
+  },
+  "decode_layer_policy": {
+    "primary": "own capstone 5.0.7 disassembly from the physical EXE (pe935_core.py)",
+    "support": "Ghidra 11.2.1 decompilation on OWN GHIDRA_LOCAL copy (census support only; layer declared in REPORT section 7)",
+    "forbidden_source": "Desktop hexdumps (used ONLY for the final D-1 cross-check - byte-identical confirmed)"
+  },
+  "originals_immutability": {
+    "before_composite": "A606CF52CC6804702C469777013115A80328539EADC27A9053F4F199877783D0",
+    "after_composite": "A606CF52CC6804702C469777013115A80328539EADC27A9053F4F199877783D0",
+    "census": "01_RAW/G7_CENSUS_before.json + 01_RAW/G7_CENSUS_after.json (1020 files in 8 historical packages + 2 originals)"
+  },
+  "singletons_identified_this_run": {
+    "mgr1_parameter_map": {"cell": "0x00BA12E8", "getter": "FUN_004154F0", "ctor": "FUN_008550C0", "size": "0x8C", "vtable": "NONE (identified by ctor/writers)"},
+    "mgr2_probe_collision": {"cell": "0x00BA12EC", "getter": "FUN_00415570", "ctor": "FUN_00858A40", "size": "0xCC"},
+    "mgr3_move_subsystem": {"cell": "0x00BA1280", "getter": "FUN_004147F0", "ctor": "FUN_0044C950", "size": "0x38 (allocated 0xCC)"},
+    "string_singleton": {"cell": "0x00BA26B8", "getter": "FUN_004C4640", "ctor": "FUN_00766480", "size": "0x1C"}
+  },
+  "rtti_identified_this_run": [
+    {"class": ".?AVMaTerrainManagerRuntime@@", "td": "0x00B79A28", "vtables": ["0x00A7F430", "0x00A7F420"], "role": "provider1 source (mgr3+0x18); vtable slot+4 = FUN_00934540 (terrain height query)"},
+    {"class": ".?AVArkMoveSubsystem@@", "td": "0x00B717E0", "vtables": ["0x00A7BA54"], "role": "provider2 (mgr1+0x4C); slot+4 = FUN_0048E7D0"},
+    {"class": ".?AVArkMoverInterface@@", "td": "0x00B717C0", "vtables": ["0x00A7BA48"], "role": "base of ArkMoveSubsystem"},
+    {"class": ".?AVSceneFeederObject@@", "td": "0x00B78834", "vtables": ["0x00A7D458"], "role": "MovableObject sub-object +0xC0"},
+    {"class": ".?AVClientMovableObject@@", "td": "0x00B79958", "vtables": ["0x00A7DCB0"], "role": "derived instance"},
+    {"class": ".?AVMovableObject@@", "td": "0x00B7997C", "vtables": ["0x00A91E4C"], "role": "base value class"}
+  ]
+}

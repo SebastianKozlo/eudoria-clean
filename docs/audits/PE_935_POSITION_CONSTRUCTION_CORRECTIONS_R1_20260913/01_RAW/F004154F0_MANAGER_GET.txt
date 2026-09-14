@@ -1,0 +1,38 @@
+# OWN DECODE (capstone x86-32) from physical EXE
+# entry=004154F0 end_detected=0x41556a size=122
+# file=D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+004154F0  6aff                     push     -1
+004154F2  68fb629900               push     0x9962fb
+004154F7  64a100000000             mov      eax, dword ptr fs:[0]
+004154FD  50                       push     eax
+004154FE  51                       push     ecx
+004154FF  a1d0d8b900               mov      eax, dword ptr [0xb9d8d0]
+00415504  33c4                     xor      eax, esp
+00415506  50                       push     eax
+00415507  8d442408                 lea      eax, [esp + 8]
+0041550B  64a300000000             mov      dword ptr fs:[0], eax
+00415511  a1e812ba00               mov      eax, dword ptr [0xba12e8]
+00415516  85c0                     test     eax, eax
+00415518  7540                     jne      0x41555a
+0041551A  688c000000               push     0x8c
+0041551F  e8a07e5400               call     0x95d3c4
+00415524  83c404                   add      esp, 4
+00415527  89442404                 mov      dword ptr [esp + 4], eax
+0041552B  85c0                     test     eax, eax
+0041552D  c744241000000000         mov      dword ptr [esp + 0x10], 0
+00415535  741c                     je       0x415553
+00415537  8bc8                     mov      ecx, eax
+00415539  e882fb4300               call     0x8550c0
+0041553E  a3e812ba00               mov      dword ptr [0xba12e8], eax
+00415543  8b4c2408                 mov      ecx, dword ptr [esp + 8]
+00415547  64890d00000000           mov      dword ptr fs:[0], ecx
+0041554E  59                       pop      ecx
+0041554F  83c410                   add      esp, 0x10
+00415552  c3                       ret      
+00415553  33c0                     xor      eax, eax
+00415555  a3e812ba00               mov      dword ptr [0xba12e8], eax
+0041555A  8b4c2408                 mov      ecx, dword ptr [esp + 8]
+0041555E  64890d00000000           mov      dword ptr fs:[0], ecx
+00415565  59                       pop      ecx
+00415566  83c410                   add      esp, 0x10
+00415569  c3                       ret      

@@ -1,0 +1,85 @@
+# OWN DECODE (capstone x86-32) from physical EXE
+# entry=0085B6A0 end_detected=0x85b77a size=218
+# file=D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+0085B6A0  51                       push     ecx
+0085B6A1  56                       push     esi
+0085B6A2  8bf1                     mov      esi, ecx
+0085B6A4  8b4678                   mov      eax, dword ptr [esi + 0x78]
+0085B6A7  6a00                     push     0
+0085B6A9  50                       push     eax
+0085B6AA  8d4c240c                 lea      ecx, [esp + 0xc]
+0085B6AE  e8bdb01100               call     0x976770
+0085B6B3  8b4608                   mov      eax, dword ptr [esi + 8]
+0085B6B6  83f803                   cmp      eax, 3
+0085B6B9  7549                     jne      0x85b704
+0085B6BB  8b4e10                   mov      ecx, dword ptr [esi + 0x10]
+0085B6BE  85c9                     test     ecx, ecx
+0085B6C0  7475                     je       0x85b737
+0085B6C2  e8595c0000               call     0x861320
+0085B6C7  d95c2404                 fstp     dword ptr [esp + 4]
+0085B6CB  d905401da800             fld      dword ptr [0xa81d40]
+0085B6D1  d8542404                 fcom     dword ptr [esp + 4]
+0085B6D5  dfe0                     fnstsw   ax
+0085B6D7  f6c405                   test     ah, 5
+0085B6DA  7a06                     jp       0x85b6e2
+0085B6DC  d95c2404                 fstp     dword ptr [esp + 4]
+0085B6E0  eb02                     jmp      0x85b6e4
+0085B6E2  ddd8                     fstp     st(0)
+0085B6E4  d9ee                     fldz     
+0085B6E6  8b44240c                 mov      eax, dword ptr [esp + 0xc]
+0085B6EA  d910                     fst      dword ptr [eax]
+0085B6EC  5e                       pop      esi
+0085B6ED  d95804                   fstp     dword ptr [eax + 4]
+0085B6F0  d90424                   fld      dword ptr [esp]
+0085B6F3  dd0508b5a700             fld      qword ptr [0xa7b508]
+0085B6F9  dce9                     fsub     st(1), st(0)
+0085B6FB  dec1                     faddp    st(1)
+0085B6FD  d95808                   fstp     dword ptr [eax + 8]
+0085B700  59                       pop      ecx
+0085B701  c20400                   ret      4
+0085B704  83f806                   cmp      eax, 6
+0085B707  74b2                     je       0x85b6bb
+0085B709  83f805                   cmp      eax, 5
+0085B70C  74ad                     je       0x85b6bb
+0085B70E  83f804                   cmp      eax, 4
+0085B711  74a8                     je       0x85b6bb
+0085B713  83f807                   cmp      eax, 7
+0085B716  74a3                     je       0x85b6bb
+0085B718  837e7c00                 cmp      dword ptr [esi + 0x7c], 0
+0085B71C  7506                     jne      0x85b724
+0085B71E  837e7800                 cmp      dword ptr [esi + 0x78], 0
+0085B722  7597                     jne      0x85b6bb
+0085B724  d9ee                     fldz     
+0085B726  8b44240c                 mov      eax, dword ptr [esp + 0xc]
+0085B72A  d910                     fst      dword ptr [eax]
+0085B72C  5e                       pop      esi
+0085B72D  d95004                   fst      dword ptr [eax + 4]
+0085B730  d95808                   fstp     dword ptr [eax + 8]
+0085B733  59                       pop      ecx
+0085B734  c20400                   ret      4
+0085B737  8b44240c                 mov      eax, dword ptr [esp + 0xc]
+0085B73B  d9ee                     fldz     
+0085B73D  d910                     fst      dword ptr [eax]
+0085B73F  5e                       pop      esi
+0085B740  d95804                   fstp     dword ptr [eax + 4]
+0085B743  d905401da800             fld      dword ptr [0xa81d40]
+0085B749  d95808                   fstp     dword ptr [eax + 8]
+0085B74C  59                       pop      ecx
+0085B74D  c20400                   ret      4
+0085B750  8b4108                   mov      eax, dword ptr [ecx + 8]
+0085B753  83f802                   cmp      eax, 2
+0085B756  741c                     je       0x85b774
+0085B758  83f803                   cmp      eax, 3
+0085B75B  7417                     je       0x85b774
+0085B75D  83f806                   cmp      eax, 6
+0085B760  7412                     je       0x85b774
+0085B762  83f805                   cmp      eax, 5
+0085B765  740d                     je       0x85b774
+0085B767  83f804                   cmp      eax, 4
+0085B76A  7408                     je       0x85b774
+0085B76C  83f807                   cmp      eax, 7
+0085B76F  7403                     je       0x85b774
+0085B771  33c0                     xor      eax, eax
+0085B773  c3                       ret      
+0085B774  b801000000               mov      eax, 1
+0085B779  c3                       ret      

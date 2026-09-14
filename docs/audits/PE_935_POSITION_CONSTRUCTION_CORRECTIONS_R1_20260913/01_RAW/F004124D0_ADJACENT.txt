@@ -1,0 +1,82 @@
+# OWN DECODE (capstone x86-32) from physical EXE
+# entry=004124D0 end_detected=0x4125d0 size=256
+# file=D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+004124D0  0489                     add      al, 0x89
+004124D2  42                       inc      edx
+004124D3  045e                     add      al, 0x5e
+004124D5  c744240408000000         mov      dword ptr [esp + 4], 8
+004124DD  e97eb9ffff               jmp      0x40de60
+004124E2  8b442404                 mov      eax, dword ptr [esp + 4]
+004124E6  c70000000000             mov      dword ptr [eax], 0
+004124EC  c7400400000000           mov      dword ptr [eax + 4], 0
+004124F3  80791100                 cmp      byte ptr [ecx + 0x11], 0
+004124F7  7404                     je       0x4124fd
+004124F9  c6411100                 mov      byte ptr [ecx + 0x11], 0
+004124FD  c20400                   ret      4
+00412500  80791100                 cmp      byte ptr [ecx + 0x11], 0
+00412504  7423                     je       0x412529
+00412506  8b410c                   mov      eax, dword ptr [ecx + 0xc]
+00412509  8d5004                   lea      edx, [eax + 4]
+0041250C  3b5108                   cmp      edx, dword ptr [ecx + 8]
+0041250F  7718                     ja       0x412529
+00412511  8b11                     mov      edx, dword ptr [ecx]
+00412513  d90410                   fld      dword ptr [eax + edx]
+00412516  8b442404                 mov      eax, dword ptr [esp + 4]
+0041251A  d918                     fstp     dword ptr [eax]
+0041251C  c744240404000000         mov      dword ptr [esp + 4], 4
+00412524  e937b9ffff               jmp      0x40de60
+00412529  d9ee                     fldz     
+0041252B  8b542404                 mov      edx, dword ptr [esp + 4]
+0041252F  d91a                     fstp     dword ptr [edx]
+00412531  80791100                 cmp      byte ptr [ecx + 0x11], 0
+00412535  7404                     je       0x41253b
+00412537  c6411100                 mov      byte ptr [ecx + 0x11], 0
+0041253B  c20400                   ret      4
+0041253E  cc                       int3     
+0041253F  cc                       int3     
+00412540  80791100                 cmp      byte ptr [ecx + 0x11], 0
+00412544  7423                     je       0x412569
+00412546  8b410c                   mov      eax, dword ptr [ecx + 0xc]
+00412549  8d5004                   lea      edx, [eax + 4]
+0041254C  3b5108                   cmp      edx, dword ptr [ecx + 8]
+0041254F  7718                     ja       0x412569
+00412551  8b11                     mov      edx, dword ptr [ecx]
+00412553  8b0410                   mov      eax, dword ptr [eax + edx]
+00412556  8b542404                 mov      edx, dword ptr [esp + 4]
+0041255A  8902                     mov      dword ptr [edx], eax
+0041255C  c744240404000000         mov      dword ptr [esp + 4], 4
+00412564  e9f7b8ffff               jmp      0x40de60
+00412569  8b442404                 mov      eax, dword ptr [esp + 4]
+0041256D  c70000000000             mov      dword ptr [eax], 0
+00412573  80791100                 cmp      byte ptr [ecx + 0x11], 0
+00412577  7404                     je       0x41257d
+00412579  c6411100                 mov      byte ptr [ecx + 0x11], 0
+0041257D  c20400                   ret      4
+00412580  8b442404                 mov      eax, dword ptr [esp + 4]
+00412584  83c0fd                   add      eax, -3
+00412587  83f806                   cmp      eax, 6
+0041258A  7720                     ja       0x4125ac
+0041258C  ff2485dc254100           jmp      dword ptr [eax*4 + 0x4125dc]
+00412593  56                       push     esi
+00412594  8b31                     mov      esi, dword ptr [ecx]
+00412596  85f6                     test     esi, esi
+00412598  7411                     je       0x4125ab
+0041259A  8bce                     mov      ecx, esi
+0041259C  ff155c5aa700             call     dword ptr [0xa75a5c]
+004125A2  56                       push     esi
+004125A3  e882ae5400               call     0x95d42a
+004125A8  83c404                   add      esp, 4
+004125AB  5e                       pop      esi
+004125AC  c20400                   ret      4
+004125AF  8b01                     mov      eax, dword ptr [ecx]
+004125B1  50                       push     eax
+004125B2  e873ae5400               call     0x95d42a
+004125B7  83c404                   add      esp, 4
+004125BA  c20400                   ret      4
+004125BD  8b09                     mov      ecx, dword ptr [ecx]
+004125BF  51                       push     ecx
+004125C0  e865ae5400               call     0x95d42a
+004125C5  83c404                   add      esp, 4
+004125C8  c20400                   ret      4
+004125CB  8b11                     mov      edx, dword ptr [ecx]
+004125CD  52                       push     edx
