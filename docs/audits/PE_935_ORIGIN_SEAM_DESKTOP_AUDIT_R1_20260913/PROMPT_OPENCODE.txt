@@ -1,0 +1,124 @@
+Kontynuuj badanie EU 9.3.5 po audycie Desktop faz A/B. Pracuj do wykonania poniższego zakresu lub do konkretnej, udokumentowanej granicy dowodu. Nie kończ na planie. Ten prompt daje GO na ograniczone badanie STATYCZNE i publikację wyników; nie daje GO na runtime, mock-server ani modyfikację klienta.
+
+CEL
+Ustalić rzeczywisty format i przetwarzanie danych pozycji oraz sprawdzić, czy znaleziony dostawca wysokości/korekty prowadzi do terenu. Zachować główny cel: źródło i historyczny placement budynku 296445.nif / template 4508. Nie uznać badania dowolnego MovableObject za automatyczne rozwiązanie placementu budynków.
+
+ŚRODOWISKO I AUTORYTET
+- Host: WinDev2407Eval; praca i artefakty wyłącznie w VM.
+- Repo: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean
+- GitHub: SebastianKozlo/eudoria-clean, master.
+- Snapshot analizowany przez Desktop: 78cd1535e6a35330bde7460c24e98db272acdbd3; faza A 5d0edde5863795d6eefd8bb11989e8edb7b28546.
+- Po tym snapshocie może już być commit nowego audytu Desktop. Ustal aktualny HEAD i origin/master; nie zakładaj, że nadal są na 78cd153. Nie resetuj repo i nie nadpisuj nowszej pracy.
+- Oryginał: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, 8015872 B, PE32 base 00400000.
+- templates.vfs: D:\Eudoria_Reconstruction\pcg_install\Data\Parameters\templates.vfs
+  SHA256 BE57818C7516F8C6C8A68DF427591567DD0E5A421934AC24ADA57E8261F65B77.
+- Reguły i checkpointy przeczytaj z AGENTS.md oraz 00_PROJECT_CONTEXT. Stare notatki PE2/2003 nie przenoszą adresów ani semantyki na tę erę.
+
+ROUTING
+pe-master nadzoruje i rozstrzyga. pe-reconstruction wykonuje bounded trace. pe-master-auditor przeprowadza własny QC i formalizuje/publikuje po rozstrzygnięciu. Wykonawcy nie tworzą dalszych podagentów. Jeden writer repo i jeden właściciel projektu Ghidry; osobna kopia do tej rundy. Nie przedstawiaj pracy wykonawcy i ponownego odczytu jego JSON jako dwóch niezależnych wykonań tego samego testu.
+
+WEJŚCIA — przeczytaj przed startem
+1. AUDIT_ENTRYPOINT.md.
+2. docs/audits/PE_935_ORIGIN_SEAM_DESKTOP_AUDIT_R1_20260913/AUDYT.md
+   oraz probe.json, probe.mjs, pe.mjs, independent_hexdumps.txt.
+   Kopia lokalna Desktop: C:\Users\User\Documents\ChatGPT\PE\audit-eu935-origin-seam-78cd153\.
+3. Faza A: docs/audits/PE_935_RECEIVER_PROVENANCE_CORRECTIONS_R1_20260913/
+   06_REPORT/REPORT.md, ERRATA_R3.md, QC_REPORT.md i aktualna macierz receiverów.
+4. Faza B: docs/audits/PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913/
+   06_REPORT/REPORT.md, ERRATA_R4.md, QC_REPORT.md, HANDOFF.md,
+   STAGE_ACCEPTANCE_GATES.csv; 02_ANALYSIS/SEAM_FLOW_MAP.md i KEY_MODEL_MATRIX.md;
+   dekompilaty nośne oraz piny T6. Raport executora i stare bramki są historyczne tam, gdzie zastępuje je errata.
+
+NOWE WYJŚCIA
+Proponowany RUN_ID: PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913.
+Przed utworzeniem sprawdź kolizję. Jeśli katalog istnieje, wybierz jednoznaczny nowy sufiks/datę i wpisz rzeczywisty RUN_ID do wszystkich dokumentów.
+AUDIT_OUTPUT_ROOT = D:\Eudoria_Reconstruction\99_Audits\<RUN_ID>\
+Publikacja = docs/audits/<RUN_ID>/
+Podkatalogi: 00_CONTROL, 01_RAW, 02_ANALYSIS, 03_EVIDENCE, 06_REPORT.
+Obowiązkowe: RUN_CONTRACT.md, ERRATA_R5.md, REPORT.md, QC_REPORT.md, HANDOFF.md,
+STAGE_ACCEPTANCE_GATES.csv, artifact_index.csv, MANIFEST_SHA256.csv, SOURCE_IDENTITIES.json.
+Poprzednich pakietów nie edytuj. Nowa errata ma dokładne targety poprzednich twierdzeń i jawne zasady pierwszeństwa.
+
+FAZA 1 — WŁASNA ADJUDYKACJA I KOREKTA
+Nie przyjmuj audytu Desktop na autorytet. Powtórz decydujące próby z oryginalnych bajtów. Każdemu findingowi nadaj ACCEPTED/REJECTED/PARTIAL z dowodem, a nie z liczbą zielonych testów.
+
+F1. FUN_007343E0 nie tworzy subkursora.
+- Rozpisz pełne ABI, pierwszy argument jako kursor, drugi jako destination.
+- Własny dekod obu epilogów przy 0073459B i 007345B4: MOV EAX,ESI oddaje ten sam cursor.
+- Caller przy 00745414/419 przekazuje rec+0x0C jako destination; dalsze odczyty używają tego samego strumienia.
+- Odtwórz maskę u16, warunkowe pola i konsumowane bajty. Desktop znalazł:
+  dst+00: bity 0002/0004; dst+08: 0008/0010; dst+0C:0020/0040;
+  dst+10:0080/0100; dst+14:0200/0400. Pierwszy bit daje 0, drugi 1,
+  brak obu czyta f32. dst+18/+1C/+20 czytane jako f32; dst+24=reszta maski;
+  dst+04 pomocnik nie zapisuje. Sprawdź wszystko samodzielnie.
+- Nie utożsamiaj maski z długością pakietu. Nie utożsamiaj offsetów rec z offsetami strumienia.
+- Znajdź konsumentów tej struktury oraz znaczenie pominiętego dst+04. Inicjalizacja zerami przez 007345C0 sama nie dowodzi macierzy 3×3.
+- Sprawdź kontrolę bounds, invalid flag, zwrot success w pełnym 007453D0 i zachowanie na krótkim buforze. Wskaż, czy float NaN jest strukturalnie akceptowany; nie mieszaj zgodności z historycznym czytnikiem z bezpiecznymi zasadami nowego narzędzia.
+- Jeśli utworzysz mały dekoder referencyjny, tylko w katalogu runu, po udowodnieniu gramatyki; jego testy porównuj z niezależnym modelem instrukcji. Nie wdrażaj parsera do produkcji.
+
+F2. FUN_004C46C0 może zmienić trzecią składową przed konstruktorem.
+- Potwierdź lokalną kopię rekordu i warianty 3/4/5/6/7.
+- CALL przy 004C476E→00853A80; porównanie x87 i FSTP przy 004C4789;
+  ctor dopiero przy 004C47C1. Dla skończonych danych to z'=max(z,h(x,y)).
+- Rozpisz flagi x87 dla equality, unordered/NaN i +/-Inf; nie ogłaszaj równoważności z Math.max dla wszystkich bitów.
+- Jawnie pokaż raw position → f90 record → corrected local copy → instance+44..4C.
+- Oryginalny SEAM_FLOW_MAP §3 już zawiera tę gałąź. Zachowaj atrybucję; poprawiany jest brak w końcowej syntezie, nie „nowe odkrycie od zera”.
+
+F3. Zakres statyków.
+- Wycofaj „ten kanał ich nie obejmuje”. Poprawnie: „użycie przez 4508/296445 niewykazane, pozostaje otwarte”.
+- Nie wykluczaj statycznych budynków na podstawie nazwy MovableObject ani plikowego źródła na podstawie zakresów adresów callerów.
+- „Źródło insertów=komunikaty” ogranicz do wykazanej ścieżki, bez uogólnienia na sześciu callerów creatora i generator lokalnych kluczy.
+
+Popraw też drobne nieścisłości: CALL 0085B3E0 jest przy 004C488A, wcześniejszy guard przy 004C4878→0085B750, rotacja przy 004C4896→0085ADB0; byte-table A2..C7 ma 38 indeksów, jump-table osobno 22; GB4/QC-3 muszą mieć jedną aktualną interpretację pól. Liczby po korekcie wyprowadź własnym narzędziem.
+
+FAZA 2 — GŁÓWNY NOWY EKSPERYMENT: KTO DOSTARCZA KOREKTĘ Z?
+Po korekcie F1/F2 prześledź FUN_00853A80, nie ogólny katalog funkcji sieciowych.
+
+1. Rozpoznaj receiver managera z FUN_004154F0 i dokładnie pola +0, +0x4C, +0x50, +0x58.
+2. Znajdź zapisujących wskaźniki +0 oraz +0x4C, rzeczywiste klasy/vtable i ciała slotu +4.
+3. Prześledź operacje, argumenty i zwrot obu dostawców. Sprawdź, który wynik jest zwracany, jakie są skutki uboczne, kiedy działa fallback 0 oraz co filtruje 00755F90.
+4. Postaw konkurencyjne hipotezy: teren/heightfield, kolizja/podłoże, inny provider. Dla każdej zdefiniuj dowód rozstrzygający i falsyfikację. Nazwa funkcji, liczby wyglądające jak współrzędne i x/y jako argumenty nie wystarczą.
+5. Jeśli dostawca prowadzi do terenu: udowodnij pełny łańcuch receiver→konkretny dataset/loader→indeksowanie próbki→interpolacja→wynik. Oznacz osie i jednostki wyłącznie tam, gdzie wynika to z przeliczeń/kontraktu. Nie przypisuj odzyskanej wcześniej heightmapy do tego providera na podobieństwo.
+6. Jeśli trafisz na nierozwiązany virtual call, zakończ tę krawędź jako UNPROVEN z listą realnych kandydatów i testem rozróżniającym. Nie „domykaj” jej przez RTTI innej gry.
+
+FAZA 3 — POWIĄZANIE Z CELEM: TA SAMA INSTANCJA I JEJ MODEL
+Ogranicz tę fazę do jednej pełnej ścieżki; nie otwieraj wszystkich 19 niesprawdzonych funkcji naraz.
+- W ClientMovableObject sprawdź sub-obiekt +0xC0: FUN_005247C0→FUN_00509330 oraz rzeczywiste argumenty tworzenia.
+- Rozdziel instance key, parent key, class/param-set ID, template ID, model resource ID i string. Ten sam numer lub offset nie dowodzi tej samej roli.
+- Ustal, czy ta konkretna instancja osiąga znaną ścieżkę modelu/NiAVObject i czy ten sam transform do niej trafia. Wymagaj tożsamości wskaźnika lub udowodnionego lookupu, nie sąsiedztwa wywołań.
+- Włącz 4508/296445 dopiero po dodatnim dowodzie, że ich definicja korzysta z tej ścieżki. Jeśli takiego połączenia nie ma w badanym zakresie, utrzymaj OPEN; wskaż jedną alternatywną ścieżkę wspólnych funkcji z uzasadnieniem, zamiast ogłaszać „budynki są gdzie indziej”.
+- Upstream ArkClientPacketExecutor/ring pozostaje backlogiem, chyba że konkretny trace tej fazy wymaga jednej krawędzi producenta. Nie zamieniaj tej rundy w ogólne rozgryzanie protokołu.
+
+WERYFIKACJA
+- Pełne źródła nośne nowych twierdzeń czytaj od wejścia do wszystkich wyjść; zapisuj zakres lektury uczciwie.
+- Osobno: oryginalne bajty, disassembly, dekompilat, hipoteza, model syntetyczny, wykonanie silnika/klienta. Brak ostatniego nie może być zamaskowany nazwą „oracle”.
+- 007343E0: maski 0,2AA,554,7FE; każda para bitów oddzielnie; oba bity; nieużywane bity; krótki bufor przed/po polu; dwa rekordy kolejno; końcowy offset kursora; dst+04 przed/po; NaN/Inf. Porównaj stan kursora i zakres zapisów, nie tylko return success.
+- Konstrukcja pozycji: warianty objęte/nieobjęte, z<h/z=h/z>h, helper niedostępny, wartości niefinitywne. Świadki syntetyczne oznacz synthetic; bez historycznych pakietów nie udawaj corpus evidence.
+- CREATE i EXISTING: osobna mapa warunków i zapisów; setter pozycji nie wywołuje się bezwarunkowo.
+- Klucze/model: kontrola pozytywna, kontrola innego receivera/klucza, brak lookupu, co najmniej jeden realny łańcuch callera.
+- Publikacja: wszystkie pliki z manifestu istnieją i mają te same SHA na commicie oraz po push; manifest bez self-row; unikalne ścieżki; brak stale rows/bramek sugerujących nieaktualny wynik.
+- Przed/po: oryginały i historyczne pakiety byte-identical; obce experiments/ i src/game/ nietknięte; porty 8000 i 9350 bez ingerencji.
+
+GRANICE
+Nie zmieniaj oryginalnych archiwów, Entropia.exe, silnika, oracle, parsera R61/viewera ani prototypu gry. Nie uruchamiaj klienta, Fridy, x32dbg, mock-servera, nie loguj się i nie łącz z usługami gry. Nie pobieraj/kopiuj proprietary source do publicznego repo. Własny projekt Ghidry tylko w kopii runu, bez nadpisania cudzego locka. Runtime wymagający osobnego GO opisz jako przyszły eksperyment, nie jako wykonany.
+Nie zamieniaj budynku w model roboczy ani nie ustawiaj zgadywanego XYZ jako „odzyskanego świata”. Nie przenoś PE2/2003/10.x ani Gamebryo 2.3/Skyrim na 9.3.5 bez potwierdzenia w jego binarium.
+
+ZAKOŃCZENIE I PUBLIKACJA — MASZ GO
+Każdy ukończony pakiet korekt/badania ma otrzymać commit i push do GitHub, aby był dostępny do kolejnego audytu. Publikacja nie zależy od pozytywnego wyniku hipotezy: uczciwy wynik PARTIAL/BLOCKED/REJECTED też jest wartościowy.
+- Najpierw własny QC i adjudykacja, potem path-limited commit nowego docs/audits/<RUN_ID>/ oraz dokładnie jeden wiersz AUDIT_ENTRYPOINT.md na pakiet. Bez git add -A, force-push i usuwania obcych zmian.
+- Przed commitem sprawdź HEAD, remote, staging i różnicę względem baseline. Przy nowej równoległej zmianie nie nadpisuj jej; uzgodnij bazę technicznie lub zgłoś konkretny konflikt.
+- Nie publikuj EXE, archiwów, Ghidra project ani dużych fragmentów kodu silnika. Publikuj raporty, własne małe sondy, konieczne krótkie piny/dane wynikowe, hashe i instrukcję odtworzenia.
+- Zweryfikuj git show nowego commita, pełną zgodność manifestu i git ls-remote po push. Podaj pełny SHA oraz bezpośrednie linki do REPORT/ERRATA/HANDOFF.
+- Brak dostępu do push opisz jako PUBLICATION_BLOCKED, z lokalnym commitem; nie deklaruj „opublikowane”.
+
+RAPORT DLA MNIE
+1. Co skorygowano względem 78cd153 i jakie własne kontrpróby to dowodzą.
+2. Poprawiona gramatyka 007343E0 z granicami semantyki pól.
+3. Czy dostawca korekty Z jest terenem, kolizją czy nadal UNKNOWN — pełny dowód albo konkretna luka.
+4. Czy udało się połączyć ten sam klucz, instancję, model i transform; osobno status 4508/296445.
+5. Macierz twierdzenie→VA/bytes→receiver→test→wynik→artefakt; aktualne bramki i ich rzeczywiste predykaty.
+6. Własne wykonania oddzielone od historii. Otwarte kwestie, zasięg negatywów i jeden następny eksperyment wynikający z nowej wiedzy.
+7. Stan Git, pełny SHA publikacji, linki i integralność pakietu.
+
+Nie wydawaj MASTER_ACCEPTED dla całego mechanizmu na podstawie samych poprawnych hashy/censusów. Można zaakceptować integralność i wąski ślad, pozostawiając format, provider, źródło danych albo placement historyczny otwarte. Rzeczywisty postęp ma polegać na udowodnionym nowym ogniwie, nie na ponownym opisaniu tego samego łańcucha mocniejszymi słowami.
