@@ -1,0 +1,195 @@
+== A: POSSIBLE_ALIAS population ==
+POSSIBLE rows: 618, distinct functions: 562
+top functions by POSSIBLE count: [('0x007A4B60', 6), ('0x009512A0', 4), ('0x0095FA10', 4), ('0x005EABF0', 3), ('0x007EC650', 3), ('0x00817C50', 3), ('0x0082E290', 3), ('0x008CF1B0', 3)]
+POSSIBLE rows inside the 19 F_SF functions: 0
+REJECTED rows inside F_SF functions: 7
+   0x0044D5F0 mov dword ptr [esi + 0x30], edx fn=0x0044D590 recv='container+0x30 (container this)'
+   0x0044D631 mov byte ptr [esp + 0x30], 0 fn=0x0044D590 recv='stack slot (esp+0x30)'
+   0x0044D683 mov byte ptr [esp + 0x30], bl fn=0x0044D590 recv='stack slot (esp+0x30)'
+   0x0044D6D4 mov byte ptr [esp + 0x30], bl fn=0x0044D590 recv='stack slot (esp+0x30)'
+   0x0044D6E2 mov dword ptr [esp + 0x30], 0xffffffff fn=0x0044D590 recv='stack slot (esp+0x30)'
+   0x0047CEF0 mov dword ptr [esp + 0x30], ecx fn=0x0047CCF0 recv='stack slot (esp+0x30)'
+   0x0047D831 mov dword ptr [esp + 0x30], eax fn=0x0047CCF0 recv='stack slot (esp+0x30)'
+
+== A2: my own receiver traces for 12 sampled POSSIBLE_ALIAS rows ==
+-- 0x00405026 fn=0x00404E50 ins='mov dword ptr [ebx + 0x30], eax' recv='unknown'
+   base reg: ebx
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==ebx in a function no
+-- 0x004C1FAC fn=0x004C1F50 ins='mov byte ptr [esi + 0x30], dl' recv='unknown'
+   base reg: esi
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==esi in a function no
+-- 0x00552352 fn=0x005522F0 ins='mov dword ptr [ebp + 0x30], ecx' recv='unknown (ebp repurposed)'
+   base reg: ebp
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: base==ebp redefined in non-SF-proven fn (FPO repurpose: ebp, [esi + 0x290] @ 0055232A); receiver not resolvable within run bounds
+-- 0x00607404 fn=0x006071A0 ins='mov dword ptr [ebp + 0x30], edx' recv='unknown (ebp repurposed)'
+   base reg: ebp
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: base==ebp redefined in non-SF-proven fn (FPO repurpose: ebp, ebp @ 006072BD); receiver not resolvable within run bounds
+-- 0x00652D5C fn=0x00652D00 ins='mov dword ptr [esi + 0x30], edx' recv='unknown'
+   base reg: esi
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==esi in a function no
+-- 0x006E1A57 fn=0x006E1A50 ins='mov dword ptr [esi + 0x30], eax' recv='unknown'
+   base reg: esi
+   aligned-ish defs in the 24-byte window before: ['006E1A55 mov esi, ecx']
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==esi in a function no
+-- 0x007894B6 fn=0x007894A0 ins='mov dword ptr [esi + 0x30], eax' recv='unknown'
+   base reg: esi
+   aligned-ish defs in the 24-byte window before: ['007894A7 mov esi, ecx']
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==esi in a function no
+-- 0x007D8C4B fn=0x007D8B70 ins='mov dword ptr [esi + 0x30], 0x7f4a20' recv='unknown'
+   base reg: esi
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==esi in a function no
+-- 0x0082E2A0 fn=0x0082E290 ins='mov dword ptr [ecx + 0x30], eax' recv='unknown'
+   base reg: ecx
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==ecx in a function no
+-- 0x0089C00A fn=0x0089BFD0 ins='mov dword ptr [esi + 0x30], edx' recv='unknown'
+   base reg: esi
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==esi in a function no
+-- 0x008F7FBC fn=0x008F7F60 ins='mov dword ptr [esi + 0x30], edx' recv='unknown'
+   base reg: esi
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==esi in a function no
+-- 0x0094B756 fn=0x0094B6E0 ins='mov dword ptr [esi + 0x30], edx' recv='unknown'
+   base reg: esi
+   aligned-ish defs in the 24-byte window before: none seen (window may be misaligned)
+   raw why: receiver provenance not resolvable within this run's static bounds (SF pointer origin closure across the whole binary not performed); base==esi in a function no
+
+== B: REJECTED_ALIAS reason taxonomy census (from raw 'why:' lines) ==
+  R-ESP              2765
+  R-STACK-PTR        129
+  R-CTOR-OTHER       104
+  R-ZERO             18
+  R-LEA-STACK        3
+  R-EBP-INHERITED    2
+  R-IMM-STATIC       1
+  R-CONT-FIELD       1
+
+== B2: my own verification of sampled REJECTED rows ==
+  0x004014A4 mov dword ptr [esp + 0x30], edi base=esp reason=R-ESP recv='stack slot (esp+0x30)'
+  0x0040170E mov byte ptr [esp + 0x30], 3 base=esp reason=R-ESP recv='stack slot (esp+0x30)'
+  0x00402F0D mov dword ptr [esi + 0x30], ebx base=esi reason=R-CTOR-OTHER recv='other-class this (vtable 0x00A7973C, .?AVArkReleaseClientApplication@@)'
+  0x0040525B mov dword ptr [edx + 0x30], ebx base=edx reason=R-IMM-STATIC recv='static data address'
+  0x00444CCA mov dword ptr [eax + 0x30], edx base=eax reason=R-CTOR-OTHER recv='other-class this (vtable 0x00A7AFC8, .?AVSoundScapeElementInit@@)'
+  0x0044D5F0 mov dword ptr [esi + 0x30], edx base=esi reason=R-CONT-FIELD recv='container+0x30 (container this)'
+  0x004975FC mov dword ptr [esi + 0x30], ecx base=esi reason=R-STACK-PTR recv='stack'
+  0x00497B55 mov dword ptr [esi + 0x30], edx base=esi reason=R-STACK-PTR recv='stack'
+  0x006A2123 mov dword ptr [eax + 0x30], ecx base=eax reason=R-LEA-STACK recv='stack object'
+  0x006A22B6 mov dword ptr [eax + 0x30], ecx base=eax reason=R-LEA-STACK recv='stack object'
+  0x00781648 mov byte ptr [esi + 0x30], dl base=esi reason=R-ZERO recv='null base'
+  0x007A929C mov dword ptr [eax + 0x30], 6 base=eax reason=R-ZERO recv='null base'
+      window def: 007A9296 xor eax, eax
+  0x007EB1B3 mov dword ptr [ebp + 0x30], esi base=ebp reason=R-EBP-INHERITED recv='caller stack (inherited ebp)'
+  0x0082DB61 mov word ptr [ebp + 0x30], cx base=ebp reason=R-EBP-INHERITED recv='caller stack (inherited ebp)'
+
+== C: scope census over the executor package ==
+  00_CONTROL/RUN_CONTRACT.md              :69 MODEL_BRIDGE_CONFIRMED neg=True :: - Attempt to prove SceneFeeder->model. No MODEL_BRIDGE_CONFIRMED, no TRANSFORM_TO_MODEL — those outcomes are FORBIDDEN for this run. MAXIMUM semantic 
+  00_CONTROL/RUN_CONTRACT.md              :69 TRANSFORM_TO_MODEL neg=True :: - Attempt to prove SceneFeeder->model. No MODEL_BRIDGE_CONFIRMED, no TRANSFORM_TO_MODEL — those outcomes are FORBIDDEN for this run. MAXIMUM semantic 
+  00_CONTROL/RUN_CONTRACT.md              :94 TRANSFORM_TO_MODEL neg=True :: - G5-SCOPE-HELD: PASS iff the package contains no slot-17 decode, no 0x437F70/0x82B5A0 analysis, and no MODEL_BRIDGE/TRANSFORM_TO_MODEL claim (a scrip
+  00_CONTROL/finalize.py                  :116 MODEL_BRIDGE_CONFIRMED neg=True :: FORBIDDEN_CLAIMS = ("MODEL_BRIDGE_CONFIRMED", "TRANSFORM_TO_MODEL")
+  00_CONTROL/finalize.py                  :116 TRANSFORM_TO_MODEL neg=True :: FORBIDDEN_CLAIMS = ("MODEL_BRIDGE_CONFIRMED", "TRANSFORM_TO_MODEL")
+  00_CONTROL/finalize.py                  :187 TRANSFORM_TO_MODEL neg=False :: "TRANSFORM_TO_MODEL claim in the package",
+  06_REPORT/HANDOFF.md                    :39 TRANSFORM_TO_MODEL neg=True :: behavior (TRANSFORM_TO_MODEL remains NOT_DEMONSTRATED); slot callers/consumers;
+  06_REPORT/REPORT.md                     :47 MODEL_BRIDGE_CONFIRMED neg=True :: Scope guard honored: no MODEL_BRIDGE_CONFIRMED and no TRANSFORM_TO_MODEL claim is
+  06_REPORT/REPORT.md                     :81 MODEL_BRIDGE_CONFIRMED neg=True :: | C11 | Scope held | CONFIRMED | G5 script census: zero claim-context occurrences of MODEL_BRIDGE_CONFIRMED / TRANSFORM_TO_MODEL in the package; zero 
+  06_REPORT/REPORT.md                     :47 TRANSFORM_TO_MODEL neg=True :: Scope guard honored: no MODEL_BRIDGE_CONFIRMED and no TRANSFORM_TO_MODEL claim is
+  06_REPORT/REPORT.md                     :48 TRANSFORM_TO_MODEL neg=True :: made anywhere in this package; TRANSFORM_TO_MODEL remains NOT_DEMONSTRATED. The RTTI
+  06_REPORT/REPORT.md                     :81 TRANSFORM_TO_MODEL neg=True :: | C11 | Scope held | CONFIRMED | G5 script census: zero claim-context occurrences of MODEL_BRIDGE_CONFIRMED / TRANSFORM_TO_MODEL in the package; zero 
+  06_REPORT/REPORT.md                     :149 TRANSFORM_TO_MODEL neg=True :: SceneFeeder→model direction) — TRANSFORM_TO_MODEL remains NOT_DEMONSTRATED.
+  06_REPORT/REPORT.md                     :159 TRANSFORM_TO_MODEL neg=True :: - **TRANSFORM_TO_MODEL = NOT_DEMONSTRATED** — nothing in this package upgrades,
+  06_REPORT/STAGE_ACCEPTANCE_GATES.csv    :7 TRANSFORM_TO_MODEL neg=True :: G5-SCOPE-HELD,PASS,"no slot-17 decode, no 0x437F70/0x82B5A0 analysis, no MODEL_BRIDGE/TRANSFORM_TO_MODEL claim in the package","claim-context occurren
+  OLD-WRONG-FIGURES 00_CONTROL/RUN_CONTRACT.md:40 :: - ADMINISTRATIVE CORRECTION (Desktop post-audit; carry it into any reference to the previous run — do NOT propagate the old wrong figures "26 package 
+  OLD-WRONG-FIGURES 00_CONTROL/SOURCE_IDENTITIES.json:43 :: "administrative_correction_carried": "committed state of PE_935_SCENEFEEDER_SLOT_CENSUS_R1_20260914 is 27 package files, 26 manifest rows + manifest s
+  OLD-WRONG-FIGURES 00_CONTROL/finalize.py:245 :: "AUDIT_ENTRYPOINT.md; the old figures '26 package files / 25 manifest rows' are "
+old wrong 26/25 figures present: YES - FINDING
+
+  forbidden-VA textual occurrences:
+  00_CONTROL/RUN_CONTRACT.md              :68 [0x437F70] :: - Decode vtable slot 17 / [vtable+0x44] target; analyze 0x437F70; analyze 0x82B5A0 (re-reading the 0x50A050 window bytes for the positive control is allowed; decoding tho
+  00_CONTROL/RUN_CONTRACT.md              :94 [0x437F70] :: - G5-SCOPE-HELD: PASS iff the package contains no slot-17 decode, no 0x437F70/0x82B5A0 analysis, and no MODEL_BRIDGE/TRANSFORM_TO_MODEL claim (a script census over the pa
+  00_CONTROL/census_state.json            :20 [0x007B5390] :: "slot17_value": "0x007B5390",
+  00_CONTROL/finalize.py                  :102 [0x007B5390] :: and "slot-17 dword VALUE = 0x007B5390" in rtti_txt
+  00_CONTROL/finalize.py                  :137 [0x007B5390] :: # a decode of 0x007B5390 would produce listing headers with its VA as a start
+  00_CONTROL/finalize.py                  :138 [0x007B5390] :: if "### 0x007B5390" in t or "derive_body(0x007B5390" in t or "FUN_007B5390:" in t:
+  00_CONTROL/finalize.py                  :147 [0x007B5390] :: forb_ranges = [fn_range(0x00437F70), fn_range(0x0082B5A0), fn_range(0x007B5390)]
+  00_CONTROL/finalize.py                  :186 [0x437F70] :: "no slot-17 decode, no 0x437F70/0x82B5A0 analysis, no MODEL_BRIDGE/"
+  01_RAW/POSITIVE_CONTROL_0050A050.txt    :21 [0x437f70] :: 0050A075  e8f6def2ff               call     0x437f70
+  01_RAW/SF30_RTTI_RAW.txt                :27 [0x007B5390] :: # [vtable+0x44] slot-17 dword VALUE = 0x007B5390 (RECORDED ONLY - next seam, NOT decoded)
+  01_RAW/SF30_WRITER_RAW.txt              :142 [0x007B5390] :: #   [vtable+0x44] dword VALUE recorded but NOT decoded, NOT followed: 0x007B5390
+  06_REPORT/HANDOFF.md                    :29 [0x007B5390] :: 0x007B5390 — recorded VALUE only, NOT decoded, per contract; candidate for the
+  06_REPORT/HANDOFF.md                    :36 [0x437F70] :: - NOT_CHECKED (short): NiNode vtable slot 17 decode (next seam); 0x437F70/0x82B5A0
+  06_REPORT/REPORT.md                     :45 [0x007B5390] :: [0x00A8CCF4+0x44] = 0x007B5390 — VALUE recorded, NOT decoded, per contract).
+  06_REPORT/REPORT.md                     :81 [0x437F70] :: | C11 | Scope held | CONFIRMED | G5 script census: zero claim-context occurrences of MODEL_BRIDGE_CONFIRMED / TRANSFORM_TO_MODEL in the package; zero slot-17 decode listi
+  06_REPORT/REPORT.md                     :107 [0x437F70] :: | G5-SCOPE-HELD | **PASS** | zero forbidden RESULT claims; zero slot-17/0x437F70/0x82B5A0 analyses; zero denominator rows inside forbidden ranges. |
+  06_REPORT/REPORT.md                     :137 [0x007B5390] :: - **NiNode vtable slot 17 decode** ([0x00A8CCF4+0x44] = 0x007B5390): VALUE recorded,
+  06_REPORT/REPORT.md                     :139 [0x437F70] :: - **0x437F70, 0x82B5A0**: not analyzed (the positive-control window re-read of
+  06_REPORT/REPORT.md                     :166 [0x007B5390] :: (0x007B5390 = [NiNode-vtable+0x44], recorded, undecoded). The one next test for the
+  06_REPORT/REPORT.md                     :167 [0x007B5390] :: next run: decode NiNode vtable slot 17 (0x007B5390) — the exact virtual invoked by
+  06_REPORT/STAGE_ACCEPTANCE_GATES.csv    :7 [0x437F70] :: G5-SCOPE-HELD,PASS,"no slot-17 decode, no 0x437F70/0x82B5A0 analysis, no MODEL_BRIDGE/TRANSFORM_TO_MODEL claim in the package","claim-context occurrences of forbidden lab
+
+  era/static markers:
+   06_REPORT/REPORT.md                      PCG_9_3_5: 2 ; STATIC-ONLY: 1
+   06_REPORT/HANDOFF.md                     PCG_9_3_5: 1 ; STATIC-ONLY: 1
+   00_CONTROL/SOURCE_IDENTITIES.json        PCG_9_3_5: 1 ; STATIC-ONLY: 1
+   03_EVIDENCE/README.md                    PCG_9_3_5: 1 ; STATIC-ONLY: 1
+
+== D: follow-up byte checks ==
+ -- D1 block ctor entry 0x007B6000..0x007B6035 (aligned) --
+   007B6000  6aff         push     -1
+   007B6002  6854dfa100   push     0xa1df54
+   007B6007  64a100000000 mov      eax, dword ptr fs:[0]
+   007B600D  50           push     eax
+   007B600E  51           push     ecx
+   007B600F  56           push     esi
+   007B6010  57           push     edi
+   007B6011  a1d0d8b900   mov      eax, dword ptr [0xb9d8d0]
+   007B6016  33c4         xor      eax, esp
+   007B6018  50           push     eax
+   007B6019  8d442410     lea      eax, [esp + 0x10]
+   007B601D  64a300000000 mov      dword ptr fs:[0], eax
+   007B6023  8bf1         mov      esi, ecx
+   007B6025  8974240c     mov      dword ptr [esp + 0xc], esi
+   007B6029  e8a2a20000   call     0x7c02d0
+   007B602E  8b442420     mov      eax, dword ptr [esp + 0x20]
+   007B6032  6a01         push     1
+   007B6034  33ff         xor      edi, edi
+ -- D2 window before 0x00529020 (find 'mov ecx,[esi+0xc0]') --
+   00529010  eb04         jmp      0x529016
+   00529012  83612cfe     and      dword ptr [ecx + 0x2c], 0xfffffffe
+   00529016  8d4e44       lea      ecx, [esi + 0x44]
+   00529019  51           push     ecx
+   0052901A  8b8ec0000000 mov      ecx, dword ptr [esi + 0xc0]
+   00529020  e89b04feff   call     0x5094c0
+   00529025  8b8ec0000000 mov      ecx, dword ptr [esi + 0xc0]
+ -- D3 receiver sites for FUN_005094C0 membership --
+   0067B8E8  e8d3dbe8ff   call     0x5094c0
+      ctx 0067B8E0  dc07         fadd     qword ptr [edi]
+      ctx 0067B8E2  1e           push     ds
+      ctx 0067B8E3  008b4e0450e8 add      byte ptr [ebx - 0x17affbb2], cl
+   0067C8A8  e813cce8ff   call     0x5094c0
+      ctx 0067C8A0  1cf8         sbb      al, 0xf8
+      ctx 0067C8A2  1d008b4e04   sbb      eax, 0x44e8b00
+      ctx 0067C8A7  50           push     eax
+   006A3A2D  e88e5ae6ff   call     0x5094c0
+      ctx 006A3A25  97           xchg     edi, eax
+      ctx 006A3A26  861b         xchg     byte ptr [ebx], bl
+      ctx 006A3A28  008b4e1850e8 add      byte ptr [ebx - 0x17afe7b2], cl
+ -- D4 ebp redefinition in SF ctor 0x509357..0x5093C3 --
+   ebp defs in 0x509330..0x5093C3: ['00509357 mov ebp, ecx']
+ -- D4b esi redefinition in SF dtor 0x50A263..0x50A2D1 --
+   esi defs in 0x50A240..0x50A2D1: ['0050A263 mov esi, ecx']
+ -- D5 first rep movsd target (claim [esp+0x18]) --
+   before 0x50945D: edi_def=None ecx_def=00509458 mov ecx, 9
+ -- D6 second rep movsd count (claim SF+0x4C..0x70 => 9 dwords) --
+   00509465  b909000000 mov      ecx, 9
+ -- D7 combined-offset rescan at container fns (own; comb={0x34,0x3C,0x40,0x44,0x48,0xF0}, base=container reg) --
+   fn 0x0044D590 (end~0x0044D787): combined-disp writes via esi: 0
+   fn 0x00528E50 (end~0x00529075): combined-disp writes via esi: 0
+   fn 0x0067B800 (end~0x0067BACC): combined-disp writes via esi: 0
+   fn 0x0067C7C0 (end~0x0067CA8C): combined-disp writes via esi: 0
+   fn 0x006A3930 (end~0x006A3BC8): combined-disp writes via esi: 0

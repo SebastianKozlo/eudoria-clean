@@ -1,0 +1,68 @@
+== E2b: R-CTOR-OTHER full-body soundness (4 sampled rows) ==
+R-CTOR-OTHER total: 104
+-- 0x00402F0D fn=00402E90 claimed_vtable=0x00A7973C
+   vtable store via esi (imm 0xa7973c): [(4206271, 'before')]
+   ALL esi defs in full body: ['00402EB3 mov esi, ecx']
+   base==store reg and (no redefinition beyond entry this-copy): SOUND
+-- 0x007889A4 fn=00788960 claimed_vtable=0x00A8969C
+   vtable store via esi (imm 0xa8969c): [(7899529, 'before')]
+   ALL esi defs in full body: ['00788982 mov esi, ecx']
+   base==store reg and (no redefinition beyond entry this-copy): SOUND
+-- 0x008884DA fn=00888460 claimed_vtable=0x00A92CE4
+   vtable store via esi (imm 0xa92ce4): [(8946835, 'before')]
+   ALL esi defs in full body: ['00888485 mov esi, ecx']
+   base==store reg and (no redefinition beyond entry this-copy): SOUND
+-- 0x0099075A fn=00990710 claimed_vtable=0x00A9D40C
+   vtable store via esi (imm 0xa9d40c): [(10028872, 'before')]
+   ALL esi defs in full body: ['00990716 mov esi, ecx']
+   base==store reg and (no redefinition beyond entry this-copy): SOUND
+
+== D5b: first rep movsd (0x50945D) edi/esi defs (full window 0x509440..0x509460) ==
+   00509440  1c92         sbb        al, 0x92
+   00509442  ba00895540   mov        edx, 0x40558900
+   00509447  a12092ba00   mov        eax, dword ptr [0xba9220]
+   0050944C  894544       mov        dword ptr [ebp + 0x44], eax
+   0050944F  8b0d2492ba00 mov        ecx, dword ptr [0xba9224]
+   00509455  894d48       mov        dword ptr [ebp + 0x48], ecx
+   00509458  b909000000   mov        ecx, 9
+   0050945D  f3a5         rep movsd  dword ptr es:[edi], dword ptr [esi]
+   0050945F  d95d70       fstp       dword ptr [ebp + 0x70]
+   (widening: 0x509435..)
+   00509435  8b0d2492ba00 mov        ecx, dword ptr [0xba9224]
+   0050943B  894d3c       mov        dword ptr [ebp + 0x3c], ecx
+   0050943E  8b151c92ba00 mov        edx, dword ptr [0xba921c]
+   00509444  895540       mov        dword ptr [ebp + 0x40], edx
+
+== F1: forbidden-range membership (own extents) ==
+   fn 0x00437F70: my extent ~0x00437FE7 (len 0x77)
+      census rows inside: 0 []
+      census rows in (entry, entry+0x3000]: [('0x00439131', 4545), ('0x00439BE2', 7282), ('0x00439EC0', 8016), ('0x0043A461', 9457)]
+   fn 0x0082B5A0: my extent ~0x0082B5E7 (len 0x47)
+      census rows inside: 0 []
+      census rows in (entry, entry+0x3000]: [('0x0082C1E2', 3138), ('0x0082C4CD', 3885), ('0x0082C94D', 5037), ('0x0082CC41', 5793), ('0x0082CDF6', 6230), ('0x0082DB61', 9665), ('0x0082E23C', 11420), ('0x0082E2A0', 11520), ('0x0082E2B2', 11538), ('0x0082E2C7', 11559), ('0x0082E36F', 11727), ('0x0082E3A5', 11781)]
+   fn 0x007B5390: my extent ~0x007B53E1 (len 0x51)
+      census rows inside: 0 []
+      census rows in (entry, entry+0x3000]: [('0x007B56E4', 852), ('0x007B5B4D', 1981), ('0x007B5BEE', 2142)]
+
+== F2: era labels in remaining raw files ==
+   01_RAW/POSITIVE_CONTROL_0050A050.txt   PCG_9_3_5=0 STATIC-ONLY=1 RUN_ID=no
+   01_RAW/SF30_RTTI_RAW.txt               PCG_9_3_5=0 STATIC-ONLY=1 RUN_ID=yes
+   01_RAW/SF30_WRITER_RAW.txt             PCG_9_3_5=0 STATIC-ONLY=1 RUN_ID=yes
+   02_ANALYSIS/SF30_PROVENANCE.md         PCG_9_3_5=0 STATIC-ONLY=1 RUN_ID=no
+
+== F3: receiver-site citation precision (REPORT/raw/state 'mov' attached to call VAs) ==
+   SF30_WRITER_RAW.txt        :62    [0x00529020 mov ecx,[esi+0xc0]] :: #   FUN_005094C0: SF method: called with ecx=SF loaded from proven SF slots: 0x00529020 mov ecx,[esi+0xc0]; 0x0067B8E8 mov ecx,[esi+4]; 0x0067C8A8; 0x006A3A2D
+   SF30_WRITER_RAW.txt        :62    [0x0067B8E8 mov ecx,[esi+4]] :: #   FUN_005094C0: SF method: called with ecx=SF loaded from proven SF slots: 0x00529020 mov ecx,[esi+0xc0]; 0x0067B8E8 mov ecx,[esi+4]; 0x0067C8A8; 0x006A3A2D
+   census_state.json          :72    [0x00529020 mov ecx,[esi+0xc0]] :: "0x005094C0": "SF method: called with ecx=SF loaded from proven SF slots: 0x00529020 mov ecx,[esi+0xc0]; 0x0067B8E8 mov ecx,[esi+4]; 0x0067C8A8; 0x006A3A2D",
+   census_state.json          :72    [0x0067B8E8 mov ecx,[esi+4]] :: "0x005094C0": "SF method: called with ecx=SF loaded from proven SF slots: 0x00529020 mov ecx,[esi+0xc0]; 0x0067B8E8 mov ecx,[esi+4]; 0x0067C8A8; 0x006A3A2D",
+   ground truth (own bytes): load @0x0052901A mov ecx,[esi+0xc0]; call 0x5094c0 @0x00529020
+   ground truth (own bytes): load @0x0067B8E4 mov ecx,[esi+4];   call 0x5094c0 @0x0067B8E8
+   ground truth (own bytes): load @0x006A3A29 mov ecx,[esi+0x18]; call 0x5094c0 @0x006A3A2D
+
+== F4: raw 2.1 'hit -> store insn' presentation artifact (misaligned render) ==
+   raw:19 :: #   hit  -> store insn: 00509368  0058d4                   add      byte ptr [eax - 0x2c], bl
+   raw:21 :: #   hit  -> store insn: 0050A269  c70658d4a700             mov      dword ptr [esi], 0xa7d458
+   NOTE: census.py renders 'store insn' via a 1..8-back disasm that can land
+   misaligned (verified: 0x509368 'add byte ptr [eax-0x2c],bl' is a misaligned
+   decode of the imm bytes; the true store is at 0x00509366, stated on the
+   'classified:' lines). Also the hit VA itself is not printed (hexdump(h,0) bug).

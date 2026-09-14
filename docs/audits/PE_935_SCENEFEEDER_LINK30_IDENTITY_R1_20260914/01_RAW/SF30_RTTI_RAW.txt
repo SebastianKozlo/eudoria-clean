@@ -1,0 +1,33 @@
+# SF30_RTTI_RAW.txt - RTTI walks, ALL dwords from physical EXE bytes
+# RUN: PE_935_SCENEFEEDER_LINK30_IDENTITY_R1_20260914 · Era: PCG_9_3_5 · STATIC-ONLY
+# walker: object -> vtable -> [vtable-4]=COL -> COL.pTypeDescriptor -> TD -> TD+0x08 name
+
+## A. CALIBRATION (known answer) - SceneFeederObject vtable 0x00A7D458
+# [0x00A7D454] dword = 0x00AA12B8 (raw bytes b812aa00)
+# COL @ 0x00AA12B8 raw 20 bytes = 0000000000000000000000003488b700cc12aa00
+#   signature=0 offset=0 cd_offset=0 pTypeDescriptor=0x00B78834 pClassHierarchyDescriptor=0x00AA12CC
+# TD @ 0x00B78834: vfptr=0x00A98110 spare=0x00000000
+# TD+0x08 name bytes (raw) = 2e3f41565363656e654665656465724f626a6563744040
+# name verbatim = '.?AVSceneFeederObject@@'
+# expected     = '.?AVSceneFeederObject@@'
+# CALIBRATION PASS = YES
+
+## B. LINK OBJECT (the value at SF+0x30)
+# block ctor FUN_007B6000 stores the vtable: measured @ 0x007B6041
+#   c706f4cca800  mov  dword ptr [esi], 0xa8ccf4
+# vtable VA = 0x00A8CCF4 (imm operand)
+# raw bytes at vtable-4: c8eeaa00 -> dword 0x00AAEEC8 (COL pointer)
+# COL @ 0x00AAEEC8 raw 20 bytes = 000000000000000000000000c836b900dceeaa00
+#   signature=0 offset=0 cd_offset=0 pTypeDescriptor=0x00B936C8 pClassHierarchyDescriptor=0x00AAEEDC
+# TD @ 0x00B936C8: vfptr=0x00A98110 spare=0x00000000
+# TD+0x08 name bytes (raw) = 2e3f41564e694e6f64654040
+# name verbatim = '.?AVNiNode@@'
+# vtable section: .rdata ; COL section: .rdata ; TD section: .data
+# vtable code-pointer entries: 47 (first non-code dword ends extent)
+# [vtable+0x44] slot-17 dword VALUE = 0x007B5390 (RECORDED ONLY - next seam, NOT decoded)
+# block ctor 0x007B6000 among vtable entries: NO (it is a constructor, not virtual)
+
+## C. supporting: embedded member vtable 0x00A8CCE0 stored at block+0xE0
+#   c786e0000000e0cca800  mov  dword ptr [esi + 0xe0], 0xa8cce0
+#   [0x00A8CCDC] = 0x00AAEE78 -> COL -> TD name = '.?AV?$NiTPointerList@PAVNiDynamicEffect@@@@'
+#   (structural consistency with the primary walk; not used for identity)

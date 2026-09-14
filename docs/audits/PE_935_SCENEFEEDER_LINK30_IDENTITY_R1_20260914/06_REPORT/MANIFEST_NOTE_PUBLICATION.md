@@ -1,0 +1,1 @@
+The executor finalize manifest (17 rows, executor set, final SHA256 recorded in AMEND_LOG_R1.md §6) is superseded by this publication manifest covering the full published set; QC §9's own probe inventory remains a cross-reference.

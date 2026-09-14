@@ -1,0 +1,173 @@
+== PE header (own walk) ==
+machine=0x014C nsec=5 magic=0x010B imgbase=0x00400000 dllchar=0x0000 (DYNAMIC_BASE=clear)
+sha256=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 size=8015872
+
+== C2: writer#1 chain (SF ctor FUN_00509330) ==
+  00509330  6aff           push     -1                                        | SF ctor entry
+  00509357  8be9           mov      ebp, ecx                                 MISMATCH(expected 8bec)  | mov ebp,ecx (SF-this)
+  00509366  c7450058d4a700 mov      dword ptr [ebp], 0xa7d458                OK  | mov [ebp],0xa7d458 (SF vtable store)
+  00509376  6818010000     push     0x118                                    OK  | push 0x118
+  005093A0  e81f404500     call     0x95d3c4                                 OK  | call 0x95d3c4 (operator new)
+  005093A5  83c404         add      esp, 4                                   OK  | add esp,4
+  005093AC  3bc3           cmp      eax, ebx                                 OK  | cmp eax,ebx
+  005093B5  53             push     ebx                                      OK  | push ebx
+  005093B6  8bc8           mov      ecx, eax                                 OK  | mov ecx,eax
+  005093B8  e843cc2a00     call     0x7b6000                                 OK  | call 0x7b6000 (block ctor)
+  005093BD  eb02           jmp      0x5093c1                                 OK  | jmp 0x5093c1
+  005093BF  33c0           xor      eax, eax                                 OK  | xor eax,eax
+  005093C1  3bc3           cmp      eax, ebx                                 OK  | cmp eax,ebx
+  005093C3  894530         mov      dword ptr [ebp + 0x30], eax              OK  | WRITE1: mov [ebp+0x30],eax
+  005093C6  7404           je       0x5093cc                                 OK  | je
+  005093C8  83400401       add      dword ptr [eax + 4], 1                   OK  | refcount++ [eax+4]
+
+== C2: block ctor FUN_007B6000 window 0x007B6020..0x007B60A8 ==
+  007B6020  0000           add      byte ptr [eax], al
+  007B6022  008bf1897424   add      byte ptr [ebx + 0x247489f1], cl
+  007B6028  0ce8           or       al, 0xe8
+  007B602A  a2a200008b     mov      byte ptr [0x8b0000a2], al
+  007B602F  44             inc      esp
+  007B6030  2420           and      al, 0x20
+  007B6032  6a01           push     1
+  007B6034  33ff           xor      edi, edi
+  007B6036  50             push     eax
+  007B6037  8d8ec8000000   lea      ecx, [esi + 0xc8]
+  007B603D  897c2420       mov      dword ptr [esp + 0x20], edi
+  007B6041  c706f4cca800   mov      dword ptr [esi], 0xa8ccf4  <== VTABLE STORE [esi]=0x00A8CCF4
+  007B6047  e83424fdff     call     0x788480
+  007B604C  89beec000000   mov      dword ptr [esi + 0xec], edi
+  007B6052  89bee4000000   mov      dword ptr [esi + 0xe4], edi
+  007B6058  89bee8000000   mov      dword ptr [esi + 0xe8], edi
+  007B605E  c786e0000000e0cca800 mov      dword ptr [esi + 0xe0], 0xa8cce0  <== SECONDARY VTABLE STORE [esi+0xE0]=0x00A8CCE0
+  007B6068  d9ee           fldz     
+  007B606A  8b0da073ba00   mov      ecx, dword ptr [0xba73a0]
+  007B6070  898ef0000000   mov      dword ptr [esi + 0xf0], ecx
+  007B6076  8b15a473ba00   mov      edx, dword ptr [0xba73a4]
+  007B607C  8996f4000000   mov      dword ptr [esi + 0xf4], edx
+  007B6082  a1a873ba00     mov      eax, dword ptr [0xba73a8]
+  007B6087  d99efc000000   fstp     dword ptr [esi + 0xfc]
+  007B608D  8bce           mov      ecx, esi
+  007B608F  c644241802     mov      byte ptr [esp + 0x18], 2
+  007B6094  8986f8000000   mov      dword ptr [esi + 0xf8], eax
+  007B609A  e8617f0200     call     0x7de000
+  007B609F  8bc6           mov      eax, esi
+  007B60A1  8b4c2410       mov      ecx, dword ptr [esp + 0x10]
+  007B60A5  64890d00000000 mov      dword ptr fs:[0], ecx
+
+== C3: writer#2 chain (SF dtor body FUN_0050A240) ==
+  0050A263  8bf1           mov      esi, ecx                                 OK  | mov esi,ecx
+  0050A269  c70658d4a700   mov      dword ptr [esi], 0xa7d458                OK  | mov [esi],0xa7d458
+  0050A272  33db           xor      ebx, ebx                                 OK  | xor ebx,ebx (P2 source const 0)
+  0050A2BD  8b4e30         mov      ecx, dword ptr [esi + 0x30]              OK  | mov ecx,[esi+0x30]
+  0050A2C0  3bcb           cmp      ecx, ebx                                 OK  | cmp ecx,ebx
+  0050A2C4  834104ff       add      dword ptr [ecx + 4], -1                  OK  | refcount-- [ecx+4]
+  0050A2C8  7507           jne      0x50a2d1                                 OK  | jne 0x50a2d1
+  0050A2CA  8b01           mov      eax, dword ptr [ecx]                     OK  | mov eax,[ecx]
+  0050A2CC  8b5004         mov      edx, dword ptr [eax + 4]                 OK  | mov edx,[eax+4] (vtbl slot1)
+  0050A2CF  ffd2           call     edx                                      OK  | call edx
+  0050A2D1  895e30         mov      dword ptr [esi + 0x30], ebx              OK  | WRITE2: mov [esi+0x30],ebx
+  0050A2D4  8b4e30         mov      ecx, dword ptr [esi + 0x30]              OK  | mov ecx,[esi+0x30] (re-read)
+  (slot0) FUN_0050A460 entry: 56 push esi
+  (slot0) 0050A463  e8d8fdffff     call     0x50a240   <== dtor body call with ecx=this
+
+== C5: positive control window 0x0050A050..0x0050A07F ==
+  0050A050  8b442408       mov      eax, dword ptr [esp + 8]
+  0050A054  85c0           test     eax, eax
+  0050A056  56             push     esi
+  0050A057  8bf1           mov      esi, ecx <== (a) mov esi,ecx
+  0050A059  742c           je       0x50a087
+  0050A05B  8b4e30         mov      ecx, dword ptr [esi + 0x30] <== (a) mov ecx,[esi+0x30]
+  0050A05E  8b11           mov      edx, dword ptr [ecx] <== (c) mov edx,[ecx]
+  0050A060  50             push     eax
+  0050A061  8b4244         mov      eax, dword ptr [edx + 0x44] <== (c) mov eax,[edx+0x44]
+  0050A064  ffd0           call     eax <== (c) call eax
+  0050A066  85c0           test     eax, eax
+  0050A068  741d           je       0x50a087
+  0050A06A  8b742408       mov      esi, dword ptr [esp + 8]
+  0050A06E  0590000000     add      eax, 0x90
+  0050A073  50             push     eax
+  0050A074  56             push     esi
+  0050A075  e8f6def2ff     call     0x437f70 (window contains call 0x437f70 INSTRUCTION - window re-read allowed)
+  0050A07A  8bc8           mov      ecx, eax
+  0050A07C  e81f153200     call     0x82b5a0
+  ECX-clobber insns in 0x50A05E..0x50A064: [] -> NONE (PASS)
+
+== C4: RTTI walks (own walker; every dword from physical bytes) ==
+  -- CALIBRATION SceneFeederObject: vtable 0x00A7D458 (section .rdata)
+     [vtable-4] @0x00A7D454 raw=b812aa00 -> COL 0x00AA12B8
+     COL raw=0000000000000000000000003488b700cc12aa00 sig=0 off=0 cd=0 ptd=0x00B78834 pchd=0x00AA12CC
+     TD 0x00B78834 vfptr=0x00A98110 spare=0x00000000
+     TD+0x08 name bytes = 2e3f41565363656e654665656465724f626a6563744040
+     name = '.?AVSceneFeederObject@@'
+     (label check) bytes at TD+0x0C = b'SceneFeederObject@@\x00l\x95\xa7\x00'
+     CALIBRATION expected '.?AVSceneFeederObject@@' -> PASS
+  -- LINK object: vtable 0x00A8CCF4 (section .rdata)
+     [vtable-4] @0x00A8CCF0 raw=c8eeaa00 -> COL 0x00AAEEC8
+     COL raw=000000000000000000000000c836b900dceeaa00 sig=0 off=0 cd=0 ptd=0x00B936C8 pchd=0x00AAEEDC
+     TD 0x00B936C8 vfptr=0x00A98110 spare=0x00000000
+     TD+0x08 name bytes = 2e3f41564e694e6f64654040
+     name = '.?AVNiNode@@'
+     (label check) bytes at TD+0x0C = b'NiNode@@\x00\x00\x00\x00l\x95\xa7\x00$\x00\x00\x00Copy'
+  -- SECONDARY embedded vtable: vtable 0x00A8CCE0 (section .rdata)
+     [vtable-4] @0x00A8CCDC raw=78eeaa00 -> COL 0x00AAEE78
+     COL raw=0000000000000000000000009436b9008ceeaa00 sig=0 off=0 cd=0 ptd=0x00B93694 pchd=0x00AAEE8C
+     TD 0x00B93694 vfptr=0x00A98110 spare=0x00000000
+     TD+0x08 name bytes = 2e3f41563f244e6954506f696e7465724c697374405041564e6944796e616d696345666665637440404040
+     name = '.?AV?$NiTPointerList@PAVNiDynamicEffect@@@@'
+     (label check) bytes at TD+0x0C = b'?$NiTPointerList@PAVNiDy'
+
+== C4/C6: SF vtable slots 0..5 + NiNode vtable extent + slot17 ==
+  SF vtable[0] @0x00A7D458 = 0x0050A460
+  SF vtable[1] @0x00A7D45C = 0x005090A0
+  SF vtable[2] @0x00A7D460 = 0x005090B0
+  SF vtable[3] @0x00A7D464 = 0x0050A050
+  SF vtable[4] @0x00A7D468 = 0x005090C0
+  SF vtable[5] @0x00A7D46C = 0x00509580
+  NiNode vtable code-pointer entries from 0x00A8CCF4: 47
+  entry count includes 0x007B6000? NO
+  slot17 [0x00A8CCF4+0x44]=[0x00A8CD38] = 0x007B5390
+  slot17 in .text? YES
+
+== C2 aux: imm32 0x00A7D458 byte pattern in .text (own scan) ==
+  hits: 0x00509369, 0x0050A26B
+  (assert expects exactly [0x00509369, 0x0050A26B] per census.py)
+
+== C2 aux: E8 callsites census (own) ==
+  E8 -> 0x00509330 (SF ctor): 0x0047D043, 0x0052480F
+  E8 -> 0x005247C0 (create fn): 0x0044D625, 0x0044D677, 0x0044D6C8, 0x00528FE1, 0x0067B8A4, 0x0067C864, 0x006A39ED
+  absolute dword 0x00509330 in WHOLE file: 0 occurrences
+
+== C9: SF durable-slot stores after each create callsite (own check) ==
+  callsite 0x0044D625 -> store 0x0044D62E: mov dword ptr [esi + 0xc], eax
+  callsite 0x0044D677 -> store 0x0044D680: mov dword ptr [esi + 0x10], eax
+  callsite 0x0044D6C8 -> store 0x0044D6D1: mov dword ptr [esi + 0x14], eax
+  callsite 0x00528FE1 -> store 0x00528FEA: mov dword ptr [esi + 0xc0], eax
+  callsite 0x0067B8A4 -> store 0x0067B8AD: mov dword ptr [esi + 4], eax
+  callsite 0x0067C864 -> store 0x0067C86D: mov dword ptr [esi + 4], eax
+  callsite 0x006A39ED -> store 0x006A39F6: mov dword ptr [esi + 0x18], eax
+
+== coverage (ii): SF stack-slot holders ==
+  0047D04A  89442460       mov      dword ptr [esp + 0x60], eax              OK  | mov [esp+0x60],eax (SF spill, FUN_0047CCF0)
+  FUN_005247C0: no 'mov [esp+0x2c],esi' found in 0x5247C0..0x524900 - checking other spill forms
+    candidate spill 0x00524827: mov dword ptr [esp + 0x2c], esi
+
+== coverage (iv): SF ctor rep movsd targets (own decode) ==
+  0050945D  f3a5       rep movsd  dword ptr es:[edi], dword ptr [esi]   (edi last def: ?)
+  0050946E  f3a5       rep movsd  dword ptr es:[edi], dword ptr [esi]   (edi last def: 0x00509462 lea edi, [ebp + 0x4c])
+
+== C9 aux: SF re-receive example 0x00529020 ==
+  00529020  e89b04feff     call     0x5094c0                                 MISMATCH(expected 8b8ec0000000)  | expected mov ecx,[esi+0xc0]
+  00529020  e89b04feff     call     0x5094c0
+  0052902F  e8dc04feff     call     0x509510
+  0052903E  e82d00feff     call     0x509070
+
+== REPORT C2 claim: 'ctor E8 callers = {0x0047D043, 0x0052480F}' creation paths new(0x98) ==
+  005247E7  6898000000     push     0x98                                     OK  | push 0x98
+  005247EC  e8d38b4300     call     0x95d3c4                                 OK  | call 0x95d3c4
+  0052480F  e81c4bfeff     call     0x509330                                 OK  | call 0x509330
+  00524814  8bf0           mov      esi, eax                                 OK  | mov esi,eax
+  0047CFC6  6898000000     push     0x98                                     OK  | push 0x98 (chain b)
+  0047CFDE  e8e1034e00     call     0x95d3c4                                 OK  | call 0x95d3c4 (chain b)
+  0047D043  e8e8c20800     call     0x509330                                 OK  | call 0x509330 (chain b)
+  0047D048  8bd8           mov      ebx, eax                                 OK  | mov ebx,eax (chain b)
+  thunk 0x0095D3C4 bytes=ff255453a700 -> IAT 0x00A75354
+  IAT resolve: MSVCR80.dll.??2@YAPAXI@Z

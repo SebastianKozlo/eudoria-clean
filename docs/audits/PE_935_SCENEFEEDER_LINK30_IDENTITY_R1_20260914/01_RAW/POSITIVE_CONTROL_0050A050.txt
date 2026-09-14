@@ -1,0 +1,39 @@
+# POSITIVE CONTROL - FUN_0050A050 @ 0x0050A05B window (measured from physical EXE)
+# RUN: PE_935_SCENEFEEDER_LINK30_IDENTITY_R1_20260914 · Era: PCG_9_3_5 · STATIC-ONLY
+# STATIC-ONLY. capstone 5.0.7 x86-32, own PE va_to_off.
+
+# full measured window 0x0050A050..:
+0050A050  8b442408                 mov      eax, dword ptr [esp + 8]
+0050A054  85c0                     test     eax, eax
+0050A056  56                       push     esi
+0050A057  8bf1                     mov      esi, ecx
+0050A059  742c                     je       0x50a087
+0050A05B  8b4e30                   mov      ecx, dword ptr [esi + 0x30]
+0050A05E  8b11                     mov      edx, dword ptr [ecx]
+0050A060  50                       push     eax
+0050A061  8b4244                   mov      eax, dword ptr [edx + 0x44]
+0050A064  ffd0                     call     eax
+0050A066  85c0                     test     eax, eax
+0050A068  741d                     je       0x50a087
+0050A06A  8b742408                 mov      esi, dword ptr [esp + 8]
+0050A06E  0590000000               add      eax, 0x90
+0050A073  50                       push     eax
+0050A074  56                       push     esi
+0050A075  e8f6def2ff               call     0x437f70
+0050A07A  8bc8                     mov      ecx, eax
+
+# (a) 0x0050A057 bytes = 8bf1  -> mov esi,ecx   [ESI := SF-this]
+#     0x0050A05B bytes = 8b4e30  -> mov ecx,[esi+0x30]  [ECX := [SF+0x30]]
+# (b) ECX clobber check between 0x0050A05B and the call 0x0050A064:
+#     0050A05E  8b11                     mov      edx, dword ptr [ecx]
+#     0050A060  50                       push     eax
+#     0050A061  8b4244                   mov      eax, dword ptr [edx + 0x44]
+#     ECX modified in window: NO - PASS
+# (c) receiver chain: edx=[ecx] @ 0x0050A05E (bytes 8b11);
+#     eax=[edx+0x44] @ 0x0050A061 (bytes 8b4244);
+#     call eax @ 0x0050A064 (bytes ffd0)
+#     receiver of CALL = ECX = [ESI+0x30] = [SF+0x30]: CONFIRMED
+#     [edx+0x44] is the LINK vtable slot-17 dword VALUE (vtable 0x00A8CCF4+0x44=0x00A8CD38):
+#       NOT decoded, NOT followed (contract hard scope; next seam).
+
+# POSITIVE_CONTROL = PASS (a),(b),(c) all measured exactly as specified.

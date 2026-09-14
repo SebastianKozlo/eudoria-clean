@@ -1,0 +1,60 @@
+== QC1 COUNTER_ARITHMETIC (own recount) ==
+package files now on disk: 20 (executor package: 17; QC probe files: 3)
+executor files: 00_CONTROL/RUN_CONTRACT.md, 00_CONTROL/SCRIPT_SHA256.csv, 00_CONTROL/SOURCE_IDENTITIES.json, 00_CONTROL/census.py, 00_CONTROL/census_state.json, 00_CONTROL/finalize.py, 00_CONTROL/sf30_core.py, 01_RAW/POSITIVE_CONTROL_0050A050.txt, 01_RAW/SF30_RTTI_RAW.txt, 01_RAW/SF30_WRITER_RAW.txt, 02_ANALYSIS/SF30_PROVENANCE.md, 02_ANALYSIS/SF30_WRITER_CENSUS.csv, 03_EVIDENCE/README.md, 06_REPORT/HANDOFF.md, 06_REPORT/MANIFEST_SHA256.csv, 06_REPORT/REPORT.md, 06_REPORT/STAGE_ACCEPTANCE_GATES.csv
+
+== MANIFEST ==
+manifest data rows: 16 (header: file,sha256)
+expected rows = executor files (17) - manifest itself (1) = 16 -> MATCH
+manifest self-exclusion held: YES
+hash mismatches: 0 
+executor files not in manifest: none
+manifest rows not on disk: none
+
+== SCRIPT_SHA256 ==
+  sf30_core.py       OK 
+  census.py          OK 
+  finalize.py        OK 
+  census_state.json  OK 
+script hash mismatches: none
+00_CONTROL python scripts on disk: ['00_CONTROL/census.py', '00_CONTROL/finalize.py', '00_CONTROL/sf30_core.py']
+script table covers: ['sf30_core.py', 'census.py', 'finalize.py', 'census_state.json']
+
+== CENSUS CSV recount (own parse) ==
+CSV data rows: 3643
+class counts: {'REJECTED_ALIAS': 3023, 'POSSIBLE_ALIAS': 618, 'PROVEN_SF30_WRITER': 2}
+sum check: 3643
+PERVEN rows: ['0x005093C3', '0x0050A2D1']
+UNRESOLVED rows: 0
+claim match (2/618/3023/0, total 3643): FAIL
+unique writer_va: 3643 (dups: 0)
+distinct function_va values: 2461; UNATTRIBUTED rows: 15
+
+== RAW FILE ==
+per-candidate '###' blocks: 3643
+blocks unique: 3643
+CSV rows without raw block: 0
+raw blocks without CSV row: 0
+same order raw vs csv: YES
+raw header denominator: 3643
+raw header sweep stats: decoded=2266698 restarts=64
+base-register distribution: eax=80, ebp=25, ebx=24, ecx=30, edi=76, edx=6, esi=637, esp=2765
+
+== census_state.json ==
+raw_candidate_count=3643 sweep_instructions=2266698
+classification_counts={'REJECTED_ALIAS': 3023, 'POSSIBLE_ALIAS': 618, 'PROVEN_SF30_WRITER': 2}
+state == CSV recount: True
+
+== prior-run reference hashes ==
+  PE_935_SCENEFEEDER_SLOT_CENSUS_R1_20260914_REPORT       recorded=106056266d7c2e6f.. actual=106056266d7c2e6f.. OK
+  PE_935_SCENEFEEDER_SLOT_CENSUS_R1_20260914_SLOT_DISASSEMBLY recorded=9ae750f5596304b5.. actual=9ae750f5596304b5.. OK
+  PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913_REPORT recorded=9373716d3545f532.. actual=9373716d3545f532.. OK
+
+== REPORT/HANDOFF printed numbers ==
+  3643 denominator             REPORT:yes HANDOFF:yes
+  swept instructions           REPORT:yes HANDOFF:yes
+  POSSIBLE 618                 REPORT:yes HANDOFF:yes
+  REJECTED 3023                REPORT:yes HANDOFF:yes
+  writer1                      REPORT:yes HANDOFF:yes
+  writer2                      REPORT:yes HANDOFF:yes
+  RTTI name                    REPORT:yes HANDOFF:yes
+  slot17 value                 REPORT:yes HANDOFF:yes
