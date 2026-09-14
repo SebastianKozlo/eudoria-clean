@@ -1,0 +1,13 @@
+
+void __thiscall FUN_00509190(int param_1_00,undefined param_1)
+
+{
+  *(undefined *)(param_1_00 + 0x90) = param_1;
+  if (((*(int *)(param_1_00 + 0x20) != 0) && (*(char *)(param_1_00 + 0x25) == '\0')) &&
+     (*(char *)(param_1_00 + 0x26) == '\0')) {
+    FUN_006c1170();
+    return;
+  }
+  return;
+}
+

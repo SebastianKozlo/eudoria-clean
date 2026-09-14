@@ -1,0 +1,13 @@
+
+undefined4 * __thiscall FUN_00843d60(undefined4 *param_1_00,undefined4 param_1)
+
+{
+  int iVar1;
+  
+  *param_1_00 = param_1;
+  iVar1 = FUN_00841920(param_1);
+  param_1_00[1] = iVar1;
+  *(bool *)(param_1_00 + 2) = iVar1 != 0;
+  return param_1_00;
+}
+

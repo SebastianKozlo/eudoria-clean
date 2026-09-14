@@ -1,0 +1,17 @@
+
+void __thiscall FUN_00843dd0(int param_1_00,undefined4 *param_1)
+
+{
+  undefined4 *puVar1;
+  int local_4;
+  
+  if (*(int *)(param_1_00 + 4) != 0) {
+    local_4 = param_1_00;
+    puVar1 = (undefined4 *)FUN_00747970(&local_4);
+    *param_1 = *puVar1;
+    return;
+  }
+  *param_1 = 0;
+  return;
+}
+

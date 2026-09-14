@@ -1,0 +1,14 @@
+
+undefined4 __fastcall FUN_0085b750(int param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = *(int *)(param_1 + 8);
+  if ((((iVar1 != 2) && (iVar1 != 3)) && (iVar1 != 6)) &&
+     (((iVar1 != 5 && (iVar1 != 4)) && (iVar1 != 7)))) {
+    return 0;
+  }
+  return 1;
+}
+

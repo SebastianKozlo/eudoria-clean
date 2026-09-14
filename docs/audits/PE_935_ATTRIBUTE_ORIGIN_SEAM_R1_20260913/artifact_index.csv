@@ -1,0 +1,63 @@
+path,role,source,generator,executed_command,independent_truth_source,counts,limitations,depends_on
+00_CONTROL/RUN_CONTRACT.md,contract,verbatim prompt of PE-MASTER dispatch,n/a,n/a,PE-MASTER dispatch,n/a,n/a,n/a
+00_CONTROL/pe_core.py,tool (executor copy from PKG_A; SHA-verified),PKG_A 00_CONTROL/pe_core.py,pe-reconstruction copy,file copy,SCRIPT_SHA256.csv,n/a,n/a,PKG_A
+00_CONTROL/s0_era_assertion.py,tool (era fail-closed),own,pe-reconstruction,python s0_era_assertion.py,raw exe/vfs SHA256,2 SHA + PE header,hard-stops on mismatch,n/a
+00_CONTROL/gh1_decomp.py,tool (Ghidra postScript; 65 funcs),own,pe-reconstruction,Ghidra analyzeHeadless on copied GHIDRA_LOCAL,exe bytes via S14 pins,65 decomp,n/a,GHIDRA_LOCAL copy
+00_CONTROL/gh2_decomp.py,tool (Ghidra postScript; 39 funcs),own,pe-reconstruction,Ghidra analyzeHeadless,exe bytes,39 decomp,n/a,GHIDRA_LOCAL copy
+00_CONTROL/gh3_decomp.py,tool (Ghidra postScript; 22 funcs),own,pe-reconstruction,Ghidra analyzeHeadless,exe bytes,22 decomp,n/a,GHIDRA_LOCAL copy
+00_CONTROL/gb6_immutable.py,tool (GB6 census before/after),own,pe-reconstruction,python gb6_immutable.py before/after,filesystem hashes,8 packages composite,composite covers all files,n/a
+00_CONTROL/ghidra_manifest.py,tool (GHIDRA_LOCAL manifests),own,pe-reconstruction,python ghidra_manifest.py,GHIDRA_LOCAL files,10 files,n/a,n/a
+00_CONTROL/t1_value_class.py,tool (value-class probes),own,pe-reconstruction,python,exe bytes,slot-0 scan + RTTI,n/a,pe_core
+00_CONTROL/t2_insert_seam.py,tool (insert seam),own,pe-reconstruction,python,exe bytes,pins + funnel census,n/a,pe_core
+00_CONTROL/t2b_derived_insert_hunt.py,tool (derived hunt),own,pe-reconstruction,python,exe bytes,callers/edges census,n/a,pe_core
+00_CONTROL/t2c_insert_helper.py,tool (insert helper),own,pe-reconstruction,python,exe bytes,helper census,n/a,pe_core
+00_CONTROL/t2d_node_alloc.py,tool (node alloc),own,pe-reconstruction,python,exe bytes,node layout,n/a,pe_core
+00_CONTROL/t4_handler_dispatch.py,tool (dispatcher),own,pe-reconstruction,python,exe bytes,byte/jump tables,n/a,pe_core
+00_CONTROL/t4b_dispatcher_context.py,tool (dispatcher context),own,pe-reconstruction,python,exe bytes,handler census,n/a,pe_core
+00_CONTROL/t6_pinbytes.py,tool (64 byte pins),own,pe-reconstruction,python,exe bytes,64 pins,n/a,pe_core
+00_CONTROL/final_selfcheck.py,tool (self-check),own,pe-reconstruction,python,package state,census cross-checks,last-wins re-hash noted,n/a
+00_CONTROL/SCRIPT_SHA256.csv,determinism record,own,pe-reconstruction,python (hashing),script files,19 scripts (3 re-hash rows),last-wins = executed,n/a
+00_CONTROL/GHIDRA_LOCAL_MANIFEST_at_copy.csv,manifest (state at copy),GHIDRA_LOCAL,ghidra_manifest.py,python,GHIDRA_LOCAL db files,10 rows,describes pre-analysis state,GHIDRA_LOCAL
+00_CONTROL/GHIDRA_LOCAL_MANIFEST_final.csv,manifest (final state),GHIDRA_LOCAL,ghidra_manifest.py,python,GHIDRA_LOCAL db files,10 rows,describes post-analysis state,GHIDRA_LOCAL
+00_CONTROL/qc_probe/qc_pe.py,tool (auditor own PE parser),own,pe-master-auditor,python,raw exe,n/a,n/a,n/a
+00_CONTROL/qc_probe/qc_census.py,tool (auditor E8/E9 censuses 45 funcs),own,pe-master-auditor,python,exe .text,45 targets,n/a,qc_pe.py
+00_CONTROL/qc_probe/qc_dispatcher.py,tool (auditor switch decode),own,pe-master-auditor,python,exe bytes,byte/jump tables,n/a,qc_pe.py
+00_CONTROL/qc_probe/qc_gb6_repeat.py,tool (auditor GB6 repeat composite),own,pe-master-auditor,python,filesystem hashes,8 packages,n/a,n/a
+00_CONTROL/qc_probe/qc_gb6_perfile.py,tool (auditor GB6 per-file),own,pe-master-auditor,python,filesystem hashes,1385 files,n/a,n/a
+00_Control/qc_probe/qc_hash_evidence.py,tool (auditor evidence hash before/after),own,pe-master-auditor,python,package files,194 evidence files,excludes GHIDRA_LOCAL internals,n/a
+00_CONTROL/qc_probe/QC_CENSUS.json,evidence (auditor),exe,qc_census.py,python,exe .text,45 function censuses,n/a,qc_census.py
+00_CONTROL/qc_probe/QC_DISPATCHER.json,evidence (auditor),exe,qc_dispatcher.py,python,exe tables,switch decode,n/a,qc_dispatcher.py
+00_Control/qc_probe/QC_GB6_REPEAT.json,evidence (auditor),filesystem,qc_gb6_repeat.py,python,executor before/after + own,8 packages,n/a,qc_gb6_repeat.py
+00_CONTROL/qc_probe/QC_GB6_PERFILE.json,evidence (auditor),filesystem,qc_gb6_perfile.py,python,executor after census,1385 files identical,n/a,qc_gb6_perfile.py
+00_Control/qc_probe/QC_HASH_before.json,evidence (auditor),package files,qc_hash_evidence.py,python,package files,194 files,n/a,qc_hash_evidence.py
+00_Control/qc_probe/QC_HASH_after.json,evidence (auditor),package files,qc_hash_evidence.py,python,package files,194+auditor files,n/a,qc_hash_evidence.py
+01_RAW/S0_ERA_ASSERTION.json,evidence (era fail-closed),exe+vfs,s0_era_assertion.py,python,raw file SHA,2 SHA + sections + spot-checks,n/a,n/a
+01_RAW/SELF_CHECK.json,evidence (executor self-check),package,final_selfcheck.py,python,package state,15 census pairs,n/a,n/a
+01_RAW/T1_VALUE_CLASS.json,evidence (value class),exe,t1_value_class.py,python,exe bytes,RTTI + slot-0,n/a,pe_core
+01_RAW/T1_REGION_0085B100_0085B900.txt,evidence (region dump),exe,t1_value_class.py,python,exe bytes,region hexdump,n/a,n/a
+01_RAW/T2_INSERT_SEAM.json,evidence (insert seam),exe,t2_insert_seam.py,python,exe bytes,pins+census,n/a,pe_core
+01_RAW/T2B_DERIVED_INSERT_HUNT.json,evidence (derived hunt),exe,t2b_derived_insert_hunt.py,python,exe bytes,callers,n/a,pe_core
+01_RAW/T2C_INSERT_HELPER.json,evidence (insert helper),exe,t2c_insert_helper.py,python,exe bytes,helper census,n/a,pe_core
+01_RAW/T2D_NODE_ALLOC.json,evidence (node alloc),exe,t2d_node_alloc.py,python,exe bytes,node layout,n/a,pe_core
+01_RAW/T3_DRIVER_DSITES_RAW.txt,evidence (driver D-sites),exe,executor script,python,exe bytes,3 sites,n/a,pe_core
+01_RAW/T4_HANDLER_DISPATCH.json,evidence (dispatch),exe,t4_handler_dispatch.py,python,exe bytes,handler map,n/a,pe_core
+01_RAW/T4B_DISPATCHER_CONTEXT.json,evidence (dispatch ctx),exe,t4b_dispatcher_context.py,python,exe bytes,context,n/a,pe_core
+01_RAW/T6_BYTE_PINS.json,evidence (64 pins),exe,t6_pinbytes.py,python,exe bytes,64 pins,n/a,pe_core
+01_RAW/GH1_DECOMP_CENSUS.json,evidence (census isCall),GHIDRA_LOCAL,gh1_decomp.py,Ghidra analyzeHeadless,exe/Ghidra,65 funcs,n/a,GHIDRA_LOCAL copy
+01_RAW/GH2_DECOMP_CENSUS.json,evidence (census isCall),GHIDRA_LOCAL,gh2_decomp.py,Ghidra analyzeHeadless,exe/Ghidra,39 funcs,n/a,GHIDRA_LOCAL copy
+01_RAW/GH3_DECOMP_CENSUS.json,evidence (census isCall),GHIDRA_LOCAL,gh3_decomp.py,Ghidra analyzeHeadless,exe/Ghidra,22 funcs,n/a,GHIDRA_LOCAL copy
+01_RAW/GB6_IMMUTABLE_CENSUS_before.json,evidence (GB6 before),8 packages,gb6_immutable.py,python,filesystem,8 composites,n/a,n/a
+01_RAW/GB6_IMMUTABLE_CENSUS_after.json,evidence (GB6 after),8 packages,gb6_immutable.py,python,filesystem,8 composites,n/a,n/a
+01_RAW/GB6_IMMUTABLE_COMPARISON.json,evidence (GB6 diff),before/after,gb6_immutable.py,python,censuses,IDENTICAL,n/a,n/a
+01_RAW/DECOMP/*.c,evidence (112 decompiles),GHIDRA_LOCAL,gh1-3_decomp.py,Ghidra analyzeHeadless,exe,112 files,pseudocode only (byte-locked via T6),GHIDRA_LOCAL copy
+01_RAW/T2_HEX/* ; T2B_HEX/* ; T2C_HEX/* ; T2D_HEX/*,evidence (hexdumps),exe,executor scripts,python,exe bytes,regions,n/a,pe_core
+02_ANALYSIS/SEAM_FLOW_MAP.md,analysis (executor),own + exe,executor (analysis),n/a,exe bytes + decompiles,seam map,see ERRATA_R4 [SE-R4-5/6] for the 2 corrected lines,DECOMP+T6
+02_ANALYSIS/KEY_MODEL_MATRIX.md,analysis (executor),own + exe,executor (analysis),n/a,exe bytes + decompiles,E1-E18,see ERRATA_R4 [SE-R4-7a] (DIV),DECOMP+T6
+06_REPORT/RESEARCH_FINDINGS.md,report (executor working report — VERBATIM preserved),own,pe-reconstruction,n/a,exe bytes,10 sections,corrected content lives in ERRATA_R4/REPORT,DECOMP+T6
+06_REPORT/REPORT.md,report (FINAL),own + exe + QC,pe-master-auditor,n/a,exe bytes + QC evidence,seam chain + matrices,see REPORT §6 boundaries,ERRATA_R4
+06_REPORT/ERRATA_R4.md,formalization (supersession ledger),history + own,pe-master-auditor,n/a,exe bytes + historical packages,[SE-R4-1..7],quotes verbatim,MANIFEST_VALIDATION_ORDER
+06_REPORT/QC_REPORT.md,report (INTERNAL_QC),own,pe-master-auditor,n/a,exe bytes + package,QC_PASS + P2/P3,n/a,qc_probe/*
+06_REPORT/STAGE_ACCEPTANCE_GATES.csv,gates (executor GB1-GB7 + auditor QC-1..8),own,pe-reconstruction + pe-master-auditor,n/a,exe bytes + QC evidence,15 rows,n/a,n/a
+06_REPORT/HANDOFF.md,handoff,own,pe-master-auditor,n/a,n/a,n/a,n/a,n/a
+MANIFEST_SHA256.csv,manifest (closure),package files,pe-master-auditor (closure extension),python (hashing),package files,all published files,self-hash excluded per L12,n/a
+artifact_index.csv,index (this file — no self-hash per L12),own,pe-master-auditor,n/a,n/a,n/a,n/a,n/a

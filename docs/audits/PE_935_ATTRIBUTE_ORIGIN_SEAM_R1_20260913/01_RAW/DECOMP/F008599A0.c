@@ -1,0 +1,272 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+float __thiscall
+FUN_008599a0(int param_1_00,undefined4 param_1,int param_2,float param_3,float param_4,int param_5,
+            char param_6,float *param_7,undefined4 param_8,undefined4 param_9,float *param_10,
+            float *param_11)
+
+{
+  float *pfVar1;
+  allocator<char> *paVar2;
+  float fVar3;
+  undefined4 *puVar4;
+  undefined4 uVar5;
+  int iVar6;
+  float fVar7;
+  undefined4 *puVar8;
+  float10 fVar9;
+  undefined4 uVar10;
+  allocator<char> local_10d;
+  float local_10c;
+  float local_108;
+  allocator<char> local_101;
+  float local_100;
+  allocator<char> aStack_f9;
+  float local_f8;
+  float local_f4;
+  float fStack_f0;
+  float local_ec;
+  float local_e8;
+  undefined4 local_e4;
+  int local_e0;
+  undefined4 local_dc [9];
+  float local_b8;
+  float local_b4;
+  float local_b0;
+  undefined4 local_ac;
+  float fStack_a8;
+  float fStack_a4;
+  float local_a0;
+  undefined4 local_90 [18];
+  float local_48;
+  float local_44;
+  float local_40;
+  undefined4 local_3c;
+  basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+  abStack_38 [24];
+  undefined auStack_20 [12];
+  float fStack_14;
+  void *local_c;
+  undefined *puStack_8;
+  uint local_4;
+  
+  local_4 = 0xffffffff;
+  puStack_8 = &LAB_00a298ab;
+  local_c = ExceptionList;
+  ExceptionList = &local_c;
+  local_e0 = param_1_00 + 0x18;
+  FUN_00413440(DAT_00b9d8d0 ^ (uint)&stack0xfffffee0);
+  fVar7 = 0.0;
+  local_10d = (allocator<char>)(param_5 == 1);
+  local_4 = 0;
+  if (param_2 == 0) {
+    local_10c = 0.0;
+    local_108 = 0.0;
+    local_f8 = 2.80456e-41;
+    local_f4 = param_3;
+    FUN_00703b80(&local_f8);
+    local_4 = CONCAT31(local_4._1_3_,1);
+    if (local_100 != 0.0) {
+      fVar9 = (float10)FUN_0042dd00(1);
+      local_10c = (float)fVar9;
+      fVar9 = (float10)FUN_0042dd00(2);
+      local_108 = (float)fVar9;
+    }
+    if (NAN(param_4) != (param_4 == 0.0)) {
+      param_4 = 1.0;
+    }
+    local_108 = local_108 * param_4;
+    *param_10 = local_108;
+    *param_11 = param_4 * local_10c;
+    local_10c = param_4 * local_10c - (local_108 + local_108);
+    if (local_10d != (allocator<char>)0x0) {
+      local_10c = local_10c - (float)_DAT_00a7b3e8;
+    }
+    if (local_10c < _DAT_00a7afb4) {
+      local_10c = _DAT_00a7afb4;
+    }
+    FUN_007c3bb0(_DAT_00a7ae30);
+    puVar4 = local_90;
+    puVar8 = local_dc;
+    for (iVar6 = 9; iVar6 != 0; iVar6 = iVar6 + -1) {
+      *puVar8 = *puVar4;
+      puVar4 = puVar4 + 1;
+      puVar8 = puVar8 + 1;
+    }
+    local_ac = 0x3f800000;
+    local_90[0] = 0x3f800000;
+    local_90[1] = 0;
+    local_90[2] = 0;
+    local_90[3] = 0;
+    local_90[5] = 0;
+    local_90[6] = 0;
+    local_90[7] = 0;
+    local_90[4] = 0x3f800000;
+    local_b8 = DAT_00ba921c;
+    local_90[8] = 0x3f800000;
+    local_b0 = DAT_00ba9224;
+    puVar4 = local_90;
+    puVar8 = local_90 + 9;
+    for (iVar6 = 9; iVar6 != 0; iVar6 = iVar6 + -1) {
+      *puVar8 = *puVar4;
+      puVar4 = puVar4 + 1;
+      puVar8 = puVar8 + 1;
+    }
+    local_3c = 0x3f800000;
+    local_48 = *param_7;
+    local_b4 = DAT_00ba9220;
+    local_44 = param_7[1];
+    local_40 = param_7[2];
+    if (param_6 == '\0') {
+      local_ec = _DAT_00a7b25c;
+      local_e8 = _DAT_00a7b25c;
+      local_e4 = _DAT_00a7afd0;
+      fVar7 = (float)FUN_00858420(local_90 + 9,local_dc,&local_ec,_DAT_00a7af68,param_9);
+    }
+    else {
+      FUN_00858fa0();
+      local_b8 = local_b8 - 0.0;
+      local_b4 = local_b4 - 0.0;
+      local_b0 = local_b0 - (float)_DAT_00a7b2d0;
+      FUN_00859000(local_dc,_DAT_00a7afa4,_DAT_00a7ae90,param_9);
+      if ((param_5 == 1) || (param_5 == 2)) {
+        if (local_10d == (allocator<char>)0x0) {
+          local_ec = local_10c * (float)_DAT_00a79a08 + local_108;
+          local_a0 = local_ec - (float)_DAT_00a79818;
+          local_b8 = local_b8 + 0.0;
+          local_b4 = local_b4 + 0.0;
+          local_b0 = local_a0 + local_b0;
+        }
+      }
+      else {
+        local_b8 = (local_b8 + 0.0) - 0.0;
+        local_b4 = (local_b4 + 0.0) - 0.0;
+        local_b0 = (local_b0 + (float)_DAT_00a7b2d0) - (float)_DAT_00a7b508;
+      }
+      FUN_00859000(local_dc,local_10c,local_108,param_9);
+      fVar7 = (float)FUN_008572a0(local_90 + 9,_DAT_00a7af68,param_9);
+    }
+    if (fVar7 != 0.0) {
+      FUN_0085c350(param_1);
+      local_10c = fVar7;
+      FUN_006a8980(&local_ec,&local_10c);
+    }
+    local_4 = local_4 & 0xffffff00;
+    FUN_00703bc0();
+  }
+  else {
+    paVar2 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&local_101);
+    local_4._0_1_ = 2;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              ((basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+                *)local_90,"",paVar2);
+    paVar2 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&local_10d);
+    local_4._0_1_ = 4;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_38,"",paVar2);
+    local_4._0_1_ = 5;
+    fVar3 = (float)FUN_00863400(param_2,abStack_38,local_90);
+    local_4._0_1_ = 4;
+    local_108 = fVar3;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              (abStack_38);
+    stlp_std::allocator<char>::~allocator<char>(&local_10d);
+    local_4._0_1_ = 2;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              ((basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+                *)local_90);
+    local_4 = (uint)local_4._1_3_ << 8;
+    stlp_std::allocator<char>::~allocator<char>(&local_101);
+    if (fVar3 == 0.0) {
+      local_4 = 0xffffffff;
+      FUN_00413450();
+      ExceptionList = local_c;
+      return 0.0;
+    }
+    FUN_00863590(auStack_20);
+    *param_10 = fStack_14;
+    *param_11 = fStack_14;
+    iVar6 = FUN_008633e0();
+    if (0 < iVar6) {
+      FUN_00858fa0();
+      puVar4 = (undefined4 *)FUN_00417f90();
+      pfVar1 = (float *)*puVar4;
+      if (pfVar1 != (float *)puVar4[1]) {
+        fStack_a8 = _DAT_00a7ba18;
+        fStack_a4 = _DAT_00a7ba18;
+        local_a0 = _DAT_00a7ba18;
+        local_f8 = *pfVar1 + 0.0;
+        local_100 = pfVar1[1] + 0.0;
+        local_10c = pfVar1[2] - (float)_DAT_00a86c40;
+        local_f4 = local_100;
+        fStack_f0 = local_10c;
+        local_ec = local_f8;
+        FUN_0096cb70(pfVar1 + 6,pfVar1 + 9,pfVar1 + 0xc);
+        puVar4 = local_dc;
+        puVar8 = local_90 + 9;
+        for (iVar6 = 9; iVar6 != 0; iVar6 = iVar6 + -1) {
+          *puVar8 = *puVar4;
+          puVar4 = puVar4 + 1;
+          puVar8 = puVar8 + 1;
+        }
+        local_3c = 0x3f800000;
+        local_48 = local_f8;
+        local_44 = local_f4;
+        local_40 = fStack_f0;
+        FUN_00859210(local_90 + 9,&fStack_a8,param_9);
+        local_f8 = *pfVar1 + 0.0;
+        local_100 = pfVar1[1] + 0.0;
+        local_10c = pfVar1[2] - (float)_DAT_00a7b508;
+        local_f4 = local_100;
+        fStack_f0 = local_10c;
+        local_ec = local_f8;
+        FUN_0096cb70(pfVar1 + 6,pfVar1 + 9,pfVar1 + 0xc);
+        puVar4 = local_dc;
+        puVar8 = local_90 + 9;
+        for (iVar6 = 9; iVar6 != 0; iVar6 = iVar6 + -1) {
+          *puVar8 = *puVar4;
+          puVar4 = puVar4 + 1;
+          puVar8 = puVar8 + 1;
+        }
+        local_48 = local_f8;
+        local_44 = local_f4;
+        local_3c = 0x3f800000;
+        local_40 = fStack_f0;
+        uVar10 = param_9;
+        uVar5 = FUN_0096f750(&fStack_a8);
+        FUN_00859210(local_90 + 9,uVar5,uVar10);
+      }
+      uVar10 = _DAT_00a7af68;
+      uVar5 = FUN_0096d7c0(param_8,param_7);
+      fVar7 = (float)FUN_008572a0(uVar5,uVar10,param_9);
+      if (fVar7 != 0.0) {
+        FUN_0085c350(param_1);
+        FUN_00859930(fVar7);
+      }
+    }
+    paVar2 = (allocator<char> *)stlp_std::allocator<char>::allocator<char>(&aStack_f9);
+    local_4._0_1_ = 6;
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              ((basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+                *)&fStack_a8,"",paVar2);
+    local_4._0_1_ = 7;
+    FUN_008268a0(&fStack_a8);
+    local_4 = CONCAT31(local_4._1_3_,6);
+    stlp_std::basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+    ::~basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+              ((basic_string<char,class_stlp_std::char_traits<char>,class_stlp_std::allocator<char>_>
+                *)&fStack_a8);
+    stlp_std::allocator<char>::~allocator<char>(&aStack_f9);
+  }
+  local_4 = 0xffffffff;
+  FUN_00413450();
+  ExceptionList = local_c;
+  return fVar7;
+}
+
