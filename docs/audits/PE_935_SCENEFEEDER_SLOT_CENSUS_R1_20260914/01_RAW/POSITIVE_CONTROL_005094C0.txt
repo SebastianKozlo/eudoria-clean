@@ -1,0 +1,46 @@
+# OWN DECODE - PE_935_SCENEFEEDER_SLOT_CENSUS_R1_20260914
+# POSITIVE CONTROL: FUN_005094C0 window (re-derived, not trusted from listing)
+# Source: PHYSICAL EXE D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+# EXE SHA256 (measured): e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31
+
+# === HEXDUMP window 0x005094C0..0x005094FF ===
+005094C0  8B 44 24 04 8B 10 89 51 34 8B 50 04 89 51 38 8B  .D$....Q4.P..Q8.
+005094D0  40 08 89 41 3C C6 41 28 01 C2 04 00 CC CC CC CC  @..A<.A(........
+005094E0  8B 41 2C C1 E8 04 A8 01 75 19 8B 44 24 04 8B 10  .A,.....u..D$...
+005094F0  89 51 40 8B 50 04 89 51 44 8B 40 08 89 41 48 C6  .Q@.P..QD.@..AH.
+
+# === BYTE-EXACT COMPARISON vs contract-expected pattern ===
+# expected (28 bytes): 8b 44 24 04 8b 10 89 51 34 8b 50 04 89 51 38 8b 40 08 89 41 3c c6 41 28 01 c2 04 00
+# measured (28 bytes): 8b 44 24 04 8b 10 89 51 34 8b 50 04 89 51 38 8b 40 08 89 41 3c c6 41 28 01 c2 04 00
+# BYTE-EXACT MATCH: PASS
+
+# === OWN CAPSTONE DECODE (x86-32) ===
+005094C0  8b442404                   mov     eax, dword ptr [esp + 4]
+005094C4  8b10                       mov     edx, dword ptr [eax]
+005094C6  895134                     mov     dword ptr [ecx + 0x34], edx
+005094C9  8b5004                     mov     edx, dword ptr [eax + 4]
+005094CC  895138                     mov     dword ptr [ecx + 0x38], edx
+005094CF  8b4008                     mov     eax, dword ptr [eax + 8]
+005094D2  89413c                     mov     dword ptr [ecx + 0x3c], eax
+005094D5  c6412801                   mov     byte ptr [ecx + 0x28], 1
+005094D9  c20400                     ret     4
+
+# === SEMANTIC VERDICT (executor re-derivation from the measured bytes) ===
+#   loads_arg_ptr_esp4         PASS
+#   reads_src_x_arg0           PASS
+#   writes_dst_this_34         PASS
+#   reads_src_y_arg4           PASS
+#   writes_dst_this_38         PASS
+#   reads_src_z_arg8           PASS
+#   writes_dst_this_3c         PASS
+#   flag_this_28_set_1         PASS
+#   terminal_ret_4             PASS
+# SEMANTIC COPY [arg+0/4/8] -> [ecx(this)+0x34/0x38/0x3C], flag [this+0x28]=1, ret 4:
+#   -> PASS - the window PROVES: caller-supplied triple pointer (arg) is copied into the this-object fields +0x34/+0x38/+0x3C
+#
+# NOTE (layer honesty): the window proves arg-triple -> this+0x34/38/3C. The
+# identity 'arg == instance+0x44' was established by the accepted prior run
+# (PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913, caller-side); it is NOT
+# re-derived in this run and is NOT needed for the control's validation purpose.
+#
+# POSITIVE_CONTROL VERDICT: PASS

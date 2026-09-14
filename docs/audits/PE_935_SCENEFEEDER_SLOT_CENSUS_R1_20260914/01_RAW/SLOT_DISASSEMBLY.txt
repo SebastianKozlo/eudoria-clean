@@ -1,0 +1,146 @@
+# OWN DECODE (capstone 5.0.7, x86-32) - PE_935_SCENEFEEDER_SLOT_CENSUS_R1_20260914
+# Source: PHYSICAL EXE D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+# EXE SHA256 (measured): e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31
+# SceneFeederObject vtable @ 0x00A7D458 (RTTI-walk verified in 01_RAW/VTABLE_AND_SLOTS.txt)
+# Body end derivation: linear sweep stops at CC CC CC padding / 90 90 90 padding /
+#   next known vtable-entry VA / disasm failure / hard limit. body_end = end of
+#   last real instruction. Terminal RET/JMP + following padding recorded per slot.
+# Access flags below are SCRIPT-FLAGGED candidates ([any-reg + 0x30/0x34/0x38/0x3C]);
+#   the executor adjudicates `this`-register provenance in 02_ANALYSIS.
+
+==============================================================================
+# SLOT 0 - FUN_0050A460 - entry 0x0050A460  next_known_vtable_entry=NONE
+# body_start=0x0050A460  body_end=0x0050A47E (inclusive end VA = last instruction end)
+# stop_reason=CC_PAD_ALIGN @ 0x0050A47E  body_size=30
+# bytes_after_body(16): cc cc 83 ec 18 8b 44 24 1c d9 00 d9 19 d9 40 0c
+# terminal-candidate: 0x0050A47B  c20400  ret  4
+------------------------------------------------------------------------------
+0050A460  56                         push    esi
+0050A461  8bf1                       mov     esi, ecx
+0050A463  e8d8fdffff                 call    0x50a240
+#    >> CALL @ 0x0050A463 -> 0x0050A240
+0050A468  f644240801                 test    byte ptr [esp + 8], 1
+0050A46D  7409                       je      0x50a478
+0050A46F  56                         push    esi
+0050A470  e8b52f4500                 call    0x95d42a
+#    >> CALL @ 0x0050A470 -> 0x0095D42A
+0050A475  83c404                     add     esp, 4
+0050A478  8bc6                       mov     eax, esi
+0050A47A  5e                         pop     esi
+0050A47B  c20400                     ret     4
+
+==============================================================================
+# SLOT 1 - FUN_005090A0 - entry 0x005090A0  next_known_vtable_entry=0x005090B0
+# body_start=0x005090A0  body_end=0x005090A4 (inclusive end VA = last instruction end)
+# stop_reason=CC_PAD_ALIGN @ 0x005090A4  body_size=4
+# bytes_after_body(16): cc cc cc cc cc cc cc cc cc cc cc cc 8d 41 74 c3
+# terminal-candidate: 0x005090A3  c3  ret  
+------------------------------------------------------------------------------
+005090A0  8d4134                     lea     eax, [ecx + 0x34]
+#    >> SF-FIELD-HIT disp=0x34 base=ecx access=R (LEA - address-of, no value read)
+005090A3  c3                         ret     
+
+==============================================================================
+# SLOT 2 - FUN_005090B0 - entry 0x005090B0  next_known_vtable_entry=0x005090C0
+# body_start=0x005090B0  body_end=0x005090B4 (inclusive end VA = last instruction end)
+# stop_reason=CC_PAD_ALIGN @ 0x005090B4  body_size=4
+# bytes_after_body(16): cc cc cc cc cc cc cc cc cc cc cc cc 8d 81 80 00
+# terminal-candidate: 0x005090B3  c3  ret  
+------------------------------------------------------------------------------
+005090B0  8d4174                     lea     eax, [ecx + 0x74]
+005090B3  c3                         ret     
+
+==============================================================================
+# SLOT 3 - FUN_0050A050 - entry 0x0050A050  next_known_vtable_entry=0x0050A460
+# body_start=0x0050A050  body_end=0x0050A0AA (inclusive end VA = last instruction end)
+# stop_reason=CC_PAD_ALIGN @ 0x0050A0AA  body_size=90
+# bytes_after_body(16): cc cc cc cc cc cc 56 8b f1 80 7e 24 00 75 10 e8
+# terminal-candidate: 0x0050A084  c20800  ret  8
+# terminal-candidate: 0x0050A0A7  c20800  ret  8
+------------------------------------------------------------------------------
+0050A050  8b442408                   mov     eax, dword ptr [esp + 8]
+0050A054  85c0                       test    eax, eax
+0050A056  56                         push    esi
+0050A057  8bf1                       mov     esi, ecx
+0050A059  742c                       je      0x50a087
+0050A05B  8b4e30                     mov     ecx, dword ptr [esi + 0x30]
+#    >> SF-FIELD-HIT disp=0x30 base=esi access=R
+0050A05E  8b11                       mov     edx, dword ptr [ecx]
+0050A060  50                         push    eax
+0050A061  8b4244                     mov     eax, dword ptr [edx + 0x44]
+0050A064  ffd0                       call    eax
+#    >> CALL @ 0x0050A064 -> indirect: eax
+0050A066  85c0                       test    eax, eax
+0050A068  741d                       je      0x50a087
+0050A06A  8b742408                   mov     esi, dword ptr [esp + 8]
+0050A06E  0590000000                 add     eax, 0x90
+0050A073  50                         push    eax
+0050A074  56                         push    esi
+0050A075  e8f6def2ff                 call    0x437f70
+#    >> CALL @ 0x0050A075 -> 0x00437F70
+0050A07A  8bc8                       mov     ecx, eax
+0050A07C  e81f153200                 call    0x82b5a0
+#    >> CALL @ 0x0050A07C -> 0x0082B5A0
+0050A081  8bc6                       mov     eax, esi
+0050A083  5e                         pop     esi
+0050A084  c20800                     ret     8
+0050A087  8b16                       mov     edx, dword ptr [esi]
+0050A089  8b4204                     mov     eax, dword ptr [edx + 4]
+0050A08C  8bce                       mov     ecx, esi
+0050A08E  ffd0                       call    eax
+#    >> CALL @ 0x0050A08E -> indirect: eax
+0050A090  8b10                       mov     edx, dword ptr [eax]
+0050A092  8b4c2408                   mov     ecx, dword ptr [esp + 8]
+0050A096  8911                       mov     dword ptr [ecx], edx
+0050A098  8b5004                     mov     edx, dword ptr [eax + 4]
+0050A09B  895104                     mov     dword ptr [ecx + 4], edx
+0050A09E  8b4008                     mov     eax, dword ptr [eax + 8]
+0050A0A1  894108                     mov     dword ptr [ecx + 8], eax
+0050A0A4  8bc1                       mov     eax, ecx
+0050A0A6  5e                         pop     esi
+0050A0A7  c20800                     ret     8
+
+==============================================================================
+# SLOT 4 - FUN_005090C0 - entry 0x005090C0  next_known_vtable_entry=0x00509580
+# body_start=0x005090C0  body_end=0x005090C7 (inclusive end VA = last instruction end)
+# stop_reason=CC_PAD_ALIGN @ 0x005090C7  body_size=7
+# bytes_after_body(16): cc cc cc cc cc cc cc cc cc d9 44 24 04 83 ec 10
+# terminal-candidate: 0x005090C6  c3  ret  
+------------------------------------------------------------------------------
+005090C0  8d8180000000               lea     eax, [ecx + 0x80]
+005090C6  c3                         ret     
+
+==============================================================================
+# SLOT 5 - FUN_00509580 - entry 0x00509580  next_known_vtable_entry=0x0050A050
+# body_start=0x00509580  body_end=0x00509598 (inclusive end VA = last instruction end)
+# stop_reason=CC_PAD_ALIGN @ 0x00509598  body_size=24
+# bytes_after_body(16): cc cc cc cc cc cc cc cc 56 8b f1 8b 46 18 85 c0
+# terminal-candidate: 0x00509595  c20400  ret  4
+------------------------------------------------------------------------------
+00509580  8b442404                   mov     eax, dword ptr [esp + 4]
+00509584  8b4918                     mov     ecx, dword ptr [ecx + 0x18]
+00509587  50                         push    eax
+00509588  51                         push    ecx
+00509589  e862bbf0ff                 call    0x4150f0
+#    >> CALL @ 0x00509589 -> 0x004150F0
+0050958E  8bc8                       mov     ecx, eax
+00509590  e83bdc3a00                 call    0x8b71d0
+#    >> CALL @ 0x00509590 -> 0x008B71D0
+00509595  c20400                     ret     4
+
+==============================================================================
+# ONE-HOP IDENTIFICATION (no callee body decode - stop rule honored)
+# va, first-16-bytes, thunk-resolve, aligned16, direct E8 callers, direct E9 jumpers
+# 0x0050A240 bytes=6a ff 68 a3 ac 9b 00 64 a1 00 00 00 00 50 51 53 thunk=- aligned16=True E8callers=1 E9jmp=0 sample=0050A463
+# 0x0095D42A bytes=ff 25 5c 53 a7 00 ff 25 60 53 a7 00 6a 14 68 58 thunk=MSVCR80.dll.??3@YAXPAX@Z aligned16=False E8callers=3880 E9jmp=1 sample=00401506,00401587,004015C1,00401641
+# 0x00437F70 bytes=6a ff 68 6b c0 99 00 64 a1 00 00 00 00 50 51 a1 thunk=- aligned16=True E8callers=99 E9jmp=0 sample=00438A96,00438ABB,0044CCF1,00458E27
+# 0x0082B5A0 bytes=8b 54 24 08 d9 02 8b 44 24 04 dd 05 60 b3 a7 00 thunk=- aligned16=True E8callers=36 E9jmp=0 sample=00438A9D,0046E299,0047CE1B,0047D4AF
+# 0x004150F0 bytes=6a ff 68 7b 61 99 00 64 a1 00 00 00 00 50 51 a1 thunk=- aligned16=True E8callers=80 E9jmp=0 sample=00415902,00415972,00415C1E,00415D38
+# 0x008B71D0 bytes=51 80 39 00 74 2d 83 7c 24 08 00 74 26 8d 44 24 thunk=- aligned16=True E8callers=1 E9jmp=0 sample=00509590
+# 0x0050A480 bytes=83 ec 18 8b 44 24 1c d9 00 d9 19 d9 40 0c d9 59 thunk=- aligned16=True E8callers=2 E9jmp=0 sample=0050B03A,0058EE19
+# 0x0050A0B0 bytes=56 8b f1 80 7e 24 00 75 10 e8 02 f5 ff ff b0 01 thunk=- aligned16=True E8callers=1 E9jmp=2 sample=0044CC41
+# 0x005095A0 bytes=56 8b f1 8b 46 18 85 c0 74 14 50 e8 40 bb f0 ff thunk=- aligned16=True E8callers=1 E9jmp=0 sample=00442DF2
+# 0x0050A590 bytes=83 ec 3c d9 ee 53 55 8b 6c 24 4c 56 57 8b 7c 24 thunk=- aligned16=True E8callers=12 E9jmp=0 sample=0050B050,0058EE35,0085DCFA,0085DD97
+# NOTE: 0x50A480 / 0x50A0B0 / 0x5095A0 / 0x50A590 are NOT vtable entries;
+#   their E8 caller counts are function-start evidence for the body-end
+#   boundaries of slots 0/3/5 (padding runs and tight adjacency).

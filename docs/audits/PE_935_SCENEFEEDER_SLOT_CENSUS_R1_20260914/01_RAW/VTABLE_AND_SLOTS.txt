@@ -1,0 +1,60 @@
+# OWN DECODE - PE_935_SCENEFEEDER_SLOT_CENSUS_R1_20260914
+# S1: physical vtable + slot map (capstone 5.0.7, x86-32)
+# EXE: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+# SHA256(measured) = e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31
+# SIZE(measured)   = 8015872
+# machine=0x014C opt_magic=0x010B image_base=0x00400000 entry_rva=0x0055DA11
+# S0 = PASS (sha+size+PE32 all match; fail-closed asserts passed)
+
+# === PE SECTIONS ===
+#   .text    vaddr=0x00001000 vsize=0x6735E5 rsize=0x674000  VA 0x00401000..0x00A75000
+#   .rdata   vaddr=0x00675000 vsize=0xF6569 rsize=0xF7000  VA 0x00A75000..0x00B6C000
+#   .data    vaddr=0x0076C000 vsize=0x3D6E4 rsize=0x34000  VA 0x00B6C000..0x00BA96E4
+#   .tls     vaddr=0x007AA000 vsize=0xA rsize=0x1000  VA 0x00BAA000..0x00BAB000
+#   .rsrc    vaddr=0x007AB000 vsize=0x3C54 rsize=0x4000  VA 0x00BAB000..0x00BAF000
+
+# === RTTI WALK (own, from physical .rdata bytes) ===
+# vtable VA (contract pin, verified below): 0x00A7D458
+# vtable section: .rdata
+# [vtable-4] @ 0x00A7D454 = COL ptr 0x00AA12B8
+# COL @ 0x00AA12B8 raw=0000000000000000000000003488b700cc12aa00
+#   signature=0 offset=0 cd_offset=0 pTypeDescriptor=0x00B78834 pClassHierarchyDescriptor=0x00AA12CC
+# TD @ 0x00B78834 vfptr=0x00A98110 spare=0 name_hex=2e3f41565363656e654665656465724f626a6563744040
+#   name = '.?AVSceneFeederObject@@'
+# RTTI verdict: vtable->COL->TD->name == .?AVSceneFeederObject@@ -> PASS
+# COL offset=0 (primary vtable)
+
+# === RAW BYTES: vtable region 0x00A7D450..0x00A7D480 (physical .rdata) ===
+00A7D450  65 72 00 00 B8 12 AA 00 60 A4 50 00 A0 90 50 00  er......`.P...P.
+00A7D460  B0 90 50 00 50 A0 50 00 C0 90 50 00 80 95 50 00  ..P.P.P...P...P.
+00A7D470  64 50 56 53 5F 6F 63 63 00 00 00 00 64 50 56 53  dPVS_occ....dPVS
+# (layout: [-8]=tail of previous data | [-4]=COL ptr | [0..5]=6 slots | then 'dPVS' string data)
+
+# === PHYSICAL VTABLE DUMP (entries read from .rdata at 0x00A7D458) ===
+# slot_index, entry_va(of pointer), value(function VA), first-bytes-at-target
+  [  0] 0x00A7D458 : 0x0050A460  56 8b f1 e8 d8 fd ff ff
+  [  1] 0x00A7D45C : 0x005090A0  8d 41 34 c3 cc cc cc cc
+  [  2] 0x00A7D460 : 0x005090B0  8d 41 74 c3 cc cc cc cc
+  [  3] 0x00A7D464 : 0x0050A050  8b 44 24 08 85 c0 56 8b
+  [  4] 0x00A7D468 : 0x005090C0  8d 81 80 00 00 00 c3 cc
+  [  5] 0x00A7D46C : 0x00509580  8b 44 24 04 8b 49 18 50
+# slot  6: value 0x53565064 NOT in .text - vtable extent ends (first non-code pointer)
+# vtable physical extent: slots 0..5 (6 code pointers)
+
+# === SIX CONTRACT SLOTS - slot-index derivation from the physical vtable ===
+# FUN_0050A460 -> slot 0  entry-VA 0x00A7D458 == function start VA 0x0050A460 (EXACT match)
+#   first 12 bytes at 0x0050A460: 56 8b f1 e8 d8 fd ff ff f6 44 24 08
+# FUN_005090A0 -> slot 1  entry-VA 0x00A7D45C == function start VA 0x005090A0 (EXACT match)
+#   first 12 bytes at 0x005090A0: 8d 41 34 c3 cc cc cc cc cc cc cc cc
+# FUN_005090B0 -> slot 2  entry-VA 0x00A7D460 == function start VA 0x005090B0 (EXACT match)
+#   first 12 bytes at 0x005090B0: 8d 41 74 c3 cc cc cc cc cc cc cc cc
+# FUN_0050A050 -> slot 3  entry-VA 0x00A7D464 == function start VA 0x0050A050 (EXACT match)
+#   first 12 bytes at 0x0050A050: 8b 44 24 08 85 c0 56 8b f1 74 2c 8b
+# FUN_005090C0 -> slot 4  entry-VA 0x00A7D468 == function start VA 0x005090C0 (EXACT match)
+#   first 12 bytes at 0x005090C0: 8d 81 80 00 00 00 c3 cc cc cc cc cc
+# FUN_00509580 -> slot 5  entry-VA 0x00A7D46C == function start VA 0x00509580 (EXACT match)
+#   first 12 bytes at 0x00509580: 8b 44 24 04 8b 49 18 50 51 e8 62 bb
+# six-slot verification: ALL 6 CONFIRMED as vtable entries
+
+# (context) FUN_005094C0 (positive control) in vtable slots: 'none'
+

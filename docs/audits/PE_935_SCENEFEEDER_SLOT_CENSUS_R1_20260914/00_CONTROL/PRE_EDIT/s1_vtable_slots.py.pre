@@ -1,0 +1,159 @@
+# -*- coding: utf-8 -*-
+# PE_935_SCENEFEEDER_SLOT_CENSUS_R1_20260914 - S1: fail-closed S0 + RTTI walk
+# + physical vtable dump + slot-index mapping of the six contract functions.
+# STATIC-ONLY. Output: 01_RAW/VTABLE_AND_SLOTS.txt
+# Order of operations: S0 identity checks FIRST (fail-closed, no downstream
+# on mismatch), then RTTI walk, then the physical vtable dump.
+
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sf_core as core
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+RAW = os.path.join(HERE, "..", "01_RAW")
+CTRL = os.path.join(HERE, "..", "00_CONTROL")
+
+lines = []
+def emit(s=""):
+    lines.append(s)
+    print(s)
+
+# ============================ S0 (fail-closed) ============================
+exe_sha = core.sha256_file(core.EXE_PATH)
+exe_size = os.path.getsize(core.EXE_PATH)
+emit("# OWN DECODE - PE_935_SCENEFEEDER_SLOT_CENSUS_R1_20260914")
+emit("# S1: physical vtable + slot map (capstone 5.0.9, x86-32)")
+emit("# EXE: %s" % core.EXE_PATH)
+emit("# SHA256(measured) = %s" % exe_sha)
+emit("# SIZE(measured)   = %d" % exe_size)
+if exe_sha.lower() != core.EXPECTED_SHA256.lower():
+    print("HARD_STOP SOURCE_IDENTITY_FAIL: sha mismatch")
+    sys.exit(2)
+if exe_size != core.EXPECTED_SIZE:
+    print("HARD_STOP SOURCE_IDENTITY_FAIL: size mismatch")
+    sys.exit(2)
+
+pe = core.PE(core.EXE_PATH)
+s0_machine_ok = pe.machine == core.EXPECTED_MACHINE
+s0_magic_ok = pe.opt_magic == core.EXPECTED_OPT_MAGIC
+s0_base_ok = pe.image_base == core.EXPECTED_IMAGE_BASE
+emit("# machine=0x%04X opt_magic=0x%04X image_base=0x%08X entry_rva=0x%08X"
+     % (pe.machine, pe.opt_magic, pe.image_base, pe.entry_rva))
+if not (s0_machine_ok and s0_magic_ok and s0_base_ok):
+    print("HARD_STOP SOURCE_IDENTITY_FAIL: PE32 identity mismatch")
+    sys.exit(2)
+emit("# S0 = PASS (sha+size+PE32 all match; fail-closed asserts passed)")
+emit()
+
+# ============================ sections =====================================
+emit("# === PE SECTIONS ===")
+for s in pe.sections:
+    emit("#   %-8s vaddr=0x%08X vsize=0x%X rsize=0x%X  VA 0x%08X..0x%08X"
+         % (s["name"], s["vaddr"], s["vsize"], s["rsize"], s["va_start"], s["va_end"]))
+emit()
+
+# ============================ RTTI walk ===================================
+emit("# === RTTI WALK (own, from physical .rdata bytes) ===")
+emit("# vtable VA (contract pin, verified below): 0x%08X" % core.VTABLE_VA)
+emit("# vtable section: %s" % pe.section_of(core.VTABLE_VA))
+rtti = pe.rtti_walk(core.VTABLE_VA)
+if "error" in rtti:
+    print("RTTI_WALK_FAIL: %s" % rtti["error"])
+    sys.exit(3)
+col = rtti["col"]
+td = rtti["td"]
+emit("# [vtable-4] @ 0x%08X = COL ptr 0x%08X" % (rtti["col_ptr_va"], rtti["col_va"]))
+emit("# COL @ 0x%08X raw=%s" % (rtti["col_va"], col["raw"]))
+emit("#   signature=%d offset=%d cd_offset=%d pTypeDescriptor=0x%08X pClassHierarchyDescriptor=0x%08X"
+     % (col["signature"], col["offset"], col["cd_offset"], col["p_type_descriptor"], col["p_class_hierarchy"]))
+emit("# TD @ 0x%08X vfptr=0x%08X spare=%d name_hex=%s"
+     % (td["va"], td["vfptr"], td["spare"], td["name_raw_hex"]))
+emit("#   name = %r" % td["name"])
+rtti_ok = (td["name"] == core.EXPECTED_RTTI_NAME) and (col["signature"] == 0)
+emit("# RTTI verdict: vtable->COL->TD->name == .?AVSceneFeederObject@@ -> %s"
+     % ("PASS" if rtti_ok else "FAIL"))
+emit("# COL offset=%d (%s vtable)" % (col["offset"], "primary" if col["offset"] == 0 else "MI-offset"))
+emit()
+
+# ============================ vtable dump ==================================
+emit("# === RAW BYTES: vtable region 0x%08X..0x%08X (physical .rdata) ==="
+     % (core.VTABLE_VA - 8, core.VTABLE_VA + 0x28))
+emit(core.hexdump(pe, core.VTABLE_VA - 8, 0x30))
+emit("# (layout: [-8]=tail of previous data | [-4]=COL ptr | [0..5]=6 slots | then 'dPVS' string data)")
+emit()
+emit("# === PHYSICAL VTABLE DUMP (entries read from .rdata at 0x%08X) ===" % core.VTABLE_VA)
+emit("# slot_index, entry_va(of pointer), value(function VA), first-bytes-at-target")
+slots = []
+i = 0
+MAX_SLOTS = 128
+while i < MAX_SLOTS:
+    val = pe.read_va32(core.VTABLE_VA + 4 * i)
+    if val is None:
+        emit("# slot %2d: READ_FAIL - vtable extent ends" % i)
+        break
+    if not pe.in_text(val):
+        emit("# slot %2d: value 0x%08X NOT in .text - vtable extent ends (first non-code pointer)"
+             % (i, val))
+        break
+    fb = pe.read_va(val, 8)
+    slots.append(val)
+    emit("  [%3d] 0x%08X : 0x%08X  %s" % (i, core.VTABLE_VA + 4 * i, val, fb.hex(" ")))
+    i += 1
+emit("# vtable physical extent: slots 0..%d (%d code pointers)" % (len(slots) - 1, len(slots)))
+emit()
+
+# ============================ six-slot map ================================
+emit("# === SIX CONTRACT SLOTS - slot-index derivation from the physical vtable ===")
+slot_map = {}
+six_ok = True
+for va in core.SIX_FUNCS:
+    hits = [idx for idx, v in enumerate(slots) if v == va]
+    fb = pe.read_va(va, 12)
+    if len(hits) == 1:
+        slot_map[va] = hits[0]
+        emit("# FUN_%08X -> slot %d  entry-VA 0x%08X == function start VA 0x%08X (EXACT match)"
+             % (va, hits[0], core.VTABLE_VA + 4 * hits[0], va))
+        emit("#   first 12 bytes at 0x%08X: %s" % (va, fb.hex(" ")))
+    else:
+        six_ok = False
+        slot_map[va] = None
+        emit("# FUN_%08X -> NOT FOUND as exact vtable entry value (hits=%r)" % (va, hits))
+emit("# six-slot verification: %s" % ("ALL 6 CONFIRMED as vtable entries" if six_ok else "INCOMPLETE"))
+emit()
+
+# also note: is the positive-control function itself a vtable entry?
+pc_hits = [idx for idx, v in enumerate(slots) if v == core.POSITIVE_CONTROL_VA]
+emit("# (context) FUN_005094C0 (positive control) in vtable slots: %r" % (pc_hits if pc_hits else "none"))
+emit()
+
+# ============================ JSON sidecar ================================
+out_json = {
+    "exe": {
+        "path": core.EXE_PATH, "sha256": exe_sha, "size": exe_size,
+        "machine": "0x%04X" % pe.machine, "opt_magic": "0x%04X" % pe.opt_magic,
+        "image_base": "0x%08X" % pe.image_base,
+    },
+    "s0": "PASS",
+    "rtti": rtti,
+    "rtti_ok": rtti_ok,
+    "vtable": {
+        "va": "0x%08X" % core.VTABLE_VA,
+        "section": pe.section_of(core.VTABLE_VA),
+        "slot_count": len(slots),
+        "slots": ["0x%08X" % v for v in slots],
+    },
+    "slot_map": {("0x%08X" % va): slot_map[va] for va in core.SIX_FUNCS},
+    "six_ok": six_ok,
+}
+with open(os.path.join(RAW, "VTABLE_SLOT_MAP.json"), "w") as f:
+    json.dump(out_json, f, indent=1)
+
+with open(os.path.join(RAW, "VTABLE_AND_SLOTS.txt"), "w") as f:
+    f.write("\n".join(lines) + "\n")
+print()
+print("WROTE 01_RAW/VTABLE_AND_SLOTS.txt + 01_RAW/VTABLE_SLOT_MAP.json")
+if not six_ok:
+    sys.exit(4)
