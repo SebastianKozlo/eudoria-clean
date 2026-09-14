@@ -1,0 +1,176 @@
+=== E2 CALLER-PROVENANCE CENSUS — RAW (two-phase, own capstone decode of pinned Entropia.exe) ===
+RUN_ID: PE_935_PRELOOP_INTEGRATED_CLEANUP_R1_20260914
+GENERATOR: 00_CONTROL/e_ebp_reval.py (SHA256 B412D68F33F11AB0D6D3148C1B5FA2714F5D076B39BA3CFEA7392F9628DDBB10)
+COMMAND: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe -B e_ebp_reval.py
+INPUT: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe (fail-closed SHA256+SIZE asserted;
+       SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, SIZE 8015872; STATIC-ONLY — never executed)
+capstone provenance: __version__=5.0.7 (measured; 5.0.9 dist-info label is FALSE) __file__=D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+HISTORICAL CSV ROW: 0x0082DB61,0x0082DAC0,"mov word ptr [ebp + 0x30], cx",cx,caller stack (inherited ebp),REJECTED_ALIAS
+DECLARED BOUND: caller chain walked at most TWO levels above the real containing function;
+ beyond that the provenance is recorded UNKNOWN (per RUN_CONTRACT.md W1 INDIRECT_ENTRY_CLOSURE).
+TIMESTAMP: 2026-09-14T16:04:19.898094
+
+=== CASE E2 — writer 0x0082DB61 (historical fn attribution 0x0082DAC0) ===
+historical CSV row: 0x0082DB61,0x0082DAC0,"mov word ptr [ebp + 0x30], cx",cx,caller stack (inherited ebp),REJECTED_ALIAS
+historical class: REJECTED_ALIAS under the UNSOUND R-EBP-INHERITED rule
+
+[A] WRITER BYTE VERIFICATION
+  bytes at 0x0082DB61: 66894D30 (expected 66894D30) -> MATCH
+  capstone decode: mov word ptr [ebp + 0x30], cx  (pinned text: mov word ptr [ebp + 0x30], cx)
+
+[B] PHASE 1 — HISTORICAL ATTRIBUTION CHECK (claimed entry 0x0082DAC0)
+  first bytes at claimed entry: 0000008B85900000
+  decode from claimed entry starts with: add byte ptr [eax], al
+  (a leading 'add byte ptr [eax], al' = decoding the byte pair 00 00 = NOT a real
+   x86 code boundary for a function entry; typical of a mid-data/mid-instruction VA)
+  E8 rel32 calls to claimed entry: 0 []
+  E9 rel32 jmps to claimed entry:  0 []
+  EB rel8 jmps to claimed entry:   0 []
+  whole-file imm32 occurrences of the claimed entry VA: 0
+  entry-fallthrough: prev-8-bytes = 8A1088552501B590
+  linear decode of preceding 16 bytes ends exactly at claimed entry: False
+  PHASE-1 VERDICT: historical fn attribution DISPROVEN (bytes start 00 00; ZERO references via E8/E9/EB/imm32; no fallthrough; the 'FPO, ebp untouched' premise was evaluated at a NON-FUNCTION VA)
+
+[C] PHASE 2 — REAL CONTAINING FUNCTION DISCOVERY
+  REAL-FUNCTION CANDIDATE 0x0082DA80: aligned on writer (dist 225, 62 insns); rets crossed before writer: 0; EBP writes before writer: 1
+  boundary corroboration: prev-8-bytes = CCCCCCCCCCCCCCCC (CC padding / ret+CC = real boundary)
+  ==> REAL containing function of writer 0x0082DB61 = 0x0082DA80
+  EBP-WRITING instructions between real entry and writer:
+      0x0082DA82  mov ebp, ecx   <== EBP WRITE (refutes 'ebp untouched' for the REAL function)
+  ret instructions crossed before the writer: 0 []
+
+  listing written: 01_RAW/E2_FUN_0082DAC0_DISASM.txt
+
+[D] ENTRY-CHANNEL CENSUS OF THE REAL FUNCTION 0x0082DA80
+  E8 direct callers: 1 ['0x0082E057']
+  E9 rel32 jmps: 0 | EB rel8 jmps: 0
+  whole-file imm32 occurrences: 0
+  entry-fallthrough: prev-8-bytes = CCCCCCCCCCCCCCCC
+
+[E2-CHAIN] FUN_0082DA80 EBP definition and caller provenance (DECLARED BOUND: two levels)
+  (1) EBP definition INSIDE FUN_0082DA80:
+      0x0082DA80  53                       push     ebx
+      0x0082DA81  55                       push     ebp
+      0x0082DA82  8BE9                     mov      ebp, ecx
+      0x0082DA84  8B8590000000             mov      eax, dword ptr [ebp + 0x90]
+      0x0082DA8A  56                       push     esi
+      0x0082DA8B  8D4801                   lea      ecx, [eax + 1]
+      0x0082DA8E  3B8D8C000000             cmp      ecx, dword ptr [ebp + 0x8c]
+      0x0082DA94  57                       push     edi
+  ==> at 0x0082DA82: mov ebp, ecx — EBP is DEFINED from ECX = the this/arg1 OBJECT POINTER.
+      The historical premise 'fn never redefines ebp (FPO, ebp untouched)' is REFUTED for
+      the real function. The function is a bounds-checked u16 CURSOR READER: [ebp+0x90] =
+      cursor, [ebp+0x8C] = end, per-read guard lea edx,[ecx+2]; cmp edx,[ebp+0x8C]; jae;
+      mov cx,[ecx] — writing parsed u16 values into object fields (+0x2E, +0x30).
+      (16-bit write note: a 16-bit store can alias the LOW HALF of a 32-bit field; the
+      alias analysis keys on the BASE REGISTER — unchanged.)
+
+  (2) The single E8 caller of FUN_0082DA80 = 0x0082E057; decode of the caller region:
+      0x0082E030  0000                     add      byte ptr [eax], al
+      0x0082E032  0003                     add      byte ptr [ebx], al
+      0x0082E034  C189868C000000           ror      dword ptr [ecx + 0x8c86], 0
+      0x0082E03B  898E84000000             mov      dword ptr [esi + 0x84], ecx
+      0x0082E041  8D442450                 lea      eax, [esp + 0x50]
+      0x0082E045  50                       push     eax
+      0x0082E046  8D4C241C                 lea      ecx, [esp + 0x1c]
+      0x0082E04A  51                       push     ecx
+      0x0082E04B  8D54245C                 lea      edx, [esp + 0x5c]
+      0x0082E04F  52                       push     edx
+      0x0082E050  8D442420                 lea      eax, [esp + 0x20]
+      0x0082E054  50                       push     eax
+      0x0082E055  8BCE                     mov      ecx, esi
+      0x0082E057  E824FAFFFF               call     0x82da80
+      0x0082E05C  84C0                     test     al, al
+      0x0082E05E  750B                     jne      0x82e06b
+      0x0082E060  8B44244C                 mov      eax, dword ptr [esp + 0x4c]
+      0x0082E064  8928                     mov      dword ptr [eax], ebp
+      0x0082E066  E989010000               jmp      0x82e1f4
+      0x0082E06B  0FB67E38                 movzx    edi, byte ptr [esi + 0x38]
+      (the leading 'add byte ptr [eax], al' lines above are the misaligned tail of my
+       context window starting mid-instruction at 0x82E030 — not evidence; the aligned
+       stream is established from the function start below)
+
+  (3) The containing function of the call site = FUN_0082DFF0 (SEH frame: push -1; push
+      0xa24f4b; mov eax,fs:[0]; push eax; sub esp,0x28; ...) — found via the E8-target
+      lattice + CC padding (prev-8 = CCCCCCCCCCCCCCCC), forward-alignment on 0x82E057, 0 rets crossed.
+      FUN_0082DFF0 entry census: E8 callers = 2 ['0x006B0C63', '0x006B0F38']; E9/EB = 0/0; whole-file imm32 = 0;
+      ==> exactly TWO entry paths (0x006B0C63, 0x006B0F38); no indirect channel.
+      At 0x0082E017: mov esi, ecx — ESI := the caller's ECX (this); then mov ecx, esi;
+      call 0x82da80 — the reader object = FUN_0082DFF0's this.
+
+  (4) LEVEL-2: the two FUN_0082DFF0 call sites — ECX provenance:
+      -- call site 0x006B0C63, preceding decode --
+         0x006B0C39  008D8C249C00             add      byte ptr [ebp + 0x9c248c], cl
+         0x006B0C3F  0000                     add      byte ptr [eax], al
+         0x006B0C41  E8DACC1700               call     0x82d920
+         0x006B0C46  8B4608                   mov      eax, dword ptr [esi + 8]
+         0x006B0C49  8B36                     mov      esi, dword ptr [esi]
+         0x006B0C4B  55                       push     ebp
+         0x006B0C4C  50                       push     eax
+         0x006B0C4D  56                       push     esi
+         0x006B0C4E  8D442430                 lea      eax, [esp + 0x30]
+         0x006B0C52  B302                     mov      bl, 2
+         0x006B0C54  50                       push     eax
+         0x006B0C55  8D8C24AC000000           lea      ecx, [esp + 0xac]
+         0x006B0C5C  889C24B44F0000           mov      byte ptr [esp + 0x4fb4], bl
+         0x006B0C63  E888D31700               call     0x82dff0
+      -- call site 0x006B0F38, preceding decode --
+         0x006B0F0E  758D                     jne      0x6b0e9d
+         0x006B0F10  8C249C                   mov      word ptr [esp + ebx*4], fs
+         0x006B0F13  0000                     add      byte ptr [eax], al
+         0x006B0F15  00E8                     add      al, ch
+         0x006B0F17  05CA17008B               add      eax, 0x8b0017ca
+         0x006B0F1C  46                       inc      esi
+         0x006B0F1D  088B36555056             or       byte ptr [ebx + 0x56505536], cl
+         0x006B0F23  8D542428                 lea      edx, [esp + 0x28]
+         0x006B0F27  B30A                     mov      bl, 0xa
+         0x006B0F29  52                       push     edx
+         0x006B0F2A  8D8C24AC000000           lea      ecx, [esp + 0xac]
+         0x006B0F31  889C24B44F0000           mov      byte ptr [esp + 0x4fb4], bl
+         0x006B0F38  E8B3D01700               call     0x82dff0
+      BOTH call sites construct the reader IN PLACE as a STACK LOCAL:
+        lea ecx, [esp + 0x9c]; call 0x82d920   (constructor thunk)
+        ... 4 pushes (16 bytes) ...
+        lea ecx, [esp + 0xac]; call 0x82dff0    (esp+0xac AFTER the pushes == the SAME
+                                                    esp+0x9c slot BEFORE them)
+      0x82d920 decode (the constructor thunk):
+         0x0082D920  56                       push     esi
+         0x0082D921  8BF1                     mov      esi, ecx
+         0x0082D923  E8C823FCFF               call     0x7efcf0
+         0x0082D928  C7069C18A900             mov      dword ptr [esi], 0xa9189c
+         0x0082D92E  8BC6                     mov      eax, esi
+         0x0082D930  5E                       pop      esi
+         0x0082D931  C3                       ret
+         0x0082D932  CC                       int3
+         0x0082D933  CC                       int3
+         0x0082D934  CC                       int3
+         0x0082D935  CC                       int3
+         0x0082D936  CC                       int3
+         0x0082D937  CC                       int3
+         0x0082D938  CC                       int3
+         0x0082D939  CC                       int3
+         0x0082D93A  CC                       int3
+         0x0082D93B  CC                       int3
+         0x0082D93C  CC                       int3
+         0x0082D93D  CC                       int3
+         0x0082D93E  CC                       int3
+         0x0082D93F  CC                       int3
+      ==> the ctor stores vtable 0x00A9189C into the object. RTTI resolution (own byte
+          read, standard MSVC RTTI chain: [vt-4]=COL, [COL+0xC]=TypeDescriptor, TD+8=name):
+          vtable 0x00A9189C -> COL 0x00AB25E8 -> TypeDescriptor 0x00B96D3C -> name .?AVArkNiTGAReader@@
+      ==> the reader object's class = ArkNiTGAReader (.?AVArkNiTGAReader@@), a TGA image
+          reader — NOT SceneFeederObject — and the object is a STACK LOCAL (lea ecx,[esp+...])
+          on BOTH entry paths.
+
+  (5) ADJUDICATION FACTS (deterministic derivation):
+      - case A? NO (no push ebp; mov ebp,esp — SEH/FPO frames throughout).
+      - case B (EBP derived from ESP/stack on every writer-reaching path)? PROVEN: EBP := ECX
+        (0x82DA82) and ECX := lea ecx,[esp+0x9c] on BOTH entry paths (0x6B0C63/0x6B0F38) —
+        the EBP value at the writer is a STACK ADDRESS on every writer-reaching path.
+      - class corroboration: the object is an ArkNiTGAReader instance (vtable 0x00A9189C,
+        RTTI .?AVArkNiTGAReader@@) — a class distinct from SceneFeederObject.
+      - SF is always-heap per the accepted census; a stack address can never alias SF+0x30;
+        additionally the object class is provably not SF.
+      ==> CASE PROVEN: B (with class corroboration). REJECTED_ALIAS STANDS — now SOUND.
+      ==> E2 FINAL CLASS: REJECTED_ALIAS (REJECTED_STANDS_SOUND; the historical unsound
+          reason R-EBP-INHERITED is superseded by the case-B proof).

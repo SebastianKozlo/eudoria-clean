@@ -1,0 +1,32 @@
+=== ENTROPIA.EXE PE OPTIONAL HEADER DUMP (raw byte evidence, AUD-F4) ===
+RUN_ID: PE_935_PRELOOP_INTEGRATED_CLEANUP_R1_20260914
+GENERATOR: 00_CONTROL/cleanup_verify_identities.py (SHA256 1E28AF12A215BFC988F530B8945CA34CE1296DC32C5061BD0BB4892BAF1B1C7A)
+COMMAND: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe -B cleanup_verify_identities.py
+INPUT: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  SIZE=8015872 SHA256=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (fail-closed pin asserted BEFORE this dump)
+MODE: STATIC-ONLY (never executed); own byte read via struct, no third-party PE parser.
+TIMESTAMP: 2026-09-14T16:09:10.588504
+
+e_lfanew (u32 @ file 0x3C)        = 0x00000120
+PE signature @e_lfanew            = 50450000
+COFF Machine                     = 0x014C (0x014C = i386)
+COFF NumberOfSections            = 5
+COFF SizeOfOptionalHeader       = 0x00E0
+optional header start            = e_lfanew+0x18 = 0x00000138
+optional header Magic            = 0x010B (0x10B = PE32)
+dword @opt+0x1C (ImageBase)     = 0x00400000
+dword @opt+0x20 (SectionAlign)  = 0x00001000
+word  @opt+0x46 (DllCharacter)  = 0x0000
+
+SECTION TABLE (derived facts only; no payload bytes):
+name       VirtualSize   VirtualAddr(RVA)   SizeOfRawData   PointerToRawData
+.text      0x006735E5    0x00001000        0x00674000      0x00001000
+.rdata     0x000F6569    0x00675000        0x000F7000      0x00675000
+.data      0x0003D6E4    0x0076C000        0x00034000      0x0076C000
+.tls       0x0000000A    0x007AA000        0x00001000      0x007A0000
+.rsrc      0x00003C54    0x007AB000        0x00004000      0x007A1000
+
+AUD-F4 CONCLUSION (executor's own derivation): the standard IMAGE_OPTIONAL_HEADER32
+layout holds: ImageBase is at OptionalHeader+0x1C and reads 0x00400000. The SLOT17
+entropia_rtti_probe.py docstring claim of a '+4 shifted' ImageBase read is factually
+wrong (REJECTED_WITH_EVIDENCE); erratum recorded in 02_ANALYSIS/SLOT17_ERRATA.md.

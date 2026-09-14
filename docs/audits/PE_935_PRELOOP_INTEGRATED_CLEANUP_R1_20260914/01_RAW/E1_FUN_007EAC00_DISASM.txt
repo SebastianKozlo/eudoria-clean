@@ -1,0 +1,666 @@
+=== E1 DISASSEMBLY RAW — historical fn attribution 0x007EAC00 (row traceability) ===
+=== the REAL containing function discovered in phase 2 = 0x007EA740 ===
+RUN_ID: PE_935_PRELOOP_INTEGRATED_CLEANUP_R1_20260914
+GENERATOR: 00_CONTROL/e_ebp_reval.py (SHA256 B412D68F33F11AB0D6D3148C1B5FA2714F5D076B39BA3CFEA7392F9628DDBB10)
+COMMAND: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe -B e_ebp_reval.py
+INPUT: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe (fail-closed SHA256+SIZE asserted;
+       SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, SIZE 8015872; STATIC-ONLY — never executed)
+capstone provenance: __version__=5.0.7 (measured; the 5.0.9 dist-info label is FALSE) __file__=D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+HISTORICAL CSV ROW: 0x007EB1B3,0x007EAC00,"mov dword ptr [ebp + 0x30], esi",esi,caller stack (inherited ebp),REJECTED_ALIAS
+SCOPE: phase-1 disproof bytes at the historical VA; real function decode entry->writer+0x40.
+TIMESTAMP: 2026-09-14T16:04:19.567909
+
+--- phase 1: bytes at the HISTORICAL claimed entry 0x007EAC00 (first 0x20 bytes) ---
+  0x007EAC00  00 00 00 89 84 24 BC 00 00 00 D8 84 24 84 00 00
+  0x007EAC10  00 D9 9C 24 B8 00 00 00 8B 8C 24 B8 00 00 00 D9
+
+--- phase 2: real function 0x007EA740 — decode from entry to writer+0x40 ---
+  0x007EA740  6AFF                     push     -1
+  0x007EA742  688C12A200               push     0xa2128c
+  0x007EA747  64A100000000             mov      eax, dword ptr fs:[0]
+  0x007EA74D  50                       push     eax
+  0x007EA74E  81EC74010000             sub      esp, 0x174
+  0x007EA754  53                       push     ebx
+  0x007EA755  55                       push     ebp
+  0x007EA756  56                       push     esi
+  0x007EA757  57                       push     edi
+  0x007EA758  A1D0D8B900               mov      eax, dword ptr [0xb9d8d0]
+  0x007EA75D  33C4                     xor      eax, esp
+  0x007EA75F  50                       push     eax
+  0x007EA760  8D842488010000           lea      eax, [esp + 0x188]
+  0x007EA767  64A300000000             mov      dword ptr fs:[0], eax
+  0x007EA76D  8BAC24A0010000           mov      ebp, dword ptr [esp + 0x1a0]   <== EBP WRITE
+  0x007EA774  8B4508                   mov      eax, dword ptr [ebp + 8]
+  0x007EA777  33FF                     xor      edi, edi
+  0x007EA779  3BC7                     cmp      eax, edi
+  0x007EA77B  7555                     jne      0x7ea7d2
+  0x007EA77D  6A44                     push     0x44
+  0x007EA77F  E8402C1700               call     0x95d3c4
+  0x007EA784  83C404                   add      esp, 4
+  0x007EA787  898424C0000000           mov      dword ptr [esp + 0xc0], eax
+  0x007EA78E  3BC7                     cmp      eax, edi
+  0x007EA790  89BC2490010000           mov      dword ptr [esp + 0x190], edi
+  0x007EA797  7411                     je       0x7ea7aa
+  0x007EA799  8B8C24A4010000           mov      ecx, dword ptr [esp + 0x1a4]
+  0x007EA7A0  51                       push     ecx
+  0x007EA7A1  8BC8                     mov      ecx, eax
+  0x007EA7A3  E898FAFFFF               call     0x7ea240
+  0x007EA7A8  EB02                     jmp      0x7ea7ac
+  0x007EA7AA  33C0                     xor      eax, eax
+  0x007EA7AC  8D542428                 lea      edx, [esp + 0x28]
+  0x007EA7B0  52                       push     edx
+  0x007EA7B1  8D4D18                   lea      ecx, [ebp + 0x18]
+  0x007EA7B4  C7842494010000FFFFFFFF   mov      dword ptr [esp + 0x194], 0xffffffff
+  0x007EA7BF  8944242C                 mov      dword ptr [esp + 0x2c], eax
+  0x007EA7C3  894530                   mov      dword ptr [ebp + 0x30], eax
+  0x007EA7C6  E805FFFFFF               call     0x7ea6d0
+  0x007EA7CB  B001                     mov      al, 1
+  0x007EA7CD  E91D0A0000               jmp      0x7eb1ef
+  0x007EA7D2  8B842498010000           mov      eax, dword ptr [esp + 0x198]
+  0x007EA7D9  8BB424A4010000           mov      esi, dword ptr [esp + 0x1a4]
+  0x007EA7E0  D900                     fld      dword ptr [eax]
+  0x007EA7E2  D8A690000000             fsub     dword ptr [esi + 0x90]
+  0x007EA7E8  8D5E6C                   lea      ebx, [esi + 0x6c]
+  0x007EA7EB  53                       push     ebx
+  0x007EA7EC  8D8C24D4000000           lea      ecx, [esp + 0xd4]
+  0x007EA7F3  D95C242C                 fstp     dword ptr [esp + 0x2c]
+  0x007EA7F7  D94004                   fld      dword ptr [eax + 4]
+  0x007EA7FA  D86328                   fsub     dword ptr [ebx + 0x28]
+  0x007EA7FD  D95C2430                 fstp     dword ptr [esp + 0x30]
+  0x007EA801  D94008                   fld      dword ptr [eax + 8]
+  0x007EA804  8D842468010000           lea      eax, [esp + 0x168]
+  0x007EA80B  D8632C                   fsub     dword ptr [ebx + 0x2c]
+  0x007EA80E  50                       push     eax
+  0x007EA80F  51                       push     ecx
+  0x007EA810  D95C2430                 fstp     dword ptr [esp + 0x30]
+  0x007EA814  D9442434                 fld      dword ptr [esp + 0x34]
+  0x007EA818  D99C2470010000           fstp     dword ptr [esp + 0x170]
+  0x007EA81F  D9442438                 fld      dword ptr [esp + 0x38]
+  0x007EA823  D99C2474010000           fstp     dword ptr [esp + 0x174]
+  0x007EA82A  D9442430                 fld      dword ptr [esp + 0x30]
+  0x007EA82E  D99C2478010000           fstp     dword ptr [esp + 0x178]
+  0x007EA835  D94330                   fld      dword ptr [ebx + 0x30]
+  0x007EA838  D9E8                     fld1     
+  0x007EA83A  DEF1                     fdivrp   st(1)
+  0x007EA83C  D95C2438                 fstp     dword ptr [esp + 0x38]
+  0x007EA840  E80B99FDFF               call     0x7c4150
+  0x007EA845  D900                     fld      dword ptr [eax]
+  0x007EA847  D9442438                 fld      dword ptr [esp + 0x38]
+  0x007EA84B  8B9424A8010000           mov      edx, dword ptr [esp + 0x1a8]
+  0x007EA852  D9C0                     fld      st(0)
+  0x007EA854  53                       push     ebx
+  0x007EA855  DECA                     fmulp    st(2)
+  0x007EA857  52                       push     edx
+  0x007EA858  D9C9                     fxch     st(1)
+  0x007EA85A  D95C2438                 fstp     dword ptr [esp + 0x38]
+  0x007EA85E  D94004                   fld      dword ptr [eax + 4]
+  0x007EA861  D8C9                     fmul     st(1)
+  0x007EA863  D95C243C                 fstp     dword ptr [esp + 0x3c]
+  0x007EA867  D84808                   fmul     dword ptr [eax + 8]
+  0x007EA86A  8D8424E4000000           lea      eax, [esp + 0xe4]
+  0x007EA871  50                       push     eax
+  0x007EA872  D95C2448                 fstp     dword ptr [esp + 0x48]
+  0x007EA876  D944243C                 fld      dword ptr [esp + 0x3c]
+  0x007EA87A  D99C2464010000           fstp     dword ptr [esp + 0x164]
+  0x007EA881  D9442440                 fld      dword ptr [esp + 0x40]
+  0x007EA885  D99C2468010000           fstp     dword ptr [esp + 0x168]
+  0x007EA88C  D9442448                 fld      dword ptr [esp + 0x48]
+  0x007EA890  D99C246C010000           fstp     dword ptr [esp + 0x16c]
+  0x007EA897  E8B498FDFF               call     0x7c4150
+  0x007EA89C  D900                     fld      dword ptr [eax]
+  0x007EA89E  8B8ED0000000             mov      ecx, dword ptr [esi + 0xd0]
+  0x007EA8A4  D9442444                 fld      dword ptr [esp + 0x44]
+  0x007EA8A8  83C418                   add      esp, 0x18
+  0x007EA8AB  D9C0                     fld      st(0)
+  0x007EA8AD  C644242300               mov      byte ptr [esp + 0x23], 0
+  0x007EA8B2  DECA                     fmulp    st(2)
+  0x007EA8B4  D9C9                     fxch     st(1)
+  0x007EA8B6  D95C2430                 fstp     dword ptr [esp + 0x30]
+  0x007EA8BA  D94004                   fld      dword ptr [eax + 4]
+  0x007EA8BD  D8C9                     fmul     st(1)
+  0x007EA8BF  D95C2424                 fstp     dword ptr [esp + 0x24]
+  0x007EA8C3  D84808                   fmul     dword ptr [eax + 8]
+  0x007EA8C6  D95C2428                 fstp     dword ptr [esp + 0x28]
+  0x007EA8CA  D9442430                 fld      dword ptr [esp + 0x30]
+  0x007EA8CE  D99C2458010000           fstp     dword ptr [esp + 0x158]
+  0x007EA8D5  D9442424                 fld      dword ptr [esp + 0x24]
+  0x007EA8D9  D99C245C010000           fstp     dword ptr [esp + 0x15c]
+  0x007EA8E0  D9442428                 fld      dword ptr [esp + 0x28]
+  0x007EA8E4  D99C2460010000           fstp     dword ptr [esp + 0x160]
+  0x007EA8EB  8B11                     mov      edx, dword ptr [ecx]
+  0x007EA8ED  8B425C                   mov      eax, dword ptr [edx + 0x5c]
+  0x007EA8F0  FFD0                     call     eax
+  0x007EA8F2  0FB7C0                   movzx    eax, ax
+  0x007EA8F5  663BC7                   cmp      ax, di
+  0x007EA8F8  898424C0000000           mov      dword ptr [esp + 0xc0], eax
+  0x007EA8FF  897C242C                 mov      dword ptr [esp + 0x2c], edi
+  0x007EA903  0F86E2080000             jbe      0x7eb1eb
+  0x007EA909  8B8ED0000000             mov      ecx, dword ptr [esi + 0xd0]
+  0x007EA90F  8B11                     mov      edx, dword ptr [ecx]
+  0x007EA911  8B5260                   mov      edx, dword ptr [edx + 0x60]
+  0x007EA914  8D44241C                 lea      eax, [esp + 0x1c]
+  0x007EA918  50                       push     eax
+  0x007EA919  8D442418                 lea      eax, [esp + 0x18]
+  0x007EA91D  50                       push     eax
+  0x007EA91E  8D442420                 lea      eax, [esp + 0x20]
+  0x007EA922  50                       push     eax
+  0x007EA923  8B442438                 mov      eax, dword ptr [esp + 0x38]
+  0x007EA927  50                       push     eax
+  0x007EA928  FFD2                     call     edx
+  0x007EA92A  8B86D0000000             mov      eax, dword ptr [esi + 0xd0]
+  0x007EA930  8B7820                   mov      edi, dword ptr [eax + 0x20]
+  0x007EA933  8A4510                   mov      al, byte ptr [ebp + 0x10]
+  0x007EA936  88442430                 mov      byte ptr [esp + 0x30], al
+  0x007EA93A  8D8C248C000000           lea      ecx, [esp + 0x8c]
+  0x007EA941  51                       push     ecx
+  0x007EA942  8D54245C                 lea      edx, [esp + 0x5c]
+  0x007EA946  52                       push     edx
+  0x007EA947  8B542438                 mov      edx, dword ptr [esp + 0x38]
+  0x007EA94B  8D842444010000           lea      eax, [esp + 0x144]
+  0x007EA952  50                       push     eax
+  0x007EA953  0FB7442428               movzx    eax, word ptr [esp + 0x28]
+  0x007EA958  8D0440                   lea      eax, [eax + eax*2]
+  0x007EA95B  8D8C24D0000000           lea      ecx, [esp + 0xd0]
+  0x007EA962  51                       push     ecx
+  0x007EA963  8D0C87                   lea      ecx, [edi + eax*4]
+  0x007EA966  0FB7442424               movzx    eax, word ptr [esp + 0x24]
+  0x007EA96B  52                       push     edx
+  0x007EA96C  51                       push     ecx
+  0x007EA96D  8D1440                   lea      edx, [eax + eax*2]
+  0x007EA970  8D0497                   lea      eax, [edi + edx*4]
+  0x007EA973  50                       push     eax
+  0x007EA974  0FB7442434               movzx    eax, word ptr [esp + 0x34]
+  0x007EA979  8D0C40                   lea      ecx, [eax + eax*2]
+  0x007EA97C  8D148F                   lea      edx, [edi + ecx*4]
+  0x007EA97F  52                       push     edx
+  0x007EA980  8D842478010000           lea      eax, [esp + 0x178]
+  0x007EA987  50                       push     eax
+  0x007EA988  8D8C2470010000           lea      ecx, [esp + 0x170]
+  0x007EA98F  51                       push     ecx
+  0x007EA990  E8EB380200               call     0x80e280
+  0x007EA995  83C428                   add      esp, 0x28
+  0x007EA998  84C0                     test     al, al
+  0x007EA99A  0F8432080000             je       0x7eb1d2
+  0x007EA9A0  6A44                     push     0x44
+  0x007EA9A2  C644242701               mov      byte ptr [esp + 0x27], 1
+  0x007EA9A7  E8182A1700               call     0x95d3c4
+  0x007EA9AC  83C404                   add      esp, 4
+  0x007EA9AF  89442424                 mov      dword ptr [esp + 0x24], eax
+  0x007EA9B3  85C0                     test     eax, eax
+  0x007EA9B5  C784249001000001000000   mov      dword ptr [esp + 0x190], 1
+  0x007EA9C0  740C                     je       0x7ea9ce
+  0x007EA9C2  56                       push     esi
+  0x007EA9C3  8BC8                     mov      ecx, eax
+  0x007EA9C5  E876F8FFFF               call     0x7ea240
+  0x007EA9CA  8BF0                     mov      esi, eax
+  0x007EA9CC  EB02                     jmp      0x7ea9d0
+  0x007EA9CE  33F6                     xor      esi, esi
+  0x007EA9D0  837D0C01                 cmp      dword ptr [ebp + 0xc], 1
+  0x007EA9D4  C7842490010000FFFFFFFF   mov      dword ptr [esp + 0x190], 0xffffffff
+  0x007EA9DF  0F85A0000000             jne      0x7eaa85
+  0x007EA9E5  8D9424C4000000           lea      edx, [esp + 0xc4]
+  0x007EA9EC  52                       push     edx
+  0x007EA9ED  8D842474010000           lea      eax, [esp + 0x174]
+  0x007EA9F4  50                       push     eax
+  0x007EA9F5  8BCB                     mov      ecx, ebx
+  0x007EA9F7  E8A496FDFF               call     0x7c40a0
+  0x007EA9FC  D94330                   fld      dword ptr [ebx + 0x30]
+  0x007EA9FF  D95C2424                 fstp     dword ptr [esp + 0x24]
+  0x007EAA03  D9442424                 fld      dword ptr [esp + 0x24]
+  0x007EAA07  D9C0                     fld      st(0)
+  0x007EAA09  D808                     fmul     dword ptr [eax]
+  0x007EAA0B  D99C24DC000000           fstp     dword ptr [esp + 0xdc]
+  0x007EAA12  D94004                   fld      dword ptr [eax + 4]
+  0x007EAA15  D8C9                     fmul     st(1)
+  0x007EAA17  D99C24E0000000           fstp     dword ptr [esp + 0xe0]
+  0x007EAA1E  D84808                   fmul     dword ptr [eax + 8]
+  0x007EAA21  D99C24E4000000           fstp     dword ptr [esp + 0xe4]
+  0x007EAA28  D94324                   fld      dword ptr [ebx + 0x24]
+  0x007EAA2B  D88424DC000000           fadd     dword ptr [esp + 0xdc]
+  0x007EAA32  D99C2400010000           fstp     dword ptr [esp + 0x100]
+  0x007EAA39  8B8C2400010000           mov      ecx, dword ptr [esp + 0x100]
+  0x007EAA40  D94328                   fld      dword ptr [ebx + 0x28]
+  0x007EAA43  898C24C4000000           mov      dword ptr [esp + 0xc4], ecx
+  0x007EAA4A  D88424E0000000           fadd     dword ptr [esp + 0xe0]
+  0x007EAA51  D99C2404010000           fstp     dword ptr [esp + 0x104]
+  0x007EAA58  8B942404010000           mov      edx, dword ptr [esp + 0x104]
+  0x007EAA5F  D9432C                   fld      dword ptr [ebx + 0x2c]
+  0x007EAA62  899424C8000000           mov      dword ptr [esp + 0xc8], edx
+  0x007EAA69  D88424E4000000           fadd     dword ptr [esp + 0xe4]
+  0x007EAA70  D99C2408010000           fstp     dword ptr [esp + 0x108]
+  0x007EAA77  8B842408010000           mov      eax, dword ptr [esp + 0x108]
+  0x007EAA7E  898424CC000000           mov      dword ptr [esp + 0xcc], eax
+  0x007EAA85  8B8C24C4000000           mov      ecx, dword ptr [esp + 0xc4]
+  0x007EAA8C  894E08                   mov      dword ptr [esi + 8], ecx
+  0x007EAA8F  8B9424C8000000           mov      edx, dword ptr [esp + 0xc8]
+  0x007EAA96  668B4C242C               mov      cx, word ptr [esp + 0x2c]
+  0x007EAA9B  89560C                   mov      dword ptr [esi + 0xc], edx
+  0x007EAA9E  8B8424CC000000           mov      eax, dword ptr [esp + 0xcc]
+  0x007EAAA5  894610                   mov      dword ptr [esi + 0x10], eax
+  0x007EAAA8  D984243C010000           fld      dword ptr [esp + 0x13c]
+  0x007EAAAF  D95E14                   fstp     dword ptr [esi + 0x14]
+  0x007EAAB2  66894E18                 mov      word ptr [esi + 0x18], cx
+  0x007EAAB6  0FB744241C               movzx    eax, word ptr [esp + 0x1c]
+  0x007EAABB  0FB74C2414               movzx    ecx, word ptr [esp + 0x14]
+  0x007EAAC0  668B542418               mov      dx, word ptr [esp + 0x18]
+  0x007EAAC5  6689561A                 mov      word ptr [esi + 0x1a], dx
+  0x007EAAC9  66894E1C                 mov      word ptr [esi + 0x1c], cx
+  0x007EAACD  6689461E                 mov      word ptr [esi + 0x1e], ax
+  0x007EAAD1  807D3400                 cmp      byte ptr [ebp + 0x34], 0
+  0x007EAAD5  D9442458                 fld      dword ptr [esp + 0x58]
+  0x007EAAD9  D9C0                     fld      st(0)
+  0x007EAADB  D984248C000000           fld      dword ptr [esp + 0x8c]
+  0x007EAAE2  D9C0                     fld      st(0)
+  0x007EAAE4  DEC2                     faddp    st(2)
+  0x007EAAE6  D9E8                     fld1     
+  0x007EAAE8  DEE2                     fsubrp   st(2)
+  0x007EAAEA  D9C9                     fxch     st(1)
+  0x007EAAEC  D95C2428                 fstp     dword ptr [esp + 0x28]
+  0x007EAAF0  D9442428                 fld      dword ptr [esp + 0x28]
+  0x007EAAF4  0F845C010000             je       0x7eac56
+  0x007EAAFA  8B8424A4010000           mov      eax, dword ptr [esp + 0x1a4]
+  0x007EAB01  8B88D0000000             mov      ecx, dword ptr [eax + 0xd0]
+  0x007EAB07  8B412C                   mov      eax, dword ptr [ecx + 0x2c]
+  0x007EAB0A  85C0                     test     eax, eax
+  0x007EAB0C  0F8431010000             je       0x7eac43
+  0x007EAB12  0FB754241C               movzx    edx, word ptr [esp + 0x1c]
+  0x007EAB17  8D0CD0                   lea      ecx, [eax + edx*8]
+  0x007EAB1A  8B11                     mov      edx, dword ptr [ecx]
+  0x007EAB1C  8B4904                   mov      ecx, dword ptr [ecx + 4]
+  0x007EAB1F  89942484000000           mov      dword ptr [esp + 0x84], edx
+  0x007EAB26  0FB7542414               movzx    edx, word ptr [esp + 0x14]
+  0x007EAB2B  D9842484000000           fld      dword ptr [esp + 0x84]
+  0x007EAB32  D8CA                     fmul     st(2)
+  0x007EAB34  898C2488000000           mov      dword ptr [esp + 0x88], ecx
+  0x007EAB3B  8D0CD0                   lea      ecx, [eax + edx*8]
+  0x007EAB3E  8B11                     mov      edx, dword ptr [ecx]
+  0x007EAB40  D99C2484000000           fstp     dword ptr [esp + 0x84]
+  0x007EAB47  D9842488000000           fld      dword ptr [esp + 0x88]
+  0x007EAB4E  8B4904                   mov      ecx, dword ptr [ecx + 4]
+  0x007EAB51  DECA                     fmulp    st(2)
+  0x007EAB53  8954247C                 mov      dword ptr [esp + 0x7c], edx
+  0x007EAB57  0FB7542418               movzx    edx, word ptr [esp + 0x18]
+  0x007EAB5C  D9C9                     fxch     st(1)
+  0x007EAB5E  D99C2488000000           fstp     dword ptr [esp + 0x88]
+  0x007EAB65  D944247C                 fld      dword ptr [esp + 0x7c]
+  0x007EAB69  898C2480000000           mov      dword ptr [esp + 0x80], ecx
+  0x007EAB70  8B0CD0                   mov      ecx, dword ptr [eax + edx*8]
+  0x007EAB73  D8CA                     fmul     st(2)
+  0x007EAB75  8D04D0                   lea      eax, [eax + edx*8]
+  0x007EAB78  8B5004                   mov      edx, dword ptr [eax + 4]
+  0x007EAB7B  D95C247C                 fstp     dword ptr [esp + 0x7c]
+  0x007EAB7F  894C2440                 mov      dword ptr [esp + 0x40], ecx
+  0x007EAB83  D9842480000000           fld      dword ptr [esp + 0x80]
+  0x007EAB8A  89542444                 mov      dword ptr [esp + 0x44], edx
+  0x007EAB8E  DECA                     fmulp    st(2)
+  0x007EAB90  D9C9                     fxch     st(1)
+  0x007EAB92  D99C2480000000           fstp     dword ptr [esp + 0x80]
+  0x007EAB99  D9442440                 fld      dword ptr [esp + 0x40]
+  0x007EAB9D  D8C9                     fmul     st(1)
+  0x007EAB9F  D95C2440                 fstp     dword ptr [esp + 0x40]
+  0x007EABA3  8B442440                 mov      eax, dword ptr [esp + 0x40]
+  0x007EABA7  D9442444                 fld      dword ptr [esp + 0x44]
+  0x007EABAB  89842490000000           mov      dword ptr [esp + 0x90], eax
+  0x007EABB2  D8C9                     fmul     st(1)
+  0x007EABB4  D95C2444                 fstp     dword ptr [esp + 0x44]
+  0x007EABB8  8B4C2444                 mov      ecx, dword ptr [esp + 0x44]
+  0x007EABBC  D9442440                 fld      dword ptr [esp + 0x40]
+  0x007EABC0  898C2494000000           mov      dword ptr [esp + 0x94], ecx
+  0x007EABC7  D844247C                 fadd     dword ptr [esp + 0x7c]
+  0x007EABCB  D99C2490000000           fstp     dword ptr [esp + 0x90]
+  0x007EABD2  8B942490000000           mov      edx, dword ptr [esp + 0x90]
+  0x007EABD9  D9842494000000           fld      dword ptr [esp + 0x94]
+  0x007EABE0  899424B8000000           mov      dword ptr [esp + 0xb8], edx
+  0x007EABE7  D8842480000000           fadd     dword ptr [esp + 0x80]
+  0x007EABEE  D99C2494000000           fstp     dword ptr [esp + 0x94]
+  0x007EABF5  8B842494000000           mov      eax, dword ptr [esp + 0x94]
+  0x007EABFC  D9842490000000           fld      dword ptr [esp + 0x90]
+  0x007EAC03  898424BC000000           mov      dword ptr [esp + 0xbc], eax
+  0x007EAC0A  D8842484000000           fadd     dword ptr [esp + 0x84]
+  0x007EAC11  D99C24B8000000           fstp     dword ptr [esp + 0xb8]
+  0x007EAC18  8B8C24B8000000           mov      ecx, dword ptr [esp + 0xb8]
+  0x007EAC1F  D98424BC000000           fld      dword ptr [esp + 0xbc]
+  0x007EAC26  894E20                   mov      dword ptr [esi + 0x20], ecx
+  0x007EAC29  D8842488000000           fadd     dword ptr [esp + 0x88]
+  0x007EAC30  D99C24BC000000           fstp     dword ptr [esp + 0xbc]
+  0x007EAC37  8B9424BC000000           mov      edx, dword ptr [esp + 0xbc]
+  0x007EAC3E  895624                   mov      dword ptr [esi + 0x24], edx
+  0x007EAC41  EB28                     jmp      0x7eac6b
+  0x007EAC43  A1407BBA00               mov      eax, dword ptr [0xba7b40]
+  0x007EAC48  894620                   mov      dword ptr [esi + 0x20], eax
+  0x007EAC4B  8B0D447BBA00             mov      ecx, dword ptr [0xba7b44]
+  0x007EAC51  894E24                   mov      dword ptr [esi + 0x24], ecx
+  0x007EAC54  EB11                     jmp      0x7eac67
+  0x007EAC56  8B15407BBA00             mov      edx, dword ptr [0xba7b40]
+  0x007EAC5C  895620                   mov      dword ptr [esi + 0x20], edx
+  0x007EAC5F  A1447BBA00               mov      eax, dword ptr [0xba7b44]
+  0x007EAC64  894624                   mov      dword ptr [esi + 0x24], eax
+  0x007EAC67  DDDA                     fstp     st(2)
+  0x007EAC69  DDD8                     fstp     st(0)
+  0x007EAC6B  807D3500                 cmp      byte ptr [ebp + 0x35], 0
+  0x007EAC6F  0F849B020000             je       0x7eaf10
+  0x007EAC75  807D3600                 cmp      byte ptr [ebp + 0x36], 0
+  0x007EAC79  8B8C24A4010000           mov      ecx, dword ptr [esp + 0x1a4]
+  0x007EAC80  8B91D0000000             mov      edx, dword ptr [ecx + 0xd0]
+  0x007EAC86  8B4A24                   mov      ecx, dword ptr [edx + 0x24]
+  0x007EAC89  0F843F010000             je       0x7eadce
+  0x007EAC8F  85C9                     test     ecx, ecx
+  0x007EAC91  0F8437010000             je       0x7eadce
+  0x007EAC97  0FB744241C               movzx    eax, word ptr [esp + 0x1c]
+  0x007EAC9C  8D0440                   lea      eax, [eax + eax*2]
+  0x007EAC9F  8D0481                   lea      eax, [ecx + eax*4]
+  0x007EACA2  D900                     fld      dword ptr [eax]
+  0x007EACA4  D984248C000000           fld      dword ptr [esp + 0x8c]
+  0x007EACAB  D9C0                     fld      st(0)
+  0x007EACAD  DECA                     fmulp    st(2)
+  0x007EACAF  D9C9                     fxch     st(1)
+  0x007EACB1  D99C24F4000000           fstp     dword ptr [esp + 0xf4]
+  0x007EACB8  D94004                   fld      dword ptr [eax + 4]
+  0x007EACBB  D8C9                     fmul     st(1)
+  0x007EACBD  D99C24F8000000           fstp     dword ptr [esp + 0xf8]
+  0x007EACC4  D84808                   fmul     dword ptr [eax + 8]
+  0x007EACC7  0FB7442414               movzx    eax, word ptr [esp + 0x14]
+  0x007EACCC  8D1440                   lea      edx, [eax + eax*2]
+  0x007EACCF  8D0491                   lea      eax, [ecx + edx*4]
+  0x007EACD2  D99C24FC000000           fstp     dword ptr [esp + 0xfc]
+  0x007EACD9  D9442458                 fld      dword ptr [esp + 0x58]
+  0x007EACDD  D9C0                     fld      st(0)
+  0x007EACDF  D808                     fmul     dword ptr [eax]
+  0x007EACE1  D99C2430010000           fstp     dword ptr [esp + 0x130]
+  0x007EACE8  D94004                   fld      dword ptr [eax + 4]
+  0x007EACEB  D8C9                     fmul     st(1)
+  0x007EACED  D99C2434010000           fstp     dword ptr [esp + 0x134]
+  0x007EACF4  D84808                   fmul     dword ptr [eax + 8]
+  0x007EACF7  0FB7442418               movzx    eax, word ptr [esp + 0x18]
+  0x007EACFC  8D0440                   lea      eax, [eax + eax*2]
+  0x007EACFF  8D0481                   lea      eax, [ecx + eax*4]
+  0x007EAD02  D99C2438010000           fstp     dword ptr [esp + 0x138]
+  0x007EAD09  D900                     fld      dword ptr [eax]
+  0x007EAD0B  D8C9                     fmul     st(1)
+  0x007EAD0D  D99C2418010000           fstp     dword ptr [esp + 0x118]
+  0x007EAD14  D94004                   fld      dword ptr [eax + 4]
+  0x007EAD17  D8C9                     fmul     st(1)
+  0x007EAD19  D99C241C010000           fstp     dword ptr [esp + 0x11c]
+  0x007EAD20  D84808                   fmul     dword ptr [eax + 8]
+  0x007EAD23  D99C2420010000           fstp     dword ptr [esp + 0x120]
+  0x007EAD2A  D9842418010000           fld      dword ptr [esp + 0x118]
+  0x007EAD31  D8842430010000           fadd     dword ptr [esp + 0x130]
+  0x007EAD38  D99C2440010000           fstp     dword ptr [esp + 0x140]
+  0x007EAD3F  D984241C010000           fld      dword ptr [esp + 0x11c]
+  0x007EAD46  D8842434010000           fadd     dword ptr [esp + 0x134]
+  0x007EAD4D  D99C2444010000           fstp     dword ptr [esp + 0x144]
+  0x007EAD54  D9842420010000           fld      dword ptr [esp + 0x120]
+  0x007EAD5B  D8842438010000           fadd     dword ptr [esp + 0x138]
+  0x007EAD62  D99C2448010000           fstp     dword ptr [esp + 0x148]
+  0x007EAD69  D9842440010000           fld      dword ptr [esp + 0x140]
+  0x007EAD70  D88424F4000000           fadd     dword ptr [esp + 0xf4]
+  0x007EAD77  D99C24E8000000           fstp     dword ptr [esp + 0xe8]
+  0x007EAD7E  8B8C24E8000000           mov      ecx, dword ptr [esp + 0xe8]
+  0x007EAD85  D9842444010000           fld      dword ptr [esp + 0x144]
+  0x007EAD8C  894C2434                 mov      dword ptr [esp + 0x34], ecx
+  0x007EAD90  D88424F8000000           fadd     dword ptr [esp + 0xf8]
+  0x007EAD97  D99C24EC000000           fstp     dword ptr [esp + 0xec]
+  0x007EAD9E  8B9424EC000000           mov      edx, dword ptr [esp + 0xec]
+  0x007EADA5  D9842448010000           fld      dword ptr [esp + 0x148]
+  0x007EADAC  89542438                 mov      dword ptr [esp + 0x38], edx
+  0x007EADB0  D88424FC000000           fadd     dword ptr [esp + 0xfc]
+  0x007EADB7  D99C24F0000000           fstp     dword ptr [esp + 0xf0]
+  0x007EADBE  8B8424F0000000           mov      eax, dword ptr [esp + 0xf0]
+  0x007EADC5  8944243C                 mov      dword ptr [esp + 0x3c], eax
+  0x007EADC9  E9F1000000               jmp      0x7eaebf
+  0x007EADCE  0FB7442418               movzx    eax, word ptr [esp + 0x18]
+  0x007EADD3  DDD8                     fstp     st(0)
+  0x007EADD5  8D0C40                   lea      ecx, [eax + eax*2]
+  0x007EADD8  8D048F                   lea      eax, [edi + ecx*4]
+  0x007EADDB  0FB74C2414               movzx    ecx, word ptr [esp + 0x14]
+  0x007EADE0  8D1449                   lea      edx, [ecx + ecx*2]
+  0x007EADE3  8D0C97                   lea      ecx, [edi + edx*4]
+  0x007EADE6  D901                     fld      dword ptr [ecx]
+  0x007EADE8  D820                     fsub     dword ptr [eax]
+  0x007EADEA  D99C240C010000           fstp     dword ptr [esp + 0x10c]
+  0x007EADF1  D94104                   fld      dword ptr [ecx + 4]
+  0x007EADF4  D86004                   fsub     dword ptr [eax + 4]
+  0x007EADF7  D99C2410010000           fstp     dword ptr [esp + 0x110]
+  0x007EADFE  D94108                   fld      dword ptr [ecx + 8]
+  0x007EAE01  0FB74C241C               movzx    ecx, word ptr [esp + 0x1c]
+  0x007EAE06  D86008                   fsub     dword ptr [eax + 8]
+  0x007EAE09  8D0C49                   lea      ecx, [ecx + ecx*2]
+  0x007EAE0C  8D0C8F                   lea      ecx, [edi + ecx*4]
+  0x007EAE0F  D99C2414010000           fstp     dword ptr [esp + 0x114]
+  0x007EAE16  D901                     fld      dword ptr [ecx]
+  0x007EAE18  D820                     fsub     dword ptr [eax]
+  0x007EAE1A  D99C2424010000           fstp     dword ptr [esp + 0x124]
+  0x007EAE21  D94104                   fld      dword ptr [ecx + 4]
+  0x007EAE24  D86004                   fsub     dword ptr [eax + 4]
+  0x007EAE27  D99C2428010000           fstp     dword ptr [esp + 0x128]
+  0x007EAE2E  D94108                   fld      dword ptr [ecx + 8]
+  0x007EAE31  D86008                   fsub     dword ptr [eax + 8]
+  0x007EAE34  D99C242C010000           fstp     dword ptr [esp + 0x12c]
+  0x007EAE3B  D984242C010000           fld      dword ptr [esp + 0x12c]
+  0x007EAE42  D9C0                     fld      st(0)
+  0x007EAE44  D9842410010000           fld      dword ptr [esp + 0x110]
+  0x007EAE4B  D9C0                     fld      st(0)
+  0x007EAE4D  DECA                     fmulp    st(2)
+  0x007EAE4F  D9842428010000           fld      dword ptr [esp + 0x128]
+  0x007EAE56  D9C0                     fld      st(0)
+  0x007EAE58  D9842414010000           fld      dword ptr [esp + 0x114]
+  0x007EAE5F  D9C0                     fld      st(0)
+  0x007EAE61  DECA                     fmulp    st(2)
+  0x007EAE63  D9CC                     fxch     st(4)
+  0x007EAE65  DEE1                     fsubrp   st(1)
+  0x007EAE67  D99C24D0000000           fstp     dword ptr [esp + 0xd0]
+  0x007EAE6E  8B9424D0000000           mov      edx, dword ptr [esp + 0xd0]
+  0x007EAE75  D9842424010000           fld      dword ptr [esp + 0x124]
+  0x007EAE7C  89542434                 mov      dword ptr [esp + 0x34], edx
+  0x007EAE80  D9C0                     fld      st(0)
+  0x007EAE82  DECC                     fmulp    st(4)
+  0x007EAE84  D984240C010000           fld      dword ptr [esp + 0x10c]
+  0x007EAE8B  D9C0                     fld      st(0)
+  0x007EAE8D  DECE                     fmulp    st(6)
+  0x007EAE8F  D9CC                     fxch     st(4)
+  0x007EAE91  DEE5                     fsubrp   st(5)
+  0x007EAE93  D9CC                     fxch     st(4)
+  0x007EAE95  D99C24D4000000           fstp     dword ptr [esp + 0xd4]
+  0x007EAE9C  8B8424D4000000           mov      eax, dword ptr [esp + 0xd4]
+  0x007EAEA3  89442438                 mov      dword ptr [esp + 0x38], eax
+  0x007EAEA7  DECA                     fmulp    st(2)
+  0x007EAEA9  DECA                     fmulp    st(2)
+  0x007EAEAB  DEE1                     fsubrp   st(1)
+  0x007EAEAD  D99C24D8000000           fstp     dword ptr [esp + 0xd8]
+  0x007EAEB4  8B8C24D8000000           mov      ecx, dword ptr [esp + 0xd8]
+  0x007EAEBB  894C243C                 mov      dword ptr [esp + 0x3c], ecx
+  0x007EAEBF  8D4C2434                 lea      ecx, [esp + 0x34]
+  0x007EAEC3  E8887BCCFF               call     0x4b2a50
+  0x007EAEC8  DDD8                     fstp     st(0)
+  0x007EAECA  837D0C01                 cmp      dword ptr [ebp + 0xc], 1
+  0x007EAECE  7528                     jne      0x7eaef8
+  0x007EAED0  8D542434                 lea      edx, [esp + 0x34]
+  0x007EAED4  52                       push     edx
+  0x007EAED5  8D842480010000           lea      eax, [esp + 0x180]
+  0x007EAEDC  50                       push     eax
+  0x007EAEDD  8BCB                     mov      ecx, ebx
+  0x007EAEDF  E8BC91FDFF               call     0x7c40a0
+  0x007EAEE4  8B08                     mov      ecx, dword ptr [eax]
+  0x007EAEE6  894C2434                 mov      dword ptr [esp + 0x34], ecx
+  0x007EAEEA  8B5004                   mov      edx, dword ptr [eax + 4]
+  0x007EAEED  89542438                 mov      dword ptr [esp + 0x38], edx
+  0x007EAEF1  8B4008                   mov      eax, dword ptr [eax + 8]
+  0x007EAEF4  8944243C                 mov      dword ptr [esp + 0x3c], eax
+  0x007EAEF8  8B4C2434                 mov      ecx, dword ptr [esp + 0x34]
+  0x007EAEFC  D9442428                 fld      dword ptr [esp + 0x28]
+  0x007EAF00  8B542438                 mov      edx, dword ptr [esp + 0x38]
+  0x007EAF04  8B44243C                 mov      eax, dword ptr [esp + 0x3c]
+  0x007EAF08  894E28                   mov      dword ptr [esi + 0x28], ecx
+  0x007EAF0B  89562C                   mov      dword ptr [esi + 0x2c], edx
+  0x007EAF0E  EB17                     jmp      0x7eaf27
+  0x007EAF10  8B0DA073BA00             mov      ecx, dword ptr [0xba73a0]
+  0x007EAF16  894E28                   mov      dword ptr [esi + 0x28], ecx
+  0x007EAF19  8B15A473BA00             mov      edx, dword ptr [0xba73a4]
+  0x007EAF1F  89562C                   mov      dword ptr [esi + 0x2c], edx
+  0x007EAF22  A1A873BA00               mov      eax, dword ptr [0xba73a8]
+  0x007EAF27  894630                   mov      dword ptr [esi + 0x30], eax
+  0x007EAF2A  807D3700                 cmp      byte ptr [ebp + 0x37], 0
+  0x007EAF2E  0F844E020000             je       0x7eb182
+  0x007EAF34  8B8C24A4010000           mov      ecx, dword ptr [esp + 0x1a4]
+  0x007EAF3B  8B91D0000000             mov      edx, dword ptr [ecx + 0xd0]
+  0x007EAF41  8B4A28                   mov      ecx, dword ptr [edx + 0x28]
+  0x007EAF44  85C9                     test     ecx, ecx
+  0x007EAF46  0F8412020000             je       0x7eb15e
+  0x007EAF4C  0FB744241C               movzx    eax, word ptr [esp + 0x1c]
+  0x007EAF51  C1E004                   shl      eax, 4
+  0x007EAF54  8B1408                   mov      edx, dword ptr [eax + ecx]
+  0x007EAF57  03C1                     add      eax, ecx
+  0x007EAF59  8954245C                 mov      dword ptr [esp + 0x5c], edx
+  0x007EAF5D  8B5004                   mov      edx, dword ptr [eax + 4]
+  0x007EAF60  D944245C                 fld      dword ptr [esp + 0x5c]
+  0x007EAF64  89542460                 mov      dword ptr [esp + 0x60], edx
+  0x007EAF68  D984248C000000           fld      dword ptr [esp + 0x8c]
+  0x007EAF6F  8B5008                   mov      edx, dword ptr [eax + 8]
+  0x007EAF72  D9C0                     fld      st(0)
+  0x007EAF74  8B400C                   mov      eax, dword ptr [eax + 0xc]
+  0x007EAF77  DECA                     fmulp    st(2)
+  0x007EAF79  89542464                 mov      dword ptr [esp + 0x64], edx
+  0x007EAF7D  D9C9                     fxch     st(1)
+  0x007EAF7F  89442468                 mov      dword ptr [esp + 0x68], eax
+  0x007EAF83  0FB7442414               movzx    eax, word ptr [esp + 0x14]
+  0x007EAF88  D95C245C                 fstp     dword ptr [esp + 0x5c]
+  0x007EAF8C  D9442460                 fld      dword ptr [esp + 0x60]
+  0x007EAF90  D8C9                     fmul     st(1)
+  0x007EAF92  C1E004                   shl      eax, 4
+  0x007EAF95  8B1408                   mov      edx, dword ptr [eax + ecx]
+  0x007EAF98  03C1                     add      eax, ecx
+  0x007EAF9A  D95C2460                 fstp     dword ptr [esp + 0x60]
+  0x007EAF9E  89942498000000           mov      dword ptr [esp + 0x98], edx
+  0x007EAFA5  D9442464                 fld      dword ptr [esp + 0x64]
+  0x007EAFA9  8B5004                   mov      edx, dword ptr [eax + 4]
+  0x007EAFAC  D8C9                     fmul     st(1)
+  0x007EAFAE  8994249C000000           mov      dword ptr [esp + 0x9c], edx
+  0x007EAFB5  8B5008                   mov      edx, dword ptr [eax + 8]
+  0x007EAFB8  8B400C                   mov      eax, dword ptr [eax + 0xc]
+  0x007EAFBB  D95C2464                 fstp     dword ptr [esp + 0x64]
+  0x007EAFBF  899424A0000000           mov      dword ptr [esp + 0xa0], edx
+  0x007EAFC6  898424A4000000           mov      dword ptr [esp + 0xa4], eax
+  0x007EAFCD  D84C2468                 fmul     dword ptr [esp + 0x68]
+  0x007EAFD1  0FB7442418               movzx    eax, word ptr [esp + 0x18]
+  0x007EAFD6  D95C2468                 fstp     dword ptr [esp + 0x68]
+  0x007EAFDA  C1E004                   shl      eax, 4
+  0x007EAFDD  D9842498000000           fld      dword ptr [esp + 0x98]
+  0x007EAFE4  8B540804                 mov      edx, dword ptr [eax + ecx + 4]
+  0x007EAFE8  D9442458                 fld      dword ptr [esp + 0x58]
+  0x007EAFEC  03C1                     add      eax, ecx
+  0x007EAFEE  D9C0                     fld      st(0)
+  0x007EAFF0  8B08                     mov      ecx, dword ptr [eax]
+  0x007EAFF2  DECA                     fmulp    st(2)
+  0x007EAFF4  894C2448                 mov      dword ptr [esp + 0x48], ecx
+  0x007EAFF8  D9C9                     fxch     st(1)
+  0x007EAFFA  8B4808                   mov      ecx, dword ptr [eax + 8]
+  0x007EAFFD  8954244C                 mov      dword ptr [esp + 0x4c], edx
+  0x007EB001  D99C2498000000           fstp     dword ptr [esp + 0x98]
+  0x007EB008  8B500C                   mov      edx, dword ptr [eax + 0xc]
+  0x007EB00B  D984249C000000           fld      dword ptr [esp + 0x9c]
+  0x007EB012  894C2450                 mov      dword ptr [esp + 0x50], ecx
+  0x007EB016  D8C9                     fmul     st(1)
+  0x007EB018  89542454                 mov      dword ptr [esp + 0x54], edx
+  0x007EB01C  D99C249C000000           fstp     dword ptr [esp + 0x9c]
+  0x007EB023  D98424A0000000           fld      dword ptr [esp + 0xa0]
+  0x007EB02A  D8C9                     fmul     st(1)
+  0x007EB02C  D99C24A0000000           fstp     dword ptr [esp + 0xa0]
+  0x007EB033  D88C24A4000000           fmul     dword ptr [esp + 0xa4]
+  0x007EB03A  D99C24A4000000           fstp     dword ptr [esp + 0xa4]
+  0x007EB041  D9442448                 fld      dword ptr [esp + 0x48]
+  0x007EB045  D8C9                     fmul     st(1)
+  0x007EB047  D95C2448                 fstp     dword ptr [esp + 0x48]
+  0x007EB04B  8B442448                 mov      eax, dword ptr [esp + 0x48]
+  0x007EB04F  D944244C                 fld      dword ptr [esp + 0x4c]
+  0x007EB053  8944246C                 mov      dword ptr [esp + 0x6c], eax
+  0x007EB057  D8C9                     fmul     st(1)
+  0x007EB059  D95C244C                 fstp     dword ptr [esp + 0x4c]
+  0x007EB05D  8B4C244C                 mov      ecx, dword ptr [esp + 0x4c]
+  0x007EB061  D9442450                 fld      dword ptr [esp + 0x50]
+  0x007EB065  894C2470                 mov      dword ptr [esp + 0x70], ecx
+  0x007EB069  D8C9                     fmul     st(1)
+  0x007EB06B  D95C2450                 fstp     dword ptr [esp + 0x50]
+  0x007EB06F  8B542450                 mov      edx, dword ptr [esp + 0x50]
+  0x007EB073  89542474                 mov      dword ptr [esp + 0x74], edx
+  0x007EB077  D84C2454                 fmul     dword ptr [esp + 0x54]
+  0x007EB07B  D95C2454                 fstp     dword ptr [esp + 0x54]
+  0x007EB07F  8B442454                 mov      eax, dword ptr [esp + 0x54]
+  0x007EB083  D9442448                 fld      dword ptr [esp + 0x48]
+  0x007EB087  89442478                 mov      dword ptr [esp + 0x78], eax
+  0x007EB08B  D8842498000000           fadd     dword ptr [esp + 0x98]
+  0x007EB092  D95C246C                 fstp     dword ptr [esp + 0x6c]
+  0x007EB096  8B4C246C                 mov      ecx, dword ptr [esp + 0x6c]
+  0x007EB09A  D9442470                 fld      dword ptr [esp + 0x70]
+  0x007EB09E  898C24A8000000           mov      dword ptr [esp + 0xa8], ecx
+  0x007EB0A5  D884249C000000           fadd     dword ptr [esp + 0x9c]
+  0x007EB0AC  D95C2470                 fstp     dword ptr [esp + 0x70]
+  0x007EB0B0  8B542470                 mov      edx, dword ptr [esp + 0x70]
+  0x007EB0B4  D9442474                 fld      dword ptr [esp + 0x74]
+  0x007EB0B8  899424AC000000           mov      dword ptr [esp + 0xac], edx
+  0x007EB0BF  D88424A0000000           fadd     dword ptr [esp + 0xa0]
+  0x007EB0C6  D95C2474                 fstp     dword ptr [esp + 0x74]
+  0x007EB0CA  8B442474                 mov      eax, dword ptr [esp + 0x74]
+  0x007EB0CE  D9442478                 fld      dword ptr [esp + 0x78]
+  0x007EB0D2  898424B0000000           mov      dword ptr [esp + 0xb0], eax
+  0x007EB0D9  D88424A4000000           fadd     dword ptr [esp + 0xa4]
+  0x007EB0E0  D95C2478                 fstp     dword ptr [esp + 0x78]
+  0x007EB0E4  8B4C2478                 mov      ecx, dword ptr [esp + 0x78]
+  0x007EB0E8  D944246C                 fld      dword ptr [esp + 0x6c]
+  0x007EB0EC  898C24B4000000           mov      dword ptr [esp + 0xb4], ecx
+  0x007EB0F3  D844245C                 fadd     dword ptr [esp + 0x5c]
+  0x007EB0F7  D99C24A8000000           fstp     dword ptr [esp + 0xa8]
+  0x007EB0FE  8B9424A8000000           mov      edx, dword ptr [esp + 0xa8]
+  0x007EB105  D98424AC000000           fld      dword ptr [esp + 0xac]
+  0x007EB10C  895634                   mov      dword ptr [esi + 0x34], edx
+  0x007EB10F  D8442460                 fadd     dword ptr [esp + 0x60]
+  0x007EB113  D99C24AC000000           fstp     dword ptr [esp + 0xac]
+  0x007EB11A  8B8424AC000000           mov      eax, dword ptr [esp + 0xac]
+  0x007EB121  D98424B0000000           fld      dword ptr [esp + 0xb0]
+  0x007EB128  894638                   mov      dword ptr [esi + 0x38], eax
+  0x007EB12B  D8442464                 fadd     dword ptr [esp + 0x64]
+  0x007EB12F  D99C24B0000000           fstp     dword ptr [esp + 0xb0]
+  0x007EB136  8B8C24B0000000           mov      ecx, dword ptr [esp + 0xb0]
+  0x007EB13D  D98424B4000000           fld      dword ptr [esp + 0xb4]
+  0x007EB144  894E3C                   mov      dword ptr [esi + 0x3c], ecx
+  0x007EB147  D8442468                 fadd     dword ptr [esp + 0x68]
+  0x007EB14B  D99C24B4000000           fstp     dword ptr [esp + 0xb4]
+  0x007EB152  8B9424B4000000           mov      edx, dword ptr [esp + 0xb4]
+  0x007EB159  895640                   mov      dword ptr [esi + 0x40], edx
+  0x007EB15C  EB49                     jmp      0x7eb1a7
+  0x007EB15E  A11C3DB900               mov      eax, dword ptr [0xb93d1c]
+  0x007EB163  894634                   mov      dword ptr [esi + 0x34], eax
+  0x007EB166  8B0D203DB900             mov      ecx, dword ptr [0xb93d20]
+  0x007EB16C  894E38                   mov      dword ptr [esi + 0x38], ecx
+  0x007EB16F  8B15243DB900             mov      edx, dword ptr [0xb93d24]
+  0x007EB175  89563C                   mov      dword ptr [esi + 0x3c], edx
+  0x007EB178  A1283DB900               mov      eax, dword ptr [0xb93d28]
+  0x007EB17D  894640                   mov      dword ptr [esi + 0x40], eax
+  0x007EB180  EB23                     jmp      0x7eb1a5
+  0x007EB182  8B0D1C3DB900             mov      ecx, dword ptr [0xb93d1c]
+  0x007EB188  894E34                   mov      dword ptr [esi + 0x34], ecx
+  0x007EB18B  8B15203DB900             mov      edx, dword ptr [0xb93d20]
+  0x007EB191  895638                   mov      dword ptr [esi + 0x38], edx
+  0x007EB194  A1243DB900               mov      eax, dword ptr [0xb93d24]
+  0x007EB199  89463C                   mov      dword ptr [esi + 0x3c], eax
+  0x007EB19C  8B0D283DB900             mov      ecx, dword ptr [0xb93d28]
+  0x007EB1A2  894E40                   mov      dword ptr [esi + 0x40], ecx
+  0x007EB1A5  DDD8                     fstp     st(0)
+  0x007EB1A7  8D542424                 lea      edx, [esp + 0x24]
+  0x007EB1AB  52                       push     edx
+  0x007EB1AC  8D4D18                   lea      ecx, [ebp + 0x18]
+  0x007EB1AF  89742428                 mov      dword ptr [esp + 0x28], esi
+  0x007EB1B3  897530                   mov      dword ptr [ebp + 0x30], esi   <== WRITER (mov dword ptr [ebp + 0x30], esi)
+  0x007EB1B6  E815F5FFFF               call     0x7ea6d0
+  0x007EB1BB  837D0001                 cmp      dword ptr [ebp], 1
+  0x007EB1BF  750A                     jne      0x7eb1cb
+  0x007EB1C1  837D0401                 cmp      dword ptr [ebp + 4], 1
+  0x007EB1C5  0F8400F6FFFF             je       0x7ea7cb
+  0x007EB1CB  8BB424A4010000           mov      esi, dword ptr [esp + 0x1a4]
+  0x007EB1D2  8B44242C                 mov      eax, dword ptr [esp + 0x2c]
+  0x007EB1D6  83C001                   add      eax, 1
+  0x007EB1D9  663B8424C0000000         cmp      ax, word ptr [esp + 0xc0]
+  0x007EB1E1  8944242C                 mov      dword ptr [esp + 0x2c], eax
+  0x007EB1E5  0F821EF7FFFF             jb       0x7ea909
+  0x007EB1EB  8A442423                 mov      al, byte ptr [esp + 0x23]
+
+SUMMARY: real fn 0x007EA740; EBP writes entry->writer: 1; rets crossed: 0

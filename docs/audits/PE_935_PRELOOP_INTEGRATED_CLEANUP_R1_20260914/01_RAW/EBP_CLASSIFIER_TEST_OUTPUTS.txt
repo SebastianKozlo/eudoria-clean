@@ -1,0 +1,37 @@
+=== EBP CLASSIFIER RULE V2 â€” MANDATORY TEST OUTPUTS (RAW PROGRAM OUTPUT) ===
+RUN_ID: PE_935_PRELOOP_INTEGRATED_CLEANUP_R1_20260914
+GENERATOR: 00_CONTROL/ebp_alias_classifier.py (SHA256 AC63A2CB3C2CC9970031E6F69E65937A98F21A90BE3D15C9FAE85BF89C18C0AA)
+COMMAND: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe -B ebp_alias_classifier.py
+interpreter: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe (3.12.7)
+capstone.__version__: 5.0.7 (MEASURED; the 5.0.9 dist-info label is a KNOWN FALSE LABEL)
+capstone.__file__: D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+timestamp: 2026-09-14T16:05:09.760654
+
+--- TEST 1: MANDATORY NEGATIVE TEST (SYNTHETIC_FIXTURE) ---
+FIXTURE (SYNTHETIC_FIXTURE â€” synthetic bytes defined inline in the checker;
+        NEVER claimed to be Entropia bytes):
+  function stream (7 bytes):
+    53                push ebx            (a callee-saved push â€” EBP NOT touched)
+    56                push esi
+    8B D9             mov ebx, ecx        (arbitrary work, EBP NOT touched)
+    89 75 30          mov dword ptr [ebp + 0x30], esi   <- THE WRITER (offset 5)
+  precondition: incoming EBP value UNKNOWN (nothing in the stream defines it)
+  fixture hex: 53568BD9897530
+    detail: writer @0x00400004: mov dword ptr [ebp + 0x30], esi
+    detail: EBP-writing instructions before the writer: 0 
+  CLASSIFIER OUTPUT: POSSIBLE_ALIAS
+  CASE: NONE_PROVEN
+  REASON: UNKNOWN LIVE-IN EBP (never redefined in-function): rule V2 forbids structural REJECTED solely because EBP is untouched â€” EBP is callee-saved and may carry arbitrary caller state; default POSSIBLE_ALIAS
+  REQUIRED: POSSIBLE_ALIAS -> PASS
+
+--- TEST 2: POSITIVE CONTROL (sound case A) ---
+FIXTURE (SYNTHETIC_FIXTURE): push ebp; mov ebp,esp; mov dword ptr [ebp+0x30], eax
+  fixture hex: 558BEC894530
+    detail: writer @0x00400003: mov dword ptr [ebp + 0x30], eax
+    detail: EBP-writing instructions before the writer: 1 [(4194305, 'mov ebp, esp')]
+  CLASSIFIER OUTPUT: REJECTED_ALIAS
+  CASE: A
+  REASON: case A PROVEN: push ebp; mov ebp,esp before the writer â€” EBP is the function's own frame pointer = a stack address; SF is always-heap so [ebp+disp] can never alias SF+0x30
+  REQUIRED: REJECTED_ALIAS -> PASS
+
+G8 SELF-VERDICT: BOTH TESTS PASS

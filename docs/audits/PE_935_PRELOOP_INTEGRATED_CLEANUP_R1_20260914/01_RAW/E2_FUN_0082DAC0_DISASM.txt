@@ -1,0 +1,97 @@
+=== E2 DISASSEMBLY RAW — historical fn attribution 0x0082DAC0 (row traceability) ===
+=== the REAL containing function discovered in phase 2 = 0x0082DA80 ===
+RUN_ID: PE_935_PRELOOP_INTEGRATED_CLEANUP_R1_20260914
+GENERATOR: 00_CONTROL/e_ebp_reval.py (SHA256 B412D68F33F11AB0D6D3148C1B5FA2714F5D076B39BA3CFEA7392F9628DDBB10)
+COMMAND: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe -B e_ebp_reval.py
+INPUT: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe (fail-closed SHA256+SIZE asserted;
+       SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, SIZE 8015872; STATIC-ONLY — never executed)
+capstone provenance: __version__=5.0.7 (measured; the 5.0.9 dist-info label is FALSE) __file__=D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+HISTORICAL CSV ROW: 0x0082DB61,0x0082DAC0,"mov word ptr [ebp + 0x30], cx",cx,caller stack (inherited ebp),REJECTED_ALIAS
+SCOPE: phase-1 disproof bytes at the historical VA; real function decode entry->writer+0x40.
+TIMESTAMP: 2026-09-14T16:04:19.761446
+
+--- phase 1: bytes at the HISTORICAL claimed entry 0x0082DAC0 (first 0x20 bytes) ---
+  0x0082DAC0  00 00 00 8B 85 90 00 00 00 8D 48 01 3B 8D 8C 00
+  0x0082DAD0  00 00 73 0B 8A 10 88 55 26 01 B5 90 00 00 00 8B
+
+--- phase 2: real function 0x0082DA80 — decode from entry to writer+0x40 ---
+  0x0082DA80  53                       push     ebx
+  0x0082DA81  55                       push     ebp
+  0x0082DA82  8BE9                     mov      ebp, ecx   <== EBP WRITE
+  0x0082DA84  8B8590000000             mov      eax, dword ptr [ebp + 0x90]
+  0x0082DA8A  56                       push     esi
+  0x0082DA8B  8D4801                   lea      ecx, [eax + 1]
+  0x0082DA8E  3B8D8C000000             cmp      ecx, dword ptr [ebp + 0x8c]
+  0x0082DA94  57                       push     edi
+  0x0082DA95  BE01000000               mov      esi, 1
+  0x0082DA9A  730B                     jae      0x82daa7
+  0x0082DA9C  8A10                     mov      dl, byte ptr [eax]
+  0x0082DA9E  885524                   mov      byte ptr [ebp + 0x24], dl
+  0x0082DAA1  01B590000000             add      dword ptr [ebp + 0x90], esi
+  0x0082DAA7  8B8590000000             mov      eax, dword ptr [ebp + 0x90]
+  0x0082DAAD  8D4801                   lea      ecx, [eax + 1]
+  0x0082DAB0  3B8D8C000000             cmp      ecx, dword ptr [ebp + 0x8c]
+  0x0082DAB6  730B                     jae      0x82dac3
+  0x0082DAB8  8A10                     mov      dl, byte ptr [eax]
+  0x0082DABA  885525                   mov      byte ptr [ebp + 0x25], dl
+  0x0082DABD  01B590000000             add      dword ptr [ebp + 0x90], esi
+  0x0082DAC3  8B8590000000             mov      eax, dword ptr [ebp + 0x90]
+  0x0082DAC9  8D4801                   lea      ecx, [eax + 1]
+  0x0082DACC  3B8D8C000000             cmp      ecx, dword ptr [ebp + 0x8c]
+  0x0082DAD2  730B                     jae      0x82dadf
+  0x0082DAD4  8A10                     mov      dl, byte ptr [eax]
+  0x0082DAD6  885526                   mov      byte ptr [ebp + 0x26], dl
+  0x0082DAD9  01B590000000             add      dword ptr [ebp + 0x90], esi
+  0x0082DADF  8B8D90000000             mov      ecx, dword ptr [ebp + 0x90]
+  0x0082DAE5  8B858C000000             mov      eax, dword ptr [ebp + 0x8c]
+  0x0082DAEB  8D5102                   lea      edx, [ecx + 2]
+  0x0082DAEE  3BD0                     cmp      edx, eax
+  0x0082DAF0  730D                     jae      0x82daff
+  0x0082DAF2  668B09                   mov      cx, word ptr [ecx]
+  0x0082DAF5  66894D28                 mov      word ptr [ebp + 0x28], cx
+  0x0082DAF9  899590000000             mov      dword ptr [ebp + 0x90], edx
+  0x0082DAFF  8B8D90000000             mov      ecx, dword ptr [ebp + 0x90]
+  0x0082DB05  8D5102                   lea      edx, [ecx + 2]
+  0x0082DB08  3BD0                     cmp      edx, eax
+  0x0082DB0A  730D                     jae      0x82db19
+  0x0082DB0C  668B09                   mov      cx, word ptr [ecx]
+  0x0082DB0F  66894D2A                 mov      word ptr [ebp + 0x2a], cx
+  0x0082DB13  899590000000             mov      dword ptr [ebp + 0x90], edx
+  0x0082DB19  8B8D90000000             mov      ecx, dword ptr [ebp + 0x90]
+  0x0082DB1F  8D5101                   lea      edx, [ecx + 1]
+  0x0082DB22  3BD0                     cmp      edx, eax
+  0x0082DB24  730B                     jae      0x82db31
+  0x0082DB26  8A01                     mov      al, byte ptr [ecx]
+  0x0082DB28  88452C                   mov      byte ptr [ebp + 0x2c], al
+  0x0082DB2B  01B590000000             add      dword ptr [ebp + 0x90], esi
+  0x0082DB31  8B8D90000000             mov      ecx, dword ptr [ebp + 0x90]
+  0x0082DB37  8B858C000000             mov      eax, dword ptr [ebp + 0x8c]
+  0x0082DB3D  8D5102                   lea      edx, [ecx + 2]
+  0x0082DB40  3BD0                     cmp      edx, eax
+  0x0082DB42  730D                     jae      0x82db51
+  0x0082DB44  668B09                   mov      cx, word ptr [ecx]
+  0x0082DB47  66894D2E                 mov      word ptr [ebp + 0x2e], cx
+  0x0082DB4B  899590000000             mov      dword ptr [ebp + 0x90], edx
+  0x0082DB51  8B8D90000000             mov      ecx, dword ptr [ebp + 0x90]
+  0x0082DB57  8D5102                   lea      edx, [ecx + 2]
+  0x0082DB5A  3BD0                     cmp      edx, eax
+  0x0082DB5C  730D                     jae      0x82db6b
+  0x0082DB5E  668B09                   mov      cx, word ptr [ecx]
+  0x0082DB61  66894D30                 mov      word ptr [ebp + 0x30], cx   <== WRITER (mov word ptr [ebp + 0x30], cx)
+  0x0082DB65  899590000000             mov      dword ptr [ebp + 0x90], edx
+  0x0082DB6B  8B8D90000000             mov      ecx, dword ptr [ebp + 0x90]
+  0x0082DB71  8D5102                   lea      edx, [ecx + 2]
+  0x0082DB74  3BD0                     cmp      edx, eax
+  0x0082DB76  730D                     jae      0x82db85
+  0x0082DB78  668B09                   mov      cx, word ptr [ecx]
+  0x0082DB7B  66894D32                 mov      word ptr [ebp + 0x32], cx
+  0x0082DB7F  899590000000             mov      dword ptr [ebp + 0x90], edx
+  0x0082DB85  8B8D90000000             mov      ecx, dword ptr [ebp + 0x90]
+  0x0082DB8B  8D5102                   lea      edx, [ecx + 2]
+  0x0082DB8E  3BD0                     cmp      edx, eax
+  0x0082DB90  730D                     jae      0x82db9f
+  0x0082DB92  668B09                   mov      cx, word ptr [ecx]
+  0x0082DB95  66894D34                 mov      word ptr [ebp + 0x34], cx
+  0x0082DB99  899590000000             mov      dword ptr [ebp + 0x90], edx
+
+SUMMARY: real fn 0x0082DA80; EBP writes entry->writer: 1; rets crossed: 0

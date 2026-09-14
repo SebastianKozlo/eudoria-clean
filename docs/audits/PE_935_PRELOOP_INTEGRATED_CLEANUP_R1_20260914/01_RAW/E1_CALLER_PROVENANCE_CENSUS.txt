@@ -1,0 +1,210 @@
+=== E1 CALLER-PROVENANCE CENSUS — RAW (two-phase, own capstone decode of pinned Entropia.exe) ===
+RUN_ID: PE_935_PRELOOP_INTEGRATED_CLEANUP_R1_20260914
+GENERATOR: 00_CONTROL/e_ebp_reval.py (SHA256 B412D68F33F11AB0D6D3148C1B5FA2714F5D076B39BA3CFEA7392F9628DDBB10)
+COMMAND: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe -B e_ebp_reval.py
+INPUT: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe (fail-closed SHA256+SIZE asserted;
+       SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, SIZE 8015872; STATIC-ONLY — never executed)
+capstone provenance: __version__=5.0.7 (measured; 5.0.9 dist-info label is FALSE) __file__=D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+HISTORICAL CSV ROW: 0x007EB1B3,0x007EAC00,"mov dword ptr [ebp + 0x30], esi",esi,caller stack (inherited ebp),REJECTED_ALIAS
+DECLARED BOUND: caller chain walked at most TWO levels above the real containing function;
+ beyond that the provenance is recorded UNKNOWN (per RUN_CONTRACT.md W1 INDIRECT_ENTRY_CLOSURE).
+TIMESTAMP: 2026-09-14T16:04:19.698989
+
+=== CASE E1 — writer 0x007EB1B3 (historical fn attribution 0x007EAC00) ===
+historical CSV row: 0x007EB1B3,0x007EAC00,"mov dword ptr [ebp + 0x30], esi",esi,caller stack (inherited ebp),REJECTED_ALIAS
+historical class: REJECTED_ALIAS under the UNSOUND R-EBP-INHERITED rule
+
+[A] WRITER BYTE VERIFICATION
+  bytes at 0x007EB1B3: 897530 (expected 897530) -> MATCH
+  capstone decode: mov dword ptr [ebp + 0x30], esi  (pinned text: mov dword ptr [ebp + 0x30], esi)
+
+[B] PHASE 1 — HISTORICAL ATTRIBUTION CHECK (claimed entry 0x007EAC00)
+  first bytes at claimed entry: 000000898424BC00
+  decode from claimed entry starts with: add byte ptr [eax], al
+  (a leading 'add byte ptr [eax], al' = decoding the byte pair 00 00 = NOT a real
+   x86 code boundary for a function entry; typical of a mid-data/mid-instruction VA)
+  E8 rel32 calls to claimed entry: 0 []
+  E9 rel32 jmps to claimed entry:  0 []
+  EB rel8 jmps to claimed entry:   0 []
+  whole-file imm32 occurrences of the claimed entry VA: 0
+  entry-fallthrough: prev-8-bytes = 94000000D9842490
+  linear decode of preceding 16 bytes ends exactly at claimed entry: False
+  PHASE-1 VERDICT: historical fn attribution DISPROVEN (bytes start 00 00; ZERO references via E8/E9/EB/imm32; no fallthrough; the 'FPO, ebp untouched' premise was evaluated at a NON-FUNCTION VA)
+
+[C] PHASE 2 — REAL CONTAINING FUNCTION DISCOVERY
+  REAL-FUNCTION CANDIDATE 0x007EA740: aligned on writer (dist 2675, 634 insns); rets crossed before writer: 0; EBP writes before writer: 1
+  boundary corroboration: prev-8-bytes = 00CCCCCCCCCCCCCC (CC padding / ret+CC = real boundary)
+  ==> REAL containing function of writer 0x007EB1B3 = 0x007EA740
+  EBP-WRITING instructions between real entry and writer:
+      0x007EA76D  mov ebp, dword ptr [esp + 0x1a0]   <== EBP WRITE (refutes 'ebp untouched' for the REAL function)
+  ret instructions crossed before the writer: 0 []
+
+  listing written: 01_RAW/E1_FUN_007EAC00_DISASM.txt
+
+[D] ENTRY-CHANNEL CENSUS OF THE REAL FUNCTION 0x007EA740
+  E8 direct callers: 1 ['0x007EB284']
+  E9 rel32 jmps: 0 | EB rel8 jmps: 0
+  whole-file imm32 occurrences: 0
+  entry-fallthrough: prev-8-bytes = 00CCCCCCCCCCCCCC
+
+[E1-CHAIN] FUN_007EA740 EBP definition and caller provenance (DECLARED BOUND: two levels)
+  (1) EBP definition INSIDE FUN_007EA740: prologue is an MSVC SEH frame
+      0x007EA740  6AFF                     push     -1
+      0x007EA742  688C12A200               push     0xa2128c
+      0x007EA747  64A100000000             mov      eax, dword ptr fs:[0]
+      0x007EA74D  50                       push     eax
+      0x007EA74E  81EC74010000             sub      esp, 0x174
+      0x007EA754  53                       push     ebx
+      0x007EA755  55                       push     ebp
+      0x007EA756  56                       push     esi
+      0x007EA757  57                       push     edi
+      0x007EA758  A1D0D8B900               mov      eax, dword ptr [0xb9d8d0]
+      0x007EA75D  33C4                     xor      eax, esp
+      0x007EA75F  50                       push     eax
+      0x007EA760  8D842488010000           lea      eax, [esp + 0x188]
+      0x007EA767  64A300000000             mov      dword ptr fs:[0], eax
+      0x007EA76D  8BAC24A0010000           mov      ebp, dword ptr [esp + 0x1a0]
+      0x007EA774  8B4508                   mov      eax, dword ptr [ebp + 8]
+  ==> at 0x007EA76D: mov ebp, dword ptr [esp + 0x1a0] — EBP is DEFINED from an incoming
+      stack argument (8 pushes + 0x174 sub = 0x194 below entry esp at that point;
+      [esp+0x1a0] = [entry_esp+0x0C] = ARG3). The historical premise 'fn never redefines
+      ebp (FPO, ebp untouched)' is REFUTED for the real function: EBP is a redefined
+      ARGUMENT POINTER, not an inherited frame pointer, and not a frame pointer at all.
+
+  (2) The single E8 caller of FUN_007EA740 = 0x007EB284 — decode of the caller region:
+      0x007EB210  56                       push     esi
+      0x007EB211  8B742414                 mov      esi, dword ptr [esp + 0x14]
+      0x007EB215  85F6                     test     esi, esi
+      0x007EB217  7504                     jne      0x7eb21d
+      0x007EB219  32C0                     xor      al, al
+      0x007EB21B  5E                       pop      esi
+      0x007EB21C  C3                       ret
+      0x007EB21D  55                       push     ebp
+      0x007EB21E  8B6C2414                 mov      ebp, dword ptr [esp + 0x14]
+      0x007EB222  807D1100                 cmp      byte ptr [ebp + 0x11], 0
+      0x007EB226  740B                     je       0x7eb233
+      0x007EB228  F6462001                 test     byte ptr [esi + 0x20], 1
+      0x007EB22C  7405                     je       0x7eb233
+      0x007EB22E  5D                       pop      ebp
+      0x007EB22F  32C0                     xor      al, al
+      0x007EB231  5E                       pop      esi
+      0x007EB232  C3                       ret
+      0x007EB233  53                       push     ebx
+      0x007EB234  8B5C2410                 mov      ebx, dword ptr [esp + 0x10]
+      0x007EB238  57                       push     edi
+      0x007EB239  8B7C2418                 mov      edi, dword ptr [esp + 0x18]
+      0x007EB23D  57                       push     edi
+      0x007EB23E  53                       push     ebx
+      0x007EB23F  56                       push     esi
+      0x007EB240  E81B2F0200               call     0x80e160
+      0x007EB245  83C40C                   add      esp, 0xc
+      0x007EB248  84C0                     test     al, al
+      0x007EB24A  7456                     je       0x7eb2a2
+      0x007EB24C  8B06                     mov      eax, dword ptr [esi]
+      0x007EB24E  8B5008                   mov      edx, dword ptr [eax + 8]
+      0x007EB251  8BCE                     mov      ecx, esi
+      0x007EB253  FFD2                     call     edx
+      0x007EB255  85C0                     test     eax, eax
+      0x007EB257  7415                     je       0x7eb26e
+      0x007EB259  8DA42400000000           lea      esp, [esp]
+      0x007EB260  3D1872BA00               cmp      eax, 0xba7218
+      0x007EB265  742A                     je       0x7eb291
+      0x007EB267  8B4004                   mov      eax, dword ptr [eax + 4]
+      0x007EB26A  85C0                     test     eax, eax
+      0x007EB26C  75F2                     jne      0x7eb260
+      0x007EB26E  56                       push     esi
+      0x007EB26F  68947ABA00               push     0xba7a94
+      0x007EB274  E857F4C4FF               call     0x43a6d0
+      0x007EB279  83C408                   add      esp, 8
+      0x007EB27C  84C0                     test     al, al
+      0x007EB27E  7422                     je       0x7eb2a2
+      0x007EB280  56                       push     esi
+      0x007EB281  55                       push     ebp
+      0x007EB282  57                       push     edi
+      0x007EB283  53                       push     ebx
+      0x007EB284  E8B7F4FFFF               call     0x7ea740
+      0x007EB289  83C410                   add      esp, 0x10
+      0x007EB28C  5F                       pop      edi
+      0x007EB28D  5B                       pop      ebx
+      0x007EB28E  5D                       pop      ebp
+      0x007EB28F  5E                       pop      esi
+  ==> CALLER = FUN_007EB210 (boundary: prev bytes ret+CC padding; the 'ret' at 0x7EB21C is
+      its own early-exit; 0x7EB21D is the jne continuation of the SAME function).
+  ==> It is an NiNode-RTTI-GUARDED DISPATCH WRAPPER: virtual call [esi->vtable+8] (slot 2,
+      GetRTTI-like) on esi; walks the NiRTTI base chain ([eax+4]) comparing against the
+      immediate 0x00BA7218 — the NiNode NiRTTI address (independent corroboration of the
+      SLOT17 NiRTTI pin in a second static context); name-literal fallback via 0x00BA7A94;
+      then PASSES ITS OWN FOUR ARGS THROUGH: push esi(arg4); push ebp(arg3); push edi(arg2);
+      push ebx(arg1); call 0x007EA740.
+  ==> FUN_007EA740's EBP = ARG3 = FUN_007EB210's EBP, which FUN_007EB210 set at 0x7EB21E:
+      mov ebp, [esp+0x14] = ITS OWN ARG3 (a caller-passed object pointer).
+
+  (3) ENTRY CENSUS of the wrapper FUN_007EB210: E8=3 ['0x007C198F', '0x007EB2FF', '0x007EB410']; E9=0; EB=0; imm32=0; prev8=C3CCCCCCCCCCCCCC
+      (three direct callers; no indirect channel; no fallthrough — closure complete)
+
+  (4) LEVEL-2: the three wrapper call sites — arg3 provenance at each:
+      -- caller A: call site 0x007C198F, preceding decode --
+         0x007C196F  CC                       int3
+         0x007C1970  51                       push     ecx
+         0x007C1971  807C241000               cmp      byte ptr [esp + 0x10], 0
+         0x007C1976  55                       push     ebp
+         0x007C1977  8BE9                     mov      ebp, ecx
+         0x007C1979  7505                     jne      0x7c1980
+         0x007C197B  E890FFFFFF               call     0x7c1910
+         0x007C1980  8B4514                   mov      eax, dword ptr [ebp + 0x14]
+         0x007C1983  8B4C240C                 mov      ecx, dword ptr [esp + 0xc]
+         0x007C1987  50                       push     eax
+         0x007C1988  8B442414                 mov      eax, dword ptr [esp + 0x14]
+         0x007C198C  55                       push     ebp
+         0x007C198D  50                       push     eax
+         0x007C198E  51                       push     ecx
+         0x007C198F  E87C980200               call     0x7eb210
+      -- caller B: call site 0x007EB2FF, preceding decode --
+         0x007EB2DF  81D40000007D             adc      esp, 0x7d000000
+         0x007EB2E5  27                       daa
+         0x007EB2E6  8B89CC000000             mov      ecx, dword ptr [ecx + 0xcc]
+         0x007EB2EC  8B0481                   mov      eax, dword ptr [ecx + eax*4]
+         0x007EB2EF  85C0                     test     eax, eax
+         0x007EB2F1  741A                     je       0x7eb30d
+         0x007EB2F3  50                       push     eax
+         0x007EB2F4  8B44240C                 mov      eax, dword ptr [esp + 0xc]
+         0x007EB2F8  52                       push     edx
+         0x007EB2F9  8B542414                 mov      edx, dword ptr [esp + 0x14]
+         0x007EB2FD  52                       push     edx
+         0x007EB2FE  50                       push     eax
+         0x007EB2FF  E80CFFFFFF               call     0x7eb210
+      -- caller C: call site 0x007EB410, preceding decode --
+         0x007EB3F0  06                       push     es
+         0x007EB3F1  837D2800                 cmp      dword ptr [ebp + 0x28], 0
+         0x007EB3F5  75A2                     jne      0x7eb399
+         0x007EB3F7  3BC6                     cmp      eax, esi
+         0x007EB3F9  7626                     jbe      0x7eb421
+         0x007EB3FB  8B97CC000000             mov      edx, dword ptr [edi + 0xcc]
+         0x007EB401  8B04B2                   mov      eax, dword ptr [edx + esi*4]
+         0x007EB404  85C0                     test     eax, eax
+         0x007EB406  7419                     je       0x7eb421
+         0x007EB408  50                       push     eax
+         0x007EB409  8B442428                 mov      eax, dword ptr [esp + 0x28]
+         0x007EB40D  55                       push     ebp
+         0x007EB40E  53                       push     ebx
+         0x007EB40F  50                       push     eax
+         0x007EB410  E8FBFDFFFF               call     0x7eb210
+      caller A (0x007C198F): push ecx; push ebp; mov ebp, ecx (0x7C1977) — the arg3 pushed
+        is the caller's EBP, which THAT caller set from ECX = a this-object pointer.
+      caller B (0x007EB2FF): arg3 = edx = [esp+0x14] — an incoming stack-argument VALUE
+        (unbounded within the declared bound).
+      caller C (0x007EB410): arg3 = the caller's EBP register (frame state of that caller
+        not established within the declared bound).
+
+  (5) ADJUDICATION FACTS (deterministic derivation):
+      - case A (push ebp; mov ebp,esp before the writer)? NO — the real function has an SEH
+        FPO prologue and redefines EBP from an ARGUMENT slot, not from ESP.
+      - case B (EBP derived from ESP/stack)? NOT PROVEN — EBP := arg3 (an object pointer
+        value); on the three level-2 paths arg3 is an ECX-this / a stack-arg VALUE / a caller
+        EBP register — none PROVEN to be a stack address on every writer-reaching path.
+      - case C (incoming EBP non-SF on every entry path)? NOT APPLICABLE — EBP is redefined
+        in-function; the relevant object (arg3) class is UNRESOLVED within the bound.
+      ==> CASE PROVEN: NONE_PROVEN. REJECTED_ALIAS is NOT proven.
+      ==> E1 FINAL CLASS: POSSIBLE_ALIAS (historical REJECTED under the unsound rule is
+          superseded; this does NOT assert the write IS SF+0x30 — it asserts the rejection
+          was never proven).

@@ -1,0 +1,62 @@
+=== NIRTTI BOUNDED PROBE — pattern B9 70 72 BA 00 (mov ecx, 0x00BA7270) ===
+RUN_ID: PE_935_PRELOOP_INTEGRATED_CLEANUP_R1_20260914
+GENERATOR: 00_CONTROL/nirtti_bounded_probe.py (SHA256 A9C93556840EC9F1EC48F5B538D0CCD46517E5B6237AD574EA130BA7B7826F4D)
+COMMAND: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe -B nirtti_bounded_probe.py
+INPUT: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe (fail-closed SHA256+SIZE asserted;
+       SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, SIZE 8015872; STATIC-ONLY — never executed)
+interpreter: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe (3.12.7)
+capstone.__version__: 5.0.7 (MEASURED; the 5.0.9 dist-info label is a KNOWN FALSE LABEL)
+capstone.__file__: D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+BOUND DECLARED: one pattern scan over the whole file + ONE context window decode per hit;
+ no expansion (per RUN_CONTRACT.md W6.4).
+timestamp: 2026-09-14T16:06:37.510870
+
+pattern occurrences in the WHOLE FILE: 1
+hit at file offset 0x66C33A -> VA 0x00A6C33A (section .text)
+context decode (window 0x00A6C31A-0x00A6C35A):
+  0x00A6C31A  B96472BA00           mov    ecx, 0xba7264
+  0x00A6C31F  E8BCD6CAFF           call   0x7199e0
+  0x00A6C324  C3                   ret    
+  0x00A6C325  CC                   int3   
+  0x00A6C326  CC                   int3   
+  0x00A6C327  CC                   int3   
+  0x00A6C328  CC                   int3   
+  0x00A6C329  CC                   int3   
+  0x00A6C32A  CC                   int3   
+  0x00A6C32B  CC                   int3   
+  0x00A6C32C  CC                   int3   
+  0x00A6C32D  CC                   int3   
+  0x00A6C32E  CC                   int3   
+  0x00A6C32F  CC                   int3   
+  0x00A6C330  682472BA00           push   0xba7224
+  0x00A6C335  68BCD8A800           push   0xa8d8bc   ; -> literal 'NiAVObject'
+  0x00A6C33A  B97072BA00           mov    ecx, 0xba7270
+  0x00A6C33F  E89CD6CAFF           call   0x7199e0
+  0x00A6C344  C3                   ret    
+  0x00A6C345  CC                   int3   
+  0x00A6C346  CC                   int3   
+  0x00A6C347  CC                   int3   
+  0x00A6C348  CC                   int3   
+  0x00A6C349  CC                   int3   
+  0x00A6C34A  CC                   int3   
+  0x00A6C34B  CC                   int3   
+  0x00A6C34C  CC                   int3   
+  0x00A6C34D  CC                   int3   
+  0x00A6C34E  CC                   int3   
+  0x00A6C34F  CC                   int3   
+  0x00A6C350  687872BA00           push   0xba7278
+
+structural comparison (this run's own bytes): the hit's thunk body is
+  push <base RTTI imm>; push <name literal imm>; mov ecx, 0x00BA7270; call 0x007199E0; ret
+  — the SAME constructor call (0x007199E0) and the SAME thunk shape as the NiNode
+  static initializer at 0x00A6C200 (SLOT17 03_EVIDENCE/ENTROPIA_NIRTTI_STATIC_INIT.txt:
+  push 0x00BA7270; push 0x00A8CE00 ('NiNode'); mov ecx, 0x00BA7218; call 0x007199E0; ret).
+
+DIRECT PROOF RECORDED: the static initializer at 0x00A6C330 constructs the NiRTTI
+object at ecx = 0x00BA7270 with the name literal 'NiAVObject' (push 0x00A8D8BC,
+whose .rdata bytes decode to the ASCII literal) and base pointer 0x00BA7224:
+  *(NiRTTI*)0x00BA7270 = NiRTTI("NiAVObject", (const NiRTTI*)0x00BA7224)
+EVIDENCE CLASS: DIRECT STATIC-INITIALIZER CALL-SITE PROOF (own bytes, this run,
+STATIC-ONLY). The semantic identity 0x00BA7270 = NiAVObject NiRTTI is CONFIRMED
+(upgraded from STRONGLY_SUPPORTED). The probe did NOT expand beyond the declared
+bound (one pattern + one context window).
