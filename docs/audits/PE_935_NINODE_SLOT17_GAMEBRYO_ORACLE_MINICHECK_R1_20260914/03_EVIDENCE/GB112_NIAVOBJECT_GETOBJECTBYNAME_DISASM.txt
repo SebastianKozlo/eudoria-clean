@@ -1,0 +1,42 @@
+=== MEMBER .\releaselib\NiAVObject.obj ===
+SYMBOL: ?GetObjectByName@NiAVObject@@UAEPAV1@PBD@Z
+SECTION: .text (#230) value_in_section=0x0 -> file 0x541C
+0000  8B 44 24 04           mov     eax, dword ptr [esp + 4]
+0004  85 C0                 test    eax, eax
+0006  56                    push    esi
+0007  57                    push    edi
+0008  8B F9                 mov     edi, ecx
+000A  74 57                 je      0x63
+000C  8B 77 0C              mov     esi, dword ptr [edi + 0xc]
+000F  85 F6                 test    esi, esi
+0011  74 50                 je      0x63
+0013  53                    push    ebx
+0014  8A 08                 mov     cl, byte ptr [eax]
+0016  8A 1E                 mov     bl, byte ptr [esi]
+0018  8A D1                 mov     dl, cl
+001A  3A CB                 cmp     cl, bl
+001C  75 2E                 jne     0x4c
+001E  84 D2                 test    dl, dl
+0020  74 16                 je      0x38
+0022  8A 48 01              mov     cl, byte ptr [eax + 1]
+0025  8A 5E 01              mov     bl, byte ptr [esi + 1]
+0028  8A D1                 mov     dl, cl
+002A  3A CB                 cmp     cl, bl
+002C  75 1E                 jne     0x4c
+002E  83 C0 02              add     eax, 2
+0031  83 C6 02              add     esi, 2
+0034  84 D2                 test    dl, dl
+0036  75 DC                 jne     0x14
+0038  33 C0                 xor     eax, eax
+003A  33 D2                 xor     edx, edx
+003C  85 C0                 test    eax, eax
+003E  0F 95 C2              setne   dl
+0041  5B                    pop     ebx
+0042  4A                    dec     edx
+0043  23 D7                 and     edx, edi
+0045  5F                    pop     edi
+0046  8B C2                 mov     eax, edx
+0048  5E                    pop     esi
+0049  C2 04 00              ret     4
+004C  1B C0                 sbb     eax, eax
+(stop at cap)

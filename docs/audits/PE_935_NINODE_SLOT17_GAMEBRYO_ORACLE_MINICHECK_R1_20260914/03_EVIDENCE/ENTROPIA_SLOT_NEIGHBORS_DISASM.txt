@@ -1,0 +1,291 @@
+ENTROPIA NiNode VTABLE NEIGHBOR SLOTS (vtable VA 0x00A8CCF4, 47 slots)
+Decoded STATIC-ONLY from physical Entropia.exe (SHA256 pin re-verified inside the tool)
+by 00_Control/entropia_disasm_7b5390.py at each --start VA. Purpose: (1) anchor the
+vtable ABI prefix (slots 0/1/2) measured from Entropia bytes; (2) behavioral negative
+controls for slot 17 (NC1): slots 16 and 18 have clearly different behavior; (3) G7:
+slot 27 UpdateWorldData proves the NiAVObject transform offsets in Entropia itself.
+
+================================================================================
+SLOT 0 (+0x00) = 0x0082E420 -- candidate vector deleting destructor
+================================================================================
+TARGET: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (PIN OK)
+IMAGE_BASE: 0x00400000  file_offset==RVA (probe-verified)
+FUNC_VA: 0x0082E420  file_off: 0x42E420
+CONTEXT_PRE_16: b8 e0 82 ba 00 c3 cc cc cc cc cc cc cc cc cc cc
+
+0082E420  56                      push     esi
+0082E421  8B F1                   mov      esi, ecx
+0082E423  E8 A8 7C F8 FF          call     0x7b60d0
+0082E428  F6 44 24 08 01          test     byte ptr [esp + 8], 1
+0082E42D  74 09                   je       0x82e438
+0082E42F  56                      push     esi
+0082E430  E8 F5 EF 12 00          call     0x95d42a
+0082E435  83 C4 04                add      esp, 4
+0082E438  8B C6                   mov      eax, esi
+0082E43A  5E                      pop      esi
+0082E43B  C2 04 00                ret      4
+
+CONTEXT_POST_END(0x0042E43E)_16: cc cc 6a ff 68 7b 4f a2 00 64 a1 00 00 00 00 50
+
+================================================================================
+SLOT 1 (+0x04) = 0x00406D50 -- candidate scalar deleting dtor thunk (calls vtable[0] with flags=1)
+================================================================================
+TARGET: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (PIN OK)
+IMAGE_BASE: 0x00400000  file_offset==RVA (probe-verified)
+FUNC_VA: 0x00406D50  file_off: 0x6D50
+CONTEXT_PRE_16: 8b e5 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc
+
+00406D50  85 C9                   test     ecx, ecx
+00406D52  74 08                   je       0x406d5c
+00406D54  8B 01                   mov      eax, dword ptr [ecx]
+00406D56  8B 10                   mov      edx, dword ptr [eax]
+00406D58  6A 01                   push     1
+00406D5A  FF D2                   call     edx
+00406D5C  C3                      ret      
+
+CONTEXT_POST_END(0x00006D5D)_16: cc cc cc 51 8b 44 24 0c 56 8b 74 24 0c 50 8b ce
+
+================================================================================
+SLOT 2 (+0x08) = 0x007B60C0 -- candidate GetRTTI (returns 0x00BA7218 = &NiNode::ms_RTTI)
+================================================================================
+TARGET: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (PIN OK)
+IMAGE_BASE: 0x00400000  file_offset==RVA (probe-verified)
+FUNC_VA: 0x007B60C0  file_off: 0x3B60C0
+CONTEXT_PRE_16: c4 10 c2 04 00 cc cc cc cc cc cc cc cc cc cc cc
+
+007B60C0  B8 18 72 BA 00          mov      eax, 0xba7218
+007B60C5  C3                      ret      
+
+CONTEXT_POST_END(0x003B60C6)_16: cc cc cc cc cc cc cc cc cc cc 6a ff 68 9c df a1
+
+================================================================================
+SLOT 16 (+0x40) = 0x007B4650 -- transform-applier class method (fp matrix math on m_kLocal@+0x38, m_kLocal.translate@+0x5C, m_kLocal.scale@+0x68; children +0xCC/+0xD4) -- NOT a name lookup (NC1)
+================================================================================
+TARGET: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (PIN OK)
+IMAGE_BASE: 0x00400000  file_offset==RVA (probe-verified)
+FUNC_VA: 0x007B4650  file_off: 0x3B4650
+CONTEXT_PRE_16: ff d2 8b 76 38 85 f6 75 e8 5f 5e c2 08 00 cc cc
+
+007B4650  81 EC 8C 00 00 00       sub      esp, 0x8c
+007B4656  80 BC 24 98 00 00 00 00 cmp      byte ptr [esp + 0x98], 0
+007B465E  53                      push     ebx
+007B465F  55                      push     ebp
+007B4660  56                      push     esi
+007B4661  57                      push     edi
+007B4662  8B F1                   mov      esi, ecx
+007B4664  0F 84 0F 01 00 00       je       0x7b4779
+007B466A  8B AC 24 A0 00 00 00    mov      ebp, dword ptr [esp + 0xa0]
+007B4671  8D 5E 38                lea      ebx, [esi + 0x38]
+007B4674  53                      push     ebx
+007B4675  8D 44 24 7C             lea      eax, [esp + 0x7c]
+007B4679  50                      push     eax
+007B467A  8B CD                   mov      ecx, ebp
+007B467C  E8 8F F8 00 00          call     0x7c3f10
+007B4681  50                      push     eax
+007B4682  8D 4C 24 58             lea      ecx, [esp + 0x58]
+007B4686  51                      push     ecx
+007B4687  8B CB                   mov      ecx, ebx
+007B4689  E8 02 FF 00 00          call     0x7c4590
+007B468E  8D 7E 5C                lea      edi, [esi + 0x5c]
+007B4691  57                      push     edi
+007B4692  8D 54 24 4C             lea      edx, [esp + 0x4c]
+007B4696  52                      push     edx
+007B4697  8B CD                   mov      ecx, ebp
+007B4699  E8 02 FA 00 00          call     0x7c40a0
+007B469E  D9 00                   fld      dword ptr [eax]
+007B46A0  8B 8C 24 A4 00 00 00    mov      ecx, dword ptr [esp + 0xa4]
+007B46A7  D8 01                   fadd     dword ptr [ecx]
+007B46A9  53                      push     ebx
+007B46AA  D9 5C 24 1C             fstp     dword ptr [esp + 0x1c]
+007B46AE  D9 40 04                fld      dword ptr [eax + 4]
+007B46B1  D8 41 04                fadd     dword ptr [ecx + 4]
+007B46B4  D9 5C 24 20             fstp     dword ptr [esp + 0x20]
+007B46B8  D9 40 08                fld      dword ptr [eax + 8]
+007B46BB  8D 44 24 34             lea      eax, [esp + 0x34]
+007B46BF  D8 41 08                fadd     dword ptr [ecx + 8]
+007B46C2  50                      push     eax
+007B46C3  8D 4C 24 44             lea      ecx, [esp + 0x44]
+007B46C7  51                      push     ecx
+007B46C8  D9 5C 24 2C             fstp     dword ptr [esp + 0x2c]
+007B46CC  D9 44 24 24             fld      dword ptr [esp + 0x24]
+007B46D0  D8 27                   fsub     dword ptr [edi]
+007B46D2  D9 5C 24 3C             fstp     dword ptr [esp + 0x3c]
+007B46D6  D9 44 24 28             fld      dword ptr [esp + 0x28]
+007B46DA  D8 67 04                fsub     dword ptr [edi + 4]
+007B46DD  D9 5C 24 40             fstp     dword ptr [esp + 0x40]
+007B46E1  D9 44 24 2C             fld      dword ptr [esp + 0x2c]
+007B46E5  D8 67 08                fsub     dword ptr [edi + 8]
+007B46E8  D9 5C 24 44             fstp     dword ptr [esp + 0x44]
+007B46EC  D9 46 68                fld      dword ptr [esi + 0x68]
+007B46EF  D9 5C 24 1C             fstp     dword ptr [esp + 0x1c]
+007B46F3  E8 58 FA 00 00          call     0x7c4150
+007B46F8  D9 44 24 1C             fld      dword ptr [esp + 0x1c]
+007B46FC  33 FF                   xor      edi, edi
+007B46FE  D9 E8                   fld1     
+007B4700  83 C4 0C                add      esp, 0xc
+007B4703  39 BE D4 00 00 00       cmp      dword ptr [esi + 0xd4], edi
+007B4709  DE F1                   fdivrp   st(1)
+007B470B  D9 5C 24 10             fstp     dword ptr [esp + 0x10]
+007B470F  D9 40 04                fld      dword ptr [eax + 4]
+007B4712  D9 44 24 10             fld      dword ptr [esp + 0x10]
+007B4716  D9 C0                   fld      st(0)
+007B4718  DE CA                   fmulp    st(2)
+007B471A  D9 C9                   fxch     st(1)
+007B471C  D9 5C 24 10             fstp     dword ptr [esp + 0x10]
+007B4720  D9 40 08                fld      dword ptr [eax + 8]
+007B4723  D8 C9                   fmul     st(1)
+007B4725  D9 5C 24 14             fstp     dword ptr [esp + 0x14]
+007B4729  D8 08                   fmul     dword ptr [eax]
+007B472B  D9 5C 24 24             fstp     dword ptr [esp + 0x24]
+007B472F  D9 44 24 10             fld      dword ptr [esp + 0x10]
+007B4733  D9 5C 24 28             fstp     dword ptr [esp + 0x28]
+007B4737  D9 44 24 14             fld      dword ptr [esp + 0x14]
+007B473B  D9 5C 24 2C             fstp     dword ptr [esp + 0x2c]
+007B473F  76 73                   jbe      0x7b47b4
+007B4741  8B 96 CC 00 00 00       mov      edx, dword ptr [esi + 0xcc]
+007B4747  8B 0C BA                mov      ecx, dword ptr [edx + edi*4]
+007B474A  85 C9                   test     ecx, ecx
+007B474C  74 13                   je       0x7b4761
+007B474E  8B 01                   mov      eax, dword ptr [ecx]
+(no ret+padding boundary within cap)
+
+================================================================================
+SLOT 18 (+0x48) = 0x007B5160 -- selective-update-flags class method (bool&/bool/bool& args, writes m_uFlags@+0x20 masks 2/4/8/0x10, recursion at child vtable +0x48) -- NOT a name lookup (NC1)
+================================================================================
+TARGET: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (PIN OK)
+IMAGE_BASE: 0x00400000  file_offset==RVA (probe-verified)
+FUNC_VA: 0x007B5160  file_off: 0x3B5160
+CONTEXT_PRE_16: 00 5f 5e 83 c4 34 c3 cc cc cc cc cc cc cc cc cc
+
+007B5160  51                      push     ecx
+007B5161  53                      push     ebx
+007B5162  55                      push     ebp
+007B5163  56                      push     esi
+007B5164  57                      push     edi
+007B5165  8B F1                   mov      esi, ecx
+007B5167  E8 F4 A5 00 00          call     0x7bf760
+007B516C  80 7C 24 1C 00          cmp      byte ptr [esp + 0x1c], 0
+007B5171  88 44 24 13             mov      byte ptr [esp + 0x13], al
+007B5175  75 04                   jne      0x7b517b
+007B5177  88 44 24 1C             mov      byte ptr [esp + 0x1c], al
+007B517B  8B 6C 24 18             mov      ebp, dword ptr [esp + 0x18]
+007B517F  8A 44 24 1C             mov      al, byte ptr [esp + 0x1c]
+007B5183  8B 5C 24 20             mov      ebx, dword ptr [esp + 0x20]
+007B5187  88 45 00                mov      byte ptr [ebp], al
+007B518A  33 FF                   xor      edi, edi
+007B518C  C6 03 01                mov      byte ptr [ebx], 1
+007B518F  39 BE D4 00 00 00       cmp      dword ptr [esi + 0xd4], edi
+007B5195  76 55                   jbe      0x7b51ec
+007B5197  8B 5C 24 1C             mov      ebx, dword ptr [esp + 0x1c]
+007B519B  8B 8E CC 00 00 00       mov      ecx, dword ptr [esi + 0xcc]
+007B51A1  8B 0C B9                mov      ecx, dword ptr [ecx + edi*4]
+007B51A4  85 C9                   test     ecx, ecx
+007B51A6  74 35                   je       0x7b51dd
+007B51A8  8B 11                   mov      edx, dword ptr [ecx]
+007B51AA  8B 52 48                mov      edx, dword ptr [edx + 0x48]
+007B51AD  8D 44 24 12             lea      eax, [esp + 0x12]
+007B51B1  50                      push     eax
+007B51B2  53                      push     ebx
+007B51B3  8D 44 24 20             lea      eax, [esp + 0x20]
+007B51B7  50                      push     eax
+007B51B8  C6 44 24 24 00          mov      byte ptr [esp + 0x24], 0
+007B51BD  C6 44 24 1E 01          mov      byte ptr [esp + 0x1e], 1
+007B51C2  FF D2                   call     edx
+007B51C4  80 7C 24 18 00          cmp      byte ptr [esp + 0x18], 0
+007B51C9  74 04                   je       0x7b51cf
+007B51CB  C6 45 00 01             mov      byte ptr [ebp], 1
+007B51CF  80 7C 24 12 00          cmp      byte ptr [esp + 0x12], 0
+007B51D4  75 07                   jne      0x7b51dd
+007B51D6  8B 44 24 20             mov      eax, dword ptr [esp + 0x20]
+007B51DA  C6 00 00                mov      byte ptr [eax], 0
+007B51DD  83 C7 01                add      edi, 1
+007B51E0  39 BE D4 00 00 00       cmp      dword ptr [esi + 0xd4], edi
+007B51E6  77 B3                   ja       0x7b519b
+007B51E8  8B 5C 24 20             mov      ebx, dword ptr [esp + 0x20]
+007B51EC  8B CE                   mov      ecx, esi
+007B51EE  E8 9D A5 00 00          call     0x7bf790
+007B51F3  84 C0                   test     al, al
+007B51F5  75 06                   jne      0x7b51fd
+007B51F7  83 7E 10 00             cmp      dword ptr [esi + 0x10], 0
+007B51FB  74 0B                   je       0x7b5208
+007B51FD  C6 45 00 01             mov      byte ptr [ebp], 1
+007B5201  66 83 4E 20 02          or       word ptr [esi + 0x20], 2
+007B5206  EB 13                   jmp      0x7b521b
+007B5208  80 7D 00 00             cmp      byte ptr [ebp], 0
+007B520C  74 07                   je       0x7b5215
+007B520E  66 83 4E 20 02          or       word ptr [esi + 0x20], 2
+007B5213  EB 06                   jmp      0x7b521b
+007B5215  66 81 66 20 FD FF       and      word ptr [esi + 0x20], 0xfffd
+007B521B  80 7C 24 1C 00          cmp      byte ptr [esp + 0x1c], 0
+007B5220  74 07                   je       0x7b5229
+007B5222  66 83 4E 20 04          or       word ptr [esi + 0x20], 4
+007B5227  EB 06                   jmp      0x7b522f
+007B5229  66 81 66 20 FB FF       and      word ptr [esi + 0x20], 0xfffb
+007B522F  84 C0                   test     al, al
+007B5231  74 07                   je       0x7b523a
+007B5233  66 83 4E 20 08          or       word ptr [esi + 0x20], 8
+007B5238  EB 06                   jmp      0x7b5240
+007B523A  66 81 66 20 F7 FF       and      word ptr [esi + 0x20], 0xfff7
+007B5240  80 3B 00                cmp      byte ptr [ebx], 0
+007B5243  74 07                   je       0x7b524c
+007B5245  66 83 4E 20 10          or       word ptr [esi + 0x20], 0x10
+007B524A  EB 06                   jmp      0x7b5252
+007B524C  66 81 66 20 EF FF       and      word ptr [esi + 0x20], 0xffef
+007B5252  80 7C 24 13 00          cmp      byte ptr [esp + 0x13], 0
+007B5257  74 03                   je       0x7b525c
+007B5259  C6 03 00                mov      byte ptr [ebx], 0
+007B525C  5F                      pop      edi
+007B525D  5E                      pop      esi
+007B525E  5D                      pop      ebp
+007B525F  5B                      pop      ebx
+(no ret+padding boundary within cap)
+
+================================================================================
+SLOT 27 (+0x6C) = 0x007E4820 -- UpdateWorldData (m_kLocal@+0x38, m_kWorld@+0x6C [rep movsd 13 dwords], parent@+0x24, parent->m_kWorld@+0x6C, collision object@+0xB0 -> dispatch [eax+0x3C]) -- G7 anchor
+================================================================================
+TARGET: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (PIN OK)
+IMAGE_BASE: 0x00400000  file_offset==RVA (probe-verified)
+FUNC_VA: 0x007E4820  file_off: 0x3E4820
+CONTEXT_PRE_16: ce e8 4a 39 fd ff 5f 5e 5b 59 c2 04 00 cc cc cc
+
+007E4820  83 EC 34                sub      esp, 0x34
+007E4823  53                      push     ebx
+007E4824  8B D9                   mov      ebx, ecx
+007E4826  8B 43 24                mov      eax, dword ptr [ebx + 0x24]
+007E4829  85 C0                   test     eax, eax
+007E482B  56                      push     esi
+007E482C  57                      push     edi
+007E482D  74 15                   je       0x7e4844
+007E482F  8D 4B 38                lea      ecx, [ebx + 0x38]
+007E4832  51                      push     ecx
+007E4833  8D 54 24 10             lea      edx, [esp + 0x10]
+007E4837  52                      push     edx
+007E4838  8D 48 6C                lea      ecx, [eax + 0x6c]
+007E483B  E8 40 6B F0 FF          call     0x6eb380
+007E4840  8B F0                   mov      esi, eax
+007E4842  EB 03                   jmp      0x7e4847
+007E4844  8D 73 38                lea      esi, [ebx + 0x38]
+007E4847  8D 7B 6C                lea      edi, [ebx + 0x6c]
+007E484A  B9 0D 00 00 00          mov      ecx, 0xd
+007E484F  F3 A5                   rep movsd dword ptr es:[edi], dword ptr [esi]
+007E4851  8B 8B B0 00 00 00       mov      ecx, dword ptr [ebx + 0xb0]
+007E4857  85 C9                   test     ecx, ecx
+007E4859  5F                      pop      edi
+007E485A  5E                      pop      esi
+007E485B  5B                      pop      ebx
+007E485C  74 0A                   je       0x7e4868
+007E485E  8B 01                   mov      eax, dword ptr [ecx]
+007E4860  8B 50 3C                mov      edx, dword ptr [eax + 0x3c]
+007E4863  83 C4 34                add      esp, 0x34
+007E4866  FF E2                   jmp      edx
+007E4868  83 C4 34                add      esp, 0x34
+007E486B  C3                      ret      
+
+CONTEXT_POST_END(0x003E486C)_16: cc cc cc cc b8 b8 7a ba 00 c3 cc cc cc cc cc cc
+
