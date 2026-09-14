@@ -1,0 +1,108 @@
+TARGET: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (PIN OK)
+IMAGE_BASE: 0x00400000  file_offset==RVA (probe-verified)
+FUNC_VA: 0x007B5390  file_off: 0x3B5390
+CONTEXT_PRE_16: 31 01 00 39 af ec 00 00 00 75 c5 5e 5b 5f 5d c3
+
+007B5390  53                      push     ebx
+007B5391  8B 5C 24 08             mov      ebx, dword ptr [esp + 8]
+007B5395  57                      push     edi
+007B5396  53                      push     ebx
+007B5397  8B F9                   mov      edi, ecx
+007B5399  E8 82 9E 00 00          call     0x7bf220
+007B539E  85 C0                   test     eax, eax
+007B53A0  75 3A                   jne      0x7b53dc
+007B53A2  8B 87 D4 00 00 00       mov      eax, dword ptr [edi + 0xd4]
+007B53A8  56                      push     esi
+007B53A9  33 F6                   xor      esi, esi
+007B53AB  85 C0                   test     eax, eax
+007B53AD  76 2A                   jbe      0x7b53d9
+007B53AF  3B C6                   cmp      eax, esi
+007B53B1  76 19                   jbe      0x7b53cc
+007B53B3  8B 87 CC 00 00 00       mov      eax, dword ptr [edi + 0xcc]
+007B53B9  8B 0C B0                mov      ecx, dword ptr [eax + esi*4]
+007B53BC  85 C9                   test     ecx, ecx
+007B53BE  74 0C                   je       0x7b53cc
+007B53C0  8B 11                   mov      edx, dword ptr [ecx]
+007B53C2  8B 42 44                mov      eax, dword ptr [edx + 0x44]
+007B53C5  53                      push     ebx
+007B53C6  FF D0                   call     eax
+007B53C8  85 C0                   test     eax, eax
+007B53CA  75 0F                   jne      0x7b53db
+007B53CC  8B 87 D4 00 00 00       mov      eax, dword ptr [edi + 0xd4]
+007B53D2  83 C6 01                add      esi, 1
+007B53D5  3B C6                   cmp      eax, esi
+007B53D7  77 DA                   ja       0x7b53b3
+007B53D9  33 C0                   xor      eax, eax
+007B53DB  5E                      pop      esi
+007B53DC  5F                      pop      edi
+007B53DD  5B                      pop      ebx
+007B53DE  C2 04 00                ret      4
+
+CONTEXT_POST_END(0x003B53E1)_16: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc 53
+================================================================================
+HELPER 0x007BF220 -- OPENED BECAUSE: it is the first and only callee of
+0x007B5390 before the child loop; classifying 0x007B5390 requires proving whether
+the caller performs a NAME comparison (NC3 falsifier) or something else. It is the
+self-name-check component (base NiAVObject::GetObjectByName semantics factored
+into a shared helper), not a downstream traversal. Disassembled from the true
+function entry 0x007BF220 (prologue included; extent 0x007BF220..0x007BF270).
+================================================================================
+TARGET: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+SHA256: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (PIN OK)
+IMAGE_BASE: 0x00400000  file_offset==RVA (probe-verified)
+FUNC_VA: 0x007BF220  file_off: 0x3BF220
+CONTEXT_PRE_16: ff d2 89 9f 00 02 00 00 5f 5b 5e c2 04 00 cc cc
+
+007BF220  8B 44 24 04             mov      eax, dword ptr [esp + 4]
+007BF224  85 C0                   test     eax, eax
+007BF226  74 43                   je       0x7bf26b
+007BF228  8B 51 0C                mov      edx, dword ptr [ecx + 0xc]
+007BF22B  85 D2                   test     edx, edx
+007BF22D  74 3C                   je       0x7bf26b
+007BF22F  53                      push     ebx
+007BF230  8A 18                   mov      bl, byte ptr [eax]
+007BF232  3A 1A                   cmp      bl, byte ptr [edx]
+007BF234  75 24                   jne      0x7bf25a
+007BF236  84 DB                   test     bl, bl
+007BF238  74 12                   je       0x7bf24c
+007BF23A  8A 58 01                mov      bl, byte ptr [eax + 1]
+007BF23D  3A 5A 01                cmp      bl, byte ptr [edx + 1]
+007BF240  75 18                   jne      0x7bf25a
+007BF242  83 C0 02                add      eax, 2
+007BF245  83 C2 02                add      edx, 2
+007BF248  84 DB                   test     bl, bl
+007BF24A  75 E4                   jne      0x7bf230
+007BF24C  33 C0                   xor      eax, eax
+007BF24E  F7 D8                   neg      eax
+007BF250  1B C0                   sbb      eax, eax
+007BF252  F7 D0                   not      eax
+007BF254  23 C1                   and      eax, ecx
+007BF256  5B                      pop      ebx
+007BF257  C2 04 00                ret      4
+007BF25A  1B C0                   sbb      eax, eax
+007BF25C  83 D8 FF                sbb      eax, -1
+007BF25F  F7 D8                   neg      eax
+007BF261  1B C0                   sbb      eax, eax
+007BF263  F7 D0                   not      eax
+007BF265  23 C1                   and      eax, ecx
+007BF267  5B                      pop      ebx
+007BF268  C2 04 00                ret      4
+007BF26B  33 C0                   xor      eax, eax
+007BF26D  C2 04 00                ret      4
+007BF270  E9 4B 7C FF FF          jmp      0x7b6ec0
+007BF275  CC                      int3     
+007BF276  CC                      int3     
+007BF277  CC                      int3     
+007BF278  CC                      int3     
+007BF279  CC                      int3     
+007BF27A  CC                      int3     
+007BF27B  CC                      int3     
+007BF27C  CC                      int3     
+007BF27D  CC                      int3     
+007BF27E  CC                      int3     
+007BF27F  CC                      int3     
+007BF280  C7 01 14 D5 A8 00       mov      dword ptr [ecx], 0xa8d514
+007BF286  C3                      ret      
+
+CONTEXT_POST_END(0x003BF287)_16: cc cc cc cc cc cc cc cc cc 6a ff 68 c8 e8 a1 00

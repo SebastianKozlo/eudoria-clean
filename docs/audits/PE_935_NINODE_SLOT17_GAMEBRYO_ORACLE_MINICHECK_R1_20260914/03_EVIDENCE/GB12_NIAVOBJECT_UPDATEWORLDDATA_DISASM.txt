@@ -1,0 +1,89 @@
+SYMBOL: ?UpdateWorldData@NiAVObject@@UAEXXZ
+SECTION: .text$mn (#21) value_in_section=0x0 -> file 0x827
+0000  81 EC 88 00 00 00     sub     esp, 0x88
+0006  A1 00 00 00 00        mov     eax, dword ptr [0]
+000B  33 C4                 xor     eax, esp
+000D  89 84 24 84 00 00 00  mov     dword ptr [esp + 0x84], eax
+0014  53                    push    ebx
+0015  56                    push    esi
+0016  57                    push    edi
+0017  8B F9                 mov     edi, ecx
+0019  8B 77 20              mov     esi, dword ptr [edi + 0x20]
+001C  8D 5F 34              lea     ebx, [edi + 0x34]
+001F  85 F6                 test    esi, esi
+0021  0F 84 B2 00 00 00     je      0xd9
+0027  F3 0F 10 43 30        movss   xmm0, dword ptr [ebx + 0x30]
+002C  8D 44 24 6C           lea     eax, [esp + 0x6c]
+0030  F3 0F 59 86 98 00 00 00 mulss   xmm0, dword ptr [esi + 0x98]
+0038  8D 4E 68              lea     ecx, [esi + 0x68]
+003B  53                    push    ebx
+003C  50                    push    eax
+003D  F3 0F 11 44 24 70     movss   dword ptr [esp + 0x70], xmm0
+0043  E8 00 00 00 00        call    0x48
+0048  8D 4E 68              lea     ecx, [esi + 0x68]
+004B  0F 10 00              movups  xmm0, xmmword ptr [eax]
+004E  0F 11 44 24 18        movups  xmmword ptr [esp + 0x18], xmm0
+0053  0F 10 40 10           movups  xmm0, xmmword ptr [eax + 0x10]
+0057  8B 40 20              mov     eax, dword ptr [eax + 0x20]
+005A  89 44 24 58           mov     dword ptr [esp + 0x58], eax
+005E  8D 43 24              lea     eax, [ebx + 0x24]
+0061  50                    push    eax
+0062  8D 44 24 10           lea     eax, [esp + 0x10]
+0066  50                    push    eax
+0067  0F 11 44 24 30        movups  xmmword ptr [esp + 0x30], xmm0
+006C  E8 00 00 00 00        call    0x71
+0071  F3 0F 10 8E 98 00 00 00 movss   xmm1, dword ptr [esi + 0x98]
+0079  0F 28 D1              movaps  xmm2, xmm1
+007C  0F 28 C1              movaps  xmm0, xmm1
+007F  F3 0F 59 40 04        mulss   xmm0, dword ptr [eax + 4]
+0084  F3 0F 59 10           mulss   xmm2, dword ptr [eax]
+0088  F3 0F 58 86 90 00 00 00 addss   xmm0, dword ptr [esi + 0x90]
+0090  F3 0F 59 48 08        mulss   xmm1, dword ptr [eax + 8]
+0095  F3 0F 58 96 8C 00 00 00 addss   xmm2, dword ptr [esi + 0x8c]
+009D  F3 0F 58 8E 94 00 00 00 addss   xmm1, dword ptr [esi + 0x94]
+00A5  0F 14 D0              unpcklps xmm2, xmm0
+00A8  0F 10 44 24 18        movups  xmm0, xmmword ptr [esp + 0x18]
+00AD  F3 0F 11 4C 24 14     movss   dword ptr [esp + 0x14], xmm1
+00B3  8B 44 24 14           mov     eax, dword ptr [esp + 0x14]
+00B7  0F 11 47 68           movups  xmmword ptr [edi + 0x68], xmm0
+00BB  89 44 24 64           mov     dword ptr [esp + 0x64], eax
+00BF  0F 10 44 24 28        movups  xmm0, xmmword ptr [esp + 0x28]
+00C4  8B 44 24 68           mov     eax, dword ptr [esp + 0x68]
+00C8  66 0F D6 54 24 5C     movq    qword ptr [esp + 0x5c], xmm2
+00CE  0F 11 47 78           movups  xmmword ptr [edi + 0x78], xmm0
+00D2  0F 10 44 24 58        movups  xmm0, xmmword ptr [esp + 0x58]
+00D7  EB 16                 jmp     0xef
+00D9  0F 10 03              movups  xmm0, xmmword ptr [ebx]
+00DC  8B 43 30              mov     eax, dword ptr [ebx + 0x30]
+00DF  0F 11 47 68           movups  xmmword ptr [edi + 0x68], xmm0
+00E3  0F 10 43 10           movups  xmm0, xmmword ptr [ebx + 0x10]
+00E7  0F 11 47 78           movups  xmmword ptr [edi + 0x78], xmm0
+00EB  0F 10 43 20           movups  xmm0, xmmword ptr [ebx + 0x20]
+00EF  8B 8F AC 00 00 00     mov     ecx, dword ptr [edi + 0xac]
+00F5  0F 11 87 88 00 00 00  movups  xmmword ptr [edi + 0x88], xmm0
+00FC  89 87 98 00 00 00     mov     dword ptr [edi + 0x98], eax
+0102  5F                    pop     edi
+0103  5E                    pop     esi
+0104  5B                    pop     ebx
+0105  85 C9                 test    ecx, ecx
+0107  74 05                 je      0x10e
+0109  8B 01                 mov     eax, dword ptr [ecx]
+010B  FF 50 40              call    dword ptr [eax + 0x40]
+010E  8B 8C 24 84 00 00 00  mov     ecx, dword ptr [esp + 0x84]
+0115  33 CC                 xor     ecx, esp
+0117  E8 00 00 00 00        call    0x11c
+011C  81 C4 88 00 00 00     add     esp, 0x88
+0122  C3                    ret     
+0123  07                    pop     es
+0124  00 00                 add     byte ptr [eax], al
+0126  00 3C 00              add     byte ptr [eax + eax], bh
+0129  00 00                 add     byte ptr [eax], al
+012B  06                    push    es
+012C  00 44 00 00           add     byte ptr [eax + eax], al
+0130  00 34 00              add     byte ptr [eax + eax], dh
+0133  00 00                 add     byte ptr [eax], al
+0135  14 00                 adc     al, 0
+0137  6D                    insd    dword ptr es:[edi], dx
+0138  00 00                 add     byte ptr [eax], al
+013A  00 35 00 00 00 14     add     byte ptr [0x14000000], dh
+(stop at cap)

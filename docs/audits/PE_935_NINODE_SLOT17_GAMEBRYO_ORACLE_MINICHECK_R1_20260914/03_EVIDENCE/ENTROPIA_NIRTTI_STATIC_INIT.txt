@@ -1,0 +1,61 @@
+# ENTROPIA_NIRTTI_STATIC_INIT — Gamebryo NiRTTI (second RTTI system) provenance of
+# NiNode vtable slot 2, measured STATIC-ONLY from physical Entropia.exe
+# (SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31).
+
+## Why this file exists
+
+Slot 2 of the Entropia NiNode vtable (VA 0x00A8CCF4) contains 0x007B60C0, which
+disassembles as `mov eax, 0x00BA7218; ret` (see ENTROPIA_SLOT_NEIGHBORS_DISASM.txt,
+SLOT 2 section) — the GetRTTI() signature in both pinned oracles
+(`virtual const NiRTTI* GetRTTI() const`). This file proves FROM ENTROPIA'S OWN BYTES
+that 0x00BA7218 is the NiRTTI object of the class named "NiNode" whose base NiRTTI is
+0x00BA7270 — i.e. an independent, in-binary confirmation of the class chain that also
+agrees with the MSVC RTTI walk (ENTROPIA_RTTI_CHAIN_PROBE.json:
+.?AVNiNode@@ -> .?AVNiAVObject@@ -> .?AVNiObjectNET@@ -> .?AVNiObject@@ -> .?AVNiRefObject@@).
+
+## Measured facts (all from file bytes; file_offset == RVA in this binary)
+
+1. "NiNode\0" ASCII string at VA 0x00A8CE00 (file offset 0x68CE00, .rdata), inside a
+   cluster of Gamebryo RTTI name literals (context at 0x00A8CDF0 reads
+   `... m_bVisual  NiNode  ExtraData ...`).
+
+2. Static-initializer thunk at VA 0x00A6C200 (file offset 0x66C200, .text; preceded by
+   0xCC int3 padding and followed by `ret; int3 ...` — a standalone initializer body):
+
+   ```
+   68 70 72 BA 00      push 0x00BA7270     ; base RTTI pointer
+   68 00 CE A8 00      push 0x00A8CE00     ; "NiNode"
+   B9 18 72 BA 00      mov  ecx, 0x00BA7218 ; this = the object returned by slot 2
+   E8 CC D7 CA FF      call 0x007199E0      ; rel32 = -3483700 (NiRTTI ctor)
+   C3                  ret
+   ```
+
+   i.e. `*(NiRTTI*)0x00BA7218 = NiRTTI("NiNode", (const NiRTTI*)0x00BA7270)` — the
+   Gamebryo `NiRTTI(const char* pcName, const NiRTTI* pkBaseRTTI)` constructor form
+   used by both pinned oracles (NiRTTI.h: `NiRTTI (const char* pcName, const NiRTTI*
+   pkBaseRTTI)`; NiImplementRTTI expands to `const NiRTTI C::m_RTTI(#C, &B::m_RTTI)`).
+
+3. 0x00BA7270 (the base NiRTTI pointer pushed by the initializer) is the analogous
+   static of the base class NiAVObject (not decoded further this run — out of scope).
+
+4. The NiRTTI object VA 0x00BA7218 lies in the .data section's virtual-only tail
+   (section table, measured: .data VA 0x76C000, VSize 0x3D6E4, RawPtr 0x76C000,
+   RawSize 0x34000; RVA(0xBA7218)=0x7A7218 > 0x76C000+0x34000=0x7A0000), so its
+   on-disk bytes are zero and its name/base contents exist only at runtime after the
+   initializer above runs. This is why the identity is proven from the INITIALIZER
+   CALL SITE bytes, not from the object storage. The call-site proof is static and
+   complete: the runtime-constructed value of NiNode::ms_RTTI is fully determined by
+   the pushed immediates.
+
+## Interpretation (bounded)
+
+Entropia slot 2 = GetRTTI (returns &NiNode::ms_RTTI), whose name is "NiNode" and whose
+base NiRTTI is the NiAVObject static. This anchors the Entropia vtable ABI prefix:
+slot 0 = vector deleting dtor (0x0082E420), slot 1 = scalar deleting dtor thunk
+(0x00406D50, calls vtable[0] with flags=1), slot 2 = GetRTTI. Both pinned oracles have
+GetRTTI at slot 1 with only ONE destructor slot; Entropia therefore carries one extra
+destructor-related slot before GetRTTI, which shifts every later GB112-analogous
+ordinal by +1 (slot 16 -> GB112's ApplyTransform@15 analog, slot 17 -> GB112's
+GetObjectByName@16 analog, slot 18 -> GB112's SetSelectiveUpdateFlags@17 analog; all
+four neighbor slots were behaviorally decoded this run, see
+ENTROPIA_SLOT_NEIGHBORS_DISASM.txt).
