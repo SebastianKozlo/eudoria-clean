@@ -14,8 +14,10 @@ FINAL_HANDOFF_SCHEMA (per contract):
     block initialized by FUN_007B6000, refcount++ at block+4
   - 0x0050A2D1 (SF dtor body FUN_0050A240): [SF+0x30] = 0 after the refcount release
     protocol
-  (residue: 3023 REJECTED_ALIAS with per-row reasons; 618 POSSIBLE_ALIAS = the
-  documented static bound; 0 UNRESOLVED)
+  (residue: 3022 REJECTED_ALIAS with per-row reasons; 619 POSSIBLE_ALIAS = the
+   documented static bound, canonical after AMEND_LOG_R2 F1 branch (b) — census row
+   0x0040525B reclassified REJECTED_ALIAS -> POSSIBLE_ALIAS; historical row counts
+   3023/618; 0 UNRESOLVED)
 - SF30_SOURCE_PROVENANCE: RESOLVED for both writers (creation/receipt-level chains
   with VA+byte hop tables in 02_ANALYSIS/SF30_PROVENANCE.md; P1 allocation->ctor->
   stored->refcount++; P2 constant zero after release protocol; nothing followed past
@@ -41,7 +43,9 @@ FINAL_HANDOFF_SCHEMA (per contract):
 
 Gates: G0–G5 all PASS (06_REPORT/STAGE_ACCEPTANCE_GATES.csv, recomputed by
 00_CONTROL/finalize.py from the artifacts; COUNTER_ARITHMETIC holds: raw file ==
-CSV == state json == 3643 with counts 2/618/3023/0).
+CSV == state json == 3643 with counts 2/618/3023/0 — historical at this run's
+publication; canonical 2/619/3022/0 after AMEND_LOG_R2 F1 branch (b); the gates CSV
+and the raw/CSV artifacts stay byte-identical).
 
 Era label: PCG_9_3_5. STATIC-ONLY: the client never ran; no game binary process was
 launched; every claim is from physical-byte reading scripts (own PE walk + capstone

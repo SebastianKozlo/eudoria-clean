@@ -26,10 +26,15 @@ from the physical EXE `D:\Eudoria_Reconstruction\pcg_install\Entropia.exe`
 | 06_REPORT/HANDOFF.md | delivery notice per FINAL_HANDOFF_SCHEMA | (authored from script outputs) |
 | 06_REPORT/STAGE_ACCEPTANCE_GATES.csv | G0–G5 verdicts with raw evidence | finalize.py |
 | 06_REPORT/MANIFEST_SHA256.csv | SHA256 of every package file (L12 self-exclusion: the manifest itself is not a row; rows = package files minus the manifest) | finalize.py |
+| 06_REPORT/AMEND_LOG_R2.md | post-audit R2 amendment record | amendment executor |
+| 00_CONTROL/f1_globalptr_proof.py | the F1 static closure proof script | itself |
+| 01_RAW/F1_GLOBALPTR_PROOF_RAW.txt | the proof raw evidence | f1_globalptr_proof.py |
+| 02_ANALYSIS/SF30_WRITER_CENSUS_SUPERSESSION_R2.md | the CSV/RAW supersession annotation (historical artifacts unchanged) | amendment executor |
+| 00_CONTROL/amend_r2_manifest.py | the bounded manifest updater | itself |
 
 ## How to reproduce
 
-Interpreter: Python 3.12.10 (Windows host). Capstone 5.0.7 installed run-locally to
+Interpreter: `D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe` — Python 3.12.7 (canonical reproduction interpreter; version re-measured in-run — the prior "3.12.10" was a transcription error, erratum AMEND_LOG_R2 F4). Capstone 5.0.7 installed run-locally to
 `C:\Users\User\AppData\Local\Temp\opencode\capstone_lib` (added to sys.path by the
 scripts; no global site-packages or repo pollution).
 
@@ -38,6 +43,7 @@ python 00_CONTROL/census.py     # regenerates: 01_RAW/* (all three), 02_ANALYSIS
 python 00_CONTROL/finalize.py   # regenerates: 06_REPORT/STAGE_ACCEPTANCE_GATES.csv,
                                 #   00_CONTROL/SOURCE_IDENTITIES.json, 00_CONTROL/SCRIPT_SHA256.csv,
                                 #   06_REPORT/MANIFEST_SHA256.csv (must run LAST: covers REPORT/HANDOFF)
+python -B 00_CONTROL/f1_globalptr_proof.py  # regenerates 01_RAW/F1_GLOBALPTR_PROOF_RAW.txt
 ```
 
 Both scripts are fail-closed: identity asserts (SHA256/size/machine/opt_magic/

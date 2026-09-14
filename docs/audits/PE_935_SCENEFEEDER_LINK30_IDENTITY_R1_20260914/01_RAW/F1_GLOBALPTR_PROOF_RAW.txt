@@ -1,0 +1,542 @@
+# F1_GLOBALPTR_PROOF_RAW - PE_935_SCENEFEEDER_LINK30_AMEND_R2_20260914
+# RUN: PE_935_SCENEFEEDER_LINK30_AMEND_R2_20260914 - Era: PCG_9_3_5 - STATIC-ONLY (the client NEVER ran; no process of
+#   any game binary; byte-reading script only; zero git mutations).
+# generator: 00_CONTROL/f1_globalptr_proof.py (own minimal PE parser; capstone
+#   5.0.7; bad-byte restart rule documented in the script header).
+# QUESTION: is census row 0x0040525B's receiver (base register edx of
+#   `mov dword ptr [edx+0x30], ebx`) provably never a SceneFeederObject
+#   pointer - via the global pointer slot 0x00B6C3D8 - so REJECTED_ALIAS
+#   stands with the corrected justification R-GLOBAL-PTR-NON-SF?
+# SWEEP: full .text 0x00401000..0x00A75000 (rsize 0x674000), linear, restart-at-next-byte.
+
+== P1: source + base identity (fail-closed) ==
+git HEAD           = 3644e5ac9cbf7b5445861e7f5342fb8642741346 (pin 3644e5ac9cbf7b5445861e7f5342fb8642741346) OK
+git origin/master  = 3644e5ac9cbf7b5445861e7f5342fb8642741346 OK
+git ls-remote      = 3644e5ac9cbf7b5445861e7f5342fb8642741346 OK
+git status --short lines: 3
+  ?? docs/audits/PE_935_NINODE_SLOT17_FIRSTCALL_R1_20260914/                                 allowed
+  ?? docs/audits/PE_935_SCENEFEEDER_LINK30_IDENTITY_R1_20260914/00_CONTROL/f1_globalptr_proof.py allowed
+  ?? experiments/                                                                            allowed
+git diff HEAD empty      : YES
+git diff --cached empty  : YES
+EXE sha256         = E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 OK
+EXE size            = 8015872 OK
+machine=0x014C opt_magic=0x010B image_base=0x00400000 dll_chars=0x0000 (no-ASLR bit clear: True)
+P1 VERDICT: PASS
+
+# sweep recorded facts (NOT gates): decoded 2266698 instructions, 64 restarts
+# restart VAs (first <=200): 0x004129AC, 0x00463D58, 0x00463E74, 0x00463E78, 0x0046F179, 0x0046F185, 0x00489B80, 0x00490E98, 0x0050ACA5, 0x0050ACA6, 0x00571C30, 0x005AF0A9, 0x005AF0B1, 0x00622CB4, 0x0065CFA5, 0x006FA428, 0x0072D72C, 0x0073CABC, 0x0073CAE0, 0x00749CD8, 0x0075B440, 0x0075B634, 0x0075F588, 0x0075F598, 0x0076E181, 0x0076E1B0, 0x0078D230, 0x00799458, 0x007C202C, 0x007D4B34, 0x007DB81C, 0x007E8AFC, 0x007ED850, 0x007F00FD, 0x007F0100, 0x007F0101, 0x00843AEC, 0x0084748C, 0x0085DF10, 0x0085E388, 0x0085F2A9, 0x0085F2B0, 0x0085F2B1, 0x0087AEDC, 0x0087AF54, 0x0087AF91, 0x008CC260, 0x008CC271, 0x008CC273, 0x008E6DA0, 0x008E6DA8, 0x00937F9C, 0x00960E11, 0x00965A49, 0x00965A79, 0x0098C7F1, 0x0098C7F9, 0x0098F375, 0x0098F385, 0x0098F389, 0x0098FFB5, 0x0098FFB9, 0x0098FFBD, 0x00A74FFF
+
+== P2: candidate window 0x00405250..0x0040525B (boundary-aligned decode + sweep stream) ==
+boundary-aligned decode:
+  00405250  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  00405256  68304c4000               push   0x404c30
+  0040525B  895a30                   mov    dword ptr [edx + 0x30], ebx
+  load  @0x00405250 == pin (8b15d8c3b600, mov edx,[0xb6c3d8], writes edx): True
+  push  @0x00405256 == pin (68304c4000, push 0x404c30): True
+  cand  @0x0040525B == pin (895a30, mov [edx+0x30],ebx, WRITE [edx+0x30]): True
+  boundary stream 0x405250+6==0x405256 and 0x405256+5==0x40525B: True
+sweep-stream sightings (the full sweep decoded an instruction STARTING at these VAs):
+  0x00405250: SEEN (bytes match pin)
+  0x00405256: SEEN (bytes match pin)
+  0x0040525B: SEEN (bytes match pin)
+instructions STARTING in the open interval (0x405250, 0x40525B) per sweep:
+  00405256  68304c4000               push   0x404c30
+  count: 1 (pin exactly 1 - the push; NO edx definition among them): True
+P2 VERDICT: PASS
+
+== P3: global-writer census (full .text sweep; mem operands base==0, index==0, disp==0x00B6C3D8) ==
+total occurrences: 179 (pin 179)
+WRITE (access & CS_AC_WRITE): 1 (pin exactly 1) | READ: 178 (pin 178) | RMW: 0 (pin 0) | unknown-access: 0 (pin 0)
+ALL occurrences (VA + access + bytes + rendered):
+  W 00404C9D  a3d8c3b600               mov    dword ptr [0xb6c3d8], eax
+  R 00404E3F  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0040522A  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00405250  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0040526B  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 004052C6  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0040531C  8b1dd8c3b600             mov    ebx, dword ptr [0xb6c3d8]
+  R 00405334  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 00405357  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0040838A  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 004088C2  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 004088E0  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0041AE05  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0041B047  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0042FBA1  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 0042FBB6  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0043063D  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 00430652  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0044146C  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0045B316  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 0045B333  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0045E3A4  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 0045E3CA  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0045E62A  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 0045E645  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0045E798  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0045E827  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0045E868  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0045E8E3  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0045E934  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0045E9AE  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0045EAC6  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 0045EAE3  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0045EBD5  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0046018A  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 004601A6  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0047D40F  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0047D42B  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00488076  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 0048808B  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00488259  8b1dd8c3b600             mov    ebx, dword ptr [0xb6c3d8]
+  R 0048826E  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00488434  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 00488449  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 004AD770  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 004AD788  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 004B0462  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 004B04A3  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 004B2042  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 004B209E  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 004B212F  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 004BF4E3  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 004CC325  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 004CC82D  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 004CFBC6  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 004CFBDB  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 004D9C06  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 0051E85B  8b2dd8c3b600             mov    ebp, dword ptr [0xb6c3d8]
+  R 0051E8C7  8b2dd8c3b600             mov    ebp, dword ptr [0xb6c3d8]
+  R 0051E8DC  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00552235  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00552272  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 0055D705  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 0055D722  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0055D910  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 0055D928  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 005A4747  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 005ACE17  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 005ACE4E  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 005B407A  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 005B40C1  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 005BB90A  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 005BB92E  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 005C009A  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 005C00BB  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 005C36AA  8b2dd8c3b600             mov    ebp, dword ptr [0xb6c3d8]
+  R 005C36BF  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 005C73DE  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 005C7403  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00602CDB  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00602D00  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 00602D5B  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 00602D80  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0060D7BE  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 00670C08  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00670DFB  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0068294F  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00682976  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 006B0225  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006B0249  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 006B0271  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 006B02B7  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 006B02CC  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006B02F7  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006B030F  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 006B0668  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006B06BB  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 006B089F  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 006B914D  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006BC2D0  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006C0B6A  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 006C0BBC  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006E6515  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006E677A  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006E69FE  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006E6B70  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006EAC62  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006EAC98  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006EC8D8  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 006EC96D  8b1dd8c3b600             mov    ebx, dword ptr [0xb6c3d8]
+  R 006EC982  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0070167C  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0072FAA7  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00743DB7  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00743EE5  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00766A88  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00822038  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0083C3EF  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0083C40A  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0083C658  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 0083C673  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0083DF58  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00868C3B  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00868C95  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0086B6AF  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 0086B6C7  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0086FC5E  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 008719C2  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 008719D7  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 008722E9  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0087237B  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 008726D8  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 008726ED  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0087A403  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 0087A42D  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 00880539  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 00880568  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 00892910  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0089292D  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 00892961  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0089297E  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 00894262  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 00894277  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0089467D  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 00894695  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 00895799  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 008957B6  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 008957ED  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 0089580E  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 008999C5  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 008999E8  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 008DB827  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008DB86A  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 008DBE19  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008DBE47  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 008DEAF8  8b3dd8c3b600             mov    edi, dword ptr [0xb6c3d8]
+  R 008DEB0D  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008DEE5C  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 008DEE71  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008ED1ED  8b2dd8c3b600             mov    ebp, dword ptr [0xb6c3d8]
+  R 008EF3F7  8b0dd8c3b600             mov    ecx, dword ptr [0xb6c3d8]
+  R 008EF41B  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008EF601  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008EF624  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 008EF7EA  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008EF80D  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 008EF9CF  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008EF9F2  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 008EFC91  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 008EFCC4  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0092FB63  8b35d8c3b600             mov    esi, dword ptr [0xb6c3d8]
+  R 0092FB78  a1d8c3b600               mov    eax, dword ptr [0xb6c3d8]
+  R 00932B67  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0094E08C  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0094FECC  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0095A7F3  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0095A85B  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0095A8BA  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+  R 0095A906  8b15d8c3b600             mov    edx, dword ptr [0xb6c3d8]
+sole WRITE @0x00404C9D == a3d8c3b600 `mov dword ptr [0xb6c3d8], eax`: True
+READ count == 178: True | total == 179: True
+P3 VERDICT: PASS
+
+== P4: call census (E8 rel32 -> 0x00409080; whole-file raw dword 0x00409080) ==
+E8 rel32 calls in .text targeting 0x00409080: 1 (pin exactly 1, at 0x00404C8B)
+  00404C8B  e8f0430000               call   0x409080
+raw dword 0x00409080 occurrences in WHOLE FILE: 0 (pin 0)
+P4 VERDICT: PASS
+
+== P5: the value chain 0x00404C86 -> store (all bytes re-read) ==
+  00404C86  b9c0feb900               mov    ecx, 0xb9fec0
+  00404C8B  e8f0430000               call   0x409080
+  00404C90  68d8c3b600               push   0xb6c3d8
+  00404C95  c7442414ffffffff         mov    dword ptr [esp + 0x14], 0xffffffff
+  00404C9D  a3d8c3b600               mov    dword ptr [0xb6c3d8], eax
+  0x00404C86 mov    b9c0feb900: MATCH
+  0x00404C8B call   e8f0430000: MATCH
+  0x00404C90 push   68d8c3b600: MATCH
+  0x00404C95 mov    c7442414ffffffff: MATCH
+  0x00404C9D mov    a3d8c3b600: MATCH
+between call-end and store: exactly push@0x404C90 + mov [esp+0x14],0xffffffff@0x404C95, NEITHER defines eax: True
+mov ecx,0xb9fec0 @0x404C86 ends exactly at call@0x404C8B (imm == 0x00B9FEC0): True
+
+-- FUN_00409080 body: linear decode entry->ret (pin: ret 4 @0x00409155, ZERO bad bytes) --
+bad bytes in body: 0  (pin 0)
+FULL body decode (55 instructions):
+  00409080  6aff                     push   -1
+  00409082  689a3e9900               push   0x993e9a
+  00409087  64a100000000             mov    eax, dword ptr fs:[0]
+  0040908D  50                       push   eax
+  0040908E  83ec08                   sub    esp, 8
+  00409091  53                       push   ebx
+  00409092  56                       push   esi
+  00409093  a1d0d8b900               mov    eax, dword ptr [0xb9d8d0]
+  00409098  33c4                     xor    eax, esp
+  0040909A  50                       push   eax
+  0040909B  8d442414                 lea    eax, [esp + 0x14]
+  0040909F  64a300000000             mov    dword ptr fs:[0], eax
+  004090A5  8bf1                     mov    esi, ecx
+  004090A7  89742410                 mov    dword ptr [esp + 0x10], esi
+  004090AB  8d4c240f                 lea    ecx, [esp + 0xf]
+  004090AF  c744241c00000000         mov    dword ptr [esp + 0x1c], 0
+  004090B7  ff15385aa700             call   dword ptr [0xa75a38]
+  004090BD  50                       push   eax
+  004090BE  68d497a700               push   0xa797d4
+  004090C3  8bce                     mov    ecx, esi
+  004090C5  c644242401               mov    byte ptr [esp + 0x24], 1
+  004090CA  ff15445aa700             call   dword ptr [0xa75a44]
+  004090D0  8d4c240f                 lea    ecx, [esp + 0xf]
+  004090D4  ff15405aa700             call   dword ptr [0xa75a40]
+  004090DA  8d4c240f                 lea    ecx, [esp + 0xf]
+  004090DE  ff15385aa700             call   dword ptr [0xa75a38]
+  004090E4  bb04000000               mov    ebx, 4
+  004090E9  50                       push   eax
+  004090EA  8d4e18                   lea    ecx, [esi + 0x18]
+  004090ED  885c2420                 mov    byte ptr [esp + 0x20], bl
+  004090F1  ff153c5aa700             call   dword ptr [0xa75a3c]
+  004090F7  8d4c240f                 lea    ecx, [esp + 0xf]
+  004090FB  c644241c06               mov    byte ptr [esp + 0x1c], 6
+  00409100  ff15405aa700             call   dword ptr [0xa75a40]
+  00409106  d905cc99a700             fld    dword ptr [0xa799cc]
+  0040910C  8d4e4c                   lea    ecx, [esi + 0x4c]
+  0040910F  d95e38                   fstp   dword ptr [esi + 0x38]
+  00409112  c7463000040000           mov    dword ptr [esi + 0x30], 0x400
+  00409119  c7463400030000           mov    dword ptr [esi + 0x34], 0x300
+  00409120  895e3c                   mov    dword ptr [esi + 0x3c], ebx
+  00409123  895e40                   mov    dword ptr [esi + 0x40], ebx
+  00409126  895e44                   mov    dword ptr [esi + 0x44], ebx
+  00409129  c7464802000000           mov    dword ptr [esi + 0x48], 2
+  00409130  e8dbddffff               call   0x406f10
+  00409135  8d4e64                   lea    ecx, [esi + 0x64]
+  00409138  c644241c07               mov    byte ptr [esp + 0x1c], 7
+  0040913D  e87eafffff               call   0x4040c0
+  00409142  8bc6                     mov    eax, esi
+  00409144  8b4c2414                 mov    ecx, dword ptr [esp + 0x14]
+  00409148  64890d00000000           mov    dword ptr fs:[0], ecx
+  0040914F  59                       pop    ecx
+  00409150  5e                       pop    esi
+  00409151  5b                       pop    ebx
+  00409152  83c414                   add    esp, 0x14
+  00409155  c20400                   ret    4
+esi definitions in body: 2 (pin exactly 1: mov esi, ecx @0x004090A5, 8bf1)
+  004090A5  8bf1                     mov    esi, ecx
+  00409150  5e                       pop    esi
+  esi-def pin: False
+eax definitions in body (calls count as eax defs): 13
+  00409087  64a100000000             mov    eax, dword ptr fs:[0]
+  00409093  a1d0d8b900               mov    eax, dword ptr [0xb9d8d0]
+  00409098  33c4                     xor    eax, esp
+  0040909B  8d442414                 lea    eax, [esp + 0x14]
+  004090B7  ff15385aa700             call   dword ptr [0xa75a38]
+  004090CA  ff15445aa700             call   dword ptr [0xa75a44]
+  004090D4  ff15405aa700             call   dword ptr [0xa75a40]
+  004090DE  ff15385aa700             call   dword ptr [0xa75a38]
+  004090F1  ff153c5aa700             call   dword ptr [0xa75a3c]
+  00409100  ff15405aa700             call   dword ptr [0xa75a40]
+  00409130  e8dbddffff               call   0x406f10
+  0040913D  e87eafffff               call   0x4040c0
+  00409142  8bc6                     mov    eax, esi
+last eax def == mov eax, esi @0x00409142 (8bc6): True
+instructions after 0x00409142 (pin: ONLY epilogue + ret 4 @0x00409155):
+  00409144  8b4c2414                 mov    ecx, dword ptr [esp + 0x14]
+  00409148  64890d00000000           mov    dword ptr fs:[0], ecx
+  0040914F  59                       pop    ecx
+  00409150  5e                       pop    esi
+  00409151  5b                       pop    ebx
+  00409152  83c414                   add    esp, 0x14
+  00409155  c20400                   ret    4
+tail: no eax/esi def, ends ret 0x4 @0x00409155 (c20400): False
+no ecx definition (incl. calls) between entry and 0x004090A5: True (12 insns checked)
+writes to [esi] / [esi+0] in body: 0 (pin ZERO - no vtable store; non-polymorphic)
+P5 VERDICT: MISMATCH
+=> chain: FUN_00409080 return == esi == entry ecx == 0x00B9FEC0; store @0x00404C9D
+   stores eax == 0x00B9FEC0 into [0x00B6C3D8].
+
+== P6: static object + global at rest (file-backed reads; own VA->offset) ==
+  section .text    va 0x00401000..0x00A75000 vsize 0x6735E5 rsize 0x674000 (file-backed end 0x00A75000)
+  section .rdata   va 0x00A75000..0x00B6C000 vsize 0xF6569 rsize 0xF7000 (file-backed end 0x00B6C000)
+  section .data    va 0x00B6C000..0x00BA96E4 vsize 0x3D6E4 rsize 0x34000 (file-backed end 0x00BA0000)
+  section .tls     va 0x00BAA000..0x00BAB000 vsize 0xA rsize 0x1000 (file-backed end 0x00BAB000)
+  section .rsrc    va 0x00BAB000..0x00BAF000 vsize 0x3C54 rsize 0x4000 (file-backed end 0x00BAF000)
+0x00B9FEC0 in section: .data; 0x00B6C3D8 in section: .data; .data va_start == 0x00B6C000: True
+at-rest dwords 0x00B9FEC0..0x00B9FF20 (file-backed; 25 dwords incl. both ends):
+  [0x00B9FEC0] = 0x00000000
+  [0x00B9FEC4] = 0x00000000
+  [0x00B9FEC8] = 0x00000000
+  [0x00B9FECC] = 0x00000000
+  [0x00B9FED0] = 0x00000000
+  [0x00B9FED4] = 0x00000000
+  [0x00B9FED8] = 0x00000000
+  [0x00B9FEDC] = 0x00000000
+  [0x00B9FEE0] = 0x00000000
+  [0x00B9FEE4] = 0x00000000
+  [0x00B9FEE8] = 0x00000000
+  [0x00B9FEEC] = 0x00000000
+  [0x00B9FEF0] = 0x00000000
+  [0x00B9FEF4] = 0x00000000
+  [0x00B9FEF8] = 0x00000000
+  [0x00B9FEFC] = 0x00000000
+  [0x00B9FF00] = 0x00000000
+  [0x00B9FF04] = 0x00000000
+  [0x00B9FF08] = 0x00000000
+  [0x00B9FF0C] = 0x00000000
+  [0x00B9FF10] = 0x00000000
+  [0x00B9FF14] = 0x00000000
+  [0x00B9FF18] = 0x00000000
+  [0x00B9FF1C] = 0x00000000
+  [0x00B9FF20] = 0x00000000
+all zero: True (pin ALL ZERO)
+[0x00B6C3D8] at rest = 0x00000000 (pin 0x00000000)
+P6 VERDICT: PASS
+
+== P7: address-taker channel closure ==
+IMM-operand census of 0x00B6C3D8 in .text (sweep stream): 1 (pin EXACTLY 1)
+  00404C90  68d8c3b600               push   0xb6c3d8
+the sole address-taker == push 0xb6c3d8 @0x00404C90 (68d8c3b600): True
+
+E8 rel32 calls in .text targeting 0x00404B60 (recorded facts): 2
+  call site 0x00404CA2
+  call site 0x005B3C82
+caller chain decode 0x00404C95..0x00404CA2 (linear, path-insensitive esp simulation):
+  00404C95  c7442414ffffffff         mov    dword ptr [esp + 0x14], 0xffffffff  (esp delta +0)
+  00404C9D  a3d8c3b600               mov    dword ptr [0xb6c3d8], eax  (esp delta +0)
+  00404CA2  e8b9feffff               call   0x404b60  (call)
+caller-side stack delta D (bytes pushed between the &global push and this call): +0
+
+-- FUN_00404B60 window: linear decode to the function's end (path-insensitive) --
+body-end stop: CC_PAD at 0x00404C28 (run 8); bad-byte restarts in window: 0 
+FULL window decode (58 instructions):
+  00404B60  6aff                     push   -1
+  00404B62  68e8329900               push   0x9932e8
+  00404B67  64a100000000             mov    eax, dword ptr fs:[0]
+  00404B6D  50                       push   eax
+  00404B6E  83ec08                   sub    esp, 8
+  00404B71  56                       push   esi
+  00404B72  a1d0d8b900               mov    eax, dword ptr [0xb9d8d0]
+  00404B77  33c4                     xor    eax, esp
+  00404B79  50                       push   eax
+  00404B7A  8d442410                 lea    eax, [esp + 0x10]
+  00404B7E  64a300000000             mov    dword ptr fs:[0], eax
+  00404B84  68f0284000               push   0x4028f0
+  00404B89  68bcfeb900               push   0xb9febc
+  00404B8E  e82dd8ffff               call   0x4023c0
+  00404B93  83c408                   add    esp, 8
+  00404B96  e8e5dcffff               call   0x402880
+  00404B9B  8b00                     mov    eax, dword ptr [eax]
+  00404B9D  83c004                   add    eax, 4
+  00404BA0  8d4c2408                 lea    ecx, [esp + 8]
+  00404BA4  89442408                 mov    dword ptr [esp + 8], eax
+  00404BA8  c644240c00               mov    byte ptr [esp + 0xc], 0
+  00404BAD  e85efcffff               call   0x404810
+  00404BB2  c744241800000000         mov    dword ptr [esp + 0x18], 0
+  00404BBA  e8c1dcffff               call   0x402880
+  00404BBF  8b08                     mov    ecx, dword ptr [eax]
+  00404BC1  8b01                     mov    eax, dword ptr [ecx]
+  00404BC3  85c0                     test   eax, eax
+  00404BC5  8b542420                 mov    edx, dword ptr [esp + 0x20]
+  00404BC9  7416                     je     0x404be1
+  00404BCB  eb03                     jmp    0x404bd0
+  00404BCD  8d4900                   lea    ecx, [ecx]
+  00404BD0  8b7008                   mov    esi, dword ptr [eax + 8]
+  00404BD3  3b7208                   cmp    esi, dword ptr [edx + 8]
+  00404BD6  7d09                     jge    0x404be1
+  00404BD8  8d480c                   lea    ecx, [eax + 0xc]
+  00404BDB  8b01                     mov    eax, dword ptr [ecx]
+  00404BDD  85c0                     test   eax, eax
+  00404BDF  75ef                     jne    0x404bd0
+  00404BE1  807c240c00               cmp    byte ptr [esp + 0xc], 0
+  00404BE6  89420c                   mov    dword ptr [edx + 0xc], eax
+  00404BE9  8911                     mov    dword ptr [ecx], edx
+  00404BEB  c7442418ffffffff         mov    dword ptr [esp + 0x18], 0xffffffff
+  00404BF3  7422                     je     0x404c17
+  00404BF5  8b4c2408                 mov    ecx, dword ptr [esp + 8]
+  00404BF9  b8ffffff7f               mov    eax, 0x7fffffff
+  00404BFE  8bd1                     mov    edx, ecx
+  00404C00  f00fc102                 lock xadd dword ptr [edx], eax
+  00404C04  3d01000080               cmp    eax, 0x80000001
+  00404C09  7e0c                     jle    0x404c17
+  00404C0B  e860ccffff               call   0x401870
+  00404C10  50                       push   eax
+  00404C11  ff153051a700             call   dword ptr [0xa75130]
+  00404C17  8b4c2410                 mov    ecx, dword ptr [esp + 0x10]
+  00404C1B  64890d00000000           mov    dword ptr fs:[0], ecx
+  00404C22  59                       pop    ecx
+  00404C23  5e                       pop    esi
+  00404C24  83c414                   add    esp, 0x14
+  00404C27  c3                       ret    
+first [esp+0x20] access at window index 27; callee esp delta P before it: +28
+stack arithmetic: 4 (retaddr) +0 (caller D) +28 (callee P) == 0x20 (pin 0x20): True
+arg-slot loads (reg := [esp+0x20]): [('edx', {'va': 4213701, 'size': 4, 'bytes': '8b542420', 'mnemonic': 'mov', 'op_str': 'edx, dword ptr [esp + 0x20]', 'mem': [{'base': 30, 'index': 0, 'scale': 1, 'disp': 32, 'access': 1, 'base_name': 'esp'}], 'imm': [], 'wregs': ['edx'], 'rregs': []})]
+census (a): WRITE mem-operands [argreg + 0]: 1 (pin ZERO)
+  VIOLATION: 00404C00  f00fc102                 lock xadd dword ptr [edx], eax
+census (b): stores of an arg register to memory (incl. push argreg): 1 (pin ZERO)
+  VIOLATION: 00404BE9  8911                     mov    dword ptr [ecx], edx
+census (c): ALL observed uses of arg registers as mem-op bases (disp/access):
+  00404BD3  3b7208                   cmp    esi, dword ptr [edx + 8] disp=0x8 access=R
+  00404BE6  89420c                   mov    dword ptr [edx + 0xc], eax disp=0xC access=W
+  00404C00  f00fc102                 lock xadd dword ptr [edx], eax disp=0x0 access=RW
+expected observations present - read [arg+8]: True, write [arg+0xc]: True
+P7 VERDICT: MISMATCH (ALIAS_CHANNEL_OPEN if (a)/(b) nonzero)
+
+== P8: SF-always-heap premise re-assertion ==
+whole-file raw dword 0x00A7D458 occurrences: 2 (pin exactly 2)
+  file offset 0x109369 -> VA 0x00509369
+    imm-operand position pin (0x00509369 / 0x0050A26B): True
+    containing store (true start, end-anchored at imm end): 00509366  c7450058d4a700           mov    dword ptr [ebp], 0xa7d458
+  file offset 0x10A26B -> VA 0x0050A26B
+    imm-operand position pin (0x00509369 / 0x0050A26B): True
+    containing store (true start, end-anchored at imm end): 0050A269  c70658d4a700             mov    dword ptr [esi], 0xa7d458
+sweep census: insns with imm 0x00A7D458: 2 (pin exactly 2, both WRITE stores)
+  00509366  c7450058d4a700           mov    dword ptr [ebp], 0xa7d458
+  0050A269  c70658d4a700             mov    dword ptr [esi], 0xa7d458
+whole-file raw dword 0x00509330 occurrences: 0 (pin 0)
+E8 rel32 calls in .text targeting 0x00509330 (SF ctor): ['0x0047D043', '0x0052480F'] (pin [0x0047D043, 0x0052480F])
+
+-- FUN_005247C0 allocation window (SF-block allocation: push 0x98 + new-thunk call) --
+body-end stop: CC_PAD at 0x00524858 (run 8); bad-byte restarts: 0
+window: 0x005247C0..0x00524858, 49 instructions decoded
+push 0x98 sites in window: 1 (pin exactly 1)
+  005247E7  6898000000               push   0x98
+operator-new thunk (call 0x95d3c4) sites in window: 1 (pin exactly 1; 0x95D3C4 = the MSVCR80.dll operator-new thunk per the accepted run's IAT walk - not re-decoded here)
+  005247EC  e8d38b4300               call   0x95d3c4
+SF ctor call sites in window: 1 (pin exactly 1, at 0x0052480F)
+  0052480F  e81c4bfeff               call   0x509330
+allocation pattern ok (push 0x98 BEFORE new-call BEFORE ctor call): True
+bounded context decode around the allocation (0x005247CC..):
+  005247CC  005083                   add    byte ptr [eax - 0x7d], dl
+  005247CF  ec                       in     al, dx
+  005247D0  085657                   or     byte ptr [esi + 0x57], dl
+  005247D3  a1d0d8b900               mov    eax, dword ptr [0xb9d8d0]
+  005247D8  33c4                     xor    eax, esp
+  005247DA  50                       push   eax
+  005247DB  8d442414                 lea    eax, [esp + 0x14]
+  005247DF  64a300000000             mov    dword ptr fs:[0], eax
+  005247E5  8bf9                     mov    edi, ecx
+  005247E7  6898000000               push   0x98
+  005247EC  e8d38b4300               call   0x95d3c4
+  005247F1  83c404                   add    esp, 4
+  005247F4  8944240c                 mov    dword ptr [esp + 0xc], eax
+  005247F8  33f6                     xor    esi, esi
+  005247FA  3bc6                     cmp    eax, esi
+  005247FC  8974241c                 mov    dword ptr [esp + 0x1c], esi
+  00524800  7414                     je     0x524816
+  00524802  8b4c2428                 mov    ecx, dword ptr [esp + 0x28]
+  00524806  8b542424                 mov    edx, dword ptr [esp + 0x24]
+  0052480A  51                       push   ecx
+  0052480B  52                       push   edx
+P8 VERDICT: PASS
+
+== P9: counts recomputed from the UNCHANGED 02_ANALYSIS/SF30_WRITER_CENSUS.csv ==
+CSV data rows: 3643 (pin 3643)
+counts: {'PROVEN_SF30_WRITER': 2, 'POSSIBLE_ALIAS': 618, 'REJECTED_ALIAS': 3023, 'UNRESOLVED': 0} (pin 2/618/3023/0; UNRESOLVED via .get(k,0) - the AMEND T-2 lesson)
+row 0x0040525B present with classification REJECTED_ALIAS: True
+  row: {'writer_va': '0x0040525B', 'function_va': '0x00405150', 'instruction': 'mov dword ptr [edx + 0x30], ebx', 'source_register_value': 'ebx', 'receiver_provenance': 'static data address', 'classification': 'REJECTED_ALIAS'}
+P9 VERDICT: PASS
+
+== F1-P GATE VERDICT (P1..P9) ==
+P1: PASS
+P2: PASS
+P3: PASS
+P4: PASS
+P5: FAIL/MISMATCH
+P6: PASS
+P7: FAIL/MISMATCH
+P8: PASS
+P9: PASS
+F1-P: FAIL - branch decision per the pre-registered contract branches
+
+# interpreter: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+# capstone: 5.0.7
+# END OF RAW

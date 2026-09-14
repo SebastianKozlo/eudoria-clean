@@ -79,7 +79,7 @@ name does not read like a "Model..." class; the maximum semantic label achieved 
 |---|---|---|---|
 | C1 | RTTI walker calibration reproduces the known answer | CONFIRMED | 01_RAW/SF30_RTTI_RAW.txt §A: [0x00A7D454]=0x00AA12B8 → COL(sig=0,off=0,ptd=0x00B78834) → TD name `.?AVSceneFeederObject@@` == expected. Asserted fail-closed before the link walk. |
 | C2 | SF identity re-derived in-run (not inherited) | CONFIRMED | Raw §2.1: exactly TWO stores of imm32 0x00A7D458 in .text: 0x00509366 (ctor, `mov [ebp],0xa7d458`) and 0x0050A269 (dtor, `mov [esi],0xa7d458`); ctor E8 callers = {0x0047D043, 0x0052480F}; ZERO absolute dword refs of 0x00509330 in the file; both creation paths = operator new(0x98) (thunk 0x95D3C4 = MSVCR80.dll.??2@YAPAXI@Z, own IAT walk). |
-| C3 | Complete writer census (Task A) | CONFIRMED | Enumeration rule (documented in raw header): linear capstone 5.0.7 sweep of FULL .text (0x00401000..0x00A75000, rsize 0x674000), bad-byte restart; 2,266,698 instructions decoded, 64 restarts; RAW CANDIDATES (any WRITE mem-operand disp==0x30: mov disp8/disp32, base+index+disp, imm stores, superset incl. x87) = **3643** = the denominator. Every candidate has a CSV row; counts recomputed from rows: PROVEN=2, REJECTED=3023, POSSIBLE=618, UNRESOLVED=0 (3643 total). |
+| C3 | Complete writer census (Task A) | CONFIRMED | Enumeration rule (documented in raw header): linear capstone 5.0.7 sweep of FULL .text (0x00401000..0x00A75000, rsize 0x674000), bad-byte restart; 2,266,698 instructions decoded, 64 restarts; RAW CANDIDATES (any WRITE mem-operand disp==0x30: mov disp8/disp32, base+index+disp, imm stores, superset incl. x87) = **3643** = the denominator. Every candidate has a CSV row; counts recomputed from rows: PROVEN=2, REJECTED=3023, POSSIBLE=618, UNRESOLVED=0 (3643 total). (Counts historical at this run's publication; canonical after AMEND_LOG_R2 F1 branch (b): 619 POSSIBLE / 3022 REJECTED — census row 0x0040525B reclassified REJECTED_ALIAS -> POSSIBLE_ALIAS; the CSV rows unchanged.) |
 | C4 | The two PROVEN writers + receiver provenance | CONFIRMED | 0x005093C3: ebp==SF (0x00509357 `mov ebp,ecx`; 0x00509366 vtable store) — CSV receiver_provenance carries the chain. 0x0050A2D1: esi==SF (0x0050A263 `mov esi,ecx`; 0x0050A269 vtable store; dtor body called from vtable slot 0 FUN_0050A460). |
 | C5 | Source provenance to creation/receipt only (Task B) | CONFIRMED | 02_ANALYSIS/SF30_PROVENANCE.md: P1 hop table 0x00509376→0x005093C8 (new(0x118)→FUN_007B6000→stored→refcount++), STOP at receipt; P2 = constant 0 (0x0050A272 `xor ebx,ebx`) after the release protocol 0x0050A2BD..0x0050A2D1. SOURCE_PROVENANCE per writer: RESOLVED / RESOLVED (no UNRESOLVED edge needed). |
 | C6 | Type identity (Task C) | CONFIRMED | Raw §B: block ctor 0x007B6041 stores vtable 0x00A8CCF4; [0x00A8CCF0]=0x00AAEEC8 (raw bytes `c8eeaa00`) → COL(sig=0,off=0,ptd=0x00B936C8) → TD name bytes `2e3f41564e694e6f64654040` = `.?AVNiNode@@`; vtable in .rdata, 47 code-pointer entries; ctor FUN_007B6000 is NOT a vtable entry (not virtual). Supporting: embedded vtable 0x00A8CCE0 @ block+0xE0 → `?$NiTPointerList@PAVNiDynamicEffect@@@@`. |
@@ -91,16 +91,34 @@ name does not read like a "Model..." class; the maximum semantic label achieved 
 
 ### The POSSIBLE_ALIAS bound (honest residue, by design of the taxonomy)
 
-618 of 3643 candidates are classified **POSSIBLE_ALIAS**: receiver provenance not
+619 of 3643 candidates are classified **POSSIBLE_ALIAS** (canonical after
+AMEND_LOG_R2 F1; historical row count 618): receiver provenance not
 resolvable to SF or non-SF within this run's static bounds (base register e.g. esi/eax
 in functions never proven to receive SF; whole-binary SF pointer-origin closure —
 interprocedural dataflow — was out of scope). This residue is the documented static
 bound of the census method, NOT unexamined code: every row carries its form, function,
-and the structural rejection rules that did not apply. 3023 rows are REJECTED_ALIAS
-with per-row reasons; fired-reason census recomputed by script from the raw why-lines
-of 01_RAW/SF30_WRITER_RAW.txt: **R-ESP 2765 / R-STACK-PTR 129 / R-CTOR-OTHER 104 /
-R-ZERO 18 / R-LEA-STACK 3 / R-EBP-INHERITED 2 / R-IMM-STATIC 1 / R-CONT-FIELD 1 =
-3023**; **R-EBP-FRAME: rule present, never fired (0 rows)**.
+and the structural rejection rules that did not apply. 3022 rows are REJECTED_ALIAS
+(canonical after AMEND_LOG_R2 F1; historical row count 3023) with per-row reasons;
+fired-reason census recomputed by script from the raw why-lines of the HISTORICAL
+01_RAW/SF30_WRITER_RAW.txt (byte-identical): **R-ESP 2765 / R-STACK-PTR 129 /
+R-CTOR-OTHER 104 / R-ZERO 18 / R-LEA-STACK 3 / R-EBP-INHERITED 2 / R-IMM-STATIC 1 /
+R-CONT-FIELD 1 = 3023 (historical)**; **R-EBP-FRAME: rule present, never fired
+(0 rows)**. (AMEND_LOG_R2 F1 supersession, BRANCH (b): the historical R-IMM-STATIC
+label of census row 0x0040525B — raw why-line 'base==edx = fixed immediate address' —
+is SUPERSEDED: the base register holds the VALUE loaded from the global pointer slot
+0x00B6C3D8 (`mov edx, dword ptr [0xb6c3d8]` @0x00405250, bytes 8B 15 D8 C3 B6 00;
+proof 01_RAW/F1_GLOBALPTR_PROOF_RAW.txt). The corrected rejection R-GLOBAL-PTR-NON-SF
+was attempted and PROVED the direct-write channel closed (exactly ONE direct writer
+0x00404C9D storing FUN_00409080's return = its `this` = 0x00B9FEC0, a static .data
+address, non-polymorphic — no vtable store in its body; the slot at rest 0x00000000) —
+but the address-taker channel is OPEN: the sole consumer of &global (FUN_00404B60,
+arg verified at [esp+0x20]) stores the arg pointer into a linked list (`mov dword
+ptr [ecx], edx` @0x00404BE9 with edx == &global), so a write-through-pointer channel
+via the list is NOT excluded within the amendment's static bounds. The row is
+therefore reclassified REJECTED_ALIAS -> POSSIBLE_ALIAS. Canonical counts: 3643 =
+2 PROVEN / 619 POSSIBLE / 3022 REJECTED / 0 UNRESOLVED. The historical CSV/RAW
+artifacts stay byte-identical; the reclassification is recorded in AMEND_LOG_R2 and
+02_ANALYSIS/SF30_WRITER_CENSUS_SUPERSESSION_R2.md.)
 
 ---
 
@@ -129,9 +147,12 @@ R-ZERO 18 / R-LEA-STACK 3 / R-EBP-INHERITED 2 / R-IMM-STATIC 1 / R-CONT-FIELD 1 
 4. **Bulk-init non-coverage proof** — the ctor's two `rep movsd` are measured to
    target [esp+0x18] and [ebp+0x4C] (range +0x4C..+0x70) — bulk init provably does
    NOT cover +0x30 (class iv satisfied with byte evidence, not assumption).
-5. **Classifier discipline** — the 3023 REJECTED rows demonstrate the classifier
-   does not rubber-stamp: structural rules (stack/frame/lea/imm/null/other-class/
-   container-field) fire with per-row reasons.
+5. **Classifier discipline** — the 3023 REJECTED rows (historical at this run's
+   publication; canonical 3022 after AMEND_LOG_R2 F1) demonstrate the classifier
+   does not rubber-stamp: structural rules (stack/frame/lea/null/other-class/
+   container-field — plus the historical `imm` rule, whose single fired row proved
+   a mislabel and is canonically POSSIBLE_ALIAS per AMEND_LOG_R2 F1/erratum E-2)
+   fire with per-row reasons.
 6. **Scope census** — zero claim-context forbidden labels; zero decodes of the
    forbidden callees; the slot-17 dword appears exactly once as a recorded VALUE.
 
@@ -150,8 +171,9 @@ contract.
 - The other 46 slots of the NiNode vtable; any method of the NiNode class.
 - Callees inside the block ctor (0x7C02D0, 0x788480, 0x7DE000) — recorded at
   receipt level only, not analyzed (Task B stops at creation/receipt).
-- The 618 POSSIBLE_ALIAS rows were not individually resolved to non-SF (requires
-  whole-binary SF pointer-origin closure; declared bound of the method).
+- The 618 POSSIBLE_ALIAS rows (historical at this run's publication; 619 canonical
+   after AMEND_LOG_R2 F1) were not individually resolved to non-SF (requires
+   whole-binary SF pointer-origin closure; declared bound of the method).
 - The SF dtor's second release block (0x50A2D4..0x50A2EA, re-read of the now-null
   field) — semantics not analyzed beyond the measured write.
 - SF+0x30's value LATER behavior (what the NiNode is used for after receipt;
