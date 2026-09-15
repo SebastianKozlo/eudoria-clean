@@ -1,0 +1,110 @@
+================================================================================
+RAW ARTIFACT: FUN_006FAB80_DISASM.txt
+RUN_ID: PE_935_SF_ARG2_UPSTREAM_HOLDER_R1_20260915
+GENERATOR: phase_a_thunk.py (SHA256=39ED41ED116532BE12179B88A6154F5D93F01E27C81F9E73006A10859CA42F08)
+PYTHON: 3.12.7 | CAPSTONE: 5.0.7
+S0 PASS: SIZE=8015872 SHA256=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 PE32 i386 ImageBase=0x00400000
+SOURCE_OF_TRUTH: D:/Eudoria_Reconstruction/pcg_install/Entropia.exe physical bytes (STATIC decode; binary NEVER executed)
+HEADER_TIMESTAMP: 2026-09-15T05:35:35Z (metadata only; decode content is byte-deterministic)
+================================================================================
+
+[A1] B.5 EXTENT (iterative terminal+padding rule, own capstone)
+  anchor start : 0x006FAB80
+  extent end   : 0x006FAB9A
+  extent size  : 26 bytes
+  end_kind     : pad
+  terminal     : ret
+  pad_len      : 6
+  next_start   : 0x006FABA0
+  events       : none
+
+[A2] FULL DISASSEMBLY (measured layer)
+  VA         BYTES                  MNEMONIC+OPERANDS            SEMANTIC (interpretive)
+  0x006FAB80  8b4914                 mov ecx, dword ptr [ecx + 0x14] ecx := [ecx+0x14]  | OBSERVED: base register ECX at entry = this (thiscall this); loads the HELD object pointer from [this+0x14] into ECX
+  0x006FAB83  d9442404               fld dword ptr [esp + 4]      st0 := fld dword [esp+4]  | OBSERVED: loads thunk arg1 (32 bits at [esp+4]) into the x87 register stack
+  0x006FAB87  8b542408               mov edx, dword ptr [esp + 8] edx := [esp+8]  | OBSERVED: loads thunk arg2 verbatim into EDX (no test, no arithmetic)
+  0x006FAB8B  8b01                   mov eax, dword ptr [ecx]     eax := [ecx]  | OBSERVED: vtable pointer of the HELD object (receiver vtable)
+  0x006FAB8D  8b400c                 mov eax, dword ptr [eax + 0xc] eax := [eax+0x0C]  | OBSERVED: virtual slot displacement 0x0C = 4*3 = SLOT 3 (byte evidence 8B 40 0C)
+  0x006FAB90  52                     push edx                     push edx  | OBSERVED: receiver stack slot 2 receives thunk arg2 verbatim (after call: [esp+8])
+  0x006FAB91  51                     push ecx                     push ecx  | OBSERVED: argument-slot allocation push (value overwritten by next insn; not a data forward)
+  0x006FAB92  d91c24                 fstp dword ptr [esp]         fstp dword [esp]  | OBSERVED: stores st0 into the slot pushed by 0x006FAB91 = receiver stack slot 1 (after call: [esp+4])
+  0x006FAB95  ffd0                   call eax                     call eax  | OBSERVED: indirect call to receiver vtable slot 3; this in ECX = HELD object (ECX not clobbered between 0x006FAB80 and the call)
+  0x006FAB97  c20800                 ret 8                        ret 8  | OBSERVED: callee cleanup of 2 dword stack args -> thunk ABI is thiscall(this in ECX, arg1=[esp+4], arg2=[esp+8])
+
+[A3] MEASURED ABI
+  calling convention : thiscall (this in ECX; callee-cleanup)
+  evidence           : ret-imm 0x8 at 0x006FAB97 (2 dword stack args cleaned)
+  this register      : ECX (base of the [reg+0x14] load at 0x006FAB80)
+  stack args         : arg1=[esp+4] (read at 0x006FAB83), arg2=[esp+8] (read at 0x006FAB87)
+  return             : to caller, no value contract observed (forwarder)
+
+[A4] RECEIVER AND SLOT
+  receiver source    : [this+0x14] (this = ECX at entry); INSN 0x006FAB80
+  receiver vtable    : [ecx] at 0x006FAB8B
+  slot displacement  : [eax+0x0C] at 0x006FAB8D -> 0x0C/4 = SLOT 3 (byte evidence: 8B 40 0C)
+  receiver this at virtual call : ECX still holds the held object (no ECX write between load and call)
+
+[A5] FORWARDING FIDELITY (measured per operand)
+  arg1 path : [esp+4] --fld dword--> st0 --fstp dword [esp]--> receiver [esp+4]
+             FORM: x87 roundtrip (32-bit load + 32-bit store), NOT a register forward
+  arg2 path : [esp+8] --mov edx--> push edx --> receiver [esp+8] ; VERBATIM (no test/arith/mutation)
+  push ecx at 0x006FAB91 is a slot-allocation push: its pushed value is overwritten by
+  the fstp at 0x006FAB92 (same [esp] cell); the ecx VALUE is not forwarded.
+
+[A6] x87 ROUNDTRIP BIT-PRESERVATION CLASSIFICATION (analytic; x87 architecture)
+  bit-exact classes : normal float32 values; denormals (x87 has no flush-to-zero;)
+                       denormal dword loads/stores back the same bit pattern);
+                       infinities; qNaN payloads (pure FLD/FSTP performs no arithmetic);
+                       POINTERS AS DWORDS (a bit pattern is a bit pattern to fld/fstp).
+  non-guaranteed     : signaling NaNs (masked #IA handling; quieting risk on some
+                       processors; sNaN bit-exactness is NOT assumed).
+  IMPLICATION (measured constraint, not a semantic claim): the receiver's arg1 could be
+  a POINTER (e.g. an out-buffer) OR a genuine FLOAT VALUE. Discriminator at callers:
+  caller passes lea/pointer-setup -> POINTER; caller passes a float constant or an x87
+  computation -> VALUE (which would falsify FUN_0050A050's out-buffer arg1 signature).
+  This discriminator is evaluated in Phase E at every proven caller.
+
+[A7] SIDE-EFFECT / CONTROL-FLOW AUDIT (measured)
+  conditional branches : 0 []
+  calls                : 1 ['0x6fab95']
+  memory writes        : 1 [('0x6fab92', 'fstp')]
+  null tests           : NONE observed (no test/cmp against the held pointer)
+  refcount operations  : NONE observed (no inc/add [held+4] in this function)
+  conversions/arith     : NONE observed on arg2; arg1 passes through x87 only
+  alternate branches    : NONE (single basic block)
+  other side effects    : stack writes for the receiver call frame only (the two pushes + fstp slot)
+
+[A8] PIN-THUNK VALIDATION (finding per row; never silent adoption)
+  0x006FAB80 expected 8b 49 14       measured 8b4914         MATCH=True
+  0x006FAB83 expected d9 44 24 04    measured d9442404       MATCH=True
+  0x006FAB87 expected 8b 54 24 08    measured 8b542408       MATCH=True
+  0x006FAB8B expected 8b 01          measured 8b01           MATCH=True
+  0x006FAB8D expected 8b 40 0c       measured 8b400c         MATCH=True
+  0x006FAB90 expected 52             measured 52             MATCH=True
+  0x006FAB91 expected 51             measured 51             MATCH=True
+  0x006FAB92 expected d9 1c 24       measured d91c24         MATCH=True
+  0x006FAB95 expected ff d0          measured ffd0           MATCH=True
+  0x006FAB97 expected c2 08 00       measured c20800         MATCH=True
+  PIN-THUNK RESULT: ALL MATCH
+
+[A9] FORWARDER_OPERATION_STATUS DETERMINATION
+  B5_extent_ok                 = True
+  arg1_x87_roundtrip           = True
+  arg2_verbatim_edx            = True
+  no_other_calls               = True
+  no_writes_outside_frame      = True
+  pin_head_all_match           = True
+  receiver_from_this14         = True
+  ret8_cleanup                 = True
+  single_bb                    = True
+  slot3_byte_evidence          = True
+  FORWARDER_OPERATION_STATUS = CONFIRMED
+  Definition used: CONFIRMED iff B.5 extent valid AND single basic block AND
+  receiver=[this+0x14] AND slot-3 byte evidence AND arg1 x87 roundtrip AND arg2
+  verbatim AND ret 8 AND no other calls AND no writes outside the call frame.
+
+[A10] EXACT FORWARDER OBSERVATION (status algebra: OBSERVED_OPERATION)
+  OBSERVED_OPERATION: FUN_006FAB80 = virtual slot-3 forwarder:
+    ECX(this) -> held=[this+0x14] -> vt=[held] -> target=[vt+0x0C] ->
+    call target(this=held, arg1=arg1_bits_via_x87, arg2=arg2_verbatim) -> ret 8
+  FORWARDER_IDENTITY: CONFIRMED (as OBSERVED_OPERATION; FUNCTION_IDENTITY of the target is Phase B+)

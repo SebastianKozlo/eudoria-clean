@@ -1,0 +1,106 @@
+================================================================================
+RAW ARTIFACT: ARG2_VALUE_FLOW_RAW.txt (Phase E disposition; G9/G10/G11)
+RUN_ID: PE_935_SF_ARG2_UPSTREAM_HOLDER_R1_20260915
+GENERATOR: phase_e_disposition.py (SHA256=693F4DA4B338D5E0E62CF318F39464BFAC8939808AE15743AD79E80DF2E0BD57)
+PYTHON: 3.12.7 | CAPSTONE: 5.0.7
+S0 PASS: SIZE=8015872 SHA256=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 PE32 i386 ImageBase=0x00400000
+INPUT RAW: 01_RAW/THUNK_CALLER_CENSUS.csv (same run, deterministic)
+HEADER_TIMESTAMP: 2026-09-15T09:07:42Z (metadata only)
+================================================================================
+
+[E1] APPLICABILITY DETERMINATION
+  Contract Phase E applies to PROVEN or strongest-bounded candidate callers
+  of FUN_006FAB80 ONLY. Phase D measured:
+    direct E8/E9/EB callers : 0 (denominators: E8=156829 E9=40668 EB=17961 byte occurrences)
+    imm32 references        : 5 (all = the thunk's own vtable slot dwords)
+    vtable memberships       : 5 (slot ordinal 2, the five expected classes)
+    dispatch candidates     : 1438 -> PROVEN_TARGET=0, REJECTED=5, INSUFFICIENT_PROOF=1433
+  => there is NO proven caller; the strongest-bounded candidates are the 5
+     REJECTED rows, whose receivers are PROVEN other classes (their slot-2
+     dispatch targets are other functions, NOT FUN_006FAB80). No thunk caller
+     exists within the declared bound -> G9 = NOT_APPLICABLE (no such caller).
+
+[E2] THUNK arg1/arg2 ABI CONTRACT (re-measured from the pinned bytes)
+    0x006FAB80  8b4914       mov ecx, dword ptr [ecx + 0x14]
+    0x006FAB83  d9442404     fld dword ptr [esp + 4]
+    0x006FAB87  8b542408     mov edx, dword ptr [esp + 8]
+    0x006FAB8B  8b01         mov eax, dword ptr [ecx]
+    0x006FAB8D  8b400c       mov eax, dword ptr [eax + 0xc]
+    0x006FAB90  52           push edx
+    0x006FAB91  51           push ecx
+    0x006FAB92  d91c24       fstp dword ptr [esp]
+    0x006FAB95  ffd0         call eax
+    0x006FAB97  c20800       ret 8
+  arg1 = [esp+4] at thunk entry -> x87 fld/fstp roundtrip -> receiver [esp+4]
+        bit-preserving for normals/denormals/pointers-as-dwords; sNaN not guaranteed
+  arg2 = [esp+8] at thunk entry -> mov edx -> push edx -> receiver [esp+8] (VERBATIM)
+  receiver ABI (thiscall): this=[this+0x14] in ECX; ret 8
+  HYPOTHETICAL consumer signature (if the receiver were SceneFeederObject):
+    FUN_0050A050(this=SF, arg1=OUT float3 buffer ptr, arg2=name ptr NULL-tested)
+    (measured in 01_RAW/NEGCTL_RECEIVER_RAW.txt [N4]; NOT exercised at the family seam)
+
+[E3] STRONGEST-BOUNDED CANDIDATE DISPOSITION (5 REJECTED rows, re-verified)
+  R2 note (QC P3-3 fix): a vtable whose extent has fewer than 3 slots
+  has NO slot-2 entry; the R1 line printed the raw dword at the slot-2
+  position as if it were a null slot-2. The R2 line prints the real
+  dword (an ASCII string fragment where the vtable is followed by
+  .rdata string data) or the actual slot-2 target.
+  REJECTED candidates re-verified from own bytes:
+    candidate 1216 call 0x0x0083CDDE: receiver class .?AVMaPanelText@@, its vtable
+      0x00A91B54 slot-2 = 0x0083FA60 == thunk? NO (different function)
+    candidate 1217 call 0x0x0083CEF4: receiver class .?AVMaPanelLine@@, its vtable
+      0x00A91B78 slot-2 = 0x0083FA60 == thunk? NO (different function)
+    candidate 1218 call 0x0x0083CFB9: receiver class .?AVMaPanelRect@@, its vtable
+      0x00A91B9C slot-2 = 0x0083FA60 == thunk? NO (different function)
+    candidate 1219 call 0x0x0083D099: receiver class .?AVMaPanelMap@@, its vtable
+      0x00A91BC0 slot-2 = 0x0083FA60 == thunk? NO (different function)
+    candidate 1351 call 0x0x0095875A: receiver class .?AVArkVegetationObservable@@, its vtable
+      0x00A9D294 NO SLOT-2 ENTRY (vtable extent = 1 slot(s);
+        the dword at the slot-2 position 0x00A9D29C = 0x566B7241
+        = ASCII b'ArkV' - string data after the vtable, not a
+        code pointer) == thunk? NO (no slot-2 entry =>
+        this class cannot dispatch the slot-2 thunk)
+  (all REJECTED candidates dispatch their own class's slot-2 function,
+   which re-verification shows is not FUN_006FAB80)
+
+[E4] arg2 PRODUCER-SOURCE TEST LIST (contract Phase E source classes)
+  Every candidate producer class below was TESTED via the caller census
+  (a producer can only exist at a call site). Measured caller count: 0.
+    string literal               : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    pointer-to-object-name       : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    NIF-scenegraph name          : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    animation channel name       : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    bone name                    : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    socket-attachment name       : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    marker name                  : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    config key                   : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    script-event-supplied name   : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    resource-derived name        : NOT_DEMONSTRATED (no call site exists to carry such a value)
+    dynamically generated buffer : NOT_DEMONSTRATED (no call site exists to carry such a value)
+
+[E5] PHASE E VERDICTS (status algebra)
+  ARG2_ABI              : CONFIRMED (verbatim dword forward; receiver [esp+8])
+  ARG2_PROVENANCE        : NOT_DEMONSTRATED (no statically-identifiable
+                           caller of the thunk exists within the declared
+                           bound. R2 correction (QC C15/P0-1): the R1 clause
+                           'the held field itself is NULL at all constructions,
+                           so no arg2 can ever reach a live receiver' is RETRACTED
+                           - live held receivers DO exist at bounded constructions
+                           (the FloatValue-family channel children); what stands
+                           is the empty CALLER set: with no thunk dispatch site,
+                           no arg2 value is carried to any receiver, live or not
+  ARG2_VALUE_CLASS       : NOT_DEMONSTRATED (honest negative; no filler)
+  ARG2_FINAL_SEMANTIC_ROLE: UNVERIFIED (valid per contract G11: string/name
+                           semantics require producer/consumer context that
+                           does not exist statically at this seam)
+  arg1 discriminator (Phase A): no caller exists to pass either a pointer
+                           (lea) or a float constant; the discriminator is
+                           unresolvable at this seam in this binary.
+
+[E6] GATE OUTCOMES
+  G9_ARG2_PRODUCER_FLOW  : PASS (NOT_APPLICABLE - no proven caller exists;
+                            strongest-bounded candidates dispositioned in [E3])
+  G10_ARG2_VALUE_CLASS   : PASS with honest NOT_DEMONSTRATED (no identified value;
+                            no STRING claim is made anywhere)
+  G11_ARG2_SEMANTIC_ROLE  : PASS (assignment follows the string/name evidence rule;
+                            outcome UNVERIFIED is a valid gate outcome)

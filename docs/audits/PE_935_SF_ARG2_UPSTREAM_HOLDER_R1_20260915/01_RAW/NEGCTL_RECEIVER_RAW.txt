@@ -1,0 +1,159 @@
+================================================================================
+RAW ARTIFACT: NEGCTL_RECEIVER_RAW.txt (G7 negative control + SF validation)
+RUN_ID: PE_935_SF_ARG2_UPSTREAM_HOLDER_R1_20260915
+GENERATOR: negctl_receiver.py (SHA256=C30C858586F24CBB7D6F064410292569A6A61A179B6B7D5EE1596D95138C4AFF)
+PYTHON: 3.12.7 | CAPSTONE: 5.0.7
+S0 PASS: SIZE=8015872 SHA256=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 PE32 i386 ImageBase=0x00400000
+HEADER_TIMESTAMP: 2026-09-15T09:05:26Z (metadata only)
+================================================================================
+
+[N1] SLOT-3 RECEIVER-CLASSIFIER DISCRIMINATOR CENSUS
+  COL-backed vtables in binary: 1393
+  vtables with a valid slot-3 entry: 803
+  vtables whose slot-3 == 0x0050A050 (SceneFeeder receiver signature): 1
+    0x00A7D458 .?AVSceneFeederObject@@
+  CLASSIFIER SELECTIVITY: 1/803 vtables classified as slot-3 SceneFeeder
+  -> the receiver classifier does NOT classify every vtable as SceneFeeder;
+     a compatible slot-3 dispatch receiver is SceneFeeder ONLY when its
+     vtable slot-3 resolves to 0x0050A050 (and RTTI matches).
+
+[N2] PIN-NC ANCHOR RE-DERIVATION (negative-control anchors)
+  method 0x007AC2F0: whole-file dword occurrences: 2
+    file_off=0x0068C324 va=0x00A8C324 aligned=True section=.rdata VTABLE_SLOT vtable=0x00A8C2EC ordinal=14 class=.?AVNiD3DPixelShader@@
+    file_off=0x0068C5D4 va=0x00A8C5D4 aligned=True section=.rdata VTABLE_SLOT vtable=0x00A8C59C ordinal=14 class=.?AVNiD3DHLSLPixelShader@@
+  method 0x007F1D70: whole-file dword occurrences: 1
+    file_off=0x00690308 va=0x00A90308 aligned=True section=.rdata VTABLE_SLOT vtable=0x00A90304 ordinal=1 class=.?AVNiBoundingVolume@@
+  PIN-NC(NiBoundingVolume slot-1 == 0x007F1D70) VALIDATED = True
+  PIN-NC(pixel-shader vtable slot == 0x007AC2F0) VALIDATED = True
+
+  NEGATIVE CONTROL VERDICT: both anchors re-derived from own bytes.
+  .?AVNiBoundingVolume@@ and the NiD3D pixel shader classes are
+  compatible-ABI vtable-dispatch receivers that are provably NOT
+  SceneFeeder (RTTI name and vtable differ; slot-3 != 0x0050A050;
+  see [N1] counts). FAILURE_CASE_DETECTED = YES (the classifier
+  rejects non-SceneFeeder receivers; it does not blanket-classify).
+
+[N3] SCENEFEEDER VTABLE VALIDATION (receiver-identity ladder)
+  vtable start : 0x00A7D458 (pin 0x00A7D458) MATCH=True
+  COL class    : .?AVSceneFeederObject@@
+  COL va       : 0x00AA12B8 sig=0 offset=0
+  extent       : [0x00A7D458..0x00A7D470) slots=6 stop=non_code:0x53565064
+    [0] 0x0050A460
+    [1] 0x005090A0
+    [2] 0x005090B0
+    [3] 0x0050A050
+    [4] 0x005090C0
+    [5] 0x00509580
+  slot-3 dword @0x00A7D464 = 0x0050A050 (pin 0x0050A050) MATCH=True
+  PIN-SF1 slot table 0..5 match = True
+  SF class hierarchy: .?AVSceneFeederObject@@ <- .?AVArkAudioObjectInterface@@
+
+[N4] FUN_0050A050 REVALIDATION (PIN-SF2)
+  B.5 extent: [0x0050A050..0x0050A087) end_kind=tight (pin 0x0050A050..0x0050A0AA)
+    0x0050A050  8b442408         mov eax, dword ptr [esp + 8]
+    0x0050A054  85c0             test eax, eax
+    0x0050A056  56               push esi
+    0x0050A057  8bf1             mov esi, ecx
+    0x0050A059  742c             je 0x50a087
+    0x0050A05B  8b4e30           mov ecx, dword ptr [esi + 0x30]
+    0x0050A05E  8b11             mov edx, dword ptr [ecx]
+    0x0050A060  50               push eax
+    0x0050A061  8b4244           mov eax, dword ptr [edx + 0x44]
+    0x0050A064  ffd0             call eax
+    0x0050A066  85c0             test eax, eax
+    0x0050A068  741d             je 0x50a087
+    0x0050A06A  8b742408         mov esi, dword ptr [esp + 8]
+    0x0050A06E  0590000000       add eax, 0x90
+    0x0050A073  50               push eax
+    0x0050A074  56               push esi
+    0x0050A075  e8f6def2ff       call 0x437f70
+    0x0050A07A  8bc8             mov ecx, eax
+    0x0050A07C  e81f153200       call 0x82b5a0
+    0x0050A081  8bc6             mov eax, esi
+    0x0050A083  5e               pop esi
+    0x0050A084  c20800           ret 8
+  ret sites: [('0x0050A084', 'ret 0x8')] (pin: 0x50A084 and 0x50A0A7, both ret 8)
+  arg2 NULL-tested (any test in function): True
+
+[N5] SF SLOT-0 METHOD 0x0050A460 DECODE (family dtor releases held via vt[0])
+    0x0050A460  56               push esi                            
+    0x0050A461  8bf1             mov esi, ecx                        
+    0x0050A463  e8d8fdffff       call 0x50a240                       
+    0x0050A468  f644240801       test byte ptr [esp + 8], 1          
+    0x0050A46D  7409             je 0x50a478                         
+    0x0050A46F  56               push esi                            
+    0x0050A470  e8b52f4500       call 0x95d42a                       
+    0x0050A475  83c404           add esp, 4                          
+    0x0050A478  8bc6             mov eax, esi                        
+    0x0050A47A  5e               pop esi                             
+    0x0050A47B  c20400           ret 4                               
+
+[N6] SIB CENSUS ROWS (from G4 census; enumerated separately, classified)
+  0x0066CF9A mov dword ptr [esp + ecx*8 + 0x14], edx [func 0x0066CF76 base=esp index=ecx scale=8 width=4]
+    -> SIB/indexed form: base+offset+index; the family writer census
+       treats indexed writes as computed-address writes (excluded form
+       per contract 7(i)); base register is not a proven family this.
+  0x006FD48C fstp dword ptr [esp + eax*4 + 0x14] [func 0x006FD420 base=esp index=eax scale=4 width=4]
+    -> SIB/indexed form: base+offset+index; the family writer census
+       treats indexed writes as computed-address writes (excluded form
+       per contract 7(i)); base register is not a proven family this.
+  0x0082D008 mov dword ptr [esi + ecx + 0x14], ebx [func 0x0082CF23 base=esi index=ecx scale=1 width=4]
+    -> SIB/indexed form: base+offset+index; the family writer census
+       treats indexed writes as computed-address writes (excluded form
+       per contract 7(i)); base register is not a proven family this.
+  0x0082FC60 xor byte ptr [eax + esi + 0x14], cl [func 0x0082FC20 base=eax index=esi scale=1 width=1]
+    -> SIB/indexed form: base+offset+index; the family writer census
+       treats indexed writes as computed-address writes (excluded form
+       per contract 7(i)); base register is not a proven family this.
+  0x009450C5 mov dword ptr [ebp + eax*8 + 0x14], ecx [func 0x00945063 base=ebp index=eax scale=8 width=4]
+    -> SIB/indexed form: base+offset+index; the family writer census
+       treats indexed writes as computed-address writes (excluded form
+       per contract 7(i)); base register is not a proven family this.
+  0x0094516D mov dword ptr [ebp + eax*8 + 0x14], ecx [func 0x0094510B base=ebp index=eax scale=8 width=4]
+    -> SIB/indexed form: base+offset+index; the family writer census
+       treats indexed writes as computed-address writes (excluded form
+       per contract 7(i)); base register is not a proven family this.
+  0x00975BF1 mov dword ptr [esp + edi*8 + 0x14], eax [func 0x00975BDF base=esp index=edi scale=8 width=4]
+    -> SIB/indexed form: base+offset+index; the family writer census
+       treats indexed writes as computed-address writes (excluded form
+       per contract 7(i)); base register is not a proven family this.
+
+[N7] READ-CENSUS: [reg+0x14] operand references in family functions
+  R2 DECLARED BOUND (QC P3-1 fix): family function set = all slots of
+  the 10 family vtables + all functions storing a family vtable
+  (ctors/dtors) + shared ctor 0x006FABA0 + PSPMod ctor 0x006FEB00;
+  per-function extent = chunk closure (branch-target + conditional-
+  fall-through + jump-table joining; <= 64 chunks, <= 64KB per function).
+  family function set size: 57 (all slot functions + all family-
+  vtable-storing functions + the shared ctor + the PSPMod ctor)
+  total [reg+0x14] operand references over the declared bound: 22
+    0x006FAB66 mov edx, dword ptr [eax + 0x14]                access=READ  func 0x006FAB60 (closure chunks=1)
+    0x006FAB80 mov ecx, dword ptr [ecx + 0x14]                access=READ  func 0x006FAB80 (closure chunks=1)
+    0x006FABB5 mov dword ptr [eax + 0x14], ecx                access=WRITE func 0x006FABA0 (closure chunks=1)
+    0x006FAC09 mov eax, dword ptr [esi + 0x14]                access=READ  func 0x006FAC00 (closure chunks=1)
+    0x006FAC16 mov ecx, dword ptr [esi + 0x14]                access=READ  func 0x006FAC00 (closure chunks=1)
+    0x006FAC25 mov dword ptr [esi + 0x14], 0                  access=WRITE func 0x006FAC00 (closure chunks=1)
+    0x006FAC59 mov eax, dword ptr [esi + 0x14]                access=READ  func 0x006FAC50 (closure chunks=1)
+    0x006FAC66 mov ecx, dword ptr [esi + 0x14]                access=READ  func 0x006FAC50 (closure chunks=1)
+    0x006FAC75 mov dword ptr [esi + 0x14], 0                  access=WRITE func 0x006FAC50 (closure chunks=1)
+    0x006FB3EA lea eax, [esp + 0x14]                          access=READ  func 0x006FB3D0 (closure chunks=3)
+    0x006FB4EE mov ecx, dword ptr [esp + 0x14]                access=READ  func 0x006FB3D0 (closure chunks=3)
+    0x006FB9D4 mov dword ptr [esp + 0x14], ecx                access=WRITE func 0x006FB960 (closure chunks=2)
+    0x006FBA6A mov dword ptr [esp + 0x14], 0                  access=WRITE func 0x006FBA10 (closure chunks=1)
+    0x006FBAB4 mov eax, dword ptr [esp + 0x14]                access=READ  func 0x006FBAB0 (closure chunks=3)
+    0x006FBAC2 fld dword ptr [esp + 0x14]                     access=READ  func 0x006FBAB0 (closure chunks=3)
+    0x006FD274 mov eax, dword ptr [esp + 0x14]                access=READ  func 0x006FD270 (closure chunks=1)
+    0x006FD282 fld dword ptr [esp + 0x14]                     access=READ  func 0x006FD270 (closure chunks=1)
+    0x006FE899 mov edx, dword ptr [eax + 0x14]                access=READ  func 0x006FE890 (closure chunks=1)
+    0x006FEA46 fld dword ptr [eax + 0x14]                     access=READ  func 0x006FE9B0 (closure chunks=1)
+    0x006FEA4C fld dword ptr [ecx + 0x14]                     access=READ  func 0x006FE9B0 (closure chunks=1)
+    0x006FEB55 mov dword ptr [esp + 0x14], 0                  access=WRITE func 0x006FEB00 (closure chunks=7)
+    0x006FFAA7 mov ecx, dword ptr [esp + 0x14]                access=READ  func 0x006FFA70 (closure chunks=7)
+  NOTE (R2, context for QC P3-1): the QC's P3-1 enumeration also
+  listed 0x008267C7/0x008267DA as 'Predefined slot-3 function' refs;
+  own re-derivation: the Predefined slot-3 (vtable ordinal 3 of
+  0x00A864C0) is the 2-insn stub 0x00826770 (xor al,al; ret 4);
+  0x008267C7/0x008267DA are esp-based frame refs inside the ADJACENT
+  function [0x00826780..0x0082682F), which stores no family vtable and
+  is NOT a member of the declared family function set (reported here
+  for completeness; including them would add 2 esp-frame refs).

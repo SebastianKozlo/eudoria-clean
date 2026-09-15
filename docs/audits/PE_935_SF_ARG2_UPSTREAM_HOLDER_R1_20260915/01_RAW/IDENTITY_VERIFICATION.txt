@@ -1,0 +1,63 @@
+================================================================================
+RAW ARTIFACT: IDENTITY_VERIFICATION.txt
+RUN_ID: PE_935_SF_ARG2_UPSTREAM_HOLDER_R1_20260915
+GENERATOR: probe_identity.py (SHA256=8CFD06E48CAEFB65B64552A5BA6DE5669F4E8C19676EC637E683BAD9C59DADAB)
+PYTHON: 3.12.7 | CAPSTONE: 5.0.7
+S0 PASS: SIZE=8015872 SHA256=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 PE32 i386 ImageBase=0x00400000
+SOURCE_OF_TRUTH: D:/Eudoria_Reconstruction/pcg_install/Entropia.exe (physical bytes; binary NEVER executed)
+HEADER_TIMESTAMP: 2026-09-15T09:07:43Z (metadata only; content is byte-deterministic)
+================================================================================
+
+[1] EXE IDENTITY (measured vs PINS)
+  path      : D:/Eudoria_Reconstruction/pcg_install/Entropia.exe
+  size      : 8015872  (pin 8015872)  MATCH=True
+  sha256    : E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  machine   : 0x014C (pin i386 0x014C) MATCH=True
+  opt_magic : 0x010B (PE32 pin 0x010B) MATCH=True
+  imagebase : 0x00400000 (pin 0x00400000) MATCH=True
+  nsections : 5
+
+[2] PE SECTIONS (measured from PE headers)
+  name       vaddr      vsize      rawoff     rawsize    flags
+  .text      0x00001000 0x006735E5 0x00001000 0x00674000 EXEC|READ
+  .rdata     0x00675000 0x000F6569 0x00675000 0x000F7000 READ
+  .data      0x0076C000 0x0003D6E4 0x0076C000 0x00034000 READ|WRITE
+  .tls       0x007AA000 0x0000000A 0x007A0000 0x00001000 READ|WRITE
+  .rsrc      0x007AB000 0x00003C54 0x007A1000 0x00004000 READ
+
+[3] CAPSTONE ACCESS CAPABILITY PROBE (census write-detection)
+  mov [eax+0x14], ecx          : mov dword ptr [eax + 0x14], ecx access=0x2 census_write=[0]
+  mov ecx, [eax+0x14]          : mov ecx, dword ptr [eax + 0x14] access=0x1 census_write=[]
+  fstp dword [eax+0x14]        : fstp dword ptr [eax + 0x14] access=0x1 census_write=[0]
+  fld dword [eax+0x14]         : fld dword ptr [eax + 0x14] access=0x1 census_write=[]
+  add [eax+0x14], edx          : add dword ptr [eax + 0x14], edx access=0x3 census_write=[0]
+  movss [eax+0x14], xmm0       : movss dword ptr [eax + 0x14], xmm0 access=0x2 census_write=[0]
+  push [eax+0x14] (READ)       : push dword ptr [eax + 0x14] access=0x1 census_write=[]
+  pop dword [eax+0x14]         : pop dword ptr [eax + 0x14] access=0x2 census_write=[0]
+  CENSUS WRITE DETECTION: access primary, per-op fallback declared in s0_common.mem_write_ops
+
+[4] B.5 SMOKE TEST ON CONTRACT ANCHOR 0x006FAB80
+  start      : 0x006FAB80
+  end        : 0x006FAB9A
+  end_kind   : pad (terminal=ret pad_len=6)
+  next_start : 0x006FABA0
+  insn count : 10
+    0x006FAB80  8b4914               mov ecx, dword ptr [ecx + 0x14]
+    0x006FAB83  d9442404             fld dword ptr [esp + 4]
+    0x006FAB87  8b542408             mov edx, dword ptr [esp + 8]
+    0x006FAB8B  8b01                 mov eax, dword ptr [ecx]
+    0x006FAB8D  8b400c               mov eax, dword ptr [eax + 0xc]
+    0x006FAB90  52                   push edx
+    0x006FAB91  51                   push ecx
+    0x006FAB92  d91c24               fstp dword ptr [esp]
+    0x006FAB95  ffd0                 call eax
+    0x006FAB97  c20800               ret 8
+
+[5] PINS TABLE (re-measured in this run; every pin re-derived in its phase)
+  PIN-SF1 vtable 0x00A7D458, slot-3 dword @0x00A7D464 == 0x0050A050:
+    measured dword @0x00A7D464 = 0x0050A050  MATCH=True
+  PIN-NN NiNode vtable 0x00A8CCF4, slot-17 dword @0x00A8CCF4+0x44 == 0x007B5390:
+    measured dword @0x00A8CD38 = 0x007B5390  MATCH=True
+    (value check recorded; Phase F only executes if receiver==SceneFeeder is proven)
+
+G0 SELF-ASSESSMENT: PASS (all identity pins re-measured equal; see [1])

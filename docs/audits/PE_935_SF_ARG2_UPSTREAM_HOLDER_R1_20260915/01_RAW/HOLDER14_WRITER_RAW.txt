@@ -1,0 +1,928 @@
+================================================================================
+RAW ARTIFACT: HOLDER14_WRITER_RAW.txt (Phase C iii+iv+v; anchor chain + slices)
+RUN_ID: PE_935_SF_ARG2_UPSTREAM_HOLDER_R1_20260915
+GENERATOR: phase_c_anchor.py (SHA256=AA7B01D7D54B31604309D88A19E5C25F459FD62D29F22D9C29969016A5814D0E)
+PYTHON: 3.12.7 | CAPSTONE: 5.0.7
+S0 PASS: SIZE=8015872 SHA256=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 PE32 i386 ImageBase=0x00400000
+SOURCE_OF_TRUTH: D:/Eudoria_Reconstruction/pcg_install/Entropia.exe physical bytes (STATIC; NEVER executed)
+HEADER_TIMESTAMP: 2026-09-15T08:57:49Z (metadata only)
+CORRECTION: R2 batch (AMEND_LOG_R2.md; regenerated per QC_AUDIT.md P0-1/P3-7;
+  the R1 slices' universal-NULL verdicts at the param-chained factory chains were
+  falsified by branch-bypass edges - see [IV-8]/[IV-9] for the corrected disposition).
+CORRECTED SLICE BOUND (declared, R2): 6 levels x 384-byte backward window per
+  level (widened from 4; AMEND_LOG_R2 R2-2: the child-ctor call-cross plus the
+  operator-new this-cross at the deepest Cyclic chain require 2 additional levels);
+  multi-start over ret sites (<= 8) and callers (<= 16), clobber-aware,
+  linear last-def-wins, alternates recorded, INSUFFICIENT_PROOF on exhaustion.
+EDGE-AWARENESS (R2, AMEND_LOG_R2 R2-1): slices are branch-edge aware inside the
+  declared dispatcher construct [0x006D0ED0..0x006D265F): a bypassed def becomes a
+  MULTI_PATH node (def path + bypass-entry paths); a no-def window with external
+  entries becomes a MULTI_ENTRY node; test/cmp are reads (not defs); a callee
+  returning its thiscall this gets a caller-cross child. Outside the construct
+  the R1 engine model applies unchanged.
+================================================================================
+
+[MAP] B.5 pass: functions=105492 calls=140640 insns=1928649 (cross-check: Phase B/C identical)
+[MAP] R2 branch-edge index: 143078 direct jump-family edges (jmp E9/EB + all jcc)
+[MAP] R2 declared construct: [0x006D0ED0..0x006D265F) ArkAnimation name-dispatch construct
+[MAP] construct entry 0x006D0ED0 direct E8 callers (3): ['0x58efd6', '0x58f19f', '0x6d2b1c']
+
+[IV-0] SHARED BASE CTOR 0x006FABA0 FULL DECODE
+--- shared base ctor 0x006FABA0
+    B.5: [0x006FABA0..0x006FABF8) pad
+    0x006FABA0  8bc1                 mov eax, ecx                      
+    0x006FABA2  8b4c240c             mov ecx, dword ptr [esp + 0xc]    
+    0x006FABA6  85c9                 test ecx, ecx                     
+    0x006FABA8  c700c064a800         mov dword ptr [eax], 0xa864c0        ; VTABLE_STORE -> .?AVArkAnimationPredefined@@ (vt 0x00A864C0)
+    0x006FABAE  c7400400000000       mov dword ptr [eax + 4], 0           ; WRITE_[+0x04]
+    0x006FABB5  894814               mov dword ptr [eax + 0x14], ecx      ; WRITE_[+0x14]
+    0x006FABB8  ba01000000           mov edx, 1                        
+    0x006FABBD  7403                 je 0x6fabc2                       
+    0x006FABBF  015104               add dword ptr [ecx + 4], edx         ; WRITE_[+0x04]
+    0x006FABC2  d9ee                 fldz                              
+    0x006FABC4  8a4c2404             mov cl, byte ptr [esp + 4]        
+    0x006FABC8  d9501c               fst dword ptr [eax + 0x1c]        
+    0x006FABCB  895018               mov dword ptr [eax + 0x18], edx   
+    0x006FABCE  d95020               fst dword ptr [eax + 0x20]        
+    0x006FABD1  884828               mov byte ptr [eax + 0x28], cl     
+    0x006FABD4  d95824               fstp dword ptr [eax + 0x24]       
+    0x006FABD7  c6403400             mov byte ptr [eax + 0x34], 0      
+    0x006FABDB  d9442408             fld dword ptr [esp + 8]           
+    0x006FABDF  885035               mov byte ptr [eax + 0x35], dl     
+    0x006FABE2  d9582c               fstp dword ptr [eax + 0x2c]       
+    0x006FABE5  c7403800000000       mov dword ptr [eax + 0x38], 0     
+    0x006FABEC  d90534b3a700         fld dword ptr [0xa7b334]          
+    0x006FABF2  d95830               fstp dword ptr [eax + 0x30]       
+    0x006FABF5  c20c00               ret 0xc                           
+    +0x14 writes in ctor: [('0x006FABB5', '894814')]
+    +0x04 writes in ctor: [('0x006FABAE', 'c7400400000000'), ('0x006FABBF', '015104')]
+    PIN-CTOR check: PIN-CTOR write [eax+0x14],ecx (89 48 14)           MATCH=True
+    PIN-CTOR check: PIN-CTOR mov edx,1 (BA 01 00 00 00)                MATCH=True
+    PIN-CTOR check: PIN-CTOR add [ecx+4],edx (01 51 04)                MATCH=True
+    conditional branches before the +0x14 write: NONE
+    entry ABI evidence: first insn 'mov eax, ecx'; thiscall(this=ECX, arg0=[esp+4], arg1=[esp+8], arg2=[esp+0xC]) inferred from
+    decode below: mov eax, ecx ; mov ecx, dword ptr [esp + 0xc] ; test ecx, ecx ; mov dword ptr [eax], 0xa864c0 ; mov dword ptr [eax + 4], 0 ; mov dword ptr [eax + 0x14], ecx
+    CTOR ABI DERIVATION: ret 0xC = 3 dword stack args; held param read from [esp+0xC] = ARG2;
+    arg0 = byte flag (mov cl, byte [esp+4] -> [this+0x28]); arg1 = float (fld dword [esp+8] -> [this+0x2C]);
+    arg2 = HELD OBJECT POINTER -> [this+0x14] with NULL TEST (test ecx,ecx; je skips the refcount inc).
+    CORRECTION vs first pass: earlier slice of arg0 was the WRONG ARG; the held param is arg2.
+
+[IV-0d] OBJECT-SIZE CENSUS: operator-new sites feeding family ctor calls
+  operator-new thunk (resolved via imports): 0x0095D3C4 (??2@YAPAXI@Z)
+  new-site 0x006D123C: push 0x70; ??2 -> ctor 0x006FEB00 (.?AVArkAnimationParticleSystemPredefinedMod@@)
+    size provenance: CASCADE-SIZE (R2): push 0x70 @0x006D1207, 0 hop(s) backward through the name-compare chain (push found in walk block [0x006D11C0..0x006D12AD) at hop 0); the size is shared by the whole PSP/PSPMod case cascade - the intermediate push-imms 1..6 on the match paths are ctor ARG0 values (mod-mode), not sizes
+  new-site 0x006D12BF: push 0x70; ??2 -> ctor 0x006FEB00 (.?AVArkAnimationParticleSystemPredefinedMod@@)
+    size provenance: CASCADE-SIZE (R2): push 0x70 @0x006D1207, 1 hop(s) backward through the name-compare chain (push found in walk block [0x006D11C0..0x006D12AD) at hop 1); the size is shared by the whole PSP/PSPMod case cascade - the intermediate push-imms 1..6 on the match paths are ctor ARG0 values (mod-mode), not sizes
+  new-site 0x006D1345: push 0x70; ??2 -> ctor 0x006FEB00 (.?AVArkAnimationParticleSystemPredefinedMod@@)
+    size provenance: CASCADE-SIZE (R2): push 0x70 @0x006D1207, 2 hop(s) backward through the name-compare chain (push found in walk block [0x006D11C0..0x006D12AD) at hop 2); the size is shared by the whole PSP/PSPMod case cascade - the intermediate push-imms 1..6 on the match paths are ctor ARG0 values (mod-mode), not sizes
+  new-site 0x006D13CB: push 0x70; ??2 -> ctor 0x006FEB00 (.?AVArkAnimationParticleSystemPredefinedMod@@)
+    size provenance: CASCADE-SIZE (R2): push 0x70 @0x006D1207, 3 hop(s) backward through the name-compare chain (push found in walk block [0x006D11C0..0x006D12AD) at hop 3); the size is shared by the whole PSP/PSPMod case cascade - the intermediate push-imms 1..6 on the match paths are ctor ARG0 values (mod-mode), not sizes
+  new-site 0x006D1448: push 0x70; ??2 -> ctor 0x006FEB00 (.?AVArkAnimationParticleSystemPredefinedMod@@)
+    size provenance: CASCADE-SIZE (R2): push 0x70 @0x006D1207, 4 hop(s) backward through the name-compare chain (push found in walk block [0x006D11C0..0x006D12AD) at hop 4); the size is shared by the whole PSP/PSPMod case cascade - the intermediate push-imms 1..6 on the match paths are ctor ARG0 values (mod-mode), not sizes
+  new-site 0x006D14C5: push 0x70; ??2 -> ctor 0x006FEB00 (.?AVArkAnimationParticleSystemPredefinedMod@@)
+    size provenance: CASCADE-SIZE (R2): push 0x70 @0x006D1207, 5 hop(s) backward through the name-compare chain (push found in walk block [0x006D11C0..0x006D12AD) at hop 5); the size is shared by the whole PSP/PSPMod case cascade - the intermediate push-imms 1..6 on the match paths are ctor ARG0 values (mod-mode), not sizes
+  new-site 0x006D1530: push 0x70; ??2 -> ctor 0x006FE9B0 (.?AVArkAnimationParticleSystemPredefined@@)
+    size provenance: CASCADE-SIZE (R2): push 0x70 @0x006D1207, 6 hop(s) backward through the name-compare chain (push found in walk block [0x006D11C0..0x006D12AD) at hop 6); the size is shared by the whole PSP/PSPMod case cascade - the intermediate push-imms 1..6 on the match paths are ctor ARG0 values (mod-mode), not sizes
+  new-site 0x006D16EA: push 0x88; ??2 -> ctor 0x006FD270 (.?AVArkAnimationCyclicSin@@)
+    size provenance: local push imm @0x006D16DD (within the declared 16-byte pre-call window)
+  new-site 0x006D17D7: push 0x88; ??2 -> ctor 0x006FD270 (.?AVArkAnimationCyclicSin@@)
+    size provenance: local push imm @0x006D17CA (within the declared 16-byte pre-call window)
+  new-site 0x006D1AA2: push 0x88; ??2 -> ctor 0x006FD270 (.?AVArkAnimationCyclicSin@@)
+    size provenance: local push imm @0x006D1A95 (within the declared 16-byte pre-call window)
+  new-site 0x006D1C67: push 0x88; ??2 -> ctor 0x006FD270 (.?AVArkAnimationCyclicSin@@)
+    size provenance: local push imm @0x006D1C5A (within the declared 16-byte pre-call window)
+  new-site 0x006D1D6F: push 0xC4; ??2 -> ctor 0x006FBAB0 (.?AVArkAnimationCyclicLinear@@)
+    size provenance: local push imm @0x006D1D62 (within the declared 16-byte pre-call window)
+  new-site 0x006D2078: push 0x6C; ??2 -> ctor 0x006FB590 (.?AVArkAnimationDerivatives@@)
+    size provenance: local push imm @0x006D206E (within the declared 16-byte pre-call window)
+  new-site 0x006D2297: push 0x6C; ??2 -> ctor 0x006FB590 (.?AVArkAnimationDerivatives@@)
+    size provenance: local push imm @0x006D228D (within the declared 16-byte pre-call window)
+  new-site 0x006D23F7: push 0x6C; ??2 -> ctor 0x006FB590 (.?AVArkAnimationDerivatives@@)
+    size provenance: local push imm @0x006D23ED (within the declared 16-byte pre-call window)
+  new-site 0x006D24F3: push 0x54; ??2 -> ctor 0x006FB3D0 (.?AVArkAnimationAnimatedTexture@@)
+    size provenance: local push imm @0x006D24EF (within the declared 16-byte pre-call window)
+  new-site 0x006D2558: push 0x40; ??2 -> ctor 0x006FB080 (.?AVArkAnimationNodeUpdate@@)
+    size provenance: local push imm @0x006D2556 (within the declared 16-byte pre-call window)
+  new-site 0x006D2626: push 0x44; ??2 -> ctor 0x006FAF90 (.?AVArkAnimationTimeController@@)
+    size provenance: local push imm @0x006D2624 (within the declared 16-byte pre-call window)
+  NOTE: sizes are the new() sizes that immediately precede family ctor calls; the
+        ctor name is the class whose vtable that ctor stores (from [IV-7]).
+  R2 COMPLETION (QC P3-7): the PSP site (??2 @0x006D1530 -> ctor call 0x006D1578)
+  and all six PSPMod sites (??2 @0x006D123C/0x006D12BF/0x006D1345/0x006D13CB/
+  0x006D1448/0x006D14C5 -> ctor 0x006FEB00 = .?AVArkAnimationParticleSystemPredefinedMod@@)
+  are enumerated above with the cascade-size provenance (object size 0x70;
+  measured below where the cascade walk lands).
+
+[IV-0c] +0x14 ZEROING FUNCTIONS (release path) AND DELETING-DTOR CHAIN
+--- release-path function 0x006FAC00
+    B.5: [0x006FAC00..0x006FAC2E) pad
+    0x006FAC00  56                   push esi                          
+    0x006FAC01  8bf1                 mov esi, ecx                      
+    0x006FAC03  c706c064a800         mov dword ptr [esi], 0xa864c0        ; VTABLE_STORE -> .?AVArkAnimationPredefined@@ (vt 0x00A864C0)
+    0x006FAC09  8b4614               mov eax, dword ptr [esi + 0x14]   
+    0x006FAC0C  85c0                 test eax, eax                     
+    0x006FAC0E  741c                 je 0x6fac2c                       
+    0x006FAC10  834004ff             add dword ptr [eax + 4], -1          ; WRITE_[+0x04]
+    0x006FAC14  7516                 jne 0x6fac2c                      
+    0x006FAC16  8b4e14               mov ecx, dword ptr [esi + 0x14]   
+    0x006FAC19  85c9                 test ecx, ecx                     
+    0x006FAC1B  7408                 je 0x6fac25                       
+    0x006FAC1D  8b01                 mov eax, dword ptr [ecx]          
+    0x006FAC1F  8b10                 mov edx, dword ptr [eax]          
+    0x006FAC21  6a01                 push 1                            
+    0x006FAC23  ffd2                 call edx                          
+    0x006FAC25  c7461400000000       mov dword ptr [esi + 0x14], 0        ; WRITE_[+0x14]
+    0x006FAC2C  5e                   pop esi                           
+    0x006FAC2D  c3                   ret                               
+--- release-path function 0x006FAC50
+    B.5: [0x006FAC50..0x006FAC92) pad
+    0x006FAC50  56                   push esi                          
+    0x006FAC51  8bf1                 mov esi, ecx                      
+    0x006FAC53  c706c064a800         mov dword ptr [esi], 0xa864c0        ; VTABLE_STORE -> .?AVArkAnimationPredefined@@ (vt 0x00A864C0)
+    0x006FAC59  8b4614               mov eax, dword ptr [esi + 0x14]   
+    0x006FAC5C  85c0                 test eax, eax                     
+    0x006FAC5E  741c                 je 0x6fac7c                       
+    0x006FAC60  834004ff             add dword ptr [eax + 4], -1          ; WRITE_[+0x04]
+    0x006FAC64  7516                 jne 0x6fac7c                      
+    0x006FAC66  8b4e14               mov ecx, dword ptr [esi + 0x14]   
+    0x006FAC69  85c9                 test ecx, ecx                     
+    0x006FAC6B  7408                 je 0x6fac75                       
+    0x006FAC6D  8b01                 mov eax, dword ptr [ecx]          
+    0x006FAC6F  8b10                 mov edx, dword ptr [eax]          
+    0x006FAC71  6a01                 push 1                            
+    0x006FAC73  ffd2                 call edx                          
+    0x006FAC75  c7461400000000       mov dword ptr [esi + 0x14], 0        ; WRITE_[+0x14]
+    0x006FAC7C  f644240801           test byte ptr [esp + 8], 1        
+    0x006FAC81  7409                 je 0x6fac8c                       
+    0x006FAC83  56                   push esi                          
+    0x006FAC84  e8a1272600           call 0x95d42a                        ; -> ??3@YAXPAX@Z
+    0x006FAC89  83c404               add esp, 4                        
+    0x006FAC8C  8bc6                 mov eax, esi                      
+    0x006FAC8E  5e                   pop esi                           
+    0x006FAC8F  c20400               ret 4                             
+--- release-path function 0x006FB740
+    B.5: [0x006FB740..0x006FB764) pad
+    0x006FB740  56                   push esi                          
+    0x006FB741  8bf1                 mov esi, ecx                      
+    0x006FB743  c7065065a800         mov dword ptr [esi], 0xa86550        ; VTABLE_STORE -> .?AVArkAnimationDerivatives@@ (vt 0x00A86550)
+    0x006FB749  e8b2f4ffff           call 0x6fac00                        ; -> sub_0x006FAC00
+    0x006FB74E  f644240801           test byte ptr [esp + 8], 1        
+    0x006FB753  7409                 je 0x6fb75e                       
+    0x006FB755  56                   push esi                          
+    0x006FB756  e8cf1c2600           call 0x95d42a                        ; -> ??3@YAXPAX@Z
+    0x006FB75B  83c404               add esp, 4                        
+    0x006FB75E  8bc6                 mov eax, esi                      
+    0x006FB760  5e                   pop esi                           
+    0x006FB761  c20400               ret 4                             
+--- release-path function 0x006FD2E0
+    B.5: [0x006FD2E0..0x006FD304) pad
+    0x006FD2E0  56                   push esi                          
+    0x006FD2E1  8bf1                 mov esi, ecx                      
+    0x006FD2E3  c7067465a800         mov dword ptr [esi], 0xa86574        ; VTABLE_STORE -> .?AVArkAnimationCyclic@@ (vt 0x00A86574)
+    0x006FD2E9  e812d9ffff           call 0x6fac00                        ; -> sub_0x006FAC00
+    0x006FD2EE  f644240801           test byte ptr [esp + 8], 1        
+    0x006FD2F3  7409                 je 0x6fd2fe                       
+    0x006FD2F5  56                   push esi                          
+    0x006FD2F6  e82f012600           call 0x95d42a                        ; -> ??3@YAXPAX@Z
+    0x006FD2FB  83c404               add esp, 4                        
+    0x006FD2FE  8bc6                 mov eax, esi                      
+    0x006FD300  5e                   pop esi                           
+    0x006FD301  c20400               ret 4                             
+
+[IV-1..6] EXTENDED BACKWARD DEF-SLICES AT THE SIX SHARED-CTOR CALL SITES
+  (held param = stack ARG2 of the ctor call per [IV-0] ABI derivation; this = ECX at site)
+  R2: slices run EDGE-AWARE at the declared 6-level bound; the param-chained
+  sites 4/6 now enumerate BOTH factory-block entry paths (xor/allocation-failure
+  path + bypass/normal path) instead of the R1 single ZERO verdict.
+
+  SITE 0x006FAFC7 (in function 0x006FAF90..0x006FB01A)
+    HELD-PARAM (arg2) SLICE TREE:
+      [L0] CALLSITE_ARG: arg 2 of call at 0x006FAFC7
+        [L0] IMMEDIATE: arg 2 = imm 0x00000000 (pushed at 0x006FAFC0)
+    THIS(ECX) SLICE TREE:
+      [L0] REG: track ecx used at 0x006FAFC7 in func 0x006FAF90 window[006FAF90..006FAFC7)
+        [L0] THIS_ENTRY: ecx undef in func 0x006FAF90 before 0x006FAFC7: thiscall this at function entry
+
+  SITE 0x006FB092 (in function 0x006FB080..0x006FB0AA)
+    HELD-PARAM (arg2) SLICE TREE:
+      [L0] CALLSITE_ARG: arg 2 of call at 0x006FB092
+        [L0] IMMEDIATE: arg 2 = imm 0x00000000 (pushed at 0x006FB089)
+    THIS(ECX) SLICE TREE:
+      [L0] REG: track ecx used at 0x006FB092 in func 0x006FB080 window[006FB080..006FB092)
+        [L0] THIS_ENTRY: ecx undef in func 0x006FB080 before 0x006FB092: thiscall this at function entry
+
+  SITE 0x006FB409 (in function 0x006FB3D0..0x006FB463)
+    HELD-PARAM (arg2) SLICE TREE:
+      [L0] CALLSITE_ARG: arg 2 of call at 0x006FB409
+        [L0] IMMEDIATE: arg 2 = imm 0x00000000 (pushed at 0x006FB402)
+    THIS(ECX) SLICE TREE:
+      [L0] REG: track ecx used at 0x006FB409 in func 0x006FB3D0 window[006FB3D0..006FB409)
+        [L0] THIS_ENTRY: ecx undef in func 0x006FB3D0 before 0x006FB409: thiscall this at function entry
+
+  SITE 0x006FB5CD (in function 0x006FB590..0x006FB63A)
+    HELD-PARAM (arg2) SLICE TREE:
+      [L0] CALLSITE_ARG: arg 2 of call at 0x006FB5CD
+        [L0] REG: arg 2 = eax (pushed at 0x006FB5C1)
+          [L1] MEM: load eax <- mem[esp+40] at 0x006FB5B9
+            [L2] PARAM: cell [esp+40] at esp-delta 28 = stack arg 2 of func 0x006FB590 (esp-entry param heuristic)
+              [L2] CALLSITE_ARG: caller site 0x006D20DA -> func 0x006FB590
+                [L2] REG: arg 2 = esi (pushed at 0x006D20C7)
+                  [L2] MULTI_PATH: def 'xor esi' at 0x006D206C is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                    [L2] ZERO: PATH_DEF (def at 0x006D206C; entry preconditions: je @0x006D205A -> 0x006D206C) | xor esi, esi at 0x006D206C (zero)
+                    [L2] REG: PATH_BYPASS (entry jmp @0x006D206A -> 0x006D206E bypasses the def at 0x006D206C; value flows from the entry source) | track esi used at 0x006D206A in func 0x006D2036 window[006D2036..006D206A)
+                      [L2] REG: reg rename esi <- eax at 0x006D2068
+                        [L3] CALL_RETURN: def via call 0x006D2063 -> callee 0x006FBD00 (caller-saved eax) | callee 0x006FBD00 return value; callee stores vtable 0x00A865E0 @0x006FBD0D (class-identity evidence)
+                          [L3] REG: eax at ret site 0x006FBD16 of callee 0x006FBD00
+                            [L3] REG: reg rename eax <- esi at 0x006FBD13
+                              [L3] REG: reg rename esi <- ecx at 0x006FBD06
+                                [L3] THIS_ENTRY: ecx undef in func 0x006FBD00 before 0x006FBD06: thiscall this at function entry
+                            [L3] REG: THIS-CROSS: callee returns its thiscall this; caller ECX at call site 0x006D2063
+                              [L3] REG: reg rename ecx <- eax at 0x006D2061
+                                [L4] CALL_RETURN: def via call 0x006D2044 -> callee 0x0095D3C4 (caller-saved eax) | callee 0x0095D3C4 return value
+                                  [L4] NO_RET: callee has no ret in B.5 extent
+              [L2] CALLSITE_ARG: caller site 0x006D22F7 -> func 0x006FB590
+                [L2] REG: arg 2 = esi (pushed at 0x006D22EF)
+                  [L2] MULTI_PATH: def 'xor esi' at 0x006D228B is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                    [L2] ZERO: PATH_DEF (def at 0x006D228B; entry preconditions: je @0x006D21F6 -> 0x006D228B) | xor esi, esi at 0x006D228B (zero)
+                    [L2] REG: PATH_BYPASS (entry jmp @0x006D2289 -> 0x006D228D bypasses the def at 0x006D228B; value flows from the entry source) | track esi used at 0x006D2289 in func 0x006D21D0 window[006D21D0..006D2289)
+                      [L2] REG: reg rename esi <- eax at 0x006D2287
+                        [L3] CALL_RETURN: def via call 0x006D2282 -> callee 0x006FC450 (caller-saved eax) | callee 0x006FC450 return value; callee stores vtable 0x00A8661C @0x006FC48B (class-identity evidence)
+                          [L3] NO_RET: callee has no ret in B.5 extent
+              [L2] CALLSITE_ARG: caller site 0x006D2457 -> func 0x006FB590
+                [L2] REG: arg 2 = esi (pushed at 0x006D244F)
+                  [L2] MULTI_PATH: def 'xor esi' at 0x006D23EB is path-preconditioned: 4 bypass entries land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                    [L2] ZERO: PATH_DEF (def at 0x006D23EB; entry preconditions: je @0x006D2356 -> 0x006D23EB) | xor esi, esi at 0x006D23EB (zero)
+                    [L2] REG: PATH_BYPASS (entry jmp @0x006D23E9 -> 0x006D23ED bypasses the def at 0x006D23EB; value flows from the entry source) | track esi used at 0x006D23E9 in func 0x006D2330 window[006D2330..006D23E9)
+                      [L2] REG: reg rename esi <- eax at 0x006D23E7
+                        [L3] CALL_RETURN: def via call 0x006D23E2 -> callee 0x006FBF90 (caller-saved eax) | callee 0x006FBF90 return value; callee stores vtable 0x00A86608 @0x006FBFB0 (class-identity evidence)
+                          [L3] NO_RET: callee has no ret in B.5 extent
+                    [L2] REG: PATH_BYPASS (entry jmp @0x006D1F3C -> 0x006D2441 bypasses the def at 0x006D23EB; value flows from the entry source) | track esi used at 0x006D1F3C in func 0x006D1EE4 window[006D1EE4..006D1F3C)
+                      [L2] MULTI_PATH: def 'xor esi' at 0x006D1EE4 is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                        [L2] ZERO: PATH_DEF (def at 0x006D1EE4; entry preconditions: je @0x006D1EC9 -> 0x006D1EE4) | xor esi, esi at 0x006D1EE4 (zero)
+                        [L2] REG: PATH_BYPASS (entry jmp @0x006D1EE2 -> 0x006D1EE6 bypasses the def at 0x006D1EE4; value flows from the entry source) | track esi used at 0x006D1EE2 in func 0x006D1EA3 window[006D1EA3..006D1EE2)
+                          [L2] REG: reg rename esi <- eax at 0x006D1EE0
+                            [L3] CALL_RETURN: def via call 0x006D1EDB -> callee 0x006FBDB0 (caller-saved eax) | callee 0x006FBDB0 return value; callee stores vtable 0x00A865F4 @0x006FBDC4 (class-identity evidence)
+                              [L3] REG: eax at ret site 0x006FBE20 of callee 0x006FBDB0
+                                [L3] REG: reg rename eax <- ebx at 0x006FBE1D
+                                  [L3] REG: reg rename ebx <- ecx at 0x006FBDB9
+                                    [L3] THIS_ENTRY: ecx undef in func 0x006FBDB0 before 0x006FBDB9: thiscall this at function entry
+                                [L3] REG: THIS-CROSS: callee returns its thiscall this; caller ECX at call site 0x006D1EDB
+                                  [L3] REG: reg rename ecx <- esi at 0x006D1ED9
+                                    [L3] REG: reg rename esi <- eax at 0x006D1EB6
+                                      [L3] ALLOCATION_REVISIT: callee 0x0095D3C4 (operator-new-style import thunk, no ret in B.5 extent) already traced in this slice; this call site is a DISTINCT fresh allocation of the same leaf class
+                    [L2] REG: PATH_BYPASS (entry jmp @0x006D2009 -> 0x006D2441 bypasses the def at 0x006D23EB; value flows from the entry source) | track esi used at 0x006D2009 in func 0x006D1FB1 window[006D1FB1..006D2009)
+                      [L2] MULTI_PATH: def 'xor esi' at 0x006D1FB1 is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                        [L2] ZERO: PATH_DEF (def at 0x006D1FB1; entry preconditions: je @0x006D1F96 -> 0x006D1FB1) | xor esi, esi at 0x006D1FB1 (zero)
+                        [L2] REG: PATH_BYPASS (entry jmp @0x006D1FAF -> 0x006D1FB3 bypasses the def at 0x006D1FB1; value flows from the entry source) | track esi used at 0x006D1FAF in func 0x006D1F70 window[006D1F70..006D1FAF)
+                          [L2] REG: reg rename esi <- eax at 0x006D1FAD
+                            [L3] CALL_RETURN: def via call 0x006D1FA8 -> callee 0x006FD420 (caller-saved eax) | callee 0x006FD420 return value; callee stores vtable 0x00A86678 @0x006FD463 (class-identity evidence)
+                              [L3] REG: eax at ret site 0x006FD506 of callee 0x006FD420
+                                [L3] REG: reg rename eax <- esi at 0x006FD4F4
+                                  [L3] REG: reg rename esi <- ecx at 0x006FD444
+                                    [L3] THIS_ENTRY: ecx undef in func 0x006FD420 before 0x006FD444: thiscall this at function entry
+                                [L3] REG: THIS-CROSS: callee returns its thiscall this; caller ECX at call site 0x006D1FA8
+                                  [L3] REG: reg rename ecx <- esi at 0x006D1FA6
+                                    [L3] REG: reg rename esi <- eax at 0x006D1F83
+                                      [L3] ALLOCATION_REVISIT: callee 0x0095D3C4 (operator-new-style import thunk, no ret in B.5 extent) already traced in this slice; this call site is a DISTINCT fresh allocation of the same leaf class
+                    [L2] REG: PATH_BYPASS (entry jmp @0x006D219E -> 0x006D2441 bypasses the def at 0x006D23EB; value flows from the entry source) | track esi used at 0x006D219E in func 0x006D2146 window[006D2146..006D219E)
+                      [L2] MULTI_PATH: def 'xor esi' at 0x006D2146 is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                        [L2] ZERO: PATH_DEF (def at 0x006D2146; entry preconditions: je @0x006D2134 -> 0x006D2146) | xor esi, esi at 0x006D2146 (zero)
+                        [L2] REG: PATH_BYPASS (entry jmp @0x006D2144 -> 0x006D2148 bypasses the def at 0x006D2146; value flows from the entry source) | track esi used at 0x006D2144 in func 0x006D2110 window[006D2110..006D2144)
+                          [L2] REG: reg rename esi <- eax at 0x006D2142
+                            [L3] CALL_RETURN: def via call 0x006D213D -> callee 0x006FCD00 (caller-saved eax) | callee 0x006FCD00 return value; callee stores vtable 0x00A8663C @0x006FCD34 (class-identity evidence)
+                              [L3] NO_RET: callee has no ret in B.5 extent
+    THIS(ECX) SLICE TREE:
+      [L0] REG: track ecx used at 0x006FB5CD in func 0x006FB590 window[006FB590..006FB5CD)
+        [L0] REG: reg rename ecx <- esi at 0x006FB5CB
+          [L0] REG: reg rename esi <- ecx at 0x006FB5B3
+            [L0] THIS_ENTRY: ecx undef in func 0x006FB590 before 0x006FB5B3: thiscall this at function entry
+
+  SITE 0x006FE9E8 (in function 0x006FE9B0..0x006FEAB1)
+    HELD-PARAM (arg2) SLICE TREE:
+      [L0] CALLSITE_ARG: arg 2 of call at 0x006FE9E8
+        [L0] IMMEDIATE: arg 2 = imm 0x00000000 (pushed at 0x006FE9E1)
+    THIS(ECX) SLICE TREE:
+      [L0] REG: track ecx used at 0x006FE9E8 in func 0x006FE9B0 window[006FE9B0..006FE9E8)
+        [L0] THIS_ENTRY: ecx undef in func 0x006FE9B0 before 0x006FE9E8: thiscall this at function entry
+
+  SITE 0x006FFA87 (in function 0x006FFA70..0x006FFAE7)
+    HELD-PARAM (arg2) SLICE TREE:
+      [L0] CALLSITE_ARG: arg 2 of call at 0x006FFA87
+        [L0] REG: arg 2 = eax (pushed at 0x006FFA79)
+          [L1] MEM: load eax <- mem[esp+12] at 0x006FFA70
+            [L2] PARAM: cell [esp+12] at esp-delta 0 = stack arg 2 of func 0x006FFA70 (esp-entry param heuristic)
+              [L2] CALLSITE_ARG: caller site 0x006FBAD9 -> func 0x006FFA70
+                [L2] REG: arg 2 = edx (pushed at 0x006FBAD1)
+                  [L3] MEM: load edx <- mem[esp+12] at 0x006FBAB8
+                    [L4] PARAM: cell [esp+12] at esp-delta 0 = stack arg 2 of func 0x006FBAB0 (esp-entry param heuristic)
+                      [L4] CALLSITE_ARG: caller site 0x006D1DC6 -> func 0x006FBAB0
+                        [L4] REG: arg 2 = esi (pushed at 0x006D1DBA)
+                          [L4] MULTI_PATH: def 'xor esi' at 0x006D1D60 is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                            [L4] ZERO: PATH_DEF (def at 0x006D1D60; entry preconditions: je @0x006D1D45 -> 0x006D1D60) | xor esi, esi at 0x006D1D60 (zero)
+                            [L4] REG: PATH_BYPASS (entry jmp @0x006D1D5E -> 0x006D1D62 bypasses the def at 0x006D1D60; value flows from the entry source) | track esi used at 0x006D1D5E in func 0x006D1D23 window[006D1D23..006D1D5E)
+                              [L4] REG: reg rename esi <- eax at 0x006D1D5C
+                                [L5] CALL_RETURN: def via call 0x006D1D57 -> callee 0x006FD420 (caller-saved eax) | callee 0x006FD420 return value; callee stores vtable 0x00A86678 @0x006FD463 (class-identity evidence)
+                                  [L5] REG: eax at ret site 0x006FD506 of callee 0x006FD420
+                                    [L5] REG: reg rename eax <- esi at 0x006FD4F4
+                                      [L5] REG: reg rename esi <- ecx at 0x006FD444
+                                        [L5] THIS_ENTRY: ecx undef in func 0x006FD420 before 0x006FD444: thiscall this at function entry
+                                    [L5] REG: THIS-CROSS: callee returns its thiscall this; caller ECX at call site 0x006D1D57
+                                      [L5] REG: reg rename ecx <- esi at 0x006D1D55
+                                        [L5] REG: reg rename esi <- eax at 0x006D1D32
+                                          [L6] CALL_RETURN: def via call 0x006D1D2D -> callee 0x0095D3C4 (caller-saved eax) | callee 0x0095D3C4 return value
+                                            [L6] NO_RET: callee has no ret in B.5 extent
+              [L2] CALLSITE_ARG: caller site 0x006FD299 -> func 0x006FFA70
+                [L2] REG: arg 2 = edx (pushed at 0x006FD291)
+                  [L3] MEM: load edx <- mem[esp+12] at 0x006FD278
+                    [L4] PARAM: cell [esp+12] at esp-delta 0 = stack arg 2 of func 0x006FD270 (esp-entry param heuristic)
+                      [L4] CALLSITE_ARG: caller site 0x006D1736 -> func 0x006FD270
+                        [L4] REG: arg 2 = esi (pushed at 0x006D172E)
+                          [L4] MULTI_PATH: def 'xor esi' at 0x006D16DB is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                            [L4] ZERO: PATH_DEF (def at 0x006D16DB; entry preconditions: je @0x006D16C0 -> 0x006D16DB) | xor esi, esi at 0x006D16DB (zero)
+                            [L4] REG: PATH_BYPASS (entry jmp @0x006D16D9 -> 0x006D16DD bypasses the def at 0x006D16DB; value flows from the entry source) | track esi used at 0x006D16D9 in func 0x006D1670 window[006D1670..006D16D9)
+                              [L4] REG: reg rename esi <- eax at 0x006D16D7
+                                [L4] CYCLE: callee 0x006FD420 already visited
+                      [L4] CALLSITE_ARG: caller site 0x006D1828 -> func 0x006FD270
+                        [L4] REG: arg 2 = esi (pushed at 0x006D1820)
+                          [L4] MULTI_PATH: def 'xor esi' at 0x006D17C8 is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                            [L4] ZERO: PATH_DEF (def at 0x006D17C8; entry preconditions: je @0x006D17B6 -> 0x006D17C8) | xor esi, esi at 0x006D17C8 (zero)
+                            [L4] REG: PATH_BYPASS (entry jmp @0x006D17C6 -> 0x006D17CA bypasses the def at 0x006D17C8; value flows from the entry source) | track esi used at 0x006D17C6 in func 0x006D1768 window[006D1768..006D17C6)
+                              [L4] REG: reg rename esi <- eax at 0x006D17C4
+                                [L5] CALL_RETURN: def via call 0x006D17BF -> callee 0x006FCD00 (caller-saved eax) | callee 0x006FCD00 return value; callee stores vtable 0x00A8663C @0x006FCD34 (class-identity evidence)
+                                  [L5] NO_RET: callee has no ret in B.5 extent
+                      [L4] CALLSITE_ARG: caller site 0x006D1AF3 -> func 0x006FD270
+                        [L4] REG: arg 2 = esi (pushed at 0x006D1AEB)
+                          [L4] MULTI_PATH: def 'xor esi' at 0x006D1A93 is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                            [L4] ZERO: PATH_DEF (def at 0x006D1A93; entry preconditions: je @0x006D1A6E -> 0x006D1A93) | xor esi, esi at 0x006D1A93 (zero)
+                            [L4] REG: PATH_BYPASS (entry jmp @0x006D1A91 -> 0x006D1A95 bypasses the def at 0x006D1A93; value flows from the entry source) | track esi used at 0x006D1A91 in func 0x006D19B6 window[006D19B6..006D1A91)
+                              [L4] REG: reg rename esi <- eax at 0x006D1A8F
+                                [L5] CALL_RETURN: def via call 0x006D1A8A -> callee 0x006FBF90 (caller-saved eax) | callee 0x006FBF90 return value; callee stores vtable 0x00A86608 @0x006FBFB0 (class-identity evidence)
+                                  [L5] NO_RET: callee has no ret in B.5 extent
+                      [L4] CALLSITE_ARG: caller site 0x006D1CB3 -> func 0x006FD270
+                        [L4] REG: arg 2 = esi (pushed at 0x006D1CA7)
+                          [L4] MULTI_PATH: def 'xor esi' at 0x006D1C58 is path-preconditioned: 3 bypass entries land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                            [L4] ZERO: PATH_DEF (def at 0x006D1C58; entry preconditions: je @0x006D1C46 -> 0x006D1C58) | xor esi, esi at 0x006D1C58 (zero)
+                            [L4] REG: PATH_BYPASS (entry jmp @0x006D1C56 -> 0x006D1C5A bypasses the def at 0x006D1C58; value flows from the entry source) | track esi used at 0x006D1C56 in func 0x006D1BF8 window[006D1BF8..006D1C56)
+                              [L4] REG: reg rename esi <- eax at 0x006D1C54
+                                [L5] CALL_RETURN: def via call 0x006D1C4F -> callee 0x006FBD00 (caller-saved eax) | callee 0x006FBD00 return value; callee stores vtable 0x00A865E0 @0x006FBD0D (class-identity evidence)
+                                  [L5] REG: eax at ret site 0x006FBD16 of callee 0x006FBD00
+                                    [L5] REG: reg rename eax <- esi at 0x006FBD13
+                                      [L5] REG: reg rename esi <- ecx at 0x006FBD06
+                                        [L5] THIS_ENTRY: ecx undef in func 0x006FBD00 before 0x006FBD06: thiscall this at function entry
+                                    [L5] REG: THIS-CROSS: callee returns its thiscall this; caller ECX at call site 0x006D1C4F
+                                      [L5] REG: reg rename ecx <- eax at 0x006D1C4D
+                                        [L5] ALLOCATION_REVISIT: callee 0x0095D3C4 (operator-new-style import thunk, no ret in B.5 extent) already traced in this slice; this call site is a DISTINCT fresh allocation of the same leaf class
+                            [L4] REG: PATH_BYPASS (entry jmp @0x006D1BCB -> 0x006D1C93 bypasses the def at 0x006D1C58; value flows from the entry source) | track esi used at 0x006D1BCB in func 0x006D1B90 window[006D1B90..006D1BCB)
+                              [L4] MULTI_PATH: def 'xor esi' at 0x006D1B90 is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                                [L4] ZERO: PATH_DEF (def at 0x006D1B90; entry preconditions: je @0x006D1B75 -> 0x006D1B90) | xor esi, esi at 0x006D1B90 (zero)
+                                [L4] REG: PATH_BYPASS (entry jmp @0x006D1B8E -> 0x006D1B92 bypasses the def at 0x006D1B90; value flows from the entry source) | track esi used at 0x006D1B8E in func 0x006D1B25 window[006D1B25..006D1B8E)
+                                  [L4] REG: reg rename esi <- eax at 0x006D1B8C
+                                    [L5] CALL_RETURN: def via call 0x006D1B87 -> callee 0x006FBDB0 (caller-saved eax) | callee 0x006FBDB0 return value; callee stores vtable 0x00A865F4 @0x006FBDC4 (class-identity evidence)
+                                      [L5] REG: eax at ret site 0x006FBE20 of callee 0x006FBDB0
+                                        [L5] REG: reg rename eax <- ebx at 0x006FBE1D
+                                          [L5] REG: reg rename ebx <- ecx at 0x006FBDB9
+                                            [L5] THIS_ENTRY: ecx undef in func 0x006FBDB0 before 0x006FBDB9: thiscall this at function entry
+                                        [L5] REG: THIS-CROSS: callee returns its thiscall this; caller ECX at call site 0x006D1B87
+                                          [L5] REG: reg rename ecx <- esi at 0x006D1B85
+                                            [L5] REG: reg rename esi <- eax at 0x006D1B62
+                                              [L5] ALLOCATION_REVISIT: callee 0x0095D3C4 (operator-new-style import thunk, no ret in B.5 extent) already traced in this slice; this call site is a DISTINCT fresh allocation of the same leaf class
+                            [L4] REG: PATH_BYPASS (entry jmp @0x006D1989 -> 0x006D1C9D bypasses the def at 0x006D1C58; value flows from the entry source) | track esi used at 0x006D1989 in func 0x006D193F window[006D193F..006D1989)
+                              [L4] MULTI_PATH: def 'xor esi' at 0x006D193F is path-preconditioned: 1 bypass entry land in (def, use] (R2 edge-aware; AMEND_LOG_R2 R2-1)
+                                [L4] ZERO: PATH_DEF (def at 0x006D193F; entry preconditions: je @0x006D191A -> 0x006D193F) | xor esi, esi at 0x006D193F (zero)
+                                [L4] REG: PATH_BYPASS (entry jmp @0x006D193D -> 0x006D1941 bypasses the def at 0x006D193F; value flows from the entry source) | track esi used at 0x006D193D in func 0x006D1860 window[006D1860..006D193D)
+                                  [L4] REG: reg rename esi <- eax at 0x006D193B
+                                    [L5] CALL_RETURN: def via call 0x006D1936 -> callee 0x006FC450 (caller-saved eax) | callee 0x006FC450 return value; callee stores vtable 0x00A8661C @0x006FC48B (class-identity evidence)
+                                      [L5] NO_RET: callee has no ret in B.5 extent
+    THIS(ECX) SLICE TREE:
+      [L0] REG: track ecx used at 0x006FFA87 in func 0x006FFA70 window[006FFA70..006FFA87)
+        [L0] REG: reg rename ecx <- esi at 0x006FFA85
+          [L0] REG: reg rename esi <- ecx at 0x006FFA7B
+            [L0] THIS_ENTRY: ecx undef in func 0x006FFA70 before 0x006FFA7B: thiscall this at function entry
+
+[IV-7] CLASS RESOLUTION OF ALL FAMILY-CTOR CALLER FUNCTIONS (vtable stores)
+  func 0x006FAF90: vtable stores: [('0x006FAFE3', '.?AVArkAnimationTimeController@@')]
+           direct E8 targets (within B.5 extent): ['0x6faba0', '0x6facf0', '0x6fae50']
+  func 0x006FB080: vtable stores: [('0x006FB09B', '.?AVArkAnimationNodeUpdate@@')]
+           direct E8 targets (within B.5 extent): ['0x6faba0']
+  func 0x006FB3D0: vtable stores: [('0x006FB432', '.?AVArkAnimationAnimatedTexture@@')]
+           direct E8 targets (within B.5 extent): ['0x6faba0', '0x6fb250']
+  func 0x006FB590: vtable stores: [('0x006FB5F4', '.?AVArkAnimationDerivatives@@')]
+           direct E8 targets (within B.5 extent): ['0x6faba0']
+  func 0x006FE9B0: vtable stores: [('0x006FE9F5', '.?AVArkAnimationParticleSystemPredefined@@')]
+           direct E8 targets (within B.5 extent): ['0x6e7420', '0x6faba0', '0x6fdd50', '0x6fe8d0']
+  func 0x006FFA70: vtable stores: [('0x006FFA92', '.?AVArkAnimationCyclic@@')]
+           direct E8 targets (within B.5 extent): ['0x6faba0']
+  func 0x006FBAB0: vtable stores: [('0x006FBAE5', '.?AVArkAnimationCyclicLinear@@')]
+           direct E8 targets (within B.5 extent): ['0x6ffa70']
+  func 0x006FD270: vtable stores: [('0x006FD2A8', '.?AVArkAnimationCyclicSin@@')]
+           direct E8 targets (within B.5 extent): ['0x6ffa70']
+  func 0x006FEB00: vtable stores: [('0x006FEB5D', '.?AVArkAnimationParticleSystemPredefinedMod@@')]
+           direct E8 targets (within B.5 extent): ['0x6fe9b0']
+
+[IV-8] FACTORY-CHAIN ENTRY-PATH DISPOSITION (R2 edge-aware; BOTH paths per block)
+  Method: every E8 call site of the three param-chained family ctors inside the
+  construct [0x006D0ED0..0x006D265F) is sliced at arg2 under the R2 edge-aware engine;
+  the slice trees enumerate BOTH factory-block entry paths. Child ctors are
+  measured over their chunk closure: vtable store -> RTTI class + lineage;
+  child vtable slot-3 dword (+0x0C) re-measured and tested != 0x0050A050.
+
+  CTOR 0x006FB590 (ArkAnimationDerivatives): 3 factory call site(s) in the construct: ['0x6d20da', '0x6d22f7', '0x6d2457']
+
+  CTOR 0x006FBAB0 (ArkAnimationCyclicLinear): 1 factory call site(s) in the construct: ['0x6d1dc6']
+
+  CTOR 0x006FD270 (ArkAnimationCyclicSin): 4 factory call site(s) in the construct: ['0x6d1736', '0x6d1828', '0x6d1af3', '0x6d1cb3']
+
+  SITE 0x006D20DA -> ctor 0x006FB590 (ArkAnimationDerivatives); containing block [0x006D206C..0x006D20E4)
+    PATH ENUMERATION (edge-aware): 1 xor/allocation-failure path(s) (held=NULL), 1 child-construction path(s)
+      X-PATH: PATH_DEF (def at 0x006D206C; entry preconditions: je @0x006D205A -> 0x006D206C) | xor esi, esi at 0x006D206C (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > ZERO]
+      CHILD PATH: child ctor call @0x006D2063 -> 0x006FBD00
+        child alloc      : push 0xC @0x006D2042 -> ??2 @0x006D2044 (fresh allocation; the chain's je is its NULL test)
+        child class       : .?AVArkAnimationScale@@ (vtable 0x00A865E0; vtable store @0x006FBD0D; 1 chunk(s), extent [0x006FBD00..0x006FBD19))
+        child lineage     : .?AVArkAnimationScale@@ <- .?AVArkAnimationTransform@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FBD16 mov eax,esi @0x006FBD13 (this-return shape)
+        child vtable slot-3 dword @0x00A865EC = 0x006FFF00  == 0x0050A050? NO
+
+  SITE 0x006D22F7 -> ctor 0x006FB590 (ArkAnimationDerivatives); containing block [0x006D228B..0x006D2301)
+    PATH ENUMERATION (edge-aware): 1 xor/allocation-failure path(s) (held=NULL), 1 child-construction path(s)
+      X-PATH: PATH_DEF (def at 0x006D228B; entry preconditions: je @0x006D21F6 -> 0x006D228B) | xor esi, esi at 0x006D228B (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > ZERO]
+      CHILD PATH: child ctor call @0x006D2282 -> 0x006FC450
+        child alloc      : push 0x30 @0x006D21DC -> ??2 @0x006D21DE (fresh allocation; the chain's je is its NULL test)
+        child class       : .?AVArkAnimationColor@@ (vtable 0x00A8661C; vtable store @0x006FC48B; 5 chunk(s), extent [0x006FC450..0x006FC6E5))
+        child lineage     : .?AVArkAnimationColor@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FC6E2 mov eax,esi @0x006FC6CD (this-return shape)
+        child vtable slot-3 dword @0x00A86628 = 0x009154A0  == 0x0050A050? NO
+
+  SITE 0x006D2457 -> ctor 0x006FB590 (ArkAnimationDerivatives); containing block [0x006D23EB..0x006D2461)
+    PATH ENUMERATION (edge-aware): 4 xor/allocation-failure path(s) (held=NULL), 4 child-construction path(s)
+      X-PATH: PATH_DEF (def at 0x006D23EB; entry preconditions: je @0x006D2356 -> 0x006D23EB) | xor esi, esi at 0x006D23EB (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > ZERO]
+      X-PATH: PATH_DEF (def at 0x006D1EE4; entry preconditions: je @0x006D1EC9 -> 0x006D1EE4) | xor esi, esi at 0x006D1EE4 (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > REG > MULTI_PATH > ZERO]
+      X-PATH: PATH_DEF (def at 0x006D1FB1; entry preconditions: je @0x006D1F96 -> 0x006D1FB1) | xor esi, esi at 0x006D1FB1 (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > REG > MULTI_PATH > ZERO]
+      X-PATH: PATH_DEF (def at 0x006D2146; entry preconditions: je @0x006D2134 -> 0x006D2146) | xor esi, esi at 0x006D2146 (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > REG > MULTI_PATH > ZERO]
+      CHILD PATH: child ctor call @0x006D1EDB -> 0x006FBDB0
+        child alloc      : push 0x7C @0x006D1EAF -> ??2 @0x006D1EB1 (fresh allocation; the chain's je is its NULL test)
+        child class       : .?AVArkAnimationRotation@@ (vtable 0x00A865F4; vtable store @0x006FBDC4; 3 chunk(s), extent [0x006FBDB0..0x006FBE7B))
+        child lineage     : .?AVArkAnimationRotation@@ <- .?AVArkAnimationTransform@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FBE20 mov eax,ebx @0x006FBE1D (this-return shape); ret @0x006FBE4C mov eax,ebx @0x006FBE49 (this-return shape); ret @0x006FBE78 mov eax,ebx @0x006FBE75 (this-return shape)
+        child vtable slot-3 dword @0x00A86600 = 0x006FFF00  == 0x0050A050? NO
+      CHILD PATH: child ctor call @0x006D1FA8 -> 0x006FD420
+        child alloc      : push 0x24 @0x006D1F7C -> ??2 @0x006D1F7E (fresh allocation; the chain's je is its NULL test)
+        child class       : .?AVArkAnimationTranslation@@ (vtable 0x00A86678; vtable store @0x006FD463; 1 chunk(s), extent [0x006FD420..0x006FD509))
+        child lineage     : .?AVArkAnimationTranslation@@ <- .?AVArkAnimationTransform@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FD506 mov eax,esi @0x006FD4F4 (this-return shape)
+        child vtable slot-3 dword @0x00A86684 = 0x006FFF00  == 0x0050A050? NO
+      CHILD PATH: child ctor call @0x006D213D -> 0x006FCD00
+        child alloc      : push 0x1C @0x006D211C -> ??2 @0x006D211E (fresh allocation; the chain's je is its NULL test)
+        child class       : .?AVArkAnimationAlpha@@ (vtable 0x00A8663C; vtable store @0x006FCD34; 11 chunk(s), extent [0x006FCD00..0x006FD26B))
+        child lineage     : .?AVArkAnimationAlpha@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FD268
+        child vtable slot-3 dword @0x00A86648 = 0x009154A0  == 0x0050A050? NO
+      CHILD PATH: child ctor call @0x006D23E2 -> 0x006FBF90
+        child alloc      : push 0x48 @0x006D233C -> ??2 @0x006D233E (fresh allocation; the chain's je is its NULL test)
+        child class       : .?AVArkAnimationIntensity@@ (vtable 0x00A86608; vtable store @0x006FBFB0; 5 chunk(s), extent [0x006FBF90..0x006FC040))
+        child lineage     : .?AVArkAnimationIntensity@@ <- .?AVArkAnimationColor@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FC03D mov eax,esi @0x006FC03A (this-return shape)
+        child vtable slot-3 dword @0x00A86614 = 0x009154A0  == 0x0050A050? NO
+
+  SITE 0x006D1DC6 -> ctor 0x006FBAB0 (ArkAnimationCyclicLinear); containing block [0x006D1D60..0x006D1DD0)
+    PATH ENUMERATION (edge-aware): 1 xor/allocation-failure path(s) (held=NULL), 1 child-construction path(s)
+      X-PATH: PATH_DEF (def at 0x006D1D60; entry preconditions: je @0x006D1D45 -> 0x006D1D60) | xor esi, esi at 0x006D1D60 (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > ZERO]
+      CHILD PATH: child ctor call @0x006D1D57 -> 0x006FD420
+        child alloc      : push 0x24 @0x006D1D2B -> ??2 @0x006D1D2D (fresh allocation; the chain's je is its NULL test)
+        child class       : .?AVArkAnimationTranslation@@ (vtable 0x00A86678; vtable store @0x006FD463; 1 chunk(s), extent [0x006FD420..0x006FD509))
+        child lineage     : .?AVArkAnimationTranslation@@ <- .?AVArkAnimationTransform@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FD506 mov eax,esi @0x006FD4F4 (this-return shape)
+        child vtable slot-3 dword @0x00A86684 = 0x006FFF00  == 0x0050A050? NO
+
+  SITE 0x006D1736 -> ctor 0x006FD270 (ArkAnimationCyclicSin); containing block [0x006D16DB..0x006D1740)
+    PATH ENUMERATION (edge-aware): 1 xor/allocation-failure path(s) (held=NULL), 1 child-construction path(s)
+      X-PATH: PATH_DEF (def at 0x006D16DB; entry preconditions: je @0x006D16C0 -> 0x006D16DB) | xor esi, esi at 0x006D16DB (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > ZERO]
+      CHILD PATH: child ctor call @0x006D16D2 -> 0x006FD420
+        child alloc      : no local ??2+push pair within the declared 32/16-byte windows (recorded honestly)
+        child class       : .?AVArkAnimationTranslation@@ (vtable 0x00A86678; vtable store @0x006FD463; 1 chunk(s), extent [0x006FD420..0x006FD509))
+        child lineage     : .?AVArkAnimationTranslation@@ <- .?AVArkAnimationTransform@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FD506 mov eax,esi @0x006FD4F4 (this-return shape)
+        child vtable slot-3 dword @0x00A86684 = 0x006FFF00  == 0x0050A050? NO
+
+  SITE 0x006D1828 -> ctor 0x006FD270 (ArkAnimationCyclicSin); containing block [0x006D17C8..0x006D1832)
+    PATH ENUMERATION (edge-aware): 1 xor/allocation-failure path(s) (held=NULL), 1 child-construction path(s)
+      X-PATH: PATH_DEF (def at 0x006D17C8; entry preconditions: je @0x006D17B6 -> 0x006D17C8) | xor esi, esi at 0x006D17C8 (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > ZERO]
+      CHILD PATH: child ctor call @0x006D17BF -> 0x006FCD00
+        child alloc      : no local ??2+push pair within the declared 32/16-byte windows (recorded honestly)
+        child class       : .?AVArkAnimationAlpha@@ (vtable 0x00A8663C; vtable store @0x006FCD34; 11 chunk(s), extent [0x006FCD00..0x006FD26B))
+        child lineage     : .?AVArkAnimationAlpha@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FD268
+        child vtable slot-3 dword @0x00A86648 = 0x009154A0  == 0x0050A050? NO
+
+  SITE 0x006D1AF3 -> ctor 0x006FD270 (ArkAnimationCyclicSin); containing block [0x006D1A93..0x006D1AFD)
+    PATH ENUMERATION (edge-aware): 1 xor/allocation-failure path(s) (held=NULL), 1 child-construction path(s)
+      X-PATH: PATH_DEF (def at 0x006D1A93; entry preconditions: je @0x006D1A6E -> 0x006D1A93) | xor esi, esi at 0x006D1A93 (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > ZERO]
+      CHILD PATH: child ctor call @0x006D1A8A -> 0x006FBF90
+        child alloc      : no local ??2+push pair within the declared 32/16-byte windows (recorded honestly)
+        child class       : .?AVArkAnimationIntensity@@ (vtable 0x00A86608; vtable store @0x006FBFB0; 5 chunk(s), extent [0x006FBF90..0x006FC040))
+        child lineage     : .?AVArkAnimationIntensity@@ <- .?AVArkAnimationColor@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FC03D mov eax,esi @0x006FC03A (this-return shape)
+        child vtable slot-3 dword @0x00A86614 = 0x009154A0  == 0x0050A050? NO
+
+  SITE 0x006D1CB3 -> ctor 0x006FD270 (ArkAnimationCyclicSin); containing block [0x006D1C58..0x006D1CBD)
+    PATH ENUMERATION (edge-aware): 3 xor/allocation-failure path(s) (held=NULL), 3 child-construction path(s)
+      X-PATH: PATH_DEF (def at 0x006D1C58; entry preconditions: je @0x006D1C46 -> 0x006D1C58) | xor esi, esi at 0x006D1C58 (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > ZERO]
+      X-PATH: PATH_DEF (def at 0x006D1B90; entry preconditions: je @0x006D1B75 -> 0x006D1B90) | xor esi, esi at 0x006D1B90 (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > REG > MULTI_PATH > ZERO]
+      X-PATH: PATH_DEF (def at 0x006D193F; entry preconditions: je @0x006D191A -> 0x006D193F) | xor esi, esi at 0x006D193F (zero) [tree-path: CALLSITE_ARG > REG > MULTI_PATH > REG > MULTI_PATH > ZERO]
+      CHILD PATH: child ctor call @0x006D1936 -> 0x006FC450
+        child alloc      : no local ??2+push pair within the declared 32/16-byte windows (recorded honestly)
+        child class       : .?AVArkAnimationColor@@ (vtable 0x00A8661C; vtable store @0x006FC48B; 5 chunk(s), extent [0x006FC450..0x006FC6E5))
+        child lineage     : .?AVArkAnimationColor@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FC6E2 mov eax,esi @0x006FC6CD (this-return shape)
+        child vtable slot-3 dword @0x00A86628 = 0x009154A0  == 0x0050A050? NO
+      CHILD PATH: child ctor call @0x006D1B87 -> 0x006FBDB0
+        child alloc      : no local ??2+push pair within the declared 32/16-byte windows (recorded honestly)
+        child class       : .?AVArkAnimationRotation@@ (vtable 0x00A865F4; vtable store @0x006FBDC4; 3 chunk(s), extent [0x006FBDB0..0x006FBE7B))
+        child lineage     : .?AVArkAnimationRotation@@ <- .?AVArkAnimationTransform@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FBE20 mov eax,ebx @0x006FBE1D (this-return shape); ret @0x006FBE4C mov eax,ebx @0x006FBE49 (this-return shape); ret @0x006FBE78 mov eax,ebx @0x006FBE75 (this-return shape)
+        child vtable slot-3 dword @0x00A86600 = 0x006FFF00  == 0x0050A050? NO
+      CHILD PATH: child ctor call @0x006D1C4F -> 0x006FBD00
+        child alloc      : no local ??2+push pair within the declared 32/16-byte windows (recorded honestly)
+        child class       : .?AVArkAnimationScale@@ (vtable 0x00A865E0; vtable store @0x006FBD0D; 1 chunk(s), extent [0x006FBD00..0x006FBD19))
+        child lineage     : .?AVArkAnimationScale@@ <- .?AVArkAnimationTransform@@ <- .?AVArkAnimationFloatValue@@
+        child ret shape   : ret @0x006FBD16 mov eax,esi @0x006FBD13 (this-return shape)
+        child vtable slot-3 dword @0x00A865EC = 0x006FFF00  == 0x0050A050? NO
+
+  SUMMARY: 13 xor/allocation-failure path(s) (held=NULL) and 13 child-construction path(s) across the 8 factory call sites; NO path binds a SceneFeederObject (slot-3 test above).
+
+[IV-9] PER-CLASS HELD-VALUE TABLE (R2 corrected disposition; replaces the R1
+  universal-NULL verdict that QC_AUDIT.md P0-1 falsified)
+  ArkAnimationTimeController                : held = NULL always (ctor site 0x006FAFC0 pushes immediate 0 for the
+      base ctor; byte evidence [IV-1..6] sites 1/2/3/5)
+  ArkAnimationNodeUpdate                    : held = NULL always (ctor site 0x006FB089 pushes immediate 0 for the
+      base ctor; byte evidence [IV-1..6] sites 1/2/3/5)
+  ArkAnimationAnimatedTexture               : held = NULL always (ctor site 0x006FB402 pushes immediate 0 for the
+      base ctor; byte evidence [IV-1..6] sites 1/2/3/5)
+  ArkAnimationParticleSystemPredefined      : held = NULL always (ctor site 0x006FE9E1 pushes immediate 0 for the
+      base ctor; byte evidence [IV-1..6] sites 1/2/3/5)
+  ArkAnimationParticleSystemPredefinedMod   : held = NULL always (PSPMod ctor chains via the PSP ctor's
+      immediate push 0; PSPMod ctor -> PSP ctor call @0x006FEB4B; PSP site 5
+      push 0 evidence stands; PSPMod ctor itself adds no [this+0x14] write)
+  ArkAnimationDerivatives                   : held = NULL on the allocation-failure paths (xor esi,esi;
+      entry preconditions = the child-allocation NULL tests), and = a LIVE
+      CHILD object on the normal paths: .?AVArkAnimationScale@@ (0x006FBD00); .?AVArkAnimationRotation@@ (0x006FBDB0); .?AVArkAnimationIntensity@@ (0x006FBF90); .?AVArkAnimationColor@@ (0x006FC450); .?AVArkAnimationAlpha@@ (0x006FCD00); .?AVArkAnimationTranslation@@ (0x006FD420)
+  ArkAnimationCyclicLinear                  : held = NULL on the allocation-failure paths (xor esi,esi;
+      entry preconditions = the child-allocation NULL tests), and = a LIVE
+      CHILD object on the normal paths: .?AVArkAnimationTranslation@@ (0x006FD420)
+  ArkAnimationCyclicSin                     : held = NULL on the allocation-failure paths (xor esi,esi;
+      entry preconditions = the child-allocation NULL tests), and = a LIVE
+      CHILD object on the normal paths: .?AVArkAnimationScale@@ (0x006FBD00); .?AVArkAnimationRotation@@ (0x006FBDB0); .?AVArkAnimationIntensity@@ (0x006FBF90); .?AVArkAnimationColor@@ (0x006FC450); .?AVArkAnimationAlpha@@ (0x006FCD00); .?AVArkAnimationTranslation@@ (0x006FD420)
+  ArkAnimationCyclic                        : inherits the forwarded child (Linear/Sin ctors read their own
+      arg2 @0x006FBAB8/@0x006FD278 and forward it to the Cyclic ctor
+      0x006FFA70; the Cyclic ctor passes it to the base ctor as arg2)
+  CHILD HIERARCHY ROOT: every child class lineage ends at
+  .?AVArkAnimationFloatValue@@ - a SEPARATE hierarchy root from
+  .?AVArkAnimationPredefined@@ (the 10-class family closure STANDS; the
+  children are NOT members of the ArkAnimation family).
+  SLOT-3 NEGATIVE CONTROL (R2): child vtable slot-3 dwords:
+    .?AVArkAnimationScale@@                  vt 0x00A865E0 slot-3 = 0x006FFF00  == 0x0050A050? NO
+    .?AVArkAnimationRotation@@               vt 0x00A865F4 slot-3 = 0x006FFF00  == 0x0050A050? NO
+    .?AVArkAnimationIntensity@@              vt 0x00A86608 slot-3 = 0x009154A0  == 0x0050A050? NO
+    .?AVArkAnimationColor@@                  vt 0x00A8661C slot-3 = 0x009154A0  == 0x0050A050? NO
+    .?AVArkAnimationAlpha@@                  vt 0x00A8663C slot-3 = 0x009154A0  == 0x0050A050? NO
+    .?AVArkAnimationTranslation@@            vt 0x00A86678 slot-3 = 0x006FFF00  == 0x0050A050? NO
+    .?AVSceneFeederObject@@                  vt 0x00A7D458 slot-3 = 0x0050A050  (SF re-confirmed)
+
+[V] UPSTREAM CONTINUATION: leaf ctor/factory caller census + held-arg traces
+  call-return leaves found in the six slices: ['0x6fbd00', '0x6fbdb0', '0x6fbf90', '0x6fc450', '0x6fcd00', '0x6fd420']
+  (R2: the operator-new import thunk 0x95d3c4 is EXCLUDED from the ctor-caller
+   census - it is the fresh-allocation leaf, not a constructor; its call
+   sites are enumerated inside the [IV-8] chain trees.)
+
+  LEAF 0x006FBD00 (.?AVArkAnimationScale@@): direct E8 callers: 2
+    caller-site 0x006D1C4F in func 0x006D1BF8..0x006D1C58 family-ctor-sites-in-func: []
+    caller-site 0x006D2063 in func 0x006D2036..0x006D206C family-ctor-sites-in-func: []
+
+  LEAF 0x006FBDB0 (.?AVArkAnimationRotation@@): direct E8 callers: 2
+    caller-site 0x006D1B87 in func 0x006D1B25..0x006D1B90 family-ctor-sites-in-func: []
+    caller-site 0x006D1EDB in func 0x006D1EA3..0x006D1EE4 family-ctor-sites-in-func: []
+
+  LEAF 0x006FBF90 (.?AVArkAnimationIntensity@@): direct E8 callers: 2
+    caller-site 0x006D1A8A in func 0x006D19B6..0x006D1A93 family-ctor-sites-in-func: []
+    caller-site 0x006D23E2 in func 0x006D2330..0x006D23EB family-ctor-sites-in-func: []
+
+  LEAF 0x006FC450 (.?AVArkAnimationColor@@): direct E8 callers: 3
+    caller-site 0x006D1936 in func 0x006D1860..0x006D193F family-ctor-sites-in-func: []
+    caller-site 0x006D2282 in func 0x006D21D0..0x006D228B family-ctor-sites-in-func: []
+    caller-site 0x006FBFA9 in func 0x006FBF90..0x006FBFE3 family-ctor-sites-in-func: []
+
+  LEAF 0x006FCD00 (.?AVArkAnimationAlpha@@): direct E8 callers: 2
+    caller-site 0x006D17BF in func 0x006D1768..0x006D17C8 family-ctor-sites-in-func: []
+    caller-site 0x006D213D in func 0x006D2110..0x006D2146 family-ctor-sites-in-func: []
+
+  LEAF 0x006FD420 (.?AVArkAnimationTranslation@@): direct E8 callers: 3
+    caller-site 0x006D16D2 in func 0x006D1670..0x006D16DB family-ctor-sites-in-func: []
+    caller-site 0x006D1D57 in func 0x006D1D23..0x006D1D60 family-ctor-sites-in-func: []
+    caller-site 0x006D1FA8 in func 0x006D1F70..0x006D1FB1 family-ctor-sites-in-func: []
+
+[VI] SF-CHAIN PIN REVALIDATION (receiver-identity ladder infrastructure)
+--- SF ctor FUN_00509330 (PIN-SFCHAIN)
+    B.5: [0x00509330..0x005093BF) tight
+    0x00509330  6aff                 push -1                           
+    0x00509332  6839ac9b00           push 0x9bac39                     
+    0x00509337  64a100000000         mov eax, dword ptr fs:[0]         
+    0x0050933D  50                   push eax                          
+    0x0050933E  83ec28               sub esp, 0x28                     
+    0x00509341  53                   push ebx                          
+    0x00509342  55                   push ebp                          
+    0x00509343  56                   push esi                          
+    0x00509344  57                   push edi                          
+    0x00509345  a1d0d8b900           mov eax, dword ptr [0xb9d8d0]     
+    0x0050934A  33c4                 xor eax, esp                      
+    0x0050934C  50                   push eax                          
+    0x0050934D  8d44243c             lea eax, [esp + 0x3c]             
+    0x00509351  64a300000000         mov dword ptr fs:[0], eax         
+    0x00509357  8be9                 mov ebp, ecx                      
+    0x00509359  896c2414             mov dword ptr [esp + 0x14], ebp      ; WRITE_[+0x14]
+    0x0050935D  33db                 xor ebx, ebx                      
+    0x0050935F  8d4d08               lea ecx, [ebp + 8]                
+    0x00509362  895c2444             mov dword ptr [esp + 0x44], ebx   
+    0x00509366  c7450058d4a700       mov dword ptr [ebp], 0xa7d458        ; VTABLE_STORE -> SceneFeederObject (pin, validated below) (vt 0x00A7D458)
+    0x0050936D  e80e26f0ff           call 0x40b980                        ; -> sub_0x0040B980
+    0x00509372  8b442450             mov eax, dword ptr [esp + 0x50]   
+    0x00509376  6818010000           push 0x118                        
+    0x0050937B  885d10               mov byte ptr [ebp + 0x10], bl     
+    0x0050937E  894514               mov dword ptr [ebp + 0x14], eax      ; WRITE_[+0x14]
+    0x00509381  895d18               mov dword ptr [ebp + 0x18], ebx   
+    0x00509384  895d1c               mov dword ptr [ebp + 0x1c], ebx   
+    0x00509387  895d20               mov dword ptr [ebp + 0x20], ebx   
+    0x0050938A  885d24               mov byte ptr [ebp + 0x24], bl     
+    0x0050938D  885d25               mov byte ptr [ebp + 0x25], bl     
+    0x00509390  885d26               mov byte ptr [ebp + 0x26], bl     
+    0x00509393  885d27               mov byte ptr [ebp + 0x27], bl     
+    0x00509396  885d28               mov byte ptr [ebp + 0x28], bl     
+    0x00509399  c6452901             mov byte ptr [ebp + 0x29], 1      
+    0x0050939D  895d2c               mov dword ptr [ebp + 0x2c], ebx   
+    0x005093A0  e81f404500           call 0x95d3c4                        ; -> ??2@YAPAXI@Z
+    0x005093A5  83c404               add esp, 4                        
+    0x005093A8  89442450             mov dword ptr [esp + 0x50], eax   
+    0x005093AC  3bc3                 cmp eax, ebx                      
+    0x005093AE  c644244401           mov byte ptr [esp + 0x44], 1      
+    0x005093B3  740a                 je 0x5093bf                       
+    0x005093B5  53                   push ebx                          
+    0x005093B6  8bc8                 mov ecx, eax                      
+    0x005093B8  e843cc2a00           call 0x7b6000                        ; -> sub_0x007B6000
+    0x005093BD  eb02                 jmp 0x5093c1                      
+    SF-VTABLE STORE at 0x00509366: mov dword ptr [ebp], 0xa7d458 (vt 0x00A7D458)
+--- SF factory FUN_005247C0 (PIN-SFCHAIN)
+    B.5: [0x005247C0..0x00524858) pad
+    0x005247C0  6aff                 push -1                           
+    0x005247C2  686bee9b00           push 0x9bee6b                     
+    0x005247C7  64a100000000         mov eax, dword ptr fs:[0]         
+    0x005247CD  50                   push eax                          
+    0x005247CE  83ec08               sub esp, 8                        
+    0x005247D1  56                   push esi                          
+    0x005247D2  57                   push edi                          
+    0x005247D3  a1d0d8b900           mov eax, dword ptr [0xb9d8d0]     
+    0x005247D8  33c4                 xor eax, esp                      
+    0x005247DA  50                   push eax                          
+    0x005247DB  8d442414             lea eax, [esp + 0x14]             
+    0x005247DF  64a300000000         mov dword ptr fs:[0], eax         
+    0x005247E5  8bf9                 mov edi, ecx                      
+    0x005247E7  6898000000           push 0x98                         
+    0x005247EC  e8d38b4300           call 0x95d3c4                        ; -> ??2@YAPAXI@Z
+    0x005247F1  83c404               add esp, 4                        
+    0x005247F4  8944240c             mov dword ptr [esp + 0xc], eax    
+    0x005247F8  33f6                 xor esi, esi                      
+    0x005247FA  3bc6                 cmp eax, esi                      
+    0x005247FC  8974241c             mov dword ptr [esp + 0x1c], esi   
+    0x00524800  7414                 je 0x524816                       
+    0x00524802  8b4c2428             mov ecx, dword ptr [esp + 0x28]   
+    0x00524806  8b542424             mov edx, dword ptr [esp + 0x24]   
+    0x0052480A  51                   push ecx                          
+    0x0052480B  52                   push edx                          
+    0x0052480C  57                   push edi                          
+    0x0052480D  8bc8                 mov ecx, eax                      
+    0x0052480F  e81c4bfeff           call 0x509330                        ; -> sub_0x00509330
+    0x00524814  8bf0                 mov esi, eax                      
+    0x00524816  8d87c0000000         lea eax, [edi + 0xc0]             
+    0x0052481C  50                   push eax                          
+    0x0052481D  8bce                 mov ecx, esi                      
+    0x0052481F  c7442420ffffffff     mov dword ptr [esp + 0x20], 0xffffffff
+    0x00524827  8974242c             mov dword ptr [esp + 0x2c], esi   
+    0x0052482B  e8b04cfeff           call 0x5094e0                        ; -> sub_0x005094E0
+    0x00524830  8d4c2428             lea ecx, [esp + 0x28]             
+    0x00524834  51                   push ecx                          
+    0x00524835  8d542410             lea edx, [esp + 0x10]             
+    0x00524839  52                   push edx                          
+    0x0052483A  8d4f24               lea ecx, [edi + 0x24]             
+    0x0052483D  e83e411800           call 0x6a8980                        ; -> sub_0x006A8980
+    0x00524842  8bc6                 mov eax, esi                      
+    0x00524844  8b4c2414             mov ecx, dword ptr [esp + 0x14]   
+    0x00524848  64890d00000000       mov dword ptr fs:[0], ecx         
+    0x0052484F  59                   pop ecx                           
+    0x00524850  5f                   pop edi                           
+    0x00524851  5e                   pop esi                           
+    0x00524852  83c414               add esp, 0x14                     
+    0x00524855  c20800               ret 8                             
+--- SF container FUN_0044D590 (PIN-SFCHAIN; B.5 extent is a guard fragment)
+    B.5: [0x0044D590..0x0044D5D8) tight
+    0x0044D590  6aff                 push -1                           
+    0x0044D592  68cee99900           push 0x99e9ce                     
+    0x0044D597  64a100000000         mov eax, dword ptr fs:[0]         
+    0x0044D59D  50                   push eax                          
+    0x0044D59E  83ec18               sub esp, 0x18                     
+    0x0044D5A1  53                   push ebx                          
+    0x0044D5A2  56                   push esi                          
+    0x0044D5A3  57                   push edi                          
+    0x0044D5A4  a1d0d8b900           mov eax, dword ptr [0xb9d8d0]     
+    0x0044D5A9  33c4                 xor eax, esp                      
+    0x0044D5AB  50                   push eax                          
+    0x0044D5AC  8d442428             lea eax, [esp + 0x28]             
+    0x0044D5B0  64a300000000         mov dword ptr fs:[0], eax         
+    0x0044D5B6  8bf1                 mov esi, ecx                      
+    0x0044D5B8  8b442438             mov eax, dword ptr [esp + 0x38]   
+    0x0044D5BC  833800               cmp dword ptr [eax], 0            
+    0x0044D5BF  7517                 jne 0x44d5d8                      
+    0x0044D5C1  32c0                 xor al, al                        
+    0x0044D5C3  8b4c2428             mov ecx, dword ptr [esp + 0x28]   
+    0x0044D5C7  64890d00000000       mov dword ptr fs:[0], ecx         
+    0x0044D5CE  59                   pop ecx                           
+    0x0044D5CF  5f                   pop edi                           
+    0x0044D5D0  5e                   pop esi                           
+    0x0044D5D1  5b                   pop ebx                           
+    0x0044D5D2  83c424               add esp, 0x24                     
+    0x0044D5D5  c20400               ret 4                             
+    FINDING: 0x0044D680 (pin: container +0x10 store receiving FUN_005247C0 result)
+           is NOT inside B.5 extent of 0x0044D590 ([0x0044D590..0x0044D5D8));
+           real containing function: 0x0044D5D8..0x0044D787 pad
+--- actual container function containing 0x0044D680
+    B.5: [0x0044D5D8..0x0044D787) pad
+    0x0044D5D8  8b08                 mov ecx, dword ptr [eax]          
+    0x0044D5DA  894e24               mov dword ptr [esi + 0x24], ecx   
+    0x0044D5DD  8b5004               mov edx, dword ptr [eax + 4]      
+    0x0044D5E0  895628               mov dword ptr [esi + 0x28], edx   
+    0x0044D5E3  8b4808               mov ecx, dword ptr [eax + 8]      
+    0x0044D5E6  894e2c               mov dword ptr [esi + 0x2c], ecx   
+    0x0044D5E9  8b500c               mov edx, dword ptr [eax + 0xc]    
+    0x0044D5EC  8d4c2438             lea ecx, [esp + 0x38]             
+    0x0044D5F0  895630               mov dword ptr [esi + 0x30], edx   
+    0x0044D5F3  ff15385aa700         call dword ptr [0xa75a38]            ; IMPORT_CALL ??0?$allocator@D@stlp_std@@QAE@XZ
+    0x0044D5F9  8b3d445aa700         mov edi, dword ptr [0xa75a44]     
+    0x0044D5FF  50                   push eax                          
+    0x0044D600  687b95a700           push 0xa7957b                     
+    0x0044D605  8d4c2418             lea ecx, [esp + 0x18]             
+    0x0044D609  c744243800000000     mov dword ptr [esp + 0x38], 0     
+    0x0044D611  ffd7                 call edi                          
+    0x0044D613  8b4e24               mov ecx, dword ptr [esi + 0x24]   
+    0x0044D616  8d442410             lea eax, [esp + 0x10]             
+    0x0044D61A  50                   push eax                          
+    0x0044D61B  68000000f0           push 0xf0000000                   
+    0x0044D620  c644243801           mov byte ptr [esp + 0x38], 1      
+    0x0044D625  e896710d00           call 0x5247c0                        ; -> sub_0x005247C0
+    0x0044D62A  8d4c2410             lea ecx, [esp + 0x10]             
+    0x0044D62E  89460c               mov dword ptr [esi + 0xc], eax    
+    0x0044D631  c644243000           mov byte ptr [esp + 0x30], 0      
+    0x0044D636  ff155c5aa700         call dword ptr [0xa75a5c]            ; IMPORT_CALL ??1?$basic_string@DV?$char_traits@D@stlp_std@@V?$allocator@D@2@@stlp_std@@QAE@XZ
+    0x0044D63C  8d4c2438             lea ecx, [esp + 0x38]             
+    0x0044D640  ff15405aa700         call dword ptr [0xa75a40]            ; IMPORT_CALL ??1?$allocator@D@stlp_std@@QAE@XZ
+    0x0044D646  8d4c2438             lea ecx, [esp + 0x38]             
+    0x0044D64A  ff15385aa700         call dword ptr [0xa75a38]            ; IMPORT_CALL ??0?$allocator@D@stlp_std@@QAE@XZ
+    0x0044D650  50                   push eax                          
+    0x0044D651  bb02000000           mov ebx, 2                        
+    0x0044D656  687b95a700           push 0xa7957b                     
+    0x0044D65B  8d4c2418             lea ecx, [esp + 0x18]             
+    0x0044D65F  895c2438             mov dword ptr [esp + 0x38], ebx   
+    0x0044D663  ffd7                 call edi                          
+    0x0044D665  8d4c2410             lea ecx, [esp + 0x10]             
+    0x0044D669  51                   push ecx                          
+    0x0044D66A  8b4e24               mov ecx, dword ptr [esi + 0x24]   
+    0x0044D66D  68010000f0           push 0xf0000001                   
+    0x0044D672  c644243803           mov byte ptr [esp + 0x38], 3      
+    0x0044D677  e844710d00           call 0x5247c0                        ; -> sub_0x005247C0
+    0x0044D67C  8d4c2410             lea ecx, [esp + 0x10]             
+    0x0044D680  894610               mov dword ptr [esi + 0x10], eax   
+    0x0044D683  885c2430             mov byte ptr [esp + 0x30], bl     
+    0x0044D687  ff155c5aa700         call dword ptr [0xa75a5c]            ; IMPORT_CALL ??1?$basic_string@DV?$char_traits@D@stlp_std@@V?$allocator@D@2@@stlp_std@@QAE@XZ
+    0x0044D68D  8d4c2438             lea ecx, [esp + 0x38]             
+    0x0044D691  ff15405aa700         call dword ptr [0xa75a40]            ; IMPORT_CALL ??1?$allocator@D@stlp_std@@QAE@XZ
+    0x0044D697  8d4c2438             lea ecx, [esp + 0x38]             
+    0x0044D69B  ff15385aa700         call dword ptr [0xa75a38]            ; IMPORT_CALL ??0?$allocator@D@stlp_std@@QAE@XZ
+    0x0044D6A1  50                   push eax                          
+    0x0044D6A2  bb04000000           mov ebx, 4                        
+    0x0044D6A7  687b95a700           push 0xa7957b                     
+    0x0044D6AC  8d4c2418             lea ecx, [esp + 0x18]             
+    0x0044D6B0  895c2438             mov dword ptr [esp + 0x38], ebx   
+    0x0044D6B4  ffd7                 call edi                          
+    0x0044D6B6  8b4e24               mov ecx, dword ptr [esi + 0x24]   
+    0x0044D6B9  8d542410             lea edx, [esp + 0x10]             
+    0x0044D6BD  52                   push edx                          
+    0x0044D6BE  68020000f0           push 0xf0000002                   
+    0x0044D6C3  c644243805           mov byte ptr [esp + 0x38], 5      
+    0x0044D6C8  e8f3700d00           call 0x5247c0                        ; -> sub_0x005247C0
+    0x0044D6CD  8d4c2410             lea ecx, [esp + 0x10]             
+    0x0044D6D1  894614               mov dword ptr [esi + 0x14], eax      ; WRITE_[+0x14]
+    0x0044D6D4  885c2430             mov byte ptr [esp + 0x30], bl     
+    0x0044D6D8  ff155c5aa700         call dword ptr [0xa75a5c]            ; IMPORT_CALL ??1?$basic_string@DV?$char_traits@D@stlp_std@@V?$allocator@D@2@@stlp_std@@QAE@XZ
+    0x0044D6DE  8d4c2438             lea ecx, [esp + 0x38]             
+    0x0044D6E2  c7442430ffffffff     mov dword ptr [esp + 0x30], 0xffffffff
+    0x0044D6EA  ff15405aa700         call dword ptr [0xa75a40]            ; IMPORT_CALL ??1?$allocator@D@stlp_std@@QAE@XZ
+    0x0044D6F0  8b460c               mov eax, dword ptr [esi + 0xc]    
+    0x0044D6F3  09582c               or dword ptr [eax + 0x2c], ebx    
+    0x0044D6F6  8b4610               mov eax, dword ptr [esi + 0x10]   
+    0x0044D6F9  09582c               or dword ptr [eax + 0x2c], ebx    
+    0x0044D6FC  8b4614               mov eax, dword ptr [esi + 0x14]   
+    0x0044D6FF  09582c               or dword ptr [eax + 0x2c], ebx    
+    0x0044D702  8bce                 mov ecx, esi                      
+    0x0044D704  e857fcffff           call 0x44d360                        ; -> sub_0x0044D360
+    0x0044D709  8ad8                 mov bl, al                        
+    0x0044D70B  80e301               and bl, 1                         
+    0x0044D70E  745d                 je 0x44d76d                       
+    0x0044D710  8bce                 mov ecx, esi                      
+    0x0044D712  e899faffff           call 0x44d1b0                        ; -> sub_0x0044D1B0
+    0x0044D717  22d8                 and bl, al                        
+    0x0044D719  7452                 je 0x44d76d                       
+    0x0044D71B  8bce                 mov ecx, esi                      
+    0x0044D71D  e84ef4ffff           call 0x44cb70                        ; -> sub_0x0044CB70
+    0x0044D722  22d8                 and bl, al                        
+    0x0044D724  7447                 je 0x44d76d                       
+    0x0044D726  83ec20               sub esp, 0x20                     
+    0x0044D729  8bcc                 mov ecx, esp                      
+    0x0044D72B  89642458             mov dword ptr [esp + 0x58], esp   
+    0x0044D72F  6a00                 push 0                            
+    0x0044D731  b8e0e17c00           mov eax, 0x7ce1e0                 
+    0x0044D736  8bf8                 mov edi, eax                      
+    0x0044D738  83ec0c               sub esp, 0xc                      
+    0x0044D73B  8bc4                 mov eax, esp                      
+    0x0044D73D  ba50989300           mov edx, 0x939850                 
+    0x0044D742  8910                 mov dword ptr [eax], edx          
+    0x0044D744  897804               mov dword ptr [eax + 4], edi         ; WRITE_[+0x04]
+    0x0044D747  897008               mov dword ptr [eax + 8], esi      
+    0x0044D74A  e8d1fdffff           call 0x44d520                        ; -> sub_0x0044D520
+    0x0044D74F  6a17                 push 0x17                         
+    0x0044D751  c744245406000000     mov dword ptr [esp + 0x54], 6     
+    0x0044D759  e8127afcff           call 0x415170                        ; -> sub_0x00415170
+    0x0044D75E  8bc8                 mov ecx, eax                      
+    0x0044D760  c7442454ffffffff     mov dword ptr [esp + 0x54], 0xffffffff
+    0x0044D768  e8433c2b00           call 0x7013b0                        ; -> sub_0x007013B0
+    0x0044D76D  885e20               mov byte ptr [esi + 0x20], bl     
+    0x0044D770  8ac3                 mov al, bl                        
+    0x0044D772  8b4c2428             mov ecx, dword ptr [esp + 0x28]   
+    0x0044D776  64890d00000000       mov dword ptr fs:[0], ecx         
+    0x0044D77D  59                   pop ecx                           
+    0x0044D77E  5f                   pop edi                           
+    0x0044D77F  5e                   pop esi                           
+    0x0044D780  5b                   pop ebx                           
+    0x0044D781  83c424               add esp, 0x24                     
+    0x0044D784  c20400               ret 4                             
+
+[VII] FAMILY WRITER FIELDS (contract 7(iii); rows from HOLDER14_WRITER_CENSUS.csv)
+  WRITER 0x006FABB5: mov [eax+0x14], ecx
+    CONTAINING_FUNCTION: 0x006FABA0 (shared base ctor, class .?AVArkAnimationPredefined@@)
+    VALUE_SOURCE: ECX = ctor arg2 (held object pointer, read at 0x006FABA2 from [esp+0xC];
+                  NULL-TESTED at 0x006FABA6)
+    VALUE_PROVENANCE (R2 CORRECTED, per [IV-8]/[IV-9]): the six per-site arg2
+                      slices enumerate: NULL at sites 1/2/3/5 (immediate push 0)
+                      and, at the param-chained sites 4/6, BOTH factory-block
+                      entry paths - NULL on the allocation-failure (xor) paths,
+                      a LIVE RTTI-IDENTIFIED CHILD OBJECT (Scale/Color/Intensity/
+                      Rotation/Translation/Alpha - all .?AVArkAnimationFloatValue@@-
+                      hierarchy classes; slot-3 != 0x0050A050) on the normal paths.
+    WRITE_WIDTH: 4 (dword)
+    PATH_PRECONDITION: conditional branches before the write: NONE (unconditional store;
+                      the null test only guards the refcount increment AFTER the store;
+                      the VALUE is path-preconditioned at the sources, not the store)
+    CLASS/LIFETIME_CONTEXT: base-ctor initialization of every family object (10 classes)
+    WRITER_CLASS: constructor-initialization
+  WRITER 0x006FAC25: mov [esi+0x14], 0  (function 0x006FAC00)
+    see [IV-0c] decode: value imm 0; release-path context; WRITER_CLASS from decode
+    (R2 note: on normal paths this release path is LIVE - refcount-- on the held
+     child; held->vt[0](1) delete protocol; the R1 'defensive dead code' reading is
+     RETRACTED, see AMEND_LOG_R2 R2-3)
+  WRITER 0x006FAC75: mov [esi+0x14], 0  (function 0x006FAC50 = Predefined deleting dtor)
+    see [IV-0c] decode: value imm 0; destructor-release; WRITER_CLASS from decode
+
+[VIII] BULK-COPY CHANNEL CENSUS (R2; declared bound for the write-form coverage
+  of the G4 census: rep movs/stos sites are memory writes WITHOUT a disp==0x14
+  operand and are therefore invisible to the disp-census)
+  rep movs/stos sites in .text (single-stream B.5 decode): 618
+  in the ArkAnimation family code cluster [0x006FAB40..0x006FFAF0): 4
+    0x006FBDD7  rep movsd dword ptr es:[edi], dword ptr [esi] func [0x006FBDB0..0x006FBE23)
+        context: 0x006FBDCA  lea edi, [ebx + 0x34]
+        context: 0x006FBDCD  mov ecx, 9
+        context: 0x006FBDD2  mov esi, 0xba734c
+    0x006FBDE8  rep movsd dword ptr es:[edi], dword ptr [esi] func [0x006FBDB0..0x006FBE23)
+        context: 0x006FBDDD  lea esi, [ebp + 0x38]
+        context: 0x006FBDE0  lea edi, [ebx + 0x58]
+        context: 0x006FBDE3  mov ecx, 9
+    0x006FBF30  rep movsd dword ptr es:[edi], dword ptr [esi] func [0x006FBE80..0x006FBF3A)
+        context: 0x006FBF26  add edi, 0x38
+        context: 0x006FBF29  mov ecx, 9
+        context: 0x006FBF2E  mov esi, eax
+    0x006FEE22  rep movsd dword ptr es:[edi], dword ptr [esi] func [0x006FEDA0..0x006FEE47)
+        context: 0x006FEE15  lea edi, [ebx + 0x48]
+        context: 0x006FEE18  mov ecx, 0x12
+        context: 0x006FEE1D  mov esi, 0xba7298
+  Destination analysis: all 4 in-cluster sites write to CHILD-CLASS or non-family
+  object fields ([ebx+0x34]/[ebx+0x58] ArkAnimationRotation ctor fields;
+  [[edi+8]+0x38] child helper indirection; [ebx+0x48] ArkTextureInfo ctor
+  fields) - NONE touches a family object's +0x14 (family ctors/dtors
+  initialize field-by-field; no copy-ctor/assignment-copy construction path for
+  family objects exists in the family region).
+  DECLARED NOT_CHECKED: .text-wide destination-provenance tracing of the remaining
+  614 out-of-cluster rep sites (a family-object pointer would have to flow out
+  and back; the family-function scan found no such handoff).
