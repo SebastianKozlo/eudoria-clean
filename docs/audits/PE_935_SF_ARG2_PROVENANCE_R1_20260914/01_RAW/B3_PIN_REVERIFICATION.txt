@@ -1,0 +1,51 @@
+B3_PIN_REVERIFICATION — PE_935_SF_ARG2_PROVENANCE_R1_20260914 (W2 starting points, from bytes)
+PROVENANCE (measured at run time, not assumed):
+  python_version : 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe     : D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone_version : 5.0.7
+  capstone_file    : D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+
+S0: PASS (sha256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, size 8015872)
+
+== holder-slot reader example (LINK30 C9 published receiver proof) ==
+  0052901A  8B 8E C0 00 00 00         mov ecx, dword ptr [esi + 0xc0]
+  00529020  E8 9B 04 FE FF            call 0x5094c0
+  reader pin: 0x0052901A expect '8B 8E C0 00 00 00' (mov ecx,[esi+0xC0]) measured 8B 8E C0 00 00 00 MATCH
+  call at 0x00529020: bytes E8 9B 04 FE FF -> target 0x005094c0 == 0x005094C0 MATCH
+
+== SF ctor FUN_00509330 E8 callers (B.3 pin {0x0047D043, 0x0052480F}) ==
+  measured: ['0x0047d043', '0x0052480f']
+  caller site: 0047D043  E8 E8 C2 08 00            call 0x509330
+  caller site: 0052480F  E8 1C 4B FE FF            call 0x509330
+
+== vtable imm32 stores (from CAL-1) ==
+  00509366  C7 45 00 58 D4 A7 00      mov dword ptr [ebp], 0xa7d458
+  0050A269  C7 06 58 D4 A7 00         mov dword ptr [esi], 0xa7d458
+
+== [SF+0x30] writer pins (B.3: 0x005093C3 ctor, 0x0050A2D1 dtor body FUN_0050A240) ==
+  005093C3  89 45 30                  mov dword ptr [ebp + 0x30], eax
+  0050A2D1  89 5E 30                  mov dword ptr [esi + 0x30], ebx
+
+== holder-slot writer functions (B.3 labels; start-bytes existence record only —
+   deep writer verification NOT claimed this run; bound declared in the report) ==
+  FUN_0044D590 (writer of container+0x0C/+0x10/+0x14): entry bytes 6A FF 68 CE E9 99 00 64
+    0044D590  6A FF                     push -1
+    0044D592  68 CE E9 99 00            push 0x99e9ce
+    0044D597  64 A1 00 00 00 00         mov eax, dword ptr fs:[0]
+  FUN_00528E50 (writer of container+0xC0 (the instance+0xC0 slot)): entry bytes 6A FF 68 3F F5 9B 00 64
+    00528E50  6A FF                     push -1
+    00528E52  68 3F F5 9B 00            push 0x9bf53f
+    00528E57  64 A1 00 00 00 00         mov eax, dword ptr fs:[0]
+  FUN_0067B800 (writer of container+0x04): entry bytes 6A FF 68 34 95 9F 00 64
+    0067B800  6A FF                     push -1
+    0067B802  68 34 95 9F 00            push 0x9f9534
+    0067B807  64 A1 00 00 00 00         mov eax, dword ptr fs:[0]
+  FUN_0067C7C0 (writer of container+0x04): entry bytes 6A FF 68 84 97 9F 00 64
+    0067C7C0  6A FF                     push -1
+    0067C7C2  68 84 97 9F 00            push 0x9f9784
+    0067C7C7  64 A1 00 00 00 00         mov eax, dword ptr fs:[0]
+  FUN_006A3930 (writer of container+0x18): entry bytes 6A FF 68 1B 0C A0 00 64
+    006A3930  6A FF                     push -1
+    006A3932  68 1B 0C A0 00            push 0xa00c1b
+    006A3937  64 A1 00 00 00 00         mov eax, dword ptr fs:[0]
+

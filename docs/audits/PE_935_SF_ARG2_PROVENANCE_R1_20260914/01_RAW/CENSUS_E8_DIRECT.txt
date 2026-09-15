@@ -1,0 +1,47 @@
+CENSUS_E8_DIRECT — PE_935_SF_ARG2_PROVENANCE_R1_20260914 (W2a)
+PROVENANCE (measured at run time, not assumed):
+  python_version : 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe     : D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone_version : 5.0.7
+  capstone_file    : D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+
+S0: PASS (sha256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, size 8015872)
+
+SCAN RULE: every byte position of .text where the byte is 0xE8 (call rel32),
+0xE9 (jmp rel32) or 0xEB (jmp rel8) is treated as a potential opcode; target =
+va + insn_len + rel. Byte-level scan (operand-byte false positives included by
+design; this is a census denominator, not a decode).
+
+== target FUN_0050A050 ==
+.text range: 0x00401000..0x00a75000 (6766592 bytes scanned)
+total E8 byte occurrences in .text (denominator): 156829
+E8 matches to target: 0 -> []
+E9 (jmp rel32) matches to target: 0 -> []
+EB (jmp rel8) matches to target: 0 -> []
+
+== target FUN_005247C0 (CAL-2 known answer: expect 7 E8 sites) ==
+.text range: 0x00401000..0x00a75000 (6766592 bytes scanned)
+total E8 byte occurrences in .text (denominator): 156829
+E8 matches to target: 7 -> ['0x0044d625', '0x0044d677', '0x0044d6c8', '0x00528fe1', '0x0067b8a4', '0x0067c864', '0x006a39ed']
+E9 (jmp rel32) matches to target: 0 -> []
+EB (jmp rel8) matches to target: 0 -> []
+
+== target FUN_00509330 (B.3: expect E8 callers {0x0047D043, 0x0052480F}) ==
+.text range: 0x00401000..0x00a75000 (6766592 bytes scanned)
+total E8 byte occurrences in .text (denominator): 156829
+E8 matches to target: 2 -> ['0x0047d043', '0x0052480f']
+E9 (jmp rel32) matches to target: 0 -> []
+EB (jmp rel8) matches to target: 0 -> []
+
+CAL-2 VERDICT: PASS — 7 E8 call sites found
+CAL-2 measured call-site instructions:
+  0044D625  E8 96 71 0D 00            call 0x5247c0
+  0044D677  E8 44 71 0D 00            call 0x5247c0
+  0044D6C8  E8 F3 70 0D 00            call 0x5247c0
+  00528FE1  E8 DA B7 FF FF            call 0x5247c0
+  0067B8A4  E8 17 8F EA FF            call 0x5247c0
+  0067C864  E8 57 7F EA FF            call 0x5247c0
+  006A39ED  E8 CE 0D E8 FF            call 0x5247c0
+
+B.3 ctor-caller check: MATCH {0x0047D043, 0x0052480F}
+

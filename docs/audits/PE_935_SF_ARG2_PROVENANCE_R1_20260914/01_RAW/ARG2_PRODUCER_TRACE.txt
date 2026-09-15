@@ -1,0 +1,202 @@
+ARG2_PRODUCER_TRACE — PE_935_SF_ARG2_PROVENANCE_R1_20260914 (W2c + W3)
+PROVENANCE (measured at run time, not assumed):
+  python_version : 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe     : D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone_version : 5.0.7
+  capstone_file    : D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+
+S0: PASS (sha256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, size 8015872)
+
+RTTI vtable->class entries: 1904; vtable-slot function map: 4843 functions
+SF vtable 0x00A7D458 -> '.?AVSceneFeederObject@@' (matches published RTTI '.?AVSceneFeederObject@@')
+SF function -> vtable memberships (MEASURED RTTI, vtable-extent-verified): FUN_005090A0=[('.?AVSceneFeederObject@@', 1)]; FUN_005090B0=[('.?AVSceneFeederObject@@', 2)]; FUN_005090C0=[('.?AVSceneFeederObject@@', 4)]; FUN_00509580=[('.?AVSceneFeederObject@@', 5)]; FUN_0050A050=[('.?AVSceneFeederObject@@', 3)]; FUN_0050A460=[('.?AVSceneFeederObject@@', 0)]
+STRUCTURAL CONTEXT (measured, vtable-extent-verified): each SF primary-vtable function has EXACTLY ONE vtable membership — the SF vtable itself (slots 0..5); the run's whole-file imm32 census independently bounds FUN_0050A050 to EXACTLY ONE address occurrence in the file (the SF vtable slot-3 dword 0x00A7D464).
+ADJACENCY FACT (measured): the .?AVArkAudioObjectInterface@@ vtable @ 0x00a7d42c has EXACTLY 6 slots (0x00509040, 0x0096b960, 0x0096b960, 0x00509010, 0x0096b960, 0x007e19d0); it is ADJACENT to the SF vtable @ 0x00a7d458 (.?AVSceneFeederObject@@, 6 slots) in .rdata, separated by the string literal b'ArkSceneFeeder\x00\x00' @ 0x00a7d444 and the SF COL pointer 0x00aa12b8 @ 0x00a7d454.
+Adjacency is NOT function sharing and NOT inheritance evidence: NO SF slot function is shared with .?AVArkAudioObjectInterface@@ — the pre-fix 'slots 11..15' memberships were a VTABLE-BOUNDARY OVERRUN artifact (the fixed-16-slot enumeration read through the real slots, the string literal, and the SF COL INTO the SF vtable). Corrected by the vtable-extent rule (a COL-derived vtable ends at the first non-.text dword; the FNMAP boundary lesson's data-array analog). Context only; no semantic promotion.
+function-start lattice (E8/E9 targets in .text): 44875 starts
+.text range: 0x00401000..0x00a75000 (6766592 bytes)
+DECLARED BOUND: 2 levels, 48-byte backward decode window per level
+
+== CAL-3 (self-added known-answer calibration of the receiver tracer; tooling check ONLY) ==
+pointed at the published receiver-proof site (receiver ecx of E8 call 0x00529020 -> FUN_005094C0):
+  classified: PROVEN_HOLDER_0xC0 | holder-slot read 0052901A  8B 8E C0 00 00 00         mov ecx, dword ptr [esi + 0xc0] ([base+0xC0], the instance+0xC0 holder slot, B.3)
+CAL-3 VERDICT: PASS (tracer resolves the known holder-slot receiver)
+
+PATTERN ENUMERATION (byte-level, .text): P1 call [reg+0xC]: 1; P1J jmp [reg+0xC]: 0; P2 call [reg+0xC] disp32: 0; P3 mov dst,[base+0xC] occurrences (pre-follow-check): 7106
+
+P3 candidates passing the follow-check (call/jmp dst within <=3 non-control instructions): 217
+
+== METHOD 1 (holder-slot route; genuine slot-3 vcall flow requirement) ==
+  mov reg,[base+0x04] reads (base != esp/ebp, non-SIB): 12535
+  mov reg,[base+0x0c] reads (base != esp/ebp, non-SIB): 5957
+  mov reg,[base+0x10] reads (base != esp/ebp, non-SIB): 2615
+  mov reg,[base+0x14] reads (base != esp/ebp, non-SIB): 2841
+  mov reg,[base+0x18] reads (base != esp/ebp, non-SIB): 1761
+  mov reg,[base+0xc0] reads (base != esp/ebp, non-SIB): 196
+  reads flowing into a GENUINE slot-3 vcall (vtable load + slot +0x0C call) within 48 bytes: 18
+    flow: read@0x008c52e4 (offset 0x4)
+    flow: read@0x00933008 (offset 0x4)
+    flow: read@0x00987d2a (offset 0x4)
+    flow: read@0x008bda44 (offset 0xc)
+    flow: read@0x008bf7a0 (offset 0xc)
+    flow: read@0x008bf820 (offset 0xc)
+    flow: read@0x008bf8a4 (offset 0xc)
+    flow: read@0x008bf8e1 (offset 0xc)
+    flow: read@0x008c8add (offset 0xc)
+    flow: read@0x008c96b3 (offset 0xc)
+    flow: read@0x008c9784 (offset 0xc)
+    flow: read@0x00941926 (offset 0xc)
+    flow: read@0x00942016 (offset 0xc)
+    flow: read@0x00942762 (offset 0xc)
+    flow: read@0x007b7406 (offset 0x10)
+    flow: read@0x0044c1fe (offset 0x14)
+    flow: read@0x0047d7ec (offset 0x14)
+    flow: read@0x006fab80 (offset 0x14)
+
+== PER-CANDIDATE OUTCOME COUNTS (the census denominators) ==
+total candidates examined (P1/P1J/P2/P3 after follow-check): 218
+  INSUFFICIENT_PROOF: 211
+  NOT_A_VTABLE_CALL: 2
+  REJECTED_NOT_SF: 5
+
+== HOLDER-GENERIC / CLOSEST-TO-PROVEN CANDIDATES (recorded for the report) ==
+  0x00804918 (P3) 00804918  8B 42 0C                  mov eax, dword ptr [ | +0x30 read 00804908  8B 4E 30                  mov ecx, dword ptr [esi + 0x30] (NiNode-link domain only if base is SF; not proven within bound)
+  0x00804921 (P3) 00804921  8B 42 0C                  mov eax, dword ptr [ | +0x30 read 00804908  8B 4E 30                  mov ecx, dword ptr [esi + 0x30] (NiNode-link domain only if base is SF; not proven within bound)
+  0x00804e0a (P3) 00804E0A  8B 52 0C                  mov edx, dword ptr [ | +0x30 read 00804DF3  8B 4E 30                  mov ecx, dword ptr [esi + 0x30] (NiNode-link domain only if base is SF; not proven within bound)
+  0x008bda49 (P3) 008BDA49  8B 51 0C                  mov edx, dword ptr [ | field read 008BDA44  8B 46 0C                  mov eax, dword ptr [esi + 0xc] (offset 0xc in B.3 generic holder set; container identity not provable within bound)
+  0x008be56f (P3) 008BE56F  8B 42 0C                  mov eax, dword ptr [ | field read 008BE540  8B 4E 14                  mov ecx, dword ptr [esi + 0x14] (offset 0x14 in B.3 generic holder set; container identity not provable within bound)
+  0x008bf82e (P3) 008BF82E  8B 41 0C                  mov eax, dword ptr [ | field read 008BF820  8B 46 0C                  mov eax, dword ptr [esi + 0xc] (offset 0xc in B.3 generic holder set; container identity not provable within bound)
+  0x008c52f8 (P3) 008C52F8  8B 41 0C                  mov eax, dword ptr [ | field read 008C52E4  8B 5B 04                  mov ebx, dword ptr [ebx + 4] (offset 0x4 in B.3 generic holder set; container identity not provable within bound)
+  0x008c8ae8 (P3) 008C8AE8  8B 41 0C                  mov eax, dword ptr [ | field read 008C8ADD  8B 47 0C                  mov eax, dword ptr [edi + 0xc] (offset 0xc in B.3 generic holder set; container identity not provable within bound)
+  0x00933011 (P3) 00933011  8B 42 0C                  mov eax, dword ptr [ | field read 00933008  8B 4F 04                  mov ecx, dword ptr [edi + 4] (offset 0x4 in B.3 generic holder set; container identity not provable within bound)
+  0x0094192f (P3) 0094192F  8B 40 0C                  mov eax, dword ptr [ | field read 00941926  8B 4B 0C                  mov ecx, dword ptr [ebx + 0xc] (offset 0xc in B.3 generic holder set; container identity not provable within bound)
+  0x0094276d (P3) 0094276D  8B 40 0C                  mov eax, dword ptr [ | field read 00942762  8B 4E 0C                  mov ecx, dword ptr [esi + 0xc] (offset 0xc in B.3 generic holder set; container identity not provable within bound)
+
+== VERIFIED SF SLOT-3 CALL SITES (receiver proven; W3 arg2 analysis applied) ==
+NONE — zero slot-3 virtual call sites with a proven-SF receiver inside the declared bound.
+
+== REJECTED_NOT_SF DEMONSTRATIONS (NC-2) ==
+  0x007ac450 (P3) 007AC450  8B 50 0C                  mov edx, dword ptr [eax + 0xc] receiver esi -> REJECTED_NOT_SF: receiver = `this` of enclosing method 0x007ac2f0 = vtable slot function of classes ['.?AVNiD3DHLSLPixelShader@@', '.?AVNiD3DPixelShader@@'] (all non-SF) (no def of esi in window — incoming this)
+  0x007ac468 (P3) 007AC468  8B 50 0C                  mov edx, dword ptr [eax + 0xc] receiver esi -> REJECTED_NOT_SF: receiver = `this` of enclosing method 0x007ac2f0 = vtable slot function of classes ['.?AVNiD3DHLSLPixelShader@@', '.?AVNiD3DPixelShader@@'] (all non-SF) (no def of esi in window — incoming this)
+  0x007ac5e2 (P3) 007AC5E2  8B 42 0C                  mov eax, dword ptr [edx + 0xc] receiver esi -> REJECTED_NOT_SF: receiver = `this` of enclosing method 0x007ac2f0 = vtable slot function of classes ['.?AVNiD3DHLSLPixelShader@@', '.?AVNiD3DPixelShader@@'] (all non-SF) (no def of esi in window — incoming this)
+  0x007ac5f6 (P3) 007AC5F6  8B 42 0C                  mov eax, dword ptr [edx + 0xc] receiver esi -> REJECTED_NOT_SF: receiver = `this` of enclosing method 0x007ac2f0 = vtable slot function of classes ['.?AVNiD3DHLSLPixelShader@@', '.?AVNiD3DPixelShader@@'] (all non-SF) (no def of esi in window — incoming this)
+  0x007f1d73 (P3) 007F1D73  8B 50 0C                  mov edx, dword ptr [eax + 0xc] receiver ecx -> REJECTED_NOT_SF: receiver = `this` of enclosing method 0x007f1d70 = vtable slot 1 of RTTI class .?AVNiBoundingVolume@@ (its this is a .?AVNiBoundingVolume@@, not an SF) (no def of ecx in window — incoming this)
+
+== METHOD-1 / PATTERN-ROUTE CROSS-CHECK ==
+  holder-read@0x008c52e4 (offset 0x4): read site (call follows in window; call-site disposition below)
+  holder-read@0x00933008 (offset 0x4): read site (call follows in window; call-site disposition below)
+  holder-read@0x00987d2a (offset 0x4): read site (call follows in window; call-site disposition below)
+  holder-read@0x008bda44 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x008bf7a0 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x008bf820 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x008bf8a4 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x008bf8e1 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x008c8add (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x008c96b3 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x008c9784 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x00941926 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x00942016 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x00942762 (offset 0xc): read site (call follows in window; call-site disposition below)
+  holder-read@0x007b7406 (offset 0x10): read site (call follows in window; call-site disposition below)
+  holder-read@0x0044c1fe (offset 0x14): read site (call follows in window; call-site disposition below)
+  holder-read@0x0047d7ec (offset 0x14): read site (call follows in window; call-site disposition below)
+  holder-read@0x006fab80 (offset 0x14): read site (call follows in window; call-site disposition below)
+
+== METHOD-1 FLOW DISPOSITION (ABI measured against the W1-measured FUN_0050A050 ABI: ==
+   thiscall this=ECX, exactly 2 stack args, callee ret 8; a well-formed call site must match)
+  read@0x008c52e4 (+0x4) call@0x008c52fd 008C52FD  FF D0                     call eax
+      receiver=ebx -> ABI_INCOMPATIBLE (measured 2 stack arg(s), thiscall=False)
+  read@0x00933008 (+0x4) call@0x00933014 00933014  FF D0                     call eax
+      receiver=ecx -> ABI_INCOMPATIBLE (measured 0 stack arg(s), thiscall=True)
+  read@0x00987d2a (+0x4) call@0x00987d37 00987D37  FF D2                     call edx
+      receiver=ecx -> ABI_INCOMPATIBLE (measured 1 stack arg(s), thiscall=True)
+  read@0x008bda44 (+0xc) call@0x008bda4f 008BDA4F  FF D2                     call edx
+      receiver=eax -> ABI_INCOMPATIBLE (measured 2 stack arg(s), thiscall=False)
+  read@0x008bf7a0 (+0xc) call@0x008bf7b1 008BF7B1  FF D0                     call eax
+      receiver=eax -> ABI_INCOMPATIBLE (measured 4 stack arg(s), thiscall=False)
+  read@0x008bf820 (+0xc) call@0x008bf831 008BF831  FF D0                     call eax
+      receiver=eax -> ABI_INCOMPATIBLE (measured 4 stack arg(s), thiscall=False)
+  read@0x008bf8a4 (+0xc) call@0x008bf8b5 008BF8B5  FF D0                     call eax
+      receiver=eax -> ABI_INCOMPATIBLE (measured 4 stack arg(s), thiscall=False)
+  read@0x008bf8e1 (+0xc) call@0x008bf8f2 008BF8F2  FF D2                     call edx
+      receiver=eax -> ABI_INCOMPATIBLE (measured 4 stack arg(s), thiscall=False)
+  read@0x008c8add (+0xc) call@0x008c8aeb 008C8AEB  FF D0                     call eax
+      receiver=eax -> ABI_INCOMPATIBLE (measured 2 stack arg(s), thiscall=False)
+  read@0x008c96b3 (+0xc) call@0x008c96c4 008C96C4  FF D0                     call eax
+      receiver=eax -> ABI_INCOMPATIBLE (measured 4 stack arg(s), thiscall=False)
+  read@0x008c9784 (+0xc) call@0x008c9795 008C9795  FF D0                     call eax
+      receiver=eax -> ABI_INCOMPATIBLE (measured 4 stack arg(s), thiscall=False)
+  read@0x00941926 (+0xc) call@0x00941933 00941933  FF D0                     call eax
+      receiver=ecx -> ABI_INCOMPATIBLE (measured 1 stack arg(s), thiscall=True)
+  read@0x00942016 (+0xc) call@0x00942022 00942022  FF D0                     call eax
+      receiver=ecx -> ABI_INCOMPATIBLE (measured 1 stack arg(s), thiscall=True)
+  read@0x00942762 (+0xc) call@0x00942771 00942771  FF D0                     call eax
+      receiver=ecx -> ABI_INCOMPATIBLE (measured 1 stack arg(s), thiscall=True)
+  read@0x007b7406 (+0x10) call@0x007b7415 007B7415  FF D2                     call edx
+      receiver=esi -> ABI_INCOMPATIBLE (measured 1 stack arg(s), thiscall=True)
+  read@0x0044c1fe (+0x14) call@0x0044c20e 0044C20E  FF D0                     call eax
+      receiver=ecx -> ABI_INCOMPATIBLE (measured 1 stack arg(s), thiscall=True)
+  read@0x0047d7ec (+0x14) call@0x0047d800 0047D800  FF D2                     call edx
+      receiver=ecx -> ABI_INCOMPATIBLE (measured 1 stack arg(s), thiscall=True)
+  read@0x006fab80 (+0x14) call@0x006fab95 006FAB95  FF D0                     call eax
+      receiver=ecx -> ABI_COMPATIBLE_2ARG_THISCALL
+
+== CLOSEST CANDIDATE: ABI-compatible forwarding thunks (full evidence trail) ==
+  call@0x006fab95: B.5-derived enclosing start 0x006fab80 (E8/E9-lattice start 0x006fab20 — LATTICE MIS-ATTRIBUTED (vtable-only function; B.5 start wins)
+    vtable membership of the B.5-derived enclosing start: ['.?AVArkAnimationCyclic@@', '.?AVArkAnimationCyclicLinear@@', '.?AVArkAnimationCyclicSin@@', '.?AVArkAnimationDerivatives@@', '.?AVArkAnimationPredefined@@']
+    full enclosing-function decode (B.5 start -> past the call):
+      006FAB80  8B 49 14                  mov ecx, dword ptr [ecx + 0x14]
+      006FAB83  D9 44 24 04               fld dword ptr [esp + 4]
+      006FAB87  8B 54 24 08               mov edx, dword ptr [esp + 8]
+      006FAB8B  8B 01                     mov eax, dword ptr [ecx]
+      006FAB8D  8B 40 0C                  mov eax, dword ptr [eax + 0xc]
+      006FAB90  52                        push edx
+      006FAB91  51                        push ecx
+      006FAB92  D9 1C 24                  fstp dword ptr [esp]
+      006FAB95  FF D0                     call eax
+      006FAB97  C2 08 00                  ret 8
+      006FAB9A  CC                        int3
+      006FAB9B  CC                        int3
+      006FAB9C  CC                        int3
+    class .?AVArkAnimationCyclic@@ vtable(s): ['0x00a86574', '0x00aa7958']
+      vtable store @ 0x006fd2e5 context (class ctor region):
+        006FD2DD  CC                        int3
+        006FD2DE  CC                        int3
+        006FD2DF  CC                        int3
+        006FD2E0  56                        push esi
+        006FD2E1  8B F1                     mov esi, ecx
+        006FD2E3  C7 06 74 65 A8 00         mov dword ptr [esi], 0xa86574
+        006FD2E9  E8 12 D9 FF FF            call 0x6fac00
+        006FD2EE  F6 44 24 08 01            test byte ptr [esp + 8], 1
+        006FD2F3  74 09                     je 0x6fd2fe
+        006FD2F5  56                        push esi
+        006FD2F6  E8 2F 01 26 00            call 0x95d42a
+        006FD2FB  83 C4 04                  add esp, 4
+        006FD2FE  8B C6                     mov eax, esi
+        006FD300  5E                        pop esi
+        006FD301  C2 04 00                  ret 4
+        006FD304  CC                        int3
+      vtable store @ 0x006ffa94 context (class ctor region):
+        006FFA8C  D9 EE                     fldz
+        006FFA8E  D8 54 24 1C               fcom dword ptr [esp + 0x1c]
+        006FFA92  C7 06 74 65 A8 00         mov dword ptr [esi], 0xa86574
+        006FFA98  DF E0                     fnstsw ax
+        006FFA9A  F6 C4 41                  test ah, 0x41
+        006FFA9D  75 04                     jne 0x6ffaa3
+        006FFA9F  D9 54 24 1C               fst dword ptr [esp + 0x1c]
+        006FFAA3  D9 44 24 1C               fld dword ptr [esp + 0x1c]
+        006FFAA7  8B 4C 24 14               mov ecx, dword ptr [esp + 0x14]
+        006FFAAB  8B 54 24 18               mov edx, dword ptr [esp + 0x18]
+        006FFAAF  D9 5E 54                  fstp dword ptr [esi + 0x54]
+        006FFAB2  D9 01                     fld dword ptr [ecx]
+
+== LIMITATIONS (declared) ==
+- SIB-encoded vtable loads / calls excluded from the pattern census (declared).
+- Backward decode is multi-start with cross-chain agreement check; residual x86
+  ambiguity is surfaced as INSUFFICIENT_PROOF (AMBIGUOUS), never guessed.
+- Two-level, 48-byte-per-level bound: defs earlier than the window are recorded as
+  INSUFFICIENT_PROOF (bound-exhausted), never silently dropped.
+- METHOD-1 forward window: 48 bytes, <=7 instructions, mov-accumulation only.
+- The enclosing-function this-route uses the E8/E9-target lattice (superset of
+  true function starts); false-positive lattice starts can mis-attribute the
+  enclosing function — outcomes from this route carry that caveat.

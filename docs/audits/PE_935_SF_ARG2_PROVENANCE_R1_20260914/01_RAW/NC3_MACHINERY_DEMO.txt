@@ -1,0 +1,33 @@
+NC3_MACHINERY_DEMO — PE_935_SF_ARG2_PROVENANCE_R1_20260914
+PROVENANCE (measured at run time, not assumed):
+  python_version : 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe     : D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone_version : 5.0.7
+  capstone_file    : D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+
+S0: PASS (sha256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, size 8015872)
+
+NC-3 (contract): every .rdata/.data literal identified as an arg2 producer gets its
+raw bytes re-read at the literal VA and recorded VERBATIM (proves the pointer->content
+chain; no interpretation).
+
+IN-RUN RESULT: ZERO string literals were identified as arg2 producers (zero verified
+slot-3 call sites -> the producer trace reached no IMM32 literal). NC-3 therefore has no
+in-scope subject this run. The verbatim read-back MACHINERY (imm_analysis in
+w2c_w3_virtual_census.py: read_va at the literal VA, hex + NUL-terminated ASCII read-back)
+is demonstrated below on a KNOWN .rdata literal as a tooling calibration ONLY —
+this demo is NOT adopted as arg2 evidence.
+
+known-answer read @ 0x00a7957b (section .rdata):
+  bytes[0:24]  = 00 45 6E 74 72 6F 70 69 61 00 00 00 00 20 00 00 00 22 00 00 00 52 65 6C
+  VERBATIM to first NUL (NUL at +0): 00
+  ASCII        = b''
+
+known-answer read @ 0x00a7957c (section .rdata):
+  bytes[0:24]  = 45 6E 74 72 6F 70 69 61 00 00 00 00 20 00 00 00 22 00 00 00 52 65 6C 65
+  VERBATIM to first NUL (NUL at +8): 45 6E 74 72 6F 70 69 61 00
+  ASCII        = b'Entropia'
+
+Machinery verdict: the pointer->content chain reads back exactly the bytes on disk;
+the demo literal at 0x00A7957C reads back as the ASCII string 'Entropia' (NUL-terminated,
+9 bytes) — a verbatim .rdata FACT recorded with VA + bytes.

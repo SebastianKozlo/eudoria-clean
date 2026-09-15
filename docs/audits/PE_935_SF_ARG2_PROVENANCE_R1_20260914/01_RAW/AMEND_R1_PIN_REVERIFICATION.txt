@@ -1,0 +1,140 @@
+AMEND_R1_PIN_REVERIFICATION — PE_935_SF_ARG2_PROVENANCE_R1_20260914 (R1 amendment batch)
+PROVENANCE (measured at run time, not assumed):
+  python_version : 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe     : D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone_version : 5.0.7
+  capstone_file    : D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+
+S0: PASS (sha256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, size 8015872)
+.text VA range (vsize-based, the extent-rule bound): 0x00401000..0x00a745e5
+
+== PIN SET 1: the .?AVArkAudioObjectInterface@@ vtable (PE-MASTER adjudication) ==
+[0x00a7d428] = 0x00aa1270   (COL pointer at vtable[-1]; pin 0x00AA1270: MATCH
+COL+0x0C pTypeDescriptor = 0x00b7880c   (pin 0x00B7880C: MATCH
+TD name = '.?AVArkAudioObjectInterface@@'   (pin '.?AVArkAudioObjectInterface@@': MATCH
+vtable extent @ 0x00a7d42c: EXACTLY 6 slots (pin 6: MATCH); slots: slot 0 @ 0x00a7d42c = 0x00509040; slot 1 @ 0x00a7d430 = 0x0096b960; slot 2 @ 0x00a7d434 = 0x0096b960; slot 3 @ 0x00a7d438 = 0x00509010; slot 4 @ 0x00a7d43c = 0x0096b960; slot 5 @ 0x00a7d440 = 0x007e19d0
+slot-value pin [0x00509040, 0x0096B960, 0x0096B960, 0x00509010, 0x0096B960, 0x007E19D0]: MATCH
+
+== PIN SET 2: the 'ArkSceneFeeder' separator + the SF COL + the SF vtable ==
+bytes @ 0x00a7d444..0x00a7d453: 41 72 6B 53 63 65 6E 65 46 65 65 64 65 72 00 00  reads: b'ArkSceneFeeder\x00\x00'
+pin 'ArkSceneFeeder\0' bytes 41 72 6B 53 63 65 6E 65 46 65 65 64 65 72 00 (+pad 00): MATCH
+[0x00a7d454] = 0x00aa12b8   (SF COL pointer; pin 0x00AA12B8: MATCH
+SF COL+0x0C pTypeDescriptor = 0x00b78834; TD name = '.?AVSceneFeederObject@@'   (pin '.?AVSceneFeederObject@@': MATCH
+SF vtable extent @ 0x00a7d458: EXACTLY 6 slots; slots: slot 0 @ 0x00a7d458 = 0x0050a460; slot 1 @ 0x00a7d45c = 0x005090a0; slot 2 @ 0x00a7d460 = 0x005090b0; slot 3 @ 0x00a7d464 = 0x0050a050; slot 4 @ 0x00a7d468 = 0x005090c0; slot 5 @ 0x00a7d46c = 0x00509580
+slot-value pin [0x0050A460, 0x005090A0, 0x005090B0, 0x0050A050, 0x005090C0, 0x00509580]: MATCH
+first dword past the SF vtable @ 0x00a7d470 = 0x53565064 (in .text: False — extent rule ends the vtable here)
+
+== PIN SET 3: the imm32 census bound (exactly-one address occurrence) ==
+whole-file LE-dword census of 0x0050a050: hit count = 1; hit: off=0x0067d464 VA=0x00a7d464 (.rdata)
+pin EXACTLY 1 hit at 0x00A7D464: MATCH — function-pointer sharing is EXCLUDED by the run's own evidence
+
+== PIN SET 4: the pre-fix 'slots 11..15' overrun arithmetic (artifact re-derivation) ==
+  SF slot-0 dword @ 0x00a7d458: (0x00a7d458 - 0x00a7d42c)/4 = 11
+  SF slot-1 dword @ 0x00a7d45c: (0x00a7d45c - 0x00a7d42c)/4 = 12
+  SF slot-2 dword @ 0x00a7d460: (0x00a7d460 - 0x00a7d42c)/4 = 13
+  SF slot-3 dword @ 0x00a7d464: (0x00a7d464 - 0x00a7d42c)/4 = 14
+  SF slot-4 dword @ 0x00a7d468: (0x00a7d468 - 0x00a7d42c)/4 = 15
+== the pre-fix fixed-16-slot enumeration view of the ArkAudio vtable (the DEFECT, reproduced) ==
+  slot  0 @ 0x00a7d42c = 0x00509040  in_text=True  pre-fix-loose-check-accepted=True  -> real slot
+  slot  1 @ 0x00a7d430 = 0x0096b960  in_text=True  pre-fix-loose-check-accepted=True  -> real slot
+  slot  2 @ 0x00a7d434 = 0x0096b960  in_text=True  pre-fix-loose-check-accepted=True  -> real slot
+  slot  3 @ 0x00a7d438 = 0x00509010  in_text=True  pre-fix-loose-check-accepted=True  -> real slot
+  slot  4 @ 0x00a7d43c = 0x0096b960  in_text=True  pre-fix-loose-check-accepted=True  -> real slot
+  slot  5 @ 0x00a7d440 = 0x007e19d0  in_text=True  pre-fix-loose-check-accepted=True  -> real slot
+  slot  6 @ 0x00a7d444 = 0x536b7241  in_text=False  pre-fix-loose-check-accepted=False  -> STRING bytes
+  slot  7 @ 0x00a7d448 = 0x656e6563  in_text=False  pre-fix-loose-check-accepted=False  -> STRING bytes
+  slot  8 @ 0x00a7d44c = 0x64656546  in_text=False  pre-fix-loose-check-accepted=False  -> STRING bytes
+  slot  9 @ 0x00a7d450 = 0x00007265  in_text=False  pre-fix-loose-check-accepted=False  -> STRING bytes
+  slot 10 @ 0x00a7d454 = 0x00aa12b8  in_text=False  pre-fix-loose-check-accepted=True  -> SF COL pointer
+  slot 11 @ 0x00a7d458 = 0x0050a460  in_text=True  pre-fix-loose-check-accepted=True  -> SF VTABLE slot 0
+  slot 12 @ 0x00a7d45c = 0x005090a0  in_text=True  pre-fix-loose-check-accepted=True  -> SF VTABLE slot 1
+  slot 13 @ 0x00a7d460 = 0x005090b0  in_text=True  pre-fix-loose-check-accepted=True  -> SF VTABLE slot 2
+  slot 14 @ 0x00a7d464 = 0x0050a050  in_text=True  pre-fix-loose-check-accepted=True  -> SF VTABLE slot 3
+  slot 15 @ 0x00a7d468 = 0x005090c0  in_text=True  pre-fix-loose-check-accepted=True  -> SF VTABLE slot 4
+the pre-fix rule (img <= fv < img+0x10000000, NO break on non-hit) read through the 6 real slots,
+the 'ArkSceneFeeder' string bytes (slots 6-9 — ALL rejected by the loose range check too:
+slots 6-8 exceed img+0x10000000; slot 9 falls below img), the SF COL pointer (slot 10, ACCEPTED),
+and the SF vtable slots 0-4 (slots 11-15, ACCEPTED) — the fabricated memberships
+('ArkAudioObjectInterface', 10..15) are VTABLE-BOUNDARY OVERRUN artifacts.
+
+== PIN SET 5: corrected memberships (vtable-extent rule) vs pre-fix (loose 16-slot rule) ==
+fn_slots map size: pre-fix=6713; post-fix (extent rule)=4843
+  FUN_005090A0: pre=[('.?AVArkAudioObjectInterface@@', 12), ('.?AVSceneFeederObject@@', 1)]; post=[('.?AVSceneFeederObject@@', 1)]   exactly-one-membership: MATCH (the SF vtable itself, slot 1)
+  FUN_005090B0: pre=[('.?AVArkAudioObjectInterface@@', 13), ('.?AVSceneFeederObject@@', 2)]; post=[('.?AVSceneFeederObject@@', 2)]   exactly-one-membership: MATCH (the SF vtable itself, slot 2)
+  FUN_005090C0: pre=[('.?AVArkAudioObjectInterface@@', 15), ('.?AVSceneFeederObject@@', 4)]; post=[('.?AVSceneFeederObject@@', 4)]   exactly-one-membership: MATCH (the SF vtable itself, slot 4)
+  FUN_00509580: pre=[('.?AVSceneFeederObject@@', 5)]; post=[('.?AVSceneFeederObject@@', 5)]   exactly-one-membership: MATCH (the SF vtable itself, slot 5)
+  FUN_0050A050: pre=[('.?AVArkAudioObjectInterface@@', 14), ('.?AVSceneFeederObject@@', 3)]; post=[('.?AVSceneFeederObject@@', 3)]   exactly-one-membership: MATCH (the SF vtable itself, slot 3)
+  FUN_0050A460: pre=[('.?AVArkAudioObjectInterface@@', 11), ('.?AVSceneFeederObject@@', 0)]; post=[('.?AVSceneFeederObject@@', 0)]   exactly-one-membership: MATCH (the SF vtable itself, slot 0)
+
+== the extent fix's downstream consequences (recorded for PE-MASTER; NOT adjudicated) ==
+  0x007ac2f0: pre-fix classes (2) = ['.?AVNiD3DHLSLPixelShader@@', '.?AVNiD3DPixelShader@@']
+  0x007ac2f0: post-fix classes (2) = ['.?AVNiD3DHLSLPixelShader@@', '.?AVNiD3DPixelShader@@']
+  0x007f1d70: pre-fix classes (3) = ['.?AVNiBMPReader@@', '.?AVNiBoundingVolume@@', '.?AVNiSGIReader@@']
+  0x007f1d70: post-fix classes (1) = ['.?AVNiBoundingVolume@@']
+    -> extent-verified single class .?AVNiBoundingVolume@@ (slots [1])
+  0x006fab80: pre-fix classes (10) = ['.?AVArkAnimationAlpha@@', '.?AVArkAnimationAnimatedTexture@@', '.?AVArkAnimationColor@@', '.?AVArkAnimationCyclic@@', '.?AVArkAnimationCyclicLinear@@', '.?AVArkAnimationCyclicSin@@', '.?AVArkAnimationDerivatives@@', '.?AVArkAnimationPredefined@@', '.?AVArkModelResourceInstanceRef@@', '.?AVArkRefObject@@']
+  0x006fab80: post-fix classes (5) = ['.?AVArkAnimationCyclic@@', '.?AVArkAnimationCyclicLinear@@', '.?AVArkAnimationCyclicSin@@', '.?AVArkAnimationDerivatives@@', '.?AVArkAnimationPredefined@@']
+
+== PIN SET 6: the corrected method-1 aggregate (re-derived from the package raw) ==
+  bucket +0x04: 12535
+  bucket +0x0c: 5957
+  bucket +0x10: 2615
+  bucket +0x14: 2841
+  bucket +0x18: 1761
+  bucket +0xc0: 196
+  SUM = 25905   (QC P1-QC-1 pin 25,905: MATCH)
+
+== PIN SET 7: FIX-5 instruction bytes (the refcount-increment paraphrase correction) ==
+bytes @ 0x006FABA0 (40B): 8B C1 8B 4C 24 0C 85 C9 C7 00 C0 64 A8 00 C7 40 04 00 00 00 00 89 48 14 BA 01 00 00 00 74 03 01 51 04 D9 EE 8A 4C 24 04
+pin 'mov edx,1' (BA 01 00 00 00) + 'je +3' (74 03) + 'add [ecx+4],edx' (01 51 04): MATCH — the increment is via edx, NOT an immediate (P3-QC-3; the analysis paraphrase is corrected)
+
+== R1 FILE STATE (script-computed SHA256 at reverify run time) ==
+  00_Control/w2c_w3_virtual_census.py (post-fix):  576A37D09C18958BD5CB841AB22CE6D8B1CCC807CD8A678DEF7525E4CF94B40B
+    pin (post-fix generator): 576A37D09C18958BD5CB841AB22CE6D8B1CCC807CD8A678DEF7525E4CF94B40B
+  01_RAW/ARG2_PRODUCER_TRACE.txt (regenerated):    10AA922952A0A8AE3280EED55BBB48F928A39A44DD153FC39B442DBD6455655F
+    pin (regenerated trace): 10AA922952A0A8AE3280EED55BBB48F928A39A44DD153FC39B442DBD6455655F
+  01_RAW/ARG2_PRODUCER_TRACE.txt pre-batch was:    FD10AABD5294987F0386402671DBE118098515C4606E1F0B97C8FFB68FCFDBC6
+  01_RAW/VIRTUAL_CALLSITE_CENSUS.csv (RETAINED):   7B74CB5D04E13D692207760A6DA40AD3FB3840AAB7502B457685AB2DF9EE8009
+    pin (pre-batch CSV, byte-identical per the batch freeze): 7B74CB5D04E13D692207760A6DA40AD3FB3840AAB7502B457685AB2DF9EE8009
+  02_ANALYSIS\ARG2_ANALYSIS.md: EFA11922A0247F0879B3B43280155785CE2795854B43D38B7A791BF7D19DB5B9
+  02_ANALYSIS\SCIENCE_STATUS_DELTA.csv: 320D2916BC57B7E00164AD0229C1A08A5F236EA12609E24932BE72BF4221CEC0
+  03_EVIDENCE\EVIDENCE_INDEX.csv: 901D2FAB8B154CC229A67842FA18CFA4589CFA844B4B9DA204E2B0674F2278E8
+  06_REPORT\REPORT.md: 99CDC3A8FD740CFCA1EEC481A8B092C99E1E6C6CDE6E5ED2D2383FA708C1B453
+  06_REPORT\HANDOFF.md: E9DB229D1155A0508CE361E5B3E0D1654C6150438C83452533FA9DB5492D7FF1
+  06_REPORT\STAGE_ACCEPTANCE_GATES.csv: 1A04E6311FBFF63D2DF15AC9B3A6A3BFDD62C8661E146356BEE62CF24E971093
+
+== R1 IMMUTABILITY ASSERT (vs the pre-batch MANIFEST_SHA256.csv rows) ==
+  OK  00_CONTROL/GIT_OBSERVATIONS_AT_FORMALIZE.md: UNCHANGED
+  OK  00_CONTROL/RUN_CONTRACT.md: UNCHANGED
+  OK  00_CONTROL/SCRIPT_SHA256.csv: EDITED-BY-DESIGN (R1 document corrections; see AMEND_LOG_R1.md)
+  OK  00_CONTROL/SOURCE_IDENTITIES.json: UNCHANGED
+  OK  00_CONTROL/s0_runstart.py: UNCHANGED
+  OK  00_CONTROL/sf_arg2_common.py: UNCHANGED
+  OK  00_CONTROL/w1_abi_rederive.py: UNCHANGED
+  OK  00_CONTROL/w2_censuses.py: UNCHANGED
+  OK  00_CONTROL/w2c_w3_virtual_census.py: CHANGED-BY-DESIGN (regenerated/fixed; see AMEND_LOG_R1.md)
+  OK  00_CONTROL/w6_manifest.py: UNCHANGED
+  OK  00_CONTROL/w6_package.py: UNCHANGED
+  OK  01_RAW/ARG2_PRODUCER_TRACE.txt: CHANGED-BY-DESIGN (regenerated/fixed; see AMEND_LOG_R1.md)
+  OK  01_RAW/AT_RUN_END_GIT_OBSERVATION.md: UNCHANGED
+  OK  01_RAW/AT_RUN_START_GIT_OBSERVATION.md: UNCHANGED
+  OK  01_RAW/B3_PIN_REVERIFICATION.txt: UNCHANGED
+  OK  01_RAW/CENSUS_E8_DIRECT.txt: UNCHANGED
+  OK  01_RAW/CENSUS_IMM32_0050A050.txt: UNCHANGED
+  OK  01_RAW/FUN_0050A050_DISASM.txt: UNCHANGED
+  OK  01_RAW/G7_IMMUTABILITY_CHECK.txt: UNCHANGED
+  OK  01_RAW/IDENTITY_VERIFICATION.txt: UNCHANGED
+  OK  01_RAW/NC3_MACHINERY_DEMO.txt: UNCHANGED
+  OK  01_RAW/VIRTUAL_CALLSITE_CENSUS.csv: UNCHANGED
+  OK  02_ANALYSIS/ARG2_ANALYSIS.md: EDITED-BY-DESIGN (R1 document corrections; see AMEND_LOG_R1.md)
+  OK  02_ANALYSIS/SCIENCE_STATUS_DELTA.csv: EDITED-BY-DESIGN (R1 document corrections; see AMEND_LOG_R1.md)
+  OK  03_EVIDENCE/EVIDENCE_INDEX.csv: EDITED-BY-DESIGN (R1 document corrections; see AMEND_LOG_R1.md)
+  OK  03_EVIDENCE/README.md: UNCHANGED
+  OK  06_REPORT/HANDOFF.md: EDITED-BY-DESIGN (R1 document corrections; see AMEND_LOG_R1.md)
+  OK  06_REPORT/REPORT.md: EDITED-BY-DESIGN (R1 document corrections; see AMEND_LOG_R1.md)
+  OK  06_REPORT/STAGE_ACCEPTANCE_GATES.csv: EDITED-BY-DESIGN (R1 document corrections; see AMEND_LOG_R1.md)
+IMMUTABILITY ASSERT: PASS (all non-amended files byte-identical to their pre-batch rows)
+
+QC_AUDIT.md is NOT covered by MANIFEST_SHA256.csv (by design, per the QC session's note);
+its byte-identity is asserted in the amendment record against its pre-batch hash.
+

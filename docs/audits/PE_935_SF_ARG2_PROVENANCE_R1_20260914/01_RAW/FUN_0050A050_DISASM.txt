@@ -1,0 +1,128 @@
+FUN_0050A050_DISASM — PE_935_SF_ARG2_PROVENANCE_R1_20260914 (W1, fail-closed)
+PROVENANCE (measured at run time, not assumed):
+  python_version : 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe     : D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone_version : 5.0.7
+  capstone_file    : D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+
+S0: PASS (sha256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, size 8015872)
+
+SECTION: .text
+
+== FULL LINEAR DECODE (entry 0x0050A050; window 96 bytes) ==
+VA       BYTES                     TEXT
+0050A050  8B 44 24 08               mov eax, dword ptr [esp + 8]
+0050A054  85 C0                     test eax, eax
+0050A056  56                        push esi
+0050A057  8B F1                     mov esi, ecx
+0050A059  74 2C                     je 0x50a087
+0050A05B  8B 4E 30                  mov ecx, dword ptr [esi + 0x30]
+0050A05E  8B 11                     mov edx, dword ptr [ecx]
+0050A060  50                        push eax
+0050A061  8B 42 44                  mov eax, dword ptr [edx + 0x44]
+0050A064  FF D0                     call eax
+0050A066  85 C0                     test eax, eax
+0050A068  74 1D                     je 0x50a087
+0050A06A  8B 74 24 08               mov esi, dword ptr [esp + 8]
+0050A06E  05 90 00 00 00            add eax, 0x90
+0050A073  50                        push eax
+0050A074  56                        push esi
+0050A075  E8 F6 DE F2 FF            call 0x437f70
+0050A07A  8B C8                     mov ecx, eax
+0050A07C  E8 1F 15 32 00            call 0x82b5a0
+0050A081  8B C6                     mov eax, esi
+0050A083  5E                        pop esi
+0050A084  C2 08 00                  ret 8
+0050A087  8B 16                     mov edx, dword ptr [esi]
+0050A089  8B 42 04                  mov eax, dword ptr [edx + 4]
+0050A08C  8B CE                     mov ecx, esi
+0050A08E  FF D0                     call eax
+0050A090  8B 10                     mov edx, dword ptr [eax]
+0050A092  8B 4C 24 08               mov ecx, dword ptr [esp + 8]
+0050A096  89 11                     mov dword ptr [ecx], edx
+0050A098  8B 50 04                  mov edx, dword ptr [eax + 4]
+0050A09B  89 51 04                  mov dword ptr [ecx + 4], edx
+0050A09E  8B 40 08                  mov eax, dword ptr [eax + 8]
+0050A0A1  89 41 08                  mov dword ptr [ecx + 8], eax
+0050A0A4  8B C1                     mov eax, ecx
+0050A0A6  5E                        pop esi
+0050A0A7  C2 08 00                  ret 8
+0050A0AA  CC                        int3
+0050A0AB  CC                        int3
+0050A0AC  CC                        int3
+0050A0AD  CC                        int3
+0050A0AE  CC                        int3
+0050A0AF  CC                        int3
+
+== B.5 BOUNDARY DERIVATION (iterative terminal + padding rule) ==
+TERMINAL 0x0050a084 'ret 8' end=0x0050a087 pad[0x0050a087..0x0050a090)=8B 16 8B 42 04 8B CE FF D0 -> NOT the extent end (padding not a CC/90 run; internal branch targets beyond it; continue)
+TERMINAL 0x0050a0a7 'ret 8' end=0x0050a0aa pad[0x0050a0aa..0x0050a0b0)=CC CC CC CC CC CC -> PADDING-VALID extent end
+DERIVED EXTENT: 0X0050A050 .. 0X0050A0AA (90 bytes)
+published extent end 0x0050A0AA -> measured 0x0050a0aa: AGREES
+adjacent function start candidate: 0X0050A0B0
+bytes at adjacent candidate: 56 8B F1 80 7E 24 00 75 10 E8 02 F5 FF FF B0 01
+
+== E8/E9/EB/imm32 LATTICE (references TO the derived boundary region) ==
+E8/E9/EB refs to entry 0X0050A050: []
+imm32 refs to entry 0X0050A050 (whole file): ['0x00a7d464']
+E8/E9/EB refs to adjacent candidate 0x0050A0B0: ['E8@0x0044cc41', 'E9@0x0044cc92', 'E9@0x0044cd64']
+imm32 refs to adjacent candidate 0x0050A0B0 (whole file): []
+vtable dword at 0x00A7D464 = 0x0050a050 (expect 0x0050a050)
+B.5 zero-reference disposition: entry 0x0050A050 has ZERO E8/E9/EB refs BUT is a VTABLE ENTRY (imm32 @0x00A7D464) — not a suspect start (B.5 rule 4 exception).
+B.5 lattice: adjacent candidate 0x0050A0B0 corroborated by its own E8/E9 refs ['E8@0x0044cc41', 'E9@0x0044cc92', 'E9@0x0044cd64'].
+
+== RET-N MEASUREMENT (every ret site in the decoded window) ==
+ret site #1: 0x0050a084 bytes=C2 08 00 text='ret 8'
+ret site #2: 0x0050a0a7 bytes=C2 08 00 text='ret 8'
+ret site count = 2; all measured above (no assumption)
+
+== EAX DEF CHAIN to the dispatch push at 0x0050A060 ==
+EAX-DEF: 0050A050  8B 44 24 08               mov eax, dword ptr [esp + 8]
+EAX-DEF: 0050A054  85 C0                     test eax, eax
+DISPATCH PUSH: 0050A060  50                        push eax
+
+== NC-1 PIN CHECKS (B.1 dispatch window + fallback; MEASURED bytes win) ==
+[MATCH] 0x0050a057 expect 8B F1 measured 8B F1 | mov esi, ecx (esi = this = SF)
+         decoded: 0050A057  8B F1                     mov esi, ecx
+[MATCH] 0x0050a05b expect 8B 4E 30 measured 8B 4E 30 | mov ecx, [esi+0x30] (the link)
+         decoded: 0050A05B  8B 4E 30                  mov ecx, dword ptr [esi + 0x30]
+[MATCH] 0x0050a05e expect 8B 11 measured 8B 11 | mov edx, [ecx] (link vtable)
+         decoded: 0050A05E  8B 11                     mov edx, dword ptr [ecx]
+[MATCH] 0x0050a060 expect 50 measured 50 | push eax (the dispatch push — arg2 name argument) [VERIFY per B.1]
+         decoded: 0050A060  50                        push eax
+[MATCH] 0x0050a061 expect 8B 42 44 measured 8B 42 44 | mov eax, [edx+0x44] (slot 17 of the link vtable)
+         decoded: 0050A061  8B 42 44                  mov eax, dword ptr [edx + 0x44]
+[MATCH] 0x0050a064 expect FF D0 measured FF D0 | call eax
+         decoded: 0050A064  FF D0                     call eax
+[MATCH] 0x0050a087 expect 8B 16 measured 8B 16 | mov edx, [esi] (self vtable load — fallback)
+         decoded: 0050A087  8B 16                     mov edx, dword ptr [esi]
+[MATCH] 0x0050a089 expect 8B 42 04 measured 8B 42 04 | mov eax, [edx+4] (slot 1 — fallback)
+         decoded: 0050A089  8B 42 04                  mov eax, dword ptr [edx + 4]
+[MATCH] 0x0050a08e expect FF D0 measured FF D0 | call eax (fallback)
+         decoded: 0050A08E  FF D0                     call eax
+
+== FALLBACK SITE SEMANTIC CHECKS (reads/copies; pins say VERIFY form) ==
+[DECODED] 0x0050a090 | X read (from SF+0x34 via returned &SF+0x34)
+         measured: 0050A090  8B 10                     mov edx, dword ptr [eax]
+[DECODED] 0x0050a098 | Y read (from SF+0x38)
+         measured: 0050A098  8B 50 04                  mov edx, dword ptr [eax + 4]
+[DECODED] 0x0050a09e | Z read (from SF+0x3C)
+         measured: 0050A09E  8B 40 08                  mov eax, dword ptr [eax + 8]
+[DECODED] 0x0050a096 | out-buffer copy 1
+         measured: 0050A096  89 11                     mov dword ptr [ecx], edx
+[DECODED] 0x0050a09b | out-buffer copy 2
+         measured: 0050A09B  89 51 04                  mov dword ptr [ecx + 4], edx
+[DECODED] 0x0050a0a1 | out-buffer copy 3
+         measured: 0050A0A1  89 41 08                  mov dword ptr [ecx + 8], eax
+
+== BRANCH STRUCTURE (linear window) ==
+BRANCH: 0050A059  74 2C                     je 0x50a087
+BRANCH: 0050A068  74 1D                     je 0x50a087
+
+== B.2 PERMITTED VALUE CHECK (value read, NOT a decode of slot 17) ==
+dword [0x00A8CCF4+0x44] = 0x007b5390 (expect 0x007B5390): MATCH
+
+== W1 SUMMARY ==
+S0: PASS; window decoded: 42 instructions from 0X0050A050
+ret sites measured: 2
+NC-1 pin mismatches: 0

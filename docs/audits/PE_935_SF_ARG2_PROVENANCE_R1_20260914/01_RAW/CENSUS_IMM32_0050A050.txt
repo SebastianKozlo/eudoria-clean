@@ -1,0 +1,30 @@
+CENSUS_IMM32_0050A050 — PE_935_SF_ARG2_PROVENANCE_R1_20260914 (W2b)
+PROVENANCE (measured at run time, not assumed):
+  python_version : 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe     : D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone_version : 5.0.7
+  capstone_file    : D:\Eudoria_Reconstruction\10_Scripts\python_env\Lib\site-packages\capstone\__init__.py
+
+S0: PASS (sha256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, size 8015872)
+
+SCAN RULE: every byte position of the WHOLE FILE is tested for the little-endian
+dword encoding of the target (byte-level, no alignment requirement); every hit is
+mapped file-offset -> VA (+ section) when the offset lies in a mapped section raw range.
+
+== LE dword 0x0050a050 (bytes 50 A0 50 00) whole-file census ==
+hit count: 1 (published expectation: exactly 1, at the vtable dword 0x00a7d464)
+  file_off=0x0067d464 VA=0x00a7d464 section=.rdata
+NC-4 vtable-entry pin: dword at 0x00a7d464 measured 0x0050a050 == 0x0050A050 MATCH
+
+== CAL-1 known-answer: same scanner pointed at SF vtable 0x00a7d458 (bytes 58 D4 A7 00) ==
+hit count: 2
+  file_off=0x00109369 VA=0x00509369 section=.text
+  file_off=0x0010a26b VA=0x0050a26b section=.text
+CAL-1 hits within ctor store instruction [0x00509366..0x0050936C): [5280617]
+CAL-1 hits within dtor store instruction [0x0050A269..0x0050A26F): [5284459]
+CAL-1 VERDICT: PASS — both published stores reproduced
+
+measured store instructions:
+  00509366  C7 45 00 58 D4 A7 00      mov dword ptr [ebp], 0xa7d458
+  0050A269  C7 06 58 D4 A7 00         mov dword ptr [esi], 0xa7d458
+
