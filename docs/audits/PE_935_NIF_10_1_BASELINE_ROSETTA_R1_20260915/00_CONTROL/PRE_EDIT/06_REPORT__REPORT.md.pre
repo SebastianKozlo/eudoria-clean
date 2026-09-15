@@ -1,0 +1,162 @@
+# REPORT — PE_935_NIF_10_1_BASELINE_ROSETTA_R1_20260915
+
+RUN_CLASS: LOAD_BEARING (declared by PE-MASTER). RUN_TYPE:
+FORENSIC_REFERENCE_BASELINE. Executor: PE-RECONSTRUCTION under PE-MASTER
+governance. All claims in this report are reproducible from the run's
+artifacts (bytes → scripts → outputs); load-bearing numbers carry explicit
+denominators.
+
+## 1. What this run did
+
+Answered the PRIMARY QUESTION (§0) for NIF 10.1.0.0 in PCG 9.3.5: separated
+STANDARD GAMEBRYO from MINDARK EXTENSION at byte level, against an
+independently pinned external baseline (nif.xml historical/modern + the
+ACTUAL Gamebryo 1.1.2/1.2 engine source + SDK/EE2 cross-publisher samples),
+with an independent census and an independent table-driven structural
+decoder achieving full-file closure on 2,343/2,363 world-slice files.
+
+## 2. Headline results
+
+1. **Corpus anchor (G0/G1 PASS).** Models.bnt re-measured
+   (size=395,412,868; SHA256=C950A8C2...BEE0 — exact pin match). Independent
+   BNT2 walk: 5,596 entries, EOF-exact index, 0 gaps/overlaps, 100% payload
+   coverage. Independent version census: **4,838 × 10.1.0.0 / 757 × 4.1.0.12 /
+   1 × 4.0.0.2 — EXACT match with the canonical claim** (0 scan failures).
+   All payloads stored RAW (no zlib in Models.bnt).
+
+2. **The physical 10.1 header framing is STANDARD GAMEBRYO — and the public
+   schemas are wrong about it.** The per-block u32 (prior docs called it
+   "preamble/record separator, MUST be 0") is the engine's **GroupID**
+   (Gamebryo 1.2 NiObject::LoadBinary, 5.0.0.6 ≤ v < 10.1.0.114; PE
+   NumGroups=0 hence always 0). Modern nif.xml mis-versions it as
+   since=10.1.0.114; historical omits it; NiflySharp's header reader would
+   misalign on real 10.1.0.0 files. The file ends with the engine's
+   **TopObjects footer** (u32 count + refs; 2,343/2,343 closure files:
+   count=1, root=block0 NiNode "Scene Root"). CONFIRMED by engine source +
+   Entropia bytes + EE2 + SDK samples.
+
+3. **World-slice structural closure (G6/G7 PASS).** A schema-driven,
+   table-driven decoder (baseline = nif.xml HIST + engine framing) achieves
+   **full-file closure on 2,343/2,363 world-slice files (99.2%)**:
+   TRAIN 1,876/1,890 (99.3%), HOLDOUT 467/473 (98.7%), frozen hypothesis
+   (sha 6DB2F1E3...), deterministic 80/20 SHA split. 20 files PARSE_BLOCKED
+   (search-exhausted/EOF in deep ArkAnimation-variant territory — honestly
+   recorded, never guessed).
+
+4. **Cross-publisher proof (§14).** The SAME frozen layouts close Empire
+   Earth II lodtest.nif (a non-MindArk 10.1.0.0 file) — 7 blocks to
+   EOF-exact. EE2-skinned/SDK samples fail only at types ABSENT from the
+   Entropia corpus (NiTriStrips/skin/PSys/...). => **The Entropia world
+   slice IS standard Gamebryo 10.1** (same writer family), not a MindArk
+   dialect — at the framing/scene/geometry/property level.
+
+5. **76 observed types (G5 PASS)** across 4,838 files (364,062 blocks);
+   independently censused; per-file MATCH with the R61 parser manifest
+   4,838/4,838 (post-hoc mutual validation; echo excluded by executed
+   negative controls).
+
+6. **Classification (G8).** 25 world-slice standard types = STANDARD_10_1_
+   CONFIRMED (byte-level, closure). 7 MindArk types = MINDARK_EXTENSION_
+   STRONGLY_SUPPORTED (custom layouts closure-derived; 5 of them exist as
+   "unknown node" stubs in HISTORICAL nif.xml 0.7.1.1 — a supersession of
+   the docs claim "not in any public NIF documentation"; MODERN schema
+   removed them). 44 remaining observed types = UNKNOWN for layout THIS RUN
+   (explicit deferral with denominators — prior R61 closure remains prior
+   claim). NiTriStripsData: 0 occurrences confirmed.
+
+7. **Byte-level adjudications of prior-claim conflicts (Rosetta wins).**
+   - **Importer tail = 41 bytes** (13B header + 7×f32 bbox+pad; matches the
+     historical schema stub exactly) — NOT the wiki's 38B. The parser's
+     "38B + 3 zero bytes on ArkTexture" re-attributes the importer pad's
+     last 3 bytes; both consume identical bytes (bit-compatible).
+   - **ArkTexture entry ref = block link** to NiTexturingProperty (10,610)
+     / NiTextureEffect (1,105) — the schema's "Texturing Property Ref"
+     role CONFIRMED; the wiki's "slot/purpose index" is a mislabel.
+   - **ArkTexture count = (field2 >> 8) & 0xFFFFFF in 2,319/2,343 (99.0%)**
+     — the prior "4,838/4,838 PERFECT" claim is superseded; **24-block
+     variant family (NEW open finding**: count from field1/numfield; f1=15/
+     0x1000000 entries; garbage refs).
+   - **TexDesc "32-byte raw transform" = 5 labeled baseline fields**
+     (Translation/Tiling/W Rotation/Transform Type/Center Offset);
+     **"trailing u32 always 0" = Num Shader Textures = 0**.
+   - **NiVertexColorProperty**: the "PE-SPECIFIC u32" claim is superseded —
+     the same 10 bytes parse as the STANDARD schema layout (u16 + VertMode
+     u32 + LightMode u32); the wiki split (u16×3 + u32) is a width-identical
+     alternative; semantic adjudication between the two splits stays OPEN.
+   - **NiTexturingProperty "field_A/field_B" = Apply Mode u32** (enum values
+     {0,2} observed) — baseline label adopted.
+   - **"numUvSets u16" ≡ "u8 count + u8 flags"** — bit-identical mappings
+     (count=low6; tangent bit) — prior reading is an equivalent split.
+   - **NiArkBillboardNode = NiNode + u16 BillboardMode** — alias CONFIRMED
+     (22/22 closure).
+
+8. **Parser audit (G11, REPORT-ONLY).** src/pesource/NifModelReader.js
+   audited, NOT modified. 17 matrix rows: 8 PARSER_MATCHES_STANDARD,
+   4 PARSER_ASSUMPTION_UNVERIFIED (width-identical relabels), 2 bit-
+   compatible mis-attributions (importer 38+3), **1 confirmed defect-class
+   finding: the JS/R61 ArkTexture count formula would mis-read the 24-block
+   variant family (no fallback in the JS reader)**, plus scope limits
+   (witness-scope by design). Recommended separate bounded corrections:
+   PE_935_NIF_PARSER_TEXTURECOUNT_24BLOCK_CORRECTION (the 24-block family +
+   fallback), and a minor importer/texture attribution relabel ride-along.
+   R61 itself needs the same count-formula review (the 24-block family is a
+   corpus fact; how R61 passes those files — likely boundary fallback — is
+   NOT established by this run).
+
+9. **World viewer (G12).** REQUIRED_FOR_STATIC_WORLD = 23 type rows, ALL
+   closure-evidenced (structure). Remaining blockers: texture PIXEL
+   resolution (ArkTexture bnt2_id → Textures.bnt — prior claim, separate
+   run; include the 24-block family), world placement (NOT in NIF files —
+   REJECTED claim stands), and UV orientation (runtime calibration).
+
+## 3. Coverage and negative sets
+
+- Baseline: 425 schema types apply to 10.1.0.0 (HIST); **349 NOT observed
+  in Entropia** (G10) — format capability ≠ Entropia observation.
+- Field coverage (G9): per-type numerator/denominator in
+  NIF_10_1_STANDARD_COVERAGE.csv (closure-validated types: 100% of the
+  structural layer on validated blocks; deferred types 0/N with N stated).
+
+## 4. Anti-circularity (G13)
+
+§19 discipline applied to every PASS (FIELD_VALIDATION_RAW.md). Executed
+negative controls: 4 walker + 4 parser-echo + closure-exactness/ref-range/
+float-sanity/freeze checks — all real failures on corrupted inputs
+(NEGATIVE_CONTROL_RAW.md). The census existed before any manifest
+comparison; contradictions with prior claims are recorded as supersessions,
+not inherited.
+
+## 5. Live doc impact (G14)
+
+17-row LIVE_DOC_IMPACT_MATRIX: KEEP 8 / CLARIFY 5 / SUPERSEDE 4
+(including "NiArk not in any public documentation", "38B importer tail",
+"PE-specific VertexColor u32", "field2>>8 = 4838/4838"). No live docs
+edited (separate authorized proposal required).
+
+## 6. What we still do NOT know (honest UNKNOWNs)
+
+- The 45 non-slice type LAYOUTS at byte level (this run; prior claims stand).
+- NiSourceTexture/NiPixelData v10 layouts (45/1 blocks outside slice).
+- ArkTexture 24-block variant family semantics; f1=15/0x1000000 meaning.
+- VertexColor internal split semantics (width-identical ambiguity).
+- ArkTexture 9-byte trailing internal split (prior claim, not re-validated
+  against Textures.bnt here).
+- All Ark SEMANTICS beyond structure (viewport floats, TEXT behaviors,
+  G3D class bytes, morph grammar) — prior-claim status unchanged.
+- Original-client consumer paths for any of the above (runtime track).
+
+## 7. Gates
+
+G0–G15: PASS (STAGE_ACCEPTANCE_GATES.csv, with evidence pointers).
+G16 (FRESH_QC), G17 (PE_MASTER_ADJUDICATION), G18 (PERSISTENCE):
+PENDING_LATER_PHASE by design (fresh QC auditor / PE-MASTER /
+pe-master-auditor).
+
+## 8. Provenance & integrity
+
+Canonical order held (SCRIPT_SHA256.csv → EVIDENCE README/INDEX →
+MANIFEST_SHA256.csv; self-exclusion L12; no __pycache__). The driver script
+s07 was corrected mid-run (subset-merge fix after a TRAIN-result overwrite)
+— the FROZEN hypothesis covers only s06/s04 (decoder+schema), whose sha
+(6DB2F1E3...) is identical across TRAIN/HOLDOUT/ALL runs; disclosed in
+AMEND_LOG_R1.md. No git operations performed by the executor.

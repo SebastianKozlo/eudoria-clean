@@ -1,0 +1,84 @@
+# WORLD-VIEWER MINIMUM NIF SLICE — PE_935_NIF_10_1_BASELINE_ROSETTA_R1
+
+Question: which NIF types must be understood to render a STATIC world from
+physical PCG_9.3.5 files? All statuses cite this run's closure evidence
+(WORLD_SLICE_VALIDATION.json; HOLDOUT_RESULTS.csv) and the coverage matrix.
+
+## REQUIRED_FOR_STATIC_WORLD (byte-validated this run — closure evidence)
+
+| Capability | Type(s) | Blocks in corpus (v10.1 census) | Closure evidence |
+|---|---|---|---|
+| Scene hierarchy | NiNode | 116,150 | full-file closure, slice subset |
+| Node transforms (world/local) | NiAVObject layer inside NiNode/NiTriShape | (all AV objects) | closure: flags+translation+rotation+scale+properties+collisionObject |
+| Static mesh containers | NiTriShape | 17,023 | closure + hasShader=0 (8,605/8,605 slice blocks) |
+| Mesh data: vertices | NiTriShapeData (NiGeometryData chain) | 16,958 | closure (keepFlags/compressFlags/hasVertices/vertices) |
+| Indices | NiTriShapeData Triangles | 16,958 | closure (hasTriangles+numTrianglePoints==3xNumTriangles observed) |
+| Normals | NiGeometryData | 16,958 | closure (hasNormals path) |
+| UV | UV Sets [(NumUVSets&63) x N] | 16,958 | closure (u8 count + u8 flags = bit-identical to prior u16 reading) |
+| Materials | NiMaterialProperty | 8,146 | closure (no-flags v10 layout CONFIRMED) |
+| Texture references | NiTexturingProperty (slots+TexDesc) | 11,177 | closure; ApplyMode u32 {0,2}; TextureCount=7 (7088/7088) |
+| PE texture binding | NiArkTextureExtraData | 4,838 | closure; ref→NiTexturingProperty(10,610)/NiTextureEffect(1,105); count sources |
+| Environment maps | NiTextureEffect | 1,586 | closure |
+| Alpha | NiAlphaProperty | 4,478 | closure |
+| Z-buffer | NiZBufferProperty | 4,176 | closure |
+| Stencil | NiStencilProperty | 532 | closure |
+| Vertex colors | NiVertexColorProperty | 3,877 | closure (width-identical split ambiguity disclosed) |
+| Other one-flag props | NiSpecular/NiShade/NiDither/NiFog | 25 total | closure (tiny N) |
+| Lights (baked-world fidelity) | NiPointLight/NiSpotLight/NiDirectionalLight/NiAmbientLight | 846/47/120/54 | closure (all but Ambient fully in slice; Ambient 54) |
+| Bounding data for culling | NiArkImporterExtraData 41B bbox tail | 4,838 | closure-CONFIRMED tail=41B (13B header + 7xf32 bounds+pad) |
+| Billboards (vegetation) | NiBillboardNode + NiArkBillboardNode | 384 + 40 | closure (NiNode + u16 BillboardMode; ArkBillboard 22/22 u16) |
+| File framing | header/GroupID/TopObjects | 4,838 | closure + engine source |
+| Extra data base + strings | NiStringExtraData/NiIntegerExtraData/NiBooleanExtraData | 4,225/25/25 | closure |
+| Viewport/camera config | NiArkViewportInfoExtraData | 4,062 | closure (boundary-derived ext) |
+| Shader/effect assignment | NiArkShaderExtraData | 2,084 | closure (name+u32+SS) |
+| Behaviors on static props | NiArkAnimationExtraData (structure only) | 4,838 | closure (boundary-derived ext; semantic variants deferred) |
+
+**Structurally understood (static world): all of the above — closure-proven
+on 2,343/2,363 world-slice files (99.2%), TRAIN 99.3% / HOLDOUT 98.7%
+(frozen hypothesis, hypothesis_sha 6DB2F1E3...).**
+
+## REQUIRED_FOR_FIDELITY (understood structurally or prior-claimed, needed
+for exact original-client look, but NOT required to draw the static world)
+
+- NiKeyframeController/NiKeyframeData (1,839 files — doors/machinery motion;
+  schema-defined, layout NOT byte-validated this run)
+- NiTextKeyExtraData (1,030) — clip markers
+- NiSkinInstance/NiSkinData/NiSkinPartition (694/694/116) — skinned avatars
+- NiSourceTexture/NiPixelData (45/1) — embedded textures (deferred this run)
+- NiCamera (corpus count 0 in v10.1 census? — NiCamera appears in the docs
+  registry; census shows 0 occurrences in v10.1 subset → cameras ride the
+  ArkViewportInfo/TEXT viewport suite instead)
+- NiArkAnimationExtraData SEMANTICS (14 variant families, TEXT behaviors)
+- NiArkViewportInfoExtraData ext SEMANTICS (camera float parameters)
+- Vertex-morph channel (NiVertexMorphExtraData, 354) + its event triggers
+- Particle systems (NiPSys*, 130-133 files) — effects fidelity
+
+## DEFERRED_FOR_STATIC_WORLD (not needed for static render; explicitly
+deferred with denominators)
+
+- Animation evaluation (all controllers beyond structure: NiFlipController
+  112, NiTextureTransformController 744, NiUVController 25, NiAlphaController
+  31, NiVisController 11, NiMaterialColorController 244, NiLightColorController
+  11, NiLookAtController 10, NiPSys* ctlrs 259) — 45 non-slice types,
+  layout byte-validation deferred (NIF_10_1_STANDARD_COVERAGE.csv rows)
+- Skinning math, skin partition layout (NiSkinData 'arg' conditional,
+  NiSkinPartition strips) — schema-defined, deferred
+- Morph payload grammar (NiVertexMorphExtraData interior; prior ITER-34
+  claims stand as prior claims)
+- Particle system internals (emitters/modifiers/colliders)
+- Gameplay metadata (ArkAnimation TEXT semantics beyond structure)
+
+## Remaining blockers for the static world (honest list)
+
+1. NONE for geometry/materials/lighting STRUCTURE (closure-proven).
+2. TEXTURE PIXEL DATA resolution (ArkTexture bnt2_id → Textures.bnt → TGA)
+   is prior-claim territory (99.86% resolution claimed; re-validation is a
+   separate texture-binding run). [AMEND-009/F-14: the former clause
+   "the 24-block ArkTexture variant family found here should be included"
+   is WITHDRAWN — no variant family exists in-slice; the count formula is
+   100% in-slice (see FINDINGS_LOG F-14; ARKTEXTURE_ZERO_COUNT_
+   REDERIVATION.csv).]
+3. World PLACEMENT of instances is NOT in NIF files (docs/nif/09 REJECTED
+   claim stands; server-delivered placement hypothesis unchanged).
+4. UV orientation convention (the r185 "no V flip" documented choice) is a
+   runtime calibration, not a NIF-structure question.

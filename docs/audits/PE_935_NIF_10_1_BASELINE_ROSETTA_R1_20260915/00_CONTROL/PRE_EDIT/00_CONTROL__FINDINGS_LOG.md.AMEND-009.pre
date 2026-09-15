@@ -1,0 +1,87 @@
+# FINDINGS_LOG — PE_935_NIF_10_1_BASELINE_ROSETTA_R1_20260915
+
+Append-only working findings log (executor). Final polished versions go to 02_ANALYSIS/*.
+
+## F-01 (S0/S1) BNT2 structure physically verified (2026-09-15)
+- Footer last-8: DirOffset u32 LE + "BNT2". Physical: DirOffset=395262727.
+- Index at DirOffset: NumEntries u32 = 5596 (physical). Entry: name ASCII + 0x0A + 16B {size,offset,field_c,field_d}.
+- Last entry ("16175.nif" [QC AMEND-005: fixed typo "175.nif"; bytes
+  unchanged]): size=27971, offset=395234756; offset+size == DirOffset EXACT.
+- Entry0 "505775.nif": offset=0, size=306034; entry1 offset=306034 (contiguous).
+- PRIOR KNOWLEDGE SOURCE: Dragon UnPACKer BNT2Entry (skill) — treated as hypothesis, now physically verified on live bytes; full walk with fail-closed invariants pending (s01).
+
+## F-02 (§4) Entropia NIF 10.1.0.0 header layout — ENGINE GROUND TRUTH (2026-09-15)
+Physical (entry0 505775.nif, PCG 9.3.5 Models.bnt):
+- @0 HeaderString: "Gamebryo File Format, Version 10.1.0.0\n" — 0x0A-terminated, NO length prefix (39 bytes)
+- @39 Version u32 LE = 0x0A010000
+- @43 User Version u32 = 0  [cond: >= 10.0.1.8]
+- @47 Num Blocks u32 = 103
+- @51 Num Block Types u16 = 13
+- @53 Block Types: 13× SizedString (u32 len + chars): NiNode, NiArkAnimationExtraData, NiArkImporterExtraData, NiArkTextureExtraData, NiTexturingProperty, NiTextureEffect, NiArkViewportInfoExtraData, NiMaterialProperty, NiZBufferProperty, NiTriShape, NiTriShapeData, NiAlphaProperty, NiPointLight
+- @323 Block Type Index: u16 × NumBlocks (206B for 103)
+- @529 Num Groups u32 = 0  [cond: >= 5.0.0.6]
+- @533 Block 0 GroupID u32 = 0  ← per-block, part of NiObject::LoadBinary
+- @537 Block 0 (NiNode) Name SizedString "Scene Root"
+
+ENGINE SOURCE (D:\gamebyroengine\extracted\Gb12_Source\CoreLibs\NiMain\NiStream.cpp — Gamebryo 1.2 source):
+- NiStream::LoadHeader: GetLine(HeaderString) → Version u32 → UserVersion u32 (file >= 10.0.1.8) → NumBlocks u32.
+- NiStream::LoadRTTI (file >= 5.0.0.1): u16 RTTI count → LoadRTTIString×count (u32 len + chars) → u16 type index per object.
+- NiStream::LoadObjectGroups (file >= 5.0.0.6): u32 NumGroups → u32 size per group.
+- NiObject::LoadBinary (NiObject.cpp L134): reads u32 GroupID if file version >= 5.0.0.6 AND < 10.1.0.114. ← per-block GroupID
+- NiStream::LoadTopLevelObjects: after all blocks: u32 NumTopObjects + u32 LinkID each.
+
+## F-03 (§4) BASELINE CONFLICT #1 — GroupID version condition (2026-09-15)
+- Modern nif.xml (0.10.0.0): NiObject "Group ID" field `since="10.1.0.114"` ("Always zero.")
+- Historical nif.xml (0.7.1.1): NO GroupID field at all in NiObject.
+- Engine source (Gamebryo 1.2): GroupID for 5.0.0.6 <= version < 10.1.0.114 — INVERTED vs modern schema for 10.1.0.0.
+- Physical adjudication (5 independent 10.1.0.0 files, 3 publishers):
+  - EE2 lodtest.nif + lodtest-skinned.nif (Empire Earth II, non-MindArk): GroupID present (=0)
+  - Gamebryo 1.1.2 SDK samples BABYLENGUIN.NIF / DESTROYERBOT.NIF / ROCKY.NIF / BABYLENGUIN.KF: GroupID present (=0)
+  - Entropia PE_101358/PE_11710/PE_508947 + corpus files: GroupID present (=0)
+- VERDICT: public schemas (all pinned variants) FAIL to model per-block GroupID for 10.1.0.0; engine + physical bytes agree. Baseline for this run = engine-source framing.
+- NOTE: NiflySharp (104d79f) NiHeader reads only NumGroups after array → would misalign blocks on real 10.1.0.0 files. Its 10.1.0.0 support is untested against real Gamebryo-1.x-era files.
+
+## F-04 (§4) External oracles pinned locally (2026-09-15)
+- nif.xml variants (5 distinct): nifxml modern 0.10.0.0 (SHA D6B76A83..., 565041B, == byroredux legacy copy), nifxml_historical 0.7.1.1 (SHA 1D5C8E58..., 401093B, == pyffi copy), NifSkope 2.0 (2018-02-22) bundled (0DCE5092..., 466952B), NiflySharp bundled (752C7978..., 570454B), fo76utils build (880C3167..., 667577B).
+- NiflySharp source: ousnius-NiflySharp-104d79f (C# implementation).
+- Gamebryo engine source: Gb12_Source (Gamebryo 1.2 full source) + Gamebryo 1.1.2 Evaluation SDK (D:\gamebyroengine\) + gb112_known_good sample NIFs.
+- EE2 10.1.0.0 samples: blender_niftools todo/old_nifs/ee2/lodtest.nif, lodtest-skinned.nif.
+- Also available: pyffi source, blender_niftools (0305c8d), openmw 0.51.0, openmw-nif, pynifly, byroredux, f4ref_to_blender.
+- Historical nif.xml 10.1.0.0 version entry EXPLICITLY LISTS "Entropia Universe" as a 10.1.0.0 title.
+
+## F-05 (§1 probe) SOLDIER.NIF (SDK sample) = 10.0.1.18 (0x0A000112) — a 10.0.1.x variant exists in SDK; not in PCG corpus expectation (watch during census).
+
+## F-06 Header+block framing for 4.1.0.12 / 4.0.0.2 (from engine + schema, to verify on physical bytes during census):
+- line + version u32 + NumBlocks u32; block types INLINE (SizedString before each block, no RTTI table — file < 5.0.0.1); NO GroupID (4.1 < 5.0.0.6); no groups.
+
+## F-07 (§8/§9) NiArkImporterExtraData v10 tail = 41 BYTES (2026-09-15)
+- Closure-confirmed 2,343/2,343 slice blocks (+ witness 457485.nif dump): name + u32(=8) + SS version + 41B = 13B header + 7×f32 (bbox 6 + pad 0.0).
+- Matches HIST schema stub (UnknownBytes[13]+UnknownFloats[7]=41). WIKI 38B claim SUPERSEDED: the parser's 38+3 split re-attributes the tail pad's last 3 bytes to ArkTexture's "3 unknown zero bytes" (bit-compatible).
+- Importer int1 = 8 in ALL slice blocks. Version strings (slice): Gamebryo_1_1 ×2,302 / 4.1.0.12 ×36 / 4.0.0.2 ×5.
+
+## F-08 (§8/§9) ArkTexture entry ref = BLOCK LINK (2026-09-15)
+- 10,610 refs → NiTexturingProperty; 1,105 → NiTextureEffect (ENVIRONMENT-slot pairing f1=9); +3 NiNode + 24 garbage (anomaly family).
+- HIST schema's "Texturing Property Ref" role CONFIRMED; docs/nif/08 "slot/purpose index" label SUPERSEDED.
+
+## F-09 (§8/§9) ArkTexture count = (field2>>8)&0xFFFFFF in 99.0% (2026-09-15)
+- 2,319/2,343 slice blocks formula==closure-truth; 24-block variant family deviates (17× count=1/field2=0 via field1; 7× count=3 via numfield; f1=15 ×24 / 0x1000000 ×3 entries).
+- NEW OPEN FINDING; prior "4,838/4,838 PERFECT" claim SUPERSEDED. Parser (JS, no fallback) would mis-read the 24 blocks → PARSER_GAP row.
+
+## F-10 (§8/§9) Width-identical split ambiguities resolved to BASELINE labels (2026-09-15)
+- NiTexturingProperty header 4B = ApplyMode u32 (enum {0,2} observed; TextureCount=7 constant ×7,088) — wiki's 2×u16 = alternative split of the same bytes.
+- NiVertexColorProperty 10B = flags u16 + VertMode u32 + LightMode u32 (schema closure 2,544/2,544); the wiki u16×3+u32 "PE ext" = width-identical alternative; "PE-SPECIFIC" attribution SUPERSEDED (ambiguity disclosed, not semantically resolved).
+- NiGeometryData "numUvSets u16" ≡ u8 count + u8 ExtraVectorsFlags (bit-identical: low6=count, bit4=tangents; flags=0 ×8,206 / 48 ×377).
+- TexDesc 32B "raw transform" = Translation/Tiling TexCoord + WRotation f32 + TransformType u32 + CenterOffset TexCoord; "trailing u32==0" = NumShaderTextures==0.
+
+## F-11 (§10) Closure + holdout discipline (2026-09-15)
+- World slice (2,363 files, 32 supported types): TRAIN 1,876/1,890 (99.3%); HOLDOUT 467/473 (98.7%); hypothesis_sha frozen 6DB2F1E3...; 20 PARSE_BLOCKED recorded with reasons.
+- 0 out-of-range refs; NaN/Inf fail-closed; TopObjects root = block0 NiNode in 2,343/2,343 closed files; per-block GroupID==0 everywhere.
+
+## F-12 (§14) Cross-publisher closure (2026-09-15)
+- EE2 lodtest.nif (non-MindArk 10.1.0.0): FULL CLOSURE with the same frozen layouts (7 blocks + footer).
+- EE2-skinned/SDK samples fail only at types absent from the Entropia corpus (skin/PSys/strips/camera...). The Entropia world slice == standard Gamebryo 10.1.
+
+## F-13 (§15) Parser audit verdicts (2026-09-15)
+- NifModelReader.js: 8 PARSER_MATCHES_STANDARD; 4 unverified width-identical assumptions; 2 bit-compatible mis-attributions (38+3); 1 defect-class finding (ArkTexture count formula, 24-block family, no fallback in the JS reader); witness-scope limits by design.
+- Recommended separate runs: PE_935_NIF_PARSER_TEXTURECOUNT_24BLOCK_CORRECTION_R1 (+ minor relabel ride-along; REPORT-ONLY held — no src/ changes made).
+

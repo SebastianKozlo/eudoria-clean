@@ -1,0 +1,108 @@
+# FIELD_VALIDATION_RAW — PE_935_NIF_10_1_BASELINE_ROSETTA_R1 (§9 evidence)
+
+All numbers from run-local artifacts: WORLD_SLICE_VALIDATION.json (single
+ALL-pass, hypothesis_sha 6DB2F1E37E900A2573FEE07B5945B5E25B438066EA0A26AF0841540C96693752),
+TYPE_CENSUS_SUMMARY.json, PARSER_MANIFEST_CROSSCHECK.json, CROSS_PUBLISHER_TEST.json.
+
+## METHOD (per §19 for every PASS claim)
+
+- MEASURED_QUANTITY: full-file structural closure = header + per-block
+  [GroupID u32 + class fields per pinned baseline] + TopObjects + EOF-exact,
+  computed by the run-local table-driven decoder (s06) over the schema-driven
+  baseline (s04/HIST) with closure-constrained boundary search for the 4
+  variable Ark blocks.
+- INDEPENDENT_SOURCE_OF_TRUTH: physical Models.bnt bytes (SRC-15) + pinned
+  external oracles (schema HIST/MOD, engine source) — never R61/manifest/
+  NifModelReader.js (parser echo excluded; see NEGATIVE_CONTROL_RAW.md).
+- WHY_NON_CIRCULAR: the census and the closure decoder were built before
+  any comparison to parser outputs; the per-file census MATCH with the
+  parser manifest (4838/4838) is a POST-HOC cross-check; scrambled-input
+  controls prove byte-dependence.
+- FAILURE_CASE_DETECTED: any desync/NaN/Inf/OOB-ref/array-cap → file FAIL
+  recorded with reason (2363-candidate denominators; 20 failures listed).
+
+## Denominators
+
+- 10.1 files: 4,838 (independent census; 0 scan failures)
+- World-slice files (all-types-supported): 2,363
+  - TRAIN (SHA-sorted 80%, discovery file 505775.nif forced in): 1,890
+  - HOLDOUT (20%): 473
+- Closure: TRAIN 1,876/1,890 (99.3%); HOLDOUT 467/473 (98.7%);
+  TOTAL 2,343/2,363 (99.2%)
+- 20 PARSE_BLOCKED files (14 train + 6 hold... exact list in the JSON;
+  reasons: search-exhausted (deep ArkAnim variant territory) / EOF)
+
+## FIELD_CHECK ledger (FIELD_PRESENT / ORDER / WIDTH / ARRAY_LENGTH /
+COUNT_RELATION / LINK_INDEX / STRING_ENCODING / VERSION_CONDITION /
+INHERITED_PREFIX / BLOCK_BOUNDARY)
+
+| Check | Result | Denominator |
+|---|---|---|
+| HeaderString = Gamebryo 10.1 line | PASS | 4838/4838 |
+| Version u32 == 0x0A010000 | PASS | 4838/4838 |
+| Header version text == u32 version | PASS (0 mismatches) | 4838/4838 |
+| UserVersion == 0 | PASS | 4838/4838 |
+| NumGroups == 0 | PASS | 4838/4838 |
+| First-block GroupID == 0 | PASS | 4838/4838 (census) |
+| Block type index in range | PASS | 364,062 index reads (4838 files) |
+| Per-block GroupID == 0 (all blocks) | PASS | 2,343 closure files (~180k blocks) |
+| NiNode full chain | PASS (closure) | 2,343 files containing NiNode |
+| NiTriShape chain + hasShader=0 | PASS | 8,605 slice blocks |
+| NiTriShapeData full layout | PASS | 16,958 slice blocks |
+| NumTrianglePoints == 3xNumTriangles | observed in sampled traces (e.g. 104/312) | closure-enforced |
+| NiTexturingProperty (ApplyMode u32 ∈{0,2}; TexCount=7) | PASS | 7,088 slice blocks |
+| NiMaterialProperty (no-flags v10) | PASS | 8,146 census; slice closure |
+| NiAlphaProperty (flags+threshold) | PASS | 4,478 census; slice closure |
+| NiZBufferProperty (flags+function) | PASS | 4,176 census; slice closure |
+| NiStencilProperty (29B chain) | PASS | 532 census; slice closure |
+| NiVertexColorProperty (10B; schema split) | PASS-with-disclosed-ambiguity | 2,544 slice blocks (2,544 schema variant wins; alt split width-identical) |
+| NiTextureEffect (167B v10 layout) | PASS | 1,586 census; slice closure |
+| Lights (Point/Spot/Dir/Amb) | PASS | 846/47/120/54 census; slice closure |
+| NiString/Integer/BooleanExtraData | PASS | 4,225/25/25 census; slice closure |
+| NiArkAnimationExtraData header (name+4xi32) + boundary | PASS (boundary-derived) | 2,343 files |
+| NiArkImporterExtraData (name+u32=8+SS+41B tail) | PASS | 2,343 blocks (u32=8 in all; tails 41B in all; strings Gamebryo_1_1 x2,302 / 4.1.0.12 x36 / 4.0.0.2 x5) |
+| NiArkTextureExtraData (name+3u32+u8+entries) | PASS | 2,343 blocks; entry count == (field2>>8)&0xFFFFFF in 2,343/2,343 in-slice blocks (100%: 2,319 direct + 24 re-derived — F-14/AMEND-009: the former "24-block variant family / 99.0%" was a decoder candidate-order artifact, retracted; corpus-wide outside the slice OPEN) |
+| ArkTexture entry ref → NiTexturingProperty/NiTextureEffect | PASS | 10,610 / 1,105 targets (F-14/F-15 re-derivation: the former "+3 NiNode + 24 garbage" qualifiers were fake-entry artifacts of the 24 mis-parsed blocks — 0 NiNode / 0 OOR refs remain in the true parse) |
+| ArkTexture entry f1 slot enum | PASS | f1 domain exactly {0,1,2,3,4,5,6,9} on 11,715 true entries (the former "+15:24, +0x1000000:3 anomalies" were fake entries — F-14) |
+| NiArkShaderExtraData (name+u32=0+SS) | PASS | 2,084 census; slice closure |
+| NiArkViewportInfoExtraData (name+ext boundary) | PASS (boundary-derived) | 2,343 files (ext lens recorded) |
+| NiArkBillboardNode = NiNode+u16 mode | PASS | 22 slice blocks (u16 22/22) |
+| Refs in range (children/props/extras/controllers/data/skin/collision) | PASS (0 out-of-range) | all refs in 2,343 closure files |
+| TopObjects footer (count + refs; root=NiNode) | PASS | 2,343/2,343 files (count=1, root=block0 NiNode) |
+| String encodings (latin-1 allowed; names plausible) | PASS (no decode failures) | 2,343 files |
+| NaN/Inf floats | NONE (fail-closed) | all parsed floats |
+| Cross-publisher closure (SAME frozen layouts) | EE2 lodtest.nif CLOSURE_OK (7 blocks); EE2-skinned/SDK samples fail only at types absent from Entropia corpus | 5 samples |
+| Per-file census vs R61 manifest (post-hoc cross-check) | MATCH 4838/4838; type totals identical | 4838 files |
+
+## Layout-variant decisions (LAYOUT_VARIANTS mechanism)
+
+NiVertexColorProperty: 'schema' variant won every time it was tried
+(2,544 wins; 'u16x3_u32' alternative never required — the two splits are
+width-identical; ambiguity DISCLOSED, not resolved by closure).
+
+## ArkTexture count-source resolution (closure search) — [RELABELED F-14/AMEND-009]
+
+Accepted count labels recorded by the frozen decoder: numfield(=3) 168
+blocks; field1 1,206; field2>>8 969 (total 2,343). These labels are
+VALUE-COINCIDENCE artifacts of the candidate ordering, NOT source
+semantics: candidates (A,'numfield'), (B,'field1'), ((C>>8)&0xFFFFFF,
+'field2>>8') are deduplicated BY VALUE, so a true count whose value equals
+A or B gets labeled 'numfield'/'field1' even though the formula also gives
+that value. Post-hoc byte verification: (field2>>8)&0xFFFFFF == accepted
+count in 2,319/2,343 blocks; the 24 exceptions were this run's own decoder
+mis-parses (F-14 RETRACTION: 18 zero-count blocks accepted as count=1 via
+field1 + 6 true-count-1/2 blocks accepted as count=3 via numfield), all
+24 re-derived from bytes with TRUE count == formula (ARKTEXTURE_ZERO_
+COUNT_REDERIVATION.csv; ARKTEXTURE_FAKE_ENTRIES_RETRACTED.csv). FORMULA
+VERDICT: (field2>>8)&0xFFFFFF == true count in 100% of the 2,343 in-slice
+closure blocks (2,319 direct + 24 re-derived); QC independent decoder
+2,361/2,363; corpus-wide outside the 2,363-file slice remains OPEN.
+
+## Known-N limitations (explicit)
+
+- NiSpecularProperty 14, NiShadeProperty 1, NiDitherProperty 9, NiFogProperty
+  1, NiSortAdjustNode 1, NiCollisionData 12, NiPixelData 1: validated at
+  small N or deferred (NiPixelData/NiSourceTexture outside slice).
+- 45 non-slice types: layout NOT byte-validated this run (see coverage
+  matrix); their rows carry UNKNOWN/deferred status with census
+  denominators.

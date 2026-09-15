@@ -1,0 +1,162 @@
+# HANDOFF — PE_935_NIF_10_1_BASELINE_ROSETTA_R1_20260915 (executor → PE-MASTER)
+
+RUN_STATUS: COMPLETE (executor phase; G0–G15 PASS; G16–G18 pending later
+phases). HARD_STOP at executor-phase end (no parser correction, no M2, no
+persistence by executor).
+
+## Resume / next-phase pointers
+
+- Fresh QC inputs: 00_CONTROL/ (RUN_CONTRACT, SOURCE_REGISTRY, FINDINGS_LOG,
+  AMEND_LOG, scripts), 01_RAW/ (census + validation evidence),
+  02_ANALYSIS/ (matrices + spec), 06_REPORT/ (REPORT, gates).
+- QC falsification targets per contract §23: version recount (expect
+  5596/4838/757/1), sample type-table decode (expect census rows), custom
+  type set identity (7 MindArk types), field-level checks for
+  NiTriShapeData/NiTexturingProperty/ArkTexture (expect closure),
+  holdout recomputation (expect 467/473 with sha 6DB2F1E3...), negative
+  controls (4+4 executed), parser-echo check, provenance rehash,
+  stale-claim sweep.
+- Known honest gaps for QC to try: 20 PARSE_BLOCKED slice files (list in
+  WORLD_SLICE_VALIDATION.json results); ArkTexture count-formula
+  corpus-wide test outside the 2,363-file slice (in-slice 100% — the
+  former "24-block variant family" is RETRACTED, F-14/AMEND-009);
+  386950/386951 trailing-23 tail semantics (open; AMEND-012);
+  width-identical split ambiguities (VertexColor / ApplyMode / importer
+  38+3-vs-41 attribution); 45 non-slice types not byte-validated.
+
+## §29 REQUIRED FINAL RETURN (compact — full data in REPORT.md)
+
+- RUN_ID: PE_935_NIF_10_1_BASELINE_ROSETTA_R1_20260915
+- BASE_SHA: f3a3d401f1f254f32cee072260fdc15a6549d378
+- FINAL_SHA: f3a3d401f1f254f32cee072260fdc15a6549d378 (observed HEAD,
+  unchanged — executor performed no commits)
+- PHYSICAL SOURCE: Models.bnt size=395,412,868;
+  SHA256=C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0
+  (re-measured S0, exact pin match)
+- PHYSICAL NIF COUNTS: total 5,596; 10.1.0.0 = 4,838; 4.1.0.12 = 757;
+  4.0.0.2 = 1; failures = 0 (independent census; exact match with canonical
+  claim)
+- NIF 10.1 BASELINE:
+  - baseline types defined (10.1-applicable, HIST schema): 425
+  - types observed in Entropia (v10.1 census): 76
+  - standard types validated (byte-level closure): 23 world-slice types
+    (STANDARD_10_1_CONFIRMED; incl. EE2 cross-publisher closure)
+    [QC AMEND-005: corrected from 25; the coverage CSV has 23 CONFIRMED +
+    3 STANDARD_NAME_CUSTOM_LAYOUT_PENDING (NiSourceTexture/NiPixelData/
+    NiSortAdjustNode — census-level only, deferred)]
+  - standard-name/custom-layout: 0 (two width-identical split ambiguities
+    disclosed: NiVertexColorProperty internal split; TexProp ApplyMode
+    labeling — both byte-compatible, not deviations)
+  - MindArk extensions: 7 (5 with closure-derived structure:
+    ArkAnimation/Importer/Texture/ViewportInfo/Shader + ArkBillboardNode
+    layout-confirmed; NiVertexMorph deferred-UNKNOWN)
+  - unknown (layout, this run): 44 non-slice types (explicit deferral with
+    denominators)
+  - parse-blocked: 20 slice files (of 2,363; reasons recorded)
+- FIELD COVERAGE: closure-validated types — 100% of the structural layer on
+  validated blocks (numerator/denominator per type in coverage CSV; e.g.
+  NiTriShapeData 16,958 blocks × applicable fields); deferred types 0/N
+  explicit.
+- HOLDOUT: split 1,890 TRAIN / 473 HOLDOUT (deterministic by SHA, discovery
+  file disclosed into TRAIN); blocks per type in HOLDOUT_RESULTS.csv
+  (e.g. NiTriShapeData: 11,471 train / 5,487 holdout blocks); pass = all
+  closure-validated files pass (HOLDOUT 467/473 files); fail = 0 blocks on
+  validated files (6 holdout files PARSE_BLOCKED, recorded) [AMEND-012:
+  TRAIN/HOLDOUT numbers are frozen-decoder-scoped — the fresh-QC
+  independent decoder closed 2,361/2,363 including all 20 of this run's
+  PARSE_BLOCKED files (union 2,363/2,363 closable); 2 QC-blocked files
+  386950/386951 ("trailing 23") are OPEN items — this run's closure of
+  them rests on the ArkTexture mis-attribution retracted in F-14 (true
+  count=1 byte-evidenced; 23-byte tail semantics OPEN)]
+- WORLD VIEWER: required type families 23 (structure-closed for static
+  world); remaining blockers: texture-pixel resolution (Textures.bnt run)
+  [AMEND-009/F-14: the former "include the 24-block ArkTexture variant
+  family" clause is withdrawn — no variant family exists in-slice], world
+  placement (not in NIF — server-delivered hypothesis stands), UV
+  orientation (runtime calibration)
+- PARSER AUDIT (NifModelReader.js, REPORT-ONLY):
+  - confirmed-correct: header framing/NET/AV/Node/TriShape/Data/material/
+    alpha/zbuffer/stencil/extra-data layouts (8 PARSER_MATCHES_STANDARD
+    rows — AMEND-009/F-14: row 7 ArkTexture count formula moved from the
+    defect class to MATCHES after the verdict inversion) [QC AMEND-005:
+    corrected from 8→7 pre-retraction]; the preamble==0 invariant is
+    correct for PE (it is the engine GroupID)
+  - confirmed defects: NONE [AMEND-009/F-14: the former "ArkTexture count
+    formula (field2>>8) fails the 24-block variant family" defect verdict
+    is RETRACTED/INVERTED — the JS/R61 formula reads all in-slice blocks
+    correctly (formula == true count 100%); the mis-reads were this run's
+    own frozen-decoder candidate-order artifact (instrument), resolved by
+    PE-MASTER adjudication of QC F-QC-1]
+  - unverified assumptions: 3 PARSER_ASSUMPTION_UNVERIFIED (VertexColor
+    split, ApplyMode split, trailing-9 textureId semantics) + 2
+    bit-compatible mis-attributions (importer-38+3) [QC AMEND-005:
+    corrected from "4"]
+  - recommended correction runs:
+    (0) WITHDRAWN: PE_935_NIF_PARSER_TEXTURECOUNT_24BLOCK_CORRECTION_R1 —
+    false premise (F-14/AMEND-009: no 24-block family exists in-slice; the
+    JS/R61 count formula is correct); replaced by an optional
+    decoder-INSTRUMENT documentation note (count-candidate ordering /
+    next-block signature validation; no code change);
+    (1) minor relabel ride-along (importer 41B / TopObjects tail
+    semantics) — REMAINS
+- EXTERNAL ORACLES: 16 pinned (SOURCE_REGISTRY); 5 nif.xml variants
+  SHA-identified; engine source + SDK + EE2 samples byte-verified;
+  conflicts C-01..C-11 in BASELINE_CONFLICT_MATRIX (load-bearing: GroupID
+  framing — schemas wrong, engine+bytes right; importer tail 41 vs 38;
+  count-formula — in-slice 100%, corpus-wide outside the slice OPEN
+  [F-14/AMEND-009 retraction of the former "99.0% not 100%"])
+- LIVE DOC IMPACT: KEEP 5 / CLARIFY 6 / SUPERSEDE 4 / REVALIDATE 1 /
+  NO_CHANGE 1 [QC AMEND-005: corrected from "KEEP 8 / CLARIFY 5 /
+  SUPERSEDE 4"; action-column tally recomputed from the matrix;
+  AMEND-009/F-14: row 12 REVALIDATE → KEEP] (no live
+  docs edited)
+- TOP 10 MINDARK EXTENSION GAPS: (1) ArkTexture count-formula corpus-wide
+  test outside the 2,363-file slice (in-slice 100% — F-14; raw scan
+  observes 1,790 further zero-count-signature blocks outside the slice,
+  unverified); (2) ArkTexture trailing-9 internal
+  semantics vs Textures.bnt; (3) ArkAnimation variant semantics (TEXT/G3B/
+  G3D); (4) ArkViewportInfo ext field semantics; (5) G3D class byte roles;
+  (6) ArkImporter flag-bits/mode semantics; (7) morph payload grammar
+  (334/354 spans open per prior); (8) ArkShader runtime directive effects;
+  (9) original-client consumer paths for all Ark blocks; (10) ArkAnimation
+  u1=5/u2-variant selector semantics.
+- TOP 10 STANDARD NIF GAPS (this run's deferred layouts + baseline gaps):
+  (1) NiSourceTexture v10 (45 blocks unvalidated); (2) NiPixelData (1);
+  (3) NiKeyframeController/Data (72,483 blocks, layout prior-claim only);
+  (4) skinning trio layouts (694/694/116); (5) particle system family
+  (NiPSys*, ~130 files); (6) controller family layouts (Flip/UV/etc.);
+   (7) NiTextKeyExtraData; (8) public-schema 10.1 gaps (GroupID mis-version;
+   NiflySharp per-block groupId range V10_0_0_0.. vs engine 5.0.0.6.. —
+   external, affects only 5.x–9.x files; F-16/AMEND-010 corrects the former
+   "NiflySharp 10.1 header bug" wording: 10.1.0.0 IS covered correctly);
+   (9) 349
+  baseline-capability types never used by Entropia (no action — negative
+  set); (10) 4.1.0.12 corpus layout validation (out of this run's 10.1
+  scope).
+- RETRACTIONS / SUPERSESSIONS (produced by this run): docs/nif/08 "not in
+  any public NIF documentation" (HIST schema HAS 5 NiArk stubs); "importer
+  tail ALWAYS 38B" (physically 41B; 38+3 = mis-attribution); "ArkTexture
+  entry ref = slot/purpose index" (it is a block link to
+  NiTexturingProperty/NiTextureEffect); "NiVertexColorProperty
+  PE-SPECIFIC u32" (width-identical standard split exists; attribution
+  unproven). ["field2>>8 formula 4838/4838 PERFECT" supersession
+  WITHDRAWN — F-14/AMEND-009: in-slice the formula is 100% TRUE (the
+  99.0%/24-block-family supersession was a decoder candidate-order
+  artifact); the corpus-wide prior claim is uncontradicted, with in-slice
+  confirmation; corpus-wide test outside the slice remains OPEN.]
+  Prior claims preserved as PRIOR; live docs untouched.
+- QC VERDICT: QC_PASS_WITH_FINDINGS (fresh-context QC complete —
+  06_REPORT/QC_AUDIT.md; 0×P0, 1×P1, 2×P2, 7×P3; G16 closure belongs to
+  PE-MASTER, not the executor)
+- PE-MASTER VERDICT: adjudication COMPLETE for findings F-QC-1/2/3/8/9 —
+  this bounded correction batch (AMEND_LOG AMEND-009..014) implements it;
+  G17 closure belongs to PE-MASTER
+- FILES_CHANGED (executor, all untracked new): the full package
+  docs/audits/PE_935_NIF_10_1_BASELINE_ROSETTA_R1_20260915/ (list in
+  MANIFEST_SHA256.csv). src/, package.json, runtime/, docs/nif/* untouched.
+  Local heavy-work artifacts in
+  D:\Eudoria_Reconstruction\99_Audits\PE_935_NIF_10_1_BASELINE_ROSETTA_R1_20260915\
+  (incl. extracted-free intermediates; no proprietary payloads in repo).
+- AUDIT_ENTRYPOINT row added: NO (executor scope)
+- PERSISTENCE: N/A in this phase (pe-master-auditor after QC + adjudication)
+- HARD_STOP: YES (end of executor phase)
