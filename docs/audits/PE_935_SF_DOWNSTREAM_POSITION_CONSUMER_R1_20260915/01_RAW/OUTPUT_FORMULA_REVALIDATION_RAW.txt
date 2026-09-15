@@ -1,0 +1,97 @@
+====================================================================================================
+OUTPUT FORMULA REVALIDATION — FUN_0082B5A0 full decode + K constant bits + ret convention
+RUN_ID (correction): PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915
+CANONICAL PACKAGE: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915 (in-place correction)
+GENERATED_UTC: 2026-09-15T17:06:03Z
+GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\probe_output_formula.py
+GENERATOR_SHA256: 28BAC65668B757BB9F6275B3067513CA582ED3BDF66C09AECE9340E161BDAAD0
+MEASURED ENVIRONMENT:
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at script start (size+sha256+PE layout re-verified before any decode).
+PURPOSE: independent re-derivation of the scale-and-subtract arithmetic from bytes
+  (contract Section 8). Measurements only; status algebra in 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md.
+====================================================================================================
+
+[F.1] FULL DECODE 0x82B5A0..0x82B5F0
+  0x0082B5A0  8b 54 24 08               mov      edx, dword ptr [esp + 8]
+  0x0082B5A4  d9 02                     fld      dword ptr [edx]
+  0x0082B5A6  8b 44 24 04               mov      eax, dword ptr [esp + 4]
+  0x0082B5AA  dd 05 60 b3 a7 00         fld      qword ptr [0xa7b360]
+  0x0082B5B0  dc c9                     fmul     st(1), st(0)
+  0x0082B5B2  d9 c9                     fxch     st(1)
+  0x0082B5B4  d9 5c 24 08               fstp     dword ptr [esp + 8]
+  0x0082B5B8  d9 44 24 08               fld      dword ptr [esp + 8]
+  0x0082B5BC  d8 21                     fsub     dword ptr [ecx]
+  0x0082B5BE  d9 18                     fstp     dword ptr [eax]
+  0x0082B5C0  d9 42 04                  fld      dword ptr [edx + 4]
+  0x0082B5C3  d8 c9                     fmul     st(1)
+  0x0082B5C5  d9 5c 24 08               fstp     dword ptr [esp + 8]
+  0x0082B5C9  d9 44 24 08               fld      dword ptr [esp + 8]
+  0x0082B5CD  d8 61 04                  fsub     dword ptr [ecx + 4]
+  0x0082B5D0  d9 58 04                  fstp     dword ptr [eax + 4]
+  0x0082B5D3  d8 4a 08                  fmul     dword ptr [edx + 8]
+  0x0082B5D6  d9 5c 24 08               fstp     dword ptr [esp + 8]
+  0x0082B5DA  d9 44 24 08               fld      dword ptr [esp + 8]
+  0x0082B5DE  d8 61 08                  fsub     dword ptr [ecx + 8]
+  0x0082B5E1  d9 58 08                  fstp     dword ptr [eax + 8]
+  0x0082B5E4  c2 08 00                  ret      8
+  0x0082B5E7  cc                        int3     
+  0x0082B5E8  cc                        int3     
+  0x0082B5E9  cc                        int3     
+  0x0082B5EA  cc                        int3     
+  0x0082B5EB  cc                        int3     
+  0x0082B5EC  cc                        int3     
+  0x0082B5ED  cc                        int3     
+  0x0082B5EE  cc                        int3     
+  0x0082B5EF  cc                        int3     
+  bytes after 'ret 8' @0x82B5E4: cc cc cc cc cc cc cc cc cc 83 ec 30 d9 ee 53 8b (int3 run 9; next function 0x0082B5F0)
+
+[F.2] RET CONVENTION (measured by decode)
+  ret_n = 8 (ret 8 at 0x0082B5E4 (all 1 rets agree; extent ended at 0x82b5f0 or window end))
+
+[F.3] K CONSTANT AT 0x00A7B360 (measured bits)
+  bytes: 00 00 00 40 e1 7a 84 3f
+  as u64 bits: 0x3F847AE140000000
+  as f64: 0.0099999997764825821
+  (double)(float)0.01 reference bits: 0x3F847AE140000000 -> BITMATCH
+  f32 0.01 bits: 0x3C23D70A
+
+[F.4] PER-COMPONENT ARITHMETIC (from the decode above; ECX=S, [esp+4]=out, [esp+8]=src)
+  X: 0x82B5A4 fld [edx]            st0 := src.x (f32->f80 exact)
+      0x82B5AA fld qword [0x00A7B360]  st0 := K (f64->f80 exact); st1 := src.x
+      0x82B5B0 fmul st(1), st       st1 := src.x * K (f80 mul)
+      0x82B5B2 fxch st(1)
+      0x82B5B4 fstp dword [esp+8]   [esp+8] := f32(src.x * K)   <<< f32 narrowing #1
+      0x82B5B8 fld dword [esp+8]    st0 := f32(src.x * K) (re widened, exact)
+      0x82B5BC fsub dword [ecx]     st0 := f32(src.x*K) - S.x   (f80 sub vs f32-loaded base)
+      0x82B5BE fstp dword [eax]     out.x := f32(f32(src.x*K) - S.x)  <<< final store
+  Y: 0x82B5C0..0x82B5D0: identical shape at [edx+4] / [ecx+4] / [eax+4]
+  Z: 0x82B5D3..0x82B5E1: identical shape at [edx+8] / [ecx+8] / [eax+8]
+  MEASURED FORMULA (per component i in {0,4,8}):
+      out[i] = f32( f32( (f80)src[i] * (f80)K ) - (f80)S[i] )
+  with K == (double)(float)0.01 measured bit-exact above. S is READ (fsub source operand),
+  never written by this function (no store through ECX in the decode).
+
+[F.5] ZERO-SUBTRACTION FACT (for the special-case analysis; measured narrowing order)
+  the second operand S[i] enters the f80 subtraction as an f32->f80 exact widening;
+  IF S[i] == +0.0 then x - (+0.0) == x for all finite x (IEEE-754, round-to-nearest),
+  with the sign-of-zero caveat: (+0.0) - (+0.0) == +0.0 and (-0.0) - (+0.0) == -0.0;
+  IF S[i] == -0.0 then x - (-0.0) == x + 0.0 (which turns -0.0 into +0.0 for x == -0.0).
+  These are IEEE-754 facts applied to the measured instruction sequence, not measurements
+  of runtime values (STATIC-ONLY run; no runtime execution).
+
+MEASURED_QUANTITY: full decode of 0x82B5A0; K qword bits at 0x00A7B360; ret convention;
+  per-component x87 operation sequence.
+INDEPENDENT_SOURCE_OF_TRUTH: capstone 5.0.7 linear decode of Entropia.exe physical bytes
+  (SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31; S0 fail-closed).
+WHY_NON_CIRCULAR: decoded from bytes here; no prior package prose is imported as evidence.
+FAILURE_CASE_DETECTED: N/A for this probe (measurement revalidation); the falsified
+  unconditional claim 'out = W*0.01 always' is corrected by the measured S-subtraction
+  above combined with the origin-mutability census (see ORIGIN_STATUS_CORRECTION.md).

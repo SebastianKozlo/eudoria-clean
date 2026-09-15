@@ -245,3 +245,685 @@ single path-limited commit is the durable record.
   (frozen QC records). The post-push verification record (HEAD == origin/master == ls-remote + the commit SHA)
   lives in the AUDIT_ENTRYPOINT row's discovery command + the G17 persistence return, per the one-commit
   discipline (a package file cannot embed its own commit SHA).
+
+---
+
+# ORIGIN-MUTABILITY CORRECTION PASS (RUN_ID PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915; PE-MASTER-dispatched
+# bounded in-place correction of this published package; STATIC-ONLY; zero git mutations; no new package root)
+
+Convention for this pass: every amended file has a byte-exact .pre copy under 00_CONTROL/PRE_EDIT_R2/ (mirrored
+relative path + ".pre"; SNAPSHOT_MECHANISM = PRE_EDIT_R2 for every entry below). Entries list finding, exact old
+claim, corrected claim, OLD/NEW SHA256, snapshot, reason, blast radius. The OLD PRE_EDIT tree (first correction
+pass) was hash-verified byte-identical before and after this pass (20 files; census in the correction git
+observation). AMEND-1..13 above are untouched.
+
+## STANDING LESSONS (named lessons of this correction pass; in-repo record per contract Section 7)
+- LESSON 1: CLAIM_OF_MEASUREMENT_REQUIRES_MEASUREMENT_ARTIFACT — a claim of the form "measured over all 99 sites"
+  requires a measurement artifact that actually performed that measurement. The original [C.10] sentence claimed
+  an 8-instruction write-through measurement over 99 sites; the actual instrument looked at TWO instructions after
+  each call and keyed on the first instruction's pattern. No measurement artifact existed; the claim was fabricated.
+- LESSON 2: ROW_INTEGRITY_DOES_NOT_VALIDATE_INFERENCE — a byte-correct CSV does not imply the interpretation of that
+  CSV is correct. The original HELPER437F70_CALLER_CENSUS.csv rows were byte-correct (including
+  instruction_after_next='mov dword ptr [eax], edx' for site 0x00458E27) and the "no writer" conclusion drawn from
+  them was false. Measurement rows and the inference layer must be separately auditable.
+
+## AMEND-14 (2026-09-15 origin-mutability correction) — THE FALSIFIER + THE CORRECTED SCIENCE
+- FINDING (independently reproduced by this run's own deterministic script BEFORE any canonical edit):
+  call site 0x00458E27 (E8 -> FUN_00437F70, direct-call verified) inside FUN_00458D90..0x00458E43 writes through
+  the getter-returned singleton pointer: 0x458E30 mov [eax],edx / 0x458E36 mov [eax+4],ecx / 0x458E3D mov [eax+8],edx
+  (offsets 0/4/8; EAX proven = FUN_00437F70 return on both normal getter paths; write values proven by the esp
+  ledger + slot dataflow to be f32(f80(-(int32_in[i])))). EAX_PROVENANCE_AT_0x458E2C = FUN_00437F70_RETURN.
+- EXACT OLD CLAIM (retracted): "No caller writes through the returned pointer within 8 instructions (measured over
+  all 99 sites) => singleton never mutated post-construction" and "S == {0,0,0} at ALL times / EAX == S for the
+  entire process lifetime / => S == {0,0,0} for the whole process lifetime, immutable after construction".
+- CORRECTED CLAIM: ORIGIN_MUTATION_CHANNEL_EXISTS = CONFIRMED (setter FUN_00458D90; writer site 0x00458E27;
+  operation S[i] := f32(-(int32)in[i]); ECX = 12-byte int32 triple; statically reachable from the message loop
+  FUN_00402910 -> FUN_00417030 (tick) -> guarded -> FUN_00458E50 -> delta-condition @0x458EE2 -> FUN_00458D90);
+  ORIGIN_INITIAL_ZERO = CONFIRMED (zero-init + ctor copy of the not-written-within-channels triple);
+  ORIGIN_MUTATED_AT_RUNTIME = UNVERIFIED; ORIGIN_PERMANENT_ZERO = REJECTED; ORIGIN_RUNTIME_VALUE = UNVERIFIED.
+  Status algebra: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md (NEW).
+- NEW EVIDENCE FILES (NEW; not amendments — hashes in SCRIPT_SHA256/MANIFEST post-regeneration):
+  01_RAW/ORIGIN_SETTER_458D90_DISASM.txt; 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv;
+  01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_RAW.txt; 01_RAW/ORIGIN_SETTER_CALLER_CENSUS.csv;
+  01_RAW/ORIGIN_SETTER_REACHABILITY_RAW.txt; 01_RAW/OUTPUT_FORMULA_REVALIDATION_RAW.txt;
+  01_RAW/CORRECTION_RUN_GIT_OBSERVATION.md; 00_CONTROL/CORRECTION_CONTRACT_ORIGIN_MUTABILITY_R1.md
+  (contract persisted verbatim BEFORE any package edit); NEW scripts: sprov.py (symbolic provenance engine),
+  probe_origin_setter.py (falsifier+setter decode), census_write_through.py (write-through census),
+  census_setter_reach.py (reachability census), probe_output_formula.py (formula revalidation).
+- CENSUS NUMBERS (pre-registered N=16 + N=8; denominator D=99 re-measured, all 99 boundary-verified, 0 excluded):
+  N=16: WRITE_S_PLUS_0+4+8=1 (0x458E27); S_PTR_ESCAPED_READ_ONLY=43; S_PTR_ESCAPED_UNRESOLVED=12;
+  INSUFFICIENT_PROOF=6; CONTROL_FLOW_ESCAPE=1; NO_WRITE_WITHIN_BOUND=17; S_PROVENANCE_LOST=19 (sum 99 OK).
+  N=8: 41 READ_ONLY / 8 UNRESOLVED / 14 PROV_LOST / 17 INSUFFICIENT_PROOF / 18 NO_WRITE / 1 writer (sum 99 OK).
+- PE-MASTER ANCHOR CROSS-CHECKS: all setter/getter/caller/chain anchors re-derived and MATCH; ONE loud discrepancy:
+  the anchor note "ret 0xc @0x0041702D" for FUN_00416FD0's extent is off by one (measured ret @0x0041702C;
+  0x41702D is mid-instruction; int3 @0x41702F + next fn 0x417030 unchanged; boundary conclusion unchanged).
+- REASON: external WORK AUDITOR finding independently reproduced from physical bytes (EG1); the published
+  permanent-zero claim is falsified by counterexample; science corrected in place per contract Section 8.
+- BLAST RADIUS: the origin-mutability + output-formula status prose across the package (AMEND-15..20 below);
+  measurement sections everywhere verified byte-stable; the surviving triple write-census measurement unchanged.
+
+## AMEND-15 (2026-09-15 origin-mutability correction) — GENERATOR REPAIR: gen_raw_evidence.py
+- FINDING: the generator hardcoded science conclusions in its emitted text (violating GENERATORS-EMIT-MEASUREMENTS).
+- EXACT OLD CLAIMS (emitted literals): "[A.6] singleton = global-zero-vector snapshot (Phase C)";
+  "[C.7] Writers: ONLY this function ... NO other reader/writer exists"; "[C.7] NEVER WRITTEN (correction-pass
+  whole-image write census ...)"; "[C.9](4) copies the global zero triple"; "[C.9](10) = {0,0,0} at ALL times ...
+  EAX == S for the entire process lifetime after first call"; "[C.10] No caller writes through the returned pointer
+  within 8 instructions (measured over all 99 sites) => singleton never mutated post-construction";
+  "[D.4] With S == {0,0,0} (Phase C) ... out[i] = f32(src[i]*0.01f)" (unconditional).
+- CORRECTED CLAIMS: measurement-only wording + pointers to the analysis layer and the write-through census;
+  [D.4] conditionalized (IF S == {0,0,0} then bit-exact x0.01 with sign-of-zero caveat; general formula stands);
+  the QC-pass inline amendment notes (P2-1/P2-2/P3-1/P3-3/P2-4 texts + the %-22s disk-format column width of
+  HELPER82B5A0_CALLER_CENSUS.txt) moved INTO the generator so regeneration reproduces the QC-era disk text.
+- FILES: 00_Control/scripts/gen_raw_evidence.py (OLD 389C82C889F32E10C3C3F65E067E8C615BFF669CE3B741F890DEE0E0881E4C7C
+  -> NEW DA8B59594513513569A7E2CC9867E386D6D1BF3868AC8F80274A0511FC36B441;
+  snapshot 00_Control/PRE_EDIT_R2/00_Control/scripts/gen_raw_evidence.py.pre).
+  REGENERATED OUTPUTS (all regenerated by the repaired generator; verified vs PRE_EDIT_R2):
+  01_RAW/FUN_00437F70_DISASM.txt (OLD AE041E5A05D2040552ABE21C9BCC780C7B86B9FBE3657F90DE4101E4B7AE7656 ->
+  NEW 305486DA212DF9F128BB32109629341019DF1F50E829DAEA58740D51307F4068; diff = corrected prose + disclosed
+  GENERATED_UTC/GENERATOR_SHA256 header ONLY — [C.1]-[C.6]/[C.8]/decodes/census counts byte-stable);
+  01_RAW/FUN_0050A050_DOWNSTREAM_DISASM.txt (OLD A27FD8B72B996B59D4C87FCF4CFBA279376140BF0C4C238999942403A7CB2589 ->
+  NEW F562852F2CF2AEF1801CB5F669E4FD42B53662861506ADD9C47BD80222584205; diff = [A.6] line + header only;
+  the QC P2-1/P2-2 inline notes now reproduce byte-identically);
+  01_RAW/FUN_0082B5A0_DISASM.txt (OLD 7E5C7E44BDCB61CA205AFEB62EFB4BA93EEA4C77C09376223985A4D68599A471 ->
+  NEW DA39897968F7DD242224D8705AB40D4CC1D4BD37628CBA9B61B0E167648EE4C1; diff = [D.4] conditionalization + header);
+  01_RAW/SOURCE_VECTOR_LAYOUT_RAW.txt (OLD 868E9A867B2FC00B153C80DF130FDBA34E43F9C3C339D8F4C49AB62C1A6EDC1E ->
+  NEW A7A74AA66FB41C9A8C0E64DF62B22D8AD8D2030C7FF1F46BDEEB897C84228546; diff = header ONLY — the QC P3-1 [B.2]
+  extension now reproduces byte-identically from the generator);
+  01_RAW/HELPER437F70_CALLER_CENSUS.csv (OLD 4ED9AF9B6677133D9A85519E9EB0B5B8886B404F458F0DAD3B73ECE79A7CAD59 ->
+  NEW IDENTICAL — regenerated byte-for-byte; the CSV carries the writer site's instruction_after_next row
+  unchanged — it is the HISTORICAL instrument's data, preserved);
+  01_RAW/HELPER82B5A0_CALLER_CENSUS.csv (OLD A847CA2C8010C84FE60EDCD87DA5ED2C0477FC10869D5FA4DAFE02D80C1B9EF ->
+  NEW IDENTICAL); 01_RAW/HELPER82B5A0_CALLER_CENSUS.txt (OLD A533B5364BF58E4F7AF498C1AABF6ADB6A0874FD03C25EF0CEA7F15C9A68C073 ->
+  NEW byte-identical after the generator's format-string repair restored the disk %-22s column width + the
+  P2-4 inline note moved into the generator; diff vs PRE_EDIT_R2 = header ONLY).
+- REASON: contract Section 7 (remove hardcoded science from generators; regeneration must be byte-stable except
+  corrected prose; disclosed GENERATED_UTC/GENERATOR_SHA256 changes are expected because the generator changed).
+- BLAST RADIUS: the six regenerated files above; no measurement value changed anywhere (36/36 pins MATCH re-run;
+  census rows 99 re-run; pair counts re-derived).
+
+## AMEND-16 (2026-09-15 origin-mutability correction) — GENERATOR REPAIR: census_triple_writes.py [T.10] + residuals
+- EXACT OLD CLAIMS (emitted literals): "[T.10] => THE ORIGIN TRIPLE ... IS NEVER WRITTEN anywhere in the image =>
+  S == {0,0,0} for the whole process lifetime, immutable after construction." (the second arrow is an INVALID
+  inference: writes through the returned singleton pointer are not writes to the triple addresses) and the residual
+  "FUN_00437F70-return consumers writing through the returned singleton pointer more than 8 instructions out
+  (covered for 99 sites by the HELPER437F70 census; unchanged from the original run)" (a FABRICATED coverage claim —
+  that census never analyzed write-through); also the [T.8] header "(expect 0 — S never written through ECX)"
+  (channel-scoping tightened).
+- CORRECTED CLAIMS: [T.10] stops at the measurement ("not written within the enumerated channels of this census;
+  the residuals below bound the claim (not 'anywhere in the image')") + a STATUS NOTE pointer (the census does NOT
+  measure singleton-pointer write-through; the correction census found writer site 0x458E27; S's initial value
+  follows from [T.9]+this census; S's immutability does NOT follow); the residual now states the honest boundary
+  and cites the real census with its own disclosed residuals. [T.1]-[T.9] measurement logic UNTOUCHED.
+- FILES: 00_Control/scripts/census_triple_writes.py (OLD 5777F559101CFAC2CAEACC6ADA23291E412F046909D52677E2E751A2E98C734B
+  -> NEW 4982E0AB225E02DC17A652A2BD4C2A3483776C4A5C6F1BB28DA797A2C9C0D256;
+  snapshot 00_Control/PRE_EDIT_R2/00_Control/scripts/census_triple_writes.py.pre);
+  01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt regenerated (OLD FEF5DC1C9E4B4C212D4D80E78DAED0574EFA0CD79ACBC22823E7D9D6C401FF87
+  -> NEW 4635598F9D9E62344CDD189C542F58F1E36999956FDB908DCDE79BD8687E93E4;
+  snapshot 00_Control/PRE_EDIT_R2/01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt.pre; diff = [T.10] verdict/residual
+  wordings + header ONLY; [T.1]-[T.9] + annexes byte-stable — T1 counts re-measured 107/81/80=268 MATCH,
+  store candidates 0/0/0 MATCH, push sites 24 MATCH).
+- REASON: contract Section 7 (the triple census measurement SURVIVES; the "=> S permanently zero" inference and the
+  fabricated write-through coverage claim die).
+- BLAST RADIUS: the [T.10] interpretation layer; no census measurement value changed.
+
+## AMEND-17 (2026-09-15 origin-mutability correction) — GENERATOR REPAIR: gen_manifest.py role map
+- EXACT OLD CLAIMS (role-map descriptions): "01_RAW/END_TO_END_VALUE_FLOW_RAW.txt ... S={0,0,0} never-written
+  proof (channels enumerated per QC P1-1)..."; "02_ANALYSIS/HELPER_OPERATIONS.md ... (never-written claim
+  re-measured per QC P1-1)"; "01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt ... exhaustive write census...";
+  README template "...the S={0,0,0} never-written proof was re-measured exhaustively...".
+- CORRECTED CLAIMS: neutral provenance text + roles for ALL new correction artifacts (new raw/analysis files,
+  new scripts, the correction contract, the git observation) + a correction-run paragraph in the README
+  (measurement/status separation stated). Role count extended accordingly; L12 self-exclusion unchanged.
+- FILES: 00_Control/scripts/gen_manifest.py (OLD A88E730C0C039046AF9D8E820858D24B0494A109CA169111EFC7EF23D1964BD2 ->
+  NEW 746EDA3141EB23F57AD9DF7A2D62E6E7F80FE0B398A8514FD6DE9AC0E8C23749;
+  snapshot 00_Control/PRE_EDIT_R2/00_Control/scripts/gen_manifest.py.pre). The four provenance files it builds are
+  regenerated in ONE final pass in AMEND-21.
+- REASON: contract Section 7 (role-map descriptions must not carry stale conclusions; new files must be covered).
+- BLAST RADIUS: 00_Control/SCRIPT_SHA256.csv, 03_EVIDENCE/README.md, 03_EVIDENCE/EVIDENCE_INDEX.csv,
+  06_REPORT/MANIFEST_SHA256.csv (regenerated AMEND-21).
+
+## AMEND-18 (2026-09-15 origin-mutability correction) — NEGATIVE_CONTROL_RAW.txt Control-4 supersession (append)
+- EXACT OLD CLAIM: Control 4's premise "NO writer of the triple, NO writer of S post-construction (all 99 call
+  sites + all ECX-consumers measured)" and result "The 'mutable origin' reading is REJECTED; S = permanent zero
+  vector."
+- CORRECTED CLAIM: appended CONTROL 4 SUPERSESSION block: NEGATIVE_CONTROL_4 = FALSIFIED_BY_COUNTEREXAMPLE
+  (counterexample 0x00458E27 + writes 0x458E30/0x458E36/0x458E3D; why the control failed — the "measured"
+  write-through never had a measurement artifact; the instrument's own CSV recorded the site's
+  instruction_after_next without interpreting write-through; the triple-census inference was invalid); resulting
+  status correction (ORIGIN_PERMANENT_ZERO REJECTED; ORIGIN_MUTATION_CHANNEL_EXISTS CONFIRMED;
+  ORIGIN_MUTATED_AT_RUNTIME/VALUE UNVERIFIED); FAILURE_CASE_DETECTED bookkeeping annotated (historical PASS
+  record not falsified — Controls 1-3 STAND).
+- FILE: 01_RAW/NEGATIVE_CONTROL_RAW.txt (OLD FD056D54CB89573E4E673FC64FC95C680F56FEF4F17958EBC38EE24A066ECC9F ->
+  NEW 9B9F49C2BF64B8F17DF1B9C2B441C1A30F9C4E81A1A3A5548783315768E4F56A; snapshot
+  00_Control/PRE_EDIT_R2/01_RAW/NEGATIVE_CONTROL_RAW.txt.pre). APPEND-ONLY: the original text above the block is
+  preserved BYTE-IDENTICAL (verified: BYTE_PREFIX=True, appended 4387 bytes).
+- REASON: contract Section 9 (preserve the historical result; record the supersession; annotate bookkeeping).
+- BLAST RADIUS: G10 (gate row re-evaluated, AMEND-20); REPORT.md negative-control section (AMEND-20).
+
+## AMEND-19 (2026-09-15 origin-mutability correction) — bounded prose corrections in analysis/raw prose
+- FINDING: semantic equivalents of the retracted claims in the analysis layer and authored raw prose.
+- FILES (each: OLD -> NEW SHA256; snapshot under 00_Control/PRE_EDIT_R2/<same path>.pre; edits are AMEND-marked
+  inline; measurement content byte-stable):
+  01_RAW/END_TO_END_VALUE_FLOW_RAW.txt (A8077F4910BBF96026B6DAAADEB6A381C15A11778EFCB9132A20DF31555904C4 ->
+  B70F77F3D93998FBB23DBB47136D4357087310799A303A7722FE2DB416995B26): E.1 'S=={0,0,0} forever' -> initial-value
+  + retraction note; E.2 'GIVEN E.3 (S == {0,0,0} always)' -> IF-conditional; E.3 header 'PROOF THAT THE BASE IS
+  THE ZERO VECTOR' -> initial-value/triple-census retitling; E.3(6) 'S never written through ECX' -> channel
+  scope; the fabricated residual '99-site census, unchanged' -> honest boundary + real-census pointer; the
+  'FAILURE_CASE_DETECTED ... rejecting mutable base' conclusion annotated SUPERSEDED; the '=> S is IMMUTABLE'
+  paragraph retracted in place (original quoted verbatim inside the E.3-AMEND block); E.4/E.5 unconditional
+  '{0,0,0}'/'100:1' readings conditionalized.
+  01_RAW/FALLBACK_PRIMARY_COMPARISON.txt (E8F06D5CD8CAA6780FDC619EB4B22CDCA314330229272B93F603E25C3D70783A ->
+  8BD94F70D8359143FFA3E8B73E15B255CFA9445D68BBFA7B6699C8586FD1DA45): 'S = origin singleton (= {0,0,0}
+  permanently)' -> initial value + retraction; '(measured S={0,0,0})' -> subtraction unconditional in bytes,
+  value is a status question.
+  02_ANALYSIS/HELPER_OPERATIONS.md (BB719FD00B13D1C692A33AC182C78DF0831EAA7834D53A33C6D3AC87ADCFFF83 ->
+  6E21459CA19712B84D9DE33CCF4AC1000A3BAFE359916AF63A968DC69B9C59A6): 'NEVER WRITTEN ... => S == {0,0,0} at ALL
+  times, immutable' -> measurement + initial value + mutation-channel amendment; 'No caller writes through the
+  return' -> retracted with the census pointer; 82B5A0 base '= {0,0,0}' -> conditional; H3 '(origin == 0)' ->
+  conditional.
+  02_ANALYSIS/OUTPUT_VALUE_RELATION.md (319EE31B6AAB353F3804747CF711EA727378DBA4BA2250DB2C94B546179A20C1 ->
+  651C1FBA7EFDB658118285CB6890224212775096922D8C26951AA3F5CEC696F3): 'S = {0,0,0} (proven)' -> initial value +
+  status separation; REDUCED block conditionalized; 'S is a proven-constant zero vector' -> determinism GIVEN S.
+  02_ANALYSIS/POSITION_SEMANTICS.md (6DD0D42126A57CE99E33321B3014FC6A227F266C92B5E30471DCEB93CAA023CC ->
+  48C8637CCAAFCE80CD4EF36FB4C475DC74A564860867BBA7B93432D6461C8A0C): G11 '100:1 scale conversion (x0.01,
+  origin 0) CONFIRMED' -> scale+subtraction CONFIRMED, 100:1 magnitude conditional; H4 'out = world translate x
+  0.01' -> general formula + conditional reduction.
+  02_ANALYSIS/SCIENCE_STATUS_DELTA.csv (243CD870965FD60EEB13D6B32541880E8D48494E623CFDCE037DB3DD79F6F6CF ->
+  A6EB5BFAE61F0CBBB5D14D71B5F88D9965CBBBBF661C555CF48A98F991107945): rows 5/8/9 basis cells corrected
+  ('S={0,0,0} proven never written' -> initial-value + mutation-channel status; 'with S=0 => f32(W*0.01f)' ->
+  general formula + conditional special case; '100:1 conversion CONFIRMED' -> scale+subtraction + conditional
+  100:1); 6 NEW correction rows appended (ORIGIN_INITIAL_ZERO/MUTATION_CHANNEL_EXISTS/MUTATED_AT_RUNTIME/
+  PERMANENT_ZERO/RUNTIME_VALUE/NEGATIVE_CONTROL_4).
+- REASON: contract Section 11 (semantic stale-claim sweep; corrected canonical reading).
+- BLAST RADIUS: interpretation layer only; no measurement value changed; G6/G11 bases updated accordingly
+  (AMEND-20).
+
+## AMEND-20 (2026-09-15 origin-mutability correction) — REPORT/HANDOFF/GATES corrections + gate re-evaluation
+- FINDING: the report layer carried the retracted claims and gate rows leaned on them.
+- FILES (OLD -> NEW SHA256; snapshots under 00_Control/PRE_EDIT_R2):
+  06_REPORT/REPORT.md (C17A5691F161111403C5E427B24ABF7B279EB001942CC4528AE6E706DD701043 ->
+  CD39E0A16FE3A178B5F5AD7CACCA3884E80097C6CD5871E7B1365B406CD301C8): correction-run header note; ONE-LINE
+  ANSWER amended ("(always {0,0,0})" -> initial value + mutation-channel status; "100:1-scaled ... origin zero"
+  -> scale(W)-S + conditional); EXEC SUMMARY item 3's "S = zero vector forever; never mutated" retracted in place
+  with the census numbers; H4 conditionalized; NEGATIVE CONTROL (4) supersession recorded; finding 2 "100x
+  smaller" conditionalized; GATE SUMMARY re-evaluated (G4 evidence-consistency recheck stated PASS; G6 basis
+  corrected; G10 NC-4 supersession; G11 conditional; G13 re-verified; G14 reworded; G16 supersession-chain
+  pointer; G15/G16/G17 governance rows aligned with the published gates CSV).
+  06_REPORT/HANDOFF.md (DE504596F26A46BA7358F1FF343FE07E536C84E4536BAA18FC87B33E76265243 ->
+  4769D044028B636DEC36C2243EA1DC01C073A0FD1B70239B39CA65CC08307E97): correction-run header note; evidence-list
+  annotations; gate one-liners corrected; PRIMARY QUESTION one-liner amended; finding 2 conditionalized;
+  CORRECTION RUN handoff block appended (full corrected status algebra + census numbers + branch corrections +
+  pending QC/review/persistence pointers).
+  06_REPORT/STAGE_ACCEPTANCE_GATES.csv (D69F7220D9C2CF38958BAD0B888662ECCC29D0DE56B7E73D7EBE0719ACDBA461 ->
+  857125C9FC37DEDA4182D2D389B26BC4B8768955088639D5D0F49F5403F43C84): rows G4/G5/G6/G10/G11/G13/G14/G16
+  re-evaluated with explicit "|| CORRECTION-RUN RE-EVALUATION" basis blocks (row survival preserved — no row
+  disappeared); CG1-CG8 correction-gate rows APPENDED (falsifier/census/setter/reachability/generators/sweep/
+  snapshots/fencing).
+- GATE RE-EVALUATION SUMMARY: G4 PASS stands (getter identity; evidence file regenerated clean — RECHECK PASS);
+  G5 PASS stands (arithmetic untouched; K BITMATCH re-verified); G6 PASS stands on the corrected basis
+  (out = scale(W) - S; zero-origin reduction conditional); G10 PASS with the NC-4 supersession recorded
+  (FALSIFIED_BY_COUNTEREXAMPLE; controls 1-3 stand); G11 STRONGLY_SUPPORTED (scale + subtraction proven; 100:1
+  conditional); G13 PASS unchanged (K re-proven); G14 STRONGLY_SUPPORTED (reworded; no unconditional scale
+  relation); G16 historical MASTER_ACCEPTED preserved + supersession-chain pointer (the superseding review is
+  PE-MASTER's to write; this run only prepares the pointer). CG1-CG8 = the correction's own executor gates, all PASS.
+- REASON: contract Sections 10-11.
+- BLAST RADIUS: report layer + gates; no measurement value changed.
+
+## AMEND-21 (2026-09-15 origin-mutability correction) — mechanical provenance regeneration (ONE final pass)
+- WHAT: after the content amendments above, the four generated provenance files were regenerated in ONE pass by
+  the repaired gen_manifest.py (generation order per AMEND-4: SCRIPT_SHA256.csv -> README.md -> EVIDENCE_INDEX.csv
+  -> MANIFEST_SHA256.csv; L12 self-exclusion respected; all NEW correction files covered — new raw/analysis
+  evidence, the correction contract, the correction git observation, the 5 new scripts; .pre copies of all four
+  under 00_Control/PRE_EDIT_R2/): 00_Control/SCRIPT_SHA256.csv (OLD 00B062183478D64179BD744B492BDD324600B97640029493D65D81EEFB9DCF42),
+  03_EVIDENCE/README.md (OLD B5FEAEBAA822572A99B16109889DB7714EE9E889AD90A944FD1E4272545863F3),
+  03_EVIDENCE/EVIDENCE_INDEX.csv (OLD F88D5C7DB2BAB1F51F715EB780A07C4BA45CBE730A46D397E9DD0CC1EA5CEBA9),
+  06_REPORT/MANIFEST_SHA256.csv (OLD 61A9EBD23A5DC49A376FFF5EDF0F188EEF7FE5C88763DEE5C90275AF8285DEF7).
+  The NEW hashes of these four files (and of this log) are intentionally NOT embedded here (the AMEND-12
+  self-reference rule: the manifest/index hash this log); they are on disk and re-verified by the post-regeneration
+  re-hash pass (every manifest row re-hashed MATCH; every index row re-hashed MATCH).
+- NOTE (coverage boundary): QC_AUDIT_R3.md and the superseding PE-MASTER review DO NOT EXIST YET at this
+  regeneration (fresh QC + superseding review are LATER sessions' work); the manifest covers what exists on disk
+  at this correction run's end; a later regeneration happens at persistence.
+- REASON: contract Section 13.
+- NATURE: mechanical; NO science content, NO measured value, NO pin affected.
+
+## AMEND-22 (2026-09-15 QC_R3 fresh-session) - QC_AUDIT_R3 artifacts + provenance regeneration for the QC session
+- FINDING (QC_R3, fresh-context internal QC of the origin-mutability correction): the correction's core science
+  is INDEPENDENTLY CONFIRMED (census 99/99 site-identity equal; writer set {0x00458E27} + 3 write events identical;
+  setter formula S[i] := f32(-(int32)in[i]); true chain message-loop->0x417030->0x458E50->0x458D90; K BITMATCH;
+  triple 107/81/80; anchor discrepancy ret @0x0041702C confirmed; PRE_EDIT 19/19 + PRE_EDIT_R2 24/24 verified).
+  FOUR bounded findings returned to PE-MASTER for adjudication (NOT silently fixed here; no executor measurement
+  evidence altered): P1 branch-B claims contradict the executor's own [R.6] False lines (E8@0x4B1EEB/0x4B1F2C are
+  inside FUN_004B1C70, not 0x4B1B70; not self-recursive; 0x4B1C70 has external caller 0x4B2984 in 0x4B2950;
+  "does not reach the setter" still TRUE); P2 ten census rows mis-attributed (enclosing_function_start
+  0x6C19B0/0x6C4C40/0x6E21F0/0x8CD1A0 should be 0x6C1A90/0x6C4E70/0x6E23B0/0x8CD3E0 - ret+1xCC+prologue
+  boundaries with verified inbound E8 callers; dispositions unaffected); P3 CG7 basis says 20 PRE_EDIT files
+  (actual 19; the return says 19); P3 [R.6] intra-raw summary contradiction. Full record: 06_REPORT/QC_AUDIT_R3.md.
+- EXACT OLD CLAIM / CORRECTED CLAIM: none in this log's own prior entries (append-only; entries 1-21 byte-preserved
+  - the current log's first 22151 bytes remain byte-identical to PRE_EDIT_R2/00_Control/AMEND_LOG_R1.md.pre).
+- FILES (ALL NEW unless noted; every QC-modified file snapshotted under 00_Control/PRE_EDIT_R3/ BEFORE the edit):
+  NEW 00_Control/scripts/{qc_peutil.py, qc_origin_writethrough.py, qc_setter_reachability.py,
+  qc_output_formula.py, qc_attribution_audit.py, qc_session_capture.py} (QC_R3 probes; S0 fail-closed; -B);
+  NEW 00_Control/QC_R3_RAW/{QC_R3_WRITE_THROUGH_RAW.txt, QC_R3_REACHABILITY_RAW.txt,
+  QC_R3_OUTPUT_FORMULA_RAW.txt, QC_R3_ATTRIBUTION_AUDIT.txt, QC_R3_SESSION_RAW.txt}; NEW 06_REPORT/QC_AUDIT_R3.md;
+  NEW 00_Control/PRE_EDIT_R3/ (5 .pre snapshots: AMEND_LOG_R1.md (OLD AFACE892E260DFD6086AA0957D2031DE931A129F4EDFD213C42B821C900B72CB),
+  SCRIPT_SHA256.csv (OLD 43D4A2588FD028E886F7014ED4312C59A8F0A42C8BC625092EA0370EA5BCA78), 03_EVIDENCE/README.md
+  (OLD DEE3D74FD163D7F7FE7AD2BDF2898FA5AECBF3C746BB912AF3C954794839BA60), 03_EVIDENCE/EVIDENCE_INDEX.csv
+  (OLD 1F17F394938DE4CC0F6EF0134CDAE66EA535CC7BD036D7977521A62B7D3F6CB5), 06_REPORT/MANIFEST_SHA256.csv
+  (OLD 8562E629592E369229B4C0EBE95893F37CB1DA4E8D9DF17D91D75A4E5C936AB4));
+  REGENERATED (one gen_manifest.py pass, canonical order): 00_Control/SCRIPT_SHA256.csv (now covers all 16
+  scripts incl. the 6 qc_ probes), 03_EVIDENCE/README.md (new GENERATED_UTC + QC_R3 coverage note via generator),
+  03_EVIDENCE/EVIDENCE_INDEX.csv (covers QC_R3_RAW/ + QC_AUDIT_R3.md + PRE_EDIT_R3/), 06_REPORT/MANIFEST_SHA256.csv
+  (covers the same). NEW hashes intentionally not embedded here (AMEND-12 self-reference rule); on disk and
+  re-verified post-regeneration.
+- CLEANUP DISCLOSURE: 00_Control/scripts/__pycache__/qc_peutil.cpython-312.pyc was created by THIS QC session's
+  first probe runs (before switching to -B) and was removed; the executor's zero-pycache claim stands (the QC
+  session-start git status had no such path).
+- REASON: QC session evidence discipline (probe scripts must be SCRIPT_SHA256-registered; QC evidence must be
+  in-package; provenance files must cover what exists on disk) + the four findings' honest record.
+- BLAST RADIUS: provenance files only (mechanical regeneration); NO science content, NO measured value, NO pin,
+  NO executor measurement evidence affected; QC_AUDIT.md/QC_AUDIT_R2.md/PE_MASTER_REVIEW.md untouched.
+
+---
+
+# QC_R3 FINDINGS FIX ROUND (RUN_ID PE_935_SF_QC_R3_FINDINGS_FIX_R1_20260915; PE-MASTER-dispatched bounded
+# fix of the four adjudicated QC_R3 findings F1/F2/F3/F4 — 06_REPORT/QC_AUDIT_R3.md, PE-MASTER ACCEPTED;
+# STATIC-ONLY; zero git mutations; no new package root)
+
+Convention for this round: every amended file has a byte-exact .pre copy under 00_CONTROL/PRE_EDIT_R4/
+(mirrored relative path + ".pre"; SNAPSHOT_MECHANISM = PRE_EDIT_R4 for every entry below). Entries list
+finding, exact old claim, corrected claim, OLD/NEW SHA256, snapshot, reason, blast radius. AMEND-1..22
+above are untouched (byte-prefix verified: the log's first 48594 bytes are byte-identical to this
+round's PRE_EDIT_R4 snapshot). 00_CONTROL/PRE_EDIT/ and PRE_EDIT_R2/ are FROZEN and were hash-verified
+by this round against independent baselines: PRE_EDIT all 19 .pre re-hashed vs the QC_R3 census
+(00_CONTROL/QC_R3_RAW/QC_R3_SESSION_RAW.txt) — 19/19 MATCH; PRE_EDIT_R2 all 27 .pre compared
+byte-exactly against the git HEAD blobs of their mirrored tracked paths — 27/27 MATCH. This round
+wrote NOTHING into PRE_EDIT/, PRE_EDIT_R2/ or PRE_EDIT_R3/ (file counts 19/27/5 unchanged).
+DISCOVERED PRE-EXISTING DEFECT (reported to PE-MASTER in this round's return; NOT corrected here —
+entries 1..22 are frozen append-only): the parenthetical OLD-hash strings in the frozen AMEND-22 entry
+for 4 of the 5 PRE_EDIT_R3 snapshots (00_Control/SCRIPT_SHA256.csv, 03_EVIDENCE/README.md,
+03_EVIDENCE/EVIDENCE_INDEX.csv, 06_Report/MANIFEST_SHA256.csv) do NOT match the actual .pre bytes —
+each shares only its first 16 hex characters with the true hash and then diverges, and the
+SCRIPT_SHA256.csv string is additionally malformed at 63 characters (the AMEND_LOG_R1.md string
+matches exactly); the same transcription-defect class exists in AMEND-8 (one dropped character at
+position 17 of the 01_RAW/HELPER82B5A0_CALLER_CENSUS.csv OLD hash, 63 chars). The recorded strings
+are not the hash of ANY package file in any manifest state (checked against the current manifest and
+the PRE_EDIT_R2/PRE_EDIT_R3-era manifests) — i.e. transcription corruption, not mis-attribution of a
+real hash; format-presence checks (QC_AUDIT_R3 Point 12) do not catch this defect class (hash strings
+must be byte-verified programmatically). The TRUE PRE_EDIT_R3 .pre hashes are carried by the
+regenerated 06_REPORT/MANIFEST_SHA256.csv rows for 00_CONTROL/PRE_EDIT_R3/**. 00_CONTROL/QC_R3_RAW/**
+(QC evidence) untouched. Every corrected fact was re-verified from physical bytes BEFORE any canonical
+edit by the independent probe 00_Control/scripts/fix_probe_r4.py (S0 fail-closed; does NOT import
+either generator under repair; output 01_RAW/FIX_ROUND_R4_BYTE_REVERIFICATION_RAW.txt; its
+PROBE_SHA256 header matches the script on disk). ZERO contradictions with the QC/PE-MASTER facts were
+found (no HARD STOP; the dispatch's hard-stop predicate never fired).
+
+## AMEND-23 (2026-09-15 fix round) — F1+F4: branch-B disposition corrected ([R.6] raw + its generator)
+- FINDING: QC_R3 F1 (P1) + F4 (P3): the reachability raw's [R.6] "self-recursive edge" label and summary
+  line contradicted the file's own False measurements; the reported branch-B subtree is NOT
+  0x4B1B70-rooted and NOT statically dead. PE-MASTER adjudicated ACCEPTED and byte-verified the facts.
+- EXACT OLD CLAIMS (generator literals + emitted raw lines): "self-recursive edge: E8@0x004B1F2C targets
+  0x4B1B70: True"; "=> Branch B: 0x4B1B70 -> 0x417A40 -> 0x417880 -> (0x416FD0 path, measured in [R.5]):
+  this subtree DOES NOT REACH the setter chain either (no 0x458E50/0x458D90 edge)."; docstring "Branch B:
+  0x417A40 <- 0x4B1EEB (inside 0x4B1B70); 0x4B1B70 self-recursive E8@0x4B1F2C verified as a real
+  instruction boundary by linear decode from the function start."
+- CORRECTED CLAIM (measured; probe 01_RAW/FIX_ROUND_R4_BYTE_REVERIFICATION_RAW.txt [A]; QC evidence
+  00_CONTROL/QC_R3_RAW/QC_R3_REACHABILITY_RAW.txt): FUN_004B1B70's extent ends ret 0x004B1C6E + single
+  int3 0x004B1C6F; next function 0x004B1C70 (SEH prologue push -1; push 0x9acc2a). E8@0x4B1EEB (call
+  0x417A40) and E8@0x4B1F2C (call 0x4B1B70) are BOTH inside FUN_004B1C70 (extent 0x004B1C70..0x004B1FB0)
+  and BOTH outside FUN_004B1B70: 0x4B1F2C is a SIBLING call, NOT self-recursion. FUN_004B1C70 channels:
+  E8={0x4B2984}, E9/imm32/vtable=0; the external caller E8@0x4B2984 is a real instruction inside
+  FUN_004B2950 (prior-canon ArkClientPacketExecutor::Execute; extent 0x004B2950..0x004B29F0) in the
+  case-0xB2 dispatch path (cmp edi, 0xb2 @0x004B2975; taken path calls 0x4B1C70 @0x004B2984). The
+  measured subtree is Execute(FUN_004B2950) --case 0xB2--> FUN_004B1C70 -> {0x417A40 -> 0x417880 ->
+  0x416FD0 (config/init subtree; the [R.5] dead-end path); 0x4B1B70 (queue/ring processing)} —
+  STATICALLY REACHABLE within the measured channels, and STILL NEVER REACHES the origin setter
+  (callee-set closure measured: no 0x458E50/0x458D90/0x417030 edge in FUN_004B1B70/FUN_004B1C70/
+  FUN_00417A40 callee sets; 0x458D90's sole static in-tree caller remains the message-loop chain)
+  => LIVE_WITHIN_MEASURED_CHANNELS_BUT_IMMATERIAL_TO_ORIGIN_MUTABILITY. The original summary line is
+  quoted verbatim as the RETRACTED text inside the regenerated [R.6]; the original raw measurement
+  lines (both False containment tests etc.) are preserved unchanged.
+- FILES: 00_Control/scripts/census_setter_reach.py (OLD 50B5BCF51ABED206C708C46AF4901CAFD23F7CD4B9C0977B291B03F5F3662907
+  -> NEW DD18D0079E239FAF89808C6640951EAD93DEA35838AFA2DC9311CFD25C134E4F; snapshot
+  00_Control/PRE_EDIT_R4/00_Control/scripts/census_setter_reach.py.pre) — [R.6] emission block corrected
+  + docstring corrected. REGENERATED 01_RAW/ORIGIN_SETTER_REACHABILITY_RAW.txt (OLD
+  C9CC8DD8F359B3692EA2E96A406918A087C84628E8CC077FB6332F1CD446940D -> NEW
+  EA5678509C9382327F84C580C3B3808DA7A76E2AC45AA1B617651D0F909157C8; snapshot
+  00_Control/PRE_EDIT_R4/01_RAW/ORIGIN_SETTER_REACHABILITY_RAW.txt.pre) — verified diff = disclosed
+  GENERATED_UTC/GENERATOR_SHA256 header + the [R.6] section ONLY (lines 8..273 after the header and the
+  [R.7]-to-EOF tail verified byte-stable; the regenerated [R.6] preserves the original measurement lines
+  and adds the corrected measurements + retraction quote + corrected disposition). REGENERATED
+  01_RAW/ORIGIN_SETTER_CALLER_CENSUS.csv (OLD 5D4AE8190704C6CBD41C6DB648AA55048F5484CA2E6E4655D569AEFAE1FC365E
+  == NEW 5D4AE8190704C6CBD41C6DB648AA55048F5484CA2E6E4655D569AEFAE1FC365E — BYTE-IDENTICAL, re-verified;
+  snapshot taken anyway for the diff proof) — the corrected [R.6] adds measurements WITHOUT adding
+  census subjects, so the subject/channel census CSV is unchanged.
+- REASON: QC_R3 findings F1/F4 (PE-MASTER adjudicated ACCEPTED; F4 is the same contradiction's raw-file
+  instance — fixed here in one coherent corrected [R.6]).
+- BLAST RADIUS: the branch-B reachability reading only; NO census number, NO writer set, NO census
+  disposition, NO gate status changed; ORIGIN_SETTER_RUNTIME_EXECUTION = UNVERIFIED unchanged.
+
+## AMEND-24 (2026-09-15 fix round) — F1 continued: analysis/gates/return branch-B corrections
+- FINDING: QC_R3 F1's remaining locations — the analysis-layer section, the CG4 gate basis, and the
+  executor return record.
+- EXACT OLD CLAIMS: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md section "### DEAD_CANDIDATE_BRANCH (external
+  Branch B, re-derived) — STATICALLY DEAD WITHIN MEASURED CHANNELS, AND IMMATERIAL TO THE SETTER" (incl.
+  "E8 callers of 0x00417A40 = {0x004B1EEB} (inside FUN_004B1B70's stream, verified by linear decode from
+  0x4B1B70)" and "FUN_004B1B70 channels measured: E8 = {0x004B1F2C} (the SELF-RECURSIVE edge only, verified
+  as a real instruction boundary by linear decode from 0x4B1B70 through 0x4B1F2C) ... -> STATICALLY DEAD
+  WITHIN THE MEASURED CHANNELS (no external entry channel exists for it in this image)"); 06_REPORT/
+  STAGE_ACCEPTANCE_GATES.csv CG4 basis clause "Branch B (0x4B1B70 self-recursive sole E8 0x4B1F2C; zero
+  imm32; zero vtable) statically dead within measured channels AND immaterial (does not reach the setter)";
+  00_CONTROL/CORRECTION_EXECUTOR_RETURN.md line "DEAD_CANDIDATE_BRANCH = ... => STATICALLY_DEAD_WITHIN_
+  MEASURED_CHANNELS; AND immaterial ...".
+- CORRECTED CLAIM: the AMEND-23 disposition, applied to each location: ORIGIN_STATUS_CORRECTION.md
+  section retitled "### BRANCH_B_SUBTREE (external Branch B, re-derived; AMEND-23 corrected disposition)
+  — LIVE WITHIN THE MEASURED CHANNELS, AND IMMATERIAL TO ORIGIN MUTABILITY" with the original section
+  quoted verbatim as RETRACTED + measured corrections (a)-(d) + the corrected disposition (the
+  'does not reach the setter' conclusion survives by a different route; the status algebra is UNCHANGED);
+  CG4 basis clause replaced with the corrected disposition + the fix-round probe added to CG4's evidence
+  column (gate status PASS unchanged); CORRECTION_EXECUTOR_RETURN.md superseded via an APPENDED bounded
+  "FIX ROUND F1 CORRECTION NOTE" (append-only; the original return text above it is byte-preserved).
+- FILES: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md (OLD 1CE527EA2BA1AE658211CCE9B4F2859887C8FED852372EABD4BBB45C3002AEC8
+  -> NEW D913226005AE942407519B7A25401FFCD24F6562C9493D89B9AC8088B0ECD8B9; snapshot
+  00_Control/PRE_EDIT_R4/02_Analysis/ORIGIN_STATUS_CORRECTION.md.pre); 06_REPORT/STAGE_ACCEPTANCE_GATES.csv
+  (OLD 857125C9FC37DEDA4182D2D389B26BC4B8768955088639D5D0F49F5403F43C84 -> NEW
+  7CD143BEA76461F60FA9AA827B8A5A2507BD1C92C2FD49F2065015D352C72FA9; snapshot
+  00_Control/PRE_EDIT_R4/06_Report/STAGE_ACCEPTANCE_GATES.csv.pre; NOTE: this hash pair covers BOTH the
+  CG4 correction of this entry AND the CG7 count correction of AMEND-26 — both landed in one edit pass
+  on this file, and each entry lists its own corrected clause); 00_CONTROL/CORRECTION_EXECUTOR_RETURN.md
+  (OLD 38DF227A7E6EA1BF32D7AFDB6AA0E0617E2E17FFDB35E41455BA0061B2BBA7AE -> NEW
+  6195B0CE0A409E339C6C9E1318EF289950C30AD396A150240B26B777673EC024; snapshot
+  00_Control/PRE_EDIT_R4/00_Control/CORRECTION_EXECUTOR_RETURN.md.pre; APPEND-ONLY — byte-prefix
+  verified against the snapshot).
+- REASON: QC_R3 F1 (PE-MASTER adjudicated ACCEPTED).
+- BLAST RADIUS: interpretation/report layer only; NO measurement value changed; NO gate status changed.
+
+## AMEND-25 (2026-09-15 fix round) — F2: write-through census enclosing-function re-attribution (10 rows)
+- FINDING: QC_R3 F2 (P2): 10 write-through census rows carried wrong enclosing_function_start/extent —
+  the executor's >=2-byte-CC-only anchor rule attributed sites whose true enclosing function starts
+  after 'ret + single CC' to an EARLIER function across a real boundary.
+- EXACT OLD CLAIMS (CSV columns enclosing_function_start/enclosing_function_extent, per row):
+  0x006C1C2A/0x006C1C5C/0x006C1C9A/0x006C1CB5 -> 0x006C19B0, "0x006C1A33..0x006C1A35 (first-terminal
+  extent; SITE BEYOND first terminal: multi-path function)"; 0x006C4E8E/0x006C4EE9 -> 0x006C4C40,
+  "0x006C4D31..0x006C4D33 (...)"; 0x006E23FA/0x006E2441 -> 0x006E21F0, "0x006E237C..0x006E237E (...)";
+  0x008CD556/0x008CD645 -> 0x008CD1A0, "0x008CD1D0..0x008CD1D5 (...)".
+- CORRECTED CLAIM (every boundary re-verified from bytes with the QC-documented rule — function start
+  anchor ret(C3 or C2 imm16)+ret-adjacent 1-byte CC + clean linear decode reaching each site exactly as
+  'call 0x437f70'; extents per the census generator's first-terminal rule; probe evidence
+  01_RAW/FIX_ROUND_R4_BYTE_REVERIFICATION_RAW.txt [B]):
+  0x006C1A90 (bytes before: ".. 83 c4 1c c3 cc"; head: push -1; push 0xa047bb; inbound E8 callers
+  {0x4597C7, 0x45F02D, 0x55B891, 0x5F61AA} — re-verified, each decodes 'call 0x6c1a90'), extent
+  "0x006C1BDC..0x006C1BDE (first-terminal extent; SITE BEYOND first terminal: multi-path function)";
+  0x006C4E70 (bytes before: ".. 83 c4 20 c2 08 00 cc"; head: sub esp,0x94; callers {0x6C5506, 0x6C551C}),
+  extent "0x006C4F6B..0x006C4F6E"; 0x006E23B0 (bytes before: ".. 83 c4 34 c2 10 00 cc"; head: sub
+  esp,0x3c; caller {0x6E2EB9}), extent "0x006E2495..0x006E2498"; 0x008CD3E0 (bytes before: ".. 83 c4 10
+  c2 08 00 cc"; head: sub esp,0x3c; callers {0x8CD887, 0x8CDE82}), extent "0x008CD40F..0x008CD414
+  (first-terminal extent; SITE BEYOND first terminal: multi-path function)". The 4 old starts were also
+  re-verified as REAL adjacent functions (prologues + padding runs) and the 4 old extents as the
+  generator's mechanical output of the WRONG starts (the old rows were mis-anchored, not fabricated).
+- INSTRUMENT REPAIR: 00_Control/scripts/census_write_through.py find_function_start extended
+  (RET_ADJACENT_1CC: a 1-byte CC run immediately preceded by C3 or C2 imm16 ALSO anchors a candidate
+  start; the same clean-decode-landing filter decides); [W.0] PADDING_ANCHOR_RULE text documents the
+  extension + the closed defect; module docstring updated (OLD 47CD442C473713BE6CDDEEFB51ED240B9E74223EC0C786CA175132214B015F4F
+  -> NEW EBDEE761F3683FCAC69864C550F5252956C5C82C28C97AA1DA604F02DD72B4D4; snapshot
+  00_Control/PRE_EDIT_R4/00_Control/scripts/census_write_through.py.pre).
+- REGENERATED OUTPUTS: 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv (OLD
+  6EF52657F70BD43DA9054F78801AD9C7C8561CB80BF3619FF0094314A96081B9 -> NEW
+  9C8EAAAF0725E24B59F49D088381084E8662682652E1363A47CD710539EFAE83; snapshot
+  00_Control/PRE_EDIT_R4/01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv.pre) — programmatic
+  column-level diff: EXACTLY 10 rows changed, ONLY columns enclosing_function_start+enclosing_function_
+  extent (union of changed columns = {2,3}); the changed site set == the QC's 10; the other 89 rows
+  byte-identical. 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_RAW.txt (OLD
+  B227DDCFAD39F4F42908A49F58EBD62905EE67EB5A5D7D1AEDD8017A58ED5A05 -> NEW
+  B1795CC5DC65B58BF845D7AD86A147457307E04C3A5B24745EB04A92D02857C3; snapshot .pre) — aligned diff =
+  disclosed GENERATED_UTC/GENERATOR_SHA256 header + the [W.0] PADDING_ANCHOR_RULE block + EXACTLY the 10
+  per-site "SITE 0x... enclosing_function_start=... extent=..." lines; all per-site windows/events and
+  aggregates byte-stable.
+- FULL-POPULATION VERIFICATION (this run's own, stronger than the 10-row requirement): all 99 regenerated
+  enclosing_function_start values MATCH the QC hardened-finder attribution (0 mismatches; per-site list
+  in 00_CONTROL/QC_R3_RAW/QC_R3_REACHABILITY_RAW.txt); denominator D=99 unchanged; N=16 disposition sums
+  unchanged (READ_ONLY 43 / NO_WRITE 17 / PROV_LOST 19 / writer 1 / CFG 1 / UNRESOLVED 12 / INSUFFICIENT
+  6 = 99); N=8 unchanged (41/18/14/1/17/8 = 99); writer set {0x00458E27, three write events off 0/4/8}
+  unchanged; disposition/write-event/basis columns byte-identical for all 99 rows.
+- REASON: QC_R3 F2 (PE-MASTER adjudicated ACCEPTED; PE-MASTER sample-verified the structural basis).
+- BLAST RADIUS: attribution metadata only (10 rows x 2 columns); dispositions, write events, writer set,
+  row count and aggregates UNCHANGED; the census conclusions are unaffected.
+- RESIDUAL: NONE — this executor's re-verification from bytes agreed with the QC's corrected attribution
+  on all 10 rows and on all 99 sites.
+
+## AMEND-26 (2026-09-15 fix round) — F3: CG7 gate-basis count 20 -> 19
+- FINDING: QC_R3 F3 (P3).
+- EXACT OLD CLAIM: 06_REPORT/STAGE_ACCEPTANCE_GATES.csv CG7 basis "... 00_CONTROL/PRE_EDIT/** verified
+  byte-identical before and after (hash census: 20 files, all hashes equal to the run-start census)".
+- CORRECTED CLAIM: "(hash census: 19 files, all hashes equal to the run-start census; count corrected
+  20->19 per QC_R3 finding F3/AMEND-26 — the actual PRE_EDIT file count is 19, re-measured by the fix
+  round probe: 01_RAW/FIX_ROUND_R4_BYTE_REVERIFICATION_RAW.txt [C]; PRE_EDIT_R2 holds 27 files,
+  PRE_EDIT_R3 holds 5)". VERIFICATION: counted 00_CONTROL/PRE_EDIT/ = 19 files (the tree CG7's census
+  hashes; the QC's census also = 19) and 00_CONTROL/PRE_EDIT_R2/ = 27 files (the dispatch's
+  mentioned tree; count stated for completeness). The substantive claim (all hash censuses equal) was
+  TRUE and is unchanged.
+- FILE: 06_REPORT/STAGE_ACCEPTANCE_GATES.csv (OLD 857125C9FC37DEDA4182D2D389B26BC4B8768955088639D5D0F49F5403F43C84
+  -> NEW 7CD143BEA76461F60FA9AA827B8A5A2507BD1C92C2FD49F2065015D352C72FA9; snapshot
+  00_Control/PRE_EDIT_R4/06_Report/STAGE_ACCEPTANCE_GATES.csv.pre; same file/edit pass as AMEND-24's
+  CG4 correction — this entry's clause is the CG7 count only).
+- REASON: QC_R3 F3 (PE-MASTER adjudicated ACCEPTED).
+- BLAST RADIUS: one count literal in one gate basis cell; NO gate status changed.
+
+## AMEND-27 (2026-09-15 fix round) — fix-round evidence + provenance regeneration (mechanical)
+- WHAT: NEW fix-round artifacts + the final provenance regeneration. NEW 00_Control/scripts/fix_probe_r4.py
+  (SHA256 6D78571029DBBD65C412C80E7FCE488958C4B55AECAC154884FCC699FC1DF8BE; S0 fail-closed; run with -B;
+  independent of the generators under repair); NEW 01_RAW/FIX_ROUND_R4_BYTE_REVERIFICATION_RAW.txt (SHA256
+  11B986AEC3EB3E488CA5C0B8904472A6483A0DC0AD3D4744A29799CC6DAB0AFF; the PRE-EDIT byte re-verification of
+  every corrected fact: branch-B structure/containment/channels/dispatch/callee closure; the 4 F2 boundary
+  pairs with inbound-caller re-verification; the snapshot-tree counts). NEW 00_Control/PRE_EDIT_R4/
+  (14 .pre snapshots, mirrored relative paths: AMEND_LOG_R1.md OLD 0CF46C9B883833939366B940C5057C6EED3884D4C4CE40AD1B293059498E1822,
+  CORRECTION_EXECUTOR_RETURN.md OLD 38DF227A7E6EA1BF32D7AFDB6AA0E0617E2E17FFDB35E41455BA0061B2BBA7AE,
+  census_setter_reach.py OLD 50B5BCF51ABED206C708C46AF4901CAFD23F7CD4B9C0977B291B03F5F3662907,
+  census_write_through.py OLD 47CD442C473713BE6CDDEEFB51ED240B9E74223EC0C786CA175132214B015F4F,
+  ORIGIN_SETTER_REACHABILITY_RAW.txt OLD C9CC8DD8F359B3692EA2E96A406918A087C84628E8CC077FB6332F1CD446940D,
+  ORIGIN_SETTER_CALLER_CENSUS.csv OLD 5D4AE8190704C6CBD41C6DB648AA55048F5484CA2E6E4655D569AEFAE1FC365E,
+  ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv OLD 6EF52657F70BD43DA9054F78801AD9C7C8561CB80BF3619FF0094314A96081B9,
+  ORIGIN_SINGLETON_WRITE_THROUGH_RAW.txt OLD B227DDCFAD39F4F42908A49F58EBD62905EE67EB5A5D7D1AEDD8017A58ED5A05,
+  STAGE_ACCEPTANCE_GATES.csv OLD 857125C9FC37DEDA4182D2D389B26BC4B8768955088639D5D0F49F5403F43C84,
+  ORIGIN_STATUS_CORRECTION.md OLD 1CE527EA2BA1AE658211CCE9B4F2859887C8FED852372EABD4BBB45C3002AEC8,
+  SCRIPT_SHA256.csv OLD C6CCFD8E94E5CB87108AE9002A61DD6BA7596D04FC9E3A3C5F4F43A309E89646,
+  03_EVIDENCE/README.md OLD 5A96ADE92E1618971AA26FC12617EE1CE76251C784AF0435C57132841202DA52,
+  EVIDENCE_INDEX.csv OLD 8FA534AA1DEEB52B9C0EBDA711F8451A2BBEC6504A500EA4C3469BE4418BB0C2,
+  MANIFEST_SHA256.csv OLD D1DC9F3DC31468CFF865960E97E14136025F2F2A1AF0C03751415924712111B3). The four
+  provenance files were regenerated in ONE pass by gen_manifest.py (UNCHANGED script, QC_R3 precedent —
+  coverage via the package walk; canonical order SCRIPT_SHA256.csv -> 03_EVIDENCE/README.md ->
+  03_EVIDENCE/EVIDENCE_INDEX.csv -> 06_REPORT/MANIFEST_SHA256.csv; L12 self-exclusion respected;
+  SCRIPT_SHA256.csv now covers all 17 scripts incl. fix_probe_r4.py and the 2 repaired census
+  generators' new hashes; the index/manifest cover the new probe script, the new raw evidence and
+  PRE_EDIT_R4/). The NEW hashes of these four generated files — and of this log itself — are
+  intentionally NOT embedded here (the AMEND-12 self-reference rule: the manifest/index hash this log);
+  they are on disk and re-verified by the post-regeneration re-hash pass.
+- REASON: fix-round evidence discipline (new scripts must be SCRIPT_SHA256-registered; new evidence must
+  be in-package and manifest-covered; provenance must cover what exists on disk; snapshot mechanism
+  PRE_EDIT_R4 without touching PRE_EDIT/PRE_EDIT_R2/PRE_EDIT_R3).
+- NATURE: mechanical; NO science content, NO measured value, NO pin affected.
+- BLAST RADIUS: provenance files + new evidence/snapshot artifacts only.
+
+---
+
+# QC_R3 F1 RESIDUAL + TRANSCRIPTION ERRATUM TOUCHUP ROUND (PE-MASTER-dispatched bounded touchup of this
+# package; STATIC-ONLY; zero git mutations; no new package root; EXACTLY two bounded edits —
+# 06_REPORT/HANDOFF.md branch-B line correction + this log's AMEND-28/29 append — plus one provenance
+# regeneration by the UNCHANGED gen_manifest.py)
+
+Convention for this round: every amended file has a byte-exact .pre copy under 00_CONTROL/PRE_EDIT_R5/
+(mirrored relative path + ".pre"; SNAPSHOT_MECHANISM = PRE_EDIT_R5 for every entry below). Entries list
+finding, exact old claim, corrected claim, OLD/NEW SHA256, snapshot, reason, blast radius. AMEND-1..27
+above are untouched (append-only; byte-prefix verified against this round's PRE_EDIT_R5 log snapshot). All
+four older snapshot roots are FROZEN and were left untouched by this round (verified by before/after hash
+census, 19/27/5/14 files): PRE_EDIT, PRE_EDIT_R2, PRE_EDIT_R3, PRE_EDIT_R4. The new PRE_EDIT_R5 holds the
+2 files edited below: 06_REPORT/HANDOFF.md (OLD 4769D044028B636DEC36C2243EA1DC01C073A0FD1B70239B39CA65CC08307E97)
+and 00_CONTROL/AMEND_LOG_R1.md (OLD 86625D923913E837DB94635C4A8AA748C17C09E01F9642D9716453F82BEA49D3).
+
+## AMEND-28 (2026-09-15 touchup round) — F1 residual copy: HANDOFF.md branch-B line still carried the retracted disposition
+- FINDING: the QC_R3 F1 sweep left one stale copy of the branch-B disposition: 06_REPORT/HANDOFF.md's
+  CORRECTION RUN handoff block (appended by AMEND-20) still carried the pre-AMEND-23/24 reading. Discovered
+  by the fix-round executor and PE-MASTER-verified at dispatch (this round's EDIT 1); same F1 disposition
+  as AMEND-23/24.
+- EXACT OLD CLAIM (06_REPORT/HANDOFF.md, inside the EXTERNAL-AUDIT BRANCH CORRECTIONS bullet): "Branch B
+  (0x4B1B70: sole self-recursive E8 0x4B1F2C, zero imm32/vtable) is statically dead within measured channels
+  AND immaterial (does not reach the setter)."
+- CORRECTED CLAIM (measured; AMEND-23/24 per QC_R3 F1): "Branch B subtree re-derived (AMEND-23/24 per QC_R3
+  F1): NOT self-recursive and NOT statically dead — the E8 sites 0x4B1EEB (call 0x417A40) and 0x4B1F2C (call
+  0x4B1B70) both lie inside FUN_004B1C70 (FUN_004B1B70 extent ends ret @0x4B1C6E + int3 0x4B1C6F);
+  FUN_004B1C70 has external caller E8@0x4B2984 inside FUN_004B2950 (Execute, case-0xB2 dispatch) => the
+  subtree Execute --0xB2--> FUN_004B1C70 -> {0x417A40 -> 0x417880 -> 0x416FD0; 0x4B1B70} is STATICALLY
+  REACHABLE within the measured channels and STILL NEVER REACHES the origin setter (immaterial to origin
+  mutability; the setter's sole static in-tree remains the message-loop chain)." — applied inside the same
+  bullet with an inline AMEND-28 marker quoting the retracted sentence.
+- FILES: 06_REPORT/HANDOFF.md (OLD 4769D044028B636DEC36C2243EA1DC01C073A0FD1B70239B39CA65CC08307E97 ->
+  NEW 68A5B48019197B284C2863CB36479DAE5F2A921CD88933A5AE1E4D146C2D1C2D; snapshot
+  00_Control/PRE_EDIT_R5/06_REPORT/HANDOFF.md.pre). ONLY the branch-B sentence + the inline marker changed;
+  every byte before and after the replaced region is byte-identical to the .pre copy (verified
+  programmatically; Branch A text, anchor-discrepancy text and all other lines untouched).
+- REASON: QC_R3 F1 completeness — the missed stale-claim copy; the corrected disposition was already
+  canonical everywhere else (AMEND-23: [R.6] raw + its generator; AMEND-24: analysis layer + CG4 gate
+  basis + executor return).
+- BLAST RADIUS: one report-layer sentence; NO measurement value, NO census number, NO gate status, NO
+  science status changed; ORIGIN_SETTER_RUNTIME_EXECUTION = UNVERIFIED unchanged.
+
+## AMEND-29 (2026-09-15 touchup round) — TRANSCRIPTION ERRATUM (disclosure only; NO frozen entry rewritten): byte-verified frozen-entry hash-string defects
+- FINDING (this round's own ad-hoc -B python re-measurement, read-only on the package; every pair re-hashed
+  from the bytes — hash strings must be byte-verified programmatically vs the bytes, not format-checked):
+  the fix-round preamble's defect report for the frozen AMEND-22 parenthetical OLD-hash strings is CONFIRMED,
+  and its entry attribution for the HELPER82B5A0_CALLER_CENSUS.csv one-drop string is CORRECTED by
+  measurement (the defective string is AMEND-15's OLD string, NOT AMEND-8's). The five byte-verified pairs:
+  (1) AMEND-22 00_Control/SCRIPT_SHA256.csv OLD: recorded 43D4A2588FD028E886F7014ED4312C59A8F0A42C8BC625092EA0370EA5BCA78
+  (63 chars — additionally malformed) vs actual .pre bytes 43D4A2588FD028E8183E6CC299483C5D2178AFC39BB7234248FCB025569BC597
+  (64 chars) — common prefix 16, diverges at char 17.
+  (2) AMEND-22 03_EVIDENCE/README.md OLD: recorded DEE3D74FD163D7F7FE7AD2BDF2898FA5AECBF3C746BB912AF3C954794839BA60
+  vs actual DEE3D74FD163D7F75F3500651D46173BA805A18ADEA3133E36DE39C66AB81831 — common prefix 16, diverges at 17.
+  (3) AMEND-22 03_EVIDENCE/EVIDENCE_INDEX.csv OLD: recorded 1F17F394938DE4CC0F6EF0134CDAE66EA535CC7BD036D7977521A62B7D3F6CB5
+  vs actual 1F17F394938DE4CCE15913AA62E952735D623FE502D0FED84CAC78F28AFB84B0 — common prefix 16, diverges at 17.
+  (4) AMEND-22 06_Report/MANIFEST_SHA256.csv OLD: recorded 8562E629592E369229B4C0EBE95893F37CB1DA4E8D9DF17D91D75A4E5C936AB4
+  vs actual 8562E629592E369291FCFCFDC7BB59BFDF9D2A9D45332C76CD158F9DE7494E0B — common prefix 16, diverges at 17.
+  (5) HELPER82B5A0_CALLER_CENSUS.csv one-character drop (63 chars): recorded A847CA2C8010C84FE60EDCD87DA5ED2C0477FC10869D5FA4DAFE02D80C1B9EF
+  vs actual A847CA2C8010C84FEE60EDCD87DA5ED2C0477FC10869D5FA4DAFE02D80C1B9EF (64 chars; == the current
+  01_RAW/HELPER82B5A0_CALLER_CENSUS.csv bytes; this log itself carries the CORRECT 64-char form at
+  AMEND-8's NEW string) — exactly one 'E' dropped after the common 17-char prefix. MEASURED ATTRIBUTION
+  CORRECTION: this defective string is the parenthetical OLD string in the frozen AMEND-15 entry
+  ("01_RAW/HELPER82B5A0_CALLER_CENSUS.csv (OLD A847CA2C... -> NEW IDENTICAL)"), NOT AMEND-8's: AMEND-8's own
+  OLD string 2092154C0E72850EBD8A31DCB92603E7646353C6E4BFD462D2222B53029A7AA7 (64 chars) byte-MATCHES
+  00_CONTROL/PRE_EDIT/01_RAW/HELPER82B5A0_CALLER_CENSUS.csv.pre, and AMEND-8's NEW string
+  A847CA2C8010C84FEE60EDCD87DA5ED2C0477FC10869D5FA4DAFE02D80C1B9EF byte-matches the current file. The
+  fix-round preamble's sentence "the same transcription-defect class exists in AMEND-8 (one dropped character
+  at position 17 of the 01_RAW/HELPER82B5A0_CALLER_CENSUS.csv OLD hash, 63 chars)" is therefore
+  mis-ATTRIBUTED (the defect is real; the entry number was wrong). The preamble text stays frozen
+  (append-only discipline); THIS entry is the corrected record.
+- NEGATIVE CONTROLS (same measurement): (a) AMEND-22's fifth string (AMEND_LOG_R1.md OLD
+  AFACE892E260DFD6086AA0957D2031DE931A129F4EDFD213C42B821C900B72CB, 64 chars) byte-MATCHES
+  00_CONTROL/PRE_EDIT_R3/00_CONTROL/AMEND_LOG_R1.md.pre — the transcription defect is selective, not
+  universal; (b) AMEND-8's OLD/NEW pair both byte-MATCH (above) — the defect is not per-file but per-string.
+- DEFECT CLASS (measured): transcription corruption — the first ~16 hex characters are correct, then the
+  strings diverge (the four AMEND-22 strings) or drop one character (the AMEND-15 string). Full-census
+  cross-check (this round, run on the log BEFORE this round's append: 119 full-length hash strings):
+  every string was compared against the SHA256 of every package file on disk (130 files, incl. ALL .pre
+  snapshots), every hash value in the five preserved manifest states (current + PRE_EDIT/R2/R3/R4-era;
+  422 row values) and all 55 HEAD-committed blob contents — NO defective string is the hash of ANY package file in ANY of those states (transcription
+  corruption, NOT mis-attribution of a real hash); 112 of the 119 strings byte-verified MATCH a preserved
+  on-disk/manifest/HEAD state. Census residuals, recorded for completeness and NOT classified as defects:
+  AMEND-1's E3B0C442... is the canonical SHA256 of the empty byte string (the in-progress empty
+  EVIDENCE_INDEX.csv state it cites — correct by definition; those bytes were never preserved on disk);
+  AMEND-3's EAECE8B9... (first-correction-pass NEW for 06_REPORT/STAGE_ACCEPTANCE_GATES.csv) has NO
+  surviving byte state (not on disk, not at HEAD — the persistence pass modified the file before any
+  snapshot or commit captured that state) — unverifiable either way, so NOT classified.
+- AUTHORITATIVE HASHES: the .pre bytes themselves plus the regenerated 06_REPORT/MANIFEST_SHA256.csv rows
+  for 00_CONTROL/PRE_EDIT_R3/** (re-verified this round: the five true PRE_EDIT_R3 .pre hashes above are
+  exactly the current manifest rows). The frozen entry texts (AMEND-15, AMEND-22, the fix-round preamble,
+  and AMEND-8) stay frozen as the historical record (append-only discipline); NO file was rewritten by
+  this entry.
+- CHECK LIMITATION (carried forward): QC_AUDIT_R3 Point-12 verified hash strings by FORMAT presence ("OLD
+  <sha256> -> NEW <sha256>" shape) — that check cannot catch this defect class; hash strings must be
+  byte-verified programmatically against the cited bytes. Carried as the noted check limitation for future
+  QC rounds.
+- REASON: the fix round disclosed the frozen-entry hash-string defects to PE-MASTER without correcting
+  them (entries 1..22 frozen append-only); this round re-measured every pair from the bytes and records
+  the erratum (disclosure only).
+- BLAST RADIUS: NONE on any artifact (disclosure only; no file rewritten). NO science content, NO measured
+  value, NO pin, NO gate status affected; the .pre bytes and the manifest rows were always authoritative
+  and are unchanged by this entry.
+- IN-ROUND CORRECTION NOTE (this round's own quality census caught a live instance of the defect class
+  in THIS entry's first append before return to PE-MASTER): pair (2)'s two strings were initially
+  transcribed here with a single-character display-chain error (char 13 read as 'F' instead of the byte
+  'D' in BOTH strings; the prefix-16/diverge-at-17 relationship was preserved, so the shape check passed).
+  The post-append programmatic census (every full-length hash string in this log byte-compared against
+  the on-disk artifacts) flagged the actual-hash citation as matching NO on-disk artifact; the pair was
+  then re-derived from three independent pre-session oracles (00_CONTROL/PRE_EDIT_R4/00_Control/
+  AMEND_LOG_R1.md.pre frozen AMEND-22 text; the PRE_EDIT_R4-era manifest row for 00_CONTROL/PRE_EDIT_R3/
+  03_EVIDENCE/README.md.pre; a fresh direct hash of the .pre bytes) and corrected in-round BEFORE the
+  provenance regeneration. Frozen entries 1..27 were not touched; the correction is confined to this
+  round's own appended bytes. Recorded here as a demonstrated instance of the entry's own check
+  limitation: only byte-verification against the bytes catches this class.
+
+---
+
+# PERSISTENCE PASS RECORD (supersession publication; G17-equivalent; 2026-09-15; pe-master-auditor; PE-MASTER-ordered path-limited publication of the human-authorized bounded correction PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915)
+
+This section records every persistence-pass change of the supersession publication for log completeness
+(the P3-R1 lesson: every package change is logged). Append-only; no prior entry above is rewritten
+(byte-prefix verified post-append: the pre-append bytes of this log, SHA256
+9C036A5B074280A116323F7489225840DA7A2FD13010F1CBC6AB4FCE8642D19A / 79407 bytes, are the exact byte-prefix
+of the post-append log). Governance/packaging only — NO science content, NO measured value, NO pin
+affected. No .pre copies were created FOR THIS PASS (all five PRE_EDIT roots are frozen load-bearing
+evidence, untouched and re-verified present: PRE_EDIT 19 / R2 27 / R3 5 / R4 14 / R5 2). Entropia.exe pin
+re-verified at persistence start, recorded only (nothing decoded by this pass): SIZE 8015872, SHA256
+E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (D:\Eudoria_Reconstruction\pcg_install\Entropia.exe).
+Base state at persistence start: HEAD 8a09e459eb5a930054f35b713afe3e28b6fa5abc == origin/master ==
+ls-remote; zero staged; worktree changes confined to this package (+ the pre-existing untracked
+docs/audits/PE_935_NINODE_SLOT17_FIRSTCALL_R1_20260914/ and experiments/, untouched).
+
+- 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md: CREATED — PE-MASTER's supersession adjudication of the
+  corrected state persisted VERBATIM on PE-MASTER's direct order (UTF-8, LF line endings, single trailing
+  newline at EOF; 30 lines; 19751 bytes; SHA256
+  48C6FC23233038EA267C7FB9330FE4DB37FB9A38AC9A60280E006072DC381795). It SUPERSEDES the scientific status
+  of the historical 06_REPORT/PE_MASTER_REVIEW.md (preserved byte-identical as history; the superseded-
+  claims scope per the supersession review's own header).
+- docs/audits/STANDING_RULES.md (OUTSIDE this package; the authorized in-repo standing-rules file,
+  append-only per its own contract; authority: the human authorization of
+  PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): four new entries OMC/L1..L4 appended below the
+  P4R3/c entry — OMC/L1 CLAIM_OF_MEASUREMENT_REQUIRES_MEASUREMENT_ARTIFACT; OMC/L2
+  ROW_INTEGRITY_DOES_NOT_VALIDATE_INFERENCE; OMC/L3 POINTER_RETURN_ANALYSIS_MUST_TRACK_ALIAS_PROVENANCE;
+  OMC/L4 NEGATIVE_EXISTENCE_CLAIM_REQUIRES_ESCAPE_CHANNEL_ACCOUNTING (rule texts verbatim per PE-MASTER's
+  supersession adjudication CLAIM_MATRIX (10); evidence pointers into this package). OLD SHA256
+  6D00442B759ACAAB9F877D1088FE9BC4E7AF141124B0E5E4EC8C4BB3CA50BAF3 (3191 bytes) -> NEW SHA256
+  5537C71372990D66A85F1C606EDC6C154B140DE9B27F2411882050A0E25AC0E4 (9650 bytes); byte-prefix verified
+  (append-only). DISCLOSED RESIDUAL: the standing-contract repo/local byte-identical pair copies
+  (99_Audits\STANDING_RULES.md + the two frozen audit worktrees) remain at the OLD bytes — NOT updated
+  by this pass (outside the authorized target set; left for a separate SYNC authorization).
+- 06_REPORT/QC_AUDIT_R3.md, 00_CONTROL/QC_R3_RAW/, 01_RAW/FIX_ROUND_R4_BYTE_REVERIFICATION_RAW.txt,
+  00_CONTROL/PRE_EDIT_R2..R5/, 00_CONTROL/CORRECTION_CONTRACT_ORIGIN_MUTABILITY_R1.md,
+  00_CONTROL/CORRECTION_EXECUTOR_RETURN.md: NOT modified by this pass (frozen; covered by the regenerated
+  provenance below).
+- FINAL PROVENANCE REGENERATION (this record appended FIRST, so the regenerated manifest covers the final
+  log bytes): the UNCHANGED gen_manifest.py (python -B; AMEND-12 generation order SCRIPT_SHA256.csv ->
+  03_EVIDENCE/README.md -> 03_EVIDENCE/EVIDENCE_INDEX.csv -> 06_REPORT/MANIFEST_SHA256.csv; L12
+  self-exclusion respected) regenerates the four provenance files in ONE pass, so ALL package files are
+  covered INCLUDING 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md, 06_REPORT/QC_AUDIT_R3.md,
+  PRE_EDIT_R2..R5/, 00_CONTROL/QC_R3_RAW/, the FIX_ROUND artifacts and this amended log: package files
+  133 (censused pre-regeneration; zero __pycache__/.pyc) -> 06_REPORT/MANIFEST_SHA256.csv 132 rows +
+  03_EVIDENCE/EVIDENCE_INDEX.csv 131 rows. Post-regeneration re-hash census gate (fail-closed): every
+  manifest row (132/132) and every index row (131/131) must re-hash MATCH against the on-disk bytes, and
+  the actual row counts must equal the recorded 132/131 — this pass commits ONLY on full MATCH; the
+  verification result is reported in the G17-equivalent persistence return. 00_CONTROL/SCRIPT_SHA256.csv
+  covers all 17 scripts (byte-stable — no script changed by this pass). The NEW hashes of the four
+  generated provenance files are intentionally NOT embedded here (the AMEND-12 self-reference rule: the
+  manifest/index hash this log); they are on disk and reported in the G17-equivalent persistence return.
+- AUDIT_ENTRYPOINT.md (repo root, OUTSIDE this package): exactly ONE new topmost LATEST RUNS row appended
+  (the correction supersession row; commit cell discovery command `git log -1 --
+  docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915`); no existing row rewritten or removed
+  (git diff --numstat 1 added / 0 removed; ENTRYPOINT_ROW_SURVIVAL verified); the CURRENT STATE / IMMEDIATE
+  BLOCKER row NOT touched (the M1 queue is unchanged; minimal-touch rule).
+- COMMIT DISCIPLINE: ONE path-limited commit staging EXACTLY this package (all modified + new files,
+  incl. PRE_EDIT_R2..R5) + AUDIT_ENTRYPOINT.md + docs/audits/STANDING_RULES.md — NOTHING ELSE (staged
+  census verified: zero paths outside the three roots; the pre-existing untracked
+  docs/audits/PE_935_NINODE_SLOT17_FIRSTCALL_R1_20260914/ and experiments/ NOT swept in; zero
+  audit/work-audit branch files; zero __pycache__/.pyc; zero proprietary payload — the staged diff
+  carries no EXE byte-dumps beyond short instruction citations). git diff --cached --check — MEASURED HONESTLY, NOT ZERO: the staged diff carries 11,424 default-rule flags, ALL pre-existing package-file conventions — CRLF line endings of the Windows text-mode generator outputs (.pre snapshots, raws, CSVs; the SAME convention as the HEAD-committed package files — the 8a09e45 publication commit itself carried 2,686 such flags) plus the cr-at-eol census's 544 flags (543 real-trailing-space lines inside the executor's raw disasm/QC dumps + 1 new-blank-line-at-EOF @01_RAW/ORIGIN_SETTER_458D90_DISASM.txt:701), incl. this log's own 2 pre-existing stray CRs (@lines 488/525, AMEND-22-era) and HANDOFF.md:159's stray CR — every flagged byte predates this pass; THIS pass's own additions (06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md, the STANDING_RULES.md OMC/L1..L4 append, the AUDIT_ENTRYPOINT.md row, this record) carry ZERO flags under BOTH the default and the cr-at-eol rules; the flagged bytes are frozen QC-verified manifest-locked evidence (zero science edits — not modifiable by this pass), so they are published as-is and disclosed here + in the G17-equivalent persistence return. The commit SHA is discoverable via `git log -1 --
+  docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915` (a package file cannot embed its own
+  commit SHA); the post-push HEAD == origin/master == ls-remote triple + timestamp live in the
+  G17-equivalent persistence return, per the one-commit discipline.

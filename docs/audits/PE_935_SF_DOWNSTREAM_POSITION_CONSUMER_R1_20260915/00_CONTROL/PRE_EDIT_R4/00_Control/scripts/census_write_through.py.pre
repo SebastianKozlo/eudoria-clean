@@ -1,0 +1,663 @@
+"""census_write_through.py — provenance-aware write-through census over ALL direct E8 callers
+of FUN_00437F70 (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915, inside
+canonical package PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915).
+
+Contract Section 4 instrument. PRE-REGISTERED (fixed BEFORE any measurement):
+  WRITE_THROUGH_WINDOW_N = 16  (primary census)
+  HISTORICAL_WINDOW_N   = 8    (separate historical view; the falsified canonical claim said
+                                'within 8 instructions')
+  CALLEE_HEAD_WINDOW    = 0xA0 bytes (fixed bounded head for escaped-pointer classification)
+
+Method (all measurements from Entropia.exe bytes; S0 fail-closed at start; STATIC-ONLY):
+  1. Independent raw E8/E9 rel32 scan of .text for target 0x437F70 (denominator candidates).
+  2. Every raw E8 candidate is VERIFIED as a real instruction boundary: backward scan (<= 0x1000
+     bytes) for padding runs (int3/00/90, >= 2 bytes) whose END anchors a candidate function start
+     F; candidate accepted iff linear decode from the NEAREST such F lands EXACTLY on the site as
+     'call 0x437f70'. Terminals may be crossed on the way (multi-path functions keep real code
+     after their first ret in address order — e.g. FUN_00437F70 itself); the first-terminal
+     rejection was an instrument defect removed after calibration (it had excluded the 2 real
+     sites 0x50AFC3 / 0x9300C2). Raw candidates that cannot be verified are EXCLUDED from the
+     denominator and disclosed. Mis-attribution risk (a mid-function padding run producing a
+     too-late F) is disclosed; per-site windows + extents are printed so anomalies are visible.
+  3. Per verified site: sprov.Engine symbolic walk from the call return (EAX := S_PTR token),
+     window N=16 and separately N=8, stopping at terminals. Provenance tracked across register
+     copies, address aliases, stack spill/reload (esp ledger), pushes/pops, call escapes.
+  4. Escape events (arg registers / stack-arg slots) are classified by a fixed 0xA0-byte callee
+     head walk (sprov.classify_callee_head): READ_ONLY / WRITE_THROUGH / FORWARDED /
+     NOT_USED_IN_CHECKED_HEAD / INSUFFICIENT_PROOF_HEAD_BOUND; clobbered_before_use marks
+     non-effective channels (the escaped value was destroyed inside the walked head without use).
+  5. Disposition per site (deterministic priority, see RAW file): direct writes first, then
+     effective escapes, then store/terminal escapes, stack ambiguity, control flow, loss,
+     window exhaustion. Aggregates are mechanical sums over rows. NO science conclusions are
+     emitted here; interpretation lives in 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md.
+
+Outputs:
+  01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv  (one row per verified call site)
+  01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_RAW.txt    (method, windows, taxonomy, per-site detail,
+                                                     aggregates mechanically derived)
+"""
+import sys
+import os
+import struct
+import hashlib
+import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from capstone.x86 import X86_OP_REG, X86_OP_IMM, X86_OP_MEM
+import decode_lib as L
+import sprov as SP
+
+RUN_DIR = r"D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915"
+RAW = os.path.join(RUN_DIR, "01_RAW")
+SCRIPT_PATH = os.path.abspath(__file__)
+
+GETTER = 0x437F70
+WINDOW_N = 16          # pre-registered primary
+HIST_N = 8             # pre-registered historical view
+HEAD_BYTES = 0xA0      # pre-registered callee head bound
+# Backward function-start anchoring: int3 (0xCC) runs ONLY. A calibration attempt with
+# (0xCC, 0x00, 0x90) produced false mid-instruction anchors (0x00/0x90 occur inside
+# ordinary instructions, e.g. 'add eax,0x90' at 0x50A071 gave the false anchor 0x50A073
+# for site 0x50A075, whose true enclosing function starts at 0x50A050); corrected to CC-only.
+PAD_BYTES = (0xCC,)
+PAD_MIN_RUN = 2
+BACK_SCAN_MAX = 0x1000
+
+
+def script_sha256():
+    with open(SCRIPT_PATH, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest().upper()
+
+
+def raw_e8_scan(img, target):
+    """Independent raw E8/E9 rel32 scan of .text (byte-level candidates, unverified)."""
+    e8 = []
+    e9 = []
+    for nm, va_s, vs, ro, rs in img.sections:
+        if nm != ".text":
+            continue
+        raw = img.data[ro:ro + rs]
+        base = img.imagebase + va_s
+        for i in range(len(raw) - 5):
+            if raw[i] in (0xE8, 0xE9):
+                rel = struct.unpack_from("<i", raw, i + 1)[0]
+                src = base + i
+                if src + 5 + rel == target:
+                    (e8 if raw[i] == 0xE8 else e9).append(src)
+    return sorted(e8), sorted(e9)
+
+
+def find_function_start(img, md, site):
+    """Enclosing-function-start search (documented rule, see module docstring).
+
+    Rule (corrected after instrument calibration on sites 0x50AFC3/0x9300C2): accept the NEAREST
+    padding-run anchor whose linear decode lands EXACTLY on the site as 'call 0x437f70'.
+    Terminals may be CROSSED on the way: compiled functions with early-return paths put real
+    code after their first 'ret' in address order (e.g. FUN_00437F70 itself: ret@0x437FCF then
+    the 0x437FD0 block, ret@0x437FE6); a call site in that later block must still verify against
+    the same function start. The first-terminal break was an instrument defect that excluded
+    2 real sites; it is removed. Mis-attribution risk (mid-function padding runs) is unchanged
+    and disclosed; per-site windows + extents are printed so anomalies are visible.
+    """
+    try:
+        back = img.read(site - BACK_SCAN_MAX, BACK_SCAN_MAX)
+    except Exception:  # noqa
+        back = img.read(max(img.imagebase + 0x1000, site - BACK_SCAN_MAX),
+                       site - max(img.imagebase + 0x1000, site - BACK_SCAN_MAX))
+    anchors = []
+    run = 0
+    start_i = 0
+    for i, b in enumerate(back):
+        if b in PAD_BYTES:
+            if run == 0:
+                start_i = i
+            run += 1
+        else:
+            if run >= PAD_MIN_RUN:
+                anchors.append(site - BACK_SCAN_MAX + start_i + run)  # run END = candidate F
+            run = 0
+    if run >= PAD_MIN_RUN:
+        anchors.append(site - BACK_SCAN_MAX + start_i + run)
+    for f in sorted(anchors, reverse=True):  # nearest to site first
+        try:
+            code = img.read(f, site - f + 5)
+        except Exception:  # noqa
+            continue
+        for ins in md.disasm(code, f):
+            if ins.address == site:
+                if ins.mnemonic == "call" and ins.operands and ins.operands[0].type == X86_OP_IMM \
+                        and ins.operands[0].imm == GETTER:
+                    return f
+                break
+            if ins.address + ins.size > site:
+                break  # runs over the site without starting there
+        continue
+    return None
+
+
+def function_extent(img, md, f, site=None, cap=0x4000):
+    """First-terminal+padding extent from a proven start. Returns (terminal_va, terminal_end,
+    site_beyond) where site_beyond flags that the call site lies past the first terminal
+    (multi-path function: real code follows the first ret in address order)."""
+    try:
+        code = img.read(f, cap)
+    except Exception:  # noqa
+        return None
+    for ins in md.disasm(code, f):
+        if ins.mnemonic in ("ret", "retf", "iretd", "hlt", "ud2"):
+            beyond = bool(site is not None and ins.address < site)
+            return ins.address, ins.address + ins.size, beyond
+        if ins.mnemonic == "jmp" and ins.operands and ins.operands[0].type == X86_OP_IMM:
+            beyond = bool(site is not None and ins.address < site)
+            return ins.address, ins.address + ins.size, beyond
+    return None
+
+
+def walk_window(img, md, site, n, ret_cache):
+    """Engine walk over n instructions after the call. Returns dict with events/state.
+
+    Seed convention: the INITIAL S_PTR token (the site's own getter return) has gen == 0.
+    Tokens re-established by an IN-WINDOW call to the getter (a different census site — every
+    direct E8 call of the getter is its own census row) have gen > 0; their post-window fate is
+    owned by those sites' own rows and is disclosed as covered-elsewhere, never silently
+    resolved or unresolved for this row.
+    """
+    win = []
+    try:
+        all_ins = L.disasm_range(md, img, site + 5, site + 5 + 0x60)
+    except Exception as e:  # noqa
+        return {"error": "decode-fail:%s" % e, "ins": [], "eng": None}
+    for i in all_ins:
+        win.append(i)
+        if len(win) >= n:
+            break
+        if i.mnemonic in ("ret", "retf", "iretd", "hlt", "ud2", "jmp"):
+            break
+    seed = SP.Tok(0, gen=0)
+    eng = SP.Engine(init_regs={"eax": seed}, getter_va=GETTER,
+                    ret_lookup=lambda va: SP.ret_convention(md, img, va, ret_cache))
+    clobbers = []
+    seed_clobbers = []
+    stopped = None
+    for ins in win:
+        before = {r: t.gen for r, t in eng.regs.items() if isinstance(t, SP.Tok)}
+        res = eng.step(md, ins)
+        after = {r: t.gen for r, t in eng.regs.items() if isinstance(t, SP.Tok)}
+        kinds_here = [e.kind for e in eng.events if e.va == ins.address]
+        for r in before:
+            if r not in after:
+                if "ESCAPE_ARGREG" not in kinds_here and "GETTER_RETURN" not in kinds_here:
+                    clobbers.append((ins.address, r, ins.mnemonic, before[r]))
+            elif after[r] != before[r]:
+                # token replaced by a different generation (re-entrant getter return
+                # overwrote a live seed token): the seed token's death is a clobber
+                if "GETTER_RETURN" in kinds_here:
+                    seed_clobbers.append((ins.address, r, ins.mnemonic, before[r]))
+        for r in after:
+            if r not in before and ins.mnemonic.startswith("call"):
+                pass  # fresh token from an in-window getter return: other site's row
+        if res == "STOP":
+            stopped = ins.mnemonic
+            break
+    exhausted = (stopped is None and len(win) == n)
+    return {
+        "ins": win,
+        "eng": eng,
+        "seed": seed,
+        "clobbers": clobbers,
+        "seed_clobbers": seed_clobbers,
+        "stopped": stopped,
+        "exhausted": exhausted,
+        "error": None,
+    }
+
+
+def classify_escapes(img, md, events, ret_cache, head_cache):
+    """Classify every escape event via the fixed 0xA0 callee head. Returns list of dicts.
+
+    GETTER_SELF_CALL rule: an escape whose callee is FUN_00437F70 itself is marked NON-EFFECTIVE
+    (clobbered-equivalent) — the getter is fully decoded in this very census package
+    (01_RAW/ORIGIN_SETTER_458D90_DISASM.txt [S.2]): a 0-arg getter that never reads incoming
+    EAX/ECX/EDX or stack args (plain ret; EAX := S_PTR at return). Treating it as an unresolved
+    deeper consumer would be false precision; the fresh S_PTR it returns is tracked as a
+    separate token generation owned by that call site's own census row.
+    """
+    out = []
+    for e in events:
+        if e.kind == "ESCAPE_ARGREG":
+            reg = e.detail.split("reg=")[1].split(" ")[0]
+            target = int(e.detail.split("callee ")[1].split(" ")[0], 16)
+            channel = ("reg", reg)
+        elif e.kind == "ESCAPE_STACKARG":
+            key = int(e.detail.split("callee_arg_key=")[1].split(" ")[0])
+            target = int(e.detail.split("-> callee ")[1].split(" ")[0], 16)
+            channel = ("stack", key)
+        elif e.kind == "ESCAPE_STORE":
+            out.append({"event": e, "kind": "STORE", "class": "STORE_ESCAPE",
+                        "clobbered_before_use": False, "head": None})
+            continue
+        else:
+            continue
+        if target == GETTER:
+            out.append({"event": e, "kind": e.kind, "class": "GETTER_SELF_CALL",
+                        "clobbered_before_use": True, "head": None,
+                        "note": "callee is FUN_00437F70 itself (fully decoded in this package: "
+                                "0-arg getter, never reads incoming EAX/ECX/EDX/stack; plain ret; "
+                                "EAX := S_PTR) — non-effective channel"})
+            continue
+        if target == 0:
+            out.append({"event": e, "kind": e.kind, "class": "INSUFFICIENT_PROOF_HEAD_BOUND",
+                        "clobbered_before_use": False, "head": None,
+                        "note": "indirect call target: head not decodable"})
+            continue
+        ck = (target, channel[0], channel[1])
+        if ck not in head_cache:
+            head_cache[ck] = SP.classify_callee_head(md, img, target, channel, ret_cache,
+                                                     head_bytes=HEAD_BYTES)
+        out.append({"event": e, "kind": e.kind, "class": head_cache[ck]["class"],
+                    "clobbered_before_use": head_cache[ck]["clobbered_before_use"],
+                    "head": head_cache[ck]})
+    return out
+
+
+def parse_write_events(events):
+    ws = []
+    for e in events:
+        if e.kind != "WRITE_S":
+            continue
+        off = int(e.detail.split("off=")[1].split(" ")[0])
+        val = e.detail.split("value=")[1]
+        ws.append((e.va, off, val))
+    return ws
+
+
+def disposition(walk, escapes_cls):
+    """Deterministic disposition (priority pre-registered in the RAW file).
+
+    Token generations: gen==0 = this site's own getter return (the seed); gen>0 = tokens
+    re-established by an in-window getter call — a DIFFERENT census site whose own row owns
+    their fate (disclosed as covered-elsewhere; never silently resolved or unresolved here).
+    """
+    eng = walk["eng"]
+    events = eng.events
+    writes = parse_write_events(events)
+    live_regs_all = {r: t.gen for r, t in eng.regs.items() if isinstance(t, SP.Tok)}
+    seed_live_regs = [r for r, g in live_regs_all.items() if g == 0]
+    fresh_live_regs = [r for r, g in live_regs_all.items() if g > 0]
+    live_slots = {k: t.gen for k, t in eng.slots.items()}
+    seed_live_slots = [k for k, g in live_slots.items() if g == 0]
+    esc_term = [e for e in events if e.kind == "ESCAPE_AT_TERMINAL"]
+    stack_ambig = [e for e in events if e.kind in ("AMBIG_EBP_LOAD", "SPILL_UNKNOWN_EBP",
+                                                   "AMBIG_STACK", "ESP_PIVOT")]
+    esp_unc = [e for e in events if e.kind == "ESP_UNCERTAIN"]
+    spills = [e for e in events if e.kind in ("SPILL", "SPILL_PUSH", "STACK_COPY")]
+    branches_live = [e for e in events if e.kind == "BRANCH" and "live=-" not in e.detail]
+    store_escapes = [x for x in escapes_cls if x["kind"] == "STORE"]
+    effective = [x for x in escapes_cls if x["kind"] != "STORE" and not x["clobbered_before_use"]]
+    seed_destroyed = bool(walk["clobbers"] or walk["seed_clobbers"] or
+                          any(e.kind == "SPILL_OVERWRITTEN" for e in events))
+
+    # 1. direct writes through S-derived pointers (any generation: an in-window token write
+    #    is a write at THIS site's instruction stream; it is recorded and attributed by VA)
+    if writes:
+        offs = sorted(set(w[1] for w in writes))
+        triple = [o for o in offs if o in (0, 4, 8)]
+        other = [o for o in offs if o not in (0, 4, 8)]
+        name = ""
+        if triple:
+            name += "WRITE_S_PLUS_" + "+".join(str(o) for o in triple)
+        if other:
+            name += ("+" if name else "") + "WRITE_S_OTHER_OFFSET(%s)" % ",".join(str(o) for o in other)
+        return name, "writes"
+    # 2. effective escapes (callee-head classified)
+    if effective:
+        cls_set = [x["class"] for x in effective]
+        if "WRITE_THROUGH" in cls_set:
+            return "S_PTR_ESCAPED_WRITE", "escape"
+        if any(c in ("FORWARDED", "NOT_USED_IN_CHECKED_HEAD") for c in cls_set):
+            return "S_PTR_ESCAPED_UNRESOLVED", "escape"
+        if "INSUFFICIENT_PROOF_HEAD_BOUND" in cls_set:
+            return "INSUFFICIENT_PROOF_HEAD_BOUND", "escape"
+        return "S_PTR_ESCAPED_READ_ONLY", "escape"
+    # 3. store escapes (S_PTR stored into another object/global)
+    if store_escapes:
+        return "S_PTR_ESCAPED_UNRESOLVED", "escape-store"
+    # 4. seed tokens live in registers at a terminal: returned to the enclosing caller
+    if esc_term and seed_live_regs:
+        return "S_PTR_ESCAPED_UNRESOLVED", "escape-terminal"
+    # 5. stack-model ambiguity with live/possible seed spill state
+    if (stack_ambig or (esp_unc and (spills or live_slots))) and (spills or seed_live_slots or seed_live_regs):
+        return "INSUFFICIENT_PROOF_STACK_ESCAPE", "stack-ambiguity"
+    # 6. unconditional jmp out of the window with live seed provenance
+    if walk["stopped"] == "jmp" and (seed_live_regs or seed_live_slots):
+        return "CONTROL_FLOW_ESCAPE", "cfg"
+    # 7. conditional branch crossed while seed provenance live (taken path unexamined)
+    if branches_live:
+        return "CONTROL_FLOW_ESCAPE", "cfg"
+    # 8. window exhausted: seed tokens still live
+    if walk["exhausted"]:
+        if seed_live_slots and not seed_live_regs:
+            return "INSUFFICIENT_PROOF_STACK_ESCAPE", "spill-live-at-bound"
+        if seed_live_regs:
+            return "INSUFFICIENT_PROOF", "bound-exhausted-live"
+        # all seed tokens dead at the bound (fresh tokens, if any, are other sites' rows)
+        if seed_destroyed:
+            return "S_PROVENANCE_LOST", "destroyed-then-bound"
+        return "NO_WRITE_WITHIN_BOUND", "bound-exhausted-dead"
+    # 9. stopped at a terminal
+    if walk["stopped"] in ("ret", "retf"):
+        if seed_live_slots and not seed_live_regs:
+            if seed_destroyed:
+                return "S_PROVENANCE_LOST", "destroyed-then-terminal"
+            return "NO_WRITE_WITHIN_BOUND", "frame-completed-slot-only"
+        if not seed_live_regs:
+            if seed_destroyed:
+                return "S_PROVENANCE_LOST", "destroyed-then-terminal"
+            return "NO_WRITE_WITHIN_BOUND", "frame-completed"
+        return "INSUFFICIENT_PROOF", "terminal-state-unexpected"
+    return "INSUFFICIENT_PROOF", "unclassified"
+
+
+def esc_cmd():
+    return 0
+
+
+def main():
+    out = []
+    A = out.append
+    img = L.Image()  # S0 FAIL-CLOSED before any decode
+    md = L.make_disassembler()
+    ret_cache = {}
+    head_cache = {}
+
+    e8_raw, e9_raw = raw_e8_scan(img, GETTER)
+    _, _, imm32_text = L.scan_calls(img, GETTER)
+    pat_whole = L.scan_pattern_calls(img, GETTER)
+
+    # ---------------- boundary verification + rows ----------------
+    rows = []
+    excluded = []
+    for site in e8_raw:
+        f = find_function_start(img, md, site)
+        if f is None:
+            excluded.append(site)
+            continue
+        ext = function_extent(img, md, f, site)
+        if ext is not None and ext[2]:
+            ext_txt = "0x%08X..0x%08X (first-terminal extent; SITE BEYOND first terminal: multi-path function)" % (ext[0], ext[1])
+        elif ext is not None:
+            ext_txt = "0x%08X..0x%08X" % (ext[0], ext[1])
+        else:
+            ext_txt = "NOT-MEASURED"
+        walk16 = walk_window(img, md, site, WINDOW_N, ret_cache)
+        walk8 = walk_window(img, md, site, HIST_N, ret_cache)
+        if walk16["error"]:
+            rows.append({
+                "site": site, "f": f, "ext": ext_txt, "verified": True,
+                "disp16": "INSUFFICIENT_PROOF", "note16": walk16["error"],
+                "walk16": None, "walk8": walk8, "esc16": [], "writes16": [],
+            })
+            continue
+        esc16 = classify_escapes(img, md, walk16["eng"].events, ret_cache, head_cache)
+        disp16, why16 = disposition(walk16, esc16)
+        if walk8["error"]:
+            disp8, why8 = "INSUFFICIENT_PROOF", walk8["error"]
+        else:
+            esc8 = classify_escapes(img, md, walk8["eng"].events, ret_cache, head_cache)
+            disp8, why8 = disposition(walk8, esc8)
+        rows.append({
+            "site": site, "f": f, "ext": ext_txt, "verified": True,
+            "disp16": disp16, "why16": why16, "walk16": walk16, "walk8": walk8,
+            "esc16": esc16, "writes16": parse_write_events(walk16["eng"].events),
+            "disp8": disp8, "why8": why8,
+        })
+
+    # ---------------- header / method ----------------
+    A("=" * 100)
+    A("ORIGIN SINGLETON WRITE-THROUGH CENSUS — provenance-aware, all direct E8 callers of FUN_00437F70")
+    A("RUN_ID (correction): PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915")
+    A("CANONICAL PACKAGE: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915 (in-place correction)")
+    A("GENERATED_UTC: " + time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+    A("GENERATOR_SCRIPT: %s" % SCRIPT_PATH)
+    A("GENERATOR_SHA256: %s" % script_sha256())
+    A("MEASURED ENVIRONMENT:")
+    for ln in L.measured_env(img).split("\n"):
+        A("  " + ln)
+    A("S0 FAIL-CLOSED: PASSED at script start (size+sha256+PE layout re-verified before any decode).")
+    A("=" * 100)
+    A("")
+    A("[W.0] PRE-REGISTERED PARAMETERS (fixed before measurement; never changed after seeing results)")
+    A("  WRITE_THROUGH_WINDOW_N = %d (primary census window, instructions after the call return)" % WINDOW_N)
+    A("  HISTORICAL_WINDOW_N   = %d (separate historical view: the falsified canonical claim said" % HIST_N)
+    A("                            'within 8 instructions'; this view is emitted for comparison)")
+    A("  CALLEE_HEAD_WINDOW    = 0x%X bytes (fixed bounded head for escaped-channel classification)" % HEAD_BYTES)
+    A("  PADDING_ANCHOR_RULE   = backward scan <= 0x%X bytes for a >=%d-byte INT3 (0xCC) run; the run" % (BACK_SCAN_MAX, PAD_MIN_RUN))
+    A("                            END anchors a candidate function start; accepted iff linear decode")
+    A("                            from the NEAREST such anchor lands EXACTLY on the site as")
+    A("                            'call 0x437f70'. Anchors are int3-only (a calibration attempt")
+    A("                            with 0x00/0x90 included produced false mid-instruction anchors:")
+    A("                            0x00/0x90 occur inside ordinary instructions, e.g. 'add eax,0x90'")
+    A("                            produced the false anchor 0x50A073 for site 0x50A075 whose true")
+    A("                            enclosing function starts at 0x50A050 — corrected to CC-only).")
+    A("                            Terminals may be crossed on the way (multi-path functions keep")
+    A("                            real code after their first ret — e.g. FUN_00437F70 itself); a")
+    A("                            first-terminal-rejection variant was an instrument defect removed")
+    A("                            after calibration (it excluded the 2 real sites 0x50AFC3/0x9300C2).")
+    A("                            Residual mis-attribution risk (mid-function CC runs) is disclosed;")
+    A("                            per-site windows + extents are printed so anomalies show.")
+    A("  ESCAPE-CHANNEL RULE   = a token present in EAX/ECX/EDX at a call, or in a stack slot at an")
+    A("                            argument position (address >= current esp), is an ESCAPE; it is")
+    A("                            classified by the callee head. clobbered_before_use (the channel's")
+    A("                            value destroyed inside the walked head without use) marks the escape")
+    A("                            NON-EFFECTIVE; the site's other channels then decide.")
+    A("  DISPOSITION PRIORITY (pre-registered, deterministic):")
+    A("    1 direct WRITE_S events (offsets 0/4/8 = triple writes; others = other-offset writes)")
+    A("    2 effective escape with head WRITE_THROUGH        -> S_PTR_ESCAPED_WRITE")
+    A("    3 effective escape with head FORWARDED / NOT_USED_IN_CHECKED_HEAD -> S_PTR_ESCAPED_UNRESOLVED")
+    A("    4 effective escape with head INSUFFICIENT_PROOF_HEAD_BOUND -> INSUFFICIENT_PROOF_HEAD_BOUND")
+    A("    5 all effective escapes READ_ONLY                  -> S_PTR_ESCAPED_READ_ONLY")
+    A("    6 ESCAPE_STORE (stored into another object/global)  -> S_PTR_ESCAPED_UNRESOLVED")
+    A("    7 ESCAPE_AT_TERMINAL with live register tokens      -> S_PTR_ESCAPED_UNRESOLVED (returned to")
+    A("      the enclosing caller; that caller is outside this site's window and unanalyzed here)")
+    A("    8 stack-model ambiguity (AMBIG_EBP/SPILL_UNKNOWN_EBP/AMBIG_STACK/ESP_PIVOT, or")
+    A("      ESP_UNCERTAIN with live/possible spill state) with live/possible spill -> INSUFFICIENT_PROOF_STACK_ESCAPE")
+    A("    9 unconditional jmp with live tokens -> CONTROL_FLOW_ESCAPE")
+    A("   10 conditional branch crossed while provenance live (taken path unexamined) -> CONTROL_FLOW_ESCAPE")
+    A("   11 window exhausted with spill-live tokens only -> INSUFFICIENT_PROOF_STACK_ESCAPE;")
+    A("      with register-live tokens -> INSUFFICIENT_PROOF; with all tokens dead:")
+    A("      destruction events present -> S_PROVENANCE_LOST else NO_WRITE_WITHIN_BOUND")
+    A("   12 terminal reached, all tokens dead: destruction events -> S_PROVENANCE_LOST else")
+    A("      NO_WRITE_WITHIN_BOUND")
+    A("  TAXONOMY (contract Section 4): NO_WRITE_WITHIN_BOUND; WRITE_S_PLUS_0; WRITE_S_PLUS_4;")
+    A("    WRITE_S_PLUS_8; WRITE_S_OTHER_OFFSET; S_PTR_ESCAPED_READ_ONLY; S_PTR_ESCAPED_WRITE;")
+    A("    S_PTR_ESCAPED_UNRESOLVED; INSUFFICIENT_PROOF_STACK_ESCAPE; INSUFFICIENT_PROOF_HEAD_BOUND;")
+    A("    S_PROVENANCE_LOST; CONTROL_FLOW_ESCAPE; INSUFFICIENT_PROOF.")
+    A("    MULTI-WRITE ENCODING: a site with several write events carries them all in the write_events")
+    A("    column as |-joined 'va:off=value' items; the disposition composes the offsets, e.g.")
+    A("    WRITE_S_PLUS_0+4+8. Sites with both triple and other-offset writes carry both components.")
+    A("  NO SCIENCE CONCLUSIONS ARE EMITTED BY THIS GENERATOR. All rows are measurements;")
+    A("    the aggregates below are mechanical sums over the rows; interpretation belongs to")
+    A("    02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md.")
+    A("")
+    A("[W.1] CHANNEL CENSUS (independently re-measured)")
+    A("  raw E8 rel32 candidates in .text targeting 0x437F70: %d" % len(e8_raw))
+    A("  raw E9 rel32 candidates in .text: %d" % len(e9_raw))
+    A("  imm32 address-takers in .text (excluding E8/E9 encodings): %d" % len(imm32_text))
+    A("  imm32 occurrences whole-image (all sections): %d -> %s" % (
+        len(pat_whole), ", ".join("%s@0x%08X" % (nm, va) for nm, va in pat_whole) or "(none)"))
+    A("  boundary-verified call sites (denominator D): %d" % len(rows))
+    A("  raw E8 candidates EXCLUDED (could not verify as a real instruction boundary): %d %s" % (
+        len(excluded), ["0x%08X" % s for s in excluded] if excluded else "(none — every raw E8 verified)"))
+    A("  HISTORICAL DENOMINATOR NOTE: the original run's census recorded 99 E8 sites; this census")
+    A("  re-measured the denominator independently (raw candidates %d, verified %d)." % (
+        len(e8_raw), len(rows)))
+    A("")
+
+    # ---------------- per-site detail ----------------
+    A("[W.2] PER-SITE WINDOWS + EVENTS (full detail; dispositions derived mechanically)")
+    for row in rows:
+        site = row["site"]
+        A("")
+        A("-" * 100)
+        A("SITE 0x%08X  enclosing_function_start=0x%08X  extent=%s  boundary_verified=YES" % (
+            site, row["f"], row["ext"]))
+        if row["walk16"] is None:
+            A("  WINDOW ERROR: %s" % row["note16"])
+            continue
+        w = row["walk16"]
+        A("  N=16 window (%d instructions decoded, stopped=%s, exhausted=%s):" % (
+            len(w["ins"]), w["stopped"], w["exhausted"]))
+        for ins in w["ins"]:
+            A("    " + L.fmt_ins(ins))
+        A("  Events (N=16):")
+        for e in w["eng"].events:
+            A("    %r" % e)
+        if w["clobbers"] or w["seed_clobbers"]:
+            A("  Token clobbers (destroyed without escape): %s" % ", ".join(
+                "0x%08X %s(gen%d,%s)" % (va, r, g, mn)
+                for va, r, mn, g in (w["clobbers"] + w["seed_clobbers"])))
+        A("  Escape classifications:")
+        for x in row["esc16"]:
+            if x["kind"] == "STORE":
+                A("    STORE_ESCAPE: %r (destination deeper use unanalyzed)" % x["event"])
+            elif x["class"] == "GETTER_SELF_CALL":
+                A("    %s -> GETTER_SELF_CALL (non-effective; callee is FUN_00437F70 itself, "
+                  "fully decoded in this package)" % x["event"].detail)
+            else:
+                A("    %s -> head_class=%s clobbered_before_use=%s decode_error=%s" % (
+                    x["event"].detail, x["class"], x["clobbered_before_use"],
+                    (x["head"] or {}).get("decode_error")))
+        if row["writes16"]:
+            A("  WRITE EVENTS: %s" % ["0x%08X off=%d value=%s" % (va, off, val)
+                                      for va, off, val in row["writes16"]])
+        live_now = {r: t.gen for r, t in w["eng"].regs.items() if isinstance(t, SP.Tok)}
+        slots_now = {k: t.gen for k, t in w["eng"].slots.items()}
+        fresh = [r for r, g in live_now.items() if g > 0] + [k for k, g in slots_now.items() if g > 0]
+        A("  Live tokens at end: regs=%s slots=%s" % (
+            ["%s(gen%d)" % (r, g) for r, g in live_now.items()],
+            ["key%d(gen%d)" % (k, g) for k, g in slots_now.items()]))
+        if fresh:
+            A("    (gen>0 tokens were (re)established by in-window getter calls — each such call is")
+            A("     its own census site; their post-window fate is owned by those sites' own rows)")
+        A("  DISPOSITION_N16 = %s  (%s)" % (row["disp16"], row["why16"]))
+        A("  DISPOSITION_N8 (historical view) = %s  (%s)" % (row["disp8"], row["why8"]))
+
+    # ---------------- aggregates ----------------
+    A("")
+    A("=" * 100)
+    A("[W.3] AGGREGATES (mechanical sums over the rows; no interpretation)")
+    A("  denominator D (boundary-verified sites): %d" % len(rows))
+    A("  raw E8 candidates: %d; excluded unverified: %d" % (len(e8_raw), len(excluded)))
+    disp_counts = {}
+    for r in rows:
+        disp_counts[r["disp16"]] = disp_counts.get(r["disp16"], 0) + 1
+    A("  N=16 disposition counts:")
+    for k in sorted(disp_counts):
+        A("    %-40s %d" % (k, disp_counts[k]))
+    A("  sum check: %d == %d : %s" % (sum(disp_counts.values()), len(rows),
+                                      "OK" if sum(disp_counts.values()) == len(rows) else "MISMATCH"))
+    disp8_counts = {}
+    for r in rows:
+        disp8_counts[r["disp8"]] = disp8_counts.get(r["disp8"], 0) + 1
+    A("  N=8 (historical view) disposition counts:")
+    for k in sorted(disp8_counts):
+        A("    %-40s %d" % (k, disp8_counts[k]))
+    writer_rows = [r for r in rows if r["writes16"]]
+    A("  sites with >=1 WRITE event (N=16): %d -> %s" % (
+        len(writer_rows), ["0x%08X%s" % (r["site"], r["disp16"]) for r in writer_rows]))
+    esc_counts = {}
+    for r in rows:
+        for x in r["esc16"]:
+            esc_counts[(x["kind"], x["class"], x["clobbered_before_use"])] = \
+                esc_counts.get((x["kind"], x["class"], x["clobbered_before_use"]), 0) + 1
+    A("  escape-channel classifications (kind, head class, clobbered_before_use):")
+    for k in sorted(esc_counts, key=lambda t: (t[0], t[1], t[2])):
+        A("    %-60s %d" % (str(k), esc_counts[k]))
+    A("")
+    A("MEASURED_QUANTITY: per-call-site S_PTR provenance events + write-through events + escape")
+    A("  classifications over all boundary-verified direct E8 callers of FUN_00437F70.")
+    A("INDEPENDENT_SOURCE_OF_TRUTH: capstone 5.0.7 linear decodes of Entropia.exe physical bytes")
+    A("  (SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31; S0 fail-closed).")
+    A("WHY_NON_CIRCULAR: the census decodes every window from bytes; it imports no prior census")
+    A("  result and no external auditor claim; the known writer site must fall out of THIS census")
+    A("  or the instrument is at fault (see [W.4]).")
+    A("FAILURE_CASE_DETECTED: YES — site 0x00458E27 carries three WRITE events (offsets 0/4/8 at")
+    A("  0x458E30/0x458E36/0x458E3D) through EAX = FUN_00437F70 return; the original instrument")
+    A("  recorded this site's instruction_after_next without interpreting write-through.")
+    A("")
+    A("[W.4] INSTRUMENT VALIDATION (pre-registered)")
+    known = [r for r in rows if r["site"] == 0x458E27]
+    if known and known[0]["writes16"] and sorted(set(o for _, o, _ in known[0]["writes16"])) == [0, 4, 8]:
+        A("  KNOWN WRITER SITE 0x00458E27: present with write events %s -> INSTRUMENT OK" % [
+            "0x%08X off=%d" % (va, off) for va, off, _ in known[0]["writes16"]])
+    elif known:
+        A("  !!! KNOWN WRITER SITE 0x00458E27 present but write events %s — INSTRUMENT DEFECT" %
+          known[0]["writes16"])
+    else:
+        A("  !!! KNOWN WRITER SITE 0x00458E27 NOT IN CENSUS — INSTRUMENT DEFECT (fix instrument, not data)")
+
+    path = os.path.join(RAW, "ORIGIN_SINGLETON_WRITE_THROUGH_RAW.txt")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(out) + "\n")
+    print("written:", path)
+
+    # ---------------- CSV ----------------
+    csv_path = os.path.join(RAW, "ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv")
+    with open(csv_path, "w", encoding="utf-8") as f:
+        f.write("call_site_va,boundary_verified,enclosing_function_start,enclosing_function_extent,"
+                "window_n16_instruction_count,window_n16_stopped,window_n16_exhausted,"
+                "provenance_transitions_n16,token_clobbers_n16,escape_events_n16,"
+                "write_events_n16,disposition_n16,disposition_basis_n16,"
+                "window_n8_instruction_count,write_events_n8,disposition_n8,disposition_basis_n8\n")
+        for r in rows:
+            w16 = r["walk16"]
+            if w16 is None:
+                f.write("0x%08X,YES,0x%08X,%s,,,,\"%s\",,,INSUFFICIENT_PROOF,%s,,,,INSUFFICIENT_PROOF,%s\n" % (
+                    r["site"], r["f"], r["ext"],
+                    r["note16"].replace('"', "'"), r["note16"].replace('"', "'"),
+                    r["note16"].replace('"', "'")))
+                continue
+            trans = []
+            for e in w16["eng"].events:
+                if e.kind in ("RELOAD", "RELOAD_POP", "SPILL", "SPILL_PUSH", "STACK_COPY",
+                              "STACK_ADDR_LEA", "GETTER_RETURN", "ESCAPE_AT_TERMINAL"):
+                    trans.append("%s@0x%08X %s" % (e.kind, e.va, e.detail))
+            escs = []
+            for x in r["esc16"]:
+                if x["kind"] == "STORE":
+                    escs.append("STORE:%s" % x["event"].detail)
+                else:
+                    escs.append("%s:%s%s" % (x["event"].detail, x["class"],
+                                             "(non-effective)" if x["clobbered_before_use"] else ""))
+            wr16 = "|".join("0x%08X:off%d=%s" % (va, off, val) for va, off, val in r["writes16"])
+            w8 = r["walk8"]
+            if w8["error"]:
+                wr8 = ""
+                f8 = "%d" % 0
+                d8 = "INSUFFICIENT_PROOF"
+                b8 = w8["error"]
+            else:
+                wr8 = "|".join("0x%08X:off%d=%s" % (va, off, val)
+                               for va, off, val in parse_write_events(w8["eng"].events))
+                f8 = "%d" % len(w8["ins"])
+                d8 = r["disp8"]
+                b8 = r["why8"]
+            f.write('0x%08X,YES,0x%08X,%s,%d,%s,%s,"%s","%s","%s","%s",%s,%s,%s,"%s",%s,%s\n' % (
+                r["site"], r["f"], r["ext"],
+                len(w16["ins"]), w16["stopped"] or "-", w16["exhausted"],
+                "; ".join(trans).replace('"', "'"),
+                "; ".join("0x%08X %s(gen%d,%s)" % (va, rr, g, mn)
+                         for va, rr, mn, g in (w16["clobbers"] + w16["seed_clobbers"])),
+                "; ".join(escs).replace('"', "'"),
+                wr16,
+                r["disp16"], r["why16"],
+                f8, wr8, d8, b8))
+    print("written:", csv_path)
+    print("denominator D =", len(rows), "excluded:", len(excluded))
+    print("N16 dispositions:", disp_counts)
+    print("writers:", [(hex(r["site"]), r["writes16"]) for r in rows if r["writes16"]])
+    print("N8 dispositions:", disp8_counts)
+
+
+if __name__ == "__main__":
+    main()

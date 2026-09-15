@@ -1,0 +1,157 @@
+====================================================================================================
+FUN_00437F70 FULL DECODE — PHASE C (helper 1 of the SF slot3 primary pair)
+RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+GENERATED_UTC: 2026-09-15T13:35:35Z
+GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\gen_raw_evidence.py
+GENERATOR_SHA256: 791E92FCB9B8A890333832D2E4804D6E56FB57CA7F4A4F8E8FAEF600F2DA534B
+MEASURED ENVIRONMENT (1a490ee lesson: measured at run time, not hardcoded):
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at generator start (size+sha256+PE layout re-verified before any decode).
+SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secondary corroboration only (QH-012).
+====================================================================================================
+
+[C.1] EXTENT BY TERMINAL+PADDING RULE
+  Terminals: 'ret' at 0x437FCF (fallthrough path) and 'ret' at 0x437FE6 (je/jne target 0x437FD7 path).
+  Last terminal ends 0x437FE7; padding 0x437FE7..0x437FF0 = 0xCC (int3, next function at 0x437FF0).
+  Extent: 0x00437F70..0x00437FE7. Function size 0x77 bytes.
+
+[C.2] FULL LINEAR DECODE 0x437F70..0x437FE7
+
+0x00437F70  6a ff                     push     -1
+0x00437F72  68 6b c0 99 00            push     0x99c06b
+0x00437F77  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+0x00437F7D  50                        push     eax
+0x00437F7E  51                        push     ecx
+0x00437F7F  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+0x00437F84  33 c4                     xor      eax, esp
+0x00437F86  50                        push     eax
+0x00437F87  8d 44 24 08               lea      eax, [esp + 8]
+0x00437F8B  64 a3 00 00 00 00         mov      dword ptr fs:[0], eax
+0x00437F91  a1 04 18 ba 00            mov      eax, dword ptr [0xba1804]
+0x00437F96  85 c0                     test     eax, eax
+0x00437F98  75 3d                     jne      0x437fd7
+0x00437F9A  6a 0c                     push     0xc
+0x00437F9C  e8 23 54 52 00            call     0x95d3c4
+0x00437FA1  83 c4 04                  add      esp, 4
+0x00437FA4  89 44 24 04               mov      dword ptr [esp + 4], eax
+0x00437FA8  85 c0                     test     eax, eax
+0x00437FAA  c7 44 24 10 00 00 00 00   mov      dword ptr [esp + 0x10], 0
+0x00437FB2  74 1c                     je       0x437fd0
+0x00437FB4  8b c8                     mov      ecx, eax
+0x00437FB6  e8 c5 35 3f 00            call     0x82b580
+0x00437FBB  a3 04 18 ba 00            mov      dword ptr [0xba1804], eax
+0x00437FC0  8b 4c 24 08               mov      ecx, dword ptr [esp + 8]
+0x00437FC4  64 89 0d 00 00 00 00      mov      dword ptr fs:[0], ecx
+0x00437FCB  59                        pop      ecx
+0x00437FCC  83 c4 10                  add      esp, 0x10
+0x00437FCF  c3                        ret      
+0x00437FD0  33 c0                     xor      eax, eax
+0x00437FD2  a3 04 18 ba 00            mov      dword ptr [0xba1804], eax
+0x00437FD7  8b 4c 24 08               mov      ecx, dword ptr [esp + 8]
+0x00437FDB  64 89 0d 00 00 00 00      mov      dword ptr fs:[0], ecx
+0x00437FE2  59                        pop      ecx
+0x00437FE3  83 c4 10                  add      esp, 0x10
+0x00437FE6  c3                        ret      
+
+[C.3] CALLING CONVENTION / STACK ARGS (MEASURED)
+  - Plain 'ret' at BOTH terminals (0x437FCF, 0x437FE6): NO 'ret n'. This function consumes ZERO stack args itself.
+  - It is called with 8 bytes of leftover caller stack args at [esp+4]/[esp+8] (at the SF site: out buffer and &world_translate);
+    it NEVER reads [esp+4]/[esp+8] as its own data — the bytes are left for the NEXT helper in the pair (0x82B5A0 'ret 8').
+  - At the SF slot3 site: ECX is NOT set by the caller before 'call 0x437F70' (caller EAX/ESI hold args); the function's only
+    register usage is EAX for the singleton pointer and ECX as SEH-scratch. It is a CDECL-style 0-arg global getter, NOT a thiscall.
+
+[C.4] EVERY MEMORY READ / WRITE (from the decode)
+  READS : [fs:0] (0x437F77, SEH chain); [0xb9d8d0] (0x437F7F, __security_cookie canary — MSVCR80-style);
+          [0xba1804] (0x437F91, GLOBAL SLOT: singleton cache); [esp+8] post-frame (0x437FC0, saved SEH node restore — not an arg read).
+  WRITES: [fs:0] (0x437F8B, SEH install); [esp+4] local slot (0x437FA4, new pointer stash); [esp+0x10] local (0x437FAA, zero init);
+          [0xba1804] (0x437FBB write on success; 0x437FD2 write-NULL on alloc failure); [fs:0] restore (0x437FC4/0x437FDB).
+  NO writes to the pair's stack args; NO FPU/SSE; NO branches beyond the test/jne/je.
+
+[C.5] SEH FRAME (decoded)
+  - Frame pushed at 0x437F70..0x437F8B: push -1 (machine frame), push 0x99c06b (HANDLER), push fs:[0] (prev),
+    push ecx (local/scratch+alignment slot — NOT the exception registration; it is later stashed with the
+    operator-new result by 'mov [esp+4],eax' at 0x437FA4), push eax(cookie^esp) — cookie-check + fs:[0] install.
+  - The exception registration NODE is the {prev, handler 0x99C06B} pair at [esp+8], installed by
+    'lea eax,[esp+8]; mov fs:[0],eax' (0x437F87-0x437F8B). (AMEND NOTE, QC P3-3: this line originally read
+    "push ecx (exception registration)" — the pushed-ECX slot is a scratch/alignment slot; the registration node
+    is {prev, handler 0x99C06B} installed via [esp+8]/fs:[0]; re-measured in ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.6].)
+  - Handler VA 0x0099C06B: at end (0x437FD7 path) the frame is popped by 'mov ecx,[esp+8]; mov fs:[0],ecx; pop ecx; add esp,0x10'.
+  - Handler address recorded: 0x0099C06B (handler body itself not decoded — outside this run's load path: the function never
+    faults unless operator new throws; scope-bounded decision, recorded as NOT_DECODED).
+
+[C.6] CALLEE IDENTITIES (via IAT walk)
+  - 0x95D3C4 = jmp dword ptr [0xa75354] -> IAT 0xa75354 = MSVCR80.dll!??2@YAPAXI@Z = operator new(unsigned int). (measured import-dir walk)
+  - 0x82B580 = singleton constructor: copies [0xba921c]/[0xba9220]/[0xba9224] -> S[0/1/2]. thiscall, ret (0-arg), returns this.
+  - No other callees.
+
+[C.7] GLOBAL SLOTS (recorded)
+  - 0xba1804: singleton cache slot (NULL until first call). Writers: ONLY this function (0x437FBB success, 0x437FD2 alloc-fail NULL).
+    Whole-image imm32 scan: exactly 3 refs, ALL inside this function. NO other reader/writer exists (HELPER437F70_CALLER_CENSUS.csv).
+  - 0xba921c/0xba9220/0xba9224: source triple for the singleton ctor. NEVER WRITTEN (correction-pass whole-image
+    write census: 01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt + END_TO_END_VALUE_FLOW_RAW.txt E.3 — all channels
+    enumerated there, 0 store-class candidates).
+  - 0xb9d8d0: security cookie (canary).
+
+[C.8] SEMANTICS (from bytes)
+  FUN_00437F70(): S = [0xba1804]; if (S == 0) { p = operator_new(12); if (!p) { [0xba1804]=0; return NULL; } S = ctor_0x82B580(p);
+                   /* S = {triple 0xba921c} */ [0xba1804] = S; } return S;   // EAX = singleton pointer, args IGNORED
+  Return type shape: a POINTER (12-byte heap object = 3 floats).
+
+[C.9] THE 10 CONTRACT QUESTIONS (answered from bytes)
+  (1) arg1 ([esp+4] = out buffer at SF site): dest or source? -> NEITHER: never read, never written by this function (IGNORED).
+  (2) arg2 ([esp+8] = &world_translate at SF site): dest or source? -> NEITHER: IGNORED (stays on stack for helper2).
+  (3) is it a copy? -> NO. Zero data movement of any float.
+  (4) vector constructor? -> NO for itself; it CALLS one (0x82B580) exactly once (lazy init) which copies the global zero triple.
+  (5) swaps axes? -> NO. (6) negates components? -> NO. (7) scales? -> NO. (8) normalizes? -> NO.
+  (9) converts engine/world/render coordinates? -> NO by itself; it RETURNS the conversion ORIGIN (the singleton S).
+  (10) what does EAX point to on return? -> the 12-byte singleton S = cached copy of the never-written global triple 0xba921c/20/24
+       = {0,0,0} at ALL times (triple proven never written by the correction-pass whole-image write census,
+       01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt; .data virtual-tail zero-init). EAX == S for the entire process lifetime after first call.
+
+[C.10] CALLER CENSUS (all channels, measured)
+  Channels: E8 rel32 direct calls: 99 sites. E9 tail calls: 0. imm32 address-takers in .text: 0. Vtable membership (.rdata scan): 0.
+  Non-.text imm32 refs: 0. => FUN_00437F70 is a plain static helper, never address-taken, never virtual.
+  Classification of all 99 callers (next instruction pattern) is in HELPER437F70_CALLER_CENSUS.csv; summary:
+  - PAIR_82B5A0 (mov ecx,eax; call 0x82B5A0 immediately): 34 sites (incl. the SF slot3 site 0x50A075).
+  - ECX_CONSUMER_0x437e80: 8 sites
+  - ECX_CONSUMER_0x48bac0: 6 sites
+  - ECX_CONSUMER_0x58e4b0: 1 sites
+  - ECX_CONSUMER_0x58e520: 2 sites
+  - ECX_CONSUMER_0x82b5f0: 2 sites
+  - ECX_CONSUMER_0x82b6a0: 7 sites
+  - ECX_CONSUMER_0x82b790: 4 sites
+  - ECX_CONSUMER_0x82b870: 2 sites
+  - OTHER(fld dword ptr [ebp + 0x28]): 1 sites
+  - OTHER(fld dword ptr [ebp]): 2 sites
+  - OTHER(fld dword ptr [ebx + 0x128]): 1 sites
+  - OTHER(fld dword ptr [ebx - 8]): 1 sites
+  - OTHER(fld dword ptr [edi + 0x124]): 1 sites
+  - OTHER(fld dword ptr [edi + 0x130]): 2 sites
+  - OTHER(fld dword ptr [edi]): 1 sites
+  - OTHER(fld dword ptr [esi + 0x118]): 1 sites
+  - OTHER(fld dword ptr [esi + 0x130]): 1 sites
+  - OTHER(fld dword ptr [esi + 0x48]): 1 sites
+  - OTHER(fld dword ptr [esi + 0xc]): 1 sites
+  - OTHER(fld dword ptr [esi]): 4 sites
+  - OTHER(fld dword ptr [esp + 0x10]): 1 sites
+  - OTHER(fld dword ptr [esp + 0x14]): 1 sites
+  - OTHER(fld dword ptr [esp + 0x160]): 1 sites
+  - OTHER(fld dword ptr [esp + 0x18]): 1 sites
+  - OTHER(fld dword ptr [esp + 0x1c]): 2 sites
+  - OTHER(fld dword ptr [esp + 0x20]): 1 sites
+  - OTHER(fld dword ptr [esp + 0x28]): 1 sites
+  - OTHER(fld dword ptr [esp + 0x48]): 1 sites
+  - OTHER(fld dword ptr [esp + 0xc]): 2 sites
+  - OTHER(fld dword ptr [esp + 4]): 1 sites
+  - OTHER(mov eax, dword ptr [esp + 0x14]): 1 sites
+  - OTHER(mov eax, dword ptr [esp + 0x18]): 1 sites
+  - OTHER(mov eax, dword ptr [esp + 0x88]): 1 sites
+  - OTHER(mov edx, dword ptr [esp + 4]): 1 sites
+  - No caller writes through the returned pointer within 8 instructions (measured over all 99 sites) => singleton never mutated post-construction.

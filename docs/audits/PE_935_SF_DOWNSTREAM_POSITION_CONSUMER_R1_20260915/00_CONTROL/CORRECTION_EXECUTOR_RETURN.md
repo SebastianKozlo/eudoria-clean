@@ -1,0 +1,110 @@
+# CORRECTION_EXECUTOR_RETURN — PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915
+
+Executor: pe-reconstruction. Persisted per contract Section 15 (the same handoff block is returned
+in the executor's final message to PE-MASTER). Contract: 00_CONTROL/CORRECTION_CONTRACT_ORIGIN_MUTABILITY_R1.md
+(persisted verbatim before any package edit). STATIC-ONLY run; zero runtime interventions; zero git mutations.
+
+CORRECTION_RUN_RETURN
+RUN_ID = PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915
+EXECUTOR_STATUS = COMPLETE
+BASE_SHA_OBSERVED = 8a09e459eb5a930054f35b713afe3e28b6fa5abc (at start AND at end; HEAD never moved; origin/master == ls-remote == HEAD at start)
+EXE_PIN_VERIFY = PASS (SIZE 8015872, SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31; PE32 i386; ImageBase 0x00400000; every probe re-verified fail-closed at its own start)
+EAX_PROVENANCE_AT_0x458E2C = FUN_00437F70_RETURN
+WRITE_THROUGH_WINDOW_N = 16
+HISTORICAL_WINDOW_N = 8
+DIRECT_CALLER_DENOMINATOR = 99 (re-measured: 99 raw E8 candidates, ALL 99 boundary-verified as real instruction boundaries, 0 excluded)
+ORIGIN_WRITE_THROUGH_CENSUS = 99/99 rows classified (N=16): WRITE_S_PLUS_0+4+8=1; S_PTR_ESCAPED_READ_ONLY=43; S_PTR_ESCAPED_UNRESOLVED=12; INSUFFICIENT_PROOF=6; CONTROL_FLOW_ESCAPE=1; NO_WRITE_WITHIN_BOUND=17; S_PROVENANCE_LOST=19 (sum 99 OK). N=8 historical view: 41/8/14/17/18/1 (sum 99 OK). Writer sites list: [0x00458E27].
+ORIGIN_WRITER_SITES = [0x00458E27] (three write events: off=0 @0x458E30, off=4 @0x458E36, off=8 @0x458E3D; values f32(f80(-(int32_in[i]))); EAX = getter return, proven)
+ORIGIN_POINTER_ESCAPE_RESIDUALS = N=16: 12 S_PTR_ESCAPED_UNRESOLVED (FORWARDED into deeper consumers: 0x82B870/0x82B5F0/0x58E520/0x4B2A50/0x6C4720 families) + 6 INSUFFICIENT_PROOF (bound-exhausted-live) + 1 CONTROL_FLOW_ESCAPE; head-bounded absence never turned into global absence
+ORIGIN_SETTER_OPERATION = three f32 stores through the getter-returned singleton pointer at offsets 0/4/8 (0x458E30/0x458E36/0x458E3D): S[i] := f32(f80(-(int32_in[i]))) via neg+fild/fstp into a local 3xf32 array; thiscall ECX input; plain ret
+ORIGIN_SETTER_INPUT_TYPE = ECX = pointer to a 12-byte triple of three INT32 at [ecx+0/4/8] (caller FUN_00458E50 builds it via three fld+call 0x95DA40 f32->int32 conversions; delta-condition @0x458EE2 (sum of squared int32 deltas == 0 -> skip); triple stored to [esi+0/4/8] @0x458EE8..0x458EEF before the call @0x458EF2)
+ORIGIN_SETTER_FINAL_SEMANTIC_ROLE = UNVERIFIED
+ORIGIN_SETTER_STATIC_REACHABILITY = message loop FUN_00402910 --E8@0x40296F--> FUN_00417030 (tick; AL feeds loop-continue via mov bl,al/test bl,bl/jne back-edge) --guarded (0x4143f0->0x42bc20(this)->test al,al; je 0x417216 skips)--> E8@0x4171BA --> FUN_00458E50 --delta-condition--> E8@0x458EF2 --> FUN_00458D90 --E8@0x458E27--> FUN_00437F70 -> writes through S (all chain members: 0 E9/imm32/vtable channels)
+LIVE_CANDIDATE_BRANCH = Branch A (0x514EF0): REAL edges measured (RTTI: vtable 0xA7D764 slot 5 @0xA7D778; COL 0xAA1304 -> TD 0xB78F74 -> .?AVArkClientPlayerImpl@@; 0x5159E5->0x417880->0x417972->0x416FD0) but NEVER reaches the setter; the auditor's "0x458E50 <- 0x416FD0" attribution is FALSE (measured: FUN_00416FD0 ends at ret 0xc @0x0041702C + int3 @0x41702F, next function 0x417030; 0x416FD0's own callees exclude 0x458E50; the sole E8 caller of 0x458E50 (0x4171BA) is inside FUN_00417030); the [esi]=0xA7A244 store points at a DATA DESCRIPTOR ([0xA7A240]=.text codeptr 0x004B3CC0; {0x00416AD0,0x005B8B80}; 'Parameters\' string at 0xA7A258), not a vtable; the ArkClientPlayerImpl class-name identity is real and IMMATERIAL to the setter chain. ANCHOR DISCREPANCY (loud): PE-MASTER anchor note "ret 0xc @0x0041702D" is off by one (measured ret @0x0041702C; 0x41702D is mid-instruction; boundary conclusion unchanged).
+DEAD_CANDIDATE_BRANCH = Branch B: 0x4B1B70 -> 0x417A40 -> 0x417880 measured (E8@0x4B1EEB->0x417A40; E8@0x417B11->0x417880); 0x4B1B70 channels: E8={self-recursive 0x4B1F2C only, verified a real instruction by linear decode from 0x4B1B70}, E9=0, imm32=0, vtable=0 => STATICALLY_DEAD_WITHIN_MEASURED_CHANNELS; AND immaterial: the subtree does not reach the setter at all
+ORIGIN_MUTATED_AT_RUNTIME = UNVERIFIED
+ORIGIN_INITIAL_ZERO = CONFIRMED (.data virtual-tail zero-init + ctor 0x82B580 copies the not-written-within-enumerated-channels triple; triple recount 107/81/80=268 MATCH)
+ORIGIN_MUTATION_CHANNEL_EXISTS = CONFIRMED
+ORIGIN_PERMANENT_ZERO = REJECTED
+ORIGIN_RUNTIME_VALUE = UNVERIFIED
+OUTPUT_GENERAL_FORMULA = CONFIRMED: out[i] = f32(f32(W[i]*(double)(float)0.01) - S[i]); K bits 0x3F847AE140000000 BITMATCH (independently re-derived); ret 8
+OUTPUT_ZERO_ORIGIN_SPECIAL_CASE = CONFIRMED CONDITIONALLY: IF S == {0,0,0} THEN out = f32(W*0.01) bit-exact (sign-of-zero caveat)
+OUTPUT_ALWAYS_W_TIMES_0_01 = REJECTED (as an unconditional claim)
+PRIMARY_ALWAYS_100X_SMALLER = REJECTED (as an unconditional claim)
+NEGATIVE_CONTROL_4 = FALSIFIED_BY_COUNTEREXAMPLE (Controls 1-3 stand; supersession block appended to 01_RAW/NEGATIVE_CONTROL_RAW.txt with the original preserved byte-identical)
+GENERATOR_DEFECT = gen_raw_evidence.py: removed [A.6] "global-zero-vector snapshot", [C.7] "NO other reader/writer"/"NEVER WRITTEN" (measurement-scoped + pointer), [C.9](4) "global zero triple", [C.9](10) "at ALL times/entire process lifetime", [C.10] fabricated "no caller writes ... measured over all 99 sites", [D.4] unconditional W*0.01; census_triple_writes.py: [T.10] "IS NEVER WRITTEN anywhere => S immutable for the whole process lifetime" stops at the measurement, fabricated "covered for 99 sites by the HELPER437F70 census" residual replaced with the honest boundary + real-census pointer, [T.8] channel-scope tightened; gen_manifest.py role map neutralized + extended; QC-pass inline amendments moved INTO the generators so regeneration preserves them
+AMEND_RANGE = AMEND-14..AMEND-21
+SNAPSHOT_MECHANISM = PRE_EDIT_R2
+OLD_PRE_EDIT_PRESERVED = YES (00_CONTROL/PRE_EDIT/** hash census before == after: 19 files, all hashes equal; the PRE_EDIT_R2 snapshots: 27 files created before the first edit; NEGATIVE_CONTROL append verified BYTE_PREFIX=True)
+FILES_CHANGED = 24 modified tracked files (see CORRECTION_RUN_GIT_OBSERVATION.md run-end census) + 27 PRE_EDIT_R2 snapshots + 14 new package files (5 scripts, 7 raw evidence, 1 analysis, 1 contract) + this return file; HELPER437F70/HELPER82B5A0 census CSVs regenerated BYTE-IDENTICAL (no git change)
+GATES_CHANGED = G4 (basis + evidence-consistency recheck PASS), G5 (re-verified), G6 (corrected basis: scale(W)-S), G10 (NC-4 supersession), G11 (conditional 100:1), G13 (re-verified), G14 (reworded), G16 (supersession-chain pointer); NEW rows CG1-CG8 appended (all PASS); row survival preserved (G0-G17 all present)
+NEW_EVIDENCE = 01_RAW/ORIGIN_SETTER_458D90_DISASM.txt; 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv; 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_RAW.txt; 01_RAW/ORIGIN_SETTER_CALLER_CENSUS.csv; 01_RAW/ORIGIN_SETTER_REACHABILITY_RAW.txt; 01_RAW/OUTPUT_FORMULA_REVALIDATION_RAW.txt; 01_RAW/CORRECTION_RUN_GIT_OBSERVATION.md; 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md; 00_CONTROL/scripts/{sprov,probe_origin_setter,census_write_through,census_setter_reach,probe_output_formula}.py; 00_CONTROL/CORRECTION_CONTRACT_ORIGIN_MUTABILITY_R1.md; this file
+INTERVENTION_LEDGER = EMPTY (STATIC-ONLY run; zero runtime interventions)
+UNRESOLVED = (1) 12 getter-return escapes FORWARDED into deeper consumers (bounded 0xA0 heads: 0x82B870/0x82B5F0/0x58E520/0x4B2A50/0x6C4720 families) — deeper consumer analysis outside this census' pre-registered bounds; (2) 6 sites INSUFFICIENT_PROOF (provenance live at the N=16 bound) + 1 CONTROL_FLOW_ESCAPE — deeper windows were NOT selectively extended (pre-registration discipline); (3) ORIGIN_MUTATED_AT_RUNTIME / ORIGIN_RUNTIME_VALUE / ORIGIN_SETTER_RUNTIME_EXECUTION = UNVERIFIED (no runtime evidence; STATIC-ONLY); (4) the anchor off-by-one (ret VA 0x41702D vs measured 0x41702C) reported loudly — boundary conclusion unchanged; (5) pending LATER sessions (NOT this executor's work): fresh QC (QC_AUDIT_R3), the superseding PE-MASTER review, persistence (path-limited commit/push only after QC + adjudication)
+WORKING_DIR_CLEAN = YES (0 __pycache__, 0 .pyc inside the package; all python invocations used -B; pre-existing foreign pycache under the SLOT17 package untouched)
+
+## SELF_CHECK (executor self-check against the contract's executor gates EG1-EG8; NOT an independent MASTER audit)
+- EG1 FALSIFIER_REPRODUCED: PASS — EAX=S at 0x458E2C proven from the getter decode (both normal paths) + direct-call
+  verification + no-EAX-clobber check; three write events at 0x458E30/0x458E36/0x458E3D (offsets 0/4/8) reproduced by
+  00_CONTROL/scripts/probe_origin_setter.py BEFORE any canonical edit; all PE-MASTER anchors re-derived and MATCH
+  (one off-by-one anchor discrepancy reported loudly; no contradiction).
+- EG2 CENSUS_COMPLETE: PASS — denominator 99 re-measured (all raw E8s boundary-verified); 99/99 rows classified;
+  dispositions mechanically summed (sum check 99==99 OK); N=16 + N=8 both emitted; known writer present with 3 events
+  ([W.4] INSTRUMENT OK); unresolved disclosed (never globalized).
+- EG3 SETTER_DECODED: PASS — extent/ABI/esp-ledger/input-types/three write formulas/13-call chain ABI all from the
+  executor's own decode; ORIGIN_SETTER_OPERATION + ORIGIN_SETTER_INPUT_TYPE stated;
+  ORIGIN_SETTER_FINAL_SEMANTIC_ROLE = UNVERIFIED.
+- EG4 REACHABILITY_DERIVED: PASS — both branches re-derived with boundary proofs; misattribution corrections verified
+  from bytes (0x4171BA in FUN_00417030; 0xA7A244 descriptor-not-vtable; ArkClientPlayerImpl subtree does not reach
+  the setter); ORIGIN_SETTER_RUNTIME_EXECUTION = UNVERIFIED.
+- EG5_GENERATORS_CLEAN: PASS — grep of the generators' emitted text: zero "never mutated"/"at ALL times"/"whole
+  process lifetime"/"measured over all 99 sites" claims emitted by generator literals (the only occurrences in the
+  script sources are AMEND comments documenting the removed literals); regenerated raws byte-stable vs PRE_EDIT_R2
+  except corrected prose + disclosed header (diffs recorded in AMEND-15/16).
+- EG6 SWEEP_COMPLETE: PASS — package-wide semantic sweep run; every remaining hit is an intentional verbatim
+  quotation inside retraction/supersession records, the immutable contract file, or a frozen historical file; the
+  frozen files are named in 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md section 5.
+- EG7 SNAPSHOT_SAFE: PASS — every AMEND-14+ edited file has a PRE_EDIT_R2 .pre (27 snapshots); 00_CONTROL/PRE_EDIT/**
+  hash census before == after (19 files, all equal).
+- EG8 PACKAGE_FENCED: PASS — no new package root (verified: no docs/audits/PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915/
+  exists); no AUDIT_ENTRYPOINT.md edit; no skill-tree edit; no runtime execution; no commit/push; zero proprietary
+  payload; zero pycache/pyc; pre-existing untracked paths untouched.
+- STOP CONDITION: SUCCESS A (writer exists; exact mutation operation recovered (S[i] := f32(-(int32)in[i]));
+  status corrected; the canonical false permanent-zero claim superseded).
+
+---
+
+# FIX ROUND F1 CORRECTION NOTE (RUN_ID PE_935_SF_QC_R3_FINDINGS_FIX_R1_20260915; appended; the
+# original return text above is preserved UNCHANGED — this section only supersedes the
+# DEAD_CANDIDATE_BRANCH reading; findings F2/F3/F4 of the same fix round are recorded in
+# 00_CONTROL/AMEND_LOG_R1.md AMEND-23..AMEND-27)
+
+- SUPERSEDED READING: the DEAD_CANDIDATE_BRANCH line above ("Branch B: 0x4B1B70 -> 0x417A40 ->
+  0x417880 ...; 0x4B1B70 channels: E8={self-recursive 0x4B1F2C only, verified a real instruction
+  by linear decode from 0x4B1B70} ... => STATICALLY_DEAD_WITHIN_MEASURED_CHANNELS") is RETRACTED
+  (QC_R3 finding F1, 06_REPORT/QC_AUDIT_R3.md; PE-MASTER adjudicated ACCEPTED; its containment
+  claims contradicted the executor's own raw measurements — ORIGIN_SETTER_REACHABILITY_RAW.txt
+  [R.6] printed False for both containment tests).
+- CORRECTED DISPOSITION (measured from bytes; independent probe:
+  01_RAW/FIX_ROUND_R4_BYTE_REVERIFICATION_RAW.txt [A]; QC evidence:
+  00_CONTROL/QC_R3_RAW/QC_R3_REACHABILITY_RAW.txt; regenerated canonical raw:
+  01_RAW/ORIGIN_SETTER_REACHABILITY_RAW.txt [R.6]): E8@0x4B1EEB (call 0x417A40) and E8@0x4B1F2C
+  (call 0x4B1B70) are BOTH inside FUN_004B1C70 (extent 0x004B1C70..0x004B1FB0), NOT inside
+  FUN_004B1B70 (extent ends ret 0x004B1C6E + single int3 0x004B1C6F; next function 0x004B1C70,
+  SEH prologue push -1; push 0x9acc2a); 0x4B1F2C is therefore a SIBLING call (FUN_004B1C70 ->
+  FUN_004B1B70), NOT self-recursion. FUN_004B1C70's sole E8 channel is 0x004B2984 inside
+  FUN_004B2950 (prior-canon ArkClientPacketExecutor::Execute; extent 0x004B2950..0x004B29F0),
+  in the case-0xB2 dispatch path (cmp edi, 0xb2 @0x004B2975; taken path calls 0x4B1C70
+  @0x004B2984): an external entry channel EXISTS, so the branch is NOT statically dead.
+  The measured branch-B subtree is Execute(FUN_004B2950) --case 0xB2--> FUN_004B1C70 ->
+  {0x417A40 -> 0x417880 -> 0x416FD0 (config/init subtree); 0x4B1B70 (queue/ring processing)}
+  — STATICALLY REACHABLE within the measured channels, and STILL NEVER REACHES the origin
+  setter (callee-set closure measured: no 0x458E50/0x458D90/0x417030 edge in FUN_004B1B70 /
+  FUN_004B1C70 / FUN_00417A40 callee sets; 0x458D90's sole static in-tree caller remains the
+  message-loop chain). Branch-B disposition =
+  LIVE_WITHIN_MEASURED_CHANNELS_BUT_IMMATERIAL_TO_ORIGIN_MUTABILITY. The "does not reach the
+  setter" conclusion survives; the origin-mutability status algebra of the correction run is
+  UNCHANGED.
+- AMEND record: 00_CONTROL/AMEND_LOG_R1.md AMEND-23 (this file's OLD/NEW SHA pair + snapshot
+  00_CONTROL/PRE_EDIT_R4/00_Control/CORRECTION_EXECUTOR_RETURN.md.pre; SNAPSHOT_MECHANISM =
+  PRE_EDIT_R4; append-only — the original text above this note is byte-preserved).

@@ -1,9 +1,9 @@
 ====================================================================================================
 FUN_00437F70 FULL DECODE — PHASE C (helper 1 of the SF slot3 primary pair)
 RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
-GENERATED_UTC: 2026-09-15T13:35:35Z
+GENERATED_UTC: 2026-09-15T17:17:09Z
 GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\gen_raw_evidence.py
-GENERATOR_SHA256: 791E92FCB9B8A890333832D2E4804D6E56FB57CA7F4A4F8E8FAEF600F2DA534B
+GENERATOR_SHA256: DA8B59594513513569A7E2CC9867E386D6D1BF3868AC8F80274A0511FC36B441
 MEASURED ENVIRONMENT (1a490ee lesson: measured at run time, not hardcoded):
   python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
   python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
@@ -81,7 +81,7 @@ SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secon
   - The exception registration NODE is the {prev, handler 0x99C06B} pair at [esp+8], installed by
     'lea eax,[esp+8]; mov fs:[0],eax' (0x437F87-0x437F8B). (AMEND NOTE, QC P3-3: this line originally read
     "push ecx (exception registration)" — the pushed-ECX slot is a scratch/alignment slot; the registration node
-    is {prev, handler 0x99C06B} installed via [esp+8]/fs:[0]; re-measured in ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.6].)
+    is {prev, handler 0x99c06b} installed via [esp+8]/fs:[0]; re-measured in ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.6].)
   - Handler VA 0x0099C06B: at end (0x437FD7 path) the frame is popped by 'mov ecx,[esp+8]; mov fs:[0],ecx; pop ecx; add esp,0x10'.
   - Handler address recorded: 0x0099C06B (handler body itself not decoded — outside this run's load path: the function never
     faults unless operator new throws; scope-bounded decision, recorded as NOT_DECODED).
@@ -92,11 +92,13 @@ SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secon
   - No other callees.
 
 [C.7] GLOBAL SLOTS (recorded)
-  - 0xba1804: singleton cache slot (NULL until first call). Writers: ONLY this function (0x437FBB success, 0x437FD2 alloc-fail NULL).
-    Whole-image imm32 scan: exactly 3 refs, ALL inside this function. NO other reader/writer exists (HELPER437F70_CALLER_CENSUS.csv).
-  - 0xba921c/0xba9220/0xba9224: source triple for the singleton ctor. NEVER WRITTEN (correction-pass whole-image
-    write census: 01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt + END_TO_END_VALUE_FLOW_RAW.txt E.3 — all channels
-    enumerated there, 0 store-class candidates).
+  - 0xba1804: singleton cache slot (NULL until first call). Writers: this function (0x437FBB success, 0x437FD2 alloc-fail NULL).
+    Whole-image imm32 scan: exactly 3 refs, ALL inside this function (imm32 channel; computed-base refs not exhaustively scanned).
+  - 0xba921c/0xba9220/0xba9224: source triple for the singleton ctor. Not written within the enumerated channels of the
+    whole-image write census (ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt; residuals disclosed there). NOTE: that census enumerates
+    triple-ADDRESS writers; it does NOT cover writes through the singleton pointer returned by this function (measured by the
+    correction-run write-through census ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv, which found writer site 0x458E27;
+    status algebra: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md).
   - 0xb9d8d0: security cookie (canary).
 
 [C.8] SEMANTICS (from bytes)
@@ -108,12 +110,14 @@ SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secon
   (1) arg1 ([esp+4] = out buffer at SF site): dest or source? -> NEITHER: never read, never written by this function (IGNORED).
   (2) arg2 ([esp+8] = &world_translate at SF site): dest or source? -> NEITHER: IGNORED (stays on stack for helper2).
   (3) is it a copy? -> NO. Zero data movement of any float.
-  (4) vector constructor? -> NO for itself; it CALLS one (0x82B580) exactly once (lazy init) which copies the global zero triple.
+  (4) vector constructor? -> NO for itself; it CALLS one (0x82B580) exactly once (lazy init) which copies the global triple 0xba921c/20/24.
   (5) swaps axes? -> NO. (6) negates components? -> NO. (7) scales? -> NO. (8) normalizes? -> NO.
   (9) converts engine/world/render coordinates? -> NO by itself; it RETURNS the conversion ORIGIN (the singleton S).
-  (10) what does EAX point to on return? -> the 12-byte singleton S = cached copy of the never-written global triple 0xba921c/20/24
-       = {0,0,0} at ALL times (triple proven never written by the correction-pass whole-image write census,
-       01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt; .data virtual-tail zero-init). EAX == S for the entire process lifetime after first call.
+  (10) what does EAX point to on return? -> the 12-byte singleton S = cached copy of the global triple 0xba921c/20/24 (initial
+       value {0,0,0} measured via .data virtual-tail zero-init + the triple's not-written-within-enumerated-channels census;
+       the singleton's mutability is a separate question, measured by the correction-run write-through census
+       (ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv: writer site 0x458E27, offsets 0/4/8; status algebra in
+       02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md).
 
 [C.10] CALLER CENSUS (all channels, measured)
   Channels: E8 rel32 direct calls: 99 sites. E9 tail calls: 0. imm32 address-takers in .text: 0. Vtable membership (.rdata scan): 0.
@@ -154,4 +158,8 @@ SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secon
   - OTHER(mov eax, dword ptr [esp + 0x18]): 1 sites
   - OTHER(mov eax, dword ptr [esp + 0x88]): 1 sites
   - OTHER(mov edx, dword ptr [esp + 4]): 1 sites
-  - No caller writes through the returned pointer within 8 instructions (measured over all 99 sites) => singleton never mutated post-construction.
+  - Write-through of the returned pointer is measured by the correction-run provenance-aware census
+    (01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv, pre-registered N=16 window + N=8 historical view,
+    99 boundary-verified sites): 1 writer site (0x458E27, three write events at offsets 0/4/8) among 99;
+    dispositions and unresolved residuals disclosed there. The original 'measured within 8 instructions' claim was
+    fabricated (no such measurement existed) and is retracted — see 00_CONTROL/AMEND_LOG_R1.md AMEND-14+.

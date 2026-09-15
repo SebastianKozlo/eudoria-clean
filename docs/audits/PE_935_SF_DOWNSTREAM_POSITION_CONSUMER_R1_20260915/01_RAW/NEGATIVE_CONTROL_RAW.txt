@@ -55,3 +55,52 @@ MEASURED_QUANTITY: 4 distinct executed falsification probes with byte-level cita
 INDEPENDENT_SOURCE_OF_TRUTH: capstone decode of Entropia.exe bytes at the cited addresses (this package's raw files).
 WHY_NON_CIRCULAR: each control falsifies a SPECIFIC promotion inference using sites/bytes independent of the
   SF slot3 window; none depends on the primary-path conclusion being tested.
+
+== CONTROL 4 SUPERSESSION (APPENDED by correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915; the original Control 4 text above is preserved byte-identical as the historical record) ==
+
+ORIGINAL PREMISE (Control 4, historical text above): "Exhaustive writer scans (END_TO_END_VALUE_FLOW_RAW.txt E.3): NO writer of the triple,
+NO writer of S post-construction (all 99 call sites + all ECX-consumers measured)."
+ORIGINAL CLAIMED RESULT: "The 'mutable origin' reading is REJECTED; S = permanent zero vector. The primary output is therefore NOT relative to any moving point."
+  (and the historical FAILURE_CASE_DETECTED line above recorded Controls 1-4 as each having a measured counterexample — Control 4's counterexample claim is now superseded: what Control 4 had was NOT a counterexample FOR the mutability hypothesis but an (invalidly inferred) absence-of-writer claim.)
+
+COUNTEREXAMPLE (mandatory failure case, measured by this correction run's own instruments):
+  Call site 0x00458E27 (call FUN_00437F70, direct E8 verified) inside FUN_00458D90..0x00458E43.
+  EAX at 0x458E2C = FUN_00437F70's return (getter decode: both normal return paths carry the singleton pointer in EAX).
+  Writes through that pointer:
+    0x00458E30  mov dword ptr [eax], edx        (offset 0)
+    0x00458E36  mov dword ptr [eax + 4], ecx    (offset 4)
+    0x00458E3D  mov dword ptr [eax + 8], edx    (offset 8)
+  Full decode + esp ledger + value provenance: 01_RAW/ORIGIN_SETTER_458D90_DISASM.txt; census row:
+  01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv (site 0x00458E27, disposition WRITE_S_PLUS_0+4+8).
+
+WHY THE ORIGINAL CONTROL FAILED (root cause, both halves):
+  1. The "all 99 call sites ... measured" write-through never had a measurement artifact. The original instrument
+     (classify_pair_membership in gen_raw_evidence.py) looked at TWO instructions after each call and keyed on the
+     first instruction's pattern; it never measured write-through at any window size. The 'measured within 8
+     instructions over all 99 sites' sentence was a FABRICATED measurement claim (gen_raw_evidence.py [C.10] literal,
+     now amended). LESSON 1 (CLAIM_OF_MEASUREMENT_REQUIRES_MEASUREMENT_ARTIFACT).
+  2. The instrument's own recorded data contained the counterexample: the historical HELPER437F70_CALLER_CENSUS.csv
+     row for 0x00458E27 records instruction_after_next='mov dword ptr [eax], edx' — the classifier never
+     interpreted write-through. LESSON 2 (ROW_INTEGRITY_DOES_NOT_VALIDATE_INFERENCE): the CSV rows were byte-correct;
+     the 'no writer' conclusion drawn from them was false.
+  3. Additionally, the triple-address write census (ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt) was valid AS A MEASUREMENT
+     (0 store-class candidates within its enumerated channels) but does not measure write-through of the singleton
+     POINTER (a heap object distinct from the triple addresses) — the '=> S immutable' inference drawn from it was
+     invalid. That census survives as a measurement; the inference does not.
+
+RESULTING STATUS CORRECTION (status algebra: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md):
+  ORIGIN_PERMANENT_ZERO = REJECTED (as previously claimed)
+  ORIGIN_MUTATION_CHANNEL_EXISTS = CONFIRMED (setter FUN_00458D90; writer site 0x00458E27; offsets 0/4/8;
+    operation S[i] := f32(-(int32)in[i]); statically reachable from the message loop via
+    FUN_00402910 -> FUN_00417030 -> guarded -> FUN_00458E50 -> delta-conditioned -> FUN_00458D90)
+  ORIGIN_MUTATED_AT_RUNTIME = UNVERIFIED (STATIC-ONLY run; no runtime evidence)
+  ORIGIN_RUNTIME_VALUE = UNVERIFIED
+  NEGATIVE_CONTROL_4 = FALSIFIED_BY_COUNTEREXAMPLE. Controls 1-3 STAND (unaffected: they falsify other
+    promotion inferences with their own measured counterexamples).
+
+FAILURE_CASE_DETECTED BOOKKEEPING (supersession annotation; the historical PASS record above is NOT falsified —
+Control 4 was executed as written against the evidence available to it; what fails is its premise):
+  Historical line: 'FAILURE_CASE_DETECTED = YES (Controls 1-4 all executed; ...)' — ANNOTATED: Controls 1-3 valid;
+  Control 4's premise ('no writer exists — all 99 call sites measured') is FALSIFIED by counterexample 0x00458E27.
+  Current bookkeeping: FAILURE_CASE_DETECTED = YES (Controls 1-3 stand with measured counterexamples;
+  Control 4 FALSIFIED_BY_COUNTEREXAMPLE — its own premise is the failure case).

@@ -732,7 +732,11 @@ def main():
     # ---------------- [T.8] ----------------
     A("[T.8] THE 9 ECX-RECEIVING FUNCTIONS (all ECX_CONSUMER_* targets of the 437F70 caller census):")
     A("      first [ECX+0/4/8] READ vs first ECX WRITE (clobber) vs first call/push-ecx event with ECX untouched;")
-    A("      ANY [ECX+0/4/8] STORE within the decoded window (expect 0 — S never written through ECX)")
+    # AMEND (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): wording tightened to
+    # the channel scope — "S never written through ECX" could be misread as a global claim; the
+    # measurement is: no [ECX+0/4/8] store within THESE decoded windows. (The separate correction-run
+    # write-through census covers getter-return consumers with callee-head bounds and residuals.)
+    A("      ANY [ECX+0/4/8] STORE within the decoded window (expected 0 in this channel; channel-scoped measurement)")
     ECX_FUNCS = [0x82B5A0, 0x82B6A0, 0x437E80, 0x82B5F0, 0x82B870, 0x48BAC0, 0x58E4B0, 0x58E520, 0x82B790]
     for fn in ECX_FUNCS:
         A("")
@@ -809,8 +813,21 @@ def main():
     A("  - 23/24 push-site consumers read-only + 1 disclosed residual ([T.4]); both getter chains read-only ([T.5]);")
     A("    the 9 ECX-receiving functions read/forward/clobber and NEVER store to [ECX+0/4/8] ([T.8]);")
     A("    the neighborhood writes stop at 0xBA921B ([T.7]); the triple lives zero-initialized in .data's virtual tail ([T.9]).")
-    A("  => THE ORIGIN TRIPLE 0xBA921C/0xBA9220/0xBA9224 IS NEVER WRITTEN anywhere in the image =>")
-    A("     S == {0,0,0} for the whole process lifetime, immutable after construction.")
+    # AMEND (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): the old [T.10]
+    # emitted "=> THE ORIGIN TRIPLE ... IS NEVER WRITTEN anywhere in the image => S == {0,0,0} for the
+    # whole process lifetime, immutable after construction." — the SECOND arrow is an INVALID
+    # inference (writes through the getter's returned singleton pointer are not writes to the
+    # triple addresses; writer site 0x458E27 exists) and the "anywhere in the image" claim was
+    # broader than the enumerated channels. [T.10] now stops at the measurement; the status
+    # algebra lives in 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md. [T.1]-[T.9] are UNCHANGED.
+    A("  => MEASUREMENT VERDICT: the origin triple 0xBA921C/0xBA9220/0xBA9224 is not written within")
+    A("     the enumerated channels of this census; the residuals below bound the claim (not 'anywhere in the image').")
+    A("  STATUS NOTE (pointer, not conclusion — see 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md): this is a")
+    A("    triple-ADDRESS write census. It does NOT measure write-through of the singleton pointer returned by")
+    A("    FUN_00437F70 (a heap object distinct from the triple addresses); the correction-run write-through census")
+    A("    (01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv) measured those consumers: writer site 0x458E27 exists")
+    A("    (three f32 stores through the returned pointer at offsets 0/4/8). S's initial value {0,0,0} follows from")
+    A("    [T.9] + this census; S's immutability does NOT follow from them.")
     A("  DECODED CHANNELS (this census): (1) whole-image imm32 occurrence + containment classification incl. ALL store")
     A("    encodings (generic WRITE-operand access, [T.2]); (2) widened absolute stores incl. qword-overlap ([T.3]);")
     A("    (3) all push-imm32 pointer channels -> callee heads + one thunk level ([T.4]);")
@@ -828,8 +845,16 @@ def main():
     A("      the slot reading (SF-base default slot1 = &zero_triple) is corroborative, not exhaustive.")
     A("    - FUN_004CE5B0's &triple arg use beyond its head window (bounded residual, [T.4]).")
     A("    - SEH handler body 0x99C06B (out of load path; disclosed since the original run).")
-    A("    - FUN_00437F70-return consumers writing through the returned singleton pointer more than 8 instructions out")
-    A("      (covered for 99 sites by the HELPER437F70 census; unchanged from the original run).")
+    # AMEND (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): the old residual said
+    # "covered for 99 sites by the HELPER437F70 census; unchanged from the original run" — a FABRICATED
+    # coverage claim: that census classified next-instruction patterns only and never measured
+    # write-through. Replaced by the honest boundary + the real measurement's pointer.
+    A("    - write-through of the FUN_00437F70-returned singleton pointer (a heap object, NOT the triple addresses):")
+    A("      NOT covered by this census (this census enumerates triple-address writers). The correction run's")
+    A("      provenance-aware write-through census (01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv,")
+    A("      ORIGIN_SINGLETON_WRITE_THROUGH_RAW.txt; pre-registered N=16 window + N=8 historical view, callee heads")
+    A("      0xA0) measured the getter-return consumers within those bounds: 1 writer site (0x458E27) with three")
+    A("      write events at offsets 0/4/8; 43 read-only escapes; unresolved residuals disclosed there.")
     A("")
 
     # ---------------- annexes ----------------

@@ -89,6 +89,12 @@ def phase_a():
     # (only the first 6 of the 12 bytes are 0xCC). Corrected: 6x 0xCC at 0x50A0AA..0x50A0AF; next fn 0x50A0B0.
     lines.append("  - Extent verdict: 0x0050A050..0x0050A0AA TERMINATED (0x50A0A7 ret 8), padded 0x50A0AA..0x50A0B0 with 0xCC (6x int3),")
     lines.append("    next function starts 0x0050A0B0 ('56 8b f1' = push esi; mov esi,ecx; ...). PIN MATCH: extent 0x50A050..0x50A0AA == package-A pin. MATCH.")
+    # AMEND (QC P2-1, inline note emitted since the QC correction pass; moved into the generator by the
+    # origin-mutability correction run so regeneration preserves it):
+    lines.append("  - AMEND NOTE (QC P2-1): the original verdict line here said \"padded 0x50A0AA..0x50A0B6 with 0xCC (12x int3), next")
+    lines.append("    function starts 0x0050A0B6\" — a miscount of the printed byte string (only the first 6 of the 12 printed bytes are")
+    lines.append("    0xCC; the re-measured census annex 01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.2] confirms 6x 0xCC at")
+    lines.append("    0x50A0AA..0x50A0AF and the next function at 0x0050A0B0). Extent verdict unchanged.")
     lines.append("")
     lines.append("[A.3] PIN RE-MEASUREMENT — every pinned instruction from the contract's standing-knowledge block")
     pins = [
@@ -146,6 +152,12 @@ def phase_a():
     # AMEND (QC P2-2): the original hardcode said "ALL 37" while the pins list has 36 entries (the contract's
     # "fallback:" line is a label, not an instruction). Corrected to the measured length.
     lines.append("  PIN RE-MEASUREMENT VERDICT: %s" % ("ALL %d PINNED INSTRUCTIONS MATCH (capstone byte decode vs contract pin block)." % len(pins) if all_match else "PIN MISMATCH DETECTED — SEE LINES ABOVE"))
+    # AMEND (QC P2-2, inline note emitted since the QC correction pass; moved into the generator by the
+    # origin-mutability correction run so regeneration preserves it):
+    lines.append("  AMEND NOTE (QC P2-2): this line originally read \"ALL 37 PINNED INSTRUCTIONS MATCH\" — a count error; the table")
+    lines.append("  above has 36 PIN rows and the contract's standing-knowledge block has 36 instruction lines (its \"fallback:\" line")
+    lines.append("  is a label, not an instruction; re-measured in ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.3]). The G2 predicate")
+    lines.append("  (every pinned instruction re-measured MATCH) is unchanged — 36/36 MATCH.")
     lines.append("")
     lines.append("[A.4] EXACT STACK-STATE TRACKING 0x50A064..0x50A084 (derived below from the decoded pushes/calls/rets)")
     lines.append("  Entry (thiscall, after 'call [slot3]' pushed return address):")
@@ -185,7 +197,12 @@ def phase_a():
     lines.append("      NiAVObject* obj = name ? this->root /* +0x30 */->GetObjectByName(name) /* slot17, 0x44 */ : NULL;")
     lines.append("      if (!obj) { float3* p = (float3*)this->slot1(); /* == &this->posSlotA @ +0x34 */ out->x=p->x; out->y=p->y; out->z=p->z; return out; }")
     lines.append("      float3* src = (float3*)((char*)obj + 0x90);   // &obj->m_kWorld.m_Translate")
-    lines.append("      S = GetOrCreateOriginSingleton();              // 0x437F70; singleton = global-zero-vector snapshot (Phase C)")
+    # AMEND (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): the old literal said
+    # "singleton = global-zero-vector snapshot (Phase C)" — a hardcoded science conclusion in generator
+    # prose. The generator now emits only the measured call structure; the singleton's lifetime and
+    # mutability status are NOT asserted here (status algebra: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md;
+    # write-through census: 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv).
+    lines.append("      S = GetOrCreateOriginSingleton();              // 0x437F70; returned pointer (see Phase C decode)")
     lines.append("      ScaledSub(out, src, S);                         // 0x82B5A0: out[i] = f32(f32(src[i]*K) - S[i]); K=(f64)f32(0.01)")
     lines.append("      return out;")
     lines.append("  }")
@@ -223,11 +240,15 @@ def phase_c():
     lines.append("  NO writes to the pair's stack args; NO FPU/SSE; NO branches beyond the test/jne/je.")
     lines.append("")
     lines.append("[C.5] SEH FRAME (decoded)")
-    # AMEND (QC P3-3): "push ecx" is a local/scratch+alignment slot (stashed with the new pointer at 0x437FA4
-    # 'mov [esp+4],eax'); the exception registration NODE is {prev, handler 0x99C06B} at [esp+8] installed by
-    # 'lea eax,[esp+8]; mov fs:[0],eax'. Wording corrected.
-    lines.append("  - Frame pushed at 0x437F70..0x437F8B: push -1 (machine frame), push 0x99c06b (HANDLER), push fs:[0] (prev), push ecx (local/scratch+alignment slot — NOT the registration; stashed with the new pointer at 0x437FA4),")
-    lines.append("    push eax(cookie^esp) — cookie-check + fs:[0] install.")
+    # AMEND (QC P3-3, inline amended text moved into the generator by the origin-mutability
+    # correction run so regeneration reproduces the QC-pass disk wording):
+    lines.append("  - Frame pushed at 0x437F70..0x437F8B: push -1 (machine frame), push 0x99c06b (HANDLER), push fs:[0] (prev),")
+    lines.append("    push ecx (local/scratch+alignment slot — NOT the exception registration; it is later stashed with the")
+    lines.append("    operator-new result by 'mov [esp+4],eax' at 0x437FA4), push eax(cookie^esp) — cookie-check + fs:[0] install.")
+    lines.append("  - The exception registration NODE is the {prev, handler 0x99C06B} pair at [esp+8], installed by")
+    lines.append("    'lea eax,[esp+8]; mov fs:[0],eax' (0x437F87-0x437F8B). (AMEND NOTE, QC P3-3: this line originally read")
+    lines.append("    \"push ecx (exception registration)\" — the pushed-ECX slot is a scratch/alignment slot; the registration node")
+    lines.append("    is {prev, handler 0x99c06b} installed via [esp+8]/fs:[0]; re-measured in ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.6].)")
     lines.append("  - Handler VA 0x0099C06B: at end (0x437FD7 path) the frame is popped by 'mov ecx,[esp+8]; mov fs:[0],ecx; pop ecx; add esp,0x10'.")
     lines.append("  - Handler address recorded: 0x0099C06B (handler body itself not decoded — outside this run's load path: the function never")
     lines.append("    faults unless operator new throws; scope-bounded decision, recorded as NOT_DECODED).")
@@ -238,10 +259,17 @@ def phase_c():
     lines.append("  - No other callees.")
     lines.append("")
     lines.append("[C.7] GLOBAL SLOTS (recorded)")
-    lines.append("  - 0xba1804: singleton cache slot (NULL until first call). Writers: ONLY this function (0x437FBB success, 0x437FD2 alloc-fail NULL).")
-    lines.append("    Whole-image imm32 scan: exactly 3 refs, ALL inside this function. NO other reader/writer exists (HELPER437F70_CALLER_CENSUS.csv).")
-    # AMEND (QC P1-1): "NEVER WRITTEN anywhere in the image" now cites the correction-pass whole-image census.
-    lines.append("  - 0xba921c/0xba9220/0xba9224: source triple for the singleton ctor. NEVER WRITTEN (correction-pass whole-image write census: ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt + END_TO_END_VALUE_FLOW_RAW.txt E.3).")
+    # AMEND (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): the old literals
+    # asserted "NO other reader/writer exists" (over the imm32 channel only) and "NEVER WRITTEN"
+    # (an inference-free measurement was cited, but the immutability prose below drew an invalid
+    # conclusion). Measurement-only wording + analysis-layer pointers now.
+    lines.append("  - 0xba1804: singleton cache slot (NULL until first call). Writers: this function (0x437FBB success, 0x437FD2 alloc-fail NULL).")
+    lines.append("    Whole-image imm32 scan: exactly 3 refs, ALL inside this function (imm32 channel; computed-base refs not exhaustively scanned).")
+    lines.append("  - 0xba921c/0xba9220/0xba9224: source triple for the singleton ctor. Not written within the enumerated channels of the")
+    lines.append("    whole-image write census (ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt; residuals disclosed there). NOTE: that census enumerates")
+    lines.append("    triple-ADDRESS writers; it does NOT cover writes through the singleton pointer returned by this function (measured by the")
+    lines.append("    correction-run write-through census ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv, which found writer site 0x458E27;")
+    lines.append("    status algebra: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md).")
     lines.append("  - 0xb9d8d0: security cookie (canary).")
     lines.append("")
     lines.append("[C.8] SEMANTICS (from bytes)")
@@ -253,12 +281,20 @@ def phase_c():
     lines.append("  (1) arg1 ([esp+4] = out buffer at SF site): dest or source? -> NEITHER: never read, never written by this function (IGNORED).")
     lines.append("  (2) arg2 ([esp+8] = &world_translate at SF site): dest or source? -> NEITHER: IGNORED (stays on stack for helper2).")
     lines.append("  (3) is it a copy? -> NO. Zero data movement of any float.")
-    lines.append("  (4) vector constructor? -> NO for itself; it CALLS one (0x82B580) exactly once (lazy init) which copies the global zero triple.")
+    # AMEND (correction run): "global zero triple" -> "global triple" (the zero value is a status claim,
+    # derived in the analysis layer from the zero-init + write-census measurements, not from this decode).
+    lines.append("  (4) vector constructor? -> NO for itself; it CALLS one (0x82B580) exactly once (lazy init) which copies the global triple 0xba921c/20/24.")
     lines.append("  (5) swaps axes? -> NO. (6) negates components? -> NO. (7) scales? -> NO. (8) normalizes? -> NO.")
     lines.append("  (9) converts engine/world/render coordinates? -> NO by itself; it RETURNS the conversion ORIGIN (the singleton S).")
-    lines.append("  (10) what does EAX point to on return? -> the 12-byte singleton S = cached copy of the never-written global triple 0xba921c/20/24")
-    # AMEND (QC P1-1): cites the correction-pass census for the never-written claim.
-    lines.append("       = {0,0,0} at ALL times (triple proven never written by the correction-pass whole-image write census, ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt; .data virtual-tail zero-init). EAX == S for the entire process lifetime after first call.")
+    lines.append("  (10) what does EAX point to on return? -> the 12-byte singleton S = cached copy of the global triple 0xba921c/20/24 (initial")
+    # AMEND (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): the old literal said
+    # "= {0,0,0} at ALL times ... EAX == S for the entire process lifetime" — a hardcoded science
+    # conclusion (falsified: writer site 0x458E27 exists). Measurement-only wording now: the initial
+    # value is a measured fact; the lifetime/mutability status belongs to the analysis layer.
+    lines.append("       value {0,0,0} measured via .data virtual-tail zero-init + the triple's not-written-within-enumerated-channels census;")
+    lines.append("       the singleton's mutability is a separate question, measured by the correction-run write-through census")
+    lines.append("       (ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv: writer site 0x458E27, offsets 0/4/8; status algebra in")
+    lines.append("       02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md).")
     lines.append("")
     lines.append("[C.10] CALLER CENSUS (all channels, measured)")
     lines.append("  Channels: E8 rel32 direct calls: 99 sites. E9 tail calls: 0. imm32 address-takers in .text: 0. Vtable membership (.rdata scan): 0.")
@@ -274,7 +310,16 @@ def phase_c():
             others[r[2]] += 1
     for k in sorted(others):
         lines.append("  - %s: %d sites" % (k, others[k]))
-    lines.append("  - No caller writes through the returned pointer within 8 instructions (measured over all 99 sites) => singleton never mutated post-construction.")
+    # AMEND (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): the old literal said
+    # "No caller writes through the returned pointer within 8 instructions (measured over all 99 sites)
+    # => singleton never mutated post-construction." — a FABRICATED measurement claim (the classifier
+    # only looked at 2 instructions and never measured write-through) with an invalid inference.
+    # Replaced by a pointer to the real write-through measurement.
+    lines.append("  - Write-through of the returned pointer is measured by the correction-run provenance-aware census")
+    lines.append("    (01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv, pre-registered N=16 window + N=8 historical view,")
+    lines.append("    99 boundary-verified sites): 1 writer site (0x458E27, three write events at offsets 0/4/8) among 99;")
+    lines.append("    dispositions and unresolved residuals disclosed there. The original 'measured within 8 instructions' claim was")
+    lines.append("    fabricated (no such measurement existed) and is retracted — see 00_CONTROL/AMEND_LOG_R1.md AMEND-14+.")
     with open(os.path.join(RAW, "FUN_00437F70_DISASM.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     return rows
@@ -297,7 +342,12 @@ def census_82b5a0():
     # NON-PAIR rows. Corrected: pair rows carry the measured prior site; NON-PAIR rows carry NOT_APPLICABLE +
     # the measured ECX source (stored origin [this+0x4C]; see ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.1]).
     lines.append("34 sites are 'call 0x437F70; mov ecx,eax; call 0x82B5A0' pairs; the 2 remaining sites use a STORED ORIGIN pointer")
-    lines.append("(ECX = [this+0x4C]; no adjacent 437F70 call — see the CSV rows and ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.1]);")
+    # AMEND (QC P2-4, inline note + disk-format column width restored by the origin-mutability
+    # correction run so regeneration reproduces the QC-pass disk text):
+    lines.append("(ECX = [this+0x4C]; no adjacent 437F70 call — see the amended CSV rows and ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.1]).")
+    lines.append("(AMEND NOTE, QC P2-4: this line originally read \"All sites follow the ... pair pattern OR are near-adjacent to a")
+    lines.append("437F70 call\" — false for the 2 NON-PAIR sites; and the two NON-PAIR rows' prior_437f70_site cells were pair-geometry")
+    lines.append("artifacts, now NOT_APPLICABLE.)")
     lines.append("(pair membership is computed from the caller census of 437F70 — see HELPER437F70_CALLER_CENSUS.csv).")
 
     NONPAIR_NOTE = {
@@ -320,7 +370,7 @@ def census_82b5a0():
                 # see ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.1]); site-7 was pair geometry, not a measured site.
                 note = NONPAIR_NOTE.get(site, "NON-PAIR; prior_437f70_site NOT_APPLICABLE (site-7 was pair geometry)")
                 f.write('0x%08X,NOT_APPLICABLE,NO,"%s"\n' % (site, note))
-            lines.append("0x%08X     %-20s           %s" % (site, ("0x%08X" % prior) if is_pair else "NOT_APPLICABLE", "PAIR" if is_pair else "NON-PAIR"))
+            lines.append("0x%08X     %-22s           %s" % (site, ("0x%08X" % prior) if is_pair else "NOT_APPLICABLE", "PAIR" if is_pair else "NON-PAIR"))
     with open(os.path.join(RAW, "HELPER82B5A0_CALLER_CENSUS.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
 
@@ -374,9 +424,16 @@ def phase_d():
     lines.append("    0x82B5E1 fstp dword ptr [eax+8]     out.z := f32(...)           <<< F32 NARROWING (final)")
     lines.append("    0x82B5E4 ret 8")
     lines.append("  PER-COMPONENT FORMULA (bit-exact): out[i] = f32( f32( (f80)src[i] * (f80)K ) - (f80)S[i] ), i in {0,4,8} (x,y,z).")
-    lines.append("  With S == {0,0,0} (Phase C) and the x87 default rounding: out[i] = f32( f32(src[i]*0.01f) - 0.0f ) = f32(src[i]*0.01f),")
-    lines.append("  with the ONLY caveat: if src[i]*K rounds to +0/-0, subtracting 0.0 preserves the sign of zero. No NaN/Inf paths exist here")
-    lines.append("  beyond the generic x87 rules (no fwait, no control-word change, no exceptions handled).")
+    # AMEND (correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915): the old literal
+    # asserted the simplification unconditionally ("With S == {0,0,0} (Phase C) ... out[i] = f32(src[i]*0.01f)").
+    # The simplification is a CONDITIONAL special case of the general formula (S's value at runtime is
+    # not a property of this function's decode); corrected to conditional wording.
+    lines.append("  IF S == {0,0,0} (each component +0.0) then, by IEEE-754 (x - (+0.0) == x for finite x) and the x87 default")
+    lines.append("  rounding: out[i] = f32( f32(src[i]*0.01f) - 0.0f ) = f32(src[i]*0.01f) bit-exactly, with the sign-of-zero caveat")
+    lines.append("  ((+0)-(+0)=+0, (-0)-(+0)=-0). IF S is anything else, out[i] = f32(f32(src[i]*K) - S[i]) as decoded above.")
+    lines.append("  (S's initial value is measured {0,0,0}; S's mutability/runtime value is a separate status — see")
+    lines.append("  02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md and 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv.)")
+    lines.append("  No NaN/Inf paths exist here beyond the generic x87 rules (no fwait, no control-word change, no exceptions handled).")
     lines.append("")
     lines.append("[D.5] MEMORY WRITES (only these 4)")
     lines.append("  [esp+8] temp stores (3x, reusing the dead caller arg slot) and the 3 output stores [eax+0/4/8]. NO writes to ECX/S, NO global writes.")
@@ -422,12 +479,18 @@ def phase_b():
     lines.append("  => m_kWorld block starts at +0x6C; m_kWorld.m_Translate = +0x6C+36 = +0x90/+0x94/+0x98; m_kWorld scale at +0x9C.")
     lines.append("  No parent => copy m_kLocal (block at +0x38, translate at +0x5C) -> m_kWorld. Parent => compose via 0x6eb380(parent+0x6C, local, tmp) -> m_kWorld.")
     lines.append("")
-    lines.append("[B.2] FUN_007B4650 (vtable slot 16 pin; local-translate applier) — first 0x28 bytes")
+    # AMEND (QC P3-1, moved into the generator by the origin-mutability correction run so
+    # regeneration preserves the extended excerpt + inline note):
+    lines.append("[B.2] FUN_007B4650 (vtable slot 16 pin; local-translate applier) — head 0x7B4650..0x7B46F0")
+    lines.append("     (AMEND NOTE, QC P3-1: the original excerpt printed only the first 0x28 bytes (0x7B4650..0x7B4678) while its")
+    lines.append("      Evidence line cited 'lea edi,[esi+0x5c]' @0x7B468E — outside the printed window. The excerpt is extended to")
+    lines.append("      0x7B46F0 so the citation is inside the printed bytes; linear decode from the function start, re-measured in")
+    lines.append("      ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.4].)")
     lines.append("")
-    lines.extend(disasm_block(img, md, 0x7B4650, 0x7B4678))
+    lines.extend(disasm_block(img, md, 0x7B4650, 0x7B46F0))
     lines.append("")
-    lines.append("  Evidence: 'lea edi,[esi+0x5c]' = &m_kLocal.m_Translate (+0x38+36=+0x5C) — confirms the LOCAL translate offset anchor and")
-    lines.append("  the 3-float additions into it ([eax+0/4/8] + [ecx+0/4/8]).")
+    lines.append("  Evidence: 'lea edi,[esi+0x5c]' @0x7B468E = &m_kLocal.m_Translate (+0x38+36=+0x5C) — confirms the LOCAL translate offset anchor and")
+    lines.append("  the 3-float additions into it ([eax+0/4/8] + [ecx+0/4/8]) and the fsub [edi+0/4/8] uses (0x7B46D0..0x7B46E5).")
     lines.append("")
     lines.append("[B.3] VTABLE MATRIX (measured: where 0x7B5390 and 0x7E4820 sit in .rdata vtables)")
     lines.append("  0x007B5390 (slot17 named lookup, ret 4 thiscall, recursive over children array [+0xCC] count [+0xD4]) stored in .rdata at:")

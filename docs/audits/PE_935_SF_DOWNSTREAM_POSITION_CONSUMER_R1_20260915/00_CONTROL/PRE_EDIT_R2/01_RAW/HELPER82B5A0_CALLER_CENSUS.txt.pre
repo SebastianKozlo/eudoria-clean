@@ -1,0 +1,63 @@
+====================================================================================================
+FUN_0082B5A0 CALLER CENSUS — measured (36 direct E8 sites)
+RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+GENERATED_UTC: 2026-09-15T13:35:36Z
+GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\gen_raw_evidence.py
+GENERATOR_SHA256: 791E92FCB9B8A890333832D2E4804D6E56FB57CA7F4A4F8E8FAEF600F2DA534B
+MEASURED ENVIRONMENT (1a490ee lesson: measured at run time, not hardcoded):
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at generator start (size+sha256+PE layout re-verified before any decode).
+SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secondary corroboration only (QH-012).
+====================================================================================================
+E8 rel32 direct: 36 sites. E9: 0. imm32 in .text: 0. Vtable membership: none found.
+34 sites are 'call 0x437F70; mov ecx,eax; call 0x82B5A0' pairs; the 2 remaining sites use a STORED ORIGIN pointer
+(ECX = [this+0x4C]; no adjacent 437F70 call — see the amended CSV rows and ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.1]).
+(AMEND NOTE, QC P2-4: this line originally read "All sites follow the ... pair pattern OR are near-adjacent to a
+437F70 call" — false for the 2 NON-PAIR sites; and the two NON-PAIR rows' prior_437f70_site cells were pair-geometry
+artifacts, now NOT_APPLICABLE.)
+(pair membership is computed from the caller census of 437F70 — see HELPER437F70_CALLER_CENSUS.csv).
+
+call_site_va  preceded_by_437f70(call site)  pair_member
+0x00438A9D     0x00438A96                       PAIR
+0x0046E299     0x0046E292                       PAIR
+0x0047CE1B     0x0047CE14                       PAIR
+0x0047D4AF     0x0047D4A8                       PAIR
+0x004B4275     0x004B426E                       PAIR
+0x0050A07C     0x0050A075                       PAIR
+0x0050B0EA     0x0050B0E3                       PAIR
+0x00523C5E     0x00523C57                       PAIR
+0x0052410A     0x00524103                       PAIR
+0x0055C227     0x0055C220                       PAIR
+0x00565BF2     0x00565BEB                       PAIR
+0x006A7BCF     0x006A7BC8                       PAIR
+0x006ABD8B     0x006ABD84                       PAIR
+0x006AC14A     0x006AC143                       PAIR
+0x006B466B     0x006B4664                       PAIR
+0x006C184C     0x006C1845                       PAIR
+0x006C1CA1     0x006C1C9A                       PAIR
+0x006C1CBC     0x006C1CB5                       PAIR
+0x006C4797     0x006C4790                       PAIR
+0x006C4E95     0x006C4E8E                       PAIR
+0x006C99B9     0x006C99B2                       PAIR
+0x006E0F55     0x006E0F4E                       PAIR
+0x006E0FDA     0x006E0FD3                       PAIR
+0x006E105F     0x006E1058                       PAIR
+0x006E2401     0x006E23FA                       PAIR
+0x008B74C1     0x008B74BA                       PAIR
+0x008B8A61     0x008B8A5A                       PAIR
+0x008BC031     0x008BC02A                       PAIR
+0x008BC254     0x008BC24D                       PAIR
+0x008BC2EE     0x008BC2E7                       PAIR
+0x008CD55D     0x008CD556                       PAIR
+0x008CD64C     0x008CD645                       PAIR
+0x008CDDF0     0x008CDDE9                       PAIR
+0x008DCB29     0x008DCB22                       PAIR
+0x00930030     NOT_APPLICABLE                   NON-PAIR
+0x00930056     NOT_APPLICABLE                   NON-PAIR

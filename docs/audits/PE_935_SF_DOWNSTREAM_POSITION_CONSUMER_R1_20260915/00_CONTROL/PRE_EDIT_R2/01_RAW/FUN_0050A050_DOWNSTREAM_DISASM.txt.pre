@@ -1,0 +1,156 @@
+====================================================================================================
+FUN_0050A050 DOWNSTREAM WINDOW — PHASE A FULL CAPSTONE DECODE (SF vtable slot 3 of SceneFeeder class, vtable 0xa7d458)
+RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+GENERATED_UTC: 2026-09-15T13:35:35Z
+GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\gen_raw_evidence.py
+GENERATOR_SHA256: 791E92FCB9B8A890333832D2E4804D6E56FB57CA7F4A4F8E8FAEF600F2DA534B
+MEASURED ENVIRONMENT (1a490ee lesson: measured at run time, not hardcoded):
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at generator start (size+sha256+PE layout re-verified before any decode).
+SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secondary corroboration only (QH-012).
+====================================================================================================
+
+[A.1] LINEAR DECODE 0x0050A050..0x0050A0AA (the pinned full window incl. fallback tail)
+
+0x0050A050  8b 44 24 08               mov      eax, dword ptr [esp + 8]
+0x0050A054  85 c0                     test     eax, eax
+0x0050A056  56                        push     esi
+0x0050A057  8b f1                     mov      esi, ecx
+0x0050A059  74 2c                     je       0x50a087
+0x0050A05B  8b 4e 30                  mov      ecx, dword ptr [esi + 0x30]
+0x0050A05E  8b 11                     mov      edx, dword ptr [ecx]
+0x0050A060  50                        push     eax
+0x0050A061  8b 42 44                  mov      eax, dword ptr [edx + 0x44]
+0x0050A064  ff d0                     call     eax
+0x0050A066  85 c0                     test     eax, eax
+0x0050A068  74 1d                     je       0x50a087
+0x0050A06A  8b 74 24 08               mov      esi, dword ptr [esp + 8]
+0x0050A06E  05 90 00 00 00            add      eax, 0x90
+0x0050A073  50                        push     eax
+0x0050A074  56                        push     esi
+0x0050A075  e8 f6 de f2 ff            call     0x437f70
+0x0050A07A  8b c8                     mov      ecx, eax
+0x0050A07C  e8 1f 15 32 00            call     0x82b5a0
+0x0050A081  8b c6                     mov      eax, esi
+0x0050A083  5e                        pop      esi
+0x0050A084  c2 08 00                  ret      8
+0x0050A087  8b 16                     mov      edx, dword ptr [esi]
+0x0050A089  8b 42 04                  mov      eax, dword ptr [edx + 4]
+0x0050A08C  8b ce                     mov      ecx, esi
+0x0050A08E  ff d0                     call     eax
+0x0050A090  8b 10                     mov      edx, dword ptr [eax]
+0x0050A092  8b 4c 24 08               mov      ecx, dword ptr [esp + 8]
+0x0050A096  89 11                     mov      dword ptr [ecx], edx
+0x0050A098  8b 50 04                  mov      edx, dword ptr [eax + 4]
+0x0050A09B  89 51 04                  mov      dword ptr [ecx + 4], edx
+0x0050A09E  8b 40 08                  mov      eax, dword ptr [eax + 8]
+0x0050A0A1  89 41 08                  mov      dword ptr [ecx + 8], eax
+0x0050A0A4  8b c1                     mov      eax, ecx
+0x0050A0A6  5e                        pop      esi
+0x0050A0A7  c2 08 00                  ret      8
+
+[A.2] EXTENT BY TERMINAL+PADDING RULE (measured)
+  - Primary-path terminal: 0x0050A084 'ret 8' (3 bytes) -> next 0x0050A087
+  - Fallback-path terminal: 0x0050A0A7 'ret 8' (3 bytes) -> next 0x0050A0AA
+  - Padding after last terminal (read from bytes at 0x50A0AA): cc cc cc cc cc cc 56 8b f1 80 7e 24
+  - Extent verdict: 0x0050A050..0x0050A0AA TERMINATED (0x50A0A7 ret 8), padded 0x50A0AA..0x50A0B0 with 0xCC (6x int3),
+    next function starts 0x0050A0B0 ('56 8b f1' = push esi; mov esi,ecx; ...). PIN MATCH: extent 0x50A050..0x50A0AA == package-A pin. MATCH.
+  - AMEND NOTE (QC P2-1): the original verdict line here said "padded 0x50A0AA..0x50A0B6 with 0xCC (12x int3), next
+    function starts 0x0050A0B6" — a miscount of the printed byte string (only the first 6 of the 12 printed bytes are
+    0xCC; the re-measured census annex 01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.2] confirms 6x 0xCC at
+    0x50A0AA..0x50A0AF and the next function at 0x0050A0B0). Extent verdict unchanged.
+
+[A.3] PIN RE-MEASUREMENT — every pinned instruction from the contract's standing-knowledge block
+  PIN_ADDR            PINNED_TEXT                                          MEASURED(capstone)                                VERDICT
+  0x0050A050  mov eax, dword ptr [esp + 8]                          mov eax, dword ptr [esp + 8]                      MATCH
+  0x0050A054  test eax, eax                                         test eax, eax                                     MATCH
+  0x0050A056  push esi                                              push esi                                          MATCH
+  0x0050A057  mov esi, ecx                                          mov esi, ecx                                      MATCH
+  0x0050A059  je 0x50a087                                           je 0x50a087                                       MATCH
+  0x0050A05B  mov ecx, dword ptr [esi + 0x30]                       mov ecx, dword ptr [esi + 0x30]                   MATCH
+  0x0050A05E  mov edx, dword ptr [ecx]                              mov edx, dword ptr [ecx]                          MATCH
+  0x0050A060  push eax                                              push eax                                          MATCH
+  0x0050A061  mov eax, dword ptr [edx + 0x44]                       mov eax, dword ptr [edx + 0x44]                   MATCH
+  0x0050A064  call eax                                              call eax                                          MATCH
+  0x0050A066  test eax, eax                                         test eax, eax                                     MATCH
+  0x0050A068  je 0x50a087                                           je 0x50a087                                       MATCH
+  0x0050A06A  mov esi, dword ptr [esp + 8]                          mov esi, dword ptr [esp + 8]                      MATCH
+  0x0050A06E  add eax, 0x90                                         add eax, 0x90                                     MATCH
+  0x0050A073  push eax                                              push eax                                          MATCH
+  0x0050A074  push esi                                              push esi                                          MATCH
+  0x0050A075  call 0x437f70                                         call 0x437f70                                     MATCH
+  0x0050A07A  mov ecx, eax                                          mov ecx, eax                                      MATCH
+  0x0050A07C  call 0x82b5a0                                         call 0x82b5a0                                     MATCH
+  0x0050A081  mov eax, esi                                          mov eax, esi                                      MATCH
+  0x0050A083  pop esi                                               pop esi                                           MATCH
+  0x0050A084  ret 8                                                 ret 8                                             MATCH
+  0x0050A087  mov edx, dword ptr [esi]                              mov edx, dword ptr [esi]                          MATCH
+  0x0050A089  mov eax, dword ptr [edx + 4]                          mov eax, dword ptr [edx + 4]                      MATCH
+  0x0050A08C  mov ecx, esi                                          mov ecx, esi                                      MATCH
+  0x0050A08E  call eax                                              call eax                                          MATCH
+  0x0050A090  mov edx, dword ptr [eax]                              mov edx, dword ptr [eax]                          MATCH
+  0x0050A092  mov ecx, dword ptr [esp + 8]                          mov ecx, dword ptr [esp + 8]                      MATCH
+  0x0050A096  mov dword ptr [ecx], edx                              mov dword ptr [ecx], edx                          MATCH
+  0x0050A098  mov edx, dword ptr [eax + 4]                          mov edx, dword ptr [eax + 4]                      MATCH
+  0x0050A09B  mov dword ptr [ecx + 4], edx                          mov dword ptr [ecx + 4], edx                      MATCH
+  0x0050A09E  mov eax, dword ptr [eax + 8]                          mov eax, dword ptr [eax + 8]                      MATCH
+  0x0050A0A1  mov dword ptr [ecx + 8], eax                          mov dword ptr [ecx + 8], eax                      MATCH
+  0x0050A0A4  mov eax, ecx                                          mov eax, ecx                                      MATCH
+  0x0050A0A6  pop esi                                               pop esi                                           MATCH
+  0x0050A0A7  ret 8                                                 ret 8                                             MATCH
+  PIN RE-MEASUREMENT VERDICT: ALL 36 PINNED INSTRUCTIONS MATCH (capstone byte decode vs contract pin block).
+  AMEND NOTE (QC P2-2): this line originally read "ALL 37 PINNED INSTRUCTIONS MATCH" — a count error; the table
+  above has 36 PIN rows and the contract's standing-knowledge block has 36 instruction lines (its "fallback:" line
+  is a label, not an instruction; re-measured in ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [A.3]). The G2 predicate
+  (every pinned instruction re-measured MATCH) is unchanged — 36/36 MATCH.
+
+[A.4] EXACT STACK-STATE TRACKING 0x50A064..0x50A084 (derived below from the decoded pushes/calls/rets)
+  Entry (thiscall, after 'call [slot3]' pushed return address):
+    [esp+0x00]=retaddr_to_slot3_caller  [esp+0x04]=ARG1(out float3 buffer ptr)  [esp+0x08]=ARG2(name lookup key ptr)
+  0x50A056 push esi           -> [esp]=saved caller ESI, [esp+0x04]=retaddr, [esp+0x08]=ARG1, [esp+0x0C]=ARG2
+  0x50A057 mov esi,ecx        -> ESI = this (SceneFeeder object)
+  0x50A060 push eax           -> [esp]=ARG2(name), [esp+0x04]=savedESI, [esp+0x08]=retaddr, [esp+0x0C]=ARG1, [esp+0x10]=ARG2
+  0x50A064 call eax           -> pushes ret 0x50A066; INSIDE LOOKUP CALLEE: [esp]=ret, [esp+0x04]=name==ARG2, ECX=this->[SF+0x30] (NiNode).
+     lookup = NiNode-family vtable slot 0x44 (slot17 = 0x007B5390, recursive named-object lookup; ret 4 thiscall; package-B pin re-measured in SOURCE_VECTOR_LAYOUT_RAW.txt)
+     lookup callee 'ret 4' pops ret+name -> stack returns to the post-0x50A060 state.
+  0x50A06A mov esi,[esp+8]   -> with [esp]=savedESI,[esp+4]=retaddr: [esp+8]=ARG1(out buffer). ESI is RE-LOADED with ARG1 (this is the
+     DERIVED mapping the contract ordered: original ARG1 after push esi sits at [esp+8] HERE — CONFIRMED, and ESI (which held SF this) is overwritten.
+  0x50A06E add eax,0x90       -> EAX = lookup_result + 0x90 (== &NiAVObject.m_kWorld.m_Translate per Phase B)
+  0x50A073 push eax           -> [esp]=&world_translate, [esp+4]=savedESI, [esp+8]=retaddr, [esp+0xC]=ARG1, [esp+0x10]=ARG2
+  0x50A074 push esi           -> [esp]=ARG1(out), [esp+4]=&world_translate, [esp+8]=savedESI, [esp+0xC]=retaddr, [esp+0x10]=ARG1, [esp+0x14]=ARG2
+  0x50A075 call 0x437F70     -> pushes ret 0x50A07A; INSIDE HELPER1: [esp]=ret, [esp+4]=ARG1(out)=callee arg1, [esp+8]=&world_translate=callee arg2.
+     PUSH-ORDER->ARG MAPPING: LAST push (esi=ARG1 out) lands at callee [esp+4]; FIRST push (eax=&world_translate) lands at callee [esp+8].
+     FUN_00437F70 IGNORES both stack args (decode in FUN_00437F70_DISASM.txt) and returns with PLAIN 'ret' — the 8 bytes REMAIN on the stack.
+     HELPER1 return value: EAX = singleton S pointer (global slot 0xba1804).
+  0x50A07A mov ecx,eax        -> ECX = S (helper1 return)
+  0x50A07C call 0x82B5A0     -> pushes ret 0x50A081; INSIDE HELPER2: [esp]=ret, [esp+4]=ARG1(out) — the SAME leftover slot — , [esp+8]=&world_translate.
+     HELPER2 stack-arg positions: [esp+4]=out buffer (same ARG1), [esp+8]=source=&world_translate, ECX=base S. HELPER2 'ret 8' CLEANSES the pair's leftover 8 bytes.
+     HELPER2 writes out[0]/out[1]/out[2] itself (decode in FUN_0082B5A0_DISASM.txt).
+  0x50A081 mov eax,esi        -> EAX = ARG1 (out buffer) — FUNCTION RETURN VALUE = the caller-provided out pointer
+  0x50A083 pop esi; 0x50A084 ret 8
+
+[A.5] REQUIRED QUESTION (def-use, from the decode above):
+  Does FUN_0050A050 itself write primary-path XYZ? -> **NO**. Between 'call 0x82B5A0' (0x50A07C) and 'ret 8' (0x50A084) the only
+  instructions are mov eax,esi / pop esi / ret 8 — ZERO memory writes to [esi] on the primary path. On the primary path the
+  ENTIRE out-buffer write happens inside FUN_0082B5A0 (out[i] = f32(f32(src[i]*K) - S[i])). FUN_0050A050 only passes the
+  pointers through the stack frames. (The FALLBACK path 0x50A087..0x50A0A7 DOES write 3 dwords directly: out[0..2]=P[0..2],
+  where P = SF::slot1() = &SF+0x34 — see FALLBACK_PRIMARY_COMPARISON.txt.)
+
+[A.6] PSEUDO-C (derived ONLY AFTER the decode above; thiscall, ret 8):
+  struct SceneFeeder { /* vtable@0 = 0xa7d458; +0x30 NiNode-family root (refcounted, 0x118B); +0x34 float3 posSlotA; +0x40 float3 posSlotB; ... */ };
+  float3* SF_slot3(SceneFeeder* this, float3* out, const char* name) {   // [esp+4]=out, [esp+8]=name, ret 8
+      NiAVObject* obj = name ? this->root /* +0x30 */->GetObjectByName(name) /* slot17, 0x44 */ : NULL;
+      if (!obj) { float3* p = (float3*)this->slot1(); /* == &this->posSlotA @ +0x34 */ out->x=p->x; out->y=p->y; out->z=p->z; return out; }
+      float3* src = (float3*)((char*)obj + 0x90);   // &obj->m_kWorld.m_Translate
+      S = GetOrCreateOriginSingleton();              // 0x437F70; singleton = global-zero-vector snapshot (Phase C)
+      ScaledSub(out, src, S);                         // 0x82B5A0: out[i] = f32(f32(src[i]*K) - S[i]); K=(f64)f32(0.01)
+      return out;
+  }
+  (Semantics of S/K/the helpers are derived in the Phase C/D raw files; the pseudo-C only encodes the measured control flow + dataflow.)

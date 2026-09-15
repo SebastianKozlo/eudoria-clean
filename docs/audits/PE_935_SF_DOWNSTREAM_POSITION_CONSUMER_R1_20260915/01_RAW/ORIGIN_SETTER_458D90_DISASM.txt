@@ -1,0 +1,701 @@
+====================================================================================================
+ORIGIN SETTER 0x00458D90 — FALSIFIER + FULL DECODE + ABI + ESP LEDGER
+RUN_ID (correction): PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915
+CANONICAL PACKAGE: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915 (in-place correction; no new package root)
+GENERATED_UTC: 2026-09-15T16:48:00Z
+GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\probe_origin_setter.py
+GENERATOR_SHA256: BC3D2F7DCB81A305E46A1E359BB16BA506AED00342E0C73E1D751599195BF486
+MEASURED ENVIRONMENT:
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at script start (size+sha256+PE layout re-verified before any decode).
+SOURCE OF TRUTH: Entropia.exe physical bytes (capstone linear decode). No external report is
+  imported as evidence; PE-MASTER cross-check anchors are recorded AFTER measurement as
+  comparisons (discrepancies are reported loudly, never forced).
+PURPOSE (contract Section 3): FIRST falsifier — reproduce or reject from physical bytes the
+  claimed write-through at call site 0x00458E27 (call FUN_00437F70), BEFORE any canonical edit.
+====================================================================================================
+
+[S.1] FALSIFIER — call site 0x00458E27 and the path through it
+
+[S.1.1] Direct call verification at 0x00458E27
+  bytes: e8 44 f1 fd ff   capstone: call 0x437f70
+  raw E8 rel32 = -134844 -> effective target 0x00437F70 (getter 0x00437F70): MATCH
+
+[S.1.2] GETTER FUN_00437F70 — return-value proof (path-sensitive EAX trace)
+  ret path -> ret@0x00437FE6 : EAX = S_PTR   [path: 0x437f98->0x437fd7]
+  ret path -> ret@0x00437FE6 : EAX = 0   [path: 0x437fb2->0x437fd0]
+  ret path -> ret@0x00437FCF : EAX = call_ret(0x0082B580)   [path: (straight-line)]
+  Terminals in 0x437F70..0x437FF0: 0x00437FCF 'ret ', 0x00437FE6 'ret '
+  (Full getter decode in [S.2]; ctor 0x82B580 decode in [S.9].)
+
+[S.1.3] REGISTER STATE AT 0x00458E2C (immediately after the call returns)
+  The call at 0x458E27 is a DIRECT call to FUN_00437F70 (S.1.1); the getter trace (S.1.2) shows
+  its return value in EAX (fast path: EAX=[0xba1804]; cold-success: EAX = ctor return = same pointer;
+  alloc-fail corner: EAX=NULL — disclosed corner, does not remove the write instructions).
+  Decoded instructions 0x458E2C..0x458E30 (between call return and the first claimed write):
+    0x00458E2C  8b 54 24 04               mov      edx, dword ptr [esp + 4]
+  no instruction in 0x458E2C..0x458E30 writes EAX -> EAX still holds FUN_00437F70's return value.
+  EAX_PROVENANCE_AT_0x458E2C = FUN_00437F70_RETURN
+
+[S.1.4] SYMBOLIC S_PTR WALK (sprov.Engine) — window from 0x458E2C, N=16 instructions
+    0x00458E2C  8b 54 24 04               mov      edx, dword ptr [esp + 4]
+    0x00458E30  89 10                     mov      dword ptr [eax], edx
+    0x00458E32  8b 4c 24 08               mov      ecx, dword ptr [esp + 8]
+    0x00458E36  89 48 04                  mov      dword ptr [eax + 4], ecx
+    0x00458E39  8b 54 24 0c               mov      edx, dword ptr [esp + 0xc]
+    0x00458E3D  89 50 08                  mov      dword ptr [eax + 8], edx
+    0x00458E40  83 c4 10                  add      esp, 0x10
+    0x00458E43  c3                        ret      
+  Events (measured):
+    0x00458E30 WRITE_S off=0 value=edx
+    0x00458E36 WRITE_S off=4 value=ecx
+    0x00458E3D WRITE_S off=8 value=edx
+    0x00458E43 ESCAPE_AT_TERMINAL live regs: eax
+    0x00458E43 TERMINAL ret
+  WRITE_S events: 3
+    0x00458E30 off=0 value=edx
+    0x00458E36 off=4 value=ecx
+    0x00458E3D off=8 value=edx
+
+  => >=1 valid write through a register proven to contain S exists (offsets [0, 4, 8] at 0x00458E30, 0x00458E36, 0x00458E3D).
+     Counterexample to the original 'no caller writes through the returned pointer' claim (see
+     ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv for the full census; status algebra in
+     02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md).
+
+[S.1.5] INSTRUMENT SELF-TEST (known-negative control: the SF slot3 pair site 0x0050A075)
+    0x0050A07C ESCAPE_ARGREG reg=eax -> callee 0x0082B5A0
+    0x0050A07C ESCAPE_ARGREG reg=ecx -> callee 0x0082B5A0
+    0x0050A07C CALL_RET_N call 0x0082B5A0 ret_n=8 (ret 8 at 0x0082B5E4 (all 1 rets agree; extent ended at 0x82b5f0 or window end))
+    0x0050A084 TERMINAL ret
+    head classification of escaped channel (reg ecx -> 0x82B5A0): READ_ONLY (decode_error=None stopped=True)
+    (expected instrument behavior: ESCAPE_ARGREG via mov ecx,eax; callee head READ_ONLY — 0x82B5A0
+     reads [ecx+0/4/8] in its fsub chain and never stores through an ECX-derived pointer.)
+
+[S.2] FUN_00437F70 GETTER — full decode 0x437F70..0x437FF0 (both terminals + padding + next fn)
+
+  0x00437F70  6a ff                     push     -1
+  0x00437F72  68 6b c0 99 00            push     0x99c06b
+  0x00437F77  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+  0x00437F7D  50                        push     eax
+  0x00437F7E  51                        push     ecx
+  0x00437F7F  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+  0x00437F84  33 c4                     xor      eax, esp
+  0x00437F86  50                        push     eax
+  0x00437F87  8d 44 24 08               lea      eax, [esp + 8]
+  0x00437F8B  64 a3 00 00 00 00         mov      dword ptr fs:[0], eax
+  0x00437F91  a1 04 18 ba 00            mov      eax, dword ptr [0xba1804]
+  0x00437F96  85 c0                     test     eax, eax
+  0x00437F98  75 3d                     jne      0x437fd7
+  0x00437F9A  6a 0c                     push     0xc
+  0x00437F9C  e8 23 54 52 00            call     0x95d3c4
+  0x00437FA1  83 c4 04                  add      esp, 4
+  0x00437FA4  89 44 24 04               mov      dword ptr [esp + 4], eax
+  0x00437FA8  85 c0                     test     eax, eax
+  0x00437FAA  c7 44 24 10 00 00 00 00   mov      dword ptr [esp + 0x10], 0
+  0x00437FB2  74 1c                     je       0x437fd0
+  0x00437FB4  8b c8                     mov      ecx, eax
+  0x00437FB6  e8 c5 35 3f 00            call     0x82b580
+  0x00437FBB  a3 04 18 ba 00            mov      dword ptr [0xba1804], eax
+  0x00437FC0  8b 4c 24 08               mov      ecx, dword ptr [esp + 8]
+  0x00437FC4  64 89 0d 00 00 00 00      mov      dword ptr fs:[0], ecx
+  0x00437FCB  59                        pop      ecx
+  0x00437FCC  83 c4 10                  add      esp, 0x10
+  0x00437FCF  c3                        ret      
+  0x00437FD0  33 c0                     xor      eax, eax
+  0x00437FD2  a3 04 18 ba 00            mov      dword ptr [0xba1804], eax
+  0x00437FD7  8b 4c 24 08               mov      ecx, dword ptr [esp + 8]
+  0x00437FDB  64 89 0d 00 00 00 00      mov      dword ptr fs:[0], ecx
+  0x00437FE2  59                        pop      ecx
+  0x00437FE3  83 c4 10                  add      esp, 0x10
+  0x00437FE6  c3                        ret      
+  0x00437FE7  cc                        int3     
+  0x00437FE8  cc                        int3     
+  0x00437FE9  cc                        int3     
+  0x00437FEA  cc                        int3     
+  0x00437FEB  cc                        int3     
+  0x00437FEC  cc                        int3     
+  0x00437FED  cc                        int3     
+  0x00437FEE  cc                        int3     
+  0x00437FEF  cc                        int3     
+  padding bytes at 0x437FE7: cc cc cc cc cc cc cc cc cc 56 8b f1 8b 0e 57 8b
+  next function starts 0x437FF0:
+    0x00437FF0  56                        push     esi
+    0x00437FF1  8b f1                     mov      esi, ecx
+    0x00437FF3  8b 0e                     mov      ecx, dword ptr [esi]
+    0x00437FF5  57                        push     edi
+
+  singleton-cache slot 0xBA1804 whole-image imm32 occurrences: 3 -> .text@0x00437F92, .text@0x00437FBC, .text@0x00437FD3
+  getter call channels: E8=99 E9=0 imm32(.text)=0
+
+[S.3] SETTER FUN_00458D90 — full decode 0x458D90..0x458E50 (terminal + padding + next fn)
+
+  0x00458D90  83 ec 10                  sub      esp, 0x10
+  0x00458D93  8b 01                     mov      eax, dword ptr [ecx]
+  0x00458D95  8b 51 04                  mov      edx, dword ptr [ecx + 4]
+  0x00458D98  f7 d8                     neg      eax
+  0x00458D9A  89 04 24                  mov      dword ptr [esp], eax
+  0x00458D9D  db 04 24                  fild     dword ptr [esp]
+  0x00458DA0  8b 41 08                  mov      eax, dword ptr [ecx + 8]
+  0x00458DA3  f7 da                     neg      edx
+  0x00458DA5  89 14 24                  mov      dword ptr [esp], edx
+  0x00458DA8  d9 5c 24 04               fstp     dword ptr [esp + 4]
+  0x00458DAC  f7 d8                     neg      eax
+  0x00458DAE  db 04 24                  fild     dword ptr [esp]
+  0x00458DB1  89 04 24                  mov      dword ptr [esp], eax
+  0x00458DB4  8d 4c 24 04               lea      ecx, [esp + 4]
+  0x00458DB8  51                        push     ecx
+  0x00458DB9  d9 5c 24 0c               fstp     dword ptr [esp + 0xc]
+  0x00458DBD  db 44 24 04               fild     dword ptr [esp + 4]
+  0x00458DC1  d9 5c 24 10               fstp     dword ptr [esp + 0x10]
+  0x00458DC5  e8 a6 c4 fb ff            call     0x415270
+  0x00458DCA  8b c8                     mov      ecx, eax
+  0x00458DCC  e8 7f ed 24 00            call     0x6a7b50
+  0x00458DD1  8d 54 24 04               lea      edx, [esp + 4]
+  0x00458DD5  52                        push     edx
+  0x00458DD6  e8 15 ba fb ff            call     0x4147f0
+  0x00458DDB  8b c8                     mov      ecx, eax
+  0x00458DDD  e8 9e 3b ff ff            call     0x44c980
+  0x00458DE2  8d 44 24 04               lea      eax, [esp + 4]
+  0x00458DE6  50                        push     eax
+  0x00458DE7  e8 74 85 fa ff            call     0x401360
+  0x00458DEC  8b c8                     mov      ecx, eax
+  0x00458DEE  e8 5d c2 02 00            call     0x485050
+  0x00458DF3  8b c8                     mov      ecx, eax
+  0x00458DF5  e8 56 d7 2e 00            call     0x746550
+  0x00458DFA  8b c8                     mov      ecx, eax
+  0x00458DFC  e8 2f b5 0c 00            call     0x524330
+  0x00458E01  8d 4c 24 04               lea      ecx, [esp + 4]
+  0x00458E05  51                        push     ecx
+  0x00458E06  e8 55 85 fa ff            call     0x401360
+  0x00458E0B  8b c8                     mov      ecx, eax
+  0x00458E0D  e8 de 94 25 00            call     0x6b22f0
+  0x00458E12  8b c8                     mov      ecx, eax
+  0x00458E14  e8 c7 53 37 00            call     0x7ce1e0
+  0x00458E19  8b c8                     mov      ecx, eax
+  0x00458E1B  e8 20 37 48 00            call     0x8dc540
+  0x00458E20  8b c8                     mov      ecx, eax
+  0x00458E22  e8 19 72 4d 00            call     0x930040
+  0x00458E27  e8 44 f1 fd ff            call     0x437f70
+  0x00458E2C  8b 54 24 04               mov      edx, dword ptr [esp + 4]
+  0x00458E30  89 10                     mov      dword ptr [eax], edx
+  0x00458E32  8b 4c 24 08               mov      ecx, dword ptr [esp + 8]
+  0x00458E36  89 48 04                  mov      dword ptr [eax + 4], ecx
+  0x00458E39  8b 54 24 0c               mov      edx, dword ptr [esp + 0xc]
+  0x00458E3D  89 50 08                  mov      dword ptr [eax + 8], edx
+  0x00458E40  83 c4 10                  add      esp, 0x10
+  0x00458E43  c3                        ret      
+  0x00458E44  cc                        int3     
+  0x00458E45  cc                        int3     
+  0x00458E46  cc                        int3     
+  0x00458E47  cc                        int3     
+  0x00458E48  cc                        int3     
+  0x00458E49  cc                        int3     
+  0x00458E4A  cc                        int3     
+  0x00458E4B  cc                        int3     
+  0x00458E4C  cc                        int3     
+  0x00458E4D  cc                        int3     
+  0x00458E4E  cc                        int3     
+  0x00458E4F  cc                        int3     
+  terminals: 0x00458E43 ret
+  bytes 0x00458E44..0x458E50 (padding + next-function head): cc cc cc cc cc cc cc cc cc cc cc cc
+  int3 padding run: 12 bytes at 0x00458E44..0x00458E4F
+  next function starts 0x00458E50:
+    0x00458E50  83 ec 24                  sub      esp, 0x24
+    0x00458E53  56                        push     esi
+    0x00458E54  8b f1                     mov      esi, ecx
+    0x00458E56  e8 95 b5 fb ff            call     0x4143f0
+    0x00458E5B  8b c8                     mov      ecx, eax
+    0x00458E5D  e8 7e 53 37 00            call     0x7ce1e0
+
+[S.4] SETTER ABI + ESP LEDGER (instruction-by-instruction; callee ret conventions measured by decode)
+  Frame convention (measured below): entry [esp]=retaddr (E0); ECX = input; 'sub esp,0x10' local frame;
+  call net effect on esp = +ret_n(target) after return (measured per callee, SP.ret_convention).
+
+  0x00458D90  83 ec 10                  sub      esp, 0x10 esp=-16  sub esp,0x10 -> esp=-16
+  0x00458D93  8b 01                     mov      eax, dword ptr [ecx] esp=-16  
+  0x00458D95  8b 51 04                  mov      edx, dword ptr [ecx + 4] esp=-16  
+  0x00458D98  f7 d8                     neg      eax esp=-16  
+  0x00458D9A  89 04 24                  mov      dword ptr [esp], eax esp=-16  
+  0x00458D9D  db 04 24                  fild     dword ptr [esp] esp=-16  
+  0x00458DA0  8b 41 08                  mov      eax, dword ptr [ecx + 8] esp=-16  
+  0x00458DA3  f7 da                     neg      edx esp=-16  
+  0x00458DA5  89 14 24                  mov      dword ptr [esp], edx esp=-16  
+  0x00458DA8  d9 5c 24 04               fstp     dword ptr [esp + 4] esp=-16  
+  0x00458DAC  f7 d8                     neg      eax esp=-16  
+  0x00458DAE  db 04 24                  fild     dword ptr [esp] esp=-16  
+  0x00458DB1  89 04 24                  mov      dword ptr [esp], eax esp=-16  
+  0x00458DB4  8d 4c 24 04               lea      ecx, [esp + 4] esp=-16  
+  0x00458DB8  51                        push     ecx esp=-20  push ecx -> esp=-20
+  0x00458DB9  d9 5c 24 0c               fstp     dword ptr [esp + 0xc] esp=-20  
+  0x00458DBD  db 44 24 04               fild     dword ptr [esp + 4] esp=-20  
+  0x00458DC1  d9 5c 24 10               fstp     dword ptr [esp + 0x10] esp=-20  
+  0x00458DC5  e8 a6 c4 fb ff            call     0x415270 esp=-20  call 0x00415270 ret_n=0 -> esp=-20
+  0x00458DCA  8b c8                     mov      ecx, eax esp=-20  
+  0x00458DCC  e8 7f ed 24 00            call     0x6a7b50 esp=-16  call 0x006A7B50 ret_n=4 -> esp=-16
+  0x00458DD1  8d 54 24 04               lea      edx, [esp + 4] esp=-16  
+  0x00458DD5  52                        push     edx esp=-20  push edx -> esp=-20
+  0x00458DD6  e8 15 ba fb ff            call     0x4147f0 esp=-20  call 0x004147F0 ret_n=0 -> esp=-20
+  0x00458DDB  8b c8                     mov      ecx, eax esp=-20  
+  0x00458DDD  e8 9e 3b ff ff            call     0x44c980 esp=-16  call 0x0044C980 ret_n=4 -> esp=-16
+  0x00458DE2  8d 44 24 04               lea      eax, [esp + 4] esp=-16  
+  0x00458DE6  50                        push     eax esp=-20  push eax -> esp=-20
+  0x00458DE7  e8 74 85 fa ff            call     0x401360 esp=-20  call 0x00401360 ret_n=0 -> esp=-20
+  0x00458DEC  8b c8                     mov      ecx, eax esp=-20  
+  0x00458DEE  e8 5d c2 02 00            call     0x485050 esp=-20  call 0x00485050 ret_n=0 -> esp=-20
+  0x00458DF3  8b c8                     mov      ecx, eax esp=-20  
+  0x00458DF5  e8 56 d7 2e 00            call     0x746550 esp=-20  call 0x00746550 ret_n=0 -> esp=-20
+  0x00458DFA  8b c8                     mov      ecx, eax esp=-20  
+  0x00458DFC  e8 2f b5 0c 00            call     0x524330 esp=-16  call 0x00524330 ret_n=4 -> esp=-16
+  0x00458E01  8d 4c 24 04               lea      ecx, [esp + 4] esp=-16  
+  0x00458E05  51                        push     ecx esp=-20  push ecx -> esp=-20
+  0x00458E06  e8 55 85 fa ff            call     0x401360 esp=-20  call 0x00401360 ret_n=0 -> esp=-20
+  0x00458E0B  8b c8                     mov      ecx, eax esp=-20  
+  0x00458E0D  e8 de 94 25 00            call     0x6b22f0 esp=-20  call 0x006B22F0 ret_n=0 -> esp=-20
+  0x00458E12  8b c8                     mov      ecx, eax esp=-20  
+  0x00458E14  e8 c7 53 37 00            call     0x7ce1e0 esp=-20  call 0x007CE1E0 ret_n=0 -> esp=-20
+  0x00458E19  8b c8                     mov      ecx, eax esp=-20  
+  0x00458E1B  e8 20 37 48 00            call     0x8dc540 esp=-20  call 0x008DC540 ret_n=0 -> esp=-20
+  0x00458E20  8b c8                     mov      ecx, eax esp=-20  
+  0x00458E22  e8 19 72 4d 00            call     0x930040 esp=-16  call 0x00930040 ret_n=4 -> esp=-16
+  0x00458E27  e8 44 f1 fd ff            call     0x437f70 esp=-16  call 0x00437F70 ret_n=0 -> esp=-16 | EAX := S_PTR (getter return)
+  0x00458E2C  8b 54 24 04               mov      edx, dword ptr [esp + 4] esp=-16  
+  0x00458E30  89 10                     mov      dword ptr [eax], edx esp=-16  
+  0x00458E32  8b 4c 24 08               mov      ecx, dword ptr [esp + 8] esp=-16  
+  0x00458E36  89 48 04                  mov      dword ptr [eax + 4], ecx esp=-16  
+  0x00458E39  8b 54 24 0c               mov      edx, dword ptr [esp + 0xc] esp=-16  
+  0x00458E3D  89 50 08                  mov      dword ptr [eax + 8], edx esp=-16  
+  0x00458E40  83 c4 10                  add      esp, 0x10 esp=+0  add esp,0x10 -> esp=+0
+  0x00458E43  c3                        ret       esp=+0  
+  0x00458E44  cc                        int3      esp=+0  
+  0x00458E45  cc                        int3      esp=+0  
+  0x00458E46  cc                        int3      esp=+0  
+  0x00458E47  cc                        int3      esp=+0  
+  0x00458E48  cc                        int3      esp=+0  
+  0x00458E49  cc                        int3      esp=+0  
+  0x00458E4A  cc                        int3      esp=+0  
+  0x00458E4B  cc                        int3      esp=+0  
+  0x00458E4C  cc                        int3      esp=+0  
+  0x00458E4D  cc                        int3      esp=+0  
+  0x00458E4E  cc                        int3      esp=+0  
+  0x00458E4F  cc                        int3      esp=+0  
+
+  Push instructions measured in the setter: 0x00458DB8, 0x00458DD5, 0x00458DE6, 0x00458E05
+  Direct calls measured in the setter:
+    @0x00458DC5 -> 0x00415270  ret_n=0  (ret 0 at 0x004152CF,0x004152E6 (all 2 rets agree; extent ended at 0x4152f0 or window end))
+    @0x00458DCC -> 0x006A7B50  ret_n=4  (ret 4 at 0x006A7C34 (all 1 rets agree; extent ended at 0x6a7c40 or window end))
+    @0x00458DD6 -> 0x004147F0  ret_n=0  (ret 0 at 0x0041484F,0x00414866 (all 2 rets agree; extent ended at 0x414870 or window end))
+    @0x00458DDD -> 0x0044C980  ret_n=4  (ret 4 at 0x0044C9D1 (all 1 rets agree; extent ended at 0x44c9e0 or window end))
+    @0x00458DE7 -> 0x00401360  ret_n=0  (ret 0 at 0x004013C2,0x004013D9 (all 2 rets agree; extent ended at 0x4013e0 or window end))
+    @0x00458DEE -> 0x00485050  ret_n=0  (ret 0 at 0x00485053 (all 1 rets agree; extent ended at 0x485060 or window end))
+    @0x00458DF5 -> 0x00746550  ret_n=0  (ret 0 at 0x00746553 (all 1 rets agree; extent ended at 0x746560 or window end))
+    @0x00458DFC -> 0x00524330  ret_n=4  (ret 4 at 0x0052438E (all 1 rets agree; extent ended at 0x5243a0 or window end))
+    @0x00458E06 -> 0x00401360  ret_n=0  (ret 0 at 0x004013C2,0x004013D9 (all 2 rets agree; extent ended at 0x4013e0 or window end))
+    @0x00458E0D -> 0x006B22F0  ret_n=0  (ret 0 at 0x006B22F3 (all 1 rets agree; extent ended at 0x6b2300 or window end))
+    @0x00458E14 -> 0x007CE1E0  ret_n=0  (ret 0 at 0x007CE1E3 (all 1 rets agree; extent ended at 0x7ce1f0 or window end))
+    @0x00458E1B -> 0x008DC540  ret_n=0  (ret 0 at 0x008DC546 (all 1 rets agree; extent ended at 0x8dc550 or window end))
+    @0x00458E22 -> 0x00930040  ret_n=4  (ret 4 at 0x0093009D,0x009300DF (all 2 rets agree; extent ended at 0x9300f0 or window end))
+    @0x00458E27 -> 0x00437F70  ret_n=0  (ret 0 at 0x00437FCF,0x00437FE6 (all 2 rets agree; extent ended at 0x437ff0 or window end))
+
+[S.10] SETTER WRITE FORMULAS (slot-content dataflow trace; from the same decoded instructions)
+  Local slot contents at the write-value loads (slots are esp-relative; esp=+0 at the getter return
+  per the ledger; the value loads are [esp+K] with the SAME esp, so they read the local frame slots):
+    write @0x00458E30  S[0] := f32(f80(-(int32_in[0])))
+    write @0x00458E36  S[4] := f32(f80(-(int32_in[1])))
+    write @0x00458E3D  S[8] := f32(f80(-(int32_in[2])))
+  Measured write offsets through EAX (=S_PTR, engine-proven in [S.1.4]): [0, 4, 8]
+  Value symbols recorded for the local frame slots (from neg + fild/fstp chain in the decode above).
+
+[S.5] CHAIN MEMBER ABI TABLE (bounded head 0xA0; ret convention + absolute .data refs)
+  callee 0x00415270 (called @0x00458DC5): ret_n=0 (ret 0 at 0x004152CF,0x004152E6 (all 2 rets agree; extent ended at 0x4152f0 or window end))
+    absolute .data imm32 refs in bounded head: ["0x00B9D8D0 @0x0041527F 'mov eax, dword ptr [0xb9d8d0]'", "0x00BA12D4 @0x00415291 'mov eax, dword ptr [0xba12d4]'", "0x00BA12D4 @0x004152BB 'mov dword ptr [0xba12d4], eax'", "0x00BA12D4 @0x004152D2 'mov dword ptr [0xba12d4], eax'", "0x00B9D8D0 @0x004152FF 'mov eax, dword ptr [0xb9d8d0]'"]
+    head (first 12 instructions):
+      0x00415270  6a ff                     push     -1
+      0x00415272  68 0b 62 99 00            push     0x99620b
+      0x00415277  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+      0x0041527D  50                        push     eax
+      0x0041527E  51                        push     ecx
+      0x0041527F  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+      0x00415284  33 c4                     xor      eax, esp
+      0x00415286  50                        push     eax
+      0x00415287  8d 44 24 08               lea      eax, [esp + 8]
+      0x0041528B  64 a3 00 00 00 00         mov      dword ptr fs:[0], eax
+      0x00415291  a1 d4 12 ba 00            mov      eax, dword ptr [0xba12d4]
+      0x00415296  85 c0                     test     eax, eax
+    head decode note: decode-stopped-at-0x41530b
+
+  callee 0x006A7B50 (called @0x00458DCC): ret_n=4 (ret 4 at 0x006A7C34 (all 1 rets agree; extent ended at 0x6a7c40 or window end))
+    absolute .data imm32 refs in bounded head: ["0x00B9D8D0 @0x006A7B65 'mov eax, dword ptr [0xb9d8d0]'"]
+    head (first 12 instructions):
+      0x006A7B50  6a ff                     push     -1
+      0x006A7B52  68 78 11 a0 00            push     0xa01178
+      0x006A7B57  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+      0x006A7B5D  50                        push     eax
+      0x006A7B5E  83 ec 24                  sub      esp, 0x24
+      0x006A7B61  53                        push     ebx
+      0x006A7B62  55                        push     ebp
+      0x006A7B63  56                        push     esi
+      0x006A7B64  57                        push     edi
+      0x006A7B65  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+      0x006A7B6A  33 c4                     xor      eax, esp
+      0x006A7B6C  50                        push     eax
+
+  callee 0x004147F0 (called @0x00458DD6): ret_n=0 (ret 0 at 0x0041484F,0x00414866 (all 2 rets agree; extent ended at 0x414870 or window end))
+    absolute .data imm32 refs in bounded head: ["0x00B9D8D0 @0x004147FF 'mov eax, dword ptr [0xb9d8d0]'", "0x00BA1280 @0x00414811 'mov eax, dword ptr [0xba1280]'", "0x00BA1280 @0x0041483B 'mov dword ptr [0xba1280], eax'", "0x00BA1280 @0x00414852 'mov dword ptr [0xba1280], eax'", "0x00B9D8D0 @0x0041487F 'mov eax, dword ptr [0xb9d8d0]'"]
+    head (first 12 instructions):
+      0x004147F0  6a ff                     push     -1
+      0x004147F2  68 1b 5e 99 00            push     0x995e1b
+      0x004147F7  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+      0x004147FD  50                        push     eax
+      0x004147FE  51                        push     ecx
+      0x004147FF  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+      0x00414804  33 c4                     xor      eax, esp
+      0x00414806  50                        push     eax
+      0x00414807  8d 44 24 08               lea      eax, [esp + 8]
+      0x0041480B  64 a3 00 00 00 00         mov      dword ptr fs:[0], eax
+      0x00414811  a1 80 12 ba 00            mov      eax, dword ptr [0xba1280]
+      0x00414816  85 c0                     test     eax, eax
+    head decode note: decode-stopped-at-0x41488b
+
+  callee 0x0044C980 (called @0x00458DDD): ret_n=4 (ret 4 at 0x0044C9D1 (all 1 rets agree; extent ended at 0x44c9e0 or window end))
+    absolute .data imm32 refs in bounded head: (none)
+    head (first 12 instructions):
+      0x0044C980  56                        push     esi
+      0x0044C981  8b f1                     mov      esi, ecx
+      0x0044C983  8b 4e 18                  mov      ecx, dword ptr [esi + 0x18]
+      0x0044C986  85 c9                     test     ecx, ecx
+      0x0044C988  57                        push     edi
+      0x0044C989  8b 7c 24 0c               mov      edi, dword ptr [esp + 0xc]
+      0x0044C98D  74 0e                     je       0x44c99d
+      0x0044C98F  57                        push     edi
+      0x0044C990  e8 4b 18 38 00            call     0x7ce1e0
+      0x0044C995  8b 48 48                  mov      ecx, dword ptr [eax + 0x48]
+      0x0044C998  e8 33 8c 4f 00            call     0x9455d0
+      0x0044C99D  8b 4e 08                  mov      ecx, dword ptr [esi + 8]
+    head decode note: decode-stopped-at-0x44ca1f
+
+  callee 0x00401360 (called @0x00458DE7): ret_n=0 (ret 0 at 0x004013C2,0x004013D9 (all 2 rets agree; extent ended at 0x4013e0 or window end))
+    absolute .data imm32 refs in bounded head: ["0x00B9D8D0 @0x0040136F 'mov eax, dword ptr [0xb9d8d0]'", "0x00B9FE5C @0x00401381 'mov eax, dword ptr [0xb9fe5c]'", "0x00B9FE5C @0x004013AE 'mov dword ptr [0xb9fe5c], eax'", "0x00B9FE5C @0x004013C5 'mov dword ptr [0xb9fe5c], eax'", "0x00B9D8D0 @0x004013F3 'mov eax, dword ptr [0xb9d8d0]'"]
+    head (first 12 instructions):
+      0x00401360  6a ff                     push     -1
+      0x00401362  68 5b 28 99 00            push     0x99285b
+      0x00401367  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+      0x0040136D  50                        push     eax
+      0x0040136E  51                        push     ecx
+      0x0040136F  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+      0x00401374  33 c4                     xor      eax, esp
+      0x00401376  50                        push     eax
+      0x00401377  8d 44 24 08               lea      eax, [esp + 8]
+      0x0040137B  64 a3 00 00 00 00         mov      dword ptr fs:[0], eax
+      0x00401381  a1 5c fe b9 00            mov      eax, dword ptr [0xb9fe5c]
+      0x00401386  85 c0                     test     eax, eax
+    head decode note: decode-stopped-at-0x4013ff
+
+  callee 0x00485050 (called @0x00458DEE): ret_n=0 (ret 0 at 0x00485053 (all 1 rets agree; extent ended at 0x485060 or window end))
+    absolute .data imm32 refs in bounded head: ["0x00B9D8D0 @0x00485072 'mov eax, dword ptr [0xb9d8d0]'"]
+    head (first 12 instructions):
+      0x00485050  8b 41 1c                  mov      eax, dword ptr [ecx + 0x1c]
+      0x00485053  c3                        ret      
+      0x00485054  cc                        int3     
+      0x00485055  cc                        int3     
+      0x00485056  cc                        int3     
+      0x00485057  cc                        int3     
+      0x00485058  cc                        int3     
+      0x00485059  cc                        int3     
+      0x0048505A  cc                        int3     
+      0x0048505B  cc                        int3     
+      0x0048505C  cc                        int3     
+      0x0048505D  cc                        int3     
+
+  callee 0x00746550 (called @0x00458DF5): ret_n=0 (ret 0 at 0x00746553 (all 1 rets agree; extent ended at 0x746560 or window end))
+    absolute .data imm32 refs in bounded head: ["0x00B9D8D0 @0x00746591 'mov eax, dword ptr [0xb9d8d0]'"]
+    head (first 12 instructions):
+      0x00746550  8b 41 04                  mov      eax, dword ptr [ecx + 4]
+      0x00746553  c3                        ret      
+      0x00746554  cc                        int3     
+      0x00746555  cc                        int3     
+      0x00746556  cc                        int3     
+      0x00746557  cc                        int3     
+      0x00746558  cc                        int3     
+      0x00746559  cc                        int3     
+      0x0074655A  cc                        int3     
+      0x0074655B  cc                        int3     
+      0x0074655C  cc                        int3     
+      0x0074655D  cc                        int3     
+
+  callee 0x00524330 (called @0x00458DFC): ret_n=4 (ret 4 at 0x0052438E (all 1 rets agree; extent ended at 0x5243a0 or window end))
+    absolute .data imm32 refs in bounded head: (none)
+    head (first 12 instructions):
+      0x00524330  53                        push     ebx
+      0x00524331  56                        push     esi
+      0x00524332  8b 71 2c                  mov      esi, dword ptr [ecx + 0x2c]
+      0x00524335  57                        push     edi
+      0x00524336  8b 7c 24 10               mov      edi, dword ptr [esp + 0x10]
+      0x0052433A  8b 07                     mov      eax, dword ptr [edi]
+      0x0052433C  89 81 c0 00 00 00         mov      dword ptr [ecx + 0xc0], eax
+      0x00524342  8b 57 04                  mov      edx, dword ptr [edi + 4]
+      0x00524345  89 91 c4 00 00 00         mov      dword ptr [ecx + 0xc4], edx
+      0x0052434B  8b 47 08                  mov      eax, dword ptr [edi + 8]
+      0x0052434E  8d 59 24                  lea      ebx, [ecx + 0x24]
+      0x00524351  3b f3                     cmp      esi, ebx
+
+  callee 0x006B22F0 (called @0x00458E0D): ret_n=0 (ret 0 at 0x006B22F3 (all 1 rets agree; extent ended at 0x6b2300 or window end))
+    absolute .data imm32 refs in bounded head: (none)
+    head (first 12 instructions):
+      0x006B22F0  8b 41 20                  mov      eax, dword ptr [ecx + 0x20]
+      0x006B22F3  c3                        ret      
+      0x006B22F4  cc                        int3     
+      0x006B22F5  cc                        int3     
+      0x006B22F6  cc                        int3     
+      0x006B22F7  cc                        int3     
+      0x006B22F8  cc                        int3     
+      0x006B22F9  cc                        int3     
+      0x006B22FA  cc                        int3     
+      0x006B22FB  cc                        int3     
+      0x006B22FC  cc                        int3     
+      0x006B22FD  cc                        int3     
+
+  callee 0x007CE1E0 (called @0x00458E14): ret_n=0 (ret 0 at 0x007CE1E3 (all 1 rets agree; extent ended at 0x7ce1f0 or window end))
+    absolute .data imm32 refs in bounded head: (none)
+    head (first 12 instructions):
+      0x007CE1E0  8b 41 08                  mov      eax, dword ptr [ecx + 8]
+      0x007CE1E3  c3                        ret      
+      0x007CE1E4  cc                        int3     
+      0x007CE1E5  cc                        int3     
+      0x007CE1E6  cc                        int3     
+      0x007CE1E7  cc                        int3     
+      0x007CE1E8  cc                        int3     
+      0x007CE1E9  cc                        int3     
+      0x007CE1EA  cc                        int3     
+      0x007CE1EB  cc                        int3     
+      0x007CE1EC  cc                        int3     
+      0x007CE1ED  cc                        int3     
+
+  callee 0x008DC540 (called @0x00458E1B): ret_n=0 (ret 0 at 0x008DC546 (all 1 rets agree; extent ended at 0x8dc550 or window end))
+    absolute .data imm32 refs in bounded head: (none)
+    head (first 12 instructions):
+      0x008DC540  8b 81 b8 01 00 00         mov      eax, dword ptr [ecx + 0x1b8]
+      0x008DC546  c3                        ret      
+      0x008DC547  cc                        int3     
+      0x008DC548  cc                        int3     
+      0x008DC549  cc                        int3     
+      0x008DC54A  cc                        int3     
+      0x008DC54B  cc                        int3     
+      0x008DC54C  cc                        int3     
+      0x008DC54D  cc                        int3     
+      0x008DC54E  cc                        int3     
+      0x008DC54F  cc                        int3     
+      0x008DC550  8b 89 b8 01 00 00         mov      ecx, dword ptr [ecx + 0x1b8]
+
+  callee 0x00930040 (called @0x00458E22): ret_n=4 (ret 4 at 0x0093009D,0x009300DF (all 2 rets agree; extent ended at 0x9300f0 or window end))
+    absolute .data imm32 refs in bounded head: (none)
+    head (first 12 instructions):
+      0x00930040  83 ec 18                  sub      esp, 0x18
+      0x00930043  56                        push     esi
+      0x00930044  8b f1                     mov      esi, ecx
+      0x00930046  8b 46 14                  mov      eax, dword ptr [esi + 0x14]
+      0x00930049  57                        push     edi
+      0x0093004A  83 c0 5c                  add      eax, 0x5c
+      0x0093004D  50                        push     eax
+      0x0093004E  8d 4c 24 0c               lea      ecx, [esp + 0xc]
+      0x00930052  51                        push     ecx
+      0x00930053  8b 4e 4c                  mov      ecx, dword ptr [esi + 0x4c]
+      0x00930056  e8 45 b5 ef ff            call     0x82b5a0
+      0x0093005B  8b 46 4c                  mov      eax, dword ptr [esi + 0x4c]
+    head decode note: decode-stopped-at-0x9300df
+
+  callee 0x00437F70 (called @0x00458E27): ret_n=0 (ret 0 at 0x00437FCF,0x00437FE6 (all 2 rets agree; extent ended at 0x437ff0 or window end))
+    absolute .data imm32 refs in bounded head: ["0x00B9D8D0 @0x00437F7F 'mov eax, dword ptr [0xb9d8d0]'", "0x00BA1804 @0x00437F91 'mov eax, dword ptr [0xba1804]'", "0x00BA1804 @0x00437FBB 'mov dword ptr [0xba1804], eax'", "0x00BA1804 @0x00437FD2 'mov dword ptr [0xba1804], eax'"]
+    head (first 12 instructions):
+      0x00437F70  6a ff                     push     -1
+      0x00437F72  68 6b c0 99 00            push     0x99c06b
+      0x00437F77  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+      0x00437F7D  50                        push     eax
+      0x00437F7E  51                        push     ecx
+      0x00437F7F  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+      0x00437F84  33 c4                     xor      eax, esp
+      0x00437F86  50                        push     eax
+      0x00437F87  8d 44 24 08               lea      eax, [esp + 8]
+      0x00437F8B  64 a3 00 00 00 00         mov      dword ptr fs:[0], eax
+      0x00437F91  a1 04 18 ba 00            mov      eax, dword ptr [0xba1804]
+      0x00437F96  85 c0                     test     eax, eax
+    head decode note: decode-stopped-at-0x43800f
+
+[S.6] CALLER FUN_00458E50 — full decode (triple production + delta condition + setter call)
+  (linear decode from 0x458E50, bounded 0x100 bytes; stops at the first terminal + padding)
+
+  0x00458E50  83 ec 24                  sub      esp, 0x24
+  0x00458E53  56                        push     esi
+  0x00458E54  8b f1                     mov      esi, ecx
+  0x00458E56  e8 95 b5 fb ff            call     0x4143f0
+  0x00458E5B  8b c8                     mov      ecx, eax
+  0x00458E5D  e8 7e 53 37 00            call     0x7ce1e0
+  0x00458E62  85 c0                     test     eax, eax
+  0x00458E64  0f 84 90 00 00 00         je       0x458efa
+  0x00458E6A  53                        push     ebx
+  0x00458E6B  55                        push     ebp
+  0x00458E6C  8d 44 24 18               lea      eax, [esp + 0x18]
+  0x00458E70  57                        push     edi
+  0x00458E71  50                        push     eax
+  0x00458E72  e8 79 b5 fb ff            call     0x4143f0
+  0x00458E77  8b c8                     mov      ecx, eax
+  0x00458E79  e8 32 2f fd ff            call     0x42bdb0
+  0x00458E7E  d9 44 24 1c               fld      dword ptr [esp + 0x1c]
+  0x00458E82  e8 b9 4b 50 00            call     0x95da40
+  0x00458E87  d9 44 24 20               fld      dword ptr [esp + 0x20]
+  0x00458E8B  89 44 24 28               mov      dword ptr [esp + 0x28], eax
+  0x00458E8F  e8 ac 4b 50 00            call     0x95da40
+  0x00458E94  d9 44 24 24               fld      dword ptr [esp + 0x24]
+  0x00458E98  89 44 24 2c               mov      dword ptr [esp + 0x2c], eax
+  0x00458E9C  e8 9f 4b 50 00            call     0x95da40
+  0x00458EA1  56                        push     esi
+  0x00458EA2  8d 4c 24 2c               lea      ecx, [esp + 0x2c]
+  0x00458EA6  51                        push     ecx
+  0x00458EA7  8d 54 24 18               lea      edx, [esp + 0x18]
+  0x00458EAB  52                        push     edx
+  0x00458EAC  8b ce                     mov      ecx, esi
+  0x00458EAE  89 44 24 3c               mov      dword ptr [esp + 0x3c], eax
+  0x00458EB2  e8 89 fd ff ff            call     0x458c40
+  0x00458EB7  8b 54 24 18               mov      edx, dword ptr [esp + 0x18]
+  0x00458EBB  2b 56 08                  sub      edx, dword ptr [esi + 8]
+  0x00458EBE  8b 5c 24 14               mov      ebx, dword ptr [esp + 0x14]
+  0x00458EC2  8b 7c 24 10               mov      edi, dword ptr [esp + 0x10]
+  0x00458EC6  8b cb                     mov      ecx, ebx
+  0x00458EC8  2b 4e 04                  sub      ecx, dword ptr [esi + 4]
+  0x00458ECB  8b ea                     mov      ebp, edx
+  0x00458ECD  0f af ea                  imul     ebp, edx
+  0x00458ED0  8b c7                     mov      eax, edi
+  0x00458ED2  2b 06                     sub      eax, dword ptr [esi]
+  0x00458ED4  8b d1                     mov      edx, ecx
+  0x00458ED6  0f af d1                  imul     edx, ecx
+  0x00458ED9  8b c8                     mov      ecx, eax
+  0x00458EDB  0f af c8                  imul     ecx, eax
+  0x00458EDE  03 ea                     add      ebp, edx
+  0x00458EE0  03 e9                     add      ebp, ecx
+  0x00458EE2  74 13                     je       0x458ef7
+  0x00458EE4  8b 54 24 18               mov      edx, dword ptr [esp + 0x18]
+  0x00458EE8  89 3e                     mov      dword ptr [esi], edi
+  0x00458EEA  89 5e 04                  mov      dword ptr [esi + 4], ebx
+  0x00458EED  8b ce                     mov      ecx, esi
+  0x00458EEF  89 56 08                  mov      dword ptr [esi + 8], edx
+  0x00458EF2  e8 99 fe ff ff            call     0x458d90
+  0x00458EF7  5f                        pop      edi
+  0x00458EF8  5d                        pop      ebp
+  0x00458EF9  5b                        pop      ebx
+  0x00458EFA  5e                        pop      esi
+  0x00458EFB  83 c4 24                  add      esp, 0x24
+  0x00458EFE  c3                        ret      
+  first terminal in window: 0x00458EFE ret 
+  padding bytes after terminal: cc d9 01 d9 44 24 04 d8 d1 df e0 dd d9 f6 c4 41
+  direct imm32 call targets in window: ['0x00458E56 -> 0x004143F0', '0x00458E5D -> 0x007CE1E0', '0x00458E72 -> 0x004143F0', '0x00458E79 -> 0x0042BDB0', '0x00458E82 -> 0x0095DA40', '0x00458E8F -> 0x0095DA40', '0x00458E9C -> 0x0095DA40', '0x00458EB2 -> 0x00458C40', '0x00458EF2 -> 0x00458D90']
+
+[S.6.1] 0x00458C40 bounded decode (head 24 instructions — what the bytes show it produces)
+  0x00458C40  83 ec 14                  sub      esp, 0x14
+  0x00458C43  8b 44 24 1c               mov      eax, dword ptr [esp + 0x1c]
+  0x00458C47  8b 4c 24 20               mov      ecx, dword ptr [esp + 0x20]
+  0x00458C4B  53                        push     ebx
+  0x00458C4C  55                        push     ebp
+  0x00458C4D  56                        push     esi
+  0x00458C4E  8b 30                     mov      esi, dword ptr [eax]
+  0x00458C50  57                        push     edi
+  0x00458C51  8b 78 04                  mov      edi, dword ptr [eax + 4]
+  0x00458C54  8b 40 08                  mov      eax, dword ptr [eax + 8]
+  0x00458C57  8b d8                     mov      ebx, eax
+  0x00458C59  2b 59 08                  sub      ebx, dword ptr [ecx + 8]
+  0x00458C5C  89 44 24 20               mov      dword ptr [esp + 0x20], eax
+  0x00458C60  8b c3                     mov      eax, ebx
+  0x00458C62  99                        cdq      
+  0x00458C63  8b e8                     mov      ebp, eax
+  0x00458C65  33 ea                     xor      ebp, edx
+  0x00458C67  89 7c 24 1c               mov      dword ptr [esp + 0x1c], edi
+  0x00458C6B  2b 79 04                  sub      edi, dword ptr [ecx + 4]
+  0x00458C6E  2b ea                     sub      ebp, edx
+  0x00458C70  8b c7                     mov      eax, edi
+  0x00458C72  99                        cdq      
+  0x00458C73  89 74 24 18               mov      dword ptr [esp + 0x18], esi
+  0x00458C77  2b 31                     sub      esi, dword ptr [ecx]
+
+[S.7] FTOL-STYLE HELPER 0x0095DA40 — bounded head (operation class from bytes)
+  0x0095DA40  83 3d c8 96 ba 00 00      cmp      dword ptr [0xba96c8], 0
+  0x0095DA47  74 2d                     je       0x95da76
+  0x0095DA49  55                        push     ebp
+  0x0095DA4A  8b ec                     mov      ebp, esp
+  0x0095DA4C  83 ec 08                  sub      esp, 8
+  0x0095DA4F  83 e4 f8                  and      esp, 0xfffffff8
+  0x0095DA52  dd 1c 24                  fstp     qword ptr [esp]
+  0x0095DA55  f2 0f 2c 04 24            cvttsd2si eax, qword ptr [esp]
+  0x0095DA5A  c9                        leave    
+  0x0095DA5B  c3                        ret      
+  0x0095DA5C  83 3d c8 96 ba 00 00      cmp      dword ptr [0xba96c8], 0
+  0x0095DA63  74 11                     je       0x95da76
+  0x0095DA65  83 ec 04                  sub      esp, 4
+  0x0095DA68  d9 3c 24                  fnstcw   word ptr [esp]
+  0x0095DA6B  58                        pop      eax
+  0x0095DA6C  66 83 e0 7f               and      ax, 0x7f
+  0x0095DA70  66 83 f8 7f               cmp      ax, 0x7f
+  0x0095DA74  74 d3                     je       0x95da49
+  0x0095DA76  55                        push     ebp
+  0x0095DA77  8b ec                     mov      ebp, esp
+  0x0095DA79  83 ec 20                  sub      esp, 0x20
+  0x0095DA7C  83 e4 f0                  and      esp, 0xfffffff0
+  0x0095DA7F  d9 c0                     fld      st(0)
+  0x0095DA81  d9 54 24 18               fst      dword ptr [esp + 0x18]
+  ret convention: 0 (ret 0 at 0x0095DA5B (all 1 rets agree; extent ended at 0x95de40 or window end))
+
+[S.8] INDEPENDENT RECOUNTS (measurements for the status algebra)
+  imm32 occurrences of 0x00BA921C in whole image: 107  (per-section: .text=107)
+  imm32 occurrences of 0x00BA9220 in whole image: 81  (per-section: .text=81)
+  imm32 occurrences of 0x00BA9224 in whole image: 80  (per-section: .text=80)
+  total triple dword occurrences: 268
+  .data: vaddr=0x76C000 vsize=0x3D6E4 rawsize=0x34000 -> raw end RVA 0x7A0000; virtual end 0x7A96E4
+    triple 0x00BA921C RVA 0x7A921C: BEYOND raw end (virtual tail; loader zero-fill)
+    triple 0x00BA9220 RVA 0x7A9220: BEYOND raw end (virtual tail; loader zero-fill)
+    triple 0x00BA9224 RVA 0x7A9224: BEYOND raw end (virtual tail; loader zero-fill)
+
+[S.9] CTOR 0x0082B580 — bounded decode (initial value copy of the singleton)
+  0x0082B580  8b c1                     mov      eax, ecx
+  0x0082B582  8b 0d 1c 92 ba 00         mov      ecx, dword ptr [0xba921c]
+  0x0082B588  89 08                     mov      dword ptr [eax], ecx
+  0x0082B58A  8b 15 20 92 ba 00         mov      edx, dword ptr [0xba9220]
+  0x0082B590  89 50 04                  mov      dword ptr [eax + 4], edx
+  0x0082B593  8b 0d 24 92 ba 00         mov      ecx, dword ptr [0xba9224]
+  0x0082B599  89 48 08                  mov      dword ptr [eax + 8], ecx
+  0x0082B59C  c3                        ret      
+  0x0082B59D  cc                        int3     
+  0x0082B59E  cc                        int3     
+  0x0082B59F  cc                        int3     
+  0x0082B5A0  8b 54 24 08               mov      edx, dword ptr [esp + 8]
+  0x0082B5A4  d9 02                     fld      dword ptr [edx]
+  0x0082B5A6  8b 44 24 04               mov      eax, dword ptr [esp + 4]
+  0x0082B5AA  dd 05 60 b3 a7 00         fld      qword ptr [0xa7b360]
+  0x0082B5B0  dc c9                     fmul     st(1), st(0)
+  0x0082B5B2  d9 c9                     fxch     st(1)
+  0x0082B5B4  d9 5c 24 08               fstp     dword ptr [esp + 8]
+  0x0082B5B8  d9 44 24 08               fld      dword ptr [esp + 8]
+  0x0082B5BC  d8 21                     fsub     dword ptr [ecx]
+  ret convention: 0 (ret 0 at 0x0082B59C (all 1 rets agree; extent ended at 0x82b5a0 or window end))
+
+REQUIRED OUTPUT LABELS (contract Section 5):
+  ORIGIN_SETTER_OPERATION = three f32 stores through the getter-returned singleton pointer: mov [S+0],edx @0x458E30, mov [S+4],ecx @0x458E36, mov [S+8],edx @0x458E3D (offsets 0/4/8); each value = f32(-(int32)in[i]) produced by neg + fild/fstp in the local frame before the call (see [S.3]/[S.4]/[S.10])
+  ORIGIN_SETTER_INPUT_TYPE = ECX = pointer to a 12-byte triple of three int32 at [ecx+0/4/8] (thiscall-style; no stack args; plain ret; caller FUN_00458E50 builds the triple via three fld+call 0x95DA40 f32->int32 conversions and stores it to [esi+0/4/8] before the call — see [S.6])
+  ORIGIN_SETTER_FINAL_SEMANTIC_ROLE = UNVERIFIED (no semantic name assigned; STATIC-ONLY run;
+      runtime execution/value not measured)
+
+MEASURED_QUANTITY: instruction-level capstone decode + symbolic S_PTR provenance events at
+  call site 0x00458E27 and its enclosing function (plus getter/caller/chain decodes, ret
+  conventions, triple imm32 recount, .data virtual-tail layout, ctor decode).
+INDEPENDENT_SOURCE_OF_TRUTH: Entropia.exe physical bytes (size 8015872, SHA256 E7785430E81DFFE6
+  48CE8F5312414B17BC9FCE61389689A22F753765D5280F31; S0 fail-closed verified at script start).
+WHY_NON_CIRCULAR: this probe decodes bytes directly; it imports no external auditor result and
+  no PE-MASTER anchor as input (anchors are post-hoc cross-checks only; discrepancies reported loudly).
+FAILURE_CASE_DETECTED: YES — call site 0x00458E27 with writes 0x458E30/0x458E36/0x458E3D through
+  EAX = FUN_00437F70 return is the counterexample to the original 'no caller writes through the
+  returned pointer' claim; the original run's own HELPER437F70_CALLER_CENSUS.csv row for this site
+  recorded instruction_after_next='mov dword ptr [eax], edx' but never interpreted write-through.
+

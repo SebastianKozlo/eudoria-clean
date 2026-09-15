@@ -13,7 +13,8 @@ FALLBACK (name==NULL or lookup==NULL; entry 0x50A087, ret 8 at 0x50A0A7):
 
 PRIMARY (name!=NULL and lookup!=NULL; through 0x50A064..0x50A084):
     W   = named NiAVObject->m_kWorld.m_Translate  (&obj+0x90)
-    S   = origin singleton (0x437F70; = {0,0,0} permanently)
+    S   = origin singleton (0x437F70; initial value {0,0,0} measured; AMEND, origin-mutability correction:
+          the '= {0,0,0} permanently' claim is retracted — mutability status: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md)
     K   = (double)(float)0.01  (qword 0xa7b360)
     out[i] = f32( f32(W[i]*K) - S[i] )   (0x82B5A0, 'ret 8')
     returns EAX = ESI = out (0x50A081)
@@ -51,7 +52,10 @@ PRIMARY (name!=NULL and lookup!=NULL; through 0x50A064..0x50A084):
 
 (5) DOES PRIMARY ADD TRANSFORMATION ABSENT IN FALLBACK?
     YES — this is the decisive measured difference: primary multiplies by K=0.01 (two f32 narrowings per component)
-    and subtracts base S (measured S={0,0,0}); fallback performs NONE of these (pure dword copy). Structural
+    and subtracts base S (the subtraction is unconditional in the bytes; S's initial value is measured {0,0,0} —
+    AMEND, origin-mutability correction: the unconditional 'measured S={0,0,0}' reading is retracted; the value
+    relation out = f32(f32(W*K) - S) is the measured formula; see 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md);
+    fallback performs NONE of these (pure dword copy). Structural
     equivalence of the interface does NOT imply semantic equivalence of the data: the primary path's output is a
     CONVERTED world position; the fallback's output is a STORED position value. H5 (same structural/coordinate
     semantic) is therefore SUPPORTED ONLY CONDITIONALLY: structurally identical (proven), coordinate-space

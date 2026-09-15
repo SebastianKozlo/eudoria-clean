@@ -24,7 +24,9 @@
     0x50A073: push EAX      -> pair arg slot HIGH  (callee [esp+8])
     0x50A074: push ESI      -> pair arg slot LOW   (callee [esp+4])  [push order: src FIRST, out LAST]
     0x50A075: call 0x437F70 -> S = [0xba1804]; if null: S = new(12); S = { [0xba921c], [0xba9220], [0xba9224] }; [0xba1804] = S
-                                                            (args IGNORED; plain 'ret'; S == {0,0,0} forever — see E.3)
+                                                            (args IGNORED; plain 'ret'; S initial value {0,0,0} — see E.3; AMEND
+                                                            (origin-mutability correction): 'S == {0,0,0} forever' retracted —
+                                                            writer site 0x458E27 exists; see the correction census + E.3 note)
     0x50A07A: ECX = EAX = S
     0x50A07C: call 0x82B5A0 -- callee view: [esp+4]=OUT (the leftover pair slot), [esp+8]=&world_translate, ECX=S
     0x82B5A0 body (per component i in {0,4,8}, x/y/z):
@@ -46,8 +48,10 @@
     S.x/S.y/S.z = singleton base components (f32 at [S+0]/[S+4]/[S+8])
     S           = { [0xba921c], [0xba9220], [0xba9224] } snapshot at first 0x437F70 call
 
-  GIVEN E.3 (S == {0,0,0} always), the load-bearing reduction (bit-exact under x87 extended precision
-  + round-to-nearest for the two f32 narrowings; sign-of-zero preserved):
+  IF S == {0,0,0} (measured initial value; each component +0.0), the reduction below is bit-exact under x87 extended
+  precision + round-to-nearest for the two f32 narrowings; sign-of-zero preserved — AMEND (origin-mutability
+  correction): this reduction is a CONDITIONAL special case of the general formula above, not an unconditional
+  identity (S's runtime mutability is a separate status: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md):
 
     out.x = f32(W.x * 0.01f)      out.y = f32(W.y * 0.01f)      out.z = f32(W.z * 0.01f)
     (the multiplications use (double)(float)0.01 in f80, then narrow twice: f32(x*K) then f32(... - 0.0f) == f32(x*K))
@@ -55,7 +59,10 @@
   NO axis permutation (component i of source -> component i of out, measured addressing [edx]/[edx+4]/[edx+8] ->
   [eax]/[eax+4]/[eax+8] in order). NO negation. NO offset. ONE multiplicative scale. ONE additive base (=0).
 
-== E.3 S == {0,0,0} — PROOF THAT THE BASE IS THE ZERO VECTOR ==
+== E.3 S INITIAL VALUE {0,0,0} — TRIPLE-ADDRESS WRITE CENSUS + zero-init (AMEND, origin-mutability correction:
+   retitled: the census proves the INITIAL value and the triple's not-written-within-enumerated-channels status;
+   it does NOT prove the singleton object immutable — see the E.3-amend block below and
+   02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md) ==
 
   MEASURED_QUANTITY: existence of ANY write to 0xba921c/0xba9220/0xba9224 anywhere in the image.
   CORRECTION-PASS NOTE (QC P1-1): the original 4-channel proof enumerated narrower channels than its prose claimed
@@ -110,7 +117,9 @@
         0x82B87D ('xor ecx,ecx'); 0x48BAC0 CLOBBERS ECX at 0x48BAD6 ('lea ecx,[esp+0x10]'; a secondary
         redefinition is 'mov ecx,esi' at 0x48BB19) — S unused; 0x58E4B0 FORWARDS the incoming ECX untouched to
         0x48BAC0; 0x58E520 FORWARDS it untouched to 0x437E80; 0x82B790 CLOBBERS ECX at 0x82B79B ('mov ecx,[edi+4]').
-        => 0 of the 9 stores to [ECX+0/4/8]; S is never written through ECX.
+         => 0 of the 9 stores to [ECX+0/4/8] within their decoded windows (channel-scoped measurement; AMEND,
+            origin-mutability correction: this channel covers the 9 ECX receivers only — it is not a global
+            "S is never written" claim).
     Additionally the triple lives in the .data VIRTUAL-ONLY tail (RVA 0x7a921c/0x7a9220/0x7a9224 > raw end RVA
     0x7a0000; .data vsize 0x3d6e4 > rawsize 0x34000; offset-in-section 0x3d21c): zero-initialized by the loader,
     no static initializer bytes exist.
@@ -119,9 +128,12 @@
     exhaustively hunted — a far-base+disp32 store is covered by channels (1)/(2) whenever its disp32 dword falls
     in the scanned windows); stack-spilled base pointers reused beyond the 12-instruction follow window; virtual
     dispatch through the 0x96B960 vtable slots beyond the direct E8 caller; FUN_004CE5B0's &triple arg use
-    beyond its head window; SEH handler body 0x99c06b (out of load path); FUN_00437F70-return consumers writing
-    through the returned pointer more than 8 instructions out (99-site census, unchanged); site 0x488BEA's
-    eventual consumer.
+     beyond its head window; SEH handler body 0x99c06b (out of load path); site 0x488BEA's
+     eventual consumer. AMEND (origin-mutability correction): the OLD residual text here claimed
+     "FUN_00437F70-return consumers writing through the returned pointer more than 8 instructions out
+     (99-site census, unchanged)" — a FABRICATED coverage claim (no such census existed). The real
+     write-through census (01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv, pre-registered N=16 + N=8
+     views, callee heads 0xA0) found writer site 0x458E27 (offsets 0/4/8) and disclosed its own residuals.
   INDEPENDENT_SOURCE_OF_TRUTH: raw byte scans + capstone decodes of the image (the census file), cross-checked
     against the fresh QC's independent census: occurrence counts 107/81/80=268 and computed-base subwindow 22
     values/45 occurrences MATCH. Two QC-annex details recorded as findings (census [T.4]/[T.8]): QC's 10th
@@ -130,13 +142,32 @@
     address 0x48BB19 is a secondary redefinition — the first is 0x48BAD6 — same conclusion either way.
   WHY_NON_CIRCULAR: the proof is a mechanical negative-existence census over all enumerated write channels,
     independent of any report prose.
-  FAILURE_CASE_DETECTED: YES — a hypothetical mutable origin (e.g. per-frame camera) was the a-priori candidate;
-    the exhaustive census FAILED to find any writer, rejecting "mutable base" in favor of "permanent zero origin".
+   FAILURE_CASE_DETECTED: YES (as written for the TRIPLE-ADDRESS channels) — AMEND (origin-mutability
+     correction): this line's conclusion "rejecting 'mutable base' in favor of 'permanent zero origin'" is
+     SUPERSEDED — the census above validly found no TRIPLE-ADDRESS writer within its enumerated channels,
+     but the getter-RETURN writer exists (0x458E27; see the E.3-amend block below). The historical text
+     is preserved here; the corrected status algebra is 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md.
 
-  Singleton post-construction mutation scan: no caller of 0x437F70 writes through the returned pointer within 8
-  instructions (all 99 sites measured, HELPER437F70_CALLER_CENSUS.csv); per channel (6) above, the 9
-  ECX-receiving functions read/forward/clobber and NEVER store to [ECX+0/4/8]. => S is IMMUTABLE after
-  construction.
+   E.3-AMEND (origin-mutability correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915):
+   the paragraph below was the ORIGINAL "Singleton post-construction mutation scan" — RETRACTED and
+   preserved verbatim as the historical record:
+   [ORIGINAL, RETRACTED] "Singleton post-construction mutation scan: no caller of 0x437F70 writes through the
+     returned pointer within 8 instructions (all 99 sites measured, HELPER437F70_CALLER_CENSUS.csv); per channel (6)
+     above, the 9 ECX-receiving functions read/forward/clobber and NEVER store to [ECX+0/4/8]. => S is IMMUTABLE after
+     construction."
+   WHY RETRACTED: (a) the "all 99 sites measured" write-through never had a measurement artifact (the instrument
+     classified next-instruction patterns only; its own CSV recorded instruction_after_next='mov dword ptr [eax],
+     edx' for the writer site 0x458E27); (b) the "=> S is IMMUTABLE" inference was invalid even from a valid
+     triple-address census (the singleton is a heap object written through the returned pointer, not through the
+     triple addresses). CORRECTED MEASUREMENT: the correction run's provenance-aware write-through census
+   (01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv + ORIGIN_SINGLETON_WRITE_THROUGH_RAW.txt;
+     99 boundary-verified sites; N=16 + N=8 windows): 1 writer site 0x458E27 with three write events at
+     offsets 0/4/8 (falsifier + full decode: 01_RAW/ORIGIN_SETTER_458D90_DISASM.txt); 43 read-only escapes;
+     12 unresolved escapes (FORWARDED into deeper consumers, disclosed); 6 insufficient-proof; 1 control-flow
+     escape; 17 no-write-within-bound; 19 provenance-lost. CORRECTED STATUS:
+     ORIGIN_INITIAL_ZERO = CONFIRMED; ORIGIN_MUTATION_CHANNEL_EXISTS = CONFIRMED;
+     ORIGIN_MUTATED_AT_RUNTIME = UNVERIFIED; ORIGIN_PERMANENT_ZERO = REJECTED;
+     ORIGIN_RUNTIME_VALUE = UNVERIFIED (status algebra: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md).
 
 == E.4 FALLBACK PATH DATAFLOW (same function, in-slot control) ==
 
@@ -147,12 +178,17 @@
     P (SF+0x34) writer: FUN_005094C0 'mov [ecx+0x34],[arg]; [ecx+0x38],[arg+4]; [ecx+0x3C],[arg+8]; byte [ecx+0x28]=1'
                           (thiscall ret 4; prior canon: copy from the placement record — pin re-measured, MATCH;
                           constructor initializes SF+0x34 from the SAME global triple {0,0,0})
-  => fallback out = raw stored placement value; primary out = live world translate * 0.01 - {0,0,0}.
+   => fallback out = raw stored placement value; primary out = live world translate * K - S (IF S == {0,0,0},
+      the measured initial value, this reduces to * 0.01 bit-exactly — AMEND, origin-mutability correction:
+      the unconditional '{0,0,0}' reading is retracted; see E.2's conditional note).
 
 == E.5 UNKNOWNS (honestly recorded) ==
 
   - The absolute meaning of the 0.01-scaled space (e.g. "meters" vs "game logic units") is NOT statically provable
-    from these bytes; what IS proven: a deterministic 100:1 scale conversion engine->out with origin S={0,0,0}.
+    from these bytes; what IS proven: a deterministic scale-by-K conversion engine->out with the base subtraction
+    out = f32(f32(W*K) - S); a 100:1 magnitude relation holds only IF S == {0,0,0} (the measured initial value;
+    AMEND, origin-mutability correction: the unconditional 'with origin S={0,0,0}' reading is retracted — the
+    general formula and the conditional special case are separated; see E.2).
     RUNTIME_COORDINATE_BEHAVIOR = UNVERIFIED (contract stop rule: no invented runtime test).
   - Whether the SF slot3 vtable is reached with a real caller name key that exists in the node tree at a given
     moment (runtime condition) — static analysis cannot enumerate names; irrelevant to the transform itself.

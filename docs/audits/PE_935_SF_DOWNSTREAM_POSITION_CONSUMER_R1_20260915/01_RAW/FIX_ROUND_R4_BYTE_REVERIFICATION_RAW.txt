@@ -1,0 +1,218 @@
+====================================================================================================
+FIX ROUND R4 BYTE RE-VERIFICATION — QC_R3 FINDINGS F1/F2/F3/F4 (before any canonical edit)
+RUN_ID (fix round): PE_935_SF_QC_R3_FINDINGS_FIX_R1_20260915
+CANONICAL PACKAGE: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915 (in-place fix round)
+ADJUDICATED FINDINGS: 06_REPORT/QC_AUDIT_R3.md F1 (P1), F2 (P2), F3 (P3), F4 (P3) — PE-MASTER ACCEPTED
+GENERATED_UTC: 2026-09-15T19:12:04Z
+PROBE_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\fix_probe_r4.py
+PROBE_SHA256: 6D78571029DBBD65C412C80E7FCE488958C4B55AECAC154884FCC699FC1DF8BE
+MEASURED ENVIRONMENT:
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at script start (size+sha256+PE layout re-verified before any decode).
+METHOD: independent linear decodes + raw E8/E9/imm32/vtable censuses from physical bytes;
+  the two generators under repair are NOT imported; no prior census result is imported.
+====================================================================================================
+
+[A] F1/F4 BRANCH-B RE-VERIFICATION (reported root 0x4B1B70; claimed-dead subtree)
+
+  A.1 bytes 0x004B1C6C..0x004B1C73: c4 20 c3 cc 6a ff 68 2a
+  FUN_004B1C70 head decode:
+    0x004B1C70  6a ff                     push     -1
+    0x004B1C72  68 2a cc 9a 00            push     0x9acc2a
+    0x004B1C77  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+  ret @0x004B1C6E + single int3 @0x004B1C6F then 0x004B1C70 prologue: MEASURED
+  ret-adjacency of the 1-byte CC run before 0x004B1C70: C3 (ret) + 1x CC (plain-ret-adjacent)
+
+  A.2 FUN_004B1B70 extent (first terminal + int3-pad rule): 0x004B1B70..0x004B1C70 (terminal 0x004B1C6E ret; next function starts 0x004B1C70)
+    terminals in stream: 0x004B1C6E ret 
+    0x004B1F2C inside FUN_004B1B70's linear stream: False
+    0x004B1EEB inside FUN_004B1B70's linear stream: False
+
+  A.3 FUN_004B1C70 extent (first terminal + int3-pad rule): 0x004B1C70..0x004B1FB0 (terminal 0x004B1FA5 ret; next function starts 0x004B1FB0)
+    terminals in stream (first 6): 0x004B1FA5 ret 4
+    0x004B1EEB inside FUN_004B1C70's linear stream: True (decodes as: call 0x417a40)
+    0x004B1F2C inside FUN_004B1C70's linear stream: True (decodes as: call 0x4b1b70)
+    => 0x4B1F2C is a SIBLING call FUN_004B1C70 -> FUN_004B1B70 (NOT self-recursion): True
+
+  A.4 FUN_004B1C70 channels: E8=['0x004B2984'] E9=[] imm32=(none) vtable=(none)
+
+  A.5 FUN_004B2950 (prior-canon ArkClientPacketExecutor::Execute) head decode:
+    0x004B2950  83 ec 0c                  sub      esp, 0xc
+    0x004B2953  56                        push     esi
+    0x004B2954  57                        push     edi
+    linear decode from 0x004B2950 lands EXACTLY on 0x004B2984 as 'call 0x4b1c70': True
+    FUN_004B2950 extent (first terminal + int3-pad rule): 0x004B2950..0x004B29F0 (terminal 0x004B29E2 ret; next function starts 0x004B29F0)
+    'cmp <reg>, 0xb2' instructions before 0x004B2984 in FUN_004B2950's stream: ['0x004B2975 cmp edi, 0xb2']
+    dispatch-context window 0x004B2960..0x004B2990:
+      0x004B2960  f1                        int1     
+      0x004B2961  75 12                     jne      0x4b2975
+      0x004B2963  8b 44 24 20               mov      eax, dword ptr [esp + 0x20]
+      0x004B2967  50                        push     eax
+      0x004B2968  e8 03 f9 ff ff            call     0x4b2270
+      0x004B296D  5f                        pop      edi
+      0x004B296E  5e                        pop      esi
+      0x004B296F  83 c4 0c                  add      esp, 0xc
+      0x004B2972  c2 0c 00                  ret      0xc
+      0x004B2975  81 ff b2 00 00 00         cmp      edi, 0xb2
+      0x004B297B  75 14                     jne      0x4b2991
+      0x004B297D  8b 4c 24 20               mov      ecx, dword ptr [esp + 0x20]
+      0x004B2981  51                        push     ecx
+      0x004B2982  8b ce                     mov      ecx, esi
+      0x004B2984  e8 e7 f2 ff ff            call     0x4b1c70
+      0x004B2989  5f                        pop      edi
+      0x004B298A  5e                        pop      esi
+      0x004B298B  83 c4 0c                  add      esp, 0xc
+
+  A.6 callee-set closure w.r.t. the setter chain {0x458E50, 0x458D90, 0x417030}:
+    direct callees of FUN_004B1B70 (linear stream): ['0x004B1BD3->0x0040E160', '0x004B1BE6->0x004B18D0', '0x004B1BFC->0x0040E180', '0x004B1C0A->0x0095DB40']
+    FUN_004B1B70 calls any setter-chain member: False
+    direct callees of FUN_004B1C70 (linear stream): ['0x004B1CBA->0x00743750', '0x004B1CE3->0x0040DE60', '0x004B1CFA->0x00743780', '0x004B1D03->0x004143F0', '0x004B1D0A->0x0042BC10', '0x004B1D14->0x004143F0', '0x004B1D1B->0x00743FD0', '0x004B1D21->0x00415470', '0x004B1D28->0x00735A00', '0x004B1D2D->0x004151F0', '0x004B1D39->0x007105E0', '0x004B1D46->0x004B0980', '0x004B1D64->0x00415470', '0x004B1D6B->0x007046A0', '0x004B1D7B->0x00415470', '0x004B1D82->0x007046A0', '0x004B1D8D->0x00843D40', '0x004B1D9F->0x00525AF0', '0x004B1DAA->0x00836A50', '0x004B1DBC->0x004C47F0', '0x004B1DDA->0x004C3580', '0x004B1DEA->0x004C33C0', '0x004B1DFD->0x004C43E0', '0x004B1E0B->0x007103C0', '0x004B1E21->0x00703B80', '0x004B1E2E->0x00742290', '0x004B1E44->0x00703B80', '0x004B1E6A->0x00415170', '0x004B1E71->0x00703B00', '0x004B1E82->0x00703BC0', '0x004B1E93->0x00703BC0', '0x004B1EA0->0x004141F0', '0x004B1EA7->0x0041A350', '0x004B1EBD->0x0040B980', '0x004B1EC4->0x0040B840', '0x004B1ECE->0x0048BBC0', '0x004B1ED5->0x0094EF20', '0x004B1EDF->0x00485110', '0x004B1EE6->0x005A46D0', '0x004B1EEB->0x00417A40', '0x004B1EF0->0x004143F0', '0x004B1EF7->0x0042BCA0', '0x004B1F01->0x004DA140', '0x004B1F0F->0x00512E60', '0x004B1F23->0x00414160', '0x004B1F2C->0x004B1B70', '0x004B1F43->0x00419DA0', '0x004B1F54->0x008E0110', '0x004B1F65->0x008E0110', '0x004B1F79->0x00743740', '0x004B1F9A->0x0095D3CA']
+    FUN_004B1C70 calls 0x417A40: True ; calls 0x4B1B70: True ; calls any setter-chain member: False
+    direct callees of FUN_00417A40 (linear stream, first 16): ['0x00417A69->0x004AD820', '0x00417A78->0x007106D0', '0x00417A89->0x007106C0', '0x00417A95->0x00416C40', '0x00417ABD->0x00710100', '0x00417AF1->0x00716350', '0x00417AF6->0x00415070', '0x00417AFD->0x0048A280', '0x00417B0A->0x0070F860', '0x00417B11->0x00417880', '0x00417B16->0x00401360', '0x00417B1D->0x00415E30', '0x00417B22->0x00416B60', '0x00417B33->0x004AD840']
+    FUN_00417A40 calls 0x417880: True ; calls any setter-chain member: False
+
+[B] F2 ATTRIBUTION RE-VERIFICATION (corrected enclosing starts vs old starts)
+
+----------------------------------------------------------------------------------------------------
+PAIR corrected=0x006C1A90 old=0x006C19B0 sites=['0x006C1C2A', '0x006C1C5C', '0x006C1C9A', '0x006C1CB5']
+  12 bytes before corrected start 0x006C1A90: 00 00 59 5f 5e 5d 5b 83 c4 1c c3 cc
+  boundary classification: C3 (ret) + 1x CC (plain-ret-adjacent)
+  corrected-start head decode:
+    0x006C1A90  6a ff                     push     -1
+    0x006C1A92  68 bb 47 a0 00            push     0xa047bb
+    0x006C1A97  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+  corrected-start first-terminal extent: terminal 0x006C1D25 ret ; extent 0x006C1D25..0x006C1D28
+  all terminals in the corrected start's stream (until the CC-adjacent one): ['0x006C1BDC jmp 0x6c1be2 (size 2)', '0x006C1D25 ret 0x14 (size 3)']
+  generator-rule (first-terminal-period) extent prediction: 0x006C1BDC..0x006C1BDE
+  site 0x006C1C2A: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: True
+    predicted CSV extent text: 0x006C1BDC..0x006C1BDE (first-terminal extent; SITE BEYOND first terminal: multi-path function)
+  site 0x006C1C5C: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: True
+    predicted CSV extent text: 0x006C1BDC..0x006C1BDE (first-terminal extent; SITE BEYOND first terminal: multi-path function)
+  site 0x006C1C9A: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: True
+    predicted CSV extent text: 0x006C1BDC..0x006C1BDE (first-terminal extent; SITE BEYOND first terminal: multi-path function)
+  site 0x006C1CB5: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: True
+    predicted CSV extent text: 0x006C1BDC..0x006C1BDE (first-terminal extent; SITE BEYOND first terminal: multi-path function)
+  inbound E8 callers of 0x006C1A90 (raw scan): ['0x004597C7', '0x0045F02D', '0x0055B891', '0x005F61AA'] (QC expected: ['0x004597C7', '0x0045F02D', '0x0055B891', '0x005F61AA'])
+    caller site 0x004597C7 decodes as 'call 0x006C1A90': True
+    caller site 0x0045F02D decodes as 'call 0x006C1A90': True
+    caller site 0x0055B891 decodes as 'call 0x006C1A90': True
+    caller site 0x005F61AA decodes as 'call 0x006C1A90': True
+  12 bytes before OLD start 0x006C19B0: cc cc cc cc cc cc cc cc cc cc cc cc
+  old-start head decode (real-adjacent-function confirmation):
+    0x006C19B0  6a ff                     push     -1
+    0x006C19B2  68 78 47 a0 00            push     0xa04778
+    0x006C19B7  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+  old-start generator-rule (first-terminal-period) extent: 0x006C1A33..0x006C1A35 ; old CSV recorded value 0x006C1A33..0x006C1A35 : MATCH
+    (sites 0x006C1C2A.. are BEYOND the old first terminal: True — the old CSV suffix was correct for the WRONG enclosing start)
+  site 0x006C1C2A inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x006C1A90)
+  site 0x006C1C5C inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x006C1A90)
+  site 0x006C1C9A inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x006C1A90)
+  site 0x006C1CB5 inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x006C1A90)
+
+----------------------------------------------------------------------------------------------------
+PAIR corrected=0x006C4E70 old=0x006C4C40 sites=['0x006C4E8E', '0x006C4EE9']
+  12 bytes before corrected start 0x006C4E70: 00 d9 5e 78 5e 83 c4 20 c2 08 00 cc
+  boundary classification: C2 08 00 (ret imm16) + 1x CC (ret-adjacent)
+  corrected-start head decode:
+    0x006C4E70  81 ec 94 00 00 00         sub      esp, 0x94
+    0x006C4E76  53                        push     ebx
+    0x006C4E77  8b 9c 24 9c 00 00 00      mov      ebx, dword ptr [esp + 0x9c]
+  corrected-start first-terminal extent: terminal 0x006C4F6B ret ; extent 0x006C4F6B..0x006C4F6E
+  all terminals in the corrected start's stream (until the CC-adjacent one): ['0x006C4F6B ret 8 (size 3)']
+  generator-rule (first-terminal-period) extent prediction: 0x006C4F6B..0x006C4F6E
+  site 0x006C4E8E: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: False
+    predicted CSV extent text: 0x006C4F6B..0x006C4F6E
+  site 0x006C4EE9: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: False
+    predicted CSV extent text: 0x006C4F6B..0x006C4F6E
+  inbound E8 callers of 0x006C4E70 (raw scan): ['0x006C5506', '0x006C551C'] (QC expected: ['0x006C5506', '0x006C551C'])
+    caller site 0x006C5506 decodes as 'call 0x006C4E70': True
+    caller site 0x006C551C decodes as 'call 0x006C4E70': True
+  12 bytes before OLD start 0x006C4C40: 00 cc cc cc cc cc cc cc cc cc cc cc
+  old-start head decode (real-adjacent-function confirmation):
+    0x006C4C40  83 ec 20                  sub      esp, 0x20
+    0x006C4C43  56                        push     esi
+    0x006C4C44  8b f1                     mov      esi, ecx
+  old-start generator-rule (first-terminal-period) extent: 0x006C4D31..0x006C4D33 ; old CSV recorded value 0x006C4D31..0x006C4D33 : MATCH
+    (sites 0x006C4E8E.. are BEYOND the old first terminal: True — the old CSV suffix was correct for the WRONG enclosing start)
+  site 0x006C4E8E inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x006C4E70)
+  site 0x006C4EE9 inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x006C4E70)
+
+----------------------------------------------------------------------------------------------------
+PAIR corrected=0x006E23B0 old=0x006E21F0 sites=['0x006E23FA', '0x006E2441']
+  12 bytes before corrected start 0x006E23B0: 59 5f 5e 5d 5b 83 c4 34 c2 10 00 cc
+  boundary classification: C2 10 00 (ret imm16) + 1x CC (ret-adjacent)
+  corrected-start head decode:
+    0x006E23B0  83 ec 3c                  sub      esp, 0x3c
+    0x006E23B3  56                        push     esi
+    0x006E23B4  8b f1                     mov      esi, ecx
+  corrected-start first-terminal extent: terminal 0x006E249E ret ; extent 0x006E249E..0x006E24A1
+  all terminals in the corrected start's stream (until the CC-adjacent one): ['0x006E2495 ret 0xc (size 3)', '0x006E249E ret 0xc (size 3)']
+  generator-rule (first-terminal-period) extent prediction: 0x006E2495..0x006E2498
+  site 0x006E23FA: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: False
+    predicted CSV extent text: 0x006E2495..0x006E2498
+  site 0x006E2441: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: False
+    predicted CSV extent text: 0x006E2495..0x006E2498
+  inbound E8 callers of 0x006E23B0 (raw scan): ['0x006E2EB9'] (QC expected: ['0x006E2EB9'])
+    caller site 0x006E2EB9 decodes as 'call 0x006E23B0': True
+  12 bytes before OLD start 0x006E21F0: 00 c2 18 00 cc cc cc cc cc cc cc cc
+  old-start head decode (real-adjacent-function confirmation):
+    0x006E21F0  6a ff                     push     -1
+    0x006E21F2  68 c8 75 a0 00            push     0xa075c8
+    0x006E21F7  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+  old-start generator-rule (first-terminal-period) extent: 0x006E237C..0x006E237E ; old CSV recorded value 0x006E237C..0x006E237E : MATCH
+    (sites 0x006E23FA.. are BEYOND the old first terminal: True — the old CSV suffix was correct for the WRONG enclosing start)
+  site 0x006E23FA inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x006E23B0)
+  site 0x006E2441 inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x006E23B0)
+
+----------------------------------------------------------------------------------------------------
+PAIR corrected=0x008CD3E0 old=0x008CD1A0 sites=['0x008CD556', '0x008CD645']
+  12 bytes before corrected start 0x008CD3E0: ff 5f 5e 5d 5b 83 c4 10 c2 08 00 cc
+  boundary classification: C2 08 00 (ret imm16) + 1x CC (ret-adjacent)
+  corrected-start head decode:
+    0x008CD3E0  83 ec 3c                  sub      esp, 0x3c
+    0x008CD3E3  53                        push     ebx
+    0x008CD3E4  56                        push     esi
+  corrected-start first-terminal extent: terminal 0x008CD6BC ret ; extent 0x008CD6BC..0x008CD6BF
+  all terminals in the corrected start's stream (until the CC-adjacent one): ['0x008CD40F jmp 0x8cd6a6 (size 5)', '0x008CD605 jmp 0x8cd67b (size 2)', '0x008CD61F jmp 0x8cd67b (size 2)', '0x008CD68F jmp 0x8cd69a (size 2)', '0x008CD6BC ret 0xc (size 3)']
+  generator-rule (first-terminal-period) extent prediction: 0x008CD40F..0x008CD414
+  site 0x008CD556: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: True
+    predicted CSV extent text: 0x008CD40F..0x008CD414 (first-terminal extent; SITE BEYOND first terminal: multi-path function)
+  site 0x008CD645: decode-from-corrected-start lands exactly as 'call 0x437f70': True ; site beyond generator-rule first terminal: True
+    predicted CSV extent text: 0x008CD40F..0x008CD414 (first-terminal extent; SITE BEYOND first terminal: multi-path function)
+  inbound E8 callers of 0x008CD3E0 (raw scan): ['0x008CD887', '0x008CDE82'] (QC expected: ['0x008CD887', '0x008CDE82'])
+    caller site 0x008CD887 decodes as 'call 0x008CD3E0': True
+    caller site 0x008CDE82 decodes as 'call 0x008CD3E0': True
+  12 bytes before OLD start 0x008CD1A0: cc cc cc cc cc cc cc cc cc cc cc cc
+  old-start head decode (real-adjacent-function confirmation):
+    0x008CD1A0  83 ec 10                  sub      esp, 0x10
+    0x008CD1A3  53                        push     ebx
+    0x008CD1A4  55                        push     ebp
+  old-start generator-rule (first-terminal-period) extent: 0x008CD1D0..0x008CD1D5 ; old CSV recorded value 0x008CD1D0..0x008CD1D5 : MATCH
+    (sites 0x008CD556.. are BEYOND the old first terminal: True — the old CSV suffix was correct for the WRONG enclosing start)
+  site 0x008CD556 inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x008CD3E0)
+  site 0x008CD645 inside OLD start's stream (up to the old CC-adjacent terminal): False (old attribution was WRONG: the site lies past the corrected boundary 0x008CD3E0)
+
+[C] F3 SNAPSHOT-TREE FILE CENSUS (fix note counts)
+  00_CONTROL/PRE_EDIT: 19 files
+  00_CONTROL/PRE_EDIT_R2: 27 files
+  00_CONTROL/PRE_EDIT_R3: 5 files
+  00_CONTROL/PRE_EDIT_R4: (does not exist yet at probe time)
+  CG7 basis claim 'hash census: 20 files' refers to 00_CONTROL/PRE_EDIT/** (the correction-pass
+  snapshot tree hashed before/after the origin-mutability correction); actual count measured
+  above. The dispatch's PRE_EDIT_R2 count is also measured above for completeness.
+
+MEASURED_QUANTITY: boundary bytes + head/extent/containment decodes + channel censuses +
+  callee-set closure + snapshot-tree counts; per corrected/old enclosing-function start.
+INDEPENDENT_SOURCE_OF_TRUTH: capstone 5.0.7 linear decodes of Entropia.exe physical bytes
+  (SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31; S0 fail-closed).
+WHY_NON_CIRCULAR: no generator-under-repair is imported; no QC_R3_RAW value is imported as
+  evidence (QC lists are printed only as EXPECTED values to compare against this decode).
+FAILURE_CASE_DETECTED: any mismatch between this decode and the QC/PE-MASTER facts is a
+  HARD STOP for the fix round (reported loudly, never forced).

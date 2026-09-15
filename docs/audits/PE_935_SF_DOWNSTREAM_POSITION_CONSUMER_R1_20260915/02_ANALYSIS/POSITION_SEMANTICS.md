@@ -26,9 +26,14 @@ PRIOR CANON (cited, pin-checked, not re-derived):
 ## GATE ANSWERS
 G9_CALLER_SEMANTIC_CONTROL: PASS (5 independent context classes; no single-caller promotion; Class B/C consumers
   independently corroborate position semantics; Class D bounds the helper identity).
-G11_COORDINATE_SPACE: the primary output is NOT in the source's space — a 100:1 scale conversion (x0.01, origin 0)
-  is CONFIRMED at the byte level (forward/inverse pair measured). The engine->internal-space direction is CONFIRMED;
-  the human label of the internal space (meters vs game units) is UNVERIFIED (RUNTIME_COORDINATE_BEHAVIOR = UNVERIFIED).
+G11_COORDINATE_SPACE: the primary output is NOT in the source's space — the conversion (x0.01, minus base S)
+  is CONFIRMED at the byte level (forward/inverse pair measured; K bit-identity re-verified by the
+  origin-mutability correction run, 01_RAW/OUTPUT_FORMULA_REVALIDATION_RAW.txt). AMEND (origin-mutability
+  correction): the OLD text said "a 100:1 scale conversion (x0.01, origin 0) is CONFIRMED" — the 100:1
+  magnitude relation holds only IF S == {0,0,0} (the measured initial value; S's runtime value is UNVERIFIED;
+  a mutation channel exists: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md). The engine->internal-space direction is
+  CONFIRMED; the human label of the internal space (meters vs game units) is UNVERIFIED
+  (RUNTIME_COORDINATE_BEHAVIOR = UNVERIFIED).
 G12_AXIS_MAPPING: identity permutation CONFIRMED (component i -> component i, no swap/negation); axis labels inherited
   from the shared NiPoint3 convention (label semantics UNVERIFIED statically, no runtime test permitted).
 G13_UNIT_SCALE: CONFIRMED as a bit-exact numeric relation — multiply by (double)(float)0.01
@@ -42,8 +47,11 @@ G14_FINAL_POSITION_ROLE: STRONGLY_SUPPORTED that the SF slot3 output is a POSITI
 
 ## H4 / H5 evaluation
 - H4 ("output represents the named NiAVObject's world-space position, possibly after a deterministic
-  convention conversion"): CONFIRMED in its full form — output = live world translate x 0.01 (a deterministic
-  unit conversion), same component order; the "possibly after conversion" clause is exactly what was measured.
+  convention conversion"): CONFIRMED in its full form — output = f32(f32(W*0.01) - S), a deterministic conversion
+  of the live world translate with same component order (IF S == {0,0,0}, the measured initial value, this is
+  the pure x0.01 unit conversion — AMEND, origin-mutability correction: the unconditional 'x 0.01' reading is
+  retracted; see 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md); the "possibly after conversion" clause is exactly
+  what was measured.
 - H5 ("primary and fallback outputs share the same structural/coordinate semantic"): PARTIAL — structure and
   interface: CONFIRMED identical; coordinate-space coherence: STRONGLY_SUPPORTED (shared origin seeding, inverse
   family, prior canon) but not byte-proven inside the window (the stored fallback value's scale is not measurable

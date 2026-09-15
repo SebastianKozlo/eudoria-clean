@@ -41,3 +41,58 @@ OVERALL EXECUTABLE PASS must always be presented as distinct from human acceptan
 
 ---
 
+## Entry OMC/L1 — CLAIM_OF_MEASUREMENT_REQUIRES_MEASUREMENT_ARTIFACT
+
+- operation: STANDING-RULE
+- applied_by: PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 (authority: the human authorization of PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 relayed via PE-MASTER; the bounded in-place correction of docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915)
+- claims: the original run's fabricated write-through coverage claim (RETRACTED by the correction); supersession adjudication 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md CLAIM_MATRIX (1)
+- standing text (verbatim):
+
+A claim that something was “measured” must be backed by a corresponding measurement artifact (script + raw rows + derived aggregate). The SF origin case: “No caller writes through the returned pointer within 8 instructions (measured over all 99 sites)” was a generator-emitted sentence with NO measurement behind it (the classifier looked at two instructions after each call and keyed on the first instruction's pattern); the counterexample (0x00458E27, three writes at 0x458E30/0x458E36/0x458E3D) was sitting in the instrument's own recorded data.
+
+- evidence_pointer: docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915/01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv + NEGATIVE_CONTROL_RAW.txt Control-4 supersession
+- lineage_ref: PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 standing lesson OMC/L1 (00_CONTROL/AMEND_LOG_R1.md STANDING LESSONS + 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md CLAIM_MATRIX (10))
+
+---
+
+## Entry OMC/L2 — ROW_INTEGRITY_DOES_NOT_VALIDATE_INFERENCE
+
+- operation: STANDING-RULE
+- applied_by: PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 (authority: the human authorization of PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 relayed via PE-MASTER; the bounded in-place correction of docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915)
+- claims: the original run's origin-immutability inference drawn from the triple-write census (RETRACTED by the correction; the bounded measurement itself preserved); supersession adjudication 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md CLAIM_MATRIX (2)/(8)
+- standing text (verbatim):
+
+A byte-correct CSV does not imply the interpretation of that CSV is correct. The origin-triple census measured “no writer of the .data triple 0xBA921C/20/24” (valid, 268 imm32 occurrences, 0 store-class) and the analysis layer illegitimately concluded “=> S == {0,0,0} for the whole process lifetime, immutable” — writes through the RETURNED singleton pointer never touch the triple addresses; the measurement and the inference had different subjects.
+
+- evidence_pointer: docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915/01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt [T.10] (corrected) + 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md
+- lineage_ref: PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 standing lesson OMC/L2 (00_CONTROL/AMEND_LOG_R1.md STANDING LESSONS + 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md CLAIM_MATRIX (10))
+
+---
+
+## Entry OMC/L3 — POINTER_RETURN_ANALYSIS_MUST_TRACK_ALIAS_PROVENANCE
+
+- operation: STANDING-RULE
+- applied_by: PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 (authority: the human authorization of PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 relayed via PE-MASTER; the bounded in-place correction of docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915)
+- claims: the provenance-blind write-through census defect (the single writer site 0x00458E27 missed by the ECX-only alias class); supersession adjudication 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md CLAIM_MATRIX (1)/(2)
+- standing text (verbatim):
+
+For any function returning a pointer, a “does anyone write through it” census must track the pointer's provenance across register copies and aliases (mov ecx,eax; mov edi,eax; ...), keep tracking after the ORIGINAL register is overwritten (mov eax,0 does not invalidate S_PTR living in ECX), handle stack spills/escapes with honest INSUFFICIENT_PROOF_* residuals, and classify escapes with bounded callee-head windows — never converting head-bounded absence into global absence. The SF case: the prior census examined only the ECX alias class (9 pair-site consumers) and never the EAX-retaining sites; the single writer site kept the pointer in EAX.
+
+- evidence_pointer: docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915/01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv (99 rows, N=16 primary + N=8 historical view; 1 writer, 43 read-only escapes, 12 unresolved escapes disclosed)
+- lineage_ref: PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 standing lesson OMC/L3 (00_CONTROL/AMEND_LOG_R1.md STANDING LESSONS + 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md CLAIM_MATRIX (10))
+
+---
+
+## Entry OMC/L4 — NEGATIVE_EXISTENCE_CLAIM_REQUIRES_ESCAPE_CHANNEL_ACCOUNTING
+
+- operation: STANDING-RULE
+- applied_by: PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 (authority: the human authorization of PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 relayed via PE-MASTER; the bounded in-place correction of docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915)
+- claims: the branch-B “0x4B1B70 self-recursive, statically dead” attribution (REJECTED_AS_ATTRIBUTED by the correction); supersession adjudication 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md CLAIM_MATRIX (7)
+- standing text (verbatim):
+
+A negative-existence claim (“no writer exists”, “statically dead”, “never called”) must account for every channel through which the negative could be escaped: direct E8/E9, imm32 address-takers, vtable membership, callee-head forwarding, stack spills, and FUNCTION BOUNDARY ATTRIBUTION (which function actually contains the cited call site — verified by decode from the function start, not by nearest-preceding-prologue). The branch-B case: the “0x4B1B70 self-recursive, statically dead” claim failed boundary attribution — the cited E8s lie inside FUN_004B1C70, which has an external caller in the packet Execute dispatcher.
+
+- evidence_pointer: docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915/01_RAW/ORIGIN_SETTER_REACHABILITY_RAW.txt [R.6] (corrected) + 06_REPORT/QC_AUDIT_R3.md F1 + AMEND-23/28
+- lineage_ref: PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 standing lesson OMC/L4 (00_CONTROL/AMEND_LOG_R1.md STANDING LESSONS + 06_REPORT/PE_MASTER_REVIEW_SUPERSESSION_R1.md CLAIM_MATRIX (10))
+
+---

@@ -11,14 +11,23 @@ object). CONFIRMED by byte decode of both paths.
 out.x = f32( f32( W.x * K ) - S.x )
 out.y = f32( f32( W.y * K ) - S.y )
 out.z = f32( f32( W.z * K ) - S.z )
-with W = named NiAVObject.m_kWorld.m_Translate (engine space), K = (double)(float)0.01, S = {0,0,0} (proven).
+with W = named NiAVObject.m_kWorld.m_Translate (engine space), K = (double)(float)0.01, S = the origin singleton
+(initial value {0,0,0} measured; AMEND, origin-mutability correction run
+PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915: the OLD text said "S = {0,0,0} (proven)" as an unconditional
+value claim — RETRACTED: S's initial value is measured {0,0,0}; S's mutability is a separate status
+(ORIGIN_MUTATION_CHANNEL_EXISTS = CONFIRMED via writer site 0x458E27; ORIGIN_MUTATED_AT_RUNTIME/VALUE =
+UNVERIFIED; status algebra: 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md; independent formula re-derivation:
+01_RAW/OUTPUT_FORMULA_REVALIDATION_RAW.txt)).
 
-REDUCED (S == 0, bit-exact under x87 round-to-nearest, sign-of-zero preserved):
+REDUCED — CONDITIONAL special case (IF S == {0,0,0} (+0.0 each), bit-exact under x87 round-to-nearest,
+sign-of-zero preserved; AMEND: the OLD header presented this as the unconditional reduction — conditionalized):
 out.x = f32(W.x * 0.01f) ; out.y = f32(W.y * 0.01f) ; out.z = f32(W.z * 0.01f)
 
 Each output component is a function of the SAME input component only (no cross-component terms). The relation is
-line-identical, injective for the representable range, deterministic (no runtime state enters the formula: K is a
-constant, S is a proven-constant zero vector).
+line-identical, injective for the representable range, deterministic given S (K is a constant; AMEND: the OLD
+text said "S is a proven-constant zero vector" — RETRACTED: S is a runtime object with a measured initial value
+and a CONFIRMED static mutation channel; its runtime value is UNVERIFIED — the formula's determinism is
+determinism GIVEN S, not proof of S's constancy).
 
 ## FALLBACK RELATION (in-slot control)
 out[i] = P[i] (raw copy), P = SF+0x34 stored placement value (writer FUN_005094C0; ctor-seeded from the same zero

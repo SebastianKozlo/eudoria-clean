@@ -1,6 +1,6 @@
 # 03_EVIDENCE — PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
 
-Evidence index: EVIDENCE_INDEX.csv (every package file -> role + SHA256 + size, generated 2026-09-15T15:00:27Z UTC).
+Evidence index: EVIDENCE_INDEX.csv (every package file -> role + SHA256 + size, generated 2026-09-15T19:58:49Z UTC).
 EXCLUSIONS (documented): EVIDENCE_INDEX.csv excludes its own row (self-hash impossible) and
 06_REPORT/MANIFEST_SHA256.csv (written after the index in the same generation pass; the manifest covers it).
 Manifest: 06_REPORT/MANIFEST_SHA256.csv (SHA256 of every package file; the manifest itself is excluded
@@ -16,5 +16,10 @@ Evidence discipline applied in this run (contract EVIDENCE QUALITY):
 - All raw files carry measured provenance headers (python 3.12.7 / capstone 5.0.7 / generator script SHA256 /
   source SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31).
 - Correction pass (fresh-QC findings P1/P2/P3): 00_CONTROL/PRE_EDIT/ holds byte-exact pre-edit copies of every
-  amended file; amendments are logged in 00_CONTROL/AMEND_LOG_R1.md; the S={0,0,0} never-written proof was
-  re-measured exhaustively in 01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt (census_triple_writes.py).
+  amended file; amendments are logged in 00_CONTROL/AMEND_LOG_R1.md; the triple write-census channels are
+  enumerated in 01_RAW/ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt (census_triple_writes.py).
+- Correction run PE_935_SF_ORIGIN_MUTABILITY_CORRECTION_R1_20260915 (origin mutability): 00_CONTROL/PRE_EDIT_R2/
+  holds byte-exact pre-edit copies of every AMEND-14+ amended file; the write-through of the getter-returned
+  singleton pointer is measured in 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv (writer site 0x458E27;
+  pre-registered N=16 window); the corrected status algebra is 02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md;
+  generator prose no longer carries science conclusions (measurement/status separation).

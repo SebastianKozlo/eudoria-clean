@@ -1,0 +1,57 @@
+# NEGATIVE_CONTROL_RAW — MANDATORY NEGATIVE CONTROL (executed; FAILURE_CASE_DETECTED = YES)
+# RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+# MEASURED ENVIRONMENT: python 3.12.7; capstone 5.0.7 (cs_version (5, 0, 1280)) — measured at run start.
+# SOURCE: Entropia.exe, size 8015872, SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (S0 verified).
+# PURPOSE (contract): prevent "looks like float3 copy" -> "therefore world position helper".
+
+== CONTROL 1 (EXECUTED): the SAME helper pair applied to a source that is NOT an NiAVObject+0x90 world translate ==
+  Site: 0x523C38..0x523C63 (caller of the 0x437F70/0x82B5A0 pair; census row verified in HELPER437F70_CALLER_CENSUS.csv).
+  MEASURED_BYTES (capstone, from this run's census decode):
+    0x00523C32  8b 43 08                  mov eax, dword ptr [ebx + 0x8]
+    0x00523C38  89 44 24 3c               mov dword ptr [esp + 0x3c], eax       ; tmp.x = [ebx+0x8]
+    0x00523C3C  8b 4b 0c                  mov ecx, dword ptr [ebx + 0xc]
+    0x00523C3F  89 4c 24 40               mov dword ptr [esp + 0x40], ecx       ; tmp.y = [ebx+0xC]
+    0x00523C43  8b 53 10                  mov edx, dword ptr [ebx + 0x10]
+    0x00523C46  8d 44 24 3c               lea eax, [esp + 0x3c]
+    0x00523C4A  50                        push eax                              ; pair src = &tmp (3-float LOCAL)
+    0x00523C4B  8d 8c 24 a8 00 00 00      lea ecx, [esp + 0xa8]
+    0x00523C52  51                        push ecx                              ; pair dst = &local
+    0x00523C53  89 54 24 4c               mov dword ptr [esp + 0x4c], edx       ; tmp.z = [ebx+0x10]
+    0x00523C57  e8 14 43 f1 ff            call 0x437f70
+    0x00523C5C  8b c8                     mov ecx, eax
+    0x00523C5E  e8 3d 79 30 00            call 0x82b5a0                          ; out = tmp*0.01 - S
+    0x00523C63  85 ff                     test edi, edi
+    0x00523C65  8b 10                     mov edx, dword ptr [eax]              ; copy out[0..2] -> [ebp..ebp+8]
+  ANALYSIS: the source is an inline 3-float field of an arbitrary record object ([ebx+0x8/+0xC/+0x10]), NOT a
+  NiAVObject m_kWorld translate (+0x90 of a scene node). The pair performs the IDENTICAL scale-and-subtract.
+  CONCLUSION: the helper pair's FUNCTION_IDENTITY is a GENERIC 3-float engine->scaled-space converter
+  (out = src*0.01 - origin), NOT a "world position helper". World-position semantics come from the SF slot3 CALL
+  CONTEXT (the +0x90 source), not from the helpers themselves. OBSERVED_OPERATION (3-float scaled subtraction) is
+  CONFIRMED and context-independent; FUNCTION_IDENTITY "world position getter" for the helpers is REJECTED.
+
+== CONTROL 2 (EXECUTED): same-function different-space in-slot control (fallback vs primary) ==
+  Site: FUN_0050A050 fallback 0x50A087..0x50A0A7 vs primary 0x50A06E..0x50A084 (same function, same out buffer).
+  The fallback produces out by RAW COPY (no scale); the primary produces out by x0.01-minus-origin. Identical
+  "float3 out" byte-shape; provably different arithmetic semantics (FALLBACK_PRIMARY_COMPARISON.txt).
+  CONCLUSION: "writes a float3 into arg1" does NOT imply "copies a position" — the naive label is falsified in-slot.
+
+== CONTROL 3 (EXECUTED): byte-shape-similar sibling with a DIFFERENT operation (0x82B6A0 inverse) ==
+  Site: FUN_0082B6A0 (same family, same ECX=S origin, near-identical byte idiom: fld [ecx+i], fmul, fstp).
+  MEASURED operation: out[i] = f32( f32( src[i] + S[i] ) * 100.0 ) using qword [0xa7a618] = (double)100.0 —
+  the inverse of 0x82B5A0's forward transform. A byte-shape classifier ("3-float FPU helper near 0x82B5xx") would
+  collapse these two into one semantic class; the measured constants (0.01 vs 100.0) and operation signs (subtract
+  vs add) prove they are OPPOSITE-DIRECTION transforms. CONCLUSION: byte-shape similarity is not operation identity.
+
+== CONTROL 4 (EXECUTED): singleton mutability falsification probe ==
+  Hypothesis probed: S is dynamic per-frame state (e.g. camera origin), which would make the primary output
+  camera-relative. Exhaustive writer scans (END_TO_END_VALUE_FLOW_RAW.txt E.3): NO writer of the triple, NO writer
+  of S post-construction (all 99 call sites + all ECX-consumers measured). The "mutable origin" reading is REJECTED;
+  S = permanent zero vector. The primary output is therefore NOT relative to any moving point.
+
+FAILURE_CASE_DETECTED = YES  (Controls 1-4 all executed; the naive "world position helper"/"plain copy"/
+  "byte-shape class" inferences each have a measured counterexample.)
+
+MEASURED_QUANTITY: 4 distinct executed falsification probes with byte-level citations.
+INDEPENDENT_SOURCE_OF_TRUTH: capstone decode of Entropia.exe bytes at the cited addresses (this package's raw files).
+WHY_NON_CIRCULAR: each control falsifies a SPECIFIC promotion inference using sites/bytes independent of the
+  SF slot3 window; none depends on the primary-path conclusion being tested.

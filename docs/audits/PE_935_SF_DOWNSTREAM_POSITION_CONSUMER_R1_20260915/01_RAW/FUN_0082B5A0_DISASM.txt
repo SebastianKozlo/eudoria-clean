@@ -1,9 +1,9 @@
 ====================================================================================================
 FUN_0082B5A0 FULL DECODE — PHASE D (helper 2 of the SF slot3 primary pair; the PRIMARY WRITER of the out buffer)
 RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
-GENERATED_UTC: 2026-09-15T13:35:36Z
+GENERATED_UTC: 2026-09-15T17:17:10Z
 GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\gen_raw_evidence.py
-GENERATOR_SHA256: 791E92FCB9B8A890333832D2E4804D6E56FB57CA7F4A4F8E8FAEF600F2DA534B
+GENERATOR_SHA256: DA8B59594513513569A7E2CC9867E386D6D1BF3868AC8F80274A0511FC36B441
 MEASURED ENVIRONMENT (1a490ee lesson: measured at run time, not hardcoded):
   python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
   python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
@@ -91,9 +91,12 @@ SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secon
     0x82B5E1 fstp dword ptr [eax+8]     out.z := f32(...)           <<< F32 NARROWING (final)
     0x82B5E4 ret 8
   PER-COMPONENT FORMULA (bit-exact): out[i] = f32( f32( (f80)src[i] * (f80)K ) - (f80)S[i] ), i in {0,4,8} (x,y,z).
-  With S == {0,0,0} (Phase C) and the x87 default rounding: out[i] = f32( f32(src[i]*0.01f) - 0.0f ) = f32(src[i]*0.01f),
-  with the ONLY caveat: if src[i]*K rounds to +0/-0, subtracting 0.0 preserves the sign of zero. No NaN/Inf paths exist here
-  beyond the generic x87 rules (no fwait, no control-word change, no exceptions handled).
+  IF S == {0,0,0} (each component +0.0) then, by IEEE-754 (x - (+0.0) == x for finite x) and the x87 default
+  rounding: out[i] = f32( f32(src[i]*0.01f) - 0.0f ) = f32(src[i]*0.01f) bit-exactly, with the sign-of-zero caveat
+  ((+0)-(+0)=+0, (-0)-(+0)=-0). IF S is anything else, out[i] = f32(f32(src[i]*K) - S[i]) as decoded above.
+  (S's initial value is measured {0,0,0}; S's mutability/runtime value is a separate status — see
+  02_ANALYSIS/ORIGIN_STATUS_CORRECTION.md and 01_RAW/ORIGIN_SINGLETON_WRITE_THROUGH_CENSUS.csv.)
+  No NaN/Inf paths exist here beyond the generic x87 rules (no fwait, no control-word change, no exceptions handled).
 
 [D.5] MEMORY WRITES (only these 4)
   [esp+8] temp stores (3x, reusing the dead caller arg slot) and the 3 output stores [eax+0/4/8]. NO writes to ECX/S, NO global writes.
