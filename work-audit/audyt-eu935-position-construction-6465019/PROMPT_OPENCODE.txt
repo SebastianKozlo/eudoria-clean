@@ -1,0 +1,93 @@
+﻿ZLECENIE: EU935 — domkniecie seamu SLOT17 (SceneFeeder -> NiNode -> transform) + 3 erraty dokumentacyjne
+(adjudykacja audytu Work-Audit runu 6465019)
+
+Pracujesz na erze PCG 9.3.5 (pin: Entropia.exe SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31,
+rozmiar 8015872, PE32, base 0x00400000, ASLR OFF). Zanim zaczniesz: sprawdz git rev-parse HEAD,
+status, ls-remote origin master — nie zakladaj, ze HEAD to 3644e5a; mozesz miec nowsze runy.
+Ostatnie znane: 1a490ee (SceneFeeder slot census) i 3644e5a (SF+0x30 link identity).
+
+----------------------------------------------------------------------------------
+1. CEL GLOWNY (P0): dekod NiNode-vtable SLOT 17 — FUN_007B5390
+----------------------------------------------------------------------------------
+
+Run PE_935_SCENEFEEDER_LINK30_IDENTITY_R1 zapisal WARTOSC slotu bez dekodu (granica kontraktu):
+[0x00A8CCF4+0x44] = 0x007B5390 — slot 17 vtable NiNode, wywolywany przez SceneFeederObject
+vtable slot 3 (FUN_0050A050) na [SF+0x30] (link o RTTI .?AVNiNode@@, refcount na block+4).
+
+Pytanie rozstrzygajace: CZYM jest slot 17 dla scenografii i czy zasilany jest transformem?
+Przypadki do rozstrzygniecia (nie zakladaj wyniku):
+A) slot 17 ustawia transform/translate/pozycje na NiNode — z jakich argumentow? czy arg1
+   (wypelniane przez 0x437F70 -> 0x82B5A0 w sciezce slot 3, wynik link->slot17(...)->[+0x90])
+   jest wektorem pozycji (SF+0x34..0x3C poprawionej) czy czyms innym?
+B) slot 17 to get, nie set — wtedy skad NiNode bierze swoj transform i kto go ustawia
+   (writer census [NiNode] transformow: pos/rot/scale pol w vtable NiNode — wskazowka:
+   Gamebryo NiAVObject m_kWorld/m_kLocal; zrodla: D:\gamebyroengine\extracted\Gb12_Source
+   \CoreLibs\NiMain\NiAVObject.inl / NiNode.cpp jako wzorzec, NIE jako dowod dla EU935);
+C) slot 17 nie dotyka transformu w ogole — wtedy TRANSFORM_TO_MODEL pozostaje
+   NOT_DEMONSTRATED i wskaz JEDNOznacznie nastepny seam.
+
+Wymagania:
+- dekod ciala FUN_007B5390 wlasnym dekoderem z fizycznego EXE (capstone z GHIDRA_LOCAL
+  lub wlasny PE parser — jak w poprzednich runach); wszystkie VA byte-locked;
+- dekoduj rowniez wskazane callees w miare potrzeb (0x437F70, 0x82B5A0) — do poziomu
+  rozstrzygniecia A/B/C, nie glebiej;
+- pozytywna kontrola: znana krawedz (np. sciezka slot3 -> slot17 z POSITIVE_CONTROL
+  runu link-identity) musi odtwarzac sie z twoich bajtow;
+- kontrola negatywna dla kazdego predykatu: zepsuty wejscie/wybra zla vtable MUSI failowac;
+- census: wszyscy callerzy slotu 17 (call [reg+0x44] na obiektach NiNode vtable 0x00A8CCF4)
+  — ile istnieje, ile dotyczy SF; podaj mianownik i metode;
+- G6 boundary: 19 ctor-callers nadal NOT_CHECKED — nie rozszerzaj bez potrzeby;
+- ZAKAZ: nie ogłaszaj MODEL_BRIDGE_CONFIRMED bez pozytywnego dowodu z dataflow;
+  RTTI .?AVNiNode@@ to klasa wezla sceny, NIE model-resource. Status maksimum bez dowodu:
+  TRANSFORM_TO_SCENE_NODE / NOT_DEMONSTRATED.
+
+----------------------------------------------------------------------------------
+2. ERRATY DOKUMENTACYJNE (z adjudykacji Work-Audit runu 6465019 — nowe, nie dotykaja historii)
+----------------------------------------------------------------------------------
+
+E-1 [P3] Wiersz param-set w tabeli 4.2 REPORT 6465019 zawiera mylna freze "zapis do +0x88 (faza B)".
+    Fakty (bajty audytora, probe2): FUN_00746550 = 8B 41 04 C3 (MOV EAX,[ECX+4]; RET) ->
+    instance+0x78 = rekord[4] (pierwszy u32 pary param-set) — to czesc raportu jest POPRAWNA;
+    FUN_00746570 = 8D 41 20 C3 (LEA EAX,[ECX+0x20]; RET) -> instance+0x88/+0x8C =
+    rekord[0x20]/rekord[0x24] = pola struktury maski 0x28, NIE para param-setu.
+    Los drugiego u32 pary (rec+8) w ctorze FUN_0085B1B0: nie znaleziono zapisu — status
+    nierozstrzygniety, nie zgaduj. Errata: popraw wiersz tabeli + zaden pozniejszy trace
+    nie moze czytac +0x88 jako param-set.
+
+E-2 [P3] HANDOFF 6465019 linia 49: "sciezka modelu biegnie WYLACZNIE kanalem atrybut-drewa"
+    jako wynik negatywnego testu slotow. Negatyw w zbadanym zakresie nie dowodzi "wylacznie".
+    Zamien na: "w zbadanym zakresie slotow nie znaleziono konsumenta modelu; pozostale kanaly
+    nierozstrzygniete". (NOT_DEMONSTRATED bylo utrzymane uczciwie — to tylko korekta jezyka.)
+
+E-3 [RECORD] Wycofanie zarzutu przerwanej sesji Desktop (usage limit): jej twierdzenie
+    "para param-setu trafia do instance+0x88/+0x8C, a +0x78 z innego pola" jest falszywe
+    w obu polowach (dowody jak E-1). Wpisz do erraty jako retraction-for-the-record,
+    z adnotacja ze slusznym tropem bylo tylko to, ze "+0x88" nie pasuje do pary.
+
+Erraty publikuj jako nowy plik w konwencji repo (supersession, cytaty verbatim plik:linia,
+disposition); NIE edytuj historycznych raportow w miejscu.
+
+----------------------------------------------------------------------------------
+3. GRANICE I TRYB
+----------------------------------------------------------------------------------
+
+- STATIC-ONLY: klient/Frida/x32dbg/mock/siec NIEURUCHOMIONE. Zrodla Gamebryo = wzorzec
+  semantyczny, NIE dowod dla EU935 (zero transferu adresow/layoutow bez wlasnych bajtow).
+- Oryginaly READ-ONLY (EXE, archiwa, Gb12_Source, GHIDRA_LOCAL zrodlowy); analyzeHeadless
+  tylko na wlasnej kopii w katalogu runu.
+- Nie dotykaj: experiments/ (obcy), src/game/, portow 8000/9350, parsera/viewera produkcyjnego.
+- Bramki nie wymuszaja odkrycia: wynik negatywny (przypadek C) jest poprawnym wynikiem rundy.
+- Statusy: CONFIRMED / NOT_DEMONSTRATED / OPEN / NOT_FOUND_IN_SEARCHED_SCOPE — osobno dla:
+  (a) semantyki slotu 17; (b) zrodla transformu NiNode; (c) SceneFeeder->model.
+- 4508/296445 pozostaje OPEN; pozycje historyczne 296445 NIEODZYSKANE — nie deklaruj inaczej.
+
+----------------------------------------------------------------------------------
+4. WYNIK I PUBLIKACJA
+----------------------------------------------------------------------------------
+
+Zapisz pakiet runu (00_CONTROL/01_RAW/02_ANALYSIS/06_REPORT: REPORT, QC, HANDOFF, GATES,
+manifest SHA256, indeks artefaktow). Publikacja: raport -> kontrole -> commit (path-limited,
+wylacznie wlasne sciezki, bez git add -A) -> push -> weryfikacja SHA na origin -> potwierdzenie
+entrypoint zgodnie z konwencja repo. Publikuj takze przy wyniku czesciowym/negatywnym.
+W odpowiedzi koncowej podaj: wynik (a/b/c), pelny SHA commita, status push, pozostale niewiadome
+i JEDEN nastepny eksperyment o najwiekszej wartosci.
