@@ -1,0 +1,60 @@
+# AT_RUN_END_GIT_OBSERVATION — PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+
+Executor: pe-reconstruction. Measured 2026-09-15T06:33:33.9041577-07:00 (PowerShell 5.1, repo
+D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean, branch master) — after all science phases and package writes;
+the final mechanical step (06_REPORT/MANIFEST_SHA256.csv + 03_EVIDENCE index, produced by gen_manifest.py
+immediately after this measurement) writes only INSIDE this run dir and cannot change the untracked path census.
+
+## git rev-parse HEAD
+```
+3068f31ad8db7e993a72365dc28cc03066095afd
+```
+EVALUATION: == run-start HEAD == BASE_SHA (3068f31ad8db7e993a72365dc28cc03066095afd) — UNCHANGED. MATCH.
+
+## git rev-parse --abbrev-ref HEAD
+```
+master
+```
+
+## git rev-parse origin/master
+```
+3068f31ad8db7e993a72365dc28cc03066095afd
+```
+EVALUATION: HEAD == origin/master — MATCH (no local/remote divergence introduced).
+
+## git status --short
+```
+?? docs/audits/PE_935_NINODE_SLOT17_FIRSTCALL_R1_20260914/
+?? docs/audits/PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915/
+?? experiments/
+```
+EVALUATION: the untracked set is EXACTLY: the two pre-existing paths
+(docs/audits/PE_935_NINODE_SLOT17_FIRSTCALL_R1_20260914/ and experiments/ — present and UNTOUCHED) + THIS run
+dir. Everything tracked is clean. MATCH with the contract's expectation (G1 end-check).
+
+## git worktree list
+```
+D:/Eudoria_Reconstruction/12_WebGame/eudoria-clean                              3068f31 [master]
+D:/Eudoria_Reconstruction/worktrees/PE_935_NINODE_SLOT17_GB_ORACLE_MINICHECK_R1 5290e79 [audit/pe935-ninode-slot17-gb-oracle-minicheck-r1]
+D:/Eudoria_Reconstruction/worktrees/WORK_AUDIT_REPORTS                          1312f89 [audit/work-audit-reports]
+```
+EVALUATION: identical to run start; WORK_AUDIT_REPORTS worktree/branch never read/merged/modified (WORK AUDITOR
+separation respected).
+
+## git reflog -3 (mutation cross-check)
+```
+3068f31 HEAD@{0}: commit: audits: PE_935_SF_ARG2_UPSTREAM_HOLDER_R1_20260915 entrypoint row (+package; path-limited)
+895bbc8 HEAD@{1}: commit: audits: PE_935_SF_ARG2_PROVENANCE_R1_20260914 entrypoint row (+1/-0; path-limited)
+46b78c2 HEAD@{2}: commit: audits: PE_935_SF_ARG2_PROVENANCE_R1_20260914 (...)
+```
+EVALUATION: the newest reflog entry (HEAD@{0}) is the PRE-EXISTING formalization-era commit (BASE_SHA itself);
+NO reflog entry was created by this executor run — ZERO git mutations performed (no add/commit/push/stash/
+checkout/reset/branch; persistence remains owned by pe-master-auditor at G17 after PE-MASTER adjudication).
+
+## Run-end source identity spot re-check
+Entropia.exe unchanged during the run (read-only opens only; every generator re-verified S0 at its own start;
+no write handle to the EXE or any client payload path was ever opened by the executor).
+
+## VERDICT
+G1 end-check: PASS. ZERO git mutations by the executor. Package complete in-place; G15 (fresh QC), G16 (PE-MASTER
+adjudication) and G17 (path-limited persistence) remain with the governance chain.

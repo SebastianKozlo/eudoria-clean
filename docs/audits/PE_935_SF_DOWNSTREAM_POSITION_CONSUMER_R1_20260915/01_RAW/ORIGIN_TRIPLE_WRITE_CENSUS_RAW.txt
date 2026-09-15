@@ -1,0 +1,1079 @@
+====================================================================================================
+ORIGIN TRIPLE WRITE CENSUS — CORRECTION PASS (P1-1) + CORRECTION-FACT VERIFICATION ANNEX
+RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+GENERATED_UTC: 2026-09-15T14:23:31Z
+GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\census_triple_writes.py
+GENERATOR_SHA256: 5777F559101CFAC2CAEACC6ADA23291E412F046909D52677E2E751A2E98C734B
+MEASURED ENVIRONMENT (1a490ee lesson: measured at run time, not hardcoded):
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at generator start (size+sha256+PE layout re-verified before any decode).
+SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secondary corroboration only (QH-012).
+PURPOSE: re-measure the E.3 'never written / S immutable' claim with exhaustive channels (QC_AUDIT.md P1-1);
+  the executor's OWN numbers are recorded here. EXECUTOR-READ one-liners are classifications hand-read from the
+  mechanically measured decodes printed adjacently in this file (see module docstring note).
+====================================================================================================
+
+[T.1] WHOLE-IMAGE imm32 OCCURRENCE CENSUS of the triple (every file offset; per-section attributed)
+  0x00BA921C: 107 occurrences  |  per-section: .text=107
+  0x00BA9220: 81 occurrences  |  per-section: .text=81
+  0x00BA9224: 80 occurrences  |  per-section: .text=80
+  TOTAL triple dword occurrences in the whole image: 268
+
+[T.2] CONTAINMENT CLASSIFICATION of every occurrence (all start offsets -14..-1 reconstructed;
+      position-sensitive XOR-substitution operand test; PRIMARY disambiguated by local linear sweep from the
+      nearest 0xCC padding anchor; ALL genuine candidates recorded; store-class candidates NEVER suppressed)
+  0x00BA921C PRIMARY classification breakdown (instruction-start VAs):
+    ABS_LOAD                                     81  0x0042BDB0 0x0042BDF0 0x0042BE54 0x0045ABCB 0x0045AD88 0x0045B021 0x0045B3B0 0x0045B9F2 0x0045CA03 0x0045CBE0 0x0045CF67 0x0045D0C3 0x0045D180 0x0045DB45 0x0045DB72 0x0045DD63 0x0045DD7D 0x0045DDA4 0x0045DDBE 0x0045DDD8 0x0045DDF5 0x0045EC2C 0x0045F94D 0x0047DC63 0x0047DC7D 0x00482957 ...
+    MOV_IMM_BASE                                  2  0x0050AA1D 0x0096B960
+    PUSH_ADDR_TAKER                              24  0x00441040 0x00441045 0x0046AB60 0x0046AB65 0x0046E7D8 0x0046E7E6 0x00488BEA 0x004B7F5E 0x004C585D 0x004C5862 0x004CFFFE 0x0050C272 0x0050CDB3 0x0050CDB8 0x0050D2C5 0x0050D2CA 0x0050F195 0x0050F19A 0x0050F6E5 0x0050F6EA 0x0058EC6C 0x005F6D21 0x006E0006 0x00949CCC
+    STORE-CLASS CANDIDATES (ABS_STORE/ABS_RMW_STORE among ALL genuine candidates): 0
+  0x00BA9220 PRIMARY classification breakdown (instruction-start VAs):
+    ABS_LOAD                                     81  0x0042BDBC 0x0042BDFC 0x0042BE5C 0x0045ABDC 0x0045ADA6 0x0045B027 0x0045B3B8 0x0045BA01 0x0045CA21 0x0045CBEB 0x0045CF72 0x0045D0CE 0x0045D191 0x0045DB56 0x0045DB83 0x0045DD6B 0x0045DD85 0x0045DDAC 0x0045DDC6 0x0045DDE0 0x0045DDFF 0x0045EC3E 0x0045F95E 0x0047DC6C 0x0047DC86 0x0048295F ...
+    STORE-CLASS CANDIDATES (ABS_STORE/ABS_RMW_STORE among ALL genuine candidates): 0
+  0x00BA9224 PRIMARY classification breakdown (instruction-start VAs):
+    ABS_LOAD                                     80  0x0042BDC5 0x0042BE05 0x0042BE65 0x0045ABEA 0x0045ADAF 0x0045B02D 0x0045B3C1 0x0045BA0A 0x0045CA08 0x0045CBF4 0x0045CF7E 0x0045D0D7 0x0045D19A 0x0045DB8C 0x0045DD74 0x0045DD8E 0x0045DDB5 0x0045DDCF 0x0045DDE9 0x0045DE08 0x0045EC47 0x0045F967 0x0047DC74 0x0047DC8E 0x00482968 0x00482982 ...
+    STORE-CLASS CANDIDATES (ABS_STORE/ABS_RMW_STORE among ALL genuine candidates): 0
+
+  STORE-ENCODING COVERAGE (generic, encoding-agnostic — every x86 store form is covered by the
+  operand-access classification above, including but not limited to):
+    A3 mov [moffs32],eax | 66 A3 (ax) | 89 /r mod00rm101 mov [disp32],r32 | 66 89 (r16)
+    C7 05 mov [disp32],imm32 | C6 05 mov byte [disp32],imm8 | 88 /r mov byte [disp32],r8
+    81 /r mod00rm101 RMW dword [disp32],imm32 | 83 /r RMW [disp32],imm8 | 8F 05 pop [disp32]
+    D9 15/1D fst/fstp m32 | DD 15/1D fst/fstp m64 | DF fistp m16/m32/m64
+    0F C7 /1 cmpxchg8b [m64] (RMW) | F3/F2/66 0F 11 movss/movsd/movupd/movups [disp32],xmm
+    F3/F2 0F D6 movq [mem],xmm | 66 0F E7 movntdq | any other WRITE memory operand capstone decodes
+  -> store-class candidates with absolute memory operand in the triple byte range: 0 (expected 0)
+
+[T.3] WIDENED ABSOLUTE-STORE SCAN — dwords 0xBA9215..0xBA9227 (19 values)
+      (catches e.g. an 8-byte store at 0xBA9215 whose disp32 is NOT itself a triple member)
+    dword 0x00BA9218 -> 0x0096BB5D  09 05 18 92 ba 00         or       dword ptr [0xba9218], eax ABS_RMW_STORE | eff=[0x00BA9218,+4) overlaps_triple=False
+  store-class candidates from the widened dwords: 1; OVERLAPPING the triple: 0 (expected 0)
+
+[T.4] PUSH-imm32 ADDRESS-TAKER SITES -> consuming call -> callee head decode + one-line classification
+  measured push sites: 24 (all pushing 0x00BA921C: yes)
+  METHOD: each site's window is machine-decoded below; the site->callee mapping is EXECUTOR-READ from those
+  measured windows (the first consuming call after the push; callee 0x6C9490 (13 sites) reads BOTH &triple
+  args at the double-push sites — see [T.4b] deep dumps). 23/24 sites resolve; 0x488BEA is a disclosed residual.
+
+  PUSH SITE 0x00441040 (0x00441040  68 1c 92 ba 00            push     0xba921c):
+    0x00441045  68 1c 92 ba 00            push     0xba921c
+    0x0044104A  51                        push     ecx
+    0x0044104B  d9 1c 24                  fstp     dword ptr [esp]
+    0x0044104E  6a 01                     push     1
+    0x00441050  53                        push     ebx
+    0x00441051  68 58 18 ba 00            push     0xba1858
+    0x00441056  8d 8c 24 94 00 00 00      lea      ecx, [esp + 0x94]
+    0x0044105D  51                        push     ecx
+    0x0044105E  8d 8c 24 b0 00 00 00      lea      ecx, [esp + 0xb0]
+    0x00441065  c6 84 24 18 01 00 00 07   mov      byte ptr [esp + 0x118], 7
+    0x0044106D  e8 1e 84 28 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x00441045 (0x00441045  68 1c 92 ba 00            push     0xba921c):
+    0x0044104A  51                        push     ecx
+    0x0044104B  d9 1c 24                  fstp     dword ptr [esp]
+    0x0044104E  6a 01                     push     1
+    0x00441050  53                        push     ebx
+    0x00441051  68 58 18 ba 00            push     0xba1858
+    0x00441056  8d 8c 24 94 00 00 00      lea      ecx, [esp + 0x94]
+    0x0044105D  51                        push     ecx
+    0x0044105E  8d 8c 24 b0 00 00 00      lea      ecx, [esp + 0xb0]
+    0x00441065  c6 84 24 18 01 00 00 07   mov      byte ptr [esp + 0x118], 7
+    0x0044106D  e8 1e 84 28 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0046AB60 (0x0046AB60  68 1c 92 ba 00            push     0xba921c):
+    0x0046AB65  68 1c 92 ba 00            push     0xba921c
+    0x0046AB6A  51                        push     ecx
+    0x0046AB6B  d9 1c 24                  fstp     dword ptr [esp]
+    0x0046AB6E  6a 01                     push     1
+    0x0046AB70  50                        push     eax
+    0x0046AB71  56                        push     esi
+    0x0046AB72  89 48 4c                  mov      dword ptr [eax + 0x4c], ecx
+    0x0046AB75  57                        push     edi
+    0x0046AB76  8d 8c 24 ac 00 00 00      lea      ecx, [esp + 0xac]
+    0x0046AB7D  c6 84 24 14 01 00 00 00   mov      byte ptr [esp + 0x114], 0
+    0x0046AB85  c7 40 48 02 00 00 00      mov      dword ptr [eax + 0x48], 2
+    0x0046AB8C  e8 ff e8 25 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0046AB65 (0x0046AB65  68 1c 92 ba 00            push     0xba921c):
+    0x0046AB6A  51                        push     ecx
+    0x0046AB6B  d9 1c 24                  fstp     dword ptr [esp]
+    0x0046AB6E  6a 01                     push     1
+    0x0046AB70  50                        push     eax
+    0x0046AB71  56                        push     esi
+    0x0046AB72  89 48 4c                  mov      dword ptr [eax + 0x4c], ecx
+    0x0046AB75  57                        push     edi
+    0x0046AB76  8d 8c 24 ac 00 00 00      lea      ecx, [esp + 0xac]
+    0x0046AB7D  c6 84 24 14 01 00 00 00   mov      byte ptr [esp + 0x114], 0
+    0x0046AB85  c7 40 48 02 00 00 00      mov      dword ptr [eax + 0x48], 2
+    0x0046AB8C  e8 ff e8 25 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0046E7D8 (0x0046E7D8  68 1c 92 ba 00            push     0xba921c):
+    0x0046E7DD  8d 4c 24 58               lea      ecx, [esp + 0x58]
+    0x0046E7E1  e8 aa 27 2c 00            call     0x730f90
+    -> consuming call to 0x00730F90 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0046E7E6 (0x0046E7E6  68 1c 92 ba 00            push     0xba921c):
+    0x0046E7EB  8d 4c 24 58               lea      ecx, [esp + 0x58]
+    0x0046E7EF  e8 bc 27 2c 00            call     0x730fb0
+    -> consuming call to 0x00730FB0 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x00488BEA (0x00488BEA  68 1c 92 ba 00            push     0xba921c):
+    0x00488BEF  d9 46 08                  fld      dword ptr [esi + 8]
+    0x00488BF2  8d 44 24 2c               lea      eax, [esp + 0x2c]
+    0x00488BF6  d9 5c 24 24               fstp     dword ptr [esp + 0x24]
+    0x00488BFA  50                        push     eax
+    0x00488BFB  d9 44 24 2c               fld      dword ptr [esp + 0x2c]
+    0x00488BFF  8d 4c 24 24               lea      ecx, [esp + 0x24]
+    0x00488C03  d9 5c 24 30               fstp     dword ptr [esp + 0x30]
+    0x00488C07  d9 44 24 28               fld      dword ptr [esp + 0x28]
+    0x00488C0B  d9 5c 24 34               fstp     dword ptr [esp + 0x34]
+    0x00488C0F  d9 05 d0 b1 a7 00         fld      dword ptr [0xa7b1d0]
+    0x00488C15  d9 5c 24 38               fstp     dword ptr [esp + 0x38]
+    0x00488C19  e8 b2 97 f8 ff            call     0x4123d0
+    -> CONSUMER: UNRESOLVED_IN_WINDOW — the &triple sits in a large argument-marshal; the first calls
+       (0x4123D0 vtable thunk, 0x527B60, 0x488920, operator new, ...) do not read the tracked slot in
+       their heads; no write-through event found in the walked window. DISCLOSED RESIDUAL: the eventual
+       consumer is not statically pinned here; the write-census conclusion is unaffected (no store
+       through the slot anywhere in the window).
+
+  PUSH SITE 0x004B7F5E (0x004B7F5E  68 1c 92 ba 00            push     0xba921c):
+    0x004B7F63  8d 4c 24 44               lea      ecx, [esp + 0x44]
+    0x004B7F67  e8 64 e7 ff ff            call     0x4b66d0
+    -> consuming call to 0x004B66D0 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x004C585D (0x004C585D  68 1c 92 ba 00            push     0xba921c):
+    0x004C5862  68 1c 92 ba 00            push     0xba921c
+    0x004C5867  8d 4c 24 54               lea      ecx, [esp + 0x54]
+    0x004C586B  51                        push     ecx
+    0x004C586C  8b ce                     mov      ecx, esi
+    0x004C586E  e8 6d aa 26 00            call     0x7302e0
+    -> consuming call to 0x007302E0 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x004C5862 (0x004C5862  68 1c 92 ba 00            push     0xba921c):
+    0x004C5867  8d 4c 24 54               lea      ecx, [esp + 0x54]
+    0x004C586B  51                        push     ecx
+    0x004C586C  8b ce                     mov      ecx, esi
+    0x004C586E  e8 6d aa 26 00            call     0x7302e0
+    -> consuming call to 0x007302E0 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x004CFFFE (0x004CFFFE  68 1c 92 ba 00            push     0xba921c):
+    0x004D0003  8b ce                     mov      ecx, esi
+    0x004D0005  c6 84 24 98 01 00 00 0a   mov      byte ptr [esp + 0x198], 0xa
+    0x004D000D  e8 9e e5 ff ff            call     0x4ce5b0
+    -> consuming call to 0x004CE5B0 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050C272 (0x0050C272  68 1c 92 ba 00            push     0xba921c):
+    0x0050C277  d9 5c 24 28               fstp     dword ptr [esp + 0x28]
+    0x0050C27B  d9 05 e8 d5 a7 00         fld      dword ptr [0xa7d5e8]
+    0x0050C281  8d 54 24 24               lea      edx, [esp + 0x24]
+    0x0050C285  52                        push     edx
+    0x0050C286  d9 5c 24 30               fstp     dword ptr [esp + 0x30]
+    0x0050C28A  d9 05 e4 d5 a7 00         fld      dword ptr [0xa7d5e4]
+    0x0050C290  51                        push     ecx
+    0x0050C291  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050C294  8d 84 24 8c 00 00 00      lea      eax, [esp + 0x8c]
+    0x0050C29B  6a 00                     push     0
+    0x0050C29D  56                        push     esi
+    0x0050C29E  50                        push     eax
+    0x0050C29F  8d 8c 24 80 00 00 00      lea      ecx, [esp + 0x80]
+    0x0050C2A6  51                        push     ecx
+    0x0050C2A7  8d 8c 24 48 01 00 00      lea      ecx, [esp + 0x148]
+    0x0050C2AE  c6 84 24 b0 01 00 00 0c   mov      byte ptr [esp + 0x1b0], 0xc
+    0x0050C2B6  e8 d5 d1 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050CDB3 (0x0050CDB3  68 1c 92 ba 00            push     0xba921c):
+    0x0050CDB8  68 1c 92 ba 00            push     0xba921c
+    0x0050CDBD  51                        push     ecx
+    0x0050CDBE  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050CDC1  6a 01                     push     1
+    0x0050CDC3  56                        push     esi
+    0x0050CDC4  8d 94 24 0c 01 00 00      lea      edx, [esp + 0x10c]
+    0x0050CDCB  52                        push     edx
+    0x0050CDCC  8d 84 24 f8 00 00 00      lea      eax, [esp + 0xf8]
+    0x0050CDD3  50                        push     eax
+    0x0050CDD4  8d 8c 24 44 01 00 00      lea      ecx, [esp + 0x144]
+    0x0050CDDB  c6 84 24 8c 02 00 00 03   mov      byte ptr [esp + 0x28c], 3
+    0x0050CDE3  c7 46 48 01 00 00 00      mov      dword ptr [esi + 0x48], 1
+    0x0050CDEA  c7 46 4c 02 00 00 00      mov      dword ptr [esi + 0x4c], 2
+    0x0050CDF1  e8 9a c6 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050CDB8 (0x0050CDB8  68 1c 92 ba 00            push     0xba921c):
+    0x0050CDBD  51                        push     ecx
+    0x0050CDBE  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050CDC1  6a 01                     push     1
+    0x0050CDC3  56                        push     esi
+    0x0050CDC4  8d 94 24 0c 01 00 00      lea      edx, [esp + 0x10c]
+    0x0050CDCB  52                        push     edx
+    0x0050CDCC  8d 84 24 f8 00 00 00      lea      eax, [esp + 0xf8]
+    0x0050CDD3  50                        push     eax
+    0x0050CDD4  8d 8c 24 44 01 00 00      lea      ecx, [esp + 0x144]
+    0x0050CDDB  c6 84 24 8c 02 00 00 03   mov      byte ptr [esp + 0x28c], 3
+    0x0050CDE3  c7 46 48 01 00 00 00      mov      dword ptr [esi + 0x48], 1
+    0x0050CDEA  c7 46 4c 02 00 00 00      mov      dword ptr [esi + 0x4c], 2
+    0x0050CDF1  e8 9a c6 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050D2C5 (0x0050D2C5  68 1c 92 ba 00            push     0xba921c):
+    0x0050D2CA  68 1c 92 ba 00            push     0xba921c
+    0x0050D2CF  51                        push     ecx
+    0x0050D2D0  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050D2D3  6a 01                     push     1
+    0x0050D2D5  56                        push     esi
+    0x0050D2D6  50                        push     eax
+    0x0050D2D7  8d 94 24 28 01 00 00      lea      edx, [esp + 0x128]
+    0x0050D2DE  52                        push     edx
+    0x0050D2DF  8d 8c 24 a0 00 00 00      lea      ecx, [esp + 0xa0]
+    0x0050D2E6  c6 84 24 8c 02 00 00 0d   mov      byte ptr [esp + 0x28c], 0xd
+    0x0050D2EE  e8 9d c1 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050D2CA (0x0050D2CA  68 1c 92 ba 00            push     0xba921c):
+    0x0050D2CF  51                        push     ecx
+    0x0050D2D0  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050D2D3  6a 01                     push     1
+    0x0050D2D5  56                        push     esi
+    0x0050D2D6  50                        push     eax
+    0x0050D2D7  8d 94 24 28 01 00 00      lea      edx, [esp + 0x128]
+    0x0050D2DE  52                        push     edx
+    0x0050D2DF  8d 8c 24 a0 00 00 00      lea      ecx, [esp + 0xa0]
+    0x0050D2E6  c6 84 24 8c 02 00 00 0d   mov      byte ptr [esp + 0x28c], 0xd
+    0x0050D2EE  e8 9d c1 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050F195 (0x0050F195  68 1c 92 ba 00            push     0xba921c):
+    0x0050F19A  68 1c 92 ba 00            push     0xba921c
+    0x0050F19F  51                        push     ecx
+    0x0050F1A0  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050F1A3  6a 01                     push     1
+    0x0050F1A5  56                        push     esi
+    0x0050F1A6  50                        push     eax
+    0x0050F1A7  8d 44 24 38               lea      eax, [esp + 0x38]
+    0x0050F1AB  b3 45                     mov      bl, 0x45
+    0x0050F1AD  50                        push     eax
+    0x0050F1AE  8d 8c 24 20 01 00 00      lea      ecx, [esp + 0x120]
+    0x0050F1B5  88 9c 24 b0 02 00 00      mov      byte ptr [esp + 0x2b0], bl
+    0x0050F1BC  e8 cf a2 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050F19A (0x0050F19A  68 1c 92 ba 00            push     0xba921c):
+    0x0050F19F  51                        push     ecx
+    0x0050F1A0  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050F1A3  6a 01                     push     1
+    0x0050F1A5  56                        push     esi
+    0x0050F1A6  50                        push     eax
+    0x0050F1A7  8d 44 24 38               lea      eax, [esp + 0x38]
+    0x0050F1AB  b3 45                     mov      bl, 0x45
+    0x0050F1AD  50                        push     eax
+    0x0050F1AE  8d 8c 24 20 01 00 00      lea      ecx, [esp + 0x120]
+    0x0050F1B5  88 9c 24 b0 02 00 00      mov      byte ptr [esp + 0x2b0], bl
+    0x0050F1BC  e8 cf a2 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050F6E5 (0x0050F6E5  68 1c 92 ba 00            push     0xba921c):
+    0x0050F6EA  68 1c 92 ba 00            push     0xba921c
+    0x0050F6EF  51                        push     ecx
+    0x0050F6F0  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050F6F3  6a 01                     push     1
+    0x0050F6F5  56                        push     esi
+    0x0050F6F6  50                        push     eax
+    0x0050F6F7  55                        push     ebp
+    0x0050F6F8  8d 8c 24 20 01 00 00      lea      ecx, [esp + 0x120]
+    0x0050F6FF  c6 84 24 b0 02 00 00 50   mov      byte ptr [esp + 0x2b0], 0x50
+    0x0050F707  e8 84 9d 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0050F6EA (0x0050F6EA  68 1c 92 ba 00            push     0xba921c):
+    0x0050F6EF  51                        push     ecx
+    0x0050F6F0  d9 1c 24                  fstp     dword ptr [esp]
+    0x0050F6F3  6a 01                     push     1
+    0x0050F6F5  56                        push     esi
+    0x0050F6F6  50                        push     eax
+    0x0050F6F7  55                        push     ebp
+    0x0050F6F8  8d 8c 24 20 01 00 00      lea      ecx, [esp + 0x120]
+    0x0050F6FF  c6 84 24 b0 02 00 00 50   mov      byte ptr [esp + 0x2b0], 0x50
+    0x0050F707  e8 84 9d 1b 00            call     0x6c9490
+    -> consuming call to 0x006C9490 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x0058EC6C (0x0058EC6C  68 1c 92 ba 00            push     0xba921c):
+    0x0058EC71  8d 4c 24 70               lea      ecx, [esp + 0x70]
+    0x0058EC75  e8 96 cf 29 00            call     0x82bc10
+    -> consuming call to 0x0082BC10 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x005F6D21 (0x005F6D21  68 1c 92 ba 00            push     0xba921c):
+    0x005F6D26  e8 95 58 2e 00            call     0x8dc5c0
+    -> consuming call to 0x008DC5C0 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x006E0006 (0x006E0006  68 1c 92 ba 00            push     0xba921c):
+    0x006E000B  8d 8c 24 80 00 00 00      lea      ecx, [esp + 0x80]
+    0x006E0012  e8 f9 bb 14 00            call     0x82bc10
+    -> consuming call to 0x0082BC10 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  PUSH SITE 0x00949CCC (0x00949CCC  68 1c 92 ba 00            push     0xba921c):
+    0x00949CD1  50                        push     eax
+    0x00949CD2  e8 49 0a b6 ff            call     0x4aa720
+    -> consuming call to 0x004AA720 (first call after the push; EXECUTOR-READ mapping from this window)
+
+  23/24 sites resolve to 9 distinct direct callees: 0x004AA720 0x004B66D0 0x004CE5B0 0x006C9490 0x007302E0 0x00730F90 0x00730FB0 0x0082BC10 0x008DC5C0
+  (0x5F6D21's callee 0x8DC5C0 is a jmp thunk -> 0x9300A0, which forwards the arg to 0x96CDD0 — both read-only,
+   see [T.4b]. Site 0x488BEA is the one disclosed residual.)
+  DISCREPANCY vs QC annex (recorded as a finding per the correction order): QC_AUDIT.md P1-1 lists a 10th
+    callee '0x8DC5B0->0x92FFE0' among the push consumers; this census REFUTES that attribution from bytes:
+    0x8DC5B0 has exactly 3 E8 callers (0x4FC9E7, 0x522F92, 0x5F6D33) and each pushes a STACK-FRAME pointer
+    (lea ecx,[esp+0x20] / lea ecx,[esp+0x3c] / lea edx,[esp+0x18] respectively), never &triple; the 0x5F6D21
+    push is consumed by the immediately-adjacent call 0x8DC5C0 at 0x5F6D26 (push;call with no intervening
+    instruction). The write-census CONCLUSION is unaffected either way (0x8DC5B0/0x92FFE0 is read-only: its
+    arg is the SRC of the inverse 0x82B6A0 conversion).
+
+  [T.4b] CALLEE DEEP DUMPS (machine-measured bodies) + EXECUTOR-READ one-line classifications:
+
+    CALLEE 0x006C9490:
+      0x006C9490  6a ff                     push     -1
+      0x006C9492  68 69 56 a0 00            push     0xa05669
+      0x006C9497  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+      0x006C949D  50                        push     eax
+      0x006C949E  51                        push     ecx
+      0x006C949F  56                        push     esi
+      0x006C94A0  57                        push     edi
+      0x006C94A1  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+      0x006C94A6  33 c4                     xor      eax, esp
+      0x006C94A8  50                        push     eax
+      0x006C94A9  8d 44 24 10               lea      eax, [esp + 0x10]
+      0x006C94AD  64 a3 00 00 00 00         mov      dword ptr fs:[0], eax
+      0x006C94B3  8b f1                     mov      esi, ecx
+      0x006C94B5  89 74 24 0c               mov      dword ptr [esp + 0xc], esi
+      0x006C94B9  8b 44 24 20               mov      eax, dword ptr [esp + 0x20]
+      0x006C94BD  8b 3d 00 5a a7 00         mov      edi, dword ptr [0xa75a00]
+      0x006C94C3  50                        push     eax
+      0x006C94C4  ff d7                     call     edi
+      0x006C94C6  8b 4c 24 24               mov      ecx, dword ptr [esp + 0x24]
+      0x006C94CA  51                        push     ecx
+      0x006C94CB  8d 4e 18                  lea      ecx, [esi + 0x18]
+      0x006C94CE  c7 44 24 1c 00 00 00 00   mov      dword ptr [esp + 0x1c], 0
+      0x006C94D6  ff d7                     call     edi
+      0x006C94D8  d9 44 24 30               fld      dword ptr [esp + 0x30]
+      0x006C94DC  8b 44 24 28               mov      eax, dword ptr [esp + 0x28]
+      0x006C94E0  d9 5e 38                  fstp     dword ptr [esi + 0x38]
+      0x006C94E3  8a 54 24 2c               mov      dl, byte ptr [esp + 0x2c]
+      0x006C94E7  89 46 34                  mov      dword ptr [esi + 0x34], eax
+      0x006C94EA  8b 44 24 34               mov      eax, dword ptr [esp + 0x34]
+      0x006C94EE  88 56 30                  mov      byte ptr [esi + 0x30], dl
+      0x006C94F1  8b 08                     mov      ecx, dword ptr [eax]
+      0x006C94F3  89 4e 3c                  mov      dword ptr [esi + 0x3c], ecx
+      0x006C94F6  8b 50 04                  mov      edx, dword ptr [eax + 4]
+      0x006C94F9  89 56 40                  mov      dword ptr [esi + 0x40], edx
+      0x006C94FC  8b 40 08                  mov      eax, dword ptr [eax + 8]
+      0x006C94FF  89 46 44                  mov      dword ptr [esi + 0x44], eax
+      0x006C9502  8b 44 24 38               mov      eax, dword ptr [esp + 0x38]
+      0x006C9506  8b 08                     mov      ecx, dword ptr [eax]
+      0x006C9508  89 4e 48                  mov      dword ptr [esi + 0x48], ecx
+      0x006C950B  8b 50 04                  mov      edx, dword ptr [eax + 4]
+      0x006C950E  8a 4c 24 3c               mov      cl, byte ptr [esp + 0x3c]
+      0x006C9512  89 56 4c                  mov      dword ptr [esi + 0x4c], edx
+      0x006C9515  8b 40 08                  mov      eax, dword ptr [eax + 8]
+      0x006C9518  89 46 50                  mov      dword ptr [esi + 0x50], eax
+      0x006C951B  88 4e 54                  mov      byte ptr [esi + 0x54], cl
+      EXECUTOR-READ: READ — reads BOTH &triple args (body [esp+0x34]/[esp+0x38] = entry args at [esp+0x18]/[esp+0x1C]) and copies their 3 dwords into its object at +0x3C..0x44 and +0x48..0x50 ('mov ecx,[eax]; mov [esi+0x3c],ecx; ... mov [esi+0x48],ecx; ...'); the triple is read as source, never written.
+
+    CALLEE 0x00730F90:
+      0x00730F90  8b 44 24 04               mov      eax, dword ptr [esp + 4]
+      0x00730F94  8b 10                     mov      edx, dword ptr [eax]
+      0x00730F96  89 51 08                  mov      dword ptr [ecx + 8], edx
+      0x00730F99  8b 50 04                  mov      edx, dword ptr [eax + 4]
+      0x00730F9C  89 51 0c                  mov      dword ptr [ecx + 0xc], edx
+      0x00730F9F  8b 40 08                  mov      eax, dword ptr [eax + 8]
+      0x00730FA2  89 41 10                  mov      dword ptr [ecx + 0x10], eax
+      EXECUTOR-READ: READ — 'mov eax,[esp+4]' then copies [eax+0/4/8] into this+8/0xC/0x10 (matrix row); ret 4. Arg pointer never written.
+
+    CALLEE 0x00730FB0:
+      0x00730FB0  8b 44 24 04               mov      eax, dword ptr [esp + 4]
+      0x00730FB4  8b 10                     mov      edx, dword ptr [eax]
+      0x00730FB6  89 51 14                  mov      dword ptr [ecx + 0x14], edx
+      0x00730FB9  8b 50 04                  mov      edx, dword ptr [eax + 4]
+      0x00730FBC  89 51 18                  mov      dword ptr [ecx + 0x18], edx
+      0x00730FBF  8b 40 08                  mov      eax, dword ptr [eax + 8]
+      0x00730FC2  89 41 1c                  mov      dword ptr [ecx + 0x1c], eax
+      EXECUTOR-READ: READ — same shape as 0x730F90 into this+0x14/0x18/0x1C (second matrix row); ret 4.
+
+    CALLEE 0x004B66D0:
+      0x004B66D0  8b 54 24 04               mov      edx, dword ptr [esp + 4]
+      0x004B66D4  d9 01                     fld      dword ptr [ecx]
+      0x004B66D6  d8 22                     fsub     dword ptr [edx]
+      0x004B66D8  d9 5c 24 04               fstp     dword ptr [esp + 4]
+      0x004B66DC  d9 44 24 04               fld      dword ptr [esp + 4]
+      0x004B66E0  d9 e1                     fabs     
+      0x004B66E2  d9 5c 24 04               fstp     dword ptr [esp + 4]
+      0x004B66E6  d9 44 24 04               fld      dword ptr [esp + 4]
+      0x004B66EA  d9 44 24 08               fld      dword ptr [esp + 8]
+      0x004B66EE  d8 d1                     fcom     st(1)
+      0x004B66F0  df e0                     fnstsw   ax
+      0x004B66F2  dd d9                     fstp     st(1)
+      0x004B66F4  f6 c4 41                  test     ah, 0x41
+      0x004B66F7  75 4a                     jne      0x4b6743
+      0x004B66F9  d9 41 04                  fld      dword ptr [ecx + 4]
+      0x004B66FC  d8 62 04                  fsub     dword ptr [edx + 4]
+      0x004B66FF  d9 5c 24 04               fstp     dword ptr [esp + 4]
+      0x004B6703  d9 44 24 04               fld      dword ptr [esp + 4]
+      0x004B6707  d9 e1                     fabs     
+      0x004B6709  d9 5c 24 04               fstp     dword ptr [esp + 4]
+      0x004B670D  d9 44 24 04               fld      dword ptr [esp + 4]
+      0x004B6711  d8 d9                     fcomp    st(1)
+      0x004B6713  df e0                     fnstsw   ax
+      0x004B6715  f6 c4 05                  test     ah, 5
+      0x004B6718  7a 29                     jp       0x4b6743
+      0x004B671A  d9 41 08                  fld      dword ptr [ecx + 8]
+      0x004B671D  d8 62 08                  fsub     dword ptr [edx + 8]
+      EXECUTOR-READ: READ — 'mov edx,[esp+4]' then per-component fld [ecx]/fsub [edx]/fabs/fcom compare of [edx+0/4/8] against the stored vector [ecx+0/4/8]; pure read of the arg.
+
+    CALLEE 0x007302E0:
+      0x007302E0  8b 41 20                  mov      eax, dword ptr [ecx + 0x20]
+      0x007302E3  53                        push     ebx
+      0x007302E4  56                        push     esi
+      0x007302E5  8d 71 20                  lea      esi, [ecx + 0x20]
+      0x007302E8  8b 4e 04                  mov      ecx, dword ptr [esi + 4]
+      0x007302EB  3b c1                     cmp      eax, ecx
+      0x007302ED  57                        push     edi
+      0x007302EE  74 17                     je       0x730307
+      0x007302F0  8b f9                     mov      edi, ecx
+      0x007302F2  2b f9                     sub      edi, ecx
+      0x007302F4  74 0e                     je       0x730304
+      0x007302F6  57                        push     edi
+      0x007302F7  51                        push     ecx
+      0x007302F8  50                        push     eax
+      0x007302F9  ff 15 b4 53 a7 00         call     dword ptr [0xa753b4]
+      0x007302FF  83 c4 0c                  add      esp, 0xc
+      0x00730302  03 c7                     add      eax, edi
+      0x00730304  89 46 04                  mov      dword ptr [esi + 4], eax
+      0x00730307  8b 46 04                  mov      eax, dword ptr [esi + 4]
+      0x0073030A  3b 46 08                  cmp      eax, dword ptr [esi + 8]
+      0x0073030D  8b 7c 24 10               mov      edi, dword ptr [esp + 0x10]
+      0x00730311  bb 04 00 00 00            mov      ebx, 4
+      0x00730316  74 0d                     je       0x730325
+      0x00730318  85 c0                     test     eax, eax
+      0x0073031A  74 04                     je       0x730320
+      0x0073031C  d9 07                     fld      dword ptr [edi]
+      0x0073031E  d9 18                     fstp     dword ptr [eax]
+      0x00730320  01 5e 04                  add      dword ptr [esi + 4], ebx
+      0x00730323  eb 12                     jmp      0x730337
+      0x00730325  6a 01                     push     1
+      0x00730327  6a 01                     push     1
+      0x00730329  8d 4c 24 18               lea      ecx, [esp + 0x18]
+      0x0073032D  51                        push     ecx
+      0x0073032E  57                        push     edi
+      0x0073032F  50                        push     eax
+      EXECUTOR-READ: READ — float3-array append (12-byte elements: 'imul 0x2aaaaaab' /12 count): grows the array and copies the arg element's dwords into the new slot ('mov edi,[esp+0x10]' = entry arg; 'fld [edi]; fstp [eax]'); the arg is the SOURCE element.
+
+    CALLEE 0x004CE5B0:
+      0x004CE5B0  6a ff                     push     -1
+      0x004CE5B2  68 c4 12 9b 00            push     0x9b12c4
+      0x004CE5B7  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+      0x004CE5BD  50                        push     eax
+      0x004CE5BE  81 ec bc 00 00 00         sub      esp, 0xbc
+      0x004CE5C4  53                        push     ebx
+      0x004CE5C5  55                        push     ebp
+      0x004CE5C6  56                        push     esi
+      0x004CE5C7  57                        push     edi
+      0x004CE5C8  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+      0x004CE5CD  33 c4                     xor      eax, esp
+      0x004CE5CF  50                        push     eax
+      0x004CE5D0  8d 84 24 d0 00 00 00      lea      eax, [esp + 0xd0]
+      0x004CE5D7  64 a3 00 00 00 00         mov      dword ptr fs:[0], eax
+      0x004CE5DD  8b f9                     mov      edi, ecx
+      0x004CE5DF  e8 fc 0b 41 00            call     0x8df1e0
+      0x004CE5E4  8b e8                     mov      ebp, eax
+      0x004CE5E6  33 db                     xor      ebx, ebx
+      0x004CE5E8  3b eb                     cmp      ebp, ebx
+      0x004CE5EA  0f 84 90 01 00 00         je       0x4ce780
+      0x004CE5F0  8b 45 00                  mov      eax, dword ptr [ebp]
+      0x004CE5F3  8b 50 64                  mov      edx, dword ptr [eax + 0x64]
+      0x004CE5F6  68 e4 41 b7 00            push     0xb741e4
+      0x004CE5FB  8b cd                     mov      ecx, ebp
+      0x004CE5FD  ff d2                     call     edx
+      0x004CE5FF  8b c8                     mov      ecx, eax
+      0x004CE601  ff 15 20 53 a7 00         call     dword ptr [0xa75320]
+      0x004CE607  84 c0                     test     al, al
+      0x004CE609  0f 85 71 01 00 00         jne      0x4ce780
+      EXECUTOR-READ: READ (bounded residual — no dereference of the &triple arg found within the head window; the arg is not read at [esp+4] in the first 0xA0 bytes; use implied read-only by the surrounding vector idioms; disclosed).
+
+    CALLEE 0x0082BC10:
+      0x0082BC10  d9 44 24 08               fld      dword ptr [esp + 8]
+      0x0082BC14  8b c1                     mov      eax, ecx
+      0x0082BC16  8b 4c 24 04               mov      ecx, dword ptr [esp + 4]
+      0x0082BC1A  8b 11                     mov      edx, dword ptr [ecx]
+      0x0082BC1C  89 10                     mov      dword ptr [eax], edx
+      0x0082BC1E  8b 51 04                  mov      edx, dword ptr [ecx + 4]
+      0x0082BC21  89 50 04                  mov      dword ptr [eax + 4], edx
+      0x0082BC24  8b 49 08                  mov      ecx, dword ptr [ecx + 8]
+      0x0082BC27  d9 58 0c                  fstp     dword ptr [eax + 0xc]
+      0x0082BC2A  d9 44 24 14               fld      dword ptr [esp + 0x14]
+      0x0082BC2E  89 48 08                  mov      dword ptr [eax + 8], ecx
+      0x0082BC31  8b 4c 24 0c               mov      ecx, dword ptr [esp + 0xc]
+      0x0082BC35  8b 11                     mov      edx, dword ptr [ecx]
+      0x0082BC37  89 50 10                  mov      dword ptr [eax + 0x10], edx
+      0x0082BC3A  8b 51 04                  mov      edx, dword ptr [ecx + 4]
+      0x0082BC3D  89 50 14                  mov      dword ptr [eax + 0x14], edx
+      0x0082BC40  8b 49 08                  mov      ecx, dword ptr [ecx + 8]
+      0x0082BC43  d9 58 20                  fstp     dword ptr [eax + 0x20]
+      0x0082BC46  8a 54 24 10               mov      dl, byte ptr [esp + 0x10]
+      0x0082BC4A  89 48 18                  mov      dword ptr [eax + 0x18], ecx
+      0x0082BC4D  8a 4c 24 18               mov      cl, byte ptr [esp + 0x18]
+      0x0082BC51  88 50 1c                  mov      byte ptr [eax + 0x1c], dl
+      0x0082BC54  8a 54 24 1c               mov      dl, byte ptr [esp + 0x1c]
+      0x0082BC58  88 48 24                  mov      byte ptr [eax + 0x24], cl
+      0x0082BC5B  88 50 25                  mov      byte ptr [eax + 0x25], dl
+      EXECUTOR-READ: READ — struct copy FROM the arg at [esp+4] into this: 'mov ecx,[esp+4]; mov edx,[ecx+0/4/8]; mov [eax+0/4/8],edx'; the arg is the copy SOURCE.
+
+    CALLEE 0x008DC5C0:
+      0x008DC5C0  8b 89 b8 01 00 00         mov      ecx, dword ptr [ecx + 0x1b8]
+      EXECUTOR-READ: READ — thunk: 'mov ecx,[ecx+0x1b8]; jmp 0x9300A0' — forwards (this, arg) to 0x9300A0; no local use of the arg.
+
+    CALLEE 0x009300A0:
+      0x009300A0  8b 44 24 04               mov      eax, dword ptr [esp + 4]
+      0x009300A4  83 ec 48                  sub      esp, 0x48
+      0x009300A7  56                        push     esi
+      0x009300A8  57                        push     edi
+      0x009300A9  8b f1                     mov      esi, ecx
+      0x009300AB  50                        push     eax
+      0x009300AC  8d 4c 24 0c               lea      ecx, [esp + 0xc]
+      0x009300B0  e8 1b cd 03 00            call     0x96cdd0
+      0x009300B5  8b 76 14                  mov      esi, dword ptr [esi + 0x14]
+      0x009300B8  8d 4c 24 08               lea      ecx, [esp + 8]
+      0x009300BC  51                        push     ecx
+      0x009300BD  8d 54 24 30               lea      edx, [esp + 0x30]
+      0x009300C1  52                        push     edx
+      0x009300C2  e8 a9 7e b0 ff            call     0x437f70
+      0x009300C7  8b c8                     mov      ecx, eax
+      EXECUTOR-READ: READ — 'mov eax,[esp+4]' (the &triple arg); pushes it for 0x96CDD0 (validity check) and later feeds the 437F70-family pair; the arg pointer is never written through.
+
+    CALLEE 0x0096CDD0:
+      0x0096CDD0  83 ec 1c                  sub      esp, 0x1c
+      0x0096CDD3  56                        push     esi
+      0x0096CDD4  57                        push     edi
+      0x0096CDD5  8b 7c 24 28               mov      edi, dword ptr [esp + 0x28]
+      0x0096CDD9  d9 07                     fld      dword ptr [edi]
+      0x0096CDDB  8b f1                     mov      esi, ecx
+      0x0096CDDD  dc c8                     fmul     st(0), st(0)
+      0x0096CDDF  dc 25 b0 c4 a9 00         fsub     qword ptr [0xa9c4b0]
+      0x0096CDE5  d9 5c 24 28               fstp     dword ptr [esp + 0x28]
+      0x0096CDE9  d9 44 24 28               fld      dword ptr [esp + 0x28]
+      0x0096CDED  d9 e1                     fabs     
+      0x0096CDEF  d9 5c 24 28               fstp     dword ptr [esp + 0x28]
+      0x0096CDF3  d9 44 24 28               fld      dword ptr [esp + 0x28]
+      0x0096CDF7  d8 1d c8 97 a7 00         fcomp    dword ptr [0xa797c8]
+      0x0096CDFD  df e0                     fnstsw   ax
+      0x0096CDFF  f6 c4 05                  test     ah, 5
+      0x0096CE02  7a 68                     jp       0x96ce6c
+      0x0096CE04  d9 47 08                  fld      dword ptr [edi + 8]
+      0x0096CE07  d8 47 04                  fadd     dword ptr [edi + 4]
+      0x0096CE0A  d9 5c 24 28               fstp     dword ptr [esp + 0x28]
+      EXECUTOR-READ: READ — 'mov edi,[esp+0x28]' (= the forwarded &triple arg); 'fld [edi]; fmul st0; fsub qword [0xa9c4b0]; fabs; fcomp...' + 'fld [edi+8]; fadd [edi+4]' — a length/validity check over the arg vector; reads only.
+
+    CALLEE 0x004AA720:
+      0x004AA720  51                        push     ecx
+      0x004AA721  53                        push     ebx
+      0x004AA722  8b 5c 24 18               mov      ebx, dword ptr [esp + 0x18]
+      0x004AA726  55                        push     ebp
+      0x004AA727  56                        push     esi
+      0x004AA728  57                        push     edi
+      0x004AA729  8b f9                     mov      edi, ecx
+      0x004AA72B  8b 4f 04                  mov      ecx, dword ptr [edi + 4]
+      0x004AA72E  2b 0f                     sub      ecx, dword ptr [edi]
+      0x004AA730  b8 ab aa aa 2a            mov      eax, 0x2aaaaaab
+      0x004AA735  f7 e9                     imul     ecx
+      0x004AA737  d1 fa                     sar      edx, 1
+      0x004AA739  8b ca                     mov      ecx, edx
+      0x004AA73B  c1 e9 1f                  shr      ecx, 0x1f
+      0x004AA73E  03 ca                     add      ecx, edx
+      0x004AA740  3b cb                     cmp      ecx, ebx
+      0x004AA742  89 4c 24 10               mov      dword ptr [esp + 0x10], ecx
+      0x004AA746  8d 44 24 24               lea      eax, [esp + 0x24]
+      0x004AA74A  72 04                     jb       0x4aa750
+      0x004AA74C  8d 44 24 10               lea      eax, [esp + 0x10]
+      0x004AA750  8b 00                     mov      eax, dword ptr [eax]
+      0x004AA752  03 c1                     add      eax, ecx
+      0x004AA754  8d 4c 24 24               lea      ecx, [esp + 0x24]
+      0x004AA758  51                        push     ecx
+      0x004AA759  8d 6f 08                  lea      ebp, [edi + 8]
+      0x004AA75C  50                        push     eax
+      0x004AA75D  8b cd                     mov      ecx, ebp
+      0x004AA75F  89 44 24 2c               mov      dword ptr [esp + 0x2c], eax
+      0x004AA763  e8 a8 f3 ff ff            call     0x4a9b10
+      0x004AA768  8b 74 24 18               mov      esi, dword ptr [esp + 0x18]
+      0x004AA76C  8b c8                     mov      ecx, eax
+      0x004AA76E  8b 07                     mov      eax, dword ptr [edi]
+      EXECUTOR-READ: READ — float3-array insert (12-byte elements; 'imul 0x2aaaaaab' /12 element count): copies the arg element (SOURCE) into the array; [ecx]->[eax] copy direction confirmed by the /12 element stride.
+
+[T.5] MOV r32,imm32 TAKERS of the triple (getter candidates) + consumer chains (read-only verification)
+  measured mov r32,imm32 sites: 2 ['0x0050AA1D', '0x0096B960'] (all 0x00BA921C: yes)
+
+  GETTER A: FUN_0050AA10 (contains mov eax,0xba921c at 0x50AA1D) — full decode to terminal:
+    0x0050AA10  8b 09                     mov      ecx, dword ptr [ecx]
+    0x0050AA12  85 c9                     test     ecx, ecx
+    0x0050AA14  74 07                     je       0x50aa1d
+    0x0050AA16  8b 01                     mov      eax, dword ptr [ecx]
+    0x0050AA18  8b 50 04                  mov      edx, dword ptr [eax + 4]
+    0x0050AA1B  ff e2                     jmp      edx
+    0x0050AA1D  b8 1c 92 ba 00            mov      eax, 0xba921c
+    0x0050AA22  c3                        ret      
+    shape: if [*this]==NULL -> return &zero_triple (0x50AA1D branch); else virtual slot1 dispatch (jmp edx).
+    consumers: E8=4 ['0x0043B584', '0x0043B78E', '0x00442886', '0x004835CD'] | E9=0 | imm32(.text)=0 | non-.text dword placements=0 []
+    caller window at 0x0043B584:
+      0x0043B589  d9 00                     fld      dword ptr [eax]
+      0x0043B58B  d8 05 fc ec b6 00         fadd     dword ptr [0xb6ecfc]
+      0x0043B591  51                        push     ecx
+      0x0043B592  8d 4c 24 2c               lea      ecx, [esp + 0x2c]
+      0x0043B596  d9 5c 24 1c               fstp     dword ptr [esp + 0x1c]
+      0x0043B59A  d9 40 04                  fld      dword ptr [eax + 4]
+      0x0043B59D  d8 05 00 ed b6 00         fadd     dword ptr [0xb6ed00]
+      0x0043B5A3  d9 5c 24 20               fstp     dword ptr [esp + 0x20]
+      0x0043B5A7  d9 40 08                  fld      dword ptr [eax + 8]
+      EXECUTOR-READ: READ — fld dword ptr [eax+0/4/8] over the returned &triple vector.
+    caller window at 0x0043B78E:
+      0x0043B793  50                        push     eax
+      0x0043B794  56                        push     esi
+      0x0043B795  8b cb                     mov      ecx, ebx
+      0x0043B797  e8 74 f7 ff ff            call     0x43af10
+      0x0043B79C  e8 bf 5b fc ff            call     0x401360
+      0x0043B7A1  d9 40 64                  fld      dword ptr [eax + 0x64]
+      0x0043B7A4  6a 01                     push     1
+      0x0043B7A6  d9 5c 24 1c               fstp     dword ptr [esp + 0x1c]
+      0x0043B7AA  d9 44 24 1c               fld      dword ptr [esp + 0x1c]
+      EXECUTOR-READ: READ — result flows into the 0x43AF10 block (fld [eax]+const per component).
+    caller window at 0x00442886:
+      0x0044288B  d9 00                     fld      dword ptr [eax]
+      0x0044288D  d8 05 fc ec b6 00         fadd     dword ptr [0xb6ecfc]
+      0x00442893  51                        push     ecx
+      0x00442894  8d 4c 24 34               lea      ecx, [esp + 0x34]
+      0x00442898  d9 5c 24 20               fstp     dword ptr [esp + 0x20]
+      0x0044289C  d9 40 04                  fld      dword ptr [eax + 4]
+      0x0044289F  d8 05 00 ed b6 00         fadd     dword ptr [0xb6ed00]
+      0x004428A5  d9 5c 24 24               fstp     dword ptr [esp + 0x24]
+      0x004428A9  d9 40 08                  fld      dword ptr [eax + 8]
+      EXECUTOR-READ: READ — fld dword ptr [eax+0/4/8] over the returned vector.
+    caller window at 0x004835CD:
+      0x004835D2  d9 46 fc                  fld      dword ptr [esi - 4]
+      0x004835D5  8b 08                     mov      ecx, dword ptr [eax]
+      0x004835D7  8b 50 04                  mov      edx, dword ptr [eax + 4]
+      0x004835DA  8b 40 08                  mov      eax, dword ptr [eax + 8]
+      0x004835DD  89 4c 24 40               mov      dword ptr [esp + 0x40], ecx
+      0x004835E1  d8 64 24 40               fsub     dword ptr [esp + 0x40]
+      0x004835E5  89 54 24 44               mov      dword ptr [esp + 0x44], edx
+      0x004835E9  89 44 24 48               mov      dword ptr [esp + 0x48], eax
+      0x004835ED  d9 5c 24 14               fstp     dword ptr [esp + 0x14]
+      EXECUTOR-READ: READ — fld dword ptr [eax+0/4/8] over the returned vector.
+
+  GETTER B: 0x96B960 — standalone thunk:
+    0x0096B960  b8 1c 92 ba 00            mov      eax, 0xba921c
+    0x0096B965  c3                        ret      
+    consumers: E8=1 ['0x004CD66E'] | E9=0 | imm32(.text)=0 | non-.text dword placements=3 ['.rdata@0x00A7D430', '.rdata@0x00A7D434', '.rdata@0x00A7D43C']
+    caller window at 0x004CD66E:
+      0x004CD673  8b 10                     mov      edx, dword ptr [eax]
+      0x004CD675  8b 4c 24 0c               mov      ecx, dword ptr [esp + 0xc]
+      0x004CD679  89 11                     mov      dword ptr [ecx], edx
+      0x004CD67B  8b 50 04                  mov      edx, dword ptr [eax + 4]
+      0x004CD67E  8b 40 08                  mov      eax, dword ptr [eax + 8]
+      0x004CD681  89 51 04                  mov      dword ptr [ecx + 4], edx
+      0x004CD684  5f                        pop      edi
+      0x004CD685  89 41 08                  mov      dword ptr [ecx + 8], eax
+      0x004CD688  8b c1                     mov      eax, ecx
+      EXECUTOR-READ: READ — copies [eax+0/4/8] into an out buffer; reads only.
+    vtable placements 0xA7D430/0xA7D434/0xA7D43C = SF-base-class default slot1 entries returning &zero_triple
+    (corroborates the one-origin design; virtual dispatch through these slots is a disclosed undecoded residual — [T.10])
+
+[T.6] COMPUTED-BASE HUNT — dword values V in [0xBA9000,0xBA92C0) occurring in .text;
+      sweep-confirmed base loads (mov reg,imm32 / lea reg,[V]) followed forward 12 instructions through
+      mov reg,reg / add / sub / lea [r+i]; any store [reg+disp] with V+disp overlapping the triple is a HIT.
+  HUNT WINDOW [0xBA9000,0xBA92C0): 34 distinct values with 349 .text occurrences; sweep-confirmed base loads followed: 9
+  QC-comparison subwindow [0xBA9000,0xBA921C): 22 distinct values, 45 .text occurrences (QC_AUDIT.md reported 22 values / 45 occurrences)
+  computed-base stores overlapping the triple: 0 (expected 0)
+  tracked-reg pointer passes (push): 0; tracked-reg spills to memory (disclosed, no further follow): 0
+
+[T.7] NEIGHBORHOOD ABSOLUTE-WRITE INVENTORY — store-class candidates with effective ranges
+      overlapping [0xBA9000,0xBA9240) (re-verifies E.3 channel-2 claims byte-exact)
+    0x0095E95D  09 05 cc 91 ba 00         or       dword ptr [0xba91cc], eax | eff=[0x00BA91CC,+4) .. 0x00BA91CF
+    0x0095E970  c7 05 c8 91 ba 00 20 81 a9 00  mov      dword ptr [0xba91c8], 0xa98120 | eff=[0x00BA91C8,+4) .. 0x00BA91CB
+    0x0095E9CD  09 05 d4 91 ba 00         or       dword ptr [0xba91d4], eax | eff=[0x00BA91D4,+4) .. 0x00BA91D7
+    0x0095E9E0  c7 05 d0 91 ba 00 5c 81 a9 00  mov      dword ptr [0xba91d0], 0xa9815c | eff=[0x00BA91D0,+4) .. 0x00BA91D3
+    0x0096B99E  83 0d 0c 92 ba 00 01      or       dword ptr [0xba920c], 1 | eff=[0x00BA920C,+4) .. 0x00BA920F
+    0x0096BB5D  09 05 18 92 ba 00         or       dword ptr [0xba9218], eax | eff=[0x00BA9218,+4) .. 0x00BA921B
+    0x0096BB68  c7 05 10 92 ba 00 5c c4 a9 00  mov      dword ptr [0xba9210], 0xa9c45c | eff=[0x00BA9210,+4) .. 0x00BA9213
+    0x00A496D8  a3 cc 91 ba 00            mov      dword ptr [0xba91cc], eax | eff=[0x00BA91CC,+4) .. 0x00BA91CF
+    0x00A49708  a3 d4 91 ba 00            mov      dword ptr [0xba91d4], eax | eff=[0x00BA91D4,+4) .. 0x00BA91D7
+    0x00A49C88  a3 0c 92 ba 00            mov      dword ptr [0xba920c], eax | eff=[0x00BA920C,+4) .. 0x00BA920F
+    0x00A70515  a3 b0 91 ba 00            mov      dword ptr [0xba91b0], eax | eff=[0x00BA91B0,+4) .. 0x00BA91B3
+    0x00A70525  a3 c4 91 ba 00            mov      dword ptr [0xba91c4], eax | eff=[0x00BA91C4,+4) .. 0x00BA91C7
+    0x00A70535  a3 a8 91 ba 00            mov      dword ptr [0xba91a8], eax | eff=[0x00BA91A8,+4) .. 0x00BA91AB
+    0x00A70545  a3 ac 91 ba 00            mov      dword ptr [0xba91ac], eax | eff=[0x00BA91AC,+4) .. 0x00BA91AF
+    0x00A70575  a3 e0 91 ba 00            mov      dword ptr [0xba91e0], eax | eff=[0x00BA91E0,+4) .. 0x00BA91E3
+    0x00A70585  a3 e4 91 ba 00            mov      dword ptr [0xba91e4], eax | eff=[0x00BA91E4,+4) .. 0x00BA91E7
+    0x00A70595  a3 d8 91 ba 00            mov      dword ptr [0xba91d8], eax | eff=[0x00BA91D8,+4) .. 0x00BA91DB
+    0x00A705A5  a3 dc 91 ba 00            mov      dword ptr [0xba91dc], eax | eff=[0x00BA91DC,+4) .. 0x00BA91DF
+    0x00A74330  c7 05 c8 91 ba 00 f0 3b a8 00  mov      dword ptr [0xba91c8], 0xa83bf0 | eff=[0x00BA91C8,+4) .. 0x00BA91CB
+    0x00A74340  c7 05 d0 91 ba 00 f0 3b a8 00  mov      dword ptr [0xba91d0], 0xa83bf0 | eff=[0x00BA91D0,+4) .. 0x00BA91D3
+    0x00A74380  c7 05 10 92 ba 00 e4 99 a7 00  mov      dword ptr [0xba9210], 0xa799e4 | eff=[0x00BA9210,+4) .. 0x00BA9213
+  highest byte written BELOW the triple: 0x00BA921B (expected 0xBA921B — no neighborhood write touches 0xBA921C..0xBA9227)
+
+[T.8] THE 9 ECX-RECEIVING FUNCTIONS (all ECX_CONSUMER_* targets of the 437F70 caller census):
+      first [ECX+0/4/8] READ vs first ECX WRITE (clobber) vs first call/push-ecx event with ECX untouched;
+      ANY [ECX+0/4/8] STORE within the decoded window (expect 0 — S never written through ECX)
+
+  FUN_0082B5A0:
+    0x0082B5A0  8b 54 24 08               mov      edx, dword ptr [esp + 8]
+    0x0082B5A4  d9 02                     fld      dword ptr [edx]
+    0x0082B5A6  8b 44 24 04               mov      eax, dword ptr [esp + 4]
+    0x0082B5AA  dd 05 60 b3 a7 00         fld      qword ptr [0xa7b360]
+    0x0082B5B0  dc c9                     fmul     st(1), st(0)
+    0x0082B5B2  d9 c9                     fxch     st(1)
+    0x0082B5B4  d9 5c 24 08               fstp     dword ptr [esp + 8]
+    0x0082B5B8  d9 44 24 08               fld      dword ptr [esp + 8]
+    0x0082B5BC  d8 21                     fsub     dword ptr [ecx]
+    0x0082B5BE  d9 18                     fstp     dword ptr [eax]
+    0x0082B5C0  d9 42 04                  fld      dword ptr [edx + 4]
+    0x0082B5C3  d8 c9                     fmul     st(1)
+    0x0082B5C5  d9 5c 24 08               fstp     dword ptr [esp + 8]
+    0x0082B5C9  d9 44 24 08               fld      dword ptr [esp + 8]
+    first [ECX+0/4/8] READ : 0x0082B5BC  d8 21                     fsub     dword ptr [ecx]
+    first ECX WRITE       : (none in window)
+    first call/push event : (none in window)
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: READS_S — fsub dword [ecx+0/4/8] reads all 3 base components; writes only [eax+0/4/8] (out) and [esp+8] temps.
+
+  FUN_0082B6A0:
+    0x0082B6A0  83 ec 0c                  sub      esp, 0xc
+    0x0082B6A3  8b 44 24 14               mov      eax, dword ptr [esp + 0x14]
+    0x0082B6A7  d9 01                     fld      dword ptr [ecx]
+    0x0082B6A9  8b 10                     mov      edx, dword ptr [eax]
+    0x0082B6AB  89 14 24                  mov      dword ptr [esp], edx
+    0x0082B6AE  d8 04 24                  fadd     dword ptr [esp]
+    0x0082B6B1  8b 50 04                  mov      edx, dword ptr [eax + 4]
+    0x0082B6B4  8b 40 08                  mov      eax, dword ptr [eax + 8]
+    0x0082B6B7  d9 1c 24                  fstp     dword ptr [esp]
+    0x0082B6BA  89 54 24 04               mov      dword ptr [esp + 4], edx
+    0x0082B6BE  d9 41 04                  fld      dword ptr [ecx + 4]
+    0x0082B6C1  89 44 24 08               mov      dword ptr [esp + 8], eax
+    0x0082B6C5  d8 44 24 04               fadd     dword ptr [esp + 4]
+    0x0082B6C9  8b 44 24 10               mov      eax, dword ptr [esp + 0x10]
+    first [ECX+0/4/8] READ : 0x0082B6A7  d9 01                     fld      dword ptr [ecx]
+    first ECX WRITE       : (none in window)
+    first call/push event : (none in window)
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: READS_S — fld dword [ecx+0/4/8] reads all 3 base components ((src+S)*100.0 inverse family).
+
+  FUN_00437E80:
+    0x00437E80  8b 44 24 08               mov      eax, dword ptr [esp + 8]
+    0x00437E84  d9 40 20                  fld      dword ptr [eax + 0x20]
+    0x00437E87  56                        push     esi
+    0x00437E88  83 ec 24                  sub      esp, 0x24
+    0x00437E8B  d9 5c 24 20               fstp     dword ptr [esp + 0x20]
+    0x00437E8F  8b 74 24 2c               mov      esi, dword ptr [esp + 0x2c]
+    0x00437E93  d9 40 1c                  fld      dword ptr [eax + 0x1c]
+    0x00437E96  8b ce                     mov      ecx, esi
+    0x00437E98  d9 5c 24 1c               fstp     dword ptr [esp + 0x1c]
+    0x00437E9C  d9 40 18                  fld      dword ptr [eax + 0x18]
+    0x00437E9F  d9 5c 24 18               fstp     dword ptr [esp + 0x18]
+    0x00437EA3  d9 40 14                  fld      dword ptr [eax + 0x14]
+    0x00437EA6  d9 5c 24 14               fstp     dword ptr [esp + 0x14]
+    0x00437EAA  d9 40 10                  fld      dword ptr [eax + 0x10]
+    first [ECX+0/4/8] READ : (none in window)
+    first ECX WRITE       : 0x00437E96  8b ce                     mov      ecx, esi
+    first call/push event : 0x00437ECB  e8 50 4c 53 00            call     0x96cb20
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: CLOBBERS_ECX_BEFORE_USE — ECX (=S) overwritten with the stack arg at 0x437E96 before any [ecx] access; S unused here.
+
+  FUN_0082B5F0:
+    0x0082B5F0  83 ec 30                  sub      esp, 0x30
+    0x0082B5F3  d9 ee                     fldz     
+    0x0082B5F5  53                        push     ebx
+    0x0082B5F6  8b 5c 24 38               mov      ebx, dword ptr [esp + 0x38]
+    0x0082B5FA  d9 53 24                  fst      dword ptr [ebx + 0x24]
+    0x0082B5FD  d9 53 28                  fst      dword ptr [ebx + 0x28]
+    0x0082B600  55                        push     ebp
+    0x0082B601  8b 6c 24 40               mov      ebp, dword ptr [esp + 0x40]
+    0x0082B605  d9 5b 2c                  fstp     dword ptr [ebx + 0x2c]
+    0x0082B608  d9 45 24                  fld      dword ptr [ebp + 0x24]
+    0x0082B60B  56                        push     esi
+    0x0082B60C  d9 5c 24 0c               fstp     dword ptr [esp + 0xc]
+    0x0082B610  57                        push     edi
+    0x0082B611  d9 45 28                  fld      dword ptr [ebp + 0x28]
+    first [ECX+0/4/8] READ : 0x0082B648  d8 21                     fsub     dword ptr [ecx]
+    first ECX WRITE       : (none in window)
+    first call/push event : 0x0082B67E  e8 fd c7 c0 ff            call     0x437e80
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: READS_S — reads [ecx+0/4/8] while scaling the arg2 block by K; no store through ECX.
+
+  FUN_0082B870:
+    0x0082B870  83 ec 10                  sub      esp, 0x10
+    0x0082B873  56                        push     esi
+    0x0082B874  8b 74 24 18               mov      esi, dword ptr [esp + 0x18]
+    0x0082B878  8b 46 04                  mov      eax, dword ptr [esi + 4]
+    0x0082B87B  2b 06                     sub      eax, dword ptr [esi]
+    0x0082B87D  33 c9                     xor      ecx, ecx
+    0x0082B87F  c1 f8 03                  sar      eax, 3
+    0x0082B882  ba 08 00 00 00            mov      edx, 8
+    0x0082B887  f7 e2                     mul      edx
+    0x0082B889  0f 90 c1                  seto     cl
+    0x0082B88C  57                        push     edi
+    0x0082B88D  f7 d9                     neg      ecx
+    0x0082B88F  0b c8                     or       ecx, eax
+    0x0082B891  51                        push     ecx
+    first [ECX+0/4/8] READ : (none in window)
+    first ECX WRITE       : 0x0082B87D  33 c9                     xor      ecx, ecx
+    first call/push event : 0x0082B891  51                        push     ecx   (ECX VALUE pushed — forwarded to stack)
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: CLOBBERS_ECX_BEFORE_USE — 'xor ecx,ecx' at 0x82B87D discards S before any use.
+
+  FUN_0048BAC0:
+    0x0048BAC0  83 ec 24                  sub      esp, 0x24
+    0x0048BAC3  8b 44 24 2c               mov      eax, dword ptr [esp + 0x2c]
+    0x0048BAC7  d9 40 18                  fld      dword ptr [eax + 0x18]
+    0x0048BACA  56                        push     esi
+    0x0048BACB  d9 5c 24 04               fstp     dword ptr [esp + 4]
+    0x0048BACF  8b 74 24 2c               mov      esi, dword ptr [esp + 0x2c]
+    0x0048BAD3  d9 40 1c                  fld      dword ptr [eax + 0x1c]
+    0x0048BAD6  8d 4c 24 10               lea      ecx, [esp + 0x10]
+    0x0048BADA  d9 5c 24 08               fstp     dword ptr [esp + 8]
+    0x0048BADE  8d 54 24 1c               lea      edx, [esp + 0x1c]
+    0x0048BAE2  d9 40 20                  fld      dword ptr [eax + 0x20]
+    0x0048BAE5  d9 5c 24 0c               fstp     dword ptr [esp + 0xc]
+    0x0048BAE9  d9 40 0c                  fld      dword ptr [eax + 0xc]
+    0x0048BAEC  d9 5c 24 10               fstp     dword ptr [esp + 0x10]
+    first [ECX+0/4/8] READ : (none in window)
+    first ECX WRITE       : 0x0048BAD6  8d 4c 24 10               lea      ecx, [esp + 0x10]
+    first call/push event : 0x0048BB17  51                        push     ecx   (ECX VALUE pushed — forwarded to stack)
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: CLOBBERS_ECX_BEFORE_USE — first ECX redefinition measured at 0x48BAD6 'lea ecx,[esp+0x10]' (a later secondary redefinition is 'mov ecx,esi' at 0x48BB19, cited in QC's annex); no [ecx+0/4/8] access before either; S unused here.
+
+  FUN_0058E4B0:
+    0x0058E4B0  83 ec 30                  sub      esp, 0x30
+    0x0058E4B3  53                        push     ebx
+    0x0058E4B4  8b 5c 24 38               mov      ebx, dword ptr [esp + 0x38]
+    0x0058E4B8  55                        push     ebp
+    0x0058E4B9  8b 6c 24 40               mov      ebp, dword ptr [esp + 0x40]
+    0x0058E4BD  d9 45 30                  fld      dword ptr [ebp + 0x30]
+    0x0058E4C0  56                        push     esi
+    0x0058E4C1  57                        push     edi
+    0x0058E4C2  d9 5b 30                  fstp     dword ptr [ebx + 0x30]
+    0x0058E4C5  55                        push     ebp
+    0x0058E4C6  8d 44 24 20               lea      eax, [esp + 0x20]
+    0x0058E4CA  50                        push     eax
+    0x0058E4CB  e8 f0 d5 ef ff            call     0x48bac0
+    first [ECX+0/4/8] READ : (none in window)
+    first ECX WRITE       : (none in window)
+    first call/push event : 0x0058E4CB  e8 f0 d5 ef ff            call     0x48bac0
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: FORWARDS_ECX_UNTOUCHED — passes the incoming ECX (=S) straight to 0x48BAC0 without reading it here.
+
+  FUN_0058E520:
+    0x0058E520  83 ec 30                  sub      esp, 0x30
+    0x0058E523  d9 ee                     fldz     
+    0x0058E525  53                        push     ebx
+    0x0058E526  8b 5c 24 38               mov      ebx, dword ptr [esp + 0x38]
+    0x0058E52A  d9 53 24                  fst      dword ptr [ebx + 0x24]
+    0x0058E52D  55                        push     ebp
+    0x0058E52E  d9 53 28                  fst      dword ptr [ebx + 0x28]
+    0x0058E531  8b 6c 24 40               mov      ebp, dword ptr [esp + 0x40]
+    0x0058E535  d9 5b 2c                  fstp     dword ptr [ebx + 0x2c]
+    0x0058E538  d9 45 30                  fld      dword ptr [ebp + 0x30]
+    0x0058E53B  56                        push     esi
+    0x0058E53C  57                        push     edi
+    0x0058E53D  d9 5b 30                  fstp     dword ptr [ebx + 0x30]
+    0x0058E540  55                        push     ebp
+    first [ECX+0/4/8] READ : (none in window)
+    first ECX WRITE       : (none in window)
+    first call/push event : 0x0058E546  e8 35 99 ea ff            call     0x437e80
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: FORWARDS_ECX_UNTOUCHED — passes the incoming ECX (=S) straight to 0x437E80 without reading it here.
+
+  FUN_0082B790:
+    0x0082B790  83 ec 18                  sub      esp, 0x18
+    0x0082B793  53                        push     ebx
+    0x0082B794  55                        push     ebp
+    0x0082B795  56                        push     esi
+    0x0082B796  57                        push     edi
+    0x0082B797  8b 7c 24 2c               mov      edi, dword ptr [esp + 0x2c]
+    0x0082B79B  8b 4f 04                  mov      ecx, dword ptr [edi + 4]
+    0x0082B79E  2b 0f                     sub      ecx, dword ptr [edi]
+    0x0082B7A0  b8 ab aa aa 2a            mov      eax, 0x2aaaaaab
+    0x0082B7A5  f7 e9                     imul     ecx
+    0x0082B7A7  d1 fa                     sar      edx, 1
+    0x0082B7A9  8b c2                     mov      eax, edx
+    0x0082B7AB  c1 e8 1f                  shr      eax, 0x1f
+    0x0082B7AE  03 c2                     add      eax, edx
+    first [ECX+0/4/8] READ : (none in window)
+    first ECX WRITE       : 0x0082B79B  8b 4f 04                  mov      ecx, dword ptr [edi + 4]
+    first call/push event : 0x0082B7C0  51                        push     ecx   (ECX VALUE pushed — forwarded to stack)
+    [ECX+0/4/8] STORES    : 0 (none)
+    EXECUTOR-READ: CLOBBERS_ECX_BEFORE_USE — 'mov ecx,[edi+4]' at 0x82B79B discards S before use; writes only a fresh array.
+
+[T.9] .DATA VIRTUAL-TAIL ZERO-INIT MEASUREMENT (PE section table, S0-parsed)
+  .data: vaddr=0x76C000 vsize=0x3D6E4 rawoff=0x76C000 rawsize=0x34000 -> raw end RVA=0x7A0000, virtual end RVA=0x7A96E4
+    triple 0x00BA921C -> RVA 0x7A921C (offset-in-section 0x3D21C): BEYOND raw (virtual-only; loader zero-fills)
+    triple 0x00BA9220 -> RVA 0x7A9220 (offset-in-section 0x3D220): BEYOND raw (virtual-only; loader zero-fills)
+    triple 0x00BA9224 -> RVA 0x7A9224 (offset-in-section 0x3D224): BEYOND raw (virtual-only; loader zero-fills)
+  vsize 0x3D6E4 > rawsize 0x34000: the tail RVA 0x7A0000..0x7A96E4 is BSS-like zero-initialized virtual memory;
+  the triple has NO static initializer bytes in the file. ([T.1] shows 0 occurrences in .data raw, so no
+  file-initialized pointer variable to the triple exists either.)
+
+[T.10] VERDICT (executor's own numbers, this census)
+  - whole-image occurrences: 0xBA921C=107, 0xBA9220=81, 0xBA9224=80 (total 268; QC_AUDIT.md independently measured the same 107/81/80=268)
+  - store-class candidates across ALL channels: 0 absolute (expected 0); 0 overlapping in the widened scan (expected 0); 0 computed-base (expected 0)
+  - 23/24 push-site consumers read-only + 1 disclosed residual ([T.4]); both getter chains read-only ([T.5]);
+    the 9 ECX-receiving functions read/forward/clobber and NEVER store to [ECX+0/4/8] ([T.8]);
+    the neighborhood writes stop at 0xBA921B ([T.7]); the triple lives zero-initialized in .data's virtual tail ([T.9]).
+  => THE ORIGIN TRIPLE 0xBA921C/0xBA9220/0xBA9224 IS NEVER WRITTEN anywhere in the image =>
+     S == {0,0,0} for the whole process lifetime, immutable after construction.
+  DECODED CHANNELS (this census): (1) whole-image imm32 occurrence + containment classification incl. ALL store
+    encodings (generic WRITE-operand access, [T.2]); (2) widened absolute stores incl. qword-overlap ([T.3]);
+    (3) all push-imm32 pointer channels -> callee heads + one thunk level ([T.4]);
+    (4) all mov-reg-imm32 getter chains -> consumers incl. vtable placements ([T.5]);
+    (5) computed bases V in [0xBA9000,0xBA92C0) followed 12 instructions ([T.6]);
+    (6) neighborhood write inventory ([T.7]); (7) the 9 ECX-receiver windows ([T.8]);
+    (8) .data section-table zero-init ([T.9]); (9) IMM_TO_MEM pointer-candidate stores of the triple VALUES
+    (counted in [T.2]: 0 real — no runtime-built stored pointer to the triple exists statically).
+  UNDECODED / DISCLOSED RESIDUALS (honest boundaries):
+    - computed bases OUTSIDE [0xBA9000,0xBA92C0) with compensating disp32 (not exhaustively hunted; the natural
+      compiler idiom is a near-neighborhood base, and an absolute disp32 store is covered by [T.2]/[T.3] whenever
+      the disp32 dword itself falls in the scanned windows).
+    - stack-spilled base pointers reused beyond the 12-instruction follow window ([T.6] spill list recorded).
+    - virtual dispatch through the 0x96B960 vtable slots (0xA7D430/34/3C) beyond the direct E8 caller ([T.5]);
+      the slot reading (SF-base default slot1 = &zero_triple) is corroborative, not exhaustive.
+    - FUN_004CE5B0's &triple arg use beyond its head window (bounded residual, [T.4]).
+    - SEH handler body 0x99C06B (out of load path; disclosed since the original run).
+    - FUN_00437F70-return consumers writing through the returned singleton pointer more than 8 instructions out
+      (covered for 99 sites by the HELPER437F70 census; unchanged from the original run).
+
+====================================================================================================
+CORRECTION-FACT VERIFICATION ANNEX (independent re-measurements backing the P2/P3 text corrections)
+====================================================================================================
+
+[A.1] P2-4 — the two NON-PAIR 0x82B5A0 call sites (0x930030, 0x930056): containing functions decoded;
+      the census CSV's prior_437f70_site cells (0x930029 / 0x93004F) are MID-INSTRUCTION byte positions:
+      0x930029 lies inside 'mov esi,[esp+8]' (0x930027: 8b 74 24 08, covers 0x930027..0x93002A);
+      0x93004F lies inside 'lea ecx,[esp+0xc]' (0x93004E: 8d 4c 24 0c, covers 0x93004E..0x930051).
+      Neither position holds an E8; neither is a call to 0x437F70 (site-7 was pair geometry, not a measured site).
+
+  0x00930020  8b 41 14                  mov      eax, dword ptr [ecx + 0x14]
+  0x00930023  8b 49 4c                  mov      ecx, dword ptr [ecx + 0x4c]
+  0x00930026  56                        push     esi
+  0x00930027  8b 74 24 08               mov      esi, dword ptr [esp + 8]
+  0x0093002B  83 c0 5c                  add      eax, 0x5c
+  0x0093002E  50                        push     eax
+  0x0093002F  56                        push     esi
+  0x00930030  e8 6b b5 ef ff            call     0x82b5a0
+  0x00930035  8b c6                     mov      eax, esi
+  0x00930037  5e                        pop      esi
+  0x00930038  c2 04 00                  ret      4
+  0x0093003B  cc                        int3     
+  0x0093003C  cc                        int3     
+  0x0093003D  cc                        int3     
+  0x0093003E  cc                        int3     
+  0x0093003F  cc                        int3     
+  0x00930040  83 ec 18                  sub      esp, 0x18
+  0x00930043  56                        push     esi
+  0x00930044  8b f1                     mov      esi, ecx
+  0x00930046  8b 46 14                  mov      eax, dword ptr [esi + 0x14]
+  0x00930049  57                        push     edi
+  0x0093004A  83 c0 5c                  add      eax, 0x5c
+  0x0093004D  50                        push     eax
+  0x0093004E  8d 4c 24 0c               lea      ecx, [esp + 0xc]
+  0x00930052  51                        push     ecx
+  0x00930053  8b 4e 4c                  mov      ecx, dword ptr [esi + 0x4c]
+  0x00930056  e8 45 b5 ef ff            call     0x82b5a0
+  0x0093005B  8b 46 4c                  mov      eax, dword ptr [esi + 0x4c]
+  0x0093005E  8b 4c 24 24               mov      ecx, dword ptr [esp + 0x24]
+  0x00930062  8b 11                     mov      edx, dword ptr [ecx]
+  0x00930064  89 10                     mov      dword ptr [eax], edx
+  0x00930066  8b 51 04                  mov      edx, dword ptr [ecx + 4]
+  0x00930069  89 50 04                  mov      dword ptr [eax + 4], edx
+  0x0093006C  8b 49 08                  mov      ecx, dword ptr [ecx + 8]
+  MEASURED: site 0x930030 -> ECX = [this+0x4C] (stored origin, loaded 0x930023 'mov ecx,[ecx+0x4c]');
+           src = [this+0x14]+0x5C (m_kLocal translate; 0x930020 'mov eax,[ecx+0x14]' + 'add eax,0x5c').
+  MEASURED: site 0x930056 -> ECX = [this+0x4C] (stored origin, loaded 0x930053 'mov ecx,[esi+0x4c]');
+           src = [this+0x14]+0x5C; out = [esp+0xc] temp. (Both NON-PAIR sites use a STORED ORIGIN pointer,
+           not a fresh 437F70 return.)
+
+[A.2] P2-1 — padding after FUN_0050A050's fallback terminal (bytes at 0x50A0AA):
+  bytes: cc cc cc cc cc cc 56 8b f1 80 7e 24 00 75 10 e8
+  0xCC run: 6 bytes at 0x50A0AA..0x0050A0AF (6x int3), next function starts 0x0050A0B0:
+    0x0050A0B0  56                        push     esi
+    0x0050A0B1  8b f1                     mov      esi, ecx
+    0x0050A0B3  80 7e 24 00               cmp      byte ptr [esi + 0x24], 0
+    0x0050A0B7  75 10                     jne      0x50a0c9
+    0x0050A0B9  e8 02 f5 ff ff            call     0x5095c0
+
+[A.3] P2-2 — pinned-instruction count re-measurement:
+  contract standing-knowledge block instruction lines matching '^0x0050A0xx ': 36
+  [A.3] PIN table rows in FUN_0050A050_DOWNSTREAM_DISASM.txt: 36
+  => the pinned-instruction count is 36 (the 'fallback:' line is a label, not an instruction);
+     '37/37' in the report layer is a count error (QC P2-2) — the G2 predicate (all pins MATCH) is unchanged.
+
+[A.4] P3-1 — FUN_007B4650 continuation: the cited 'lea edi,[esi+0x5c]' anchor MEASURED at 0x7B468E
+      (beyond the original [B.2] printed head 0x7B4650..0x7B4678):
+    0x007B468E  8d 7e 5c                  lea      edi, [esi + 0x5c]
+    0x007B4691  57                        push     edi
+    0x007B4692  8d 54 24 4c               lea      edx, [esp + 0x4c]
+    0x007B4696  52                        push     edx
+    0x007B4697  8b cd                     mov      ecx, ebp
+    0x007B4699  e8 02 fa 00 00            call     0x7c40a0
+    0x007B469E  d9 00                     fld      dword ptr [eax]
+    0x007B46A0  8b 8c 24 a4 00 00 00      mov      ecx, dword ptr [esp + 0xa4]
+    0x007B46A7  d8 01                     fadd     dword ptr [ecx]
+    0x007B46A9  53                        push     ebx
+    0x007B46AA  d9 5c 24 1c               fstp     dword ptr [esp + 0x1c]
+    0x007B46AE  d9 40 04                  fld      dword ptr [eax + 4]
+    0x007B46B1  d8 41 04                  fadd     dword ptr [ecx + 4]
+    0x007B46B4  d9 5c 24 20               fstp     dword ptr [esp + 0x20]
+    0x007B46B8  d9 40 08                  fld      dword ptr [eax + 8]
+    0x007B46BB  8d 44 24 34               lea      eax, [esp + 0x34]
+    0x007B46BF  d8 41 08                  fadd     dword ptr [ecx + 8]
+    0x007B46C2  50                        push     eax
+    0x007B46C3  8d 4c 24 44               lea      ecx, [esp + 0x44]
+    0x007B46C7  51                        push     ecx
+    0x007B46C8  d9 5c 24 2c               fstp     dword ptr [esp + 0x2c]
+    0x007B46CC  d9 44 24 24               fld      dword ptr [esp + 0x24]
+    0x007B46D0  d8 27                     fsub     dword ptr [edi]
+    0x007B46D2  d9 5c 24 3c               fstp     dword ptr [esp + 0x3c]
+    0x007B46D6  d9 44 24 28               fld      dword ptr [esp + 0x28]
+    0x007B46DA  d8 67 04                  fsub     dword ptr [edi + 4]
+    0x007B46DD  d9 5c 24 40               fstp     dword ptr [esp + 0x40]
+    0x007B46E1  d9 44 24 2c               fld      dword ptr [esp + 0x2c]
+    0x007B46E5  d8 67 08                  fsub     dword ptr [edi + 8]
+    0x007B46E8  d9 5c 24 44               fstp     dword ptr [esp + 0x44]
+  => m_kLocal.m_Translate (+0x5C) anchor + 3-float adds (fld [eax+0/4/8]; fadd [ecx+0/4/8]) + fsub [edi+0/4/8]
+     uses — the [B.2] Evidence claim is TRUE; the original excerpt window was incomplete relative to its citation.
+
+[A.5] P3-2 — K qword at 0xA7B360 bit-identity re-measurement:
+  bytes: 00 00 00 40 e1 7a 84 3f ; as qword 0x3F847AE140000000 ; as f64 0.0099999997764825821
+  (double)(float)0.01 recomputed: f32 0.01 = 0x3C23D70A -> f64 bits 0x3F847AE140000000 = 0.0099999997764825821
+  BITMATCH: True  => K = 0x3F847AE140000000 = 0.009999999776482582 (the SCIENCE_STATUS_DELTA string
+  '0x009999999776482582' is a corrupted hex literal — decimal digits prefixed with 0x00; corrected per P3-2.)
+
+[A.6] P3-3 — FUN_00437F70 SEH frame layout measurement:
+  0x00437F70  6a ff                     push     -1
+  0x00437F72  68 6b c0 99 00            push     0x99c06b
+  0x00437F77  64 a1 00 00 00 00         mov      eax, dword ptr fs:[0]
+  0x00437F7D  50                        push     eax
+  0x00437F7E  51                        push     ecx
+  0x00437F7F  a1 d0 d8 b9 00            mov      eax, dword ptr [0xb9d8d0]
+  0x00437F84  33 c4                     xor      eax, esp
+  0x00437F86  50                        push     eax
+  0x00437F87  8d 44 24 08               lea      eax, [esp + 8]
+  push order: -1 (machine frame), 0x99c06b (HANDLER), fs:[0] (prev), ecx (scratch/alignment slot), cookie^esp.
+  'lea eax,[esp+8]' + 'mov fs:[0],eax' installs the registration NODE at [esp+8] = {prev, handler 0x99C06B}.
+  The pushed-ECX slot at [esp+4] is a LOCAL/SCRATCH slot — it is stashed with the operator-new result at
+  0x437FA4 'mov [esp+4],eax' — it is NOT the exception registration node. The original '[C.5] push ecx
+  (exception registration)' wording is corrected per QC P3-3.
+
+END OF CENSUS FILE

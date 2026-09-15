@@ -1,0 +1,124 @@
+====================================================================================================
+FUN_0082B5A0 FULL DECODE — PHASE D (helper 2 of the SF slot3 primary pair; the PRIMARY WRITER of the out buffer)
+RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+GENERATED_UTC: 2026-09-15T13:35:36Z
+GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\gen_raw_evidence.py
+GENERATOR_SHA256: 791E92FCB9B8A890333832D2E4804D6E56FB57CA7F4A4F8E8FAEF600F2DA534B
+MEASURED ENVIRONMENT (1a490ee lesson: measured at run time, not hardcoded):
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at generator start (size+sha256+PE layout re-verified before any decode).
+SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secondary corroboration only (QH-012).
+====================================================================================================
+
+[D.1] EXTENT + CALLING CONVENTION
+  Terminal 'ret 8' at 0x82B5E4; padding 0x82B5E7..0x82B5F0 = 0xCC. Extent 0x0082B5A0..0x0082B5F0 (size 0x50).
+  Convention: ECX-arg (thiscall-style) + 2 stack args, 'ret 8' (callee-popped). At the SF site: ECX=S (0x437F70 return),
+  [esp+4]=out buffer (caller ARG1), [esp+8]=source (NiAVObject+0x90 world translate).
+
+[D.2] FULL LINEAR DECODE 0x82B5A0..0x82B5F0
+
+0x0082B5A0  8b 54 24 08               mov      edx, dword ptr [esp + 8]
+0x0082B5A4  d9 02                     fld      dword ptr [edx]
+0x0082B5A6  8b 44 24 04               mov      eax, dword ptr [esp + 4]
+0x0082B5AA  dd 05 60 b3 a7 00         fld      qword ptr [0xa7b360]
+0x0082B5B0  dc c9                     fmul     st(1), st(0)
+0x0082B5B2  d9 c9                     fxch     st(1)
+0x0082B5B4  d9 5c 24 08               fstp     dword ptr [esp + 8]
+0x0082B5B8  d9 44 24 08               fld      dword ptr [esp + 8]
+0x0082B5BC  d8 21                     fsub     dword ptr [ecx]
+0x0082B5BE  d9 18                     fstp     dword ptr [eax]
+0x0082B5C0  d9 42 04                  fld      dword ptr [edx + 4]
+0x0082B5C3  d8 c9                     fmul     st(1)
+0x0082B5C5  d9 5c 24 08               fstp     dword ptr [esp + 8]
+0x0082B5C9  d9 44 24 08               fld      dword ptr [esp + 8]
+0x0082B5CD  d8 61 04                  fsub     dword ptr [ecx + 4]
+0x0082B5D0  d9 58 04                  fstp     dword ptr [eax + 4]
+0x0082B5D3  d8 4a 08                  fmul     dword ptr [edx + 8]
+0x0082B5D6  d9 5c 24 08               fstp     dword ptr [esp + 8]
+0x0082B5DA  d9 44 24 08               fld      dword ptr [esp + 8]
+0x0082B5DE  d8 61 08                  fsub     dword ptr [ecx + 8]
+0x0082B5E1  d9 58 08                  fstp     dword ptr [eax + 8]
+0x0082B5E4  c2 08 00                  ret      8
+0x0082B5E7  cc                        int3     
+0x0082B5E8  cc                        int3     
+0x0082B5E9  cc                        int3     
+0x0082B5EA  cc                        int3     
+0x0082B5EB  cc                        int3     
+0x0082B5EC  cc                        int3     
+0x0082B5ED  cc                        int3     
+0x0082B5EE  cc                        int3     
+0x0082B5EF  cc                        int3     
+
+[D.3] BIT-EXACT CONSTANTS
+  qword [0xa7b360] (loaded by 'fld qword ptr [0xa7b360]' at 0x82B5AA):
+    bytes = 00 00 00 40 e1 7a 84 3f ; as f64 = 0.0099999997764825821 ; bit pattern = 0x3F847AE140000000
+    = (double)(float)0.01 = the f64 widening of f32 0.01 (0x3C23D70A); decimal value 0.009999999776482582.
+  No other constants in the function.
+
+[D.4] EXACT x87 REGISTER-STACK TRACE (per component; IEEE-754 extended-precision discipline)
+  ENTRY: x87 stack empty. EDX=[esp+8]=src, EAX=[esp+4]=out, ECX=base S.
+  COMPONENT X:
+    0x82B5A4 fld dword ptr [edx]        st0 := (f80)src.x                     [load f32 -> f80, exact]
+    0x82B5AA fld qword ptr [0xa7b360]   st0 := (f80)K, st1 := src.x            [K = (f64)f32(0.01), exact widening]
+    0x82B5B0 fmul st(1), st(0)          st1 := src.x * K  (f80 mul, extended)   st0 := K
+    0x82B5B2 fxch st(1)                 st0 := src.x*K, st1 := K
+    0x82B5B4 fstp dword ptr [esp+8]     [esp+8] := f32(src.x*K)  <<< F32 NARROWING #1 (round to nearest f32)
+                                          NOTE: [esp+8] is the caller's leftover SRC slot — reused as temp; src was already
+                                          read into registers; the temp store does not alias anything live.
+    0x82B5B8 fld dword ptr [esp+8]      st0 := (f80)f32(src.x*K), st1 := K
+    0x82B5BC fsub dword ptr [ecx]       st0 := f32(src.x*K) - S.x   (f80 sub vs f32-loaded base)
+    0x82B5BE fstp dword ptr [eax]       out.x := f32( f32(src.x*K) - S.x )  <<< F32 NARROWING #2 (final store)
+  COMPONENT Y:
+    0x82B5C0 fld dword ptr [edx+4]      st0 := src.y, st1 := K
+    0x82B5C3 fmul st(1)                 st0 := src.y*K   (st1 := K)
+    0x82B5C5 fstp dword ptr [esp+8]     [esp+8] := f32(src.y*K)     <<< F32 NARROWING
+    0x82B5C9 fld dword ptr [esp+8]      st0 := f32(src.y*K)
+    0x82B5CD fsub dword ptr [ecx+4]     st0 -= S.y
+    0x82B5D0 fstp dword ptr [eax+4]     out.y := f32(...)           <<< F32 NARROWING (final)
+  COMPONENT Z:
+    (st0 := K survives component Y's chain)
+    0x82B5D3 fmul dword ptr [edx+8]     st0 := K * src.z
+    0x82B5D6 fstp dword ptr [esp+8]     [esp+8] := f32(K*src.z)     <<< F32 NARROWING
+    0x82B5DA fld dword ptr [esp+8]      st0 := f32(K*src.z)
+    0x82B5DE fsub dword ptr [ecx+8]     st0 -= S.z
+    0x82B5E1 fstp dword ptr [eax+8]     out.z := f32(...)           <<< F32 NARROWING (final)
+    0x82B5E4 ret 8
+  PER-COMPONENT FORMULA (bit-exact): out[i] = f32( f32( (f80)src[i] * (f80)K ) - (f80)S[i] ), i in {0,4,8} (x,y,z).
+  With S == {0,0,0} (Phase C) and the x87 default rounding: out[i] = f32( f32(src[i]*0.01f) - 0.0f ) = f32(src[i]*0.01f),
+  with the ONLY caveat: if src[i]*K rounds to +0/-0, subtracting 0.0 preserves the sign of zero. No NaN/Inf paths exist here
+  beyond the generic x87 rules (no fwait, no control-word change, no exceptions handled).
+
+[D.5] MEMORY WRITES (only these 4)
+  [esp+8] temp stores (3x, reusing the dead caller arg slot) and the 3 output stores [eax+0/4/8]. NO writes to ECX/S, NO global writes.
+  => The function DOES NOT MUTATE the source vector, the base S, or any owner object.
+
+[D.6] ECX MEANING AT SF SLOT3 SITE AND AT OTHER SITES
+  - SF site (0x50A07C): ECX = FUN_00437F70 return = singleton S (12-byte origin vector).
+  - All 34 pair sites: identical construction 'mov ecx,eax' immediately after 'call 0x437F70' => ECX = S at every pair site (measured census).
+  - RTTI/vtable walk: function is never address-taken (no imm32, no vtable membership) => no virtual identity; structural identity only.
+
+[D.7] THE 7 CONTRACT QUESTIONS (answered from bytes)
+  (1) does it mutate the vector? -> It WRITES the out buffer (3 f32 stores) but does NOT mutate src (NiAVObject+0x90) or ECX/S.
+  (2) modify an owner object? -> NO (no writes outside [eax+0..8] and the dead temp slot).
+  (3) update cache/dirty state? -> NO (no flag writes).
+  (4) clamp/validate? -> NO (no compares, no min/max).
+  (5) transform coordinate system? -> YES (bit-exact scale by (f64)f32(0.01) and subtraction of origin S; per-component,
+      with two f32 narrowings per component). This is the engine->internal-space conversion of a world-space translation vector.
+  (6) merely return/commit a temporary? -> It commits the converted result into the caller's out buffer; returns EAX=out (unchanged).
+  (7) operate on something unrelated to position? -> NO: every operand is a 3-float vector (src=out-world-translate, S=origin, out=buffer).
+
+[D.8] SIBLING/INVERSE FAMILY (context, measured)
+  - FUN_0082B6A0 (same family, ECX=S): out[i] = f32( f32( (f32(src[i]) + S[i]) ) * 100.0 ) using qword [0xa7a618] = (f64)100.0:
+    the EXACT algebraic inverse of the 0x82B5A0 forward transform (inverse = (scaled + S) * 100). Bytes measured in this run.
+  - FUN_0082B5F0 (ECX=S): zero-fills arg1+0x24..0x2c then scales the block at arg2+0x24 by K (0xa7b360) — structure-space converter.
+  - FUN_0082B790 (ECX discarded before use — clobbered at 0x82B79B): array-of-float3 transformer, per-element scale by f32 [0xa7af68] = 100.0f
+    (bytes 0000c8420000a040 = f32 pair {100.0f, 5.0f}; 'fld dword ptr [0xa7af68]' loads 100.0f). NOT a setter of S (writes only the new array).
+  - FUN_00437E80 (ECX=S): reads a 9-float block from arg2 (rotate-matrix-like) and passes 9 dwords onward (0x96cb20 helper) — matrix-side consumer.
+  => The pair (437F70 + 82B5A0) is one member of a coordinate-conversion family anchored on the SAME origin singleton S.

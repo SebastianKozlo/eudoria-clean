@@ -1,0 +1,12 @@
+status_dimension,status_this_run,primary_evidence,basis
+SOURCE_OBJECT_IDENTITY,CONFIRMED,01_RAW/SOURCE_VECTOR_LAYOUT_RAW.txt [B.4],SF+0x30 refcounted 0x118B NiNode-family object + slot17 recursive lookup chain measured from bytes
+SOURCE_FIELD_IDENTITY,CONFIRMED,01_RAW/SOURCE_VECTOR_LAYOUT_RAW.txt [B.1],add eax,0x90 lands on m_kWorld.m_Translate (block +0x6C + 36) proven by UpdateWorldData 13-dword copy
+SOURCE_VECTOR_LAYOUT,CONFIRMED,01_RAW/SOURCE_VECTOR_LAYOUT_RAW.txt [B.1][B.6],contiguous 3x f32 translate +0x90/+0x94/+0x98 in 13-dword world block; m_kLocal(+0x5C) distinguished
+HELPER_437F70_OPERATION,CONFIRMED,01_RAW/FUN_00437F70_DISASM.txt [C.3]-[C.9],lazy get-or-create 12-byte origin singleton S (global 0xba1804); S={0,0,0} proven never written; args ignored; plain ret
+HELPER_82B5A0_OPERATION,CONFIRMED,01_RAW/FUN_0082B5A0_DISASM.txt [D.3]-[D.7],out[i]=f32(f32(src[i]*K)-base[i]); K=(double)(float)0.01; ECX=S base; two f32 narrowings per component; sole primary-path writer
+OUTPUT_BUFFER_LAYOUT,CONFIRMED,02_ANALYSIS/OUTPUT_VALUE_RELATION.md,float3 at out+0/+4/+8 written by both paths; return value == caller ARG1 out pointer (both paths)
+OUTPUT_VALUE_RELATION,CONFIRMED,01_RAW/END_TO_END_VALUE_FLOW_RAW.txt E.2,out.x/y/z = f32(f32(W.x/y/z*K)-S.x/y/z) with S=0 => f32(W*0.01f); per-component def-use chain complete
+COORDINATE_SPACE,STRONGLY_SUPPORTED,02_ANALYSIS/POSITION_SEMANTICS.md G11,100:1 conversion CONFIRMED byte-level (forward 0.01 + inverse 100.0 family measured); absolute label of target space UNVERIFIED (RUNTIME_COORDINATE_BEHAVIOR=UNVERIFIED)
+AXIS_MAPPING,CONFIRMED,01_RAW/FUN_0082B5A0_DISASM.txt [D.4],identity permutation measured (component i -> component i; no swap/negation); axis LABELS inherited from NiPoint3 convention (label semantics UNVERIFIED statically)
+UNIT_SCALE,CONFIRMED,01_RAW/FUN_0082B5A0_DISASM.txt [D.3],bit-exact K=0x009999999776482582 (0x3F847AE140000000=(double)(float)0.01) with two f32 narrowings; inverse constant 100.0 (0xa7a618); cm->m READING = PLAUSIBLE interpretation only
+FINAL_POSITION_SEMANTIC_ROLE,STRONGLY_SUPPORTED,02_ANALYSIS/POSITION_SEMANTICS.md G14,position semantics corroborated by 2+ independent consumer classes (position+orientation taker; placement-with-attributes) + fallback stored-placement contract; absolute confirmation would need runtime consumer trace (not permitted)

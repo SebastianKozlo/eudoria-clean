@@ -1,0 +1,67 @@
+# HANDOFF — PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915 (executor -> PE-MASTER)
+
+- AUDIT_OUTPUT_ROOT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\
+- FINAL_REPORT_PATH: 06_REPORT/REPORT.md
+- PRIMARY_EVIDENCE_PATHS:
+    01_RAW/FUN_0050A050_DOWNSTREAM_DISASM.txt        (Phase A: 37/37 pin MATCH + stack/arg mapping + def-use NO answer)
+    01_RAW/FUN_00437F70_DISASM.txt                   (Phase C: singleton getter; args ignored; SEH; census; 10 questions)
+    01_RAW/FUN_0082B5A0_DISASM.txt                   (Phase D: scaled-subtract converter; bit-exact constants; x87 trace; 7 questions)
+    01_RAW/SOURCE_VECTOR_LAYOUT_RAW.txt              (Phase B: +0x90 = m_kWorld translate; world vs local; vtable matrix)
+    01_RAW/END_TO_END_VALUE_FLOW_RAW.txt              (Phase E: per-component formulas + S={0,0,0} 4-channel proof)
+    01_RAW/NEGATIVE_CONTROL_RAW.txt                   (4 executed controls; FAILURE_CASE_DETECTED=YES)
+    01_RAW/FALLBACK_PRIMARY_COMPARISON.txt            (five contract questions answered)
+    01_RAW/HELPER437F70_CALLER_CENSUS.csv / HELPER82B5A0_CALLER_CENSUS.csv  (99 / 36 sites, classified)
+- RUN_STATUS: COMPLETE
+- HARD_STOP_REASON: NONE
+
+## Measured gate table (G0..G14 one-liners; full: 06_REPORT/STAGE_ACCEPTANCE_GATES.csv)
+G0 PASS — S0 re-verified at run start (size+SHA256+PE layout MATCH).
+G1 PASS — HEAD==BASE_SHA==origin/master==ls-remote 3068f31a...; untracked = 2 pre-existing + run dir; zero mutations.
+G2 PASS — 37/37 pin MATCH; both-helper arg mapping derived; FUN_0050A050 writes NO primary-path XYZ itself.
+G3 PASS — m_kWorld translate +0x90/+0x94/+0x98 CONFIRMED; m_kLocal +0x5C distinguished.
+G4 PASS — 437F70 = origin-singleton getter (S={0,0,0} proven); plain ret; 99-caller census; 10 questions answered.
+G5 PASS — 82B5A0 = out[i]=f32(f32(src[i]*K)-S[i]), K=(double)(float)0.01; exact x87 trace; 7 questions answered.
+G6 PASS — per-component dataflow recovered; UNKNOWNs localized (space label; fallback stored-value scale).
+G7 PASS — out float3 +0/+4/+8; return == ARG1.
+G8 PASS — five fallback-vs-primary questions answered (conversion present ONLY in primary).
+G9 PASS — 5 independent context classes; no single-caller promotion.
+G10 PASS — 4 executed negative controls; FAILURE_CASE_DETECTED=YES.
+G11 STRONGLY_SUPPORTED — 100:1 conversion proven; absolute space label UNVERIFIED.
+G12 PASS — identity permutation proven; axis labels UNVERIFIED statically.
+G13 PASS — bit-exact 0.01 scale proven; cm->m reading = PLAUSIBLE interpretation.
+G14 STRONGLY_SUPPORTED — position role corroborated by >=2 independent consumers; runtime trace not permitted.
+G15/G16/G17 PENDING — governance (fresh QC; adjudication; persistence by pe-master-auditor).
+
+## PRIMARY QUESTION — one-line answer at the highest status the bytes support
+CONFIRMED: the primary path of SF slot3 does NOT copy the world translation — FUN_0050A050 writes nothing itself;
+FUN_00437F70 fetches an immutable zero-vector origin singleton (never-written global triple), and FUN_0082B5A0
+writes the caller's out float3 as the bit-exact per-component conversion
+out[i] = f32( f32( m_kWorld.m_Translate[i] * (double)(float)0.01 ) - 0 ) = f32(W[i] * 0.01f) — a 100:1
+engine->internal-space position conversion (identity axis order), paired with a measured inverse family
+((src+S)*100.0) and contrasted by an unscaled raw-copy fallback of the stored placement value.
+
+## SCIENCE_STATUS_DELTA (all 11 dimensions; full CSV: 02_ANALYSIS/SCIENCE_STATUS_DELTA.csv)
+SOURCE_OBJECT_IDENTITY=CONFIRMED; SOURCE_FIELD_IDENTITY=CONFIRMED; SOURCE_VECTOR_LAYOUT=CONFIRMED;
+HELPER_437F70_OPERATION=CONFIRMED; HELPER_82B5A0_OPERATION=CONFIRMED; OUTPUT_BUFFER_LAYOUT=CONFIRMED;
+OUTPUT_VALUE_RELATION=CONFIRMED; COORDINATE_SPACE=STRONGLY_SUPPORTED; AXIS_MAPPING=CONFIRMED(identity
+permutation; labels UNVERIFIED); UNIT_SCALE=CONFIRMED(bit-exact; cm->m reading PLAUSIBLE);
+FINAL_POSITION_SEMANTIC_ROLE=STRONGLY_SUPPORTED.
+
+## Findings contradicting standing knowledge labels (loud)
+1. FUN_00437F70 is NOT a value-transfer helper (H2 REJECTED by bytes) — it is an origin-singleton getter that
+   ignores both stack args; the entire output computation lives in FUN_0082B5A0.
+2. FUN_0082B5A0 is NOT a copy — the SF slot3 primary output is a 100:1-scaled position (engine translate x 0.01),
+   so any consumer treating slot3 output as engine-units is off by 100x; the fallback output is a DIFFERENT
+   derivation (raw stored placement value, no conversion) sharing only the float3 interface.
+3. FUN_0082B790's apparent [ecx] writes are a loop over a FRESH array — ECX (singleton) is clobbered at 0x82B79B
+   before use; naive write-scans would misclassify it as a singleton setter (trap-library candidate).
+4. All package-A/B pins re-measured MATCH (extent, ABI, slot17, +0x90) — no contradiction to prior canon; the
+   contradiction targets only the UNMEASURED helper semantics that prior runs explicitly left as "do NOT inherit".
+
+## Notes for QC
+- ZERO git mutations performed; untracked set at run end = 2 pre-existing + this run dir (AT_RUN_END_GIT_OBSERVATION.md).
+- No AMEND_LOG_R1.md — no correction was needed after any run artifact was written (the one script bug at
+  development time — ImageBase offset misread — was fixed before any artifact existed and is disclosed in
+  AT_RUN_START SECTION 2).
+- Raw files carry measured provenance headers (python 3.12.7 / capstone 5.0.7 / script SHA256 / source SHA256).
+- MANIFEST_SHA256.csv follows L12 self-exclusion. Static analysis only; the client was never executed.

@@ -1,0 +1,30 @@
+# AMEND_LOG_R1 — PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+# Corrections to THIS RUN's own files only (contract rule 14). No pin mismatch was found in this run —
+# a pin mismatch would be a FINDING recorded loudly in the reports, never papered over here.
+
+## AMEND-1 (2026-09-15T06:3x local) — EVIDENCE_INDEX self-hash artifact
+- WHAT: the first generation of 03_EVIDENCE/EVIDENCE_INDEX.csv included a row for EVIDENCE_INDEX.csv itself
+  that captured the file in its in-progress empty state (SHA256 E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855,
+  size 0) — a meaningless self-reference, and it also lacked a 06_REPORT/MANIFEST_SHA256.csv row (written later
+  in the same pass).
+- FIX: gen_manifest.py updated (index self-exclusion + manifest-row exclusion, documented in 03_EVIDENCE/README.md);
+  EVIDENCE_INDEX.csv and MANIFEST_SHA256.csv regenerated in one pass; both now carry final, mutually consistent
+  hashes (manifest excludes only itself, per L12).
+- NATURE: mechanical packaging artifact; NO science content, NO measured value, NO pin affected.
+
+## AMEND-2 (2026-09-15T06:4x local) — raw-file text encoding normalization to UTF-8
+- WHAT: the first generation of the gen_raw_evidence.py outputs (FUN_0050A050_DOWNSTREAM_DISASM.txt,
+  FUN_00437F70_DISASM.txt, FUN_0082B5A0_DISASM.txt, SOURCE_VECTOR_LAYOUT_RAW.txt, HELPER82B5A0_CALLER_CENSUS.csv/.txt)
+  used the Windows default codec (cp1252) for open(...,"w"), which left the em-dash characters in their headers as
+  cp1252 bytes that render as mojibake to UTF-8 readers. Content (addresses/bytes/formulas) was never affected.
+- FIX: all generator open() calls made explicitly encoding="utf-8" (11 sites across gen_raw_evidence.py and
+  gen_manifest.py; one-shot helper patch_utf8.py, kept in 00_CONTROL/scripts/ for the audit trail); raw files
+  regenerated deterministically (pin re-verification re-run inside the generator: 37/37 MATCH); SCRIPT_SHA256.csv /
+  EVIDENCE_INDEX.csv / MANIFEST_SHA256.csv regenerated in one final pass to match the new hashes.
+- NATURE: packaging/encoding correction; NO science content, NO measured value, NO pin affected.
+
+## DISCLOSURE (not an amend — no artifact ever contained the bad value)
+The executor's first quick PE-parse during S0 read the ImageBase field from the wrong Optional-Header offset
+(e+28, which returns SizeOfCode 0x674000 instead of ImageBase). It was caught and re-measured at the correct
+offset (e+24+28 = 0x00400000, PIN MATCH) BEFORE any run artifact was written; the event and its resolution are
+disclosed in 01_RAW/AT_RUN_START_GIT_OBSERVATION.md SECTION 2.

@@ -1,0 +1,159 @@
+====================================================================================================
+SOURCE VECTOR LAYOUT — PHASE B RAW (independent Entropia-local evidence; oracle = secondary only)
+RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+GENERATED_UTC: 2026-09-15T13:35:36Z
+GENERATOR_SCRIPT: D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915\00_Control\scripts\gen_raw_evidence.py
+GENERATOR_SHA256: 791E92FCB9B8A890333832D2E4804D6E56FB57CA7F4A4F8E8FAEF600F2DA534B
+MEASURED ENVIRONMENT (1a490ee lesson: measured at run time, not hardcoded):
+  python: 3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]
+  python_exe: D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe
+  capstone: 5.0.7 (cs_version=(5, 0, 1280))
+  source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe
+  source_size: 8015872
+  source_sha256_measured: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  source_sha256_pin: E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (MATCH)
+  imagebase: 0x400000 (i386 PE32, S0 fail-closed verified at script start)
+S0 FAIL-CLOSED: PASSED at generator start (size+sha256+PE layout re-verified before any decode).
+SOURCE OF TRUTH: Entropia.exe physical bytes (primary). Gamebryo oracles = secondary corroboration only (QH-012).
+====================================================================================================
+
+[B.1] FUN_007E4820 (vtable slot 27 = UpdateWorldData pin; package B) — FULL DECODE
+
+0x007E4820  83 ec 34                  sub      esp, 0x34
+0x007E4823  53                        push     ebx
+0x007E4824  8b d9                     mov      ebx, ecx
+0x007E4826  8b 43 24                  mov      eax, dword ptr [ebx + 0x24]
+0x007E4829  85 c0                     test     eax, eax
+0x007E482B  56                        push     esi
+0x007E482C  57                        push     edi
+0x007E482D  74 15                     je       0x7e4844
+0x007E482F  8d 4b 38                  lea      ecx, [ebx + 0x38]
+0x007E4832  51                        push     ecx
+0x007E4833  8d 54 24 10               lea      edx, [esp + 0x10]
+0x007E4837  52                        push     edx
+0x007E4838  8d 48 6c                  lea      ecx, [eax + 0x6c]
+0x007E483B  e8 40 6b f0 ff            call     0x6eb380
+0x007E4840  8b f0                     mov      esi, eax
+0x007E4842  eb 03                     jmp      0x7e4847
+0x007E4844  8d 73 38                  lea      esi, [ebx + 0x38]
+0x007E4847  8d 7b 6c                  lea      edi, [ebx + 0x6c]
+0x007E484A  b9 0d 00 00 00            mov      ecx, 0xd
+0x007E484F  f3 a5                     rep movsd dword ptr es:[edi], dword ptr [esi]
+0x007E4851  8b 8b b0 00 00 00         mov      ecx, dword ptr [ebx + 0xb0]
+0x007E4857  85 c9                     test     ecx, ecx
+0x007E4859  5f                        pop      edi
+0x007E485A  5e                        pop      esi
+0x007E485B  5b                        pop      ebx
+0x007E485C  74 0a                     je       0x7e4868
+0x007E485E  8b 01                     mov      eax, dword ptr [ecx]
+0x007E4860  8b 50 3c                  mov      edx, dword ptr [eax + 0x3c]
+0x007E4863  83 c4 34                  add      esp, 0x34
+0x007E4866  ff e2                     jmp      edx
+0x007E4868  83 c4 34                  add      esp, 0x34
+0x007E486B  c3                        ret      
+0x007E486C  cc                        int3     
+0x007E486D  cc                        int3     
+0x007E486E  cc                        int3     
+0x007E486F  cc                        int3     
+
+  Evidence: 13-dword (52-byte) block copy into this+0x6C (rep movsd ecx=0xD).
+  Block layout (derived): +0x00..0x23 rotate (9 floats), +0x24..0x2F translate (3 floats), +0x30 scale (1 float) = 13 dwords.
+  => m_kWorld block starts at +0x6C; m_kWorld.m_Translate = +0x6C+36 = +0x90/+0x94/+0x98; m_kWorld scale at +0x9C.
+  No parent => copy m_kLocal (block at +0x38, translate at +0x5C) -> m_kWorld. Parent => compose via 0x6eb380(parent+0x6C, local, tmp) -> m_kWorld.
+
+[B.2] FUN_007B4650 (vtable slot 16 pin; local-translate applier) — first 0x28 bytes
+
+0x007B4650  81 ec 8c 00 00 00         sub      esp, 0x8c
+0x007B4656  80 bc 24 98 00 00 00 00   cmp      byte ptr [esp + 0x98], 0
+0x007B465E  53                        push     ebx
+0x007B465F  55                        push     ebp
+0x007B4660  56                        push     esi
+0x007B4661  57                        push     edi
+0x007B4662  8b f1                     mov      esi, ecx
+0x007B4664  0f 84 0f 01 00 00         je       0x7b4779
+0x007B466A  8b ac 24 a0 00 00 00      mov      ebp, dword ptr [esp + 0xa0]
+0x007B4671  8d 5e 38                  lea      ebx, [esi + 0x38]
+0x007B4674  53                        push     ebx
+
+  Evidence: 'lea edi,[esi+0x5c]' = &m_kLocal.m_Translate (+0x38+36=+0x5C) — confirms the LOCAL translate offset anchor and
+  the 3-float additions into it ([eax+0/4/8] + [ecx+0/4/8]).
+
+[B.3] VTABLE MATRIX (measured: where 0x7B5390 and 0x7E4820 sit in .rdata vtables)
+  0x007B5390 (slot17 named lookup, ret 4 thiscall, recursive over children array [+0xCC] count [+0xD4]) stored in .rdata at:
+    0xa8cd38 (vtable start 0xa8ccf4 => slot offset 0x44)
+    0xa8e800 (vtable start 0xa8e7bc => slot offset 0x44)
+    0xa90b68 (vtable start 0xa90b24 => slot offset 0x44)
+    0xa90c80 (vtable start 0xa90c3c => slot offset 0x44)
+    0xa91010 (vtable start 0xa90fcc => slot offset 0x44)
+    0xa91230 (vtable start 0xa911ec => slot offset 0x44)
+    0xa91918 (vtable start 0xa918d4 => slot offset 0x44)
+  0x007E4820 (slot27 UpdateWorldData) stored at 16 vtable slots; e.g. 0xa8cd60 in vtable start 0xa8ccf4 => slot offset 0x6c
+  => vtable 0x00A8CCF4 holds BOTH slot17=0x7B5390 @ +0x44 AND slot27=0x7E4820 @ +0x6C: the NiAVObject-family virtual layout,
+     Entropia-local. SF slot3 reads [vtable+0x44] (0x50A061) and [vtable+0x04] (0x50A089) — consistent slots.
+
+[B.4] SF+0x30 RECEIVER CONSTRUCTION (SF ctor FUN_00509330 decode excerpt — measured)
+0x00509366  c7 45 00 58 d4 a7 00      mov      dword ptr [ebp], 0xa7d458
+0x0050936D  e8 0e 26 f0 ff            call     0x40b980
+0x00509372  8b 44 24 50               mov      eax, dword ptr [esp + 0x50]
+0x00509376  68 18 01 00 00            push     0x118
+0x0050937B  88 5d 10                  mov      byte ptr [ebp + 0x10], bl
+0x0050937E  89 45 14                  mov      dword ptr [ebp + 0x14], eax
+0x00509381  89 5d 18                  mov      dword ptr [ebp + 0x18], ebx
+0x00509384  89 5d 1c                  mov      dword ptr [ebp + 0x1c], ebx
+0x00509387  89 5d 20                  mov      dword ptr [ebp + 0x20], ebx
+0x0050938A  88 5d 24                  mov      byte ptr [ebp + 0x24], bl
+0x0050938D  88 5d 25                  mov      byte ptr [ebp + 0x25], bl
+0x00509390  88 5d 26                  mov      byte ptr [ebp + 0x26], bl
+0x00509393  88 5d 27                  mov      byte ptr [ebp + 0x27], bl
+0x00509396  88 5d 28                  mov      byte ptr [ebp + 0x28], bl
+0x00509399  c6 45 29 01               mov      byte ptr [ebp + 0x29], 1
+0x0050939D  89 5d 2c                  mov      dword ptr [ebp + 0x2c], ebx
+0x005093A0  e8 1f 40 45 00            call     0x95d3c4
+0x005093A5  83 c4 04                  add      esp, 4
+0x005093A8  89 44 24 50               mov      dword ptr [esp + 0x50], eax
+0x005093AC  3b c3                     cmp      eax, ebx
+0x005093AE  c6 44 24 44 01            mov      byte ptr [esp + 0x44], 1
+0x005093B3  74 0a                     je       0x5093bf
+0x005093B5  53                        push     ebx
+0x005093B6  8b c8                     mov      ecx, eax
+0x005093B8  e8 43 cc 2a 00            call     0x7b6000
+0x005093BD  eb 02                     jmp      0x5093c1
+0x005093BF  33 c0                     xor      eax, eax
+0x005093C1  3b c3                     cmp      eax, ebx
+0x005093C3  89 45 30                  mov      dword ptr [ebp + 0x30], eax
+0x005093C6  74 04                     je       0x5093cc
+0x005093C8  83 40 04 01               add      dword ptr [eax + 4], 1
+
+  Evidence: 'push 0x118; call 0x95d3c4' (operator new(0x118)); ctor 0x7B6000 (arg=0); 'add [eax+4],1' (refcount at +4 = Gamebryo
+  NiObject-family smart-pointer acquire); [ebp+0x30] = result. => SF+0x30 = refcounted 0x118-byte NiNode-family object with
+  vtable at +0, children array at +0xCC (count +0xD4) — matches the slot17 lookup consumer layout. PIN MATCH with package B.
+
+[B.5] SF CLASS POSITION SLOT INIT (measured, ctor continues)
+0x00509424  8b 15 1c 92 ba 00         mov      edx, dword ptr [0xba921c]
+0x0050942A  89 55 34                  mov      dword ptr [ebp + 0x34], edx
+0x0050942D  a1 20 92 ba 00            mov      eax, dword ptr [0xba9220]
+0x00509432  89 45 38                  mov      dword ptr [ebp + 0x38], eax
+0x00509435  8b 0d 24 92 ba 00         mov      ecx, dword ptr [0xba9224]
+0x0050943B  89 4d 3c                  mov      dword ptr [ebp + 0x3c], ecx
+0x0050943E  8b 15 1c 92 ba 00         mov      edx, dword ptr [0xba921c]
+0x00509444  89 55 40                  mov      dword ptr [ebp + 0x40], edx
+0x00509447  a1 20 92 ba 00            mov      eax, dword ptr [0xba9220]
+0x0050944C  89 45 44                  mov      dword ptr [ebp + 0x44], eax
+0x0050944F  8b 0d 24 92 ba 00         mov      ecx, dword ptr [0xba9224]
+0x00509455  89 4d 48                  mov      dword ptr [ebp + 0x48], ecx
+
+  Evidence: SF ctor initializes SF+0x34/38/3C AND SF+0x40/44/48 FROM the global triple [0xba921c]/[0xba9220]/[0xba9224]
+  — the SAME triple that seeds the origin singleton S. (Fallback source + primary base share one origin vector.)
+
+[B.6] STRUCTURE START/EXTENT (NiAVObject-family, this-build)
+  +0x00 vtable; +0x04 refcount; +0x24 m_pkParent; +0x38 m_kLocal{rotate+0x38, translate+0x5C, scale+0x68};
+  +0x6C m_kWorld{rotate+0x6C, translate+0x90, scale+0x9C}; +0xB0 child link (per UpdateWorldData tail virtual dispatch);
+  +0xCC children array; +0xD4 children count (NiNode subclass; object size >= 0x118).
+  m_kWorld.m_Translate (+0x90/+0x94/+0x98) is EXPLICITLY DISTINGUISHED from m_kLocal.m_Translate (+0x5C/+0x60/+0x64):
+  the +0x90 block is the parent-composed WORLD state; the +0x5C block is the LOCAL state.
+
+[B.7] VERDICT
+  SOURCE_OBJECT_IDENTITY: CONFIRMED (NiAVObject-family, NiNode-subclass tree; vtable/ctor/children-layout chain measured)
+  SOURCE_FIELD_IDENTITY: CONFIRMED (m_kWorld.m_Translate at +0x90; the 'add eax,0x90' at 0x50A06E lands exactly on it)
+  SOURCE_VECTOR_LAYOUT: CONFIRMED (contiguous 3x f32 = translate of the 13-dword world block; NOT m_kLocal)
+  H1: SUPPORTED-CONFIRMED (contiguous 3-component world-translation vector at NiAVObject+0x90).

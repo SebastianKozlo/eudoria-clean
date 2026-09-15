@@ -1,0 +1,104 @@
+# END_TO_END_VALUE_FLOW_RAW — PHASE E (per-component dataflow with source expressions)
+# RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+# GENERATOR: pe-reconstruction (authored from byte decodes in FUN_0050A050_DOWNSTREAM_DISASM.txt,
+#   FUN_00437F70_DISASM.txt, FUN_0082B5A0_DISASM.txt, SOURCE_VECTOR_LAYOUT_RAW.txt of this package).
+# MEASURED ENVIRONMENT: python 3.12.7 (D:\Eudoria_Reconstruction\10_Scripts\python_env\python.exe);
+#   capstone 5.0.7 (cs_version (5, 0, 1280)) — measured at run start 2026-09-15T06:20 local.
+# SOURCE: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe, size 8015872,
+#   SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (S0 fail-closed verified).
+# INDEPENDENT_SOURCE_OF_TRUTH: Entropia.exe physical bytes via capstone linear decode (no runtime, no oracle).
+# WHY_NON_CIRCULAR: every edge below is a measured instruction address chain (def-use), not a report claim.
+
+== E.1 CHAIN (primary path of SF slot3, FUN_0050A050) ==
+
+  caller -> FUN_0050A050(this=SceneFeeder*, [esp+4]=out float3*, [esp+8]=name)
+    0x50A050..0x50A059: name==NULL -> fallback (E.4)
+    0x50A05B: ecx = this->[0x30]                       -- SF+0x30 = NiNode-family root (ctor 0x509330: new(0x118)+0x7B6000, refcount@[+4])
+    0x50A05E..0x50A064: eax = [ [ecx] + 0x44 ]          -- NiNode vtable slot17 = 0x007B5390 (recursive named-object lookup, ret 4)
+                                                            callee [esp+4] = name (0x50A060 push), ECX = NiNode
+    EAX(0x50A066) = lookup result = NiAVObject* obj      -- NULL -> fallback (0x50A068)
+    0x50A06A: ESI = [esp+8] = original ARG1 = OUT BUFFER (derived mapping; [esp+8] holds ARG1 at this point because only
+              one push (saved ESI) is live on the stack since the lookup's 'ret 4' cleaned the pushed name)
+    0x50A06E: EAX = obj + 0x90                           -- &obj->m_kWorld.m_Translate (Phase B: m_kWorld block at +0x6C,
+                                                            translate at blockstart+36 = +0x90/+0x94/+0x98; NOT m_kLocal +0x5C)
+    0x50A073: push EAX      -> pair arg slot HIGH  (callee [esp+8])
+    0x50A074: push ESI      -> pair arg slot LOW   (callee [esp+4])  [push order: src FIRST, out LAST]
+    0x50A075: call 0x437F70 -> S = [0xba1804]; if null: S = new(12); S = { [0xba921c], [0xba9220], [0xba9224] }; [0xba1804] = S
+                                                            (args IGNORED; plain 'ret'; S == {0,0,0} forever — see E.3)
+    0x50A07A: ECX = EAX = S
+    0x50A07C: call 0x82B5A0 -- callee view: [esp+4]=OUT (the leftover pair slot), [esp+8]=&world_translate, ECX=S
+    0x82B5A0 body (per component i in {0,4,8}, x/y/z):
+        tmp_i := f32( (f64..f80 arithmetic) src_i * K )       -- K = qword [0xa7b360] = (double)(float)0.01
+        out_i := f32( f32(src_i * K) - S_i )                  -- S_i read as f32 from [S+i]
+        stores: [out+0] (0x82B5BE), [out+4] (0x82B5D0), [out+8] (0x82B5E1); 'ret 8' cleans the 2 leftover pair args
+    0x50A081: EAX = ESI = OUT
+    0x50A084: ret 8 -> return value == caller ARG1 (out pointer), stack cleaned
+
+== E.2 PER-COMPONENT SOURCE EXPRESSIONS (strongest form the bytes support) ==
+
+  out.x (out[0], byte offset +0) = f32( f32( W.x * K ) - S.x )
+  out.y (out[1], byte offset +4) = f32( f32( W.y * K ) - S.y )
+  out.z (out[2], byte offset +8) = f32( f32( W.z * K ) - S.z )
+
+  where:
+    W.x/W.y/W.z = m_kWorld.m_Translate components of the named NiAVObject (engine-space translate, f32)
+    K           = (double)(float)0.01 = 0.009999999776482582 (bit pattern 0x3F847AE140000000, qword at 0xa7b360)
+    S.x/S.y/S.z = singleton base components (f32 at [S+0]/[S+4]/[S+8])
+    S           = { [0xba921c], [0xba9220], [0xba9224] } snapshot at first 0x437F70 call
+
+  GIVEN E.3 (S == {0,0,0} always), the load-bearing reduction (bit-exact under x87 extended precision
+  + round-to-nearest for the two f32 narrowings; sign-of-zero preserved):
+
+    out.x = f32(W.x * 0.01f)      out.y = f32(W.y * 0.01f)      out.z = f32(W.z * 0.01f)
+    (the multiplications use (double)(float)0.01 in f80, then narrow twice: f32(x*K) then f32(... - 0.0f) == f32(x*K))
+
+  NO axis permutation (component i of source -> component i of out, measured addressing [edx]/[edx+4]/[edx+8] ->
+  [eax]/[eax+4]/[eax+8] in order). NO negation. NO offset. ONE multiplicative scale. ONE additive base (=0).
+
+== E.3 S == {0,0,0} — PROOF THAT THE BASE IS THE ZERO VECTOR ==
+
+  MEASURED_QUANTITY: existence of ANY write to 0xba921c/0xba9220/0xba9224 anywhere in the image.
+  Method (4 independent write-vector scans, all executed):
+    (1) Exact write encodings in .text (A3 imm32 / 89 /r imm32 / C7 05 imm32 imm32 / D9 15 / D9 1D for each of the
+        3 addresses): 0 hits.
+    (2) imm32 computed bases in [0xba9200,0xba9240] (a base+disp writer would embed a nearby constant):
+        0xba920c: 'test byte [0xba920c],1' + 'or dword [0xba920c],1' (flags, stops at 0xba920f);
+        0xba9210: 'mov dword [0xba9210], 0xa9c45c' + 'mov dword [0xba9210], eax' (pointer slot, writes 0xba9210..13);
+        0xba9218: 'test byte [0xba9218],al' + 'or dword [0xba9218],eax' (flags, writes 0xba9218..1b).
+        ALL neighborhood writes STOP AT 0xba921b — none touches the triple.
+    (3) Stored pointers to the triple family in ALL non-.text sections (a global pointer variable enabling dynamic
+        writes): 0 hits.
+    (4) Pointer-passing sites ('push 0xba921c' x5: 0x441040/0x441045 -> callee 0x6C9490; 0x46ab60/0x46ab65 -> same
+        pattern; 0x46e7d8/0x46e7e6 -> callees 0x730F90/0x730FB0): all decoded — 0x730F90/0x730FB0 READ the triple into
+        a local matrix (rows at this+8/0x14); 0x6C9490 COPIES the triple into its object (+0x3C..0x44, +0x48..0x50).
+        All consumers READ; none writes.
+    Additionally the triple lives in the .data VIRTUAL-ONLY tail (RVA 0x7A921C - 0x76C000 = 0x3D21C > rawsize 0x34000):
+    zero-initialized by the loader, no static initializer bytes exist.
+  INDEPENDENT_SOURCE_OF_TRUTH: raw byte scans of the image (documented above), not interpretation.
+  WHY_NON_CIRCULAR: the proof is a negative-existence scan over all encoding channels, independent of any report.
+  FAILURE_CASE_DETECTED: YES — a hypothetical mutable origin (e.g. per-frame camera) was the a-priori candidate;
+    the exhaustive scan FAILED to find any writer, rejecting "mutable base" in favor of "permanent zero origin".
+
+  Singleton post-construction mutation scan: no caller of 0x437F70 writes through the returned pointer within 8
+  instructions (all 99 sites measured, HELPER437F70_CALLER_CENSUS.csv); the only ECX-consumers of S
+  (0x82B5A0 fsub=[read]; 0x82B6A0 fld=[read]; 0x437E80 [reads]; 0x82B5F0 [reads]; 0x82B870/0x58E4B0/0x58E520
+  [reads]; 0x82B790 clobbers ECX before use) NEVER store to [ECX+0/4/8]. => S is IMMUTABLE after construction.
+
+== E.4 FALLBACK PATH DATAFLOW (same function, in-slot control) ==
+
+  name==NULL (0x50A059) or lookup==NULL (0x50A068) -> 0x50A087:
+    0x50A087..0x50A08E: EAX = this->slot1()   -- vtable 0xa7d458 slot1 = FUN_005090A0 = 'lea eax,[ecx+0x34]; ret'
+                          => EAX = &this->posSlotA (SF+0x34)
+    0x50A090..0x50A0A1: out[0]=P[0]; out[1]=P[1]; out[2]=P[2]   (raw 3-dword copy, NO scale, NO base subtraction)
+    P (SF+0x34) writer: FUN_005094C0 'mov [ecx+0x34],[arg]; [ecx+0x38],[arg+4]; [ecx+0x3C],[arg+8]; byte [ecx+0x28]=1'
+                          (thiscall ret 4; prior canon: copy from the placement record — pin re-measured, MATCH;
+                          constructor initializes SF+0x34 from the SAME global triple {0,0,0})
+  => fallback out = raw stored placement value; primary out = live world translate * 0.01 - {0,0,0}.
+
+== E.5 UNKNOWNS (honestly recorded) ==
+
+  - The absolute meaning of the 0.01-scaled space (e.g. "meters" vs "game logic units") is NOT statically provable
+    from these bytes; what IS proven: a deterministic 100:1 scale conversion engine->out with origin S={0,0,0}.
+    RUNTIME_COORDINATE_BEHAVIOR = UNVERIFIED (contract stop rule: no invented runtime test).
+  - Whether the SF slot3 vtable is reached with a real caller name key that exists in the node tree at a given
+    moment (runtime condition) — static analysis cannot enumerate names; irrelevant to the transform itself.

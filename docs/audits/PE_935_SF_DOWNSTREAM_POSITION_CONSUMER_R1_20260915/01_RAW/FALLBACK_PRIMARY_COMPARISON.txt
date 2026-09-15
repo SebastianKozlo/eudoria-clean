@@ -1,0 +1,65 @@
+# FALLBACK_PRIMARY_COMPARISON — fallback vs primary in-slot (contract item: FALLBACK VS PRIMARY COMPARISON)
+# RUN_ID: PE_935_SF_DOWNSTREAM_POSITION_CONSUMER_R1_20260915
+# MEASURED ENVIRONMENT: python 3.12.7; capstone 5.0.7 (cs_version (5, 0, 1280)) — measured at run start.
+# SOURCE: Entropia.exe, size 8015872, SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (S0 verified).
+# Both paths decoded from the SAME bytes (FUN_0050A050_DOWNSTREAM_DISASM.txt [A.1]); no oracle input.
+
+FALLBACK (name==NULL or lookup==NULL; entry 0x50A087, ret 8 at 0x50A0A7):
+    P   = SF::slot1() == FUN_005090A0 == 'lea eax,[ecx+0x34]; ret'  -> P = &SF->posSlotA (in-object, +0x34)
+    out[0]=P[0]; out[1]=P[1]; out[2]=P[2]                          (raw dword copies, NO arithmetic)
+    returns EAX = ECX = out (0x50A0A4)
+    P's writers (measured): FUN_005094C0 (copies a 3-float placement value into SF+0x34/38/3C, sets dirty byte SF+0x28);
+    ctor 0x509330 initializes SF+0x34 from the global zero triple {0,0,0}.
+
+PRIMARY (name!=NULL and lookup!=NULL; through 0x50A064..0x50A084):
+    W   = named NiAVObject->m_kWorld.m_Translate  (&obj+0x90)
+    S   = origin singleton (0x437F70; = {0,0,0} permanently)
+    K   = (double)(float)0.01  (qword 0xa7b360)
+    out[i] = f32( f32(W[i]*K) - S[i] )   (0x82B5A0, 'ret 8')
+    returns EAX = ESI = out (0x50A081)
+
+== THE FIVE CONTRACT QUESTIONS ==
+
+(1) SAME STRUCTURE?
+    YES at the interface level: both paths write exactly 3 contiguous f32 into the SAME out buffer (ARG1) and both
+    return that same out pointer to the caller. Both sources are contiguous 3-float vectors.
+    The STRUCTURES of the sources differ: fallback source = an in-object SF slot (SF+0x34); primary source = a
+    NiAVObject world-transform member (m_kWorld.m_Translate at node+0x90).
+
+(2) SAME COORDINATE SPACE?
+    STRUCTURALLY NOT IDENTICAL AS OPERATIONS — the primary path applies a deterministic coordinate conversion
+    (x 0.01, minus origin S) that the fallback path does NOT apply. The two paths are in the SAME output space ONLY
+    IF the stored fallback value (SF+0x34, written from the placement record) is already stored in the SAME
+    0.01-scaled space the primary produces. That coherence is STRONGLY_SUPPORTED by three independent measured
+    facts: (a) the constructor seeds SF+0x34 from the SAME global triple that seeds S (one origin system);
+    (b) the inverse family 0x82B6A0 ((scaled+S)*100) exists for round-tripping the scaled space;
+    (c) prior canon (PE_935_SCENEFEEDER_SLOT_CENSUS_R1 / PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1, cited as
+    findings, pin-checked only) records the placement record as the game-logic coordinate source.
+    It is NOT CONFIRMED that the stored value is pre-scaled; if the placement value were stored in ENGINE units the
+    two paths would differ by a factor of 100. Coordinate-space coherence of the fallback SOURCE = STRONGLY_SUPPORTED,
+    not byte-proven inside this window (the placement record format is outside this run's scope fence).
+
+(3) SAME AXIS ORDER?
+    YES mechanically: both paths copy components in source order 0/1/2 -> out 0/1/2 with no permutation
+    (fallback: [eax]->[ecx], [eax+4]->[ecx+4], [eax+8]->[ecx+8]; primary: [edx+i]->[eax+i] via the 0x82B5A0 loop).
+    Axis ORDER is identity in both; absolute axis LABELS are inherited from the shared NiPoint3 convention (same
+    source structure family), so the two paths cannot disagree on order.
+
+(4) SAME OUT POINTER RETURNED?
+    YES: primary returns ESI==ARG1 (0x50A081 'mov eax,esi'); fallback returns ECX==ARG1 (0x50A0A4 'mov eax,ecx').
+    Identical return contract (EAX = out; 'ret 8').
+
+(5) DOES PRIMARY ADD TRANSFORMATION ABSENT IN FALLBACK?
+    YES — this is the decisive measured difference: primary multiplies by K=0.01 (two f32 narrowings per component)
+    and subtracts base S (measured S={0,0,0}); fallback performs NONE of these (pure dword copy). Structural
+    equivalence of the interface does NOT imply semantic equivalence of the data: the primary path's output is a
+    CONVERTED world position; the fallback's output is a STORED position value. H5 (same structural/coordinate
+    semantic) is therefore SUPPORTED ONLY CONDITIONALLY: structurally identical (proven), coordinate-space
+    equivalence rests on the fallback's stored value being pre-scaled (STRONGLY_SUPPORTED, not CONFIRMED in-slot).
+
+== CONSISTENCY NOTE (the 100x hazard) ==
+If a consumer naively assumed both paths return the same numeric scale, and the SF+0x34 stored value were in engine
+units, the outputs would differ by 100x between paths. The measured design (one origin triple seeding BOTH S and the
+SF slot; a matched forward/inverse scale family) indicates the engine maintains ONE scaled coordinate space across
+both paths. FAILURE_CASE for the naive assumption: the two paths' byte shapes ('float3 out') are identical while
+their arithmetic semantics are provably different — recorded as the run's in-slot negative control companion.
