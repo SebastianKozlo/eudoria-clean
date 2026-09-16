@@ -6,10 +6,7 @@
 - QC date: 2026-09-15
 - QC verdict (top, per contract): **QC_PASS_WITH_FINDINGS**
   - 0 × P0; **1 × P1 (OPEN — requires PE-MASTER adjudication)**;
-    2 × P2 (OPEN); 4 × P3 (fixed-in-QC); 2 × P3 (OPEN: F-QC-8,
-    F-QC-9). [AMEND-017 2026-09-16 count reconciliation: the former
-    "3 × P3 (OPEN, minor)" did not match this document's own
-    enumeration — only F-QC-8 and F-QC-9 are OPEN P3 findings.]
+    2 × P2 (OPEN); 4 × P3 (fixed-in-QC); 3 × P3 (OPEN, minor).
 - Countercheck tools: PE-MASTER-auditor's OWN code, OUTSIDE the project
   tree (C:\Users\User\AppData\Local\Temp\opencode\pe_master_countercheck\
   qc_nif_baseline_r1\): qc_walk.py (own BNT2 walker + version/type scan of
@@ -139,11 +136,8 @@ is false.
   10.1.0.0 files.
 - Evidence: `…\NiflySharp\BaseTypes\NiHeader.cs` reads (after type
   index) strings (≥20.1.0.1) + groupSizes (≥5.0.0.6) — true so far;
-   but block deserialization includes the per-block u32:
-   `…\NiflySharp\BaseTypes\NiObject.cs` (Sync)
-   [AMEND-017 path precision: the physical file is
-   ousnius-NiflySharp-104d79f\NiflySharp\BaseTypes\NiObject.cs —
-   quote byte-verified there]:
+  but block deserialization includes the per-block u32:
+  `…\NiflySharp\NiflySharp\NiObject.cs` (Sync):
   `if (stream.Version.FileVersion >= NiFileVersion.V10_0_0_0 &&
   stream.Version.FileVersion < NiFileVersion.V10_1_0_114)
   stream.Sync(ref groupId);` — 10.1.0.0 IS inside the range.

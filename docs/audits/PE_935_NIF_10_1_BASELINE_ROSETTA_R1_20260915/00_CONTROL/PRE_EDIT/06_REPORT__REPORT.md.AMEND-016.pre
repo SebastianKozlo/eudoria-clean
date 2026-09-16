@@ -29,11 +29,8 @@ decoder achieving full-file closure on 2,343/2,363 world-slice files.
    "preamble/record separator, MUST be 0") is the engine's **GroupID**
     (Gamebryo 1.2 NiObject::LoadBinary, 5.0.0.6 ≤ v < 10.1.0.114; PE
     NumGroups=0 hence always 0). Modern nif.xml mis-versions it as
-     since=10.1.0.114; historical omits it; NiflySharp implements the
-     per-block u32 CORRECTLY for 10.1.0.0 (NiflySharp\BaseTypes\
-     NiObject.cs L61-62 [path precision AMEND-017; the quote is
-     byte-verified at the real physical path
-     ousnius-NiflySharp-104d79f\NiflySharp\BaseTypes\NiObject.cs]:
+    since=10.1.0.114; historical omits it; NiflySharp implements the
+    per-block u32 CORRECTLY for 10.1.0.0 (NiObject.cs L61-62:
     `>= V10_0_0_0 && < V10_1_0_114` — no misalignment on real 10.1.0.0
     files; residual: NiflySharp's range starts at 10.0.0.0 vs the
     engine's 5.0.0.6, a 5.x–9.x-only difference out of scope)
@@ -61,23 +58,13 @@ decoder achieving full-file closure on 2,343/2,363 world-slice files.
 4. **Cross-publisher proof (§14).** The SAME frozen layouts close Empire
    Earth II lodtest.nif (a non-MindArk 10.1.0.0 file) — 7 blocks to
    EOF-exact. EE2-skinned/SDK samples fail at types ABSENT from the
-   Entropia corpus (NiTriStrips/skin/PSys/...). [CORRECTION 2026-09-16,
-   AMEND-016: the former "one framing exception: BABYLENGUIN.NIF fails
-   at block 7 GroupID=479309 — a NONZERO engine GroupID (POSITIVE
-   realism evidence)" claim is RETRACTED as a FALSE positive of the
-   frozen decoder's field-identity defect (bare-FIELD_NAME dedup lost
-   NiSourceTexture's `File Name[Use External == 0]` alternative, ending
-   block 6 at 1498 and reading filename+link bytes 4D 50 07 00 as a
-   GroupID). Engine-truth byte walk (s15): BABYLENGUIN block 6 spans
-   1464-1517 with Use External=0, File Name='LEN-SKIN_02.BMP', pixel
-   link=7; REAL block 7 (NiPixelData) GroupID = 0 @1517; under the
-   corrected V2 decoder BABYLENGUIN fails at block 13 NiSkinData (same
-   unsupported-type class as the other SDK samples). Evidence:
-   02_ANALYSIS/BABYLENGUIN_GROUPID_ADJUDICATION.md,
-   01_RAW/BABYLENGUIN_BOUNDARY_REDERIVATION.csv,
-   01_RAW/CROSS_PUBLISHER_RETEST_FIELDIDENTITY.csv. The GroupID
-   framing verdict itself is UNCHANGED (engine + physical slot
-   evidence).] => **The Entropia world
+   Entropia corpus (NiTriStrips/skin/PSys/...), with one framing exception:
+   BABYLENGUIN.NIF fails at block 7 GroupID=479309 — a NONZERO engine
+   GroupID in a non-PE 10.1.0.0 file (POSITIVE realism evidence that the
+   per-block u32 is the engine's GroupID field carrying real values;
+   PE files have NumGroups=0 hence always 0, so this run's ==0 invariant
+   is PE-scoped by design). [AMEND-012 corrects the former "fail only at
+   types absent" wording.] => **The Entropia world
    slice IS standard Gamebryo 10.1** (same writer family), not a MindArk
    dialect — at the framing/scene/geometry/property level.
 
