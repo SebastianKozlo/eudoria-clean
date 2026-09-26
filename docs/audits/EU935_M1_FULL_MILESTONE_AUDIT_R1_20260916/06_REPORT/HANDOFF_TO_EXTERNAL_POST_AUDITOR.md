@@ -51,3 +51,5 @@ ALL PE-MASTER verdicts in this lineage are ADVISORY_PRE_QUALIFICATION
 (PE-MASTER status PROVISIONAL_UNTIL_QUALIFIED pending the human-graded Q1;
 CANONICAL_GATE_EFFECT=NONE). Nothing in this package closes the milestone or
 authorizes M2; the human is the only closure authority (Gate D).
+
+FORMAL READINESS RESULT: M1_READY_FOR_HUMAN_CLOSURE_DECISION; PE-MASTER_DECLARES = MILESTONE_CANDIDATE_FOR_DEEP_AUDIT (advisory; ADVISORY_PRE_QUALIFICATION; CANONICAL_GATE_EFFECT=NONE). Gate C (this post-audit) is MANDATORY; Gate D closure is human-only.

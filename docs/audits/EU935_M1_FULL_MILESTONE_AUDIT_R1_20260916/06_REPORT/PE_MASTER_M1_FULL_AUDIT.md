@@ -401,7 +401,7 @@ science.
   09DA50660376ED6363282CE10549EEFCB8D872DF4C932E68892D131349C52CA7.
 - Exactly ONE cell modified (the PE_935_NIF_10_1_WORKAUDIT_CORRECTION_R1_20260916
   verdict cell: PENDING -> 'MASTER_ACCEPTED (advisory; supersession R2;
-  G16R/G17R/G18R PASS - AMEND-019 persistence)') and exactly ONE row added
+  G16R/G17R/G18R PASS — AMEND-019 persistence)') and exactly ONE row added
   (this audit's LATEST RUNS top row).
 - rows_added=1, rows_removed=0, rows_modified=1 - verified via
   `git diff --numstat AUDIT_ENTRYPOINT.md` = 2 insertions / 1 deletion; the
@@ -437,6 +437,7 @@ science.
   HEAD == origin/master == ls-remote verification. After that commit the
   committed state is internally consistent: every manifest row matches the
   committed file bytes (25/25 re-verified).
+- QC-FIX-R1 (post-QC correction, this commit): EVIDENCE_INDEX row-17 hash corrected to 2309F68A08580F9A6D88D96FBEC82F6C99EE31BEAE9B21538F0485D901EEE329 (QC Finding 1, one-char transcription error); handoff formal-result line added; §26 cell rendering em-dash corrected; QC verdict QC_PASS_WITH_FINDINGS (1xP2 accepted+fixed, 5xP3 adjudicated: F2/F3 accepted+fixed, F4 partially accepted (disclosure stands), F5 rejected-as-defect (L12 self-reference discipline), F6 no-action scope note).
 
 ## 28. FINDINGS LIST
 
