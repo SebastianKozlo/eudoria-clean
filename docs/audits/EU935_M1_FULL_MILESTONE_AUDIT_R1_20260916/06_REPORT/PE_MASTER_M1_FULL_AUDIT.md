@@ -411,9 +411,32 @@ science.
 
 ## 27. PERSISTENCE
 
-PENDING_COMMIT (to be filled after the path-limited commit + push + remote
-verification; this section is finalized in the immediately following
-path-limited consistency commit).
+- PUBLICATION_COMMIT (FINAL_SHA):
+  `e077562ea37e161bc958ff2bca891266131ac565` (pushed; at the publication
+  moment verified: HEAD == origin/master == `git ls-remote origin
+  refs/heads/master`, all three read e077562ea37e161bc958ff2bca891266131ac565;
+  push range 0187e18..e077562).
+- BASE_SHA: `0187e18455081e58fc1f38ee36d974206483093d` (BASE == the audit
+  start HEAD; the publication commit is the only new commit on the branch).
+- Changed path census (publication commit): 27 paths = 26 package files under
+  `docs/audits/EU935_M1_FULL_MILESTONE_AUDIT_R1_20260916/` + `AUDIT_ENTRYPOINT.md`
+  (the §19 housekeeping touch: the only modified pre-existing file; 1396
+  insertions / 1 deletion; the deletion = the single authorized verdict-cell
+  line replacement in the NIF-correction row; the 2 pre-existing untracked
+  roots `docs/audits/PE_935_NINODE_SLOT17_FIRSTCALL_R1_20260914/` and
+  `experiments/` remained untracked and unstaged - verified in the staged
+  index before commit).
+- Manifest counts: `06_REPORT/MANIFEST_SHA256.csv` = 25 rows covering every
+  package file EXCEPT the manifest itself (the L12 self-hash exclusion
+  precedent, documented here; 0 stale, 0 missing, 0 .pyc, 0 __pycache__);
+  package total = 26 files (25 + the manifest).
+- CONSISTENCY COMMIT: this §27 finalization + the regenerated manifest row for
+  this report are persisted in the immediately following path-limited commit
+  (2 paths: this report + the manifest; its SHA is the repo HEAD visible via
+  `git log` at the end of this persistence run) and pushed with the same
+  HEAD == origin/master == ls-remote verification. After that commit the
+  committed state is internally consistent: every manifest row matches the
+  committed file bytes (25/25 re-verified).
 
 ## 28. FINDINGS LIST
 
