@@ -1,0 +1,59 @@
+{
+  "probe": "F05_EXACTNESS_ORIGIN_PRECISION",
+  "run_id": "EU935_M1_GATE_C_FINDINGS_REVALIDATION_R1_20260926",
+  "node_version": "v22.22.0",
+  "origin_precision_control": {
+    "W": 5,
+    "S": 0,
+    "K_f32_0_01": {
+      "decimal": 0.009999999776482582,
+      "hex_bits": "0x3c23d70a",
+      "role": "the byte-faithful K = f32(0.01) widened to f64 for the multiply"
+    },
+    "typed_K_f32_widened": {
+      "formula": "out = f32(f32(W * (double)(float)0.01) - S)",
+      "decimal": 0.04999999701976776,
+      "hex_bits": "0x3d4ccccc"
+    },
+    "literal_K_binary64": {
+      "formula": "out = f32(f32(W * 0.01) - S)  [K read as binary64 0.01]",
+      "decimal": 0.05000000074505806,
+      "hex_bits": "0x3d4ccccd"
+    },
+    "equal": false,
+    "verdict": "DISTINCT f32 results: the K constant is f32(0.01) WIDENED to f64, NOT an unconstrained binary64 0.01 literal; the shortened downstream form \"W * 0.01\" is ambiguous and, read as a binary64 literal, WRONG for this control",
+    "binary64_0_01_bits": "0x3F847AE147AE147B (= 0.01000000000000000020816681711721685...)",
+    "f32_0_01_bits": "0x3c23d70a (= 0.009999999776482582...)"
+  },
+  "binary_operand_reread": {
+    "exe": {
+      "path": "D:/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+      "sha256_fresh": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "size": 8015872,
+      "image_base": 4194304
+    },
+    "_DAT_00a7d7a8": {
+      "va": "0xa7d7a8",
+      "bytes": "00000000c0ffdf40",
+      "f64": 32767
+    },
+    "_DAT_00a8c758": {
+      "va": "0xa8c758",
+      "bytes": "00000000e0ffef40",
+      "f64": 65535
+    },
+    "_DAT_00a980d0": {
+      "va": "0xa980d0",
+      "bytes": "00000040e17a143f",
+      "f64": 0.00007812499825377017
+    },
+    "cross_check": "PEFoliageCore.js FOLIAGE_OPERAND_LOCK byte claims: 32767.0 / 65535.0 / 0.00007812499825377017"
+  },
+  "x87_status_separation": {
+    "BYTE_LOCKED_OPERANDS": "CONFIRMED (the three .rdata QWORDs re-read above; iter035 CONSTANT_ADDRESS_LOCK)",
+    "ARITHMETIC_MODEL_EXACTNESS": "CONDITIONAL on the stated x87 model (PC in {53,64}, RC = nearest-even) — the exhaustive proofs compared f64+Math.fround vs 80-bit-then-FSTP under THAT model; PC=24 measured DIFFERENT (14,104/229,376 real; 103,073/1,245,184 synthetic)",
+    "ORIGINAL_CLIENT_RUNTIME_PARITY": "UNVERIFIED/UNMEASURED (the actual foliage-site CW at chain-execution time was never measured; no runtime experiment authorized or performed)",
+    "HISTORICAL_FOLIAGE_INPUTS": "NOT RECOVERED ([P-CLIMATE] caller-selected climate; [P-CELLSTREAM] stand-in cell content; p3 default 0; windowWorld = CURRENT_RUNTIME_CALIBRATION)",
+    "FOLIAGE_PLACEMENT_1_1": "NOT CLAIMED (no standing document claims 1:1 historical placement)"
+  }
+}

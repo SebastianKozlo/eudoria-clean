@@ -1,0 +1,54 @@
+diff --git a/src/pesource/VegetationClimateDecoder.js b/src/pesource/VegetationClimateDecoder.js
+index be3e125..bcbf389 100644
+--- a/src/pesource/VegetationClimateDecoder.js
++++ b/src/pesource/VegetationClimateDecoder.js
+@@ -13,10 +13,31 @@
+ //
+ //   The engine reads a FLAT NUMERIC TOKEN STREAM (C++ operator>> semantics):
+ //   whitespace (tab/CR/LF/space) separates tokens; line boundaries are NOT
+-//   record boundaries. This reproduces the audited census exactly: 492 engine
+-//   records from 32 .vcl chunks = 491 lines of 12 numeric tokens + the 9.vcl
+-//   29-token line contributing a SECOND (continuation) record — 12+12 numeric
+-//   tokens on one line (iter032_vcl_columns.json).
++//   record boundaries.
++//
++//   CORPUS COVERAGE (re-derived EU935_M1_GATE_C_FINDINGS_REVALIDATION_R1_
++//   20260926; supersedes the former "reproduces the audited census exactly:
++//   492 engine records" comment — a DOCUMENTATION defect corrected here, with
++//   NO behavior change): the raw corpus = 32 .vcl entries, 492 nonempty TSV
++//   lines, 5,916 whitespace tokens = 493 groups of 12. 492 groups are fully
++//   numeric; ONE group (25.vcl record 9) contains six COMMA tokens ("0,2",
++//   "0,8", "1,1", "0,01", "0,1", "0,1"; first @payload byte 447, group 9,
++//   col 1). The historical census generator (m1_iter032k_vcl_columns.py) is
++//   TSV-line based and SILENTLY SKIPPED that line on the float() ValueError
++//   (numeric_rows_12cols = 491, no error record), so the historical "492
++//   engine records" chain (491 numeric lines + the 9.vcl continuation line)
++//   matches NEITHER the raw stream census (493 groups) NOR this decoder's
++//   actual behavior: decodeVclPayload runs over the ORIGINAL bytes fail-closed,
++//   so 31/32 files decode (472 records) and 25.vcl =
++//   UNSUPPORTED_BY_CURRENT_DECODER (the whole file throws at record 9 col 1).
++//   The 9.vcl "29-token line" of the historical comment is the TAB-split
++//   count (12 numeric + 5 empty + 12 numeric fields); in the whitespace
++//   stream it is 24 tokens = 2 records.
++//   The ORIGINAL CLIENT's locale/comma-decimal tokenization, numeric
++//   conversion and failure semantics for 25.vcl remain UNVERIFIED (the
++//   bounded iter032/035 evidence does not prove them); this decoder does NOT
++//   normalize commas to dots and does NOT claim to reproduce the original
++//   client's record count or rejection behavior for 25.vcl.
+ //
+ // COLUMN SEMANTICS (census-measured, iter032_vcl_columns.json; cols 6..11
+ // UNVERIFIED — carried raw, never silently interpreted):
+@@ -32,8 +53,11 @@
+ //
+ // The per-column VALUE TYPES (int vs float at the FUN_0083a5b0 extractor level)
+ // are UNVERIFIED (iter032 bound 4); this decoder keeps every value as a JS
+-// number (the text is numeric throughout — verified by the census over all
+-// 492 records) and does NOT force a type.
++// number and does NOT force a type. (The former "the text is numeric
++// throughout — verified by the census over all 492 records" claim was FALSE:
++// 6 of the 5,916 raw whitespace token slots carry comma tokens — see the
++// corpus note above; corrected by EU935_M1_GATE_C_FINDINGS_REVALIDATION_R1_
++// 20260926. Fail-closed behavior is unchanged.)
+ 
+ export const VCL_VALUES_PER_RECORD = 12;       // FUN_0083a7d0 12-value loop
+ export const VCL_ENGINE_RECORD_BYTES = 0x30;   // 48 = 12 * 4 (engine row stride)

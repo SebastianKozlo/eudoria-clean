@@ -1,0 +1,44 @@
+diff --git a/src/peworld/PEFoliageCore.js b/src/peworld/PEFoliageCore.js
+index 9568302..f14dc89 100644
+--- a/src/peworld/PEFoliageCore.js
++++ b/src/peworld/PEFoliageCore.js
+@@ -35,11 +35,26 @@
+ //   P6 @0x0095B365  nodeScale = f32(|value*C|)        (FUN_0095b180 -> node+0x68)
+ // The lerp min/max are FLOAT32 FIELDS (FLD DWORD [impl+0x44]/[impl+0x40]) — the
+ // lerp OPERANDS are f32 values whatever their source.
+-// EXACTNESS (proven exhaustively, exact-rational, iter035): the JS formula
+-// (f64 arithmetic + Math.fround at the same points) is BIT-EXACT vs the
+-// binary's 80-bit-then-FSTP-DWORD double rounding over the COMPLETE input
++// EXACTNESS (CONDITIONAL — four-way status separation added by
++// EU935_M1_GATE_C_FINDINGS_REVALIDATION_R1_20260926; no arithmetic change):
++// UNDER THE STATED x87 MODEL (precision control PC in {53,64}, rounding
++// control RC = nearest-even), the JS formula (f64 arithmetic + Math.fround at
++// the same points) was proven exhaustively, exact-rational (iter035), BIT-EXACT
++// vs the binary's 80-bit-then-FSTP-DWORD double rounding over the COMPLETE input
+ // domains (32768/32768 rand01 values, 65536/65536 u16 positions,
+-// 1245184+1245184 lerp/scale combinations — 0 mismatches).
++// 1245184+1245184 lerp/scale combinations — 0 mismatches). PC=24 was measured
++// DIFFERENT (14,104/229,376 real + 103,073/1,245,184 synthetic lerp values) —
++// the model condition is LOAD-BEARING, and the proof is CONDITIONAL on it.
++// FOUR-WAY STATUS SEPARATION (binding; do not collapse into "BIT-EXACT"):
++//   1. BYTE-LOCKED OPERANDS = CONFIRMED (the three .rdata QWORDs above).
++//   2. ARITHMETIC MODEL EXACTNESS = CONDITIONAL on x87 PC in {53,64} +
++//      RC = nearest-even (the stated model; NOT an unconditional proof).
++//   3. ORIGINAL CLIENT RUNTIME PARITY = UNVERIFIED/UNMEASURED (the actual
++//      foliage-site CW at chain-execution time was never measured; no runtime
++//      experiment authorized or performed).
++//   4. HISTORICAL FOLIAGE INPUTS = NOT RECOVERED ([P-CLIMATE] caller-selected
++//      climate; [P-CELLSTREAM] stand-in cell content; p3 default; windowWorld
++//      = CURRENT_RUNTIME_CALIBRATION) — FOLIAGE PLACEMENT 1:1 = NOT CLAIMED.
+ //
+ // ============ THE CONFIRMED CHAIN (address-cited; unchanged parts from iter032) ============
+ // (1) .vcl TSV -> 12-value records (FUN_0083a7d0; decoded upstream by
+@@ -120,7 +135,7 @@ export const FOLIAGE_OPERAND_LOCK = {
+     'P5 @0x0095B353 f32(value*C)',
+     'P6 @0x0095B365 nodeScale = f32(|value*C|)',
+   ],
+-  exactness: 'exhaustive exact-rational proof: the f64+Math.fround replication is BIT-EXACT vs 80-bit+FSTP DWORD over the complete input domains (0 mismatches; iter035_operand_table.json exactness_proofs)',
++  exactness: 'CONDITIONAL exact-rational proof under the stated x87 model (PC in {53,64} + RC = nearest-even): under that model the f64+Math.fround replication is BIT-EXACT vs 80-bit+FSTP DWORD over the complete input domains (0 mismatches; iter035_operand_table.json exactness_proofs); PC=24 measured DIFFERENT (14,104/229,376 real + 103,073/1,245,184 synthetic). The ACTUAL original-client foliage-site CW is UNMEASURED — original-client runtime parity UNVERIFIED, historical foliage inputs NOT RECOVERED, placement 1:1 NOT claimed (EU935_M1_GATE_C_FINDINGS_REVALIDATION_R1_20260926)',
+ };
+ 
+ export const FOLIAGE_RE = {

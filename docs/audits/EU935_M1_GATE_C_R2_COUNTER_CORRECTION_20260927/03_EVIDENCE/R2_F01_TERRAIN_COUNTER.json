@@ -1,0 +1,95 @@
+{
+  "probe": "R2_F01_TERRAIN_SAMPLE_COUNTER",
+  "run_id": "EU935_M1_GATE_C_R2_COUNTER_CORRECTION_20260927",
+  "node_version": "v22.22.0",
+  "MEASURED_QUANTITY": "regular-tile census of the BNT2 index of terrain.bnt (PCG_9_3_5) + the two independent sample-slot arithmetic paths",
+  "SOURCE": "D:/Eudoria_Reconstruction/pcg_install/Data/Terrain/terrain.bnt",
+  "SOURCE_HASH": "95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990",
+  "SOURCE_SIZE": 125064817,
+  "METHOD": "BNT2 trailer parse: trailer [dir_off u32][\"BNT2\"]; at dir_off [count u32]; entries [name 0x0A-terminated][size u32][offset u32][crc u32][flags u32]; index consumed exactly p == filesize-8; census over ALL entry names",
+  "bnt2": {
+    "trailer_magic": "BNT2",
+    "dir_off": 123369726,
+    "count": 58451,
+    "index_consumed_exactly": true,
+    "index_end_position": 125064809,
+    "expected_end_position": 125064809
+  },
+  "census": {
+    "total_entries": 58451,
+    "eight_hex_tdf_names": 58451,
+    "non_hex_tdf_names": 0,
+    "regular": 51920,
+    "special": 6530,
+    "sentinel": 1,
+    "unclassified": 0,
+    "duplicates": 0,
+    "regular_plus_special_plus_sentinel": 58451,
+    "distinct_x_regular": 220,
+    "distinct_y_regular": 236,
+    "regular_x_range": [
+      0,
+      219
+    ],
+    "regular_y_range": [
+      0,
+      235
+    ],
+    "regular_x_contiguous_0_219": true,
+    "regular_y_contiguous_0_235": true,
+    "special_x_range": [
+      0,
+      217
+    ],
+    "special_y_range": [
+      65370,
+      65535
+    ],
+    "sentinel_names": [
+      "7ffe7ffe.tdf"
+    ],
+    "duplicate_names": []
+  },
+  "EXCLUSION_SET": {
+    "description": "entries EXCLUDED from the regular-tile sample-slot total",
+    "special_y_in_ff1a_ffff": 6530,
+    "sentinel_7ffe7ffe": 1,
+    "total_excluded": 6531
+  },
+  "arithmetic": {
+    "per_tile_sample_slots": 1024,
+    "path_A_regular_times_1024": {
+      "expression": "51920 * 1024",
+      "value": 53166080
+    },
+    "path_B_grid_dimensions": {
+      "expression": "(220*32) * (236*32) = 7040 * 7552",
+      "value": 53166080
+    },
+    "both_paths_equal": true,
+    "both_paths_value": 53166080,
+    "falsifier_regular_times_32": {
+      "expression": "51920 * 32",
+      "value": 1661440,
+      "equals_old_printed_total": false
+    },
+    "old_printed_total": 1664000,
+    "old_total_derivable_from_no_valid_arithmetic": true
+  },
+  "per_tile_denominator_evidence": {
+    "tdf_format": "32x32 uint16 LE at payload offset 64 (R1 F03 section 7.2 B; HEIGHT_DATA_OFFSET=64, 64+2048=2112)",
+    "region_tiles_samples": "9216/9216 samples identical for 9 region tiles = 9 * 1024 (internal consistency of the 1024-per-tile denominator)",
+    "committed_canon": "M1 gate matrix \"220x236 = 51,920 regular\" + docs/audits/CORRECTION_LEDGER.md PE-MASTER physical name census"
+  },
+  "expected_vs_measured": {
+    "total_58451": true,
+    "regular_51920": true,
+    "distinct_x_220": true,
+    "distinct_y_236": true,
+    "special_6530": true,
+    "sentinel_1": true,
+    "duplicates_0": true,
+    "both_paths_53166080": true
+  },
+  "RESULT": "REPRODUCED: 51,920 regular tiles; 53,166,080 u16 sample slots via BOTH independent arithmetic paths; the old printed total 1,664,000 is derivable from NO valid arithmetic over these denominators (51,920*32 = 1,661,440 != 1,664,000)"
+}

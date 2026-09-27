@@ -1,0 +1,84 @@
+{
+  "probe": "F01_TRACE_LINECOUNT_ERRATUM",
+  "amend_batch": "AMEND_R1",
+  "qc_ref": "QC-P3-4",
+  "run_id": "EU935_M1_GATE_C_FINDINGS_REVALIDATION_R1_20260926",
+  "node_version": "v22.22.0",
+  "source": {
+    "path": "99_Audits/PE_M1_X87CW_AUTOMATION_R1_20260905_140126/04_Runtime/live_test/entropia_death_trace.csv",
+    "size_bytes": 50053186,
+    "sha256_fresh": "2BFA1F7C71EED9AD74098D4E078FDD06F265E87C8764067A0359F8E006ED2BE8",
+    "sha256_pin_sourceindex": "2BFA1F7C71EED9AD74098D4E078FDD06F265E87C8764067A0359F8E006ED2BE8",
+    "sha256_pin_match": true,
+    "leading_utf8_bom": true,
+    "final_two_bytes_hex": "0D 0A",
+    "read_only": true
+  },
+  "byte_census": {
+    "lf_bytes_0x0A": 282060,
+    "cr_bytes_0x0D_total": 282193,
+    "crlf_pairs_0D0A": 282060,
+    "lone_cr_bytes_CR_not_followed_by_LF": 133,
+    "lf_bytes_not_preceded_by_CR": 0,
+    "method": "single pass over raw bytes: LF count; CR count; CRLF pair count (CR followed by LF); lone CR count (CR NOT followed by LF, i.e. embedded in quoted Detail fields); LF-without-preceding-CR count; leading-BOM check; final-two-bytes check. No console rendering involved."
+  },
+  "derived_line_counts": {
+    "lf_convention": {
+      "lines": 282060,
+      "data_rows": 282059,
+      "validity": "valid because the file ends with LF and every LF terminates a line (lf_bytes_not_preceded_by_CR measured = 0 extra splits)"
+    },
+    "cr_splitting_convention": {
+      "lines": 282193,
+      "data_rows": 282192,
+      "mechanism": "a line reader that treats BOTH CR and LF as terminators counts every embedded lone CR inside quoted Detail fields as an extra line boundary"
+    }
+  },
+  "rfc4180_quote_aware_parse": {
+    "records_total": 282060,
+    "data_rows": 282059,
+    "header_row": [
+      "Time of Day",
+      "Process Name",
+      "PID",
+      "Operation",
+      "Path",
+      "Result",
+      "Detail"
+    ],
+    "rows_with_field_count_not_7": 0,
+    "note": "embedded lone CRs stay INSIDE their quoted Detail fields; records are NOT split by them"
+  },
+  "per_client_facts_re_derived": {
+    "entropia_exe_rows": 2193,
+    "distinct_entropia_exe_pids": [
+      "12976"
+    ],
+    "entropia_process_exit_rows": [
+      {
+        "pid": "12976",
+        "detail": "Exit Status: -1, User Time: 0.0000000 seconds, Kernel Time: 0.0937500 seconds, Private Bytes: 6,127,616, Peak Private Bytes: 6,164,480, Working Set: 16,609,280, Peak Working Set: 16,613,376"
+      }
+    ],
+    "exit_status_minus1_count": 1,
+    "load_image_rows_total_all_processes": 129,
+    "load_image_rows_entropia_exe": 77,
+    "ddraw_d3d8_d3d9_load_image_rows": 0,
+    "d3dx9_30_load_image_rows_all_processes": 2,
+    "d3dx9_30_load_image_rows_entropia_exe": 2
+  },
+  "cross_check_vs_master": {
+    "master_lf_bytes": 282060,
+    "this_probe_lf_bytes": 282060,
+    "lf_match": true,
+    "master_lone_cr": 133,
+    "this_probe_lone_cr": 133,
+    "lone_cr_match": true
+  },
+  "erratum": {
+    "historical_quote_data_rows": 282059,
+    "this_run_f01_probe_reported_data_rows": 282192,
+    "adjudication": "ROOT-CAUSED. The historical quote 282,059 is the CORRECT LF data-row count (LF bytes 282060 = header + 282059 data rows). This run's F01 probe reported 282,192 because its line reader was CR-SENSITIVE: 282060 LF-terminated lines + 133 embedded lone CR bytes (inside quoted Detail fields) = 282193 counted lines -> 282192 \"data rows\". The 133-row delta is a LINE-COUNTING ARTIFACT, NOT a data discrepancy: the quote-aware RFC4180 parse of the same bytes confirms the per-client load-bearing facts unchanged.",
+    "per_client_facts_unaffected": true
+  }
+}

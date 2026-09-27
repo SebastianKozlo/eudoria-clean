@@ -1,0 +1,25 @@
+# EDIT_A (F03 line 102: the incorrect sample-total statement)
+# a = the byte-exact BEFORE_IMAGE preserved before the edit; b = the post-edit repository file
+diff --git a/D:/Eudoria_Reconstruction/12_WebGame/eudoria-clean/docs/audits/EU935_M1_GATE_C_R2_COUNTER_CORRECTION_20260927/03_EVIDENCE/BEFORE_IMAGES/BEFORE_F03_TERRAIN_TEXTURE_SCOPE.md b/D:/Eudoria_Reconstruction/12_WebGame/eudoria-clean/docs/audits/EU935_M1_GATE_C_FINDINGS_REVALIDATION_R1_20260926/02_ANALYSIS/F03_TERRAIN_TEXTURE_SCOPE.md
+index 6649c15..ddfde2b 100644
+--- a/D:/Eudoria_Reconstruction/12_WebGame/eudoria-clean/docs/audits/EU935_M1_GATE_C_R2_COUNTER_CORRECTION_20260927/03_EVIDENCE/BEFORE_IMAGES/BEFORE_F03_TERRAIN_TEXTURE_SCOPE.md
++++ b/D:/Eudoria_Reconstruction/12_WebGame/eudoria-clean/docs/audits/EU935_M1_GATE_C_FINDINGS_REVALIDATION_R1_20260926/02_ANALYSIS/F03_TERRAIN_TEXTURE_SCOPE.md
+@@ -99,7 +99,17 @@ B. TDF u16 HEIGHT REPRESENTATION
+ - PHYSICAL RESOURCE: the TDF payload height blocks (32x32 uint16 LE at payload
+   offset 64) in terrain.bnt/50.bnt.
+ - FRAME: PER-TILE (the 220x236 filename-xy grid; tile = 128 world units).
+-- SAMPLE DIMENSIONS: 32x32 u16 per tile (1,664,000 samples over 51,920 tiles).
++- SAMPLE DIMENSIONS: 32x32 u16 per tile. TOTAL = 53,166,080 u16 SAMPLE SLOTS
++  across the 51,920 regular 32x32 tile blocks (correction by
++  EU935_M1_GATE_C_R2_COUNTER_CORRECTION_20260927; the historical "1,664,000
++  samples" printed here was derivable from NO valid arithmetic over these
++  denominators — 51,920 x 32 = 1,661,440 — and is superseded). Two independent
++  arithmetic paths, both machine-executed: 51,920 x 1,024 = 53,166,080 and
++  (220x32) x (236x32) = 7,040 x 7,552 = 53,166,080. The 53,166,080 count is
++  SAMPLE SLOTS, NOT unique height values, NOT unique world points, NOT
++  historical rendering coverage, NOT terrain-texture coverage, NOT
++  original-client parity, NOT proof of the RGB-TDF bridge (BRIDGE_STATUS
++  below = UNKNOWN, unchanged; all calibration/unknown labels preserved).
+ - UNITS: u16 x 1/128 m = the CURRENT_RUNTIME_CALIBRATION (heightScale 128 u16/m
+   = STRONGLY_SUPPORTED calibration, NOT an engine-extracted constant); the PE2003
+   decode FUN_0047fb20 = min + (max-min)*u16/65535 (identity + operation CONFIRMED

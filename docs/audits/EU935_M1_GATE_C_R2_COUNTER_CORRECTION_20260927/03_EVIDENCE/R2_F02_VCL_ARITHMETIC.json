@@ -1,0 +1,120 @@
+{
+  "probe": "R2_F02_VCL_REVIEW_ARITHMETIC_ERRATUM",
+  "run_id": "EU935_M1_GATE_C_R2_COUNTER_CORRECTION_20260927",
+  "node_version": "v22.22.0",
+  "sources": {
+    "census": {
+      "path": "03_EVIDENCE/F02_VCL_CENSUS.json (R1 predecessor package)",
+      "sha256": "B67E1FC41820CDC165FB8033ABCA0A035CD23F7838623E166534527B6FE7093D"
+    },
+    "iter032k": {
+      "path": "03_EVIDENCE/F02_ITER032K_RERUN_vcl_columns.json (R1 predecessor package)",
+      "sha256": "A62D9473D6D6D82C97595CEECCBCB915490F95A2B0F14750DBC03075A6526789"
+    }
+  },
+  "per_file_rederivation": {
+    "method": "sums computed from the per_file array rows; the JSON totals block was NOT used",
+    "files": 32,
+    "sum_lines": 492,
+    "sum_tokens": 5916,
+    "sum_groups": 493,
+    "sum_success_records": 472,
+    "success_files": 31,
+    "throw_files": 1,
+    "cross_check_decoder_execution_log": {
+      "records": 472,
+      "success": 31,
+      "throw": 1,
+      "records_match": true
+    },
+    "v25": {
+      "lines": 21,
+      "tokens": 252,
+      "groups": 21,
+      "comma_lines": 1,
+      "numeric_lines": 20
+    },
+    "continuation_line": {
+      "files_with_groups_gt_lines": [
+        {
+          "name": "9.vcl",
+          "lines": 11,
+          "groups": 12
+        }
+      ],
+      "extra_groups_beyond_one_per_line": 1,
+      "note": "9.vcl line 1 (29 tab fields = 12 numeric + 5 empty + 12 numeric) = 24 whitespace tokens = 2 groups; its FIRST group is one of the 491 numeric rows, its SECOND is the +1 extra"
+    },
+    "numeric_rows_12cols": {
+      "value": 491,
+      "total_rows_alltokens": 492,
+      "excluded_rows": 1,
+      "only_excluded_row": "the 25.vcl comma line (float() ValueError path silently skips it)"
+    }
+  },
+  "relations": {
+    "bad_equation": {
+      "statement": "491x12 + 24 + 252 = 5916 (the human-pasted PE_MASTER_REVIEW relay)",
+      "LHS": 6168,
+      "RHS_claimed": 5916,
+      "LHS_equals_RHS": false,
+      "verdict": "FALSE — the LHS is 6168"
+    },
+    "correct_group_level": {
+      "expression": "(491+1+1)*12",
+      "value": 5916,
+      "equals_sum_tokens": true,
+      "decomposition": "491 numeric lines (the continuation line counted once via its first 12 tokens) + 1 continuation extra group + 1 comma group = 493 groups"
+    },
+    "correct_records": {
+      "expression": "493 - 21",
+      "value": 472,
+      "equals_sum_success_records": true
+    },
+    "correct_file_level": {
+      "expression": "472*12 + 252",
+      "value": 5916,
+      "equals_sum_tokens": true
+    },
+    "double_count_decomposition": {
+      "overcount": 252,
+      "overcount_equals_252": true,
+      "term_240": {
+        "value": 240,
+        "meaning": "25.vcl's 20 numeric lines x 12 = 240 tokens, ALREADY inside 491x12 (25.vcl's 20 numeric lines are among the 491) — the +252 term re-adds ALL 21 of 25.vcl's groups"
+      },
+      "term_12": {
+        "value": 12,
+        "meaning": "the 9.vcl continuation line's FIRST group = 12 tokens, ALREADY inside 491x12 (the continuation line is one of the 491 numeric rows) — the +24 term re-adds BOTH its groups (only the second is new)"
+      },
+      "sum": 252,
+      "sum_equals_overcount": true
+    },
+    "population_identities": {
+      "lines_492": true,
+      "tokens_5916": true,
+      "groups_493": true,
+      "records_472": true,
+      "numeric_rows_491": true,
+      "groups_eq_numeric_plus_extra_plus_comma": true
+    }
+  },
+  "repo_search": {
+    "search_space": "ALL tracked repo files (git ls-files) at HEAD cc747df worktree, read as bytes, latin1-decoded for literal search",
+    "tracked_files": 2594,
+    "files_scanned": 2594,
+    "bytes_scanned": 133463531,
+    "files_unreadable": [],
+    "variants": [
+      "491x12 + 24 + 252",
+      "491*12 + 24 + 252",
+      "491 × 12 + 24"
+    ],
+    "flexible_regex": "491\\s*[x*\\u00d7]\\s*12\\s*\\+\\s*24",
+    "hits": [],
+    "hits_count": 0,
+    "result": "0 hits — the bad equation existed ONLY in the human-pasted PE_MASTER_REVIEW chat relay, never in a repo file"
+  },
+  "unaffected_claims": "the raw census 32 files / 492 lines / 5,916 tokens / 493 groups / 6 bad tokens / 31 successes / 1 THROW / 472 records and ALL R1 package contents are UNCHANGED and valid; no comma normalization, no parser change, no original-client comma-semantics inference",
+  "RESULT": "REPRODUCED: the pasted-review equation LHS = 6,168 != 5,916 (FALSE); the correct relations (491+1+1)x12 = 5,916 and 472x12+252 = 5,916 both verified; the raw census 492/5,916/493/472 UNCHANGED and valid; 0 repo hits for the bad equation"
+}
