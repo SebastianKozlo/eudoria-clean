@@ -1,0 +1,359 @@
+{
+ "run_id": "PE_935_20002_PAYLOAD30_DESKTOP_CORRECTION_R1_20261002",
+ "artifact": "FALLBACK_PATH_RECORD.json",
+ "generator": "03_SCRIPTS/desktop_correction_r1/s3_fallback_path.py",
+ "generator_sha256": "F141645EA242A0EE3050B03661B1EB26346516B6F1345A353EF10A0F6584D1C4",
+ "exe_path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe",
+ "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+ "exe_size": 8015872,
+ "classification": "BYTE-CORRECT EVIDENCE OF A NON-SELECTED FALLBACK PATH",
+ "the_old_claim_superseded": {
+  "old_selected_reader": "FUN_00412540",
+  "old_read": {
+   "va": "0x00412553",
+   "bytes": "8B 04 10"
+  },
+  "old_store": {
+   "va": "0x0041255A",
+   "bytes": "89 02"
+  },
+  "old_chain": "FUN_00726900 -> FUN_0075f660 @0x726A1B -> (flags bit0 test @0x75F687, 0xC0 & 1 == 0) -> FUN_004129c0 @0x75F6AA -> case type 1 @0x4129DF -> FUN_00412540",
+  "what_was_wrong": "The old trace treated the flags-bit0/typed-reader path as THE selected path. The bytes show the flags-bit0 test lives INSIDE the fallback (reachable only after the JZ @0x75F66E is TAKEN, i.e. conditional on descriptor+0 == NULL), which is NOT the tag-ID-17 state: the registration dataflow + factory bytes prove descriptor+0 = 0x00BA937C (non-NULL), so the JZ is NOT taken and the VIRTUAL branch is selected (see BRANCH_SELECTION_TRACE.json).",
+  "lesson": "correct instruction bytes != proven selected execution/parser path"
+ },
+ "reachability_condition": {
+  "gate": "FUN_0075f660: TEST ECX,ECX @0x75F664 (ECX = [descriptor+0]) followed by JZ @0x75F66E -> 0x75F687",
+  "condition": "the fallback is selected IFF descriptor+0 == NULL",
+  "tag_17_descriptor_plus_0": "0x00BA937C (the ArkRTTraitsInt static object returned by FUN_00977a50; byte-proven non-NULL on both factory paths)",
+  "verdict": "FALLBACK NOT SELECTED for tag ID 17 (control-flow reachability from the proven descriptor state)",
+  "note_on_the_old_reasoning": "the old 'flags bit0 test @0x75F687 -> scalar path' reasoning only holds AFTER the JZ, i.e. conditional on descriptor+0 == NULL"
+ },
+ "corrected_file_offsets": {
+  "read_instruction": {
+   "va": "0x00412553",
+   "rva": "0x00012553",
+   "file_offset": "0x00012553",
+   "recomputed_by": "this run's own PE32 section-table computation (.text: virtual_address 0x1000, raw_pointer 0x1000)"
+  },
+  "store_instruction": {
+   "va": "0x0041255A",
+   "rva": "0x0001255A",
+   "file_offset": "0x0001255A"
+  },
+  "old_report_transcription": {
+   "was": "READ_INSTRUCTION_FILE_OFFSET = 0x00125553 (06_REPORT/REPORT.md, superseded)",
+   "problem": "digit-shift error: 0x00125553 is a 7-hex-digit value (1194067) that does not equal the correct offset 0x12553 (75173); the run's own pin JSON (01_RAW/CLIENT_READ_BYTES.json, immutable) already recorded the correct file_offset 0x12540-region pins with READ @ file_offset 0x12553",
+   "disposition": "superseded by the corrected value 0x12553 in DESKTOP_CORRECTION_R1; the pin JSON was always correct"
+  }
+ },
+ "historical_preservation_note": [
+  "01_RAW/CLIENT_READ_BYTES.json is byte-unchanged (immutable): its pins are BYTE-CORRECT and remain valid as FALLBACK-path + routing evidence.",
+  "Its 'role' fields ('READ_FUNCTION=FUN_00412540 (type-1 scalar value reader)', 'THE CLIENT READ INSTRUCTION') describe the fallback reader's bytes;",
+  "the SELECTED-path correction (virtual branch -> FUN_009777F0) lives in the NEW artifacts of 01_RAW/DESKTOP_CORRECTION_R1/."
+ ],
+ "pin_count": 25,
+ "match_count": 25,
+ "all_match": true,
+ "pins": [
+  {
+   "va": "0x0075F66E",
+   "rva": "0x0035F66E",
+   "file_offset": "0x0035F66E",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "7417",
+   "expected_bytes_hex": "7417",
+   "match": true,
+   "claim": "JZ -> 0x0075F687 - THE FALLBACK REACHABILITY CONDITION: this branch is taken ONLY when [descriptor+0] == NULL",
+   "role": "fallback reachability gate (inside the virtual-branch dispatch FUN_0075f660)"
+  },
+  {
+   "va": "0x0075F687",
+   "rva": "0x0035F687",
+   "file_offset": "0x0035F687",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "F6400C01",
+   "expected_bytes_hex": "F6400C01",
+   "match": true,
+   "claim": "TEST byte [EAX+0xC],1 - descriptor FLAGS bit0 test (fallback only; 0xC0 & 1 == 0 for tag 17)",
+   "role": "fallback: flags bit0 test"
+  },
+  {
+   "va": "0x0075F68B",
+   "rva": "0x0035F68B",
+   "file_offset": "0x0035F68B",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "8B4004",
+   "expected_bytes_hex": "8B4004",
+   "match": true,
+   "claim": "MOV EAX,[EAX+4] - the descriptor TYPE (1)",
+   "role": "fallback: type load"
+  },
+  {
+   "va": "0x0075F694",
+   "rva": "0x0035F694",
+   "file_offset": "0x0035F694",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "7414",
+   "expected_bytes_hex": "7414",
+   "match": true,
+   "claim": "JZ -> 0x0075F6AA - flags bit0 clear -> the SCALAR fallback path",
+   "role": "fallback: scalar-path branch"
+  },
+  {
+   "va": "0x0075F696",
+   "rva": "0x0035F696",
+   "file_offset": "0x0035F696",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E8E536CBFF",
+   "expected_bytes_hex": "E8E536CBFF",
+   "match": true,
+   "claim": "CALL FUN_00412d80 (rel32 target computed = 0x00412D80) - the ARRAY fallback (flags bit0 set; NOT the tag-17 state even on the fallback)",
+   "role": "fallback: array-path call"
+  },
+  {
+   "va": "0x0075F6AA",
+   "rva": "0x0035F6AA",
+   "file_offset": "0x0035F6AA",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E81133CBFF",
+   "expected_bytes_hex": "E81133CBFF",
+   "match": true,
+   "claim": "CALL FUN_004129c0 (rel32 target computed = 0x004129C0) - the SCALAR fallback type switch",
+   "role": "fallback: scalar-switch call"
+  },
+  {
+   "va": "0x004129C0",
+   "rva": "0x000129C0",
+   "file_offset": "0x000129C0",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "8B442408",
+   "expected_bytes_hex": "8B442408",
+   "match": true,
+   "claim": "MOV EAX,[ESP+8] - the fallback switch's TYPE argument (1)",
+   "role": "fallback switch: type load"
+  },
+  {
+   "va": "0x004129C4",
+   "rva": "0x000129C4",
+   "file_offset": "0x000129C4",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "83C0FF",
+   "expected_bytes_hex": "83C0FF",
+   "match": true,
+   "claim": "ADD EAX,-1 (type-1 range normalization)",
+   "role": "fallback switch: range normalize"
+  },
+  {
+   "va": "0x004129C7",
+   "rva": "0x000129C7",
+   "file_offset": "0x000129C7",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "83F808",
+   "expected_bytes_hex": "83F808",
+   "match": true,
+   "claim": "CMP EAX,8 (types 1..9 supported)",
+   "role": "fallback switch: range check"
+  },
+  {
+   "va": "0x004129D1",
+   "rva": "0x000129D1",
+   "file_offset": "0x000129D1",
+   "section": ".text",
+   "length": 7,
+   "original_bytes_hex": "FF2485682A4100",
+   "expected_bytes_hex": "FF2485682A4100",
+   "match": true,
+   "claim": "JMP dword [EAX*4 + 0x00412A68] - the switch jump table",
+   "role": "fallback switch: jump table dispatch"
+  },
+  {
+   "va": "0x00412A68",
+   "rva": "0x00012A68",
+   "file_offset": "0x00012A68",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "D8294100",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "jump-table entry 0 (type 1) = 0x004129D8 - the case-1 body",
+   "role": "fallback switch: jump-table entry (static .text dword)"
+  },
+  {
+   "va": "0x004129D8",
+   "rva": "0x000129D8",
+   "file_offset": "0x000129D8",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "8B742408",
+   "expected_bytes_hex": "8B742408",
+   "match": true,
+   "claim": "MOV ESI,[ESP+8] - the case-1 body: the cursor argument",
+   "role": "fallback switch case 1: cursor load"
+  },
+  {
+   "va": "0x004129DC",
+   "rva": "0x000129DC",
+   "file_offset": "0x000129DC",
+   "section": ".text",
+   "length": 1,
+   "original_bytes_hex": "51",
+   "expected_bytes_hex": "51",
+   "match": true,
+   "claim": "PUSH ECX - the dest argument (loaded by the caller at 0x75F68E)",
+   "role": "fallback switch case 1: dest push"
+  },
+  {
+   "va": "0x004129DD",
+   "rva": "0x000129DD",
+   "file_offset": "0x000129DD",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "8BCE",
+   "expected_bytes_hex": "8BCE",
+   "match": true,
+   "claim": "MOV ECX,ESI - this = the cursor",
+   "role": "fallback switch case 1: this setup"
+  },
+  {
+   "va": "0x004129DF",
+   "rva": "0x000129DF",
+   "file_offset": "0x000129DF",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E85CFBFFFF",
+   "expected_bytes_hex": "E85CFBFFFF",
+   "match": true,
+   "claim": "CALL FUN_00412540 (rel32 target computed = 0x00412540) - THE CASE-TYPE-1 DISPATCH",
+   "role": "fallback switch case 1: the FUN_00412540 dispatch"
+  },
+  {
+   "va": "0x00412540",
+   "rva": "0x00012540",
+   "file_offset": "0x00012540",
+   "section": ".text",
+   "length": 18,
+   "original_bytes_hex": "8079110074238B410C8D50043B510877188B",
+   "expected_bytes_hex": "8079110074238B410C8D50043B510877188B",
+   "match": true,
+   "claim": "FUN_00412540 prologue: CMP byte [ECX+0x11],0 (cursor flag); JZ error; MOV EAX,[ECX+0xC] (offset); LEA EDX,[EAX+4] (width bound); CMP EDX,[ECX+8] (limit); JA error; MOV EDX,[ECX] (base)",
+   "role": "fallback reader: full prologue window"
+  },
+  {
+   "va": "0x00412553",
+   "rva": "0x00012553",
+   "file_offset": "0x00012553",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "8B0410",
+   "expected_bytes_hex": "8B0410",
+   "match": true,
+   "claim": "MOV EAX,[EDX+EAX*1] - THE FALLBACK READ (4-byte LE at cursor.base+offset). Independently recomputed file offset = 0x00012553 (RVA 0x12553; .text raw_pointer 0x1000 == virtual_address 0x1000)",
+   "role": "fallback reader: THE READ INSTRUCTION (BYTE-CORRECT; NON-SELECTED for tag 17)"
+  },
+  {
+   "va": "0x00412556",
+   "rva": "0x00012556",
+   "file_offset": "0x00012556",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "8B542404",
+   "expected_bytes_hex": "8B542404",
+   "match": true,
+   "claim": "MOV EDX,[ESP+4] - the dest pointer argument",
+   "role": "fallback reader: dest load"
+  },
+  {
+   "va": "0x0041255A",
+   "rva": "0x0001255A",
+   "file_offset": "0x0001255A",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "8902",
+   "expected_bytes_hex": "8902",
+   "match": true,
+   "claim": "MOV [EDX],EAX - THE FALLBACK STORE. Independently recomputed file offset = 0x0001255A",
+   "role": "fallback reader: THE STORE INSTRUCTION (BYTE-CORRECT; NON-SELECTED for tag 17)"
+  },
+  {
+   "va": "0x0041255C",
+   "rva": "0x0001255C",
+   "file_offset": "0x0001255C",
+   "section": ".text",
+   "length": 8,
+   "original_bytes_hex": "C744240404000000",
+   "expected_bytes_hex": "C744240404000000",
+   "match": true,
+   "claim": "MOV dword [ESP+4],4 - the fallback advance width",
+   "role": "fallback reader: advance width"
+  },
+  {
+   "va": "0x00412564",
+   "rva": "0x00012564",
+   "file_offset": "0x00012564",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E9F7B8FFFF",
+   "expected_bytes_hex": "E9F7B8FFFF",
+   "match": true,
+   "claim": "JMP FUN_0040de60 (tail) - the fallback cursor advance by 4",
+   "role": "fallback reader: advance tail-jump"
+  },
+  {
+   "va": "0x00412569",
+   "rva": "0x00012569",
+   "file_offset": "0x00012569",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "8B442404",
+   "expected_bytes_hex": "8B442404",
+   "match": true,
+   "claim": "ERROR PATH of the fallback reader: MOV EAX,[ESP+4] (dest pointer)",
+   "role": "fallback reader: error path (dest load)"
+  },
+  {
+   "va": "0x0041256D",
+   "rva": "0x0001256D",
+   "file_offset": "0x0001256D",
+   "section": ".text",
+   "length": 6,
+   "original_bytes_hex": "C70000000000",
+   "expected_bytes_hex": "C70000000000",
+   "match": true,
+   "claim": "MOV dword [EAX],0 - ERROR PATH: the destination is zeroed",
+   "role": "fallback reader: error path (dest = 0)"
+  },
+  {
+   "va": "0x00412579",
+   "rva": "0x00012579",
+   "file_offset": "0x00012579",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "C6411100",
+   "expected_bytes_hex": "C6411100",
+   "match": true,
+   "claim": "MOV byte [ECX+0x11],0 - ERROR PATH: the cursor flag is CLEARED (failure propagation; NOT the successful parse path)",
+   "role": "fallback reader: error path (cursor flag cleared)"
+  },
+  {
+   "va": "0x0041257D",
+   "rva": "0x0001257D",
+   "file_offset": "0x0001257D",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "C20400",
+   "expected_bytes_hex": "C20400",
+   "match": true,
+   "claim": "RET 4 - the fallback reader's error-path return (pops its single stack arg: the dest; contrast the SELECTED reader FUN_009777F0's RET 8 = cursor + dest)",
+   "role": "fallback reader: error path return"
+  }
+ ]
+}
