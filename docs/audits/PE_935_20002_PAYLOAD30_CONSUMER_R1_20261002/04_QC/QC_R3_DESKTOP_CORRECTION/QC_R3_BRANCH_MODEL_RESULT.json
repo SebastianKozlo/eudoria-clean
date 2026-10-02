@@ -1,0 +1,77 @@
+{
+  "q": "Q2_branch_selection_model",
+  "static_evidence": {
+    "store_instruction_pinned": "MOV dword [0x00BA937C],0x00A9C670 @0x977A68 (bytes C7057C93BA0070C6A900, verified in Q1)",
+    "runtime_objtable[0x00BA937C]_predicted": "0xa9c670",
+    "static_slot_dword_va": "0xa9c684",
+    "static_slot_dword_value": "0x9777f0",
+    "slot_dword_is_FUN_009777F0": true,
+    "rtti_col": "0xab8360",
+    "rtti_td": "0xb9f10c",
+    "rtti_name": ".?AUArkRTTraitsInt@@",
+    "rtti_is_ArkRTTraitsInt": true
+  },
+  "abc_table": {
+    "A_descriptor_null": {
+      "descriptor_plus_0": "NULL",
+      "predicted_kind": "FALLBACK",
+      "predicted_target": "0x4129c0",
+      "expected": "FALLBACK (FUN_00412d80/FUN_004129c0 family)"
+    },
+    "B_descriptor_nonnull_proven": {
+      "descriptor_plus_0": "0x00BA937C (proven non-NULL)",
+      "predicted_kind": "VIRTUAL",
+      "predicted_target": "0x9777f0",
+      "expected": "VIRTUAL = static slot dword 0x009777F0 (FUN_009777F0)"
+    },
+    "C_synthetic_slot_target": {
+      "descriptor_plus_0": "0x00BA937C (non-NULL)",
+      "vtable": "synthetic",
+      "predicted_kind": "VIRTUAL",
+      "predicted_target": "0x412540",
+      "expected": "VIRTUAL = the SYNTHETIC slot value (0x00412540) - MUST differ from B"
+    }
+  },
+  "detector": {
+    "A_is_fallback": true,
+    "B_is_virtual_0x9777F0": true,
+    "C_target_changes_with_slot": true,
+    "A_vs_B_selection_change": true,
+    "B_vs_C_target_change": true,
+    "all_mutants_detected": true,
+    "null_is_legal_fallback": true,
+    "tag17_selected_reader_is_FUN_009777F0": true,
+    "tag17_fallback_NOT_selected": true,
+    "runtime_objtable_identity": true
+  },
+  "mutant_models": {
+    "M1_ignore_nonnull": {
+      "predicted": [
+        "FALLBACK",
+        "0x4129c0"
+      ],
+      "detection": "DETECTED-SELECTION-ERROR"
+    },
+    "M2_fallback_despite_nonnull": {
+      "predicted": [
+        "FALLBACK",
+        "0x4129c0"
+      ],
+      "detection": "DETECTED-SELECTION-ERROR"
+    },
+    "M3_hardcoded_slot_target": {
+      "predicted_B": [
+        "VIRTUAL",
+        "0x9777f0"
+      ],
+      "predicted_C": [
+        "VIRTUAL",
+        "0x9777f0"
+      ],
+      "C_followed_synthetic_slot": false,
+      "detection": "DETECTED-TARGET-NOT-DERIVED-FROM-SLOT"
+    }
+  },
+  "verdict": "PASS",
+  "failed_predicates": []
+}

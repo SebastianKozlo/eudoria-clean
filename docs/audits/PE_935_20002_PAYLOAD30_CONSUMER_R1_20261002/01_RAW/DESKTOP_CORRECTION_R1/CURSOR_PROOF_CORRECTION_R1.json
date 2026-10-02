@@ -1,0 +1,785 @@
+{
+ "run_id": "PE_935_20002_PAYLOAD30_DESKTOP_CORRECTION_R1_20261002",
+ "artifact": "CURSOR_PROOF_CORRECTION_R1.json",
+ "generator": "03_SCRIPTS/desktop_correction_r1/s4_cursor_walk.py",
+ "generator_sha256": "620F13CBDF85D80122BFFCA0062AE64CA45B2ACE52EFA43F605CAB989593999E",
+ "vfs_path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Parameters\\20002.vfs",
+ "vfs_sha256": "C3899C3E88D72CE12CEF9B8A4F5E73B26632BB1A3207C950FF2BC40FD9C94AC4",
+ "vfs_size": 174864,
+ "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+ "global_header_hex": "41726B56465330328000000000000000",
+ "cursor_increment_table": [
+  {
+   "step": "FUN_0070dcf0 advance-8 (class id + record id consumed)",
+   "offset": "0 -> 8",
+   "width": 8,
+   "byte_proof": "PUSH 8 @0x70DDA2; LEA ECX,&cursor @0x70DDA4; CALL FUN_0040de60 @0x70DDA8; bounds offset+8<=limit @0x70DD95..0x70DDA0"
+  },
+  {
+   "step": "FUN_00726900 header flags u16",
+   "offset": "8 -> 10 (0x08)",
+   "width": 2,
+   "byte_proof": "flag test @0x72691B; bounds @0x726925; MOVZX EDI,[ECX+EAX] @0x72692F; advance PUSH 2/CALL @0x726933/0x726937"
+  },
+  {
+   "step": "FUN_00726900 header count u16",
+   "offset": "10 -> 12 (0x0A)",
+   "width": 2,
+   "byte_proof": "MOVZX EDI,[EAX+ECX] @0x72699E; advance PUSH 2/CALL @0x7269A2/0x7269A6"
+  },
+  {
+   "step": "entry 1: tag 0x01 u16",
+   "offset": "12 -> 14 (0x0C)",
+   "width": 2,
+   "byte_proof": "MOVZX EDI,[EAX+ECX] @0x7269E7; advance @0x7269EF"
+  },
+  {
+   "step": "entry 1: tag 0x01 VALUE (descriptor type 4)",
+   "offset": "14 -> 22 (0x0E)",
+   "width": 8,
+   "byte_proof": "the type-4 selected reader FUN_00409ed0->FUN_004099c0: LEA EAX,[EDX+8] @0x4099C9; advance 8 @0x4099E7/JMP @0x4099EF"
+  },
+  {
+   "step": "entry 2: tag 0x0C u16",
+   "offset": "22 -> 24 (0x16)",
+   "width": 2,
+   "byte_proof": "@0x7269E7/@0x7269EF"
+  },
+  {
+   "step": "entry 2: tag 0x0C VALUE (type 2)",
+   "offset": "24 -> 28 (0x18)",
+   "width": 4,
+   "byte_proof": "the type-2 selected reader FUN_00977840: LEA EDX,[EAX+4] @0x97784D; advance 4 @0x97785E/CALL @0x977862"
+  },
+  {
+   "step": "entry 3: tag 0x0D u16 + VALUE (type 1)",
+   "offset": "28 -> 30 -> 34 (0x1C -> 0x1E -> 0x22)",
+   "width": "2 + 4",
+   "byte_proof": "tag @0x7269E7/@0x7269EF; the type-1 selected reader FUN_009777F0 advance 4 @0x97780E/@0x977812"
+  },
+  {
+   "step": "entry 4: tag 0x0E u16 + VALUE (type 1)",
+   "offset": "34 -> 36 -> 40 (0x22 -> 0x24 -> 0x28)",
+   "width": "2 + 4",
+   "byte_proof": "same"
+  },
+  {
+   "step": "entry 5: tag 0x10 u16 + VALUE (type 1)",
+   "offset": "40 -> 42 -> 46 (0x28 -> 0x2A -> 0x2E)",
+   "width": "2 + 4",
+   "byte_proof": "same"
+  },
+  {
+   "step": "entry 6: tag 0x11 u16 (THE TAG-17 ITERATION)",
+   "offset": "46 -> 48 (0x2E -> 0x30)",
+   "width": 2,
+   "byte_proof": "MOVZX EDI,word [EAX+ECX] @0x7269E7 reads the tag bytes at payload+0x2E..+0x30; advance @0x7269EF"
+  },
+  {
+   "step": "entry 6: tag 0x11 VALUE (THE SELECTED READ)",
+   "offset": "48 == 0x30 (payload+0x30)",
+   "width": 4,
+   "byte_proof": "the SELECTED reader FUN_009777F0: bounds offset+4<=limit @0x9777FD..0x977803; THE READ MOV EAX,[EDX+EAX*1] @0x00977807 (8B 04 10); advance 4 @0x97780E/CALL @0x977812"
+  },
+  {
+   "step": "mode-1 tail u32 (after the loop)",
+   "offset": "52 -> 56 (0x34 -> 0x38 == limit)",
+   "width": 4,
+   "byte_proof": "CMP word [ESP+0x24],1 @0x726A53 (mode==1 from FUN_0075d8d0 const-1 @0x75d8d0); MOV EDI,[EAX+ECX] @0x726A6F; advance @0x726A76; tail==0 -> the nested-reader virtual call is SKIPPED (TEST EDI,EDI/JZ @0x726A87)"
+  }
+ ],
+ "cursor_at_tag17_value_read": "0x30 (48) over the record payload; file offset = payload_start + 0x30 (record 0: 32 + 48 = 80; record 1014: 129824 + 48 = 129872)",
+ "record_0_walk": {
+  "ordinal": 0,
+  "id_hex": "0x05B80001",
+  "frame_start": 16,
+  "payload_start": 32,
+  "payload_len": 56,
+  "walk_states": [
+   {
+    "stage": "FUN_00726900 entry",
+    "offset": 8,
+    "limit": 56,
+    "flag": 1
+   },
+   {
+    "stage": "header read",
+    "flags": 128,
+    "count": 6,
+    "offset": 12,
+    "limit": 56,
+    "flag": 1
+   },
+   {
+    "stage": "TAG-0x11 ITERATION (the selected-reader entry)",
+    "cursor_offset_at_value_read": 48,
+    "cursor_offset_hex": "0x30",
+    "note": "the SELECTED reader FUN_009777F0 reads at cursor.base + cursor.offset == payload + 0x30",
+    "raw_hex": "BB2E0000",
+    "decoded_le_u32": 11963,
+    "offset_after": 52,
+    "flag": 1
+   },
+   {
+    "stage": "after tail",
+    "tail_u32": 0,
+    "offset": 56,
+    "limit": 56,
+    "flag": 1,
+    "full_consumption": true
+   }
+  ],
+  "parse_ok_full_consumption": true,
+  "events": []
+ },
+ "record_1014_walk": {
+  "ordinal": 1014,
+  "id_hex": "0x22A50001",
+  "frame_start": 129808,
+  "payload_start": 129824,
+  "payload_len": 56,
+  "walk_states": [
+   {
+    "stage": "FUN_00726900 entry",
+    "offset": 8,
+    "limit": 56,
+    "flag": 1
+   },
+   {
+    "stage": "header read",
+    "flags": 128,
+    "count": 6,
+    "offset": 12,
+    "limit": 56,
+    "flag": 1
+   },
+   {
+    "stage": "TAG-0x11 ITERATION (the selected-reader entry)",
+    "cursor_offset_at_value_read": 48,
+    "cursor_offset_hex": "0x30",
+    "note": "the SELECTED reader FUN_009777F0 reads at cursor.base + cursor.offset == payload + 0x30",
+    "raw_hex": "00000000",
+    "decoded_le_u32": 0,
+    "offset_after": 52,
+    "flag": 1
+   },
+   {
+    "stage": "after tail",
+    "tail_u32": 0,
+    "offset": 56,
+    "limit": 56,
+    "flag": 1,
+    "full_consumption": true
+   }
+  ],
+  "parse_ok_full_consumption": true,
+  "events": []
+ },
+ "census": {
+  "records_walked": 1366,
+  "tag17_value_offset_0x30": 1366,
+  "tag17_value_offsets_distinct": {
+   "0x30": 1366
+  },
+  "tag_sequence_ok": 0,
+  "final_offset_equals_limit": 1366,
+  "flag_success_path": 1366,
+  "tail_zero": 1366,
+  "full_consumption": 1366,
+  "flags_0x80": 1366,
+  "count_6": 1366,
+  "sizes_56": 1366,
+  "ver_1": 1366,
+  "crc_0": 1366,
+  "exact_eof": {
+   "formula": "16 + sum(stride_i) == filesize",
+   "first_frame": 16,
+   "last_frame_end": 174864,
+   "filesize": 174864,
+   "ok": true
+  }
+ },
+ "census_denominator": {
+  "record_count": 1366,
+  "derivation": "own framing walk over the pinned 20002.vfs: 16-byte global header, then 1366 records {16-byte header (id,size,ver,crc) + 56-byte payload, stride 128}; exact EOF: 16 + 1366*128 == 174864",
+  "tag17_value_offset_0x30_count": 1366,
+  "tag17_value_offsets_distinct": {
+   "0x30": 1366
+  },
+  "zero_valued_records": [
+   1014,
+   1015
+  ]
+ },
+ "success_vs_error_paths": {
+  "success_path": "the cursor flag byte (+0x11) stays 1 and every bounds check (offset+width <= limit) passes: the full walk consumes exactly offset 0 -> 56 with no flag clear; this is the path taken by all 1366 records",
+  "error_paths": [
+   "the reader's own error path (FUN_009777F0 @0x97781A..0x97782E): entered when the cursor flag is already clear (JZ @0x9777F8) or the bounds fail (JA @0x977803); behavior: *dest = 0 AND the cursor flag byte is cleared - the parse then aborts; NOT the successful parse path",
+   "the advance-helper overrun (FUN_0040de60 @0x40DE6F): offset > limit clears the flag",
+   "the TLV loop error branch (@0x726944 region): a failed header/tag read clears the flag and the loop exits",
+   "the pre-parse gate (FUN_0070dcf0 @0x70DDA0): offset+8 > limit skips the advance+parse entirely"
+  ],
+  "negative_simulations_on_record_0": {
+   "truncate_48": {
+    "parse_ok": false,
+    "events": [
+     {
+      "where": "entry 5 (tag 0x11) value bounds",
+      "event": "BOUNDS_FAILURE offset+4 > limit",
+      "offset": 48,
+      "limit": 48,
+      "flag_cleared": true
+     },
+     {
+      "where": "TLV loop entry 5 (tag 0x11)",
+      "event": "READER BOUNDS FAILURE (the reader's error path: dest=0 + flag cleared; NOT the successful parse path)",
+      "value_offset": 48,
+      "width": 4,
+      "offset": 48,
+      "limit": 48,
+      "flag_cleared": true
+     }
+    ],
+    "verdict": "DETECTED (the cursor flag is cleared / the walk fails; this is the ERROR path, NOT the successful parse path)"
+   },
+   "clear_flag_at_entry": {
+    "parse_ok": false,
+    "events": [
+     {
+      "where": "FUN_0070dcf0",
+      "event": "PARSE_ABORTED flag cleared"
+     }
+    ],
+    "verdict": "DETECTED (the cursor flag is cleared / the walk fails; this is the ERROR path, NOT the successful parse path)"
+   },
+   "shift_tags": {
+    "parse_ok": false,
+    "events": [
+     {
+      "where": "TLV loop entry 0",
+      "event": "UNKNOWN TAG 0x6 (no descriptor width)"
+     }
+    ],
+    "verdict": "DETECTED (the cursor flag is cleared / the walk fails; this is the ERROR path, NOT the successful parse path)"
+   }
+  },
+  "note": "the reader's failure behavior (dest=0 + flag clear) is a SEPARATE path; the +0x30 derivation belongs to the success path"
+ },
+ "width_sources": {
+  "type_1_tag_0x11_0x10_0x0D_0x0E": {
+   "selected_reader": "FUN_009777F0 (vtable+0x14 slot of the ArkRTTraitsInt object 0x00BA937C, vtable 0x00A9C670; see BRANCH_SELECTION_TRACE.json)",
+   "width_pins": [
+    {
+     "va": "0x009777FD",
+     "rva": "0x005777FD",
+     "file_offset": "0x005777FD",
+     "section": ".text",
+     "length": 3,
+     "original_bytes_hex": "8D5004",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "LEA EDX,[EAX+4] - the bounds width (4)",
+     "role": "type-1 reader: width bound"
+    },
+    {
+     "va": "0x0097780E",
+     "rva": "0x0057780E",
+     "file_offset": "0x0057780E",
+     "section": ".text",
+     "length": 2,
+     "original_bytes_hex": "6A04",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "PUSH 4 - the advance width (4)",
+     "role": "type-1 reader: advance width"
+    },
+    {
+     "va": "0x00977812",
+     "rva": "0x00577812",
+     "file_offset": "0x00577812",
+     "section": ".text",
+     "length": 5,
+     "original_bytes_hex": "E84966A9FF",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "CALL FUN_0040de60 - advance the cursor by 4",
+     "role": "type-1 reader: advance call"
+    }
+   ],
+   "width": 4
+  },
+  "type_2_tag_0x0C": {
+   "selected_reader": "FUN_00977840 (vtable+0x14 slot dword 0x00977840 read from 0x00A9C660; object 0x00BA9384, vtable 0x00A9C64C; RTTI .?AUArkRTTraitsFloat@@)",
+   "width_pins": [
+    {
+     "va": "0x0097784D",
+     "rva": "0x0057784D",
+     "file_offset": "0x0057784D",
+     "section": ".text",
+     "length": 3,
+     "original_bytes_hex": "8D5004",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "LEA EDX,[EAX+4] - the bounds width (4)",
+     "role": "type-2 reader: width bound"
+    },
+    {
+     "va": "0x0097785E",
+     "rva": "0x0057785E",
+     "file_offset": "0x0057785E",
+     "section": ".text",
+     "length": 2,
+     "original_bytes_hex": "6A04",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "PUSH 4 - the advance width (4)",
+     "role": "type-2 reader: advance width"
+    },
+    {
+     "va": "0x00977862",
+     "rva": "0x00577862",
+     "file_offset": "0x00577862",
+     "section": ".text",
+     "length": 5,
+     "original_bytes_hex": "E8F965A9FF",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "CALL FUN_0040de60 - advance the cursor by 4 (float read via FLD/FSTP D9 04 10 / D9 18)",
+     "role": "type-2 reader: advance call"
+    }
+   ],
+   "width": 4
+  },
+  "type_4_tag_0x01": {
+   "selected_reader": "FUN_00409ed0 -> FUN_004099c0 (vtable+0x14 slot dword 0x00409ED0 read from 0x00A79A44; object 0x00BA101C, vtable 0x00A79A30; RTTI .?AURT@?$ArkTraits@VArkMonetary@@@@)",
+   "width_pins": [
+    {
+     "va": "0x004099C9",
+     "rva": "0x000099C9",
+     "file_offset": "0x000099C9",
+     "section": ".text",
+     "length": 3,
+     "original_bytes_hex": "8D4208",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "LEA EAX,[EDX+8] - the bounds width (8)",
+     "role": "type-4 reader: width bound"
+    },
+    {
+     "va": "0x004099D9",
+     "rva": "0x000099D9",
+     "file_offset": "0x000099D9",
+     "section": ".text",
+     "length": 3,
+     "original_bytes_hex": "8B3C02",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "MOV EDI,[EDX+EAX] - u32 load #1",
+     "role": "type-4 reader: u32 #1"
+    },
+    {
+     "va": "0x004099DE",
+     "rva": "0x000099DE",
+     "file_offset": "0x000099DE",
+     "section": ".text",
+     "length": 4,
+     "original_bytes_hex": "8B540204",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "MOV EDX,[EDX+EAX+4] - u32 load #2 (+4)",
+     "role": "type-4 reader: u32 #2"
+    },
+    {
+     "va": "0x004099E7",
+     "rva": "0x000099E7",
+     "file_offset": "0x000099E7",
+     "section": ".text",
+     "length": 8,
+     "original_bytes_hex": "C744240408000000",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "MOV dword [ESP+4],8 - the advance width (8)",
+     "role": "type-4 reader: advance width"
+    },
+    {
+     "va": "0x004099EF",
+     "rva": "0x000099EF",
+     "file_offset": "0x000099EF",
+     "section": ".text",
+     "length": 5,
+     "original_bytes_hex": "E96C440000",
+     "expected_bytes_hex": null,
+     "match": true,
+     "claim": "JMP FUN_0040de60 - advance the cursor by 8 (tail)",
+     "role": "type-4 reader: advance tail-jump"
+    }
+   ],
+   "width": 8,
+   "note": "FUN_00409ed0 resolves the 8-byte destination pair via FUN_004123d0 (helper not further decoded; not load-bearing for the cursor proof)"
+  }
+ },
+ "entry_pins": [
+  {
+   "va": "0x0070DDA2",
+   "rva": "0x0030DDA2",
+   "file_offset": "0x0030DDA2",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "6A08",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "PUSH 8 - the advance width before the TLV loop (consume class id + record id)",
+   "role": "FUN_0070dcf0: advance-8 width"
+  },
+  {
+   "va": "0x0070DDA4",
+   "rva": "0x0030DDA4",
+   "file_offset": "0x0030DDA4",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "8D4C2418",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "LEA ECX,[ESP+0x18] - this = &cursor for FUN_0040de60",
+   "role": "FUN_0070dcf0: cursor setup"
+  },
+  {
+   "va": "0x0070DDA8",
+   "rva": "0x0030DDA8",
+   "file_offset": "0x0030DDA8",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E8B300D0FF",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "CALL FUN_0040de60 - the advance-8 (cursor.offset: 0 -> 8 before FUN_00726900 parses the payload)",
+   "role": "FUN_0070dcf0: advance-8 call"
+  },
+  {
+   "va": "0x0070DD95",
+   "rva": "0x0030DD95",
+   "file_offset": "0x0030DD95",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "8B5424",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV EDX,[ESP+0x20] - cursor offset load (0)",
+   "role": "FUN_0070dcf0: pre-advance bounds (offset)"
+  },
+  {
+   "va": "0x0070DD99",
+   "rva": "0x0030DD99",
+   "file_offset": "0x0030DD99",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "83C2",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "ADD EDX,8 - offset+8",
+   "role": "FUN_0070dcf0: pre-advance bounds (+8)"
+  },
+  {
+   "va": "0x0070DD9C",
+   "rva": "0x0030DD9C",
+   "file_offset": "0x0030DD9C",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "3B5424",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "CMP EDX,[ESP+0x1C] - offset+8 vs cursor limit",
+   "role": "FUN_0070dcf0: pre-advance bounds (limit)"
+  },
+  {
+   "va": "0x0070DDA0",
+   "rva": "0x0030DDA0",
+   "file_offset": "0x0030DDA0",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "7760",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "JA -> fail path (skip advance+parse; flag=0) - the bounds gate before the TLV loop",
+   "role": "FUN_0070dcf0: pre-advance bounds branch"
+  },
+  {
+   "va": "0x0070DD44",
+   "rva": "0x0030DD44",
+   "file_offset": "0x0030DD44",
+   "section": ".text",
+   "length": 8,
+   "original_bytes_hex": "44241C80000000E8",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV dword [ESP+0x1C],0x80 - cursor+4 = capacity 0x80",
+   "role": "FUN_0070dcf0: cursor capacity store"
+  },
+  {
+   "va": "0x0070DD58",
+   "rva": "0x0030DD58",
+   "file_offset": "0x0030DD58",
+   "section": ".text",
+   "length": 6,
+   "original_bytes_hex": "442425018B7C",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV byte [ESP+0x25],1 - cursor+0x11 = the FLAG byte (success state)",
+   "role": "FUN_0070dcf0: cursor flag set"
+  },
+  {
+   "va": "0x0070DD54",
+   "rva": "0x0030DD54",
+   "file_offset": "0x0030DD54",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "442414C6",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV [ESP+0x14],EAX - cursor+0 = BASE (operator_new(0x80) buffer; the payload copy)",
+   "role": "FUN_0070dcf0: cursor base store"
+  },
+  {
+   "va": "0x00971B3E",
+   "rva": "0x00571B3E",
+   "file_offset": "0x00571B3E",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "895E0C",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV dword [ESI+0xC],EBX (EBX=0) - cursor offset reset to 0 after the record read",
+   "role": "FUN_00971ad0: offset reset"
+  },
+  {
+   "va": "0x00971B41",
+   "rva": "0x00571B41",
+   "file_offset": "0x00571B41",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "C6461101",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV byte [ESI+0x11],1 - cursor flag set after the record read",
+   "role": "FUN_00971ad0: flag set"
+  },
+  {
+   "va": "0x00726917",
+   "rva": "0x00326917",
+   "file_offset": "0x00326917",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "8B7424",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV ESI,[ESP+0x28] - the cursor argument",
+   "role": "TLV loop: cursor load"
+  },
+  {
+   "va": "0x0072691B",
+   "rva": "0x0032691B",
+   "file_offset": "0x0032691B",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "8A4611",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV AL,[ESI+0x11] - the cursor flag test",
+   "role": "TLV loop: header flag test"
+  },
+  {
+   "va": "0x0072692F",
+   "rva": "0x0032692F",
+   "file_offset": "0x0032692F",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "0FB73C01",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOVZX EDI,word [ECX+EAX] - the u16 FLAGS read at cursor offset 8->10",
+   "role": "TLV loop: flags u16 read"
+  },
+  {
+   "va": "0x00726933",
+   "rva": "0x00326933",
+   "file_offset": "0x00326933",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "6A02",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "PUSH 2 - the advance width for the flags read",
+   "role": "TLV loop: flags advance width"
+  },
+  {
+   "va": "0x00726937",
+   "rva": "0x00326937",
+   "file_offset": "0x00326937",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E82475CEFF",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "CALL FUN_0040de60 - the flags-read advance (offset 8 -> 10)",
+   "role": "TLV loop: flags advance call"
+  },
+  {
+   "va": "0x0072699E",
+   "rva": "0x0032699E",
+   "file_offset": "0x0032699E",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "0FB73C08",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOVZX EDI,word [EAX+ECX] - the u16 COUNT read at cursor offset 10->12",
+   "role": "TLV loop: count u16 read"
+  },
+  {
+   "va": "0x007269A2",
+   "rva": "0x003269A2",
+   "file_offset": "0x003269A2",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "6A02",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "PUSH 2 - the advance width for the count read",
+   "role": "TLV loop: count advance width"
+  },
+  {
+   "va": "0x007269A6",
+   "rva": "0x003269A6",
+   "file_offset": "0x003269A6",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E8B574CEFF",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "CALL FUN_0040de60 - the count-read advance (offset 10 -> 12)",
+   "role": "TLV loop: count advance call"
+  },
+  {
+   "va": "0x007269D0",
+   "rva": "0x003269D0",
+   "file_offset": "0x003269D0",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "807E1100",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "CMP byte [ESI+0x11],0 - the per-iteration cursor flag check (loop exit on clear = the error/bounds-failure path)",
+   "role": "TLV loop: iteration flag check"
+  },
+  {
+   "va": "0x007269E7",
+   "rva": "0x003269E7",
+   "file_offset": "0x003269E7",
+   "section": ".text",
+   "length": 4,
+   "original_bytes_hex": "0FB73C08",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOVZX EDI,word [EAX+ECX] - the per-entry u16 TAG read (2 bytes)",
+   "role": "TLV loop: the TAG u16 read"
+  },
+  {
+   "va": "0x007269EB",
+   "rva": "0x003269EB",
+   "file_offset": "0x003269EB",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "6A02",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "PUSH 2 - the tag-read advance width",
+   "role": "TLV loop: tag advance width"
+  },
+  {
+   "va": "0x007269EF",
+   "rva": "0x003269EF",
+   "file_offset": "0x003269EF",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E86C74CEFF",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "CALL FUN_0040de60 - the tag-read advance (+2 per entry)",
+   "role": "TLV loop: tag advance call"
+  },
+  {
+   "va": "0x00726A53",
+   "rva": "0x00326A53",
+   "file_offset": "0x00326A53",
+   "section": ".text",
+   "length": 6,
+   "original_bytes_hex": "66837C242401",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "CMP word [ESP+0x24],1 - the MODE==1 check (mode 1 = FUN_0075d8d0's constant return 1) -> the mode-1 tail handling",
+   "role": "TLV loop: mode check"
+  },
+  {
+   "va": "0x00726A6F",
+   "rva": "0x00326A6F",
+   "file_offset": "0x00326A6F",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "8B3C08",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV EDI,[EAX+ECX] - the mode-1 TAIL u32 read at cursor offset 0x34",
+   "role": "TLV loop: tail u32 read"
+  },
+  {
+   "va": "0x00726A72",
+   "rva": "0x00326A72",
+   "file_offset": "0x00326A72",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "6A04",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "PUSH 4 - the tail-read advance width",
+   "role": "TLV loop: tail advance width"
+  },
+  {
+   "va": "0x00726A76",
+   "rva": "0x00326A76",
+   "file_offset": "0x00326A76",
+   "section": ".text",
+   "length": 5,
+   "original_bytes_hex": "E8E573CEFF",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "CALL FUN_0040de60 - the tail-read advance (offset 0x34 -> 0x38 == limit 56: exact consumption)",
+   "role": "TLV loop: tail advance call"
+  },
+  {
+   "va": "0x00726A89",
+   "rva": "0x00326A89",
+   "file_offset": "0x00326A89",
+   "section": ".text",
+   "length": 3,
+   "original_bytes_hex": "8B6E0C",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "MOV EBP,[ESI+0xC] - the cursor offset after the tail",
+   "role": "TLV loop: offset capture"
+  },
+  {
+   "va": "0x00726A87",
+   "rva": "0x00326A87",
+   "file_offset": "0x00326A87",
+   "section": ".text",
+   "length": 2,
+   "original_bytes_hex": "85FF",
+   "expected_bytes_hex": null,
+   "match": true,
+   "claim": "TEST EDI,EDI / JZ 0x726ab0 - the tail==0 branch: the nested-reader virtual call is SKIPPED when the tail u32 is 0 (1366/1366 records)",
+   "role": "TLV loop: tail==0 branch (part 1: opcode window 85 FF)"
+  }
+ ],
+ "all_pins_match": true,
+ "pin_count_total": 41
+}

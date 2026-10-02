@@ -1,0 +1,63 @@
+{
+ "run_id": "PE_935_20002_PAYLOAD30_CONSUMER_R1_20261002",
+ "generator": "03_SCRIPTS/s5_consumer_census_pass15.py + 03_SCRIPTS/s5_tlv_walk_census.py (evidence) + this consolidation",
+ "question": "who consumes the destination field (ArkParameterArmor instance value-array slot 21, the tag-0x11 property)?",
+
+ "STATIC_WRITE_SEARCH_SCOPE": {
+  "description": "the write path into instance value-array slots: the value-read dispatch FUN_0075f660 and its callers, plus the store instruction census in the typed readers (FUN_00412540/00412500/004099c0/0040e020 dispatched from FUN_004129c0/FUN_00412d80)",
+  "fun_0075f660_direct_callers": 1,
+  "the_caller": {"name": "FUN_00726900", "entry": "0x726900", "call_site": "0x726A1B"},
+  "store_instruction_for_tag_0x11": {"va": "0x0041255A", "bytes": "89 02", "via": "FUN_00412540 (type-1 scalar reader)"},
+  "note": "the store address is computed at runtime as value_array + (tag+4)*4; only one store instruction on this path (the value slot writes all flow through the same two-instruction read+store pair at 0x412553/0x41255A)"
+ },
+
+ "STATIC_READ_SEARCH_SCOPE": {
+  "description": "(a) all direct callers of the descriptor lookup FUN_0070c180 (the property machinery: getters, setters, serializers); (b) the getter family (FUN_00726450/00726490/00726510/00726d10/00726c00/00726d70/00727480/007275a0/00727e90/00727f10 - array-type and trait getters); (c) the serialization writer family (FUN_00726560/FUN_00727110: write {tag, value} pairs from instance state for save/sync)",
+  "fun_0070c180_direct_callers": 202,
+  "census_method": "for every one of the 202 call sites the preceding 0x20 bytes of instructions were captured and scanned for a static immediate tag 0x11 (03_SCRIPTS/s5_consumer_census_pass15.py; full site list in 01_RAW/GHIDRA_ROUTING/PASS15_GHIDRA_DUMP.json)"
+ },
+
+ "STATIC_WRITE_SITES_FOUND": 1,
+ "STATIC_READ_SITES_FOUND": {
+  "with_static_immediate_tag_0x11": 0,
+  "false_positives_examined": 2,
+  "false_positive_detail": [
+   {"site": "0x726A03", "why": "the TLV parse loop itself; the tag comes from the FILE via register DI, not from an immediate"},
+   {"site": "0x8AEAD5", "why": "the 0x11 is a state-variable byte store (MOV byte [ESP+0x2b8],0x11); the actual lookup argument is 0x2 and the class is 0x5DD1 (24017), not 20002"}
+  ],
+  "interpretation": "no statically-coded direct reader of the tag-0x11 slot was found; property reads are TAG-VARIABLE-DRIVEN at runtime (the 202-site machinery resolves descriptors by whatever tag value is passed)"
+ },
+
+ "GENERIC_READ_MACHINERY_EVIDENCED": {
+  "array_getters_check_flags_bit0": "FUN_00726510/FUN_00726d10/FUN_00726d70/FUN_00726c00 require descriptor flags bit0 (array-type); tag 0x11 has flags 0xC0 (bit0=0) so those specific getters return defaults for it",
+  "trait_getters": "FUN_00726450 (tag 0x8000), FUN_00726490 (tag 0x8002), FUN_00727e90 (tag 0x1C), FUN_00727f10 (tag 9) - fixed other tags, not 0x11",
+  "serialization_writers": "FUN_00726560/FUN_00727110 write {tag, value} pairs from instance state (instance+0x28/+0x2C id pair, then the tags listed in the instance+0x34 tag vector); whether tag 0x11 appears in that vector at runtime was NOT statically determined (runtime state)"
+ },
+
+ "UNRESOLVED_ALIASES": [
+  "the destination value array is a heap allocation (pointer at instance+0x40) - not statically addressable; slot 21 accesses are all pointer-relative at runtime",
+  "the ArkParameterArmor instances are stored in the class instance map (classObj+0xC) keyed by record id - consumers reach them via lookups, not static addresses",
+  "the class object singleton DAT_00ba5da8 is runtime-initialized"
+ ],
+
+ "UNRESOLVED_INDIRECT_CALLS": [
+  "the instance vtable 0xA878BC methods (slots: FUN_00761510 dtor, FUN_008e0010, FUN_009154a0, FUN_007263e0 mode-1 nested reader, FUN_008e0110, FUN_00726340) - the mode-1 nested reader is never exercised for this file (tail u32 == 0 for all 1366 records)",
+  "the class-object +0x80 trait-object virtuals (finalize vtable+0x24 / rollback vtable+0x28 called in FUN_0070dc20/FUN_0070de10)",
+  "the FUN_00977a50 descriptor-factory object behavior for tag 0x11",
+  "runtime-tag-driven getter invocations across the 202-site machinery (any call site whose tag argument is a variable could read slot 21 at runtime)"
+ ],
+
+ "UNINSPECTED_PATHS": [
+  "the full downstream data-flow of every getter family member (bounded census only: the 202 sites were captured and scanned for immediate 0x11; decompiling and tracing all 202 was outside this run's scope)",
+  "gameplay armor-behavior code that may read armor parameters at runtime (not part of the bounded trace)",
+  "network/save serialization consumers of the instances (FUN_00727110 writer iterates a runtime tag vector)",
+  "the 17 other descriptor slots of the same schema (out of scope: single-field trace)"
+ ],
+
+ "EXHAUSTIVENESS_WORDING": "ONLY_DIRECT_WRITER_FOUND (the single store instruction 0x0041255A reached from the single FUN_0075f660 caller FUN_00726900); read-side census is BOUNDED: 202/202 descriptor-lookup sites captured and scanned for a static tag-0x11 immediate (0 found); global read-side exhaustiveness is UNVERIFIED because the tag arguments are runtime variables (V2-012 wording applied)",
+
+ "CONSUMER_CLASSIFICATION_AS_EVIDENCED": {
+  "observed_operation_at_the_read_site": "opaque propagation (pure copy): the value is loaded and stored without any comparison, arithmetic, branch, or lookup AT THE TRACED INSTRUCTIONS",
+  "caveat": "this classification covers only the pinned read+store pair; what the generic property machinery does with the stored slot at runtime (comparison? lookup? display?) is NOT traced in this bounded run"
+ }
+}

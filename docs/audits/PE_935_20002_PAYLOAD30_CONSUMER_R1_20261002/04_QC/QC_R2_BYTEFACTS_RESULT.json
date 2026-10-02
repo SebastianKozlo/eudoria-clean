@@ -1,0 +1,203 @@
+{
+  "tool": "q2r2_bytefacts.py",
+  "run_id": "PE_935_20002_PAYLOAD30_CONSUMER_R1_20261002",
+  "qc_round": 2,
+  "exe_identity": {
+    "size": 8015872,
+    "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+  },
+  "pe": {
+    "machine": "0x14c",
+    "image_base": "0x400000",
+    "section_alignment": 4096,
+    "file_alignment": 4096,
+    "sections": [
+      {
+        "name": ".text",
+        "vsize": 6764005,
+        "vaddr": 4096,
+        "rawsize": 6766592,
+        "rawptr": 4096
+      },
+      {
+        "name": ".rdata",
+        "vsize": 1009001,
+        "vaddr": 6770688,
+        "rawsize": 1011712,
+        "rawptr": 6770688
+      },
+      {
+        "name": ".data",
+        "vsize": 251620,
+        "vaddr": 7782400,
+        "rawsize": 212992,
+        "rawptr": 7782400
+      },
+      {
+        "name": ".tls",
+        "vsize": 10,
+        "vaddr": 8036352,
+        "rawsize": 4096,
+        "rawptr": 7995392
+      },
+      {
+        "name": ".rsrc",
+        "vsize": 15444,
+        "vaddr": 8040448,
+        "rawsize": 16384,
+        "rawptr": 7999488
+      }
+    ]
+  },
+  "checks": {
+    "F1_bytes_at_0x70E4AD": {
+      "expected": "68 58 68 A8 00",
+      "got": "68 58 68 A8 00",
+      "pass": true
+    },
+    "F2_byte_at_0x70E4AC": {
+      "expected": "50",
+      "got": "50",
+      "pass": true
+    },
+    "F1b_imm32_decode": {
+      "value": "0xa86858",
+      "pass": true
+    },
+    "F3_string_at_0xA86858": {
+      "expected_prefix": "textures",
+      "got": "textures",
+      "raw": "74 65 78 74 75 72 65 73 00 00 00 00",
+      "pass": true
+    },
+    "F4_string_at_0xA9808C": {
+      "expected_prefix": "EnvironmentZones",
+      "got": "EnvironmentZones",
+      "raw": "45 6E 76 69 72 6F 6E 6D 65 6E 74 5A 6F 6E 65 73 00 00 00 00",
+      "pass": true
+    },
+    "F5a_imm32_at_0x958DCE": {
+      "expected": "8C 80 A9 00",
+      "got": "8C 80 A9 00",
+      "pass": true,
+      "note": "round-1 QC4 cited this OPERAND VA as the ref VA"
+    },
+    "F5b_push_at_0x958DCD": {
+      "expected": "68 8C 80 A9 00",
+      "got": "68 8C 80 A9 00",
+      "pass": true,
+      "note": "the actual PUSH 0xA9808C instruction (one byte earlier than 0x958DCE)"
+    },
+    "F6_push_.vfs_at_0x70C40E": {
+      "expected": "68 20 68 A8 00",
+      "got": "68 20 68 A8 00",
+      "pass": true
+    },
+    "F7_mov_eax_ecx8_at_0x70C3FC": {
+      "expected": "8B 41 08",
+      "got": "8B 41 08",
+      "pass": true
+    },
+    "F8_mov_esi84_eax_at_0x70C71E": {
+      "expected": "89 86 84 00 00 00",
+      "got": "89 86 84 00 00 00",
+      "pass": true,
+      "note": "matches the package pin (ESI base); disp32 == +0x84 as claimed"
+    },
+    "F9_call_0x70E470_at_0x70E866": {
+      "bytes": "E8 05 FC FF FF",
+      "decoded_target": "0x70e470",
+      "pass": true
+    },
+    "F10_call_0x972DF0_at_0x70E8B6": {
+      "bytes": "E8 35 45 26 00",
+      "decoded_target": "0x972df0",
+      "pass": true
+    },
+    "F11_call_0x972DF0_at_0x70C742": {
+      "bytes": "E8 A9 66 26 00",
+      "decoded_target": "0x972df0",
+      "pass": true
+    },
+    "F12_itoa_FUN_0040e900_call_census": {
+      "text_section": {
+        "vaddr": "0x1000",
+        "rawsize": 6766592
+      },
+      "expected_site_count": 5,
+      "got_site_count": 5,
+      "sites": [
+        "0x4c50a8",
+        "0x5b374e",
+        "0x70c405",
+        "0x75f3dd",
+        "0x8362e7"
+      ],
+      "expected_in_window_0x70E810_0x70E928": 0,
+      "got_in_window": [],
+      "pass": true
+    },
+    "F5c_push_pattern_census": {
+      "pattern": "68 8C 80 A9 00",
+      "sites": [
+        "0x958dcd"
+      ],
+      "expected_count": 1,
+      "pass": true,
+      "note": "'sole code ref' claim of C1 text is TRUE; instruction VA 0x958DCD"
+    },
+    "F5d_imm32_pattern_census": {
+      "pattern": "8C 80 A9 00",
+      "sites": [
+        "0x958dce"
+      ],
+      "expected_count": 1,
+      "pass": true
+    },
+    "F15_push_0xA86858_census": {
+      "pattern": "68 58 68 A8 00",
+      "sites": [
+        "0x70e4ad"
+      ],
+      "expected_count": 1,
+      "pass": true
+    },
+    "F16_push_.vfs_census": {
+      "pattern": "68 20 68 A8 00",
+      "sites": [
+        "0x70c40e",
+        "0x70e886",
+        "0x70ec96",
+        "0x94e0b8",
+        "0x94fef8"
+      ],
+      "cited_sites_present": [
+        true,
+        true
+      ],
+      "pass": true
+    },
+    "F17_mov_esp18_1_at_0x70E839": {
+      "expected": "C7 44 24 18 01 00 00 00",
+      "got": "C7 44 24 18 01 00 00 00",
+      "pass": true
+    },
+    "F18_mov_esp1c_80_at_0x70E841": {
+      "expected": "C7 44 24 1C 80 00 00 00",
+      "got": "C7 44 24 1C 80 00 00 00",
+      "pass": true,
+      "note": "JOIN R1's 6-byte 'C7 44 24 1C 80 00' citation was a truncated transcription of this 8-byte MOV (round-1 QC4b already noted this)"
+    },
+    "F14_round1_predicate_clause4_observation": {
+      "decomp_FUN_0070e810_contains_textures": false,
+      "PASS4_DECOMP_FUN_0070e470_contains_textures": true,
+      "round1_clause4_verdict": "FALSE_AS_WORDED",
+      "note": "round-1 P2-1 predicate clause 4 said DECOMP_FUN_0070e810.txt contains 'textures' and '(All four verified true by QC)'. The literal lives in PASS4_DECOMP_FUN_0070e470.txt (line 45) + the .rdata string + the byte pins; DECOMP/DISASM_FUN_0070e810.txt show the FUN_0070e470 call, '.vfs' concat (DAT_00a86820) and {1,0x80,8} stores, with NO itoa call. Observation only; recorded for the round-1 report's historical record.",
+      "observed": true
+    }
+  },
+  "windows": {
+    "0x70E4A0..0x70E4C0": "38 5A A7 00 89 74 24 18 8B 74 24 20 50 68 58 68 A8 00 8B CE FF 15 44 5A A7 00 8D 4C 24 0B FF 15 40"
+  },
+  "OVERALL_PASS": true
+}

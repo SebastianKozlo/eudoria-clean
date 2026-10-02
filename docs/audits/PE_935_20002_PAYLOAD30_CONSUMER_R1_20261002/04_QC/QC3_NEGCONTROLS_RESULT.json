@@ -1,0 +1,153 @@
+{
+ "run_id": "PE_935_20002_PAYLOAD30_CONSUMER_R1_20261002",
+ "countercheck": "QC3 independent negative controls + census cross-checks",
+ "tool": "04_QC/qc_tools/qc3_negcontrols.py",
+ "vfs_sha256": "C3899C3E88D72CE12CEF9B8A4F5E73B26632BB1A3207C950FF2BC40FD9C94AC4",
+ "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+ "controls": {
+  "NCQ1a_size_56_to_55": {
+   "mutation": "record 5 header size field 56 -> 55 (in-memory)",
+   "expected_failure": "walk may still succeed (stride aligns to 128 both ways) BUT the +0x30 4-byte field bounds assertion must FAIL (55 < 0x34)",
+   "walk_ok": true,
+   "walk_error": null,
+   "bounds_check": "payload 55 < 0x34 => +0x30 field out of bounds for record 5 (bounds_ok must be False)",
+   "failure_case_detected": true
+  },
+  "NCQ1b_ver_record100_7": {
+   "mutation": "record 100 ver field 1 -> 7",
+   "expected_failure": "ver!=1 must abort the walk",
+   "walk_ok": false,
+   "walk_error": "ver!=1 at frame 12816 (ver=7)",
+   "failure_case_detected": true
+  },
+  "NCQ1c_magic_byte3_flip": {
+   "mutation": "magic byte 3 XOR 0xFF (ArkVFS02 -> ArkV?S02)",
+   "expected_failure": "magic mismatch must abort",
+   "walk_ok": false,
+   "walk_error": "magic mismatch",
+   "failure_case_detected": true
+  },
+  "NCQ1d_truncate_100": {
+   "mutation": "file truncated by 100 bytes",
+   "expected_failure": "EOF violation must abort",
+   "walk_ok": false,
+   "walk_error": "payload beyond EOF at frame 174736 (size=56)",
+   "failure_case_detected": true
+  },
+  "NCQ1e_id_garbage_control": {
+   "mutation": "record 7 id -> 0xDEADBEEF (framing-NEUTRAL field)",
+   "expected_failure": "NONE - the id is not framing-checked; the walk must still SUCCEED (control that the walk does not fail for spurious reasons)",
+   "walk_ok": true,
+   "walk_error": null,
+   "note": "walk succeeds as expected; proves the failures above are caused by the specific corrupted fields, not by any mutation",
+   "failure_case_detected": true
+  },
+  "NCQ2_wrong_displacement": {
+   "control": "decode +0x2C / +0x34 by the identical LE-u32 rule; they must NOT be the +0x30 field",
+   "expected_failure": "if the anchor claim were offset-insensitive, +0x2C/+0x34 would equal or track +0x30",
+   "plus30_distinct": 142,
+   "plus2c_distinct": [
+    1114112,
+    1179647
+   ],
+   "plus34_distinct": [
+    0
+   ],
+   "plus30_equals_plus2c_count": 0,
+   "plus30_equals_plus34_count": 2,
+   "actual_result": "+0x2C is a near-constant structural window (tag-0x10 value tail + tag 0x11); +0x34 is the constant zero tail; +0x30 is the varying value (142 distinct)",
+   "failure_case_detected": true
+  },
+  "NCQ3_imm32_census": {
+   "control": "independent whole-file census of imm32 0x4E22 / ASCII 20002 / mangles",
+   "expected_failure": "if the executor's census were wrong, counts/offsets would disagree",
+   "imm32_0x4E22_count": 3,
+   "imm32_hits": [
+    {
+     "file_offset": 3375514,
+     "va": "0x73819A",
+     "section": ".text"
+    },
+    {
+     "file_offset": 3384386,
+     "va": "0x73A442",
+     "section": ".text"
+    },
+    {
+     "file_offset": 3406796,
+     "va": "0x73FBCC",
+     "section": ".text"
+    }
+   ],
+   "ascii_20002_count": 0,
+   "mangle_0EOCC_count": 2,
+   "mangle_0EOCC_hits": [
+    {
+     "file_offset": 7920629,
+     "va": "0xB8DBF5",
+     "section": ".data"
+    },
+    {
+     "file_offset": 7925220,
+     "va": "0xB8EDE4",
+     "section": ".data"
+    }
+   ],
+   "mangle_0EOCG_count": 2,
+   "mangle_0EOCG_hits": [
+    {
+     "file_offset": 7919772,
+     "va": "0xB8D89C",
+     "section": ".data"
+    },
+    {
+     "file_offset": 7921934,
+     "va": "0xB8E10E",
+     "section": ".data"
+    }
+   ],
+   "family_counts": {
+    "$0EOCA@": 2,
+    "$0EOCB@": 2,
+    "$0EOCC@": 2,
+    "$0EOCE@": 2,
+    "$0EOCF@": 2,
+    "$0EOCG@": 2,
+    "$0EOCH@": 2,
+    "$0EOCI@": 2,
+    "$0EOCJ@": 2,
+    "$0EOCK@": 2,
+    "$0EOCL@": 2,
+    "$0EOCM@": 2,
+    "$0EOCN@": 2,
+    "$0EOCO@": 2,
+    "$0EOCP@": 2
+   },
+   "executor_counts_expected": {
+    "imm32": 3,
+    "ascii": 0,
+    "0EOCC": 2,
+    "0EOCG": 2
+   },
+   "agrees_with_executor": true,
+   "failure_case_detected": true
+  },
+  "NCQ4_tlv_absence": {
+   "mutation": "record 0 payload with entry count 6 -> 5 (the tag-0x11 entry then consumes the TAIL bytes as its value)",
+   "expected_failure": "the walk must NOT identify a tag-0x11 value at payload+0x30",
+   "count": 5,
+   "tags_seen": [
+    "0x1",
+    "0xc",
+    "0xd",
+    "0xe",
+    "0x10"
+   ],
+   "tag11_present": false,
+   "tag11_value_offset": null,
+   "tag11_value_at_0x30": false,
+   "actual_result": "with count=5 the entries desynchronize; the tag-0x11 entry (if present at all) does not have its value at +0x30 (it lands at +0x34, the tail position) - the census predicate field_30_is_tag11_value would be FALSE",
+   "failure_case_detected": true
+  }
+ }
+}

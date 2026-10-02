@@ -1,0 +1,68 @@
+{
+ "run_id": "PE_935_20002_PAYLOAD30_CONSUMER_R1_20261002",
+ "correction_state": "DESKTOP_CORRECTION_R1 - this artifact's selected-path fields were corrected by the branch-selection correction (the value read for tag ID 17 flows through the VIRTUAL branch to the selected reader FUN_009777F0, not the fallback FUN_00412540); see 06_REPORT\\AMEND_LOG_DESKTOP_CORRECTION_R1.md and 01_RAW\\DESKTOP_CORRECTION_R1\\BRANCH_SELECTION_TRACE.json + FALLBACK_PATH_RECORD.json; BEFORE copy: 00_CONTROL\\DESKTOP_CORRECTION_R1\\BEFORE\\02_ANALYSIS\\DESTINATION_CONSUMER_CENSUS.json",
+ "generator": "03_SCRIPTS/s5_consumer_census_pass15.py + 03_SCRIPTS/s5_tlv_walk_census.py (evidence) + this consolidation; selected-path fields corrected in DESKTOP_CORRECTION_R1 (executor session)",
+ "question": "who consumes the destination field (ArkParameterArmor instance value-array slot 21, the tag-0x11 property)?",
+
+ "STATIC_WRITE_SEARCH_SCOPE": {
+  "description": "the write path into instance value-array slots: the value-read dispatch FUN_0075f660 and its callers, plus the store instruction census in the value readers. For tags with a non-NULL descriptor+0 object (ALL tags present in 20002.vfs records: 1, 0xC, 0xD, 0xE, 0x10, 0x11), the dispatch takes the VIRTUAL branch and the store happens in the SELECTED per-type reader (FUN_009777F0 for type-1 scalar slots; FUN_00977840 for type-2 float slots; FUN_00409ed0->FUN_004099c0 for the type-4 pair slots) reached via [reader-object.vtable+0x14]; the typed readers FUN_00412540/00412500/004099c0/0040e020 dispatched from FUN_004129c0/FUN_00412d80 are the NON-SELECTED FALLBACK machinery (byte-correct fallback-path evidence; reachable only when descriptor+0 == NULL)",
+  "fun_0075f660_direct_callers": 1,
+  "the_caller": {"name": "FUN_00726900", "entry": "0x726900", "call_site": "0x726A1B"},
+  "store_instruction_for_tag_0x11": {"va": "0x00977810", "bytes": "89 02", "via": "FUN_009777F0 (the SELECTED type-1 scalar reader; the ArkRTTraitsInt virtual at vtable+0x14, slot dword 0x009777F0 read from .rdata @0xA9C684)"},
+  "fallback_store_instruction_for_tag_0x11": {"va": "0x0041255A", "bytes": "89 02", "via": "FUN_00412540 (the NON-SELECTED FALLBACK type-1 reader; requires descriptor+0 == NULL - NOT the tag-17 state)", "classification": "BYTE-CORRECT EVIDENCE OF A NON-SELECTED FALLBACK PATH (01_RAW\\DESKTOP_CORRECTION_R1\\FALLBACK_PATH_RECORD.json)"},
+  "note": "the store address is computed at runtime as value_array + (tag+4)*4; for tag 0x11 (type-1) the parse-side value-slot write flows through the single two-instruction read+store pair of the SELECTED reader (0x00977807 / 0x00977810); ONE_DIRECT_CALLER_FOUND for the dispatch within the censused machinery (FUN_00726900 @0x726A1B) - this is NOT a global proof that slot 21 has exactly one writer across the client (runtime-tag-driven setter writes via the 202-site property machinery are the write-side counterpart of the disclosed read-side limitation; W-1 scope note)"
+ },
+
+ "STATIC_READ_SEARCH_SCOPE": {
+  "description": "(a) all direct callers of the descriptor lookup FUN_0070c180 (the property machinery: getters, setters, serializers); (b) the getter family (FUN_00726450/00726490/00726510/00726d10/00726c00/00726d70/00727480/007275a0/00727e90/00727f10 - array-type and trait getters); (c) the serialization writer family (FUN_00726560/FUN_00727110: write {tag, value} pairs from instance state for save/sync)",
+  "fun_0070c180_direct_callers": 202,
+  "census_method": "for every one of the 202 call sites the preceding 0x20 bytes of instructions were captured and scanned for a static immediate tag 0x11 (03_SCRIPTS/s5_consumer_census_pass15.py; full site list in 01_RAW/GHIDRA_ROUTING/PASS15_GHIDRA_DUMP.json)"
+ },
+
+ "STATIC_WRITE_SITES_FOUND": 1,
+ "STATIC_READ_SITES_FOUND": {
+  "with_static_immediate_tag_0x11": 0,
+  "false_positives_examined": 2,
+  "false_positive_detail": [
+   {"site": "0x726A03", "why": "the TLV parse loop itself; the tag comes from the FILE via register DI, not from an immediate"},
+   {"site": "0x8AEAD5", "why": "the 0x11 is a state-variable byte store (MOV byte [ESP+0x2b8],0x11); the actual lookup argument is 0x2 and the class is 0x5DD1 (24017), not 20002"}
+  ],
+  "interpretation_bounded": "no statically-coded direct reader of the tag-0x11 slot was identified WITHIN the inspected 202 direct descriptor-lookup sites and the documented limited context window; property reads are TAG-VARIABLE-DRIVEN at runtime (the 202-site machinery resolves descriptors by whatever tag value is passed). Full downstream static data-flow, aliases, indirect calls and global writer/read completeness remain UNVERIFIED. Further static resolvability is NOT_ESTABLISHED."
+ },
+
+ "GENERIC_READ_MACHINERY_EVIDENCED": {
+  "array_getters_check_flags_bit0": "FUN_00726510/FUN_00726d10/FUN_00726d70/FUN_00726c00 require descriptor flags bit0 (array-type); tag 0x11 has flags 0xC0 (bit0=0) so those specific getters return defaults for it",
+  "trait_getters": "FUN_00726450 (tag 0x8000), FUN_00726490 (tag 0x8002), FUN_00727e90 (tag 0x1C), FUN_00727f10 (tag 9) - fixed other tags, not 0x11",
+  "serialization_writers": "FUN_00726560/FUN_00727110 write {tag, value} pairs from instance state (instance+0x28/+0x2C id pair, then the tags listed in the instance+0x34 tag vector); whether tag 0x11 appears in that vector at runtime was NOT statically determined (runtime state)"
+ },
+
+ "UNRESOLVED_ALIASES": [
+  "the destination value array is a heap allocation (pointer at instance+0x40) - not statically addressable; slot 21 accesses are all pointer-relative at runtime",
+  "the ArkParameterArmor instances are stored in the class instance map (classObj+0xC) keyed by record id - consumers reach them via lookups, not static addresses",
+  "the class object singleton DAT_00ba5da8 is runtime-initialized"
+ ],
+
+ "UNRESOLVED_INDIRECT_CALLS": [
+  "the instance vtable 0xA878BC methods (slots: FUN_00761510 dtor, FUN_008e0010, FUN_009154a0, FUN_007263e0 mode-1 nested reader, FUN_008e0110, FUN_00726340) - the mode-1 nested reader is never exercised for this file (tail u32 == 0 for all 1366 records)",
+  "the class-object +0x80 trait-object virtuals (finalize vtable+0x24 / rollback vtable+0x28 called in FUN_0070dc20/FUN_0070de10)",
+  "runtime-tag-driven getter invocations across the 202-site machinery (any call site whose tag argument is a variable could read slot 21 at runtime)",
+  "RESOLVED_BY_DESKTOP_CORRECTION_R1: the descriptor-factory object behavior for tag 0x11 is no longer unresolved - FUN_00977a50 is byte-decoded (returns the static ArkRTTraitsInt object 0x00BA937C; lazy-init flag 0x00BA9380; vtable 0x00A9C670 stored at first call; atexit-style registration of the vtable-reset destructor 0x00A744B0; never NULL) - see 01_RAW\\DESKTOP_CORRECTION_R1\\BRANCH_SELECTION_TRACE.json"
+ ],
+
+ "UNINSPECTED_PATHS": [
+  "the full downstream data-flow of every getter family member (bounded census only: the 202 sites were captured and scanned for immediate 0x11; decompiling and tracing all 202 was outside this run's scope)",
+  "gameplay armor-behavior code that may read armor parameters at runtime (not part of the bounded trace)",
+  "network/save serialization consumers of the instances (FUN_00727110 writer iterates a runtime tag vector)",
+  "the 17 other descriptor slots of the same schema (out of scope: single-field trace)"
+ ],
+
+ "EXHAUSTIVENESS_WORDING": "ONLY_DIRECT_WRITER_FOUND (the single selected-reader store instruction 0x00977810 for the tag-0x11 value, reached from the single FUN_0075f660 caller FUN_00726900); ONE_DIRECT_CALLER_FOUND is scoped to the censused parse machinery - NOT global proof that slot 21 has exactly one writer across the client; read-side census is BOUNDED: 202/202 descriptor-lookup sites captured and scanned for a static tag-0x11 immediate (0 found); global read-side exhaustiveness is UNVERIFIED because the tag arguments are runtime variables (V2-012 wording applied, corrected store reference per DESKTOP_CORRECTION_R1)",
+
+ "CONSUMER_CLASSIFICATION_AS_EVIDENCED": {
+  "observed_operation_at_the_read_site": "opaque propagation (pure copy): the value is loaded and stored without any comparison, arithmetic, branch, or lookup AT THE TRACED INSTRUCTIONS",
+  "caveat": "this classification covers only the pinned selected-reader read+store pair; what the generic property machinery does with the stored slot at runtime (comparison? lookup? display?) is NOT traced in this bounded run"
+ },
+
+ "DOWNSTREAM_CONSUMER_IDENTIFIED": "NO",
+ "DOWNSTREAM_CONSUMER_WORDING": "Within the inspected 202 direct descriptor-lookup sites and the documented limited context window, no tag-ID-17 downstream reader was identified. Full downstream static data-flow, aliases, indirect calls and global writer/read completeness remain UNVERIFIED. Further static resolvability is NOT_ESTABLISHED."
+}

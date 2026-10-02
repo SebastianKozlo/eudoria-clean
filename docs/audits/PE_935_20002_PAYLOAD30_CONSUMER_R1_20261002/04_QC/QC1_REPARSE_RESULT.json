@@ -1,0 +1,139 @@
+{
+ "run_id": "PE_935_20002_PAYLOAD30_CONSUMER_R1_20261002",
+ "countercheck": "QC1 independent framing re-parse",
+ "tool": "04_QC/qc_tools/qc1_reparse_vfs.py",
+ "independence": "own implementation; no executor/vfs_common code",
+ "vfs_path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Parameters\\20002.vfs",
+ "vfs_size": 174864,
+ "vfs_sha256": "C3899C3E88D72CE12CEF9B8A4F5E73B26632BB1A3207C950FF2BC40FD9C94AC4",
+ "derivation": {
+  "magic": "ArkVFS02",
+  "candidate_base_u32_at_8": 128,
+  "u32_at_12": 0,
+  "derivation_notes": [
+   "base candidates that yield byte-exact EOF walk from +16 with 16-byte headers {u32,u32,u32,u32} and stride align_up(16+size, base) were tested; the exact-EOF test selects base=128"
+  ],
+  "base_candidate_tests": {
+   "base_32": {
+    "ok": false,
+    "records": 1,
+    "error": "ver!=1 at frame 112 (ver=0)",
+    "exact_eof": false
+   },
+   "base_64": {
+    "ok": true,
+    "records": 1366,
+    "error": null,
+    "exact_eof": true
+   },
+   "base_128": {
+    "ok": true,
+    "records": 1366,
+    "error": null,
+    "exact_eof": true
+   },
+   "base_256": {
+    "ok": true,
+    "records": 683,
+    "error": null,
+    "exact_eof": true
+   }
+  }
+ },
+ "walk_error": null,
+ "record_count": 1366,
+ "exact_eof_invariant": {
+  "stop_pos": 174864,
+  "file_size": 174864,
+  "sum_strides_plus_16_equals_file": true
+ },
+ "census": {
+  "distinct_sizes": [
+   56
+  ],
+  "distinct_vers": [
+   1
+  ],
+  "distinct_crcs": [
+   0
+  ],
+  "u32_at_payload_0": [
+   20002
+  ],
+  "u16_at_2e": {
+   "0x11": 1366
+  },
+  "u16_at_8_flags": {
+   "0x80": 1366
+  },
+  "u16_at_a_count": {
+   "6": 1366
+  },
+  "bounds_ok": 1366,
+  "bounds_violation": 0,
+  "id_composite_mismatch_count": 0,
+  "field_value_count": 1366,
+  "field_value_min": 0,
+  "field_value_max": 16409,
+  "field_value_distinct": 142,
+  "field_zero_indexes": [
+   1014,
+   1015
+  ],
+  "plus_2c_value_histogram": {
+   "0x110000": 1337,
+   "0x11FFFF": 29
+  },
+  "plus_34_value_histogram": {
+   "0x0": 1366
+  }
+ },
+ "tlv_walk": {
+  "shape_counts": {
+   "((1, 12, 13, 14, 16, 17), 0)": 1366
+  },
+  "walk_errors": [],
+  "field30_is_tag11_value": 1366,
+  "tag11_value_offset_30": 1366,
+  "tail_zero_count": 1366
+ },
+ "anchor_primary_qc": {
+  "record_index": 0,
+  "frame_start": 16,
+  "record_id_hex": "0x05B80001",
+  "payload_start": 32,
+  "payload_length": 56,
+  "field_file_offset": 80,
+  "plus30_raw_hex": "bb2e0000",
+  "plus30_le_u32": 11963,
+  "ver": 1,
+  "crc_field": 0,
+  "payload_hex": "224e00000100b805800006000100f02b0700000000000c00cdcc4c3e0d00020000000e00b30000001000160000001100bb2e000000000000"
+ },
+ "anchor_zero_qc": {
+  "record_index": 1014,
+  "frame_start": 129808,
+  "record_id_hex": "0x22A50001",
+  "payload_start": 129824,
+  "payload_length": 56,
+  "field_file_offset": 129872,
+  "plus30_raw_hex": "00000000",
+  "plus30_le_u32": 0,
+  "ver": 1,
+  "crc_field": 0,
+  "payload_hex": "224e00000100a522800006000100e0946601000000000c00666606400d00020000000e00b900000010001800000011000000000000000000"
+ },
+ "executor_comparison": {
+  "exec_rows_read": 1366,
+  "frame_start_mismatch": [],
+  "payload_start_mismatch": [],
+  "payload_length_mismatch": [],
+  "record_id_mismatch": [],
+  "plus30_mismatch": [],
+  "bounds_flag_mismatch": 0,
+  "anchor_primary_agrees": true,
+  "anchor_zero_agrees": true,
+  "anchor_primary_payload_hex_agrees": true,
+  "anchor_zero_payload_hex_agrees": true
+ }
+}

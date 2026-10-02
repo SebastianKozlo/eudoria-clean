@@ -1,0 +1,41 @@
+
+bool __thiscall FUN_0040e260(int *param_1_00,HANDLE param_1,uint param_2)
+
+{
+  uint nNumberOfBytesToRead;
+  BOOL BVar1;
+  int *piVar2;
+  char cVar3;
+  DWORD local_4;
+  
+  nNumberOfBytesToRead = param_2;
+  cVar3 = *(char *)((int)param_1_00 + 0x11);
+  local_4 = 0;
+  if (cVar3 != '\0') {
+    if ((uint)param_1_00[1] < param_1_00[3] + param_2) {
+      FUN_0040e1a0(param_2);
+    }
+    BVar1 = ReadFile(param_1,(LPVOID)(*param_1_00 + param_1_00[3]),nNumberOfBytesToRead,&local_4,
+                     (LPOVERLAPPED)0x0);
+    cVar3 = BVar1 == 1;
+    if ((bool)cVar3) {
+      if (local_4 != nNumberOfBytesToRead) {
+        if (*(char *)((int)param_1_00 + 0x11) != '\0') {
+          *(undefined *)((int)param_1_00 + 0x11) = 0;
+        }
+        return false;
+      }
+      piVar2 = (int *)&param_2;
+      if (nNumberOfBytesToRead <= (uint)param_1_00[2]) {
+        piVar2 = param_1_00 + 2;
+      }
+      param_1_00[2] = *piVar2;
+    }
+    else if (*(char *)((int)param_1_00 + 0x11) != cVar3) {
+      *(char *)((int)param_1_00 + 0x11) = cVar3;
+      return (bool)cVar3;
+    }
+  }
+  return (bool)cVar3;
+}
+

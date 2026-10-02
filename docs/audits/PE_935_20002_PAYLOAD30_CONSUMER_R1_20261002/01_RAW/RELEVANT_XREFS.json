@@ -1,0 +1,69 @@
+{
+ "run_id": "PE_935_20002_PAYLOAD30_CONSUMER_R1_20261002",
+ "generator": "manual consolidation of 01_RAW/GHIDRA_ROUTING/*_GHIDRA_DUMP.json outputs (executor session)",
+ "note": "Consolidated reference censuses for the 20002.vfs routing/read chain, extracted from the in-run Ghidra dumps (01_RAW/GHIDRA_ROUTING/PASS*_GHIDRA_DUMP.json). All VAs are byte-pinned in 01_RAW/CLIENT_READ_BYTES.json where load-bearing.",
+
+ "chain_summary": {
+  "class_identity": "ArkObjectClassImpl<class_ArkParameterArmor,20002> (RTTI type name, .data 0xB8EDE4 area; $0EOCC@ mangling = 20002 by the MSVC nibble rule calibrated against $0EOCG@=20006=ArkParameterCommon in the same binary)",
+  "registration": "FUN_0073d1f0 -> FUN_0073a3f0 (ctor: PUSH 0x4E22 @0x73A441 -> FUN_0070cf80; vtable 0xA86FE0 store @0x73A46B) -> FUN_00761570 (schema: 18 descriptors 0x00..0x11) -> FUN_0070e2f0(0x12,0)",
+  "registry_lookup_FUN_0073c870": "case 0x4E22 -> MOV EAX,[0x00BA5DA8] @0x73C8C1 (the class-object singleton)",
+  "open_path": "FUN_0070c680(classObj, path, flags): if classObj+0x84==0: filename = path + itoa(classObj->[+8]=20002) + '.vfs' (FUN_0070c3d0 @0x70C3FC MOV EAX,[ECX+8]; '.vfs' @0xA86820) -> FUN_00972df0(reader, filename, ...) @0x70C742; reader stored at classObj+0x84 @0x70C71E",
+  "per_record_load": "FUN_0070e100(get-by-id) -> FUN_0070de10(create-on-miss; gate: classObj+0x84 != 0) -> FUN_0070dcf0(seek+read: FUN_00971ad0 @; cursor=payload bytes, limit=56; skip 8; CRC gate skipped because every crc field==0 in this file) -> FUN_0070dc20(instance := FUN_0070d990 factory chain; FUN_00726900(instance, mode=1, cursor))",
+  "tlv_parse_FUN_00726900": "flags=u16@+8 (0x80 all records); count=u16@0xA (6 all records); loop: tag=u16 (0x7269E7), desc=FUN_0070c180(classObj, tag) (0x726A03), dest = [instance+0x40] + desc[+8]*4 (0x726A11/0x726A14), value := FUN_0075f660 -> FUN_004129c0 -> FUN_00412540 (type 1: 4-byte LE read @0x412553, store @0x41255A)",
+  "schema_for_20002": "descriptors 0x00..0x11 registered by FUN_00761570; tag 0x11 = {type 1 (4-byte scalar), flags 0xC0, field index = tag+4 = 0x15 = slot 21} (pins @0x761717 PUSH 0xC0, @0x76171C PUSH 0x1, @0x76171E PUSH 0x11, @0x70CBF6 ADD ECX,4)"
+ },
+
+ "xrefs": {
+  "FUN_0075f660_callers": {
+   "count": 1,
+   "sites": [{"call_site": "0x726A1B", "caller": "FUN_00726900", "caller_entry": "0x726900"}],
+   "meaning": "the value-read dispatch has EXACTLY ONE caller (the TLV parse loop) - the write path into instance value slots is unique"
+  },
+  "FUN_00959090_callers": {"count": 1, "sites": [{"call_site": "0x94BDAD", "caller": "FUN_0094bd30"}]},
+  "FUN_0094bd30_callers": {"count": 2, "sites": [{"call_site": "0x94E2D6", "caller": "FUN_0094e1d0"}, {"call_site": "0x94E42F", "caller": "FUN_0094e390"}]},
+  "FUN_0094e1d0_callers": {"count": 1, "sites": [{"call_site": "0x94E4D2", "caller": "FUN_0094e470"}]},
+  "FUN_0094dfc0_callers": {"count": 1, "sites": [{"call_site": "0x94E21B-ish", "caller": "FUN_0094e1d0"}], "note": "FUN_0094dfc0 is called by the family driver FUN_0094e1d0; the family's filename part A = 'EnvironmentZones' (FUN_00958d90, byte-proven string) - THIS FAMILY IS NOT THE 20002.vfs CONSUMER"},
+  "FUN_0070c180_callers": {
+   "count": 202,
+   "meaning": "the generic property descriptor lookup used by the whole client (parse loop + getter/setter families)",
+   "tag_0x11_static_immediate_sites": 0,
+   "false_positives_documented": [
+    {"site": "0x726A03", "why": "parse loop itself; the tag comes from the FILE (register DI), not an immediate"},
+    {"site": "0x8AEAD5", "why": "the 0x11 byte is a state variable store (MOV byte [ESP+0x2b8],0x11); the actual tag argument is 0x2, and the class is 0x5DD1 (24017), not 20002"}
+   ]
+  },
+  "FUN_00761540_callers": {"count": 1, "sites": [{"call_site": "0x73A4D2", "caller": "FUN_0073a490 (the class-object vtable slot-1 factory)"}], "meaning": "the ArkParameterArmor instance ctor is invoked only via the factory"},
+  "FUN_00726e70_callers": {"count": 55, "meaning": "the ArkObject base ctor - one per ArkObjectClass-family instance ctor (55 registered class families)"},
+  "FUN_0070cf80_callers": {"count": 55, "meaning": "55 ArkObjectClass class-object constructor sites (one per registered class; the 20002 one is FUN_0073a3f0)"},
+  "FUN_0070c680_callers": {"count": 1, "sites": [{"call_site": "0x703EF0", "caller": "FUN_00703e80"}], "meaning": "the class-VFS open is driven by FUN_00703e80 (iterates registered class objects)"},
+  "FUN_00703e80_callers": {"count": 1, "sites": [{"call_site": "0x4B0A5D", "caller": "FUN_004b0980"}]},
+  "FUN_0070dcf0_callers": {"count": 1, "sites": [{"caller": "FUN_0070de10", "call_site": "0x70DE??-region"}], "note": "byte-pinned chain; see CLIENT_READ_BYTES.json"},
+  "FUN_0070de10_callers": {"count": "see PASS7", "sites": [{"caller": "FUN_0070e100"}]},
+  "DAT_00ba5da8_refs": {
+   "count": 9,
+   "sites": [
+    {"from": "0x73D211", "fn": "FUN_0073d1f0", "type": "READ"},
+    {"from": "0x73D262", "fn": "FUN_0073d1f0", "type": "WRITE"},
+    {"from": "0x73D26C", "fn": "FUN_0073d1f0", "type": "READ"},
+    {"from": "0x73D277", "fn": "FUN_0073d1f0", "type": "READ"},
+    {"from": "0x73D285", "fn": "FUN_0073d1f0", "type": "READ"},
+    {"from": "0x73D294", "fn": "FUN_0073d1f0", "type": "READ"},
+    {"from": "0x73D2A6", "fn": "FUN_0073d1f0", "type": "WRITE"},
+    {"from": "0x73C8C1", "fn": "FUN_0073c870", "type": "READ"},
+    {"from": "0x761547", "fn": "FUN_00761540", "type": "READ"}
+   ],
+   "meaning": "the 20002 class object singleton is constructed once (FUN_0073d1f0), returned by the registry (FUN_0073c870 case 0x4E22), and consumed by the instance ctor (FUN_00761540)"
+  },
+  "imm32_0x4E22_sites": {
+   "count": 3,
+   "sites": [
+    {"va": "0x73819A", "containing_function": "FUN_00738150 (0x738150)", "call_target": "FUN_00703b80 (get class object by id)"},
+    {"va": "0x73A442", "containing_function": "FUN_0073a3f0 (0x73A3F0)", "call_target": "FUN_0070cf80 (ArkObjectClass ctor) - THE 20002 REGISTRATION"},
+    {"va": "0x73FBCC", "containing_function": "FUN_0073fa30 (0x73FA30)", "call_target": "FUN_00703b80"}
+   ],
+   "ascii_20002_hits": 0,
+   "mangle_$0EOCC@_hits": 2,
+   "mangle_$0EOCG@_calibration_hits": 2
+  }
+ }
+}

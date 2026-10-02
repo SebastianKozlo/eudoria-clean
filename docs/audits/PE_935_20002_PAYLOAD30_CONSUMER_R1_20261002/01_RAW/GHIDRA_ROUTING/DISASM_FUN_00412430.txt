@@ -1,0 +1,37 @@
+00412430  SUB   ESP,0xc
+00412433  CMP   byte ptr [ECX + 0x11],0x0
+00412437  JZ   0x0041246e
+00412439  MOV   EDX,dword ptr [ECX + 0xc]
+0041243c  LEA   EAX,[EDX + 0xc]
+0041243f  CMP   EAX,dword ptr [ECX + 0x8]
+00412442  JA   0x0041246e
+00412444  MOV   EAX,dword ptr [ECX]
+00412446  ADD   EAX,EDX
+00412448  MOV   EDX,dword ptr [ESP + 0x10]
+0041244c  PUSH   ESI
+0041244d  MOV   ESI,dword ptr [EAX]
+0041244f  MOV   dword ptr [EDX],ESI
+00412451  MOV   ESI,dword ptr [EAX + 0x4]
+00412454  MOV   dword ptr [EDX + 0x4],ESI
+00412457  MOV   EAX,dword ptr [EAX + 0x8]
+0041245a  MOV   dword ptr [EDX + 0x8],EAX
+0041245d  POP   ESI
+0041245e  ADD   ESP,0xc
+00412461  MOV   dword ptr [ESP + 0x4],0xc
+00412469  JMP   0x0040de60
+0041246e  FLDZ   
+00412470  MOV   EAX,dword ptr [ESP + 0x10]
+00412474  FST   dword ptr [ESP]
+00412477  MOV   EDX,dword ptr [ESP]
+0041247a  FST   dword ptr [ESP + 0x4]
+0041247e  MOV   dword ptr [EAX],EDX
+00412480  FSTP   dword ptr [ESP + 0x8]
+00412484  MOV   EDX,dword ptr [ESP + 0x4]
+00412488  MOV   dword ptr [EAX + 0x4],EDX
+0041248b  MOV   EDX,dword ptr [ESP + 0x8]
+0041248f  MOV   dword ptr [EAX + 0x8],EDX
+00412492  CMP   byte ptr [ECX + 0x11],0x0
+00412496  JZ   0x0041249c
+00412498  MOV   byte ptr [ECX + 0x11],0x0
+0041249c  ADD   ESP,0xc
+0041249f  RET   0x4
