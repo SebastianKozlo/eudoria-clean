@@ -1,0 +1,37 @@
+// source: C2_CALLER_CENSUS.json :: D03
+
+undefined4 * __thiscall FUN_00726e70(undefined4 *param_1_00,undefined4 param_1,undefined4 param_2)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  void *local_c;
+  undefined *puStack_8;
+  undefined4 local_4;
+  
+  local_4 = 0xffffffff;
+  puStack_8 = &LAB_00a115bb;
+  local_c = ExceptionList;
+  uVar1 = DAT_00b9d8d0 ^ (uint)&stack0xffffffe4;
+  ExceptionList = &local_c;
+  *param_1_00 = ArkObject::vftable;
+  param_1_00[1] = param_1;
+  FUN_004134f0(uVar1);
+  local_4 = 0;
+  uVar2 = FUN_007ce1e0();
+  param_1_00[10] = uVar2;
+  param_1_00[0xb] = param_2;
+  param_1_00[0xc] = 0;
+  param_1_00[0xd] = 0;
+  param_1_00[0xe] = 0;
+  param_1_00[0xf] = 0;
+  param_1_00[0x10] = 0;
+  param_1_00[0x11] = 0;
+  param_1_00[0x12] = 0;
+  param_1_00[0x13] = 0;
+  param_1_00[0x14] = 0;
+  param_1_00[0x15] = 0;
+  ExceptionList = local_c;
+  return param_1_00;
+}
+

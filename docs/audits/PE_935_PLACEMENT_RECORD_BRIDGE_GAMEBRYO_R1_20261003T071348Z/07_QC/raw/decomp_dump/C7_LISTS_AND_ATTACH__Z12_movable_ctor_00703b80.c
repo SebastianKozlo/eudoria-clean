@@ -1,0 +1,13 @@
+// source: C7_LISTS_AND_ATTACH.json :: Z12_movable_ctor_00703b80
+
+undefined4 * __thiscall FUN_00703b80(undefined4 *param_1_00,undefined4 param_1)
+
+{
+  undefined4 uVar1;
+  
+  FUN_00415470(param_1);
+  uVar1 = FUN_00703d70(param_1);
+  *param_1_00 = uVar1;
+  return param_1_00;
+}
+
