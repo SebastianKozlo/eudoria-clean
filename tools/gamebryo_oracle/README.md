@@ -34,16 +34,42 @@ All JSON output is DETERMINISTIC: no wall-clock timestamps, no random data.
 | gb23 | SOURCE_DERIVED_REIMPLEMENTATION (header-only) | GB_2_3 | metadata-only: engine identity from the recovered NiVersion.h (sha DFCCD6EC...); read range UNKNOWN (binary); execution NOT_TESTED (installer never installed; nothing is installed by this tool). |
 | compare | MIXED | OUR_TOOL | oracle vs our FIELD_IDENTITY_V2 decoder, the order-s11 19-item list, statuses {MATCH, MISMATCH, NOT_AVAILABLE_IN_ORACLE, NOT_AVAILABLE_IN_OUR_DECODER, SEMANTICALLY_UNRESOLVED}. |
 
+### gb12 RTTI table validation (F1 fix, 2026-10-03)
+
+`gb12core.py` validates the ENTIRE RTTI table in SOURCE TABLE ORDER
+(NiStream.cpp LoadRTTI L421-433: name -> factory lookup -> next name),
+including entries no object references. The FIRST unregistered table entry
+is the fail-closed verdict (RTTIError -> Load() false) BEFORE any later
+table name, any object type index (L436-444), the object groups or any body
+byte. The JSON separates `rtti_table_validation` (the table-order factory
+scan: `first_rtti_miss`, `first_miss_table_index`, `names_read`,
+`full_table_read`, `unregistered_table_entries`,
+`source_predicted_verdict`) from the OBJECT-side artifacts
+`object_reference_histogram` + `object_reference_census` (one u16 type
+index per header block; LoadRTTI L436-444). In ordinary fail-closed mode a
+factory miss reports NOTHING past the miss (no indices, no histogram, no
+census, no bodies). The legacy `< 5.0.0.1` inline-RTTI layout is NOT
+migrated to this fix. The pre-F1 build validated by iterating object type
+indices instead (Desktop post-audit finding F1): unused unregistered
+entries were silently skipped and the first miss was reported in object
+order.
+
 ### gb12 --full-decode (OUR extension; NEVER original behavior)
 
-The ORIGINAL GB 1.2 verdict is always: unregistered class -> LoadRTTI
-RTTIError -> Load() returns false. With `--full-decode` the adapter CONTINUES
-the stream decode past such blocks (recording them as unknowns with
-closure-derived boundaries) so known-class field data can be compared. In
-that mode the JSON carries `load_result.accepted=false` +
-`error=RTTIError(<class>)` + `partial=true` + `unknowns=[...]` +
-`decode_continued_after_rtti_gate=true`. The ORIGINAL verdict is reported in
-`load_result` and never silently merged. SOURCE_DERIVED output is never
+The ORIGINAL GB 1.2 verdict is always: first unregistered RTTI table entry
+-> LoadRTTI RTTIError -> Load() returns false. With `--full-decode` the
+adapter CONTINUES the stream decode past the miss (recording unknown blocks
+with closure-derived boundaries) so known-class field data can be compared.
+In that mode the JSON carries `load_result.accepted=false` +
+`error=RTTIError(<first table miss>)` + `partial=true` +
+`decode_continued_after_rtti_gate=true` and KEEPS
+`rtti_table_validation.source_predicted_verdict=REJECTED` with
+`first_rtti_miss` = the first miss in TABLE order; every continuation past
+the miss is explicitly labeled (`extension_observation`). If the extension
+itself hits a parser failure (truncated later table name, corrupt or
+incomplete object indices), it halts with an `EXTENDED_*` warning and the
+source-predicted verdict is never masked. The ORIGINAL verdict is reported
+in `load_result` and never silently merged. SOURCE_DERIVED output is never
 phrased as original execution (G-TOOL-4).
 
 ## Local dependency representation (s22)
@@ -69,7 +95,13 @@ blocks is invariant to which CoreLibs subset a prebuilt tool links.
 
 `tests/test_gb12.py` exercises: version packing; registry invariants; the
 wrong-version controls (synthetic 99.0.0.0 -> LATER_VERSION, 1.0.0.0 ->
-OLDER_VERSION); NOT_NIF_FILE; determinism; and (with `--sandbox-payload`)
+OLDER_VERSION); NOT_NIF_FILE; determinism; the F1 RTTI table-order battery
+(registered-only baseline preserved; unused unregistered entry rejected;
+first miss by TABLE order, not object order; factory miss before
+incomplete object indices; factory miss before a truncated later table
+name; --full-decode keeps SOURCE_PREDICTED_VERDICT=REJECTED with the
+table-order FIRST_RTTI_MISS and labels the extension, whose own parser
+failures never mask the source verdict); and (with `--sandbox-payload`)
 the fail-closed battery on a sandbox copy of a real payload: RTTIError
 reporting, unknown-class reporting (mutated RTTI name), corruption
 fail-not-silent, object-count mismatch detection, partial-load
@@ -85,4 +117,6 @@ nif_version}`, `oracle{gamebryo_version,loader_identity,
 loader_source_identity,tool_version}`, `load_result{accepted,partial,
 error}`, `objects[]`, `scene_graph`, `type_histogram`, `controllers`,
 `properties`, `textures`, `bounds`, `warnings`, `unknowns`) plus extensions
-(`version_gate`, `rtti_gate`, `tool_reports`, `object_count_check`).
+(`version_gate`, `rtti_gate` (deprecated compact alias), `rtti_table_validation`,
+`object_reference_histogram`, `object_reference_census`, `tool_reports`,
+`object_count_check`).

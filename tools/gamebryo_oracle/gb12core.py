@@ -14,11 +14,19 @@
 #       [ms_uiNifMinVersion=3.3.0.11 (L42-43), ms_uiNifMaxVersion=10.2.0.0
 #       (L44-46)]; user-defined version iff file ver >= 10.0.1.8 (L335);
 #       uiObjects u32 (L355).
-#     LoadRTTI L412-449: u16 RTTICount; per type LoadRTTIString (u32 len +
-#       bytes, L1145-1153); factory lookup ms_pkLoaders; miss -> RTTIError(name)
-#       (NO_CREATE_FUNCTION "<name>: cannot find create function.", L396-400)
-#       -> return false (ORIGINAL fail-closed verdict).
-#     LoadObject L451-468 (LEGACY < 5.0.0.1): RTTI string INLINE per object.
+#     LoadRTTI L412-449: u16 RTTICount; the table is validated IN SOURCE
+#       ORDER (L421-433: per entry LoadRTTIString (u32 len + bytes,
+#       L1145-1153) -> ms_pkLoaders factory lookup -> next entry); the FIRST
+#       unregistered name aborts with RTTIError(name) (NO_CREATE_FUNCTION
+#       "<name>: cannot find create function.", L396-400) -> return false
+#       (ORIGINAL fail-closed verdict) BEFORE any later table name, the
+#       per-object type indices (L436-444), the object groups or any body.
+#       EVERY table entry is validated including entries no object
+#       references (F1 fix 2026-10-03: the pre-F1 build validated by
+#       iterating object type indices, silently skipping unused unregistered
+#       entries and reporting the first miss in object order).
+#     LoadObject L451-468 (LEGACY < 5.0.0.1): RTTI string INLINE per object
+#       (the F1 table-order fix does NOT apply to this legacy layout).
 #     LoadObjectGroups L470-487 (iff ver >= 5.0.0.6): u32 numGroups + u32 sizes.
 #     LoadStream L506-635: bNew = ver >= 5.0.0.1; per-object LoadBinary loop;
 #       link loop (LinkObject); postlink loop (PostLinkObject);
@@ -117,13 +125,20 @@
 # for NiArk* blocks is invariant to the linked subset.
 #
 # --full-decode EXTENSION (OURS, NEVER ORIGINAL BEHAVIOR): the original GB 1.2
-# Load() FAILS the whole load at the first unregistered RTTI class. With
-# --full-decode the adapter continues the stream decode past such blocks
-# (recording them as unknowns with closure-derived byte boundaries) so the
-# known-class field data can be compared against our own decoder. In that mode
-# the JSON reports load_result.accepted=false + error=RTTIError(<class>) +
-# partial=true + decode_continued_after_rtti_gate=true. The ORIGINAL verdict is
-# always reported and is never silently merged with the extension.
+# Load() FAILS the whole load at the first unregistered RTTI class (in RTTI
+# TABLE order, including unused entries -- F1 fix). With --full-decode the
+# adapter continues the stream decode past such blocks (recording them as
+# unknowns with closure-derived byte boundaries) so the known-class field
+# data can be compared against our own decoder. In that mode the JSON
+# reports load_result.accepted=false + error=RTTIError(<class>) +
+# partial=true + decode_continued_after_rtti_gate=true, keeps
+# rtti_table_validation.source_predicted_verdict=REJECTED and
+# first_rtti_miss=<first miss in TABLE order>, and labels every continuation
+# past the miss (extension_observation) as OUR extension. If the extension
+# itself hits a parser failure (truncated later table name, corrupt/incomplete
+# object indices), it halts with an EXTENDED_* warning and the
+# source-predicted verdict is never masked. The ORIGINAL verdict is always
+# reported and is never silently merged with the extension.
 
 import hashlib
 import json
@@ -1386,66 +1401,105 @@ def decode(data, path="<memory>", full_decode=False,
     b_new = ver >= V_BNEW
     type_names = None
     type_idx = None
-    unregistered = []
     if b_new:
-        # LoadRTTI L412-449
+        # LoadRTTI L412-449 -- SOURCE TABLE ORDER (F1 fix 2026-10-03).
+        # The ORIGINAL algorithm (NiStream.cpp L421-433) reads the RTTI table
+        # ONE ENTRY AT A TIME: LoadRTTIString -> ms_pkLoaders->GetAt factory
+        # check -> NEXT entry. The FIRST unregistered name aborts LoadRTTI
+        # with RTTIError -> Load() returns false BEFORE any later table name,
+        # ANY object type index (L436-444), the object groups (L470-487) or
+        # any body byte is read. EVERY table entry is validated, INCLUDING
+        # entries that no object references; the scan order is TABLE order,
+        # never object-reference order. The pre-F1 build validated by
+        # iterating object type indices instead (Desktop post-audit finding
+        # F1): unused unregistered entries were silently skipped and the
+        # first miss was reported in object order.
         n_types = r.u16()
         type_names = []
-        for _ in range(n_types):
-            type_names.append(r.rtti_string())
-        type_idx = []
-        try:
-            for _ in range(n_obj):
-                # NiStream.cpp L440: assert(usRTTI < usRTTICount) -- a
-                # corrupted index must be DETECTED, never trusted.
-                ix = r.u16()
-                if ix >= n_types:
-                    res["load_result"].update(
-                        accepted=False, partial=False,
-                        error="INVALID_TYPE_INDEX: block type index %d out "
-                              "of range (num types %d)" % (ix, n_types),
-                        error_code="INVALID_TYPE_INDEX")
-                    return res
-                type_idx.append(ix)
-        except DecodeError:
-            res["load_result"].update(
-                accepted=False, partial=False,
-                error="NOT_NIF_FILE: truncated RTTI table",
-                error_code="NOT_NIF_FILE")
-            return res
-        for ix in type_idx:
-            tn = type_names[ix]
-            if tn not in registered_classes:
-                # ORIGINAL scan order: LoadRTTI errors at the FIRST miss in
-                # table-scan order (NiStream.cpp L421-433).
-                if tn not in unregistered:
-                    unregistered.append(tn)
-                if not full_decode:
+        first_miss_table_index = None
+        first_miss_name = None
+        for i in range(n_types):
+            try:
+                name = r.rtti_string()
+            except DecodeError as e:
+                if first_miss_table_index is not None:
+                    # full-decode extension only: the ORIGINAL loader never
+                    # reaches this read (it failed at the first miss).
+                    res["warnings"].append(
+                        "EXTENDED_TABLE_READ_FAILED (OUR extension; the "
+                        "ORIGINAL GB 1.2 load already failed at the RTTI "
+                        "factory miss): %s" % e)
                     break
-        res["rtti_gate"] = {
-            "registered_class_count": len(registered_classes),
+                raise  # no table miss yet: unchanged pre-F1 behavior
+            type_names.append(name)
+            if name not in registered_classes and first_miss_name is None:
+                # FIRST miss in TABLE order (NiStream.cpp L427-433); in
+                # --full-decode the scan continues for inspection but the
+                # first miss is never overwritten by a later entry.
+                first_miss_table_index = i
+                first_miss_name = name
+                if not full_decode:
+                    # ORIGINAL: stop reading further names at the miss.
+                    break
+                # --full-decode (OUR extension): keep reading the table
+                # for inspection; the source-predicted verdict is fixed.
+        full_table_read = len(type_names) == n_types
+        unregistered_table = [nm for nm in type_names
+                              if nm not in registered_classes]
+        res["rtti_table_validation"] = {
+            "scan_order": "SOURCE_TABLE_ORDER (NiStream.cpp LoadRTTI "
+                          "L421-433: name -> factory lookup -> next name)",
             "file_type_count": n_types,
-            "unregistered_types": unregistered,
-            "first_unregistered_scan_order": unregistered[0] if unregistered
-            else None,
+            "registered_class_count": len(registered_classes),
+            "names_read": len(type_names),
+            "full_table_read": full_table_read,
+            "first_miss_table_index": first_miss_table_index,
+            "first_rtti_miss": first_miss_name,
+            "unregistered_table_entries": unregistered_table,
+            "source_predicted_verdict": ("REJECTED" if first_miss_name
+                                         is not None else "ACCEPTED"),
+            "unused_entry_note": "table entries not referenced by any "
+                                 "object are still validated in table "
+                                 "order (F1 fix; NiStream.cpp L421-433 "
+                                 "precedes the L436-444 index loop)",
             "registry_provenance": "Gb12_Source CoreLibs *SDM.cpp "
                                    "NiRegisterStream/RegisterLoader census "
                                    "(see adapters/gb12/registry.py)",
         }
-        res["type_histogram"] = {}
-        for ix in type_idx:
-            tn = type_names[ix]
-            res["type_histogram"][tn] = res["type_histogram"].get(tn, 0) + 1
-        if unregistered:
-            # ORIGINAL fail-closed verdict (LoadRTTI -> RTTIError -> false)
-            first = unregistered[0]
+        if first_miss_name is not None and full_decode:
+            res["rtti_table_validation"]["extension_observation"] = (
+                "table scan continued past the first miss ONLY under "
+                "--full-decode (OUR extension; the ORIGINAL GB 1.2 loader "
+                "stops at the first miss); SOURCE_PREDICTED_VERDICT="
+                "REJECTED, FIRST_RTTI_MISS=%s (table index %d)"
+                % (first_miss_name, first_miss_table_index))
+        # back-compat compact view of the same TABLE scan (the pre-F1 key
+        # name is kept for downstream/compare stability; content is the
+        # table-order validation, NOT object references)
+        res["rtti_gate"] = {
+            "registered_class_count": len(registered_classes),
+            "file_type_count": n_types,
+            "unregistered_types": unregistered_table,
+            "first_unregistered_scan_order": first_miss_name,
+            "scan_basis": "RTTI TABLE order (LoadRTTI L421-433); the "
+                          "pre-F1 build scanned object reference order",
+            "registry_provenance": "Gb12_Source CoreLibs *SDM.cpp "
+                                   "NiRegisterStream/RegisterLoader census "
+                                   "(see adapters/gb12/registry.py)",
+            "deprecated_alias_of": "rtti_table_validation",
+        }
+        if first_miss_name is not None:
+            # ORIGINAL fail-closed verdict: LoadRTTI -> RTTIError -> false.
+            # In ordinary mode NOTHING past the miss was read: later table
+            # names, object indices, groups and bodies are NOT reported.
             res["load_result"].update(
                 accepted=False, partial=False,
-                error="RTTIError(%s): cannot find create function." % first,
+                error="RTTIError(%s): cannot find create function."
+                      % first_miss_name,
                 error_code="RTTIError")
             res["unknowns"] = [
-                {"class": tn, "status": "UNREGISTERED_IN_GB12_FACTORY"}
-                for tn in unregistered]
+                {"class": first_miss_name,
+                 "status": "UNREGISTERED_IN_GB12_FACTORY"}]
             if not full_decode:
                 return res
             # OUR extension: continue the decode (never original behavior)
@@ -1454,7 +1508,71 @@ def decode(data, path="<memory>", full_decode=False,
             res["warnings"].append(
                 "decode_continued_after_rtti_gate=true is OUR extension; the "
                 "ORIGINAL GB 1.2 Load() returns false at LoadRTTI (verdict "
-                "reported in load_result)")
+                "reported in load_result); SOURCE_PREDICTED_VERDICT=REJECTED "
+                "FIRST_RTTI_MISS=%s (table index %d)"
+                % (first_miss_name, first_miss_table_index))
+        # per-object type indices (LoadRTTI L436-444) -- read ONLY after the
+        # whole table validated (ordinary) or under the labeled extension
+        # (full-decode); these are OBJECT references, a separate artifact
+        # from the RTTI_TABLE_VALIDATION scan above.
+        type_idx = []
+        index_stage_failed = None
+        try:
+            for _ in range(n_obj):
+                # NiStream.cpp L441: assert(usRTTI < usRTTICount) -- a
+                # corrupted index must be DETECTED, never trusted.
+                ix = r.u16()
+                if ix >= n_types:
+                    index_stage_failed = (
+                        "INVALID_TYPE_INDEX: block type index %d out "
+                        "of range (num types %d)" % (ix, n_types))
+                    break
+                type_idx.append(ix)
+        except DecodeError:
+            index_stage_failed = "NOT_NIF_FILE: truncated RTTI table"
+        if index_stage_failed is not None:
+            if full_decode and first_miss_name is not None:
+                # extension-only failure: the ORIGINAL verdict is the
+                # factory miss (the original never reads these indices);
+                # the extension halts honestly without masking it.
+                res["warnings"].append(
+                    "EXTENDED_INSPECTION_HALTED at the object-index stage "
+                    "(OUR extension): %s -- the ORIGINAL GB 1.2 load "
+                    "already failed at the RTTI factory miss; no body "
+                    "inspection is possible without a complete type-index "
+                    "list" % index_stage_failed)
+                res["rtti_table_validation"]["extension_observation"] = (
+                    "extended inspection halted at the object-index stage: "
+                    "%s (the ORIGINAL loader never reads these indices)"
+                    % index_stage_failed)
+                res["objects"] = []
+                return res
+            res["load_result"].update(
+                accepted=False, partial=False,
+                error=index_stage_failed,
+                error_code=("INVALID_TYPE_INDEX"
+                            if index_stage_failed.startswith("INVALID_TYPE_")
+                            else "NOT_NIF_FILE"))
+            return res
+        # OBJECT_REFERENCE_HISTOGRAM / OBJECT_REFERENCE_CENSUS (LoadRTTI
+        # L436-444 artifacts; separate from RTTI_TABLE_VALIDATION).
+        res["type_histogram"] = {}
+        for ix in type_idx:
+            tn = type_names[ix]
+            res["type_histogram"][tn] = res["type_histogram"].get(tn, 0) + 1
+        res["object_reference_histogram"] = dict(res["type_histogram"])
+        referenced = set(type_idx)
+        res["object_reference_census"] = {
+            "header_num_blocks": n_obj,
+            "type_indices_read": len(type_idx),
+            "referenced_table_indices": sorted(referenced),
+            "unreferenced_table_indices": [i for i in range(n_types)
+                                           if i not in referenced],
+            "semantics": "OBJECT references into the RTTI table (LoadRTTI "
+                         "L436-444); NOT the table-order factory validation "
+                         "(L421-433) -- unused entries are validated by the "
+                         "table scan, not by this census",
+        }
         # LoadObjectGroups L470-487 (iff ver >= 5.0.0.6)
         if ver >= V_GROUPS:
             n_groups = r.u32()
