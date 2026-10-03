@@ -66,11 +66,20 @@ In that mode the JSON carries `load_result.accepted=false` +
 `rtti_table_validation.source_predicted_verdict=REJECTED` with
 `first_rtti_miss` = the first miss in TABLE order; every continuation past
 the miss is explicitly labeled (`extension_observation`). If the extension
-itself hits a parser failure (truncated later table name, corrupt or
-incomplete object indices), it halts with an `EXTENDED_*` warning and the
-source-predicted verdict is never masked. The ORIGINAL verdict is reported
-in `load_result` and never silently merged. SOURCE_DERIVED output is never
-phrased as original execution (G-TOOL-4).
+itself hits a parser failure it halts and the source-predicted verdict is
+never masked. F1-C1 fix (2026-10-03): a DecodeError on a LATER table name
+halts the extension AT THE TABLE FAILURE
+(`rtti_table_validation.extension_halt.marker=STOP_AT_TABLE_FAILURE`,
+top-level `extension_halt="STOP_AT_TABLE_FAILURE"`): after an incomplete
+table read there is NO proven boundary for the object type indices, so no
+object index, group, body, histogram/census or scan is read past the failed
+table read (never CONTINUE_FROM_UNKNOWN_OFFSET); the structured JSON is
+returned immediately with the earlier source-predicted RTTIError unchanged
+and the CLI exits != 0. A parser failure on the object-index stage of a
+FULLY-read table halts separately (`EXTENDED_INSPECTION_HALTED` at the
+object-index stage). The ORIGINAL verdict is reported in `load_result` and
+never silently merged. SOURCE_DERIVED output is never phrased as original
+execution (G-TOOL-4).
 
 ## Local dependency representation (s22)
 
@@ -101,7 +110,12 @@ first miss by TABLE order, not object order; factory miss before
 incomplete object indices; factory miss before a truncated later table
 name; --full-decode keeps SOURCE_PREDICTED_VERDICT=REJECTED with the
 table-order FIRST_RTTI_MISS and labels the extension, whose own parser
-failures never mask the source verdict); and (with `--sandbox-payload`)
+failures never mask the source verdict); the F1-C1 extension-halt battery
+(a truncated LATER table name with index-like / fake-body-like leftover
+bytes under --full-decode halts AT the table failure with
+STOP_AT_TABLE_FAILURE -- structured JSON, earlier RTTIError preserved,
+no indices/groups/bodies/histogram/census/roots ever read from the
+undetermined table boundary); and (with `--sandbox-payload`)
 the fail-closed battery on a sandbox copy of a real payload: RTTIError
 reporting, unknown-class reporting (mutated RTTI name), corruption
 fail-not-silent, object-count mismatch detection, partial-load

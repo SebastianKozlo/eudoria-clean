@@ -1,0 +1,41 @@
+[PASS] ver_pack_10_1_0_0 
+[PASS] ver_pack_4_1_0_12 
+[PASS] registry_198 
+[PASS] adapter_doc 
+[PASS] registry_ninode 
+[PASS] registry_no_niark 
+[PASS] wrong_version_rejected LATER_VERSION: Unknown NIF version.
+[PASS] too_old_rejected OLDER_VERSION: NIF version is too old.
+[PASS] not_nif_file 
+[PASS] determinism_synth 
+[PASS] no_timestamp_key 
+== F1 RTTI table-order battery (source: NiStream.cpp L412-449) ==
+MEASURED_QUANTITY: load_result verdict + rtti_table_validation (first_rtti_miss / first_miss_table_index / names_read / source_predicted_verdict)
+INDEPENDENT_SOURCE_OF_TRUTH: pinned NiStream.cpp LoadRTTI L421-433 control flow (name -> factory check -> next name; indices L436-444 only after the whole table registered)
+WHY_NON_CIRCULAR: expectations were derived from the pinned source + hand-built fixtures before the fix; a regression to object-reference-order validation fails these controls
+FAILURE_CASE_DETECTED: an adapter that skips unused unregistered table entries, or reports the first miss in object order, or reads indices/past the truncated table before the factory miss, FAILS these controls
+[PASS] f1_registered_only_baseline roots=[0]
+[PASS] f1_unused_unregistered_entry_rejected error='RTTIError(NiXyzzyx): cannot find create function.'
+[PASS] f1_ordinary_miss_reads_no_object_data histogram/census/objects not reported past the miss
+[PASS] f1_first_miss_table_order_not_object_order error='RTTIError(NiXyzzyx): cannot find create function.' (object order would give NiQuuxzyx)
+[PASS] f1_full_decode_keeps_source_verdict error='RTTIError(NiXyzzyx): cannot find create function.' first='NiXyzzyx'@1
+[PASS] f1_miss_precedes_incomplete_indices error='RTTIError(NiXyzzyx): cannot find create function.' (index-stage errors would be INVALID_TYPE_INDEX/NOT_NIF_FILE/DECODE_ERROR)
+[PASS] f1_miss_precedes_truncated_later_name error='RTTIError(NiXyzzyx): cannot find create function.'
+[PASS] f1_full_decode_extension_failure_never_masks_source_verdict error='RTTIError(NiXyzzyx): cannot find create function.' warnings=['EXTENDED_TABLE_READ_FAILED (OUR extension; the ORIGINAL GB 1.2 load already failed at the RTTI factory miss): EOF: need 1024 bytes at 79', 'decode_continued_after_rtti_gate=true is OUR extension; the ORIGINAL GB 1.2 Load() returns false at LoadRTTI (verdict reported in load_result); SOURCE_PREDICTED_VERDICT=REJECTED FIRST_RTTI_MISS=NiXyzzyx (table index 1)']
+== F1-C1 extension table-failure halt battery ==
+MEASURED_QUANTITY: load_result verdict + rtti_table_validation (extension_halt marker / first_rtti_miss / names_read / full_table_read) + the object-side artifact keys
+INDEPENDENT_SOURCE_OF_TRUTH: pinned NiStream.cpp LoadRTTI L421-433 control flow (the ORIGINAL loader aborts at the first factory miss and never reaches the later truncated name; the extension contract: no boundary proven -> no continuation)
+WHY_NON_CIRCULAR: expectations were derived from the pinned source + the extension halt contract BEFORE the fix; the pre-fix behavior (traceback / spurious object) was reproduced on the same bytes and is raw-recorded in the run package
+FAILURE_CASE_DETECTED: an adapter that breaks out of the name loop and continues into object indices/groups/bodies from the undetermined table boundary (losing the JSON to a traceback or fabricating objects) FAILS these controls
+[PASS] f1c1_C1A_ordinary_stops_at_first_miss error='RTTIError(NiDesktopFirstMissing): cannot find create function.'
+[PASS] f1c1_C1A_full_halt_at_table_failure error='RTTIError(NiDesktopFirstMissing): cannot find create function.' marker='STOP_AT_TABLE_FAILURE'
+[PASS] f1c1_C1A_full_keeps_source_verdict_and_table_state first='NiDesktopFirstMissing'@1 names_read=2 full=False
+[PASS] f1c1_C1A_full_reads_nothing_past_table_failure index-like continuation: objects/histogram/census/groups/roots must be absent
+[PASS] f1c1_C1A_marker_distinguishes_stop_vs_continue halt={'marker': 'STOP_AT_TABLE_FAILURE', 'halted_at_table_index': 2, 'file_type_count': 3, 'table_boundary_determined': False, 'detail': 'EOF: need 127 bytes at 92', 'continuation': 'NONE: no object type indices, object groups, object bodies, object_reference_histogram/census or scanning were read past the failed table read (the leftover bytes of the unfinished name are never interpreted as indices, groups or bodies; NOT CONTINUE_FROM_UNKNOWN_OFFSET)'}
+[PASS] f1c1_C1B_ordinary_stops_at_first_miss error='RTTIError(NiDesktopFirstMissing): cannot find create function.'
+[PASS] f1c1_C1B_full_halt_at_table_failure error='RTTIError(NiDesktopFirstMissing): cannot find create function.' marker='STOP_AT_TABLE_FAILURE'
+[PASS] f1c1_C1B_full_keeps_source_verdict_and_table_state first='NiDesktopFirstMissing'@1 names_read=2 full=False
+[PASS] f1c1_C1B_full_reads_nothing_past_table_failure fake-body-like continuation: objects/histogram/census/groups/roots must be absent
+[PASS] f1c1_C1B_marker_distinguishes_stop_vs_continue halt={'marker': 'STOP_AT_TABLE_FAILURE', 'halted_at_table_index': 2, 'file_type_count': 3, 'table_boundary_determined': False, 'detail': 'EOF: need 127 bytes at 92', 'continuation': 'NONE: no object type indices, object groups, object bodies, object_reference_histogram/census or scanning were read past the failed table read (the leftover bytes of the unfinished name are never interpreted as indices, groups or bodies; NOT CONTINUE_FROM_UNKNOWN_OFFSET)'}
+[PASS] f1c1_C1B_fake_body_not_reconstructed unknowns=[{'class': 'NiDesktopFirstMissing', 'status': 'UNREGISTERED_IN_GB12_FACTORY'}]
+TESTS: 0 failures: []

@@ -135,10 +135,22 @@
 # rtti_table_validation.source_predicted_verdict=REJECTED and
 # first_rtti_miss=<first miss in TABLE order>, and labels every continuation
 # past the miss (extension_observation) as OUR extension. If the extension
-# itself hits a parser failure (truncated later table name, corrupt/incomplete
-# object indices), it halts with an EXTENDED_* warning and the
-# source-predicted verdict is never masked. The ORIGINAL verdict is always
-# reported and is never silently merged with the extension.
+# itself hits a parser failure it halts and the source-predicted verdict is
+# never masked. F1-C1 fix (2026-10-03): a DecodeError on a LATER table name
+# (after an established first miss) HALTS THE EXTENSION AT THE TABLE
+# FAILURE -- rtti_table_validation.extension_halt.marker=
+# STOP_AT_TABLE_FAILURE + top-level extension_halt. After an incomplete
+# table read there is NO proven boundary for the start of the object type
+# indices (the leftover bytes of the unfinished name can never prove where
+# the table ends), so NOTHING past the failed table read is interpreted:
+# no object index, no object group, no body byte, no histogram/census, no
+# scanning/resynchronization (never CONTINUE_FROM_UNKNOWN_OFFSET). The
+# structured JSON is returned immediately with the earlier source-predicted
+# RTTIError verdict unchanged (a later parser error must NOT replace it);
+# the CLI exits != 0 (accepted=false). A parser failure on the object-index
+# stage of a FULLY-read table halts separately (EXTENDED_INSPECTION_HALTED
+# at the object-index stage). The ORIGINAL verdict is always reported and
+# is never silently merged with the extension.
 
 import hashlib
 import json
@@ -1418,6 +1430,7 @@ def decode(data, path="<memory>", full_decode=False,
         type_names = []
         first_miss_table_index = None
         first_miss_name = None
+        extension_table_failure = None
         for i in range(n_types):
             try:
                 name = r.rtti_string()
@@ -1429,6 +1442,13 @@ def decode(data, path="<memory>", full_decode=False,
                         "EXTENDED_TABLE_READ_FAILED (OUR extension; the "
                         "ORIGINAL GB 1.2 load already failed at the RTTI "
                         "factory miss): %s" % e)
+                    # F1-C1 fix (2026-10-03): the RTTI table boundary is
+                    # UNDETERMINED past this point -- the leftover bytes of
+                    # the unfinished name can never prove where the table
+                    # ends. The extension must STOP AT THE TABLE FAILURE
+                    # (never CONTINUE_FROM_UNKNOWN_OFFSET into the object
+                    # indices/groups/bodies).
+                    extension_table_failure = str(e)
                     break
                 raise  # no table miss yet: unchanged pre-F1 behavior
             type_names.append(name)
@@ -1511,6 +1531,48 @@ def decode(data, path="<memory>", full_decode=False,
                 "reported in load_result); SOURCE_PREDICTED_VERDICT=REJECTED "
                 "FIRST_RTTI_MISS=%s (table index %d)"
                 % (first_miss_name, first_miss_table_index))
+        if extension_table_failure is not None:
+            # F1-C1 fix (2026-10-03, Desktop post-audit
+            # PE_GAMEBRYO_ORACLE_F1_DESKTOP_POST_AUDIT_20261003 finding
+            # F1-C1/P2): the extended table read failed on a LATER name
+            # (first_miss_table_index established + --full-decode). The RTTI
+            # table boundary is UNDETERMINED -- the leftover bytes of the
+            # unfinished name can never prove where the table ends, so NO
+            # byte past the failed table read may be interpreted as an
+            # object type index, an object group, an object body, a
+            # histogram/census artifact or a scan/resynchronization position.
+            # The extension HALTS AT THE TABLE FAILURE
+            # (STOP_AT_TABLE_FAILURE, NOT CONTINUE_FROM_UNKNOWN_OFFSET) and
+            # returns the structured JSON IMMEDIATELY with the
+            # SOURCE-PREDICTED verdict set above (the earlier RTTIError --
+            # a later parser error must NOT replace it). The CLI exits != 0
+            # (accepted=false). no object indices are read, no
+            # object_reference_histogram/object_reference_census keys are
+            # produced, no object groups are read, no bodies are decoded and
+            # no closure scanning is attempted.
+            res["rtti_table_validation"]["extension_halt"] = {
+                "marker": "STOP_AT_TABLE_FAILURE",
+                "halted_at_table_index": len(type_names),
+                "file_type_count": n_types,
+                "table_boundary_determined": False,
+                "detail": extension_table_failure,
+                "continuation": "NONE: no object type indices, object "
+                                "groups, object bodies, "
+                                "object_reference_histogram/census or "
+                                "scanning were read past the failed table "
+                                "read (the leftover bytes of the "
+                                "unfinished name are never interpreted as "
+                                "indices, groups or bodies; NOT "
+                                "CONTINUE_FROM_UNKNOWN_OFFSET)",
+            }
+            res["extension_halt"] = "STOP_AT_TABLE_FAILURE"
+            res["warnings"].append(
+                "EXTENSION_HALT: STOP_AT_TABLE_FAILURE at extended RTTI "
+                "table entry %d of %d (%s); the source-predicted RTTIError "
+                "verdict is preserved and NOTHING is read past the failed "
+                "table read (the RTTI table boundary is undetermined)"
+                % (len(type_names), n_types, extension_table_failure))
+            return res
         # per-object type indices (LoadRTTI L436-444) -- read ONLY after the
         # whole table validated (ordinary) or under the labeled extension
         # (full-decode); these are OBJECT references, a separate artifact

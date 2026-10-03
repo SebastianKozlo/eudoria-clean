@@ -377,10 +377,176 @@ def f1_rtti_table_tests():
               rFf["load_result"]["error"], rFf["warnings"][:2]))
 
 
+def _f1c1_fixtures():
+    """Hand-built synthetic fixtures for the F1-C1 extension-halt regression
+    battery (Desktop post-audit
+    PE_GAMEBRYO_ORACLE_F1_DESKTOP_POST_AUDIT_20261003 finding F1-C1/P2; see
+    run PE_GAMEBRYO_ORACLE_F1_C1_EXTENSION_HALT_R1_20261003 for the
+    derivation). Byte layouts derived from the pinned source canon
+    (NiStream.cpp LoadRTTI L412-449 + LoadRTTIString L1145-1153 + L70
+    MAX_RTTI_LEN=256), NOT from the adapter under correction. All bytes are
+    OUR OWN synthetic data; the committed package generator
+    (docs/audits/PE_GAMEBRYO_ORACLE_F1_C1_EXTENSION_HALT_R1_20261003/
+    01_FIXTURES/build_fixtures_c1.py) reproduces the physical files
+    byte-identically (SIZE+SHA256 pins in that package)."""
+    import struct as _s
+
+    def _rtti(nm):
+        b = nm.encode("latin-1")
+        return _s.pack("<I", len(b)) + b
+
+    def _cstr(nm):
+        b = nm.encode("latin-1")
+        return _s.pack("<i", len(b)) + b
+
+    hdr = (b"Gamebryo File Format, Version 10.1.0.0\n"
+           + _s.pack("<I", 0x0A010000) + _s.pack("<I", 0))
+    nul = 0xFFFFFFFF
+    # third table name: source-valid declared length 127 (0 < 127 < 256),
+    # incomplete payload -> LoadRTTIString cannot complete at EOF.
+    third = _s.pack("<I", 127)
+
+    def node_body(name):
+        return (_s.pack("<I", 0) + _cstr(name) + _s.pack("<I", 0)
+                + _s.pack("<I", nul) + _s.pack("<H", 0)
+                + _s.pack("<3f", 0.0, 0.0, 0.0)
+                + _s.pack("<9f", 1.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                          0.0, 0.0, 1.0)
+                + _s.pack("<f", 1.0) + _s.pack("<I", 0)
+                + _s.pack("<I", nul) + _s.pack("<I", 0)
+                + _s.pack("<I", 0))
+
+    def truncated_table(payload):
+        # 1 header block; table count 3: NiNode (registered),
+        # NiDesktopFirstMissing (UNREGISTERED first miss @ index 1),
+        # third name declared 127 B with only `payload` bytes behind it.
+        return (hdr + _s.pack("<I", 1) + _s.pack("<H", 3)
+                + _rtti("NiNode") + _rtti("NiDesktopFirstMissing")
+                + third + payload)
+
+    fx = {}
+    # C1A: index-like leftover bytes ("\x02\x00" = the VALID type index 2);
+    # the pre-C1-fix build consumed them as an object type index and then
+    # crashed (IndexError: type_names[2] with only 2 names read).
+    fx["C1A"] = truncated_table(b"\x02\x00")
+    # C1B: fake-body-like leftover bytes (index + groups + NiNode body +
+    # valid footer); the pre-C1-fix build reconstructed a SPURIOUS NiNode
+    # object, histogram, census, groups and roots out of them.
+    fx["C1B"] = truncated_table(
+        _s.pack("<H", 0) + _s.pack("<I", 0) + node_body("root")
+        + _s.pack("<I", 1) + _s.pack("<i", 0))
+    return fx
+
+
+def f1c1_extension_halt_tests():
+    """F1-C1 regression battery (Desktop post-audit finding F1-C1/P2): under
+    --full-decode, a DecodeError on a LATER RTTI name (after an established
+    first table miss) must STOP the extension AT the table failure. After an
+    incomplete table read there is NO proven boundary for the object type
+    indices -- the leftover bytes of the unfinished name must NEVER be
+    interpreted as indices, groups or bodies (STOP_AT_TABLE_FAILURE, not
+    CONTINUE_FROM_UNKNOWN_OFFSET). The earlier source-predicted RTTIError
+    verdict is preserved, the structured JSON is emitted and the CLI exits
+    != 0."""
+    fx = _f1c1_fixtures()
+    print("== F1-C1 extension table-failure halt battery ==")
+    print("MEASURED_QUANTITY: load_result verdict + rtti_table_validation "
+          "(extension_halt marker / first_rtti_miss / names_read / "
+          "full_table_read) + the object-side artifact keys")
+    print("INDEPENDENT_SOURCE_OF_TRUTH: pinned NiStream.cpp LoadRTTI "
+          "L421-433 control flow (the ORIGINAL loader aborts at the first "
+          "factory miss and never reaches the later truncated name; the "
+          "extension contract: no boundary proven -> no continuation)")
+    print("WHY_NON_CIRCULAR: expectations were derived from the pinned "
+          "source + the extension halt contract BEFORE the fix; the "
+          "pre-fix behavior (traceback / spurious object) was reproduced "
+          "on the same bytes and is raw-recorded in the run package")
+    print("FAILURE_CASE_DETECTED: an adapter that breaks out of the name "
+          "loop and continues into object indices/groups/bodies from the "
+          "undetermined table boundary (losing the JSON to a traceback or "
+          "fabricating objects) FAILS these controls")
+
+    for key, cls in (("C1A", "index-like"), ("C1B", "fake-body-like")):
+        # ordinary mode is UNCHANGED by F1-C1: the scan stops at the first
+        # miss; the truncated later name is never read.
+        ro = gb12core.decode(fx[key], path="<f1c1-%s-ordinary>" % key)
+        check("f1c1_%s_ordinary_stops_at_first_miss" % key,
+              ro["load_result"]["error_code"] == "RTTIError" and
+              "RTTIError(NiDesktopFirstMissing)" in
+              (ro["load_result"]["error"] or "") and
+              ro["rtti_table_validation"]["names_read"] == 2 and
+              "extension_halt" not in ro["rtti_table_validation"] and
+              ro["objects"] == [] and
+              "object_reference_histogram" not in ro and
+              "object_reference_census" not in ro,
+              "error=%r" % ro["load_result"]["error"])
+        # --full-decode: the extension halts AT the table failure.
+        rf = gb12core.decode(fx[key], path="<f1c1-%s-full>" % key,
+                             full_decode=True)
+        tv = rf["rtti_table_validation"]
+        halt = tv.get("extension_halt", {})
+        check("f1c1_%s_full_halt_at_table_failure" % key,
+              rf["load_result"]["accepted"] is False and
+              rf["load_result"]["error_code"] == "RTTIError" and
+              "RTTIError(NiDesktopFirstMissing)" in
+              (rf["load_result"]["error"] or "") and
+              halt.get("marker") == "STOP_AT_TABLE_FAILURE" and
+              halt.get("table_boundary_determined") is False and
+              rf.get("extension_halt") == "STOP_AT_TABLE_FAILURE",
+              "error=%r marker=%r" % (rf["load_result"]["error"],
+                                      halt.get("marker")))
+        check("f1c1_%s_full_keeps_source_verdict_and_table_state" % key,
+              tv["first_rtti_miss"] == "NiDesktopFirstMissing" and
+              tv["first_miss_table_index"] == 1 and
+              tv["names_read"] == 2 and
+              tv["full_table_read"] is False and
+              tv["source_predicted_verdict"] == "REJECTED" and
+              rf["decode_continued_after_rtti_gate"] is True and
+              rf["load_result"]["partial"] is True and
+              any("EXTENDED_TABLE_READ_FAILED" in w
+                  for w in rf["warnings"]) and
+              any("EXTENSION_HALT: STOP_AT_TABLE_FAILURE" in w
+                  for w in rf["warnings"]),
+              "first=%r@%r names_read=%r full=%r" % (
+                  tv["first_rtti_miss"], tv["first_miss_table_index"],
+                  tv["names_read"], tv["full_table_read"]))
+        check("f1c1_%s_full_reads_nothing_past_table_failure" % key,
+              rf["objects"] == [] and
+              "object_reference_histogram" not in rf and
+              "object_reference_census" not in rf and
+              "object_groups" not in rf and
+              rf["type_histogram"] == {} and
+              rf["scene_graph"]["roots"] == [] and
+              not any("EXTENDED_INSPECTION_HALTED" in w
+                      for w in rf["warnings"]),
+              "%s continuation: objects/histogram/census/groups/roots "
+              "must be absent" % cls)
+        check("f1c1_%s_marker_distinguishes_stop_vs_continue" % key,
+              halt.get("continuation", "").startswith("NONE:") and
+              "NOT CONTINUE_FROM_UNKNOWN_OFFSET" in
+              halt.get("continuation", "") and
+              halt.get("halted_at_table_index") == 2 and
+              halt.get("file_type_count") == 3,
+              "halt=%r" % halt)
+    # the fake-body class additionally proves the crafted NiNode-like bytes
+    # were NOT reconstructed into an object (the pre-fix spurious object,
+    # histogram, census, groups, roots=[0] and count-match are all gone).
+    rfB = gb12core.decode(fx["C1B"], path="<f1c1-C1B-full>", full_decode=True)
+    check("f1c1_C1B_fake_body_not_reconstructed",
+          rfB["objects"] == [] and
+          "object_count_check" not in rfB and
+          rfB["scene_graph"]["edges"] == [] and
+          rfB["unknowns"] == [
+              {"class": "NiDesktopFirstMissing",
+               "status": "UNREGISTERED_IN_GB12_FACTORY"}],
+          "unknowns=%r" % rfB["unknowns"])
+
+
 def main():
     args = sys.argv[1:]
     self_tests()
     f1_rtti_table_tests()
+    f1c1_extension_halt_tests()
     if "--sandbox-payload" in args:
         i = args.index("--sandbox-payload")
         payload_controls(args[i + 1])
