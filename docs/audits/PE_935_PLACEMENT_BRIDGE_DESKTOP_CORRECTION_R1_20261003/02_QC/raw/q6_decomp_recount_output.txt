@@ -1,0 +1,39 @@
+PER-FILE DECOMPILATION RECORDS:
+  C10V2_BYTE_CROSSCHECK.json = 0
+  C10_BYTE_PINS.json = 0
+  C11_ORACLE_COUNTERPARTS.json = 4
+  C12_NINODE_VTABLE_REPIN.json = 0
+  C1_CENSUS.json = 0
+  C2_CALLER_CENSUS.json = 4
+  C3_DECOMP.json = 17
+  C4_CONSTRUCTION_TRACE.json = 12
+  C5_LAYOUT_AND_DRIVERS.json = 12
+  C6_DRIVER_SOURCES.json = 17
+  C7_LISTS_AND_ATTACH.json = 12
+  C8_TOP_SOURCES.json = 10
+  C9_LISTING_WINDOWS.json = 0
+TOTAL_RECORDS = 88
+UNIQUE_FUNCTION_ENTRY = 87
+DUPLICATE_ENTRIES = 1
+  dup 0x6baa20: [('C3_DECOMP.json', 'R10_other_006baa20'), ('C6_DRIVER_SOURCES.json', 'Y07_consumer_006baa20')]
+ROUTE_MISMATCHES (field vs key vs code) = 0
+
+QC METHOD (disclosed): parse each historical 01_RAW C*.json; take measured.decompilations; count records per
+file; extract each record's function entry by THREE independent routes — (a) the record's function_entry/va
+field, (b) trailing hex address in the record key, (c) first FUN_xxxxxxxx token of the decompiled code (the
+function's own definition signature) — and require route agreement.
+QC RESULT vs EXECUTOR ss8A CLAIM:
+  DECOMPILATION_RECORDS = 88 — EXACT MATCH
+  UNIQUE_FUNCTION_ENTRY = 87 — EXACT MATCH
+  single duplicate pair 0x6baa20 (C3:R10_other_006baa20 + C6:Y07_consumer_006baa20) — EXACT MATCH
+  per-file counts C2=4, C3=17, C4=12, C5=12, C6=17, C7=12, C8=10, C11=4 — EXACT MATCH
+  ROUTE_MISMATCHES = 0 (all three routes agree on every record; the C2 code-signature fallback
+  D01->FUN_0072f580, D02->FUN_004c5580, D03->FUN_00726e70, D04->FUN_0070bf50 is confirmed by
+  field==key==code agreement on all four C2 records)
+CORROBORATION (historical QC artifact, read by QC):
+  07_QC/raw/decomp_dump contains exactly 88 .c files (QC count: DECOMP_DUMP_C_FILES=88)
+  07_QC/raw/recheck/recheck4_decomp_integrity.json = {"dump_files": 88, "match": 88, "mismatch": [],
+  "missing_key": [], "extra_note": [], "all_match": true} — matches the package's citation.
+LIMIT CHECK: hard limit NEW_PCG_FUNCTIONS_DETAILED_MAX=120: 88 records / 87 unique — NOT exceeded (and NOT
+phrased as "88 unique functions" anywhere in the package as a current claim; only as the retracted
+historical wording or the order's own prohibition text).

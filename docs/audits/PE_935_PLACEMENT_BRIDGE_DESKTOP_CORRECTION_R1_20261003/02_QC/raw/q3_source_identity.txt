@@ -1,0 +1,39 @@
+QC-F3 RAW — F-D3 source identity verification (my own measurement)
+DATE = 2026-10-03 (UTC) | INSTRUMENT = PowerShell Get-Item/Get-FileHash (SHA256) + full file read
+TARGET = D:\gamebyroengine\extracted\Gb12_Source\CoreLibs\NiMain\Win32\NiAVObject_Win32.cpp
+
+MY MEASUREMENT:
+EXISTS = YES
+EXACT_PATH = D:\gamebyroengine\extracted\Gb12_Source\CoreLibs\NiMain\Win32\NiAVObject_Win32.cpp
+SIZE = 999 bytes                (claimed 999 — MATCH)
+SHA256 = 75E452680D4B52D469EC69EF33C79CF94BF0F3E334250B8FAB3892077BF23FD4
+                                (claimed 75E452680D4B52D469EC69EF33C79CF94BF0F3E334250B8FAB3892077BF23FD4 — MATCH)
+FILE_MTIME_UTC = 2007-07-05T11:52:25Z (executor observed the same)
+LINE COUNT = 32 lines (sole function; translation unit with PCH include + 3 headers)
+
+LINE 22 LOCATOR (what I SEE in the file):
+line 22 = "void NiAVObject::UpdateWorldData()"  (function definition line — the file's sole function)
+line 24-25:     if (m_pkParent)
+                    m_kWorld = m_pkParent->m_kWorld * m_kLocal;
+line 26-27:     else
+                    m_kWorld = m_kLocal;
+line 29-30:     if (m_spCollisionObject)
+                    m_spCollisionObject->UpdateWorldData();
+→ matches the package's LINE_22 derived description verbatim (local->world transform propagation;
+  forwards to the collision object).
+
+LABELS / SCOPE CHECKS (from full reads of the new package):
+- HISTORICAL_ORACLE_REFERENCE separated from POST_AUDIT_SOURCE_VERIFICATION (CURRENT_CLAIM_STATE.md ss4) ✓
+- POST_AUDIT_SOURCE_CHECK = YES ✓ ; MEASURED_DURING_CORRECTION = YES ✓
+- No backdating: measurements attributed to the correction executor (pe-reconstruction), 2026-10-03T09:21:53Z,
+  "explicitly NOT the historical executor's knowledge" ✓
+- ORACLE_MECHANISMS = 3 UNCHANGED — no fourth mechanism anywhere in the package ✓
+- NOT performed (order ss6): no Gamebryo inventory, no SDK build, no runtime Gamebryo, no cross-version searches —
+  package tree contains exactly 9 md/csv files (no such artifacts); EXECUTION_LOG ss3 records the negatives ✓
+- Historical 05_ORACLE/ORACLE_RECORDS.md NOT modified: git status on the historical package path = clean (empty
+  porcelain); MECHANISM 3 record (lines 80-98) read intact — general reference "CoreLibs\NiMain\NiAVObject.cpp"
+  preserved, target-local evidence (NiNode slot27 = 0x007E4820; m_kLocal @+0x38; parent m_kWorld @+0x6C;
+  world translate X @+0x90; raw vtable dump C12) intact and NOT downgraded in the new package ✓
+
+CONCLUSION: Q3 = CONFIRMED (path/size/SHA256/line-22 locator all match the package's claims; labels honest;
+no fourth oracle; no backdating; historical record untouched).

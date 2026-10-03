@@ -1,0 +1,46 @@
+QC-F5 RAW — current correction budget: physical file mtimes (my own measurement)
+DATE = 2026-10-03 (UTC) | INSTRUMENT = PowerShell Get-ChildItem CreationTimeUtc/LastWriteTimeUtc
+PACKAGE = docs/audits/PE_935_PLACEMENT_BRIDGE_DESKTOP_CORRECTION_R1_20261003/
+
+MEASURED (UTC):
+00_CONTROL\AUTHORIZATION.md          CREATED=2026-10-03T09:16:45Z LASTWRITE=2026-10-03T09:16:45Z
+00_CONTROL\PREFLIGHT.md              CREATED=2026-10-03T09:17:37Z LASTWRITE=2026-10-03T09:17:37Z
+00_CONTROL\CORRECTION_BUDGET.md      CREATED=2026-10-03T09:17:50Z LASTWRITE=2026-10-03T09:17:50Z
+01_ANALYSIS\DESKTOP_FINDINGS.md      CREATED=2026-10-03T09:26:31Z LASTWRITE=2026-10-03T09:26:31Z
+01_ANALYSIS\CORRECTION_MATRIX.csv    CREATED=2026-10-03T09:26:59Z LASTWRITE=2026-10-03T09:26:59Z
+01_ANALYSIS\HISTORY_BUDGET_RECONCILIATION.md CREATED=2026-10-03T09:27:17Z LASTWRITE=2026-10-03T09:27:17Z
+01_ANALYSIS\CURRENT_CLAIM_STATE.md   CREATED=2026-10-03T09:27:41Z LASTWRITE=2026-10-03T09:27:41Z
+01_ANALYSIS\DEFERRED_PLACEMENT_LEADS.md CREATED=2026-10-03T09:27:51Z LASTWRITE=2026-10-03T09:27:51Z
+01_ANALYSIS\EXECUTION_LOG.md         CREATED=2026-10-03T09:28:19Z LASTWRITE=2026-10-03T09:28:19Z
+(02_QC\raw\* files = this QC's own outputs, later timestamps — QC-owned)
+
+ANALYSIS:
+1. The CORRECTION_BUDGET.md banner timestamp 2026-10-03T09:16:45Z is disclosed IN the file as "the timestamp
+   of the last verified tool measurement immediately preceding this file's write (the AUTHORIZATION.md
+   byte-identity verification...)". Physically: AUTHORIZATION.md mtime = 09:16:45Z (matches), CORRECTION_BUDGET.md
+   own mtime = 09:17:50Z. The preregistration's physical completion = 09:17:50Z.
+2. The budget file (09:17:50Z) PREDATES all six 01_ANALYSIS files (earliest: DESKTOP_FINDINGS.md 09:26:31Z;
+   latest: EXECUTION_LOG.md 09:28:19Z) by ~8.7 minutes ✓.
+3. All recorded Phase B measurements postdate the budget: first UTC-stamped Phase B call 09:21:08Z;
+   F-D3 source measurement 09:21:53Z; ss8A recount 09:21:56Z; E10 census 09:21:57Z; session-store census
+   ~09:22-09:25 (reconciliation cites 09:24:40Z) — ALL after 09:17:50Z ✓.
+4. EXECUTION_LOG's stated window (~09:17Z start approximate; end = final verification call, handoff reports
+   ~09:28:35Z) is consistent with the physical mtimes ✓. Phase A window (PREFLIGHT measured 09:15:24Z-09:15:26Z;
+   AUTHORIZATION byte-verify 09:16:45Z; budget 09:17:50Z) consistent with the stated ~09:14Z phase start.
+5. Honest limitation (per my profile rules): file mtimes alone do not PROVE no pre-budget correction work
+   occurred; however, every correction-produced artifact and every recorded measurement carries a timestamp
+   AFTER the budget write, and no 01_ANALYSIS/correction artifact predates it. The budget-before-work
+   ordering is supported by all available physical evidence; no contradicting evidence exists.
+
+PLANNED VS USED (order ss13 Q5):
+- Phase A: planned 15 calls / <=25 min; self-reported final 10/15, wall ~5 min (PREFLIGHT ss9 planned final
+  10/15: 8 as of its write + CORRECTION_BUDGET.md write + final verification) — within cap ✓
+- Phase B: planned 65 calls / <=95 min; self-reported final 26/65 (EXECUTION_LOG: 25 as of its write +
+  PLANNED_FINAL_TOTAL 26/65), wall reported in handoff ~12 min — within cap ✓
+- Executor-phase total: 10 + 26 = 36 / 80 (both sub-caps respected; A+B <= 80 holds) ✓ — no cap exceeded,
+  no retroactive limit change ✓
+- Observation (P3, non-blocking): EXECUTION_LOG ss1 states "WALL_MINUTES_AS_OF_THIS_WRITE ~ 14 of MAX 95"
+  while the final handoff wall number is ~12 min; ~14 corresponds to the elapsed time since the PHASE A
+  start (~09:14Z), not since the Phase B start (~09:17Z). Both are "approximate" (~) values far below the
+  cap; the final ~12 matches the physical window (09:17Z->09:28:35Z ~ 11.6 min). Recorded as a process
+  nuance, not a budget breach.

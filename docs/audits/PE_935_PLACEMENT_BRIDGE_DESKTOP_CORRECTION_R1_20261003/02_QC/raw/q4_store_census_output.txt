@@ -1,0 +1,28 @@
+STORE = C:/Users/User/.local/share/opencode/opencode.db (mode=ro)
+TABLES = ['workspace', 'data_migration', 'account_state', 'account', 'control_account', 'credential', 'event_sequence', 'event', 'permission', 'project_directory', 'project', 'message', 'part', 'session_context_epoch', 'session_input', 'session_message', 'session', 'todo', 'session_share', 'migration']
+SCHEMA part: [('id', 'TEXT'), ('message_id', 'TEXT'), ('session_id', 'TEXT'), ('time_created', 'INTEGER'), ('time_updated', 'INTEGER'), ('data', 'TEXT')]
+SCHEMA session: [... 'parent_id' TEXT, 'directory' TEXT, 'title' TEXT ... 'time_created' INTEGER ...]
+SESSION ses_eff63660cffeJE8ariHPxOW4KQ -> ('ses_eff63660cffeJE8ariHPxOW4KQ', 'Execute bounded placement bridge run (@pe-reconstruction subagent)', 'D:/TESTAI', 'ses_eff65ce0dffehQR2H4VAoaJOIv', 1791011625459)
+SESSION ses_eff4f9ba2ffe54l7YQDmBq294P -> ('ses_eff4f9ba2ffe54l7YQDmBq294P', 'Fresh internal QC of bridge run (@pe-master-auditor subagent)', 'D:/TESTAI', 'ses_eff65ce0dffehQR2H4VAoaJOIv', 1791012922461)
+SESSION ses_eff40a7ffffex6TtoVQEAWrKmX -> ('ses_eff40a7ffffex6TtoVQEAWrKmX', 'Focused re-QC of repair round (@pe-master-auditor subagent)', 'D:/TESTAI', 'ses_eff65ce0dffehQR2H4VAoaJOIv', 1791013902336)
+SESSION ses_eff335334ffekauyuLGpNeRUxP -> ('ses_eff335334ffekauyuLGpNeRUxP', 'Persist verdict, commit and push (@pe-master-auditor subagent)', 'D:/TESTAI', 'ses_eff65ce0dffehQR2H4VAoaJOIv', 1791014776011)
+SESSION ses_eff20857cffeai93HfqGMdWPT8 -> ('ses_eff20857cffeai93HfqGMdWPT8', 'Restore EU935 NIF viewer service (@pe-reconstruction subagent)', 'D:/TESTAI', 'ses_eff65ce0dffehQR2H4VAoaJOIv', 1791016008323)
+SESSION ses_eff65ce0dffehQR2H4VAoaJOIv -> ('ses_eff65ce0dffehQR2H4VAoaJOIv', 'Eksperyment PE_935 Placement Record Bridge', 'D:/TESTAI', None, 1791011467763)
+PART_TABLE = part
+SESSION ses_eff63660cffeJE8ariHPxOW4KQ: TOTAL_PARTS=627 TOOL_PARTS=148 BADJSON=0 TYPES=[('tool', 148), ('step-start', 138), ('step-finish', 138), ('text', 102), ('reasoning', 101)]
+SESSION ses_eff4f9ba2ffe54l7YQDmBq294P: TOTAL_PARTS=316 TOOL_PARTS=109 BADJSON=0 TYPES=[('tool', 109), ('step-start', 62), ('step-finish', 62), ('reasoning', 48), ('text', 35)]
+SESSION ses_eff40a7ffffex6TtoVQEAWrKmX: TOTAL_PARTS=224 TOOL_PARTS=69 BADJSON=0 TYPES=[('step-start', 46), ('step-finish', 46), ('tool', 69), ('reasoning', 34), ('text', 29)]
+SESSION ses_eff335334ffekauyuLGpNeRUxP: TOTAL_PARTS=256 TOOL_PARTS=55 BADJSON=0 TYPES=[('tool', 55), ('step-start', 53), ('step-finish', 53), ('text', 48), ('reasoning', 47)]
+SESSION ses_eff20857cffeai93HfqGMdWPT8: TOTAL_PARTS=374 TOOL_PARTS=112 BADJSON=0 TYPES=[('tool', 112), ('step-start', 65), ('step-finish', 65), ('text', 63), ('reasoning', 63), ('patch', 6)]
+SESSION ses_eff65ce0dffehQR2H4VAoaJOIv: TOTAL_PARTS=322 TOOL_PARTS=92 BADJSON=0 TYPES=[('tool', 92), ('text', 59), ('step-start', 57), ('reasoning', 57), ('step-finish', 56), ('patch', 1)]
+
+QC COUNTING METHOD (disclosed): one part row whose data JSON type == 'tool' = one tool invocation.
+QC RESULT vs EXECUTOR CLAIM:
+  executor session: TOOL_PARTS=148 = 125+23 (sum check machine-verified by QC) — MATCH
+  fresh QC session:  TOOL_PARTS=109 — EXACT MATCH (Desktop census 109, executor INDEPENDENTLY_RECOMPUTED)
+  focused re-QC:      TOOL_PARTS=69  — EXACT MATCH (Desktop census 69, executor INDEPENDENTLY_RECOMPUTED)
+  total-parts side checks: 316 / 224 — match the reconciliation ss3.3/ss3.4 COUNT_SCOPE statements.
+  session identification (titles, directory D:/TESTAI, parent, created epoch ms -> 2026-10-03T07:13:45Z /
+  07:35:22Z / 07:51:42Z / 08:06:16Z / 08:26:48Z / 07:11:07Z) — ALL MATCH the reconciliation's claims.
+The 125/23 phase SPLIT remains INHERITED (no phase boundary in the store) — consistent with the executor's
+own INDEPENDENTLY_RECOMPUTED = NO for those two values.
