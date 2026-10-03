@@ -1,0 +1,641 @@
+{
+ "CODE_PATH": {
+  "mutation_logic": "copied verbatim from payload_controls()",
+  "runner": "04_EVIDENCE/scripts/c1_control_persist.py",
+  "test_file": "tools/gamebryo_oracle/tests/test_gb12.py",
+  "test_file_sha256": "323AAA6245605A191EF335A32397418F579A580C1DA86D686699D97C25F2289B"
+ },
+ "CONTROL_ID": "link_failure_mutation",
+ "EXECUTED": "2026-10-03 (correction round C1)",
+ "FAILURE_CASE_DETECTED": "a silent success in this control's failure class would FAIL the check; measured: DETECTED on ['SDK:2310 HN (Plane).nif']; NOT detected on ['T1', 'STOCK'] (raw outputs recorded -- see per-run entries); not applicable / not run on ['T2'] (see per-run entries)",
+ "INDEPENDENT_SOURCE_OF_TRUTH": "GB 1.2 link semantics: linkIDs must reference existing objects; an out-of-range linkID must be flagged with a LINK_FAILURE warning per block/field, never silently ignored",
+ "MEASURED_QUANTITY": "gb12 adapter decode warnings on a sandbox copy whose first NiNode child-link u32 was replaced with the out-of-range value 0xFFFFFFFE",
+ "RUN_ID": "PE_GAMEBRYO_ORACLE_TOOL_R1_20261003_C1",
+ "RUN_NOTE": "Initial C1 battery: on the T1 sandbox copy the original-mode load stops at the RTTI gate before any link phase (fail-closed RTTIError; check honestly not detected there). On the T2 sandbox copy there is no NiNode with integer children links (not applicable). On the STOCK (1310 HN (Plane).nif) sandbox copy the VERBATIM tests/test_gb12.py find() resolved the children[0] u32 pattern to the footer num-top field (value collision), the mutation fed 0xFFFFFFFE into num-top, and decode raised DecodeError (fail-closed exception, never silent; recorded in the STOCK run entry). A bounded follow-up search across GB 1.2 SDK sample models found 2310 HN (Plane).nif, where the verbatim control path reaches the link phase and the out-of-range link is flagged with LINK_FAILURE -- recorded as the last run entry (target=6, pos=388). Persistence-order disclosure: the follow-up appended this run in memory but its final recompute reloaded from disk before the dump; 04_EVIDENCE/scripts/c1_complete.py re-executed the verbatim control on the same sample and persisted it; the identical target/pos confirm determinism.",
+ "SANDBOX_DISCIPLINE": "mutations applied to in-memory bytearrays loaded from sandbox copies in the OS temp sandbox; pinned payloads read-only; sha256/size pins verified before use",
+ "WHY_NON_CIRCULAR": "the link target is taken from the decoded object table of the same copy, but the mutation is applied to the file bytes before a fresh decode; the expectation (warning, not silence) comes from source-derived link semantics, not from the decoder",
+ "runs": [
+  {
+   "baseline_original_verdict": {
+    "accepted": false,
+    "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+    "error_code": "RTTIError",
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "no full-decode objects or no NiNode with integer children links on this payload",
+     "expression": "any('LINK_FAILURE' in w for w in warnings)",
+     "name": "link_failure_detected",
+     "passed": null
+    },
+    "full_decode_context": {
+     "decode_continued_after_rtti_gate": true,
+     "load_result": {
+      "accepted": false,
+      "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+      "error_code": "RTTIError",
+      "partial": true
+     },
+     "objects": 6
+    },
+    "mutation": "skipped: first NiNode has no integer children links",
+    "raw_output": null
+   },
+   "payload": "T2",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\T2_sandbox_copy.nif",
+   "source_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\sandbox\\payloads\\533021.nif",
+   "source_sha256": "9CFF776D204AEC7B64377DD365AC11A71C9DCFA4A00A5905E642EE7420D5DC28"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": false,
+    "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+    "error_code": "RTTIError",
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "warnings=[]",
+     "expression": "any('LINK_FAILURE' in w for w in warnings)",
+     "name": "link_failure_detected",
+     "passed": false
+    },
+    "mutation": "first NiNode child-link u32 (target=17) replaced with 0xFFFFFFFE at byte 568",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.1.0.0",
+      "nif_version": "10.1.0.0",
+      "nif_version_u32": 167837696,
+      "num_blocks_from_header": 66,
+      "path": "<link-failure>",
+      "sha256": "9101A27AFD5724FBD10731E81482ACB61A6E987EA98F9A27CBCC3584215D5457",
+      "size": 57316,
+      "user_defined_version": "0.0.0.0"
+     },
+     "load_result": {
+      "accepted": false,
+      "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+      "error_code": "RTTIError",
+      "partial": false
+     },
+     "objects": [],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [],
+     "rtti_gate": {
+      "file_type_count": 12,
+      "first_unregistered_scan_order": "NiArkAnimationExtraData",
+      "registered_class_count": 198,
+      "registry_provenance": "Gb12_Source CoreLibs *SDM.cpp NiRegisterStream/RegisterLoader census (see adapters/gb12/registry.py)",
+      "unregistered_types": [
+       "NiArkAnimationExtraData"
+      ]
+     },
+     "scene_graph": {
+      "edges": [],
+      "roots": []
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {
+      "NiArkAnimationExtraData": 1,
+      "NiArkImporterExtraData": 1,
+      "NiArkTextureExtraData": 1,
+      "NiArkViewportInfoExtraData": 1,
+      "NiDirectionalLight": 2,
+      "NiMaterialProperty": 9,
+      "NiNode": 12,
+      "NiStringExtraData": 1,
+      "NiTexturingProperty": 9,
+      "NiTriShape": 14,
+      "NiTriShapeData": 14,
+      "NiZBufferProperty": 1
+     },
+     "unknowns": [
+      {
+       "class": "NiArkAnimationExtraData",
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      }
+     ],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11",
+      "verdict": "ACCEPTED"
+     },
+     "warnings": []
+    }
+   },
+   "payload": "T1",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\T1_sandbox_copy.nif",
+   "source_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\sandbox\\payloads\\218757.nif",
+   "source_sha256": "3E8A22C2213202207E374B55CD65B2C3BE039CCDD1E8D01A07FCAF44DE12CF36"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": true,
+    "error": null,
+    "error_code": null,
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "decode raised an exception (fail-closed, never silent)",
+     "expression": "-",
+     "name": "link_failure_detected",
+     "passed": false
+    },
+    "exception": "Traceback (most recent call last):\n  File \"D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\04_EVIDENCE\\scripts\\c1_followup.py\", line 120, in wrap\n    return fn()\n           ^^^^\n  File \"D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\04_EVIDENCE\\scripts\\c1_followup.py\", line 221, in c_link\n    res_l = gb12core.decode(bytes(mut4),\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\tools\\gamebryo_oracle\\gb12core.py\", line 1989, in decode\n    tops = [rr.i32() for _ in range(n_top)]\n            ^^^^^^^^\n  File \"D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\tools\\gamebryo_oracle\\gb12core.py\", line 265, in i32\n    return struct.unpack(\"<i\", self.read(4))[0]\n                               ^^^^^^^^^^^^\n  File \"D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\tools\\gamebryo_oracle\\gb12core.py\", line 247, in read\n    raise DecodeError(\"EOF: need %d bytes at %d\" % (n, self.pos))\ngb12core.DecodeError: EOF: need 4 bytes at 1688\n",
+    "mutation": "control raised an exception (see 'exception')",
+    "raw_output": null
+   },
+   "payload": "STOCK",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\STOCK_sandbox_copy.nif",
+   "source_path": "D:\\gamebyroengine\\Gamebryo 1.1.2 Evaluation\\Samples\\Models\\Collision\\NIF\\1310 HN (Plane).nif",
+   "source_sha256": "F26FB84346E32BE94AFD9FD3C62DA18FB49308480D7EC38476A216520F6DAC8F"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": true,
+    "error": null,
+    "error_code": null,
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "warnings=['LINK_FAILURE: block 0 (NiNode) field children link 4294967294 out of range (num_blocks=13)']",
+     "expression": "any('LINK_FAILURE' in w for w in warnings)",
+     "name": "link_failure_detected",
+     "passed": true
+    },
+    "mutation": "first NiNode child-link u32 (target=6) replaced with 0xFFFFFFFE at byte 388",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.0.1.18",
+      "nif_version": "10.0.1.18",
+      "nif_version_u32": 167772434,
+      "num_blocks_from_header": 13,
+      "path": "<link-failure>",
+      "sha256": "092C71195D447679F108A7DB4DAB06E76BE80E8EB6A15B61053BBE3E4630C47B",
+      "size": 1755,
+      "user_defined_version": "0.0.0.0"
+     },
+     "load_result": {
+      "accepted": true,
+      "error": null,
+      "error_code": null,
+      "partial": false
+     },
+     "object_count_check": {
+      "decoded_blocks": 13,
+      "header_num_blocks": 13,
+      "match": true
+     },
+     "object_groups": {
+      "num_groups": 0
+     },
+     "objects": [
+      {
+       "byte_end": 396,
+       "byte_size": 119,
+       "byte_start": 277,
+       "flags_u16": 16,
+       "group_id": 0,
+       "index": 0,
+       "links": {
+        "children": [
+         "LINK_ERROR_OUT_OF_RANGE"
+        ],
+        "collision_object": [
+         null
+        ],
+        "controller": [
+         null
+        ],
+        "effects": [],
+        "extra_data": [
+         1
+        ],
+        "properties": [
+         5,
+         4,
+         3,
+         2
+        ]
+       },
+       "local_transform": {
+        "rotate": [
+         [
+          1.0,
+          0.0,
+          0.0
+         ],
+         [
+          0.0,
+          1.0,
+          0.0
+         ],
+         [
+          0.0,
+          0.0,
+          1.0
+         ]
+        ],
+        "scale": 1.0,
+        "translate": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "local_transform_semantics": "SERIALIZED_LOCAL_TRANSFORM (NiAVObject.cpp L602-604)",
+       "name": "SceneNode",
+       "type": "NiNode"
+      },
+      {
+       "byte_end": 528,
+       "byte_size": 132,
+       "byte_start": 396,
+       "extra_data_name": "Scene Name and Version",
+       "group_id": 0,
+       "index": 1,
+       "string_value": "NIF Creation Information >> //soba/Collision/MAYA/2310 HN (Plane).mb >>  >>  >> Maya Unlimited 4.5",
+       "type": "NiStringExtraData"
+      },
+      {
+       "alpha": 1.0,
+       "ambient_color": [
+        0.5,
+        0.5,
+        0.5
+       ],
+       "byte_end": 600,
+       "byte_size": 72,
+       "byte_start": 528,
+       "diffuse_color": [
+        0.699999988079071,
+        0.699999988079071,
+        0.699999988079071
+       ],
+       "emissive_color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "group_id": 0,
+       "index": 2,
+       "links": {
+        "controller": [
+         null
+        ],
+        "extra_data": []
+       },
+       "name": null,
+       "property_flags_stash": null,
+       "shine": 4.0,
+       "specular_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "type": "NiMaterialProperty"
+      },
+      {
+       "byte_end": 626,
+       "byte_size": 26,
+       "byte_start": 600,
+       "group_id": 0,
+       "index": 3,
+       "lighting_mode_u32": 1,
+       "links": {
+        "controller": [
+         null
+        ],
+        "extra_data": []
+       },
+       "name": null,
+       "property_flags_stash": null,
+       "source_mode_u32": 1,
+       "type": "NiVertexColorProperty",
+       "vertexcolor_flags_u16": 52685
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 644,
+       "byte_start": 626,
+       "index": 4,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER",
+       "type": "NiShadeProperty"
+      },
+      {
+       "byte_end": 666,
+       "byte_size": 22,
+       "byte_start": 644,
+       "group_id": 0,
+       "index": 5,
+       "links": {
+        "controller": [
+         null
+        ],
+        "extra_data": []
+       },
+       "name": null,
+       "property_flags_stash": null,
+       "type": "NiZBufferProperty",
+       "zbuffer_flags_u16": 3,
+       "zbuffer_test_mode_u32": 3
+      },
+      {
+       "byte_end": 769,
+       "byte_size": 103,
+       "byte_start": 666,
+       "flags_u16": 16,
+       "group_id": 0,
+       "index": 6,
+       "links": {
+        "children": [
+         8
+        ],
+        "collision_object": [
+         7
+        ],
+        "controller": [
+         null
+        ],
+        "effects": [],
+        "extra_data": [],
+        "properties": []
+       },
+       "local_transform": {
+        "rotate": [
+         [
+          1.0,
+          0.0,
+          0.0
+         ],
+         [
+          0.0,
+          1.0,
+          0.0
+         ],
+         [
+          0.0,
+          0.0,
+          1.0
+         ]
+        ],
+        "scale": 1.0,
+        "translate": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "local_transform_semantics": "SERIALIZED_LOCAL_TRANSFORM (NiAVObject.cpp L602-604)",
+       "name": "Endless_Plane",
+       "type": "NiNode"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 777,
+       "byte_start": 769,
+       "index": 7,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER",
+       "type": "NiCollisionData"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 777,
+       "byte_start": 769,
+       "index": 8,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER",
+       "type": "NiTriStrips"
+      },
+      {
+       "alpha": NaN,
+       "ambient_color": [
+        0.0,
+        1.7586497514255317e-38,
+        0.0
+       ],
+       "byte_end": 851,
+       "byte_size": 74,
+       "byte_start": 777,
+       "diffuse_color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "emissive_color": [
+        14995540992.0,
+        7.035752120739259e+22,
+        2.7904098980584256e+29
+       ],
+       "group_id": 3,
+       "index": 9,
+       "links": {
+        "controller": [
+         0
+        ],
+        "extra_data": []
+       },
+       "name": "\u0001\u0005",
+       "property_flags_stash": null,
+       "shine": 1.4153114489680652e-43,
+       "specular_color": [
+        4.0389678347315804e-28,
+        2048.0,
+        6.977069316874696e+22
+       ],
+       "type": "NiMaterialProperty"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 866,
+       "byte_start": 851,
+       "index": 10,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER",
+       "type": "NiSpecularProperty"
+      },
+      {
+       "byte_end": 892,
+       "byte_size": 26,
+       "byte_start": 866,
+       "group_id": 1065353216,
+       "index": 11,
+       "lighting_mode_u32": 0,
+       "links": {
+        "controller": [
+         0
+        ],
+        "extra_data": []
+       },
+       "name": null,
+       "property_flags_stash": null,
+       "source_mode_u32": 16256,
+       "type": "NiVertexColorProperty",
+       "vertexcolor_flags_u16": 0
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 1747,
+       "byte_start": 892,
+       "index": 12,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER",
+       "type": "NiTriStripsData"
+      }
+     ],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [
+      {
+       "index": 2,
+       "name": null,
+       "type": "NiMaterialProperty"
+      },
+      {
+       "index": 3,
+       "name": null,
+       "type": "NiVertexColorProperty"
+      },
+      {
+       "index": 4,
+       "name": null,
+       "type": "NiShadeProperty"
+      },
+      {
+       "index": 5,
+       "name": null,
+       "type": "NiZBufferProperty"
+      },
+      {
+       "index": 9,
+       "name": "\u0001\u0005",
+       "type": "NiMaterialProperty"
+      },
+      {
+       "index": 10,
+       "name": null,
+       "type": "NiSpecularProperty"
+      },
+      {
+       "index": 11,
+       "name": null,
+       "type": "NiVertexColorProperty"
+      }
+     ],
+     "rtti_gate": {
+      "file_type_count": 10,
+      "first_unregistered_scan_order": null,
+      "registered_class_count": 198,
+      "registry_provenance": "Gb12_Source CoreLibs *SDM.cpp NiRegisterStream/RegisterLoader census (see adapters/gb12/registry.py)",
+      "unregistered_types": []
+     },
+     "scene_graph": {
+      "edges": [
+       {
+        "child": 8,
+        "field": "children",
+        "parent": 6
+       }
+      ],
+      "roots": [
+       0
+      ]
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {
+      "NiCollisionData": 1,
+      "NiMaterialProperty": 2,
+      "NiNode": 2,
+      "NiShadeProperty": 1,
+      "NiSpecularProperty": 1,
+      "NiStringExtraData": 1,
+      "NiTriStrips": 1,
+      "NiTriStripsData": 1,
+      "NiVertexColorProperty": 2,
+      "NiZBufferProperty": 1
+     },
+     "unknowns": [
+      {
+       "byte_end": 644,
+       "byte_start": 626,
+       "class": "NiShadeProperty",
+       "index": 4,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+      },
+      {
+       "byte_end": 777,
+       "byte_start": 769,
+       "class": "NiCollisionData",
+       "index": 7,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+      },
+      {
+       "byte_end": 777,
+       "byte_start": 769,
+       "class": "NiTriStrips",
+       "index": 8,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+      },
+      {
+       "byte_end": 866,
+       "byte_start": 851,
+       "class": "NiSpecularProperty",
+       "index": 10,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+      },
+      {
+       "byte_end": 1747,
+       "byte_start": 892,
+       "class": "NiTriStripsData",
+       "index": 12,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+      }
+     ],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11",
+      "verdict": "ACCEPTED"
+     },
+     "warnings": [
+      "LINK_FAILURE: block 0 (NiNode) field children link 4294967294 out of range (num_blocks=13)"
+     ]
+    }
+   },
+   "payload": "SDK:2310 HN (Plane).nif",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\link_fix_2310_sandbox_copy.nif",
+   "source_path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\Models\\Collision\\NIF\\2310 HN (Plane).nif",
+   "source_sha256": "9524019F3DB700E20692E9489956D0981F0AACA62CBA389EA29AD99341D393B3"
+  }
+ ]
+}

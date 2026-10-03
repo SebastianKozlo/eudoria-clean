@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "gamebryo_oracle oracle_result",
+  "type": "object",
+  "required": ["schema", "adapter", "ORACLE_MODE", "era_category",
+               "decode_continued_after_rtti_gate", "input_identity", "oracle",
+               "load_result", "objects", "scene_graph", "type_histogram",
+               "controllers", "properties", "textures", "bounds", "warnings",
+               "unknowns"],
+  "properties": {
+    "schema": {"type": "string"},
+    "adapter": {"type": "string",
+                "enum": ["gb12", "gb26", "gb112", "gb23"]},
+    "ORACLE_MODE": {"type": "string",
+                    "enum": ["ORIGINAL_TOOL_EXECUTION",
+                             "SOURCE_DERIVED_REIMPLEMENTATION", "MIXED"]},
+    "era_category": {"type": "string",
+                     "enum": ["GB_1_1_2", "GB_1_2", "GB_2_3", "GB_2_6",
+                              "UNKNOWN_GAMEBRYO", "THIRD_PARTY", "OUR_TOOL"]},
+    "decode_continued_after_rtti_gate": {"type": "boolean"},
+    "input_identity": {
+      "type": "object",
+      "required": ["size", "sha256", "header", "nif_version"],
+      "properties": {
+        "path": {"type": ["string", "null"]},
+        "size": {"type": "integer"},
+        "sha256": {"type": "string"},
+        "header": {"type": ["string", "null"]},
+        "nif_version": {"type": ["string", "null"]},
+        "nif_version_u32": {"type": ["integer", "null"]},
+        "user_defined_version": {"type": ["string", "null"]},
+        "num_blocks_from_header": {"type": ["integer", "null"]}
+      }
+    },
+    "oracle": {
+      "type": "object",
+      "required": ["gamebryo_version", "loader_identity",
+                   "loader_source_identity", "tool_version"],
+      "properties": {
+        "gamebryo_version": {"type": "string"},
+        "loader_identity": {"type": "string"},
+        "loader_source_identity": {"type": "object"},
+        "tool_version": {"type": "string"},
+        "version_range_claim": {"type": "string"}
+      }
+    },
+    "version_gate": {"type": "object"},
+    "rtti_gate": {"type": "object"},
+    "load_result": {
+      "type": "object",
+      "required": ["accepted", "partial", "error"],
+      "properties": {
+        "accepted": {"type": "boolean"},
+        "partial": {"type": "boolean"},
+        "error": {"type": ["string", "null"]},
+        "error_code": {"type": ["string", "null"]}
+      }
+    },
+    "objects": {"type": "array", "items": {"type": ["object", "null"]}},
+    "scene_graph": {"type": "object"},
+    "type_histogram": {"type": "object"},
+    "controllers": {"type": "array"},
+    "properties": {"type": "array"},
+    "textures": {"type": "array"},
+    "bounds": {"type": "array"},
+    "warnings": {"type": "array"},
+    "unknowns": {"type": "array"},
+    "tool_reports": {"type": "array"}
+  }
+}

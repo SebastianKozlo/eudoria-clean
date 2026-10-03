@@ -1,0 +1,790 @@
+{
+ "CODE_PATH": {
+  "mutation_logic": "copied verbatim from payload_controls()",
+  "runner": "04_EVIDENCE/scripts/c1_control_persist.py",
+  "test_file": "tools/gamebryo_oracle/tests/test_gb12.py",
+  "test_file_sha256": "323AAA6245605A191EF335A32397418F579A580C1DA86D686699D97C25F2289B"
+ },
+ "CONTROL_ID": "corrupted_midfile",
+ "EXECUTED": "2026-10-03 (correction round C1)",
+ "FAILURE_CASE_DETECTED": "a silent success in this control's failure class would FAIL the check; measured: DETECTED on ['T2']; NOT detected on ['STOCK'] (raw outputs recorded -- see per-run entries and the MIDFILE_STOCK_NOTE verification); not applicable / not run on ['T1'] (see per-run entries)",
+ "INDEPENDENT_SOURCE_OF_TRUTH": "no valid NIF decode exists for a corrupted body: the E1 source-derived LoadBinary semantics must surface the failure (error/partial + warnings), never accepted=true",
+ "MEASURED_QUANTITY": "gb12 adapter FULL-DECODE verdict (load_result.accepted / .partial / .error + warnings) on a sandbox copy with one mid-file byte flipped (data[len//2] XOR 0xFF)",
+ "RUN_ID": "PE_GAMEBRYO_ORACLE_TOOL_R1_20261003_C1",
+ "RUN_NOTE": "The initial C1 battery on the STOCK sample crashed at the link control (a blanket battery-exception entry was recorded); this follow-up (04_EVIDENCE/scripts/c1_followup.py) re-ran the STOCK controls individually and replaced that entry with this per-control result.\n\nMIDFILE_STOCK_NOTE (C1 verification): the STOCK non-detection is a payload/offset artifact, not a fail-closed violation. The flipped byte (844 of 1689) lies deep inside the data region of a NiTriStripsData block (byte range 584..1399, offset-in-block 260, name=''), so the mutated file remained STRUCTURALLY VALID and the load succeeding is consistent with the original loader semantics (a value-level corruption that preserves the block layout). The structural-corruption failure case of this control is DETECTED on the T2 sandbox copy (independent QC parity: 05_QC/raw_qc_outputs/control_corrupt_midfile.json).",
+ "SANDBOX_DISCIPLINE": "mutations applied to in-memory bytearrays loaded from sandbox copies in the OS temp sandbox; pinned payloads read-only; sha256/size pins verified before use",
+ "WHY_NON_CIRCULAR": "the byte flip precedes decode; the full-decode path is the tool under test; the control asserts only fail-closed behavior (never silent success), independent of any expected content",
+ "runs": [
+  {
+   "baseline_original_verdict": {
+    "accepted": false,
+    "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+    "error_code": "RTTIError",
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "accepted=False partial=True error='RTTIError(NiArkAnimationExtraData): cannot find create function.' decode_error=[]",
+     "expression": "(not accepted) and (partial or error is not None)",
+     "name": "corruption_fail_not_silent",
+     "passed": true
+    },
+    "mutation": "byte at 268 (len//2) ^= 0xFF; decoded with full_decode=True",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": true,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.1.0.0",
+      "nif_version": "10.1.0.0",
+      "nif_version_u32": 167837696,
+      "num_blocks_from_header": 6,
+      "path": "<corrupted-midfile>",
+      "sha256": "E699B7E94C827DB4A929C404893FD19A2EC5AE45A9C6896D08BB3A9E83E66F27",
+      "size": 537,
+      "user_defined_version": "0.0.0.0"
+     },
+     "load_result": {
+      "accepted": false,
+      "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+      "error_code": "RTTIError",
+      "partial": true
+     },
+     "object_count_check": {
+      "decoded_blocks": 6,
+      "header_num_blocks": 6,
+      "match": true
+     },
+     "object_groups": {
+      "num_groups": 0
+     },
+     "objects": [
+      {
+       "byte_end": 324,
+       "byte_size": 116,
+       "byte_start": 208,
+       "flags_u16": 16,
+       "group_id": 0,
+       "index": 0,
+       "links": {
+        "children": [],
+        "collision_object": [
+         null
+        ],
+        "controller": [
+         null
+        ],
+        "effects": [],
+        "extra_data": [
+         1,
+         2,
+         3,
+         4
+        ],
+        "properties": [
+         5
+        ]
+       },
+       "local_transform": {
+        "rotate": [
+         [
+          1.0,
+          3.5733110840282835e-43,
+          0.0
+         ],
+         [
+          0.0,
+          1.0,
+          0.0
+         ],
+         [
+          0.0,
+          0.0,
+          1.0
+         ]
+        ],
+        "scale": 1.0,
+        "translate": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "local_transform_semantics": "SERIALIZED_LOCAL_TRANSFORM (NiAVObject.cpp L602-604)",
+       "name": "Scene Root",
+       "type": "NiNode"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 507,
+       "byte_start": 324,
+       "index": 1,
+       "status": "UNREGISTERED_IN_GB12_FACTORY",
+       "type": "NiArkAnimationExtraData"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 507,
+       "byte_start": 324,
+       "index": 2,
+       "status": "UNREGISTERED_IN_GB12_FACTORY",
+       "type": "NiArkImporterExtraData"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 507,
+       "byte_start": 324,
+       "index": 3,
+       "status": "UNREGISTERED_IN_GB12_FACTORY",
+       "type": "NiArkTextureExtraData"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 507,
+       "byte_start": 324,
+       "index": 4,
+       "status": "UNREGISTERED_IN_GB12_FACTORY",
+       "type": "NiArkViewportInfoExtraData"
+      },
+      {
+       "byte_end": 529,
+       "byte_size": 22,
+       "byte_start": 507,
+       "group_id": 0,
+       "index": 5,
+       "links": {
+        "controller": [
+         null
+        ],
+        "extra_data": []
+       },
+       "name": null,
+       "property_flags_stash": null,
+       "type": "NiZBufferProperty",
+       "zbuffer_flags_u16": 3,
+       "zbuffer_test_mode_u32": 3
+      }
+     ],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [
+      {
+       "index": 5,
+       "name": null,
+       "type": "NiZBufferProperty"
+      }
+     ],
+     "rtti_gate": {
+      "file_type_count": 6,
+      "first_unregistered_scan_order": "NiArkAnimationExtraData",
+      "registered_class_count": 198,
+      "registry_provenance": "Gb12_Source CoreLibs *SDM.cpp NiRegisterStream/RegisterLoader census (see adapters/gb12/registry.py)",
+      "unregistered_types": [
+       "NiArkAnimationExtraData",
+       "NiArkImporterExtraData",
+       "NiArkTextureExtraData",
+       "NiArkViewportInfoExtraData"
+      ]
+     },
+     "scene_graph": {
+      "edges": [],
+      "roots": [
+       0
+      ]
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {
+      "NiArkAnimationExtraData": 1,
+      "NiArkImporterExtraData": 1,
+      "NiArkTextureExtraData": 1,
+      "NiArkViewportInfoExtraData": 1,
+      "NiNode": 1,
+      "NiZBufferProperty": 1
+     },
+     "unknowns": [
+      {
+       "class": "NiArkAnimationExtraData",
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      },
+      {
+       "class": "NiArkImporterExtraData",
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      },
+      {
+       "class": "NiArkTextureExtraData",
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      },
+      {
+       "class": "NiArkViewportInfoExtraData",
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      },
+      {
+       "byte_end": 507,
+       "byte_start": 324,
+       "class": "NiArkAnimationExtraData",
+       "index": 1,
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      },
+      {
+       "byte_end": 507,
+       "byte_start": 324,
+       "class": "NiArkImporterExtraData",
+       "index": 2,
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      },
+      {
+       "byte_end": 507,
+       "byte_start": 324,
+       "class": "NiArkTextureExtraData",
+       "index": 3,
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      },
+      {
+       "byte_end": 507,
+       "byte_start": 324,
+       "class": "NiArkViewportInfoExtraData",
+       "index": 4,
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      }
+     ],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11",
+      "verdict": "ACCEPTED"
+     },
+     "warnings": [
+      "decode_continued_after_rtti_gate=true is OUR extension; the ORIGINAL GB 1.2 Load() returns false at LoadRTTI (verdict reported in load_result)"
+     ]
+    }
+   },
+   "payload": "T2",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\T2_sandbox_copy.nif",
+   "source_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\sandbox\\payloads\\533021.nif",
+   "source_sha256": "9CFF776D204AEC7B64377DD365AC11A71C9DCFA4A00A5905E642EE7420D5DC28"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": false,
+    "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+    "error_code": "RTTIError",
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "not run in C1 on this payload: a full-decode closure search on a corrupted 66-block NiArk body has unbounded wall risk (E3 measured the same S_B candidate-phase cost class on T3); the control is exercised on the T2 and STOCK sandbox copies (T2 = payload parity with the independent QC control set)",
+     "expression": "(not accepted) and (partial or error is not None)",
+     "name": "corruption_fail_not_silent",
+     "passed": null
+    },
+    "mutation": "none (mid-file flip NOT applied in C1 on T1)",
+    "raw_output": null
+   },
+   "payload": "T1",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\T1_sandbox_copy.nif",
+   "source_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\sandbox\\payloads\\218757.nif",
+   "source_sha256": "3E8A22C2213202207E374B55CD65B2C3BE039CCDD1E8D01A07FCAF44DE12CF36"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": true,
+    "error": null,
+    "error_code": null,
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "accepted=True partial=False error=None decode_error=[]",
+     "expression": "(not accepted) and (partial or error is not None)",
+     "name": "corruption_fail_not_silent",
+     "passed": false
+    },
+    "mutation": "byte at 844 (len//2) ^= 0xFF; decoded with full_decode=True",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.0.1.18",
+      "nif_version": "10.0.1.18",
+      "nif_version_u32": 167772434,
+      "num_blocks_from_header": 10,
+      "path": "<corrupted-midfile>",
+      "sha256": "ECDD0AE46FC00F52DA1ED401229B02D45D94C6BBF02FD0F666A6DBE92F3E420E",
+      "size": 1689,
+      "user_defined_version": "0.0.0.0"
+     },
+     "load_result": {
+      "accepted": true,
+      "error": null,
+      "error_code": null,
+      "partial": false
+     },
+     "object_count_check": {
+      "decoded_blocks": 10,
+      "header_num_blocks": 10,
+      "match": true
+     },
+     "object_groups": {
+      "num_groups": 0
+     },
+     "objects": [
+      {
+       "byte_end": 355,
+       "byte_size": 124,
+       "byte_start": 231,
+       "flags_u16": 16,
+       "group_id": 0,
+       "index": 0,
+       "links": {
+        "children": [
+         3,
+         8,
+         9
+        ],
+        "collision_object": [
+         null
+        ],
+        "controller": [
+         null
+        ],
+        "effects": [
+         8,
+         9
+        ],
+        "extra_data": [],
+        "properties": [
+         2,
+         1
+        ]
+       },
+       "local_transform": {
+        "rotate": [
+         [
+          1.0,
+          0.0,
+          0.0
+         ],
+         [
+          0.0,
+          1.0,
+          0.0
+         ],
+         [
+          0.0,
+          0.0,
+          1.0
+         ]
+        ],
+        "scale": 1.0,
+        "translate": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "local_transform_semantics": "SERIALIZED_LOCAL_TRANSFORM (NiAVObject.cpp L602-604)",
+       "name": "Scene Root",
+       "type": "NiNode"
+      },
+      {
+       "byte_end": 377,
+       "byte_size": 22,
+       "byte_start": 355,
+       "group_id": 0,
+       "index": 1,
+       "links": {
+        "controller": [
+         null
+        ],
+        "extra_data": []
+       },
+       "name": null,
+       "property_flags_stash": null,
+       "type": "NiZBufferProperty",
+       "zbuffer_flags_u16": 3,
+       "zbuffer_test_mode_u32": 3
+      },
+      {
+       "byte_end": 403,
+       "byte_size": 26,
+       "byte_start": 377,
+       "group_id": 0,
+       "index": 2,
+       "lighting_mode_u32": 1,
+       "links": {
+        "controller": [
+         null
+        ],
+        "extra_data": []
+       },
+       "name": null,
+       "property_flags_stash": null,
+       "source_mode_u32": 0,
+       "type": "NiVertexColorProperty",
+       "vertexcolor_flags_u16": 52685
+      },
+      {
+       "byte_end": 502,
+       "byte_size": 99,
+       "byte_start": 403,
+       "flags_u16": 16,
+       "group_id": 0,
+       "index": 3,
+       "links": {
+        "children": [
+         5
+        ],
+        "collision_object": [
+         4
+        ],
+        "controller": [
+         null
+        ],
+        "effects": [],
+        "extra_data": [],
+        "properties": []
+       },
+       "local_transform": {
+        "rotate": [
+         [
+          1.0,
+          0.0,
+          0.0
+         ],
+         [
+          0.0,
+          1.0,
+          0.0
+         ],
+         [
+          0.0,
+          0.0,
+          1.0
+         ]
+        ],
+        "scale": 1.0,
+        "translate": [
+         -0.1287582665681839,
+         -0.11438393592834473,
+         1.6277773795536632e-07
+        ]
+       },
+       "local_transform_semantics": "SERIALIZED_LOCAL_TRANSFORM (NiAVObject.cpp L602-604)",
+       "name": "HalfSpace",
+       "type": "NiNode"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 510,
+       "byte_start": 502,
+       "index": 4,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER",
+       "type": "NiCollisionData"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 510,
+       "byte_start": 502,
+       "index": 5,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER",
+       "type": "NiTriStrips"
+      },
+      {
+       "alpha": 0.0,
+       "ambient_color": [
+        0.0,
+        8.917413651943207e-08,
+        1.7558946585148227e-38
+       ],
+       "byte_end": 584,
+       "byte_size": 74,
+       "byte_start": 510,
+       "diffuse_color": [
+        0.0,
+        2.9802322387695312e-08,
+        5.804003076925352e-39
+       ],
+       "emissive_color": [
+        NaN,
+        1.5612020333873863e-39,
+        0.0
+       ],
+       "group_id": 3,
+       "index": 6,
+       "links": {
+        "controller": [
+         0
+        ],
+        "extra_data": []
+       },
+       "name": "\u0001\u0005",
+       "property_flags_stash": null,
+       "shine": 0.0,
+       "specular_color": [
+        3.76158192263132e-37,
+        32.0,
+        4.3203432953598435e-41
+       ],
+       "type": "NiMaterialProperty"
+      },
+      {
+       "boundary_method": "closure_search_extension (OUR extension; individual split inside the unknown run is UNDETERMINED_INDIVIDUAL)",
+       "byte_end": 1399,
+       "byte_start": 584,
+       "index": 7,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER",
+       "type": "NiTriStripsData"
+      },
+      {
+       "ambient_color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "byte_end": 1540,
+       "byte_size": 141,
+       "byte_start": 1399,
+       "diffuse_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "dimmer": 1.0,
+       "flags_u16": 16,
+       "group_id": 0,
+       "index": 8,
+       "links": {
+        "collision_object": [
+         null
+        ],
+        "controller": [
+         null
+        ],
+        "extra_data": [],
+        "properties": [],
+        "unaffected_nodes": []
+       },
+       "local_transform": {
+        "rotate": [
+         [
+          0.4466625154018402,
+          0.0,
+          -0.8947026133537292
+         ],
+         [
+          0.4962916970252991,
+          -0.8320503234863281,
+          0.24776378273963928
+         ],
+         [
+          -0.744437575340271,
+          -0.5547001957893372,
+          -0.3716456890106201
+         ]
+        ],
+        "scale": 1.0,
+        "translate": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "local_transform_semantics": "SERIALIZED_LOCAL_TRANSFORM (NiAVObject.cpp L602-604)",
+       "name": "__MAX_Default_Light",
+       "specular_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "type": "NiDirectionalLight"
+      },
+      {
+       "ambient_color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "byte_end": 1681,
+       "byte_size": 141,
+       "byte_start": 1540,
+       "diffuse_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "dimmer": 1.0,
+       "flags_u16": 16,
+       "group_id": 0,
+       "index": 9,
+       "links": {
+        "collision_object": [
+         null
+        ],
+        "controller": [
+         null
+        ],
+        "extra_data": [],
+        "properties": [],
+        "unaffected_nodes": []
+       },
+       "local_transform": {
+        "rotate": [
+         [
+          -0.4466625154018402,
+          -0.0,
+          -0.8947026133537292
+         ],
+         [
+          -0.4962916970252991,
+          0.8320503234863281,
+          0.24776378273963928
+         ],
+         [
+          0.744437575340271,
+          0.5547001957893372,
+          -0.3716456890106201
+         ]
+        ],
+        "scale": 1.0,
+        "translate": [
+         0.0,
+         0.0,
+         0.0
+        ]
+       },
+       "local_transform_semantics": "SERIALIZED_LOCAL_TRANSFORM (NiAVObject.cpp L602-604)",
+       "name": "__MAX_Default_Light",
+       "specular_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "type": "NiDirectionalLight"
+      }
+     ],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [
+      {
+       "index": 1,
+       "name": null,
+       "type": "NiZBufferProperty"
+      },
+      {
+       "index": 2,
+       "name": null,
+       "type": "NiVertexColorProperty"
+      },
+      {
+       "index": 6,
+       "name": "\u0001\u0005",
+       "type": "NiMaterialProperty"
+      }
+     ],
+     "rtti_gate": {
+      "file_type_count": 8,
+      "first_unregistered_scan_order": null,
+      "registered_class_count": 198,
+      "registry_provenance": "Gb12_Source CoreLibs *SDM.cpp NiRegisterStream/RegisterLoader census (see adapters/gb12/registry.py)",
+      "unregistered_types": []
+     },
+     "scene_graph": {
+      "edges": [
+       {
+        "child": 3,
+        "field": "children",
+        "parent": 0
+       },
+       {
+        "child": 8,
+        "field": "children",
+        "parent": 0
+       },
+       {
+        "child": 9,
+        "field": "children",
+        "parent": 0
+       },
+       {
+        "child": 5,
+        "field": "children",
+        "parent": 3
+       }
+      ],
+      "roots": [
+       0
+      ]
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {
+      "NiCollisionData": 1,
+      "NiDirectionalLight": 2,
+      "NiMaterialProperty": 1,
+      "NiNode": 2,
+      "NiTriStrips": 1,
+      "NiTriStripsData": 1,
+      "NiVertexColorProperty": 1,
+      "NiZBufferProperty": 1
+     },
+     "unknowns": [
+      {
+       "byte_end": 510,
+       "byte_start": 502,
+       "class": "NiCollisionData",
+       "index": 4,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+      },
+      {
+       "byte_end": 510,
+       "byte_start": 502,
+       "class": "NiTriStrips",
+       "index": 5,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+      },
+      {
+       "byte_end": 1399,
+       "byte_start": 584,
+       "class": "NiTriStripsData",
+       "index": 7,
+       "status": "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+      }
+     ],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11",
+      "verdict": "ACCEPTED"
+     },
+     "warnings": []
+    }
+   },
+   "payload": "STOCK",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\STOCK_sandbox_copy.nif",
+   "source_path": "D:\\gamebyroengine\\Gamebryo 1.1.2 Evaluation\\Samples\\Models\\Collision\\NIF\\1310 HN (Plane).nif",
+   "source_sha256": "F26FB84346E32BE94AFD9FD3C62DA18FB49308480D7EC38476A216520F6DAC8F"
+  }
+ ]
+}

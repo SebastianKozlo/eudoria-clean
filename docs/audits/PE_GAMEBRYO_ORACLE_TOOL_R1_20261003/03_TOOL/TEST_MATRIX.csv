@@ -1,0 +1,31 @@
+test_id,scope,result,detail
+SELF_tests,tool/unit,PASS,11/11 (version packing; registry invariants incl. zero NiArk*; wrong-version LATER/OLDER; NOT_NIF_FILE; determinism; no wall-clock keys)
+POSITIVE_stock_sample,control,PASS,GB 1.1.2 SDK sample 1310 HN (Plane).nif (10.0.1.18; all-standard classes) LOADS under gb12: accepted=true exit=0 10/10 blocks EOF-exact
+WRONGVERSION_T1_vs_gb26,control,PASS,T1 (10.1.0.0) vs gb26 gate: REJECTED OLDER_VERSION exit=2
+WRONGVERSION_synthetic_99,control,PASS,synthetic header 99.0.0.0 vs gb12: REJECTED LATER_VERSION 'Unknown NIF version.' (sandbox-only mutation)
+WRONGVERSION_synthetic_1,control,PASS,synthetic header 1.0.0.0 vs gb12: REJECTED OLDER_VERSION 'NIF version is too old.'
+CORRUPTED_header_version,control,PASS,mutated header version -> explicit rejection (never silent success)
+CORRUPTED_midfile,control,PASS,mid-file flip under full-decode: accepted=false + partial/error recorded (never silent success)
+UNKNOWN_CLASS_mutation,control,PASS,first RTTI table name mutated to NiXyzzyx -> RTTIError(NiXyzzyx) reported (unknown reported not skipped)
+OBJECT_COUNT_mutation,control,PASS,header num_blocks +5 -> INVALID_TYPE_INDEX detected (assert usRTTI < usRTTICount per source L440)
+PARTIAL_LOAD_fulldecode,control,PASS,--full-decode on NiArk payloads: accepted=false partial=true decode_continued_after_rtti_gate=true unknowns listed (never PASS)
+LINK_FAILURE_mutation,control,PASS,child link mutated to 0xFFFFFFFE -> LINK_FAILURE warning recorded
+DETERMINISM_T1,control,PASS,two full-decode runs byte-identical (sha E86AAAB65CFF26FC11E07E81DF403C6E0C26922FC72BD001C3BC0FB0ABDF77B9)
+DETERMINISM_T2,control,PASS,byte-identical (sha D9AF7F4D4A354B6628345868E3CD0EE449DDB799F13DA151C3EDFCFB79554C7F)
+DETERMINISM_T4,control,PASS,byte-identical (sha E1ABCB09221349BC80749B313A527691A31D55C4E3D12D256231FB25E48FD384)
+DETERMINISM_T5,control,PASS,byte-identical (sha BA3D25E101AFC8E677B36078083400F22D36C1F1370749F82105DDD9B4177D08)
+T1_full_decode,run,PASS,66/66 blocks; 4 NiArk unknowns; roots [0]; closure match
+T2_full_decode,run,PASS,6/6 blocks
+T4_full_decode,run,PASS,10/10 blocks; legacy inline-RTTI layout; NiArk members individually named with exact boundaries
+T5_full_decode,run,PASS,6/6 blocks
+T3_full_decode,run,PARTIAL,all ~25 T3 RTTI classes implemented (E3); honest PARTIAL decode 448/1288 blocks -- NOT EOF-exact (unknown-run closure assignment exceeds the search budget; residuals in 04_EVIDENCE/T_runs/inspect_T3_gb12_full.json); full-decode determinism pair byte-identical (sha B4F5A55A7FA9BDC769B24108FCE120CAB0FFCDC75FE00FFD2FB6F2F1F4A281E7); ORIGINAL RTTIError(NiArkAnimationExtraData) verdict unchanged
+ORIGINAL_TOOL_SGP_gb112,run,PARTIAL,executed unmodified; BLOCKED_EVALUATION_TIMELOCK_EXPIRED (verbatim dialog captured)
+ORIGINAL_TOOL_SGP_gb12,run,PARTIAL,executed unmodified; exits code 1; no dialog; no stdout; no load result observable
+ORIGINAL_TOOL_SceneViewer_gb12,run,PARTIAL,executed unmodified; alive with empty title; no dialog within 15s; no load result observable
+ORIGINAL_TOOL_PhysXNifViewer_gb26,run,PARTIAL,executed unmodified (fresh sandbox copy); Settings dialog -> OK -> EGB_SHADER_LIBRARY_PATH missing -> with env set: 'Failed to load shader library!'; NIF load never reached
+OUR_DECODER_T1,run,PASS,FIELD_IDENTITY_V2 decoder accepts 218757.nif 66 blocks
+OUR_DECODER_T2,run,FAIL,our decoder EOF error on the minimal 6-block file (honest finding)
+OUR_DECODER_T3,run,FAIL,our decoder closure search exhausted (50k attempt cap) on the 1288-block file (honest finding)
+OUR_DECODER_T4,run,FAIL,10.1.0.0-specialist decoder fails closed on 4.1.0.12
+OUR_DECODER_T5,run,FAIL,our decoder EOF error (honest finding)
+G_SIG_signatures,optional,PASS,produced in E3 per order s28: 02_ANALYSIS/GAMEBRYO_SEMANTIC_SIGNATURES.json (SetTranslate/SetRotate/SetScale/UpdateWorldData/AttachChild/DetachChild/SetAt + NiStream load/link/postlink; per-version source identity file+sha256; contracts from the E1 TRANSFORM_SEMANTICS canon; NO Entropia.exe matching)

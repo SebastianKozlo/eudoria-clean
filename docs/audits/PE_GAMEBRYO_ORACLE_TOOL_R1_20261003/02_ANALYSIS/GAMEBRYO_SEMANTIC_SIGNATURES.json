@@ -1,0 +1,92 @@
+{
+ "schema": "gamebryo_oracle/semantic_signatures@1.0",
+ "deliverable": "02_ANALYSIS/GAMEBRYO_SEMANTIC_SIGNATURES.json (order s28; optional G-SIG-1)",
+ "run_id": "PE_GAMEBRYO_ORACLE_TOOL_R1_20261003",
+ "produced_in_batch": "E3",
+ "era_separation": "Every signature carries its version from the closed set {GB_1_1_2, GB_1_2, GB_2_6, UNKNOWN_GAMEBRYO}. Findings from different GB versions are NEVER merged; 'identical' below means the quoted source body is logically identical per the cited lines, not a merged claim.",
+ "exe_matching": "NONE_PERFORMED (s28 binding: no Entropia.exe matching was attempted; all signatures are SOURCE-derived only; source-exists != Entropia-uses-it until build correspondence is established)",
+ "contract_provenance": "Function contracts quoted/summarized from the E1 02_ANALYSIS/TRANSFORM_SEMANTICS.md canon, which was derived by direct reads of the cited original Gamebryo source files (read-only D:\\gamebyroengine; zero proprietary bytes embedded here).",
+ "offsets_note": "Structure offsets: ONLY source-determinable field-order evidence is recorded (NiAVObject.h source comment: m_kLocal precedes m_kWorld). NO binary measurements were made in E1/E2/E3; no absolute byte offsets are claimed.",
+ "signatures": {
+  "NiAVObject::SetTranslate": {
+   "versions": {
+    "GB_1_1_2": {
+     "source_identity": {"file": "SDK\\Win32\\Include\\NiAVObject.inl", "sha256": "D45FDDE07BF70C986EECA82087929B0081923F3D7EDEAA2C417690539C7971D5", "lines": "77-80 (82-85 x,y,z overload)"},
+     "confidence": "CONFIRMED-from-source",
+     "contract": {"body": "m_kLocal.m_Translate = kTrn (or NiPoint3(x,y,z))", "input": "const NiPoint3& / 3 floats", "output": "void", "state_mutated": "m_kLocal.m_Translate only", "calling_shape": "inline; no parent notification; world transform stale until Update"}
+    },
+    "GB_1_2": {
+     "source_identity": {"file": "CoreLibs\\NiMain\\NiAVObject.inl", "sha256": "09E1A5A5C88AF503D9566B487941305307CBA5CB1513147FB49E5A4DBDC91C3B", "lines": "82-85 (87-90 overload)"},
+     "confidence": "CONFIRMED-from-source",
+     "contract": {"body": "identical logic to GB_1_1_2", "input": "const NiPoint3& / 3 floats", "output": "void", "state_mutated": "m_kLocal.m_Translate only", "calling_shape": "inline; no parent notification"}
+    },
+    "GB_2_6": {
+     "source_identity": {"file": "NiAVObject.inl", "sha256": "44694841C4F993049BC7035727CCC4D46EDC4305219A9BBF1925D35A5938AB55", "lines": "92-95 (97-100 overload)"},
+     "confidence": "CONFIRMED-from-source",
+     "contract": {"body": "identical logic", "input": "const NiPoint3& / 3 floats", "output": "void", "state_mutated": "m_kLocal.m_Translate only", "calling_shape": "inline"}
+    }
+   },
+   "structure_offsets": "m_kLocal precedes m_kWorld in the NiAVObject layout (NiAVObject.h source comment 'Variable declarations whose order effects assembly language code begin here'; exact offsets NOT measured)",
+   "semantic_role": "SERIALIZED_LOCAL_TRANSFORM write; never a world position (RUN_CONTRACT (l))"
+  },
+  "NiAVObject::SetRotate": {
+   "versions": {
+    "GB_1_1_2": {"source_identity": {"file": "SDK\\Win32\\Include\\NiAVObject.inl", "sha256": "D45FDDE07BF70C986EECA82087929B0081923F3D7EDEAA2C417690539C7971D5", "lines": "92-95 (matrix), 102-105 (angle/axis), 118-121 (quat)"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "m_kLocal.m_Rotate = kRot / MakeRotation(angle,x,y,z) / kQuat.ToRotation(m_kLocal.m_Rotate)", "input": "NiMatrix3 / angle+axis / NiQuaternion", "output": "void", "state_mutated": "m_kLocal.m_Rotate only", "calling_shape": "inline"}},
+    "GB_1_2": {"source_identity": {"file": "CoreLibs\\NiMain\\NiAVObject.inl", "sha256": "09E1A5A5C88AF503D9566B487941305307CBA5CB1513147FB49E5A4DBDC91C3B", "lines": "97-100, 107-110, 123-126"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "identical logic", "input": "idem", "output": "void", "state_mutated": "m_kLocal.m_Rotate only", "calling_shape": "inline"}},
+    "GB_2_6": {"source_identity": {"file": "NiAVObject.inl", "sha256": "44694841C4F993049BC7035727CCC4D46EDC4305219A9BBF1925D35A5938AB55", "lines": "107-110, 117-120, 133-136"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "identical logic", "input": "idem", "output": "void", "state_mutated": "m_kLocal.m_Rotate only", "calling_shape": "inline"}}
+   },
+   "structure_offsets": "m_kLocal precedes m_kWorld (source-comment evidence only)",
+   "semantic_role": "SERIALIZED_LOCAL_TRANSFORM write"
+  },
+  "NiAVObject::SetScale": {
+   "versions": {
+    "GB_1_1_2": {"source_identity": {"file": "SDK\\Win32\\Include\\NiAVObject.inl", "sha256": "D45FDDE07BF70C986EECA82087929B0081923F3D7EDEAA2C417690539C7971D5", "lines": "130-138"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "assert(fScale >= 0.0f); m_kLocal.m_fScale = NiAbs(fScale);", "input": "float scale", "output": "void", "state_mutated": "m_kLocal.m_fScale", "calling_shape": "inline; negative scale silently corrected (source comment: negative scale 'screws up bounding spheres')"}},
+    "GB_1_2": {"source_identity": {"file": "CoreLibs\\NiMain\\NiAVObject.inl", "sha256": "09E1A5A5C88AF503D9566B487941305307CBA5CB1513147FB49E5A4DBDC91C3B", "lines": "135-143"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "identical logic", "input": "float", "output": "void", "state_mutated": "m_kLocal.m_fScale", "calling_shape": "inline"}},
+    "GB_2_6": {"source_identity": {"file": "NiAVObject.inl", "sha256": "44694841C4F993049BC7035727CCC4D46EDC4305219A9BBF1925D35A5938AB55", "lines": "145-153"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "identical logic (NIASSERT)", "input": "float", "output": "void", "state_mutated": "m_kLocal.m_fScale", "calling_shape": "inline; SetLocalTransform + SetLocalFromWorldTransform (inl L205-232) exist ONLY in GB_2_6"}}
+   },
+   "structure_offsets": "m_kLocal precedes m_kWorld (source-comment evidence only)",
+   "semantic_role": "SERIALIZED_LOCAL_TRANSFORM write; scale sign semantics matter for GAME_UNITS claims (RUN_CONTRACT (l))"
+  },
+  "NiAVObject::UpdateWorldData": {
+   "versions": {
+    "GB_1_2": {"source_identity": {"file": "CoreLibs\\NiMain\\Win32\\NiAVObject_Win32.cpp (platform implementation)", "lines": "22-31"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "if (m_pkParent) m_kWorld = m_pkParent->m_kWorld * m_kLocal; else m_kWorld = m_kLocal; if (m_spCollisionObject) m_spCollisionObject->UpdateWorldData();", "input": "none (uses m_pkParent, m_kLocal)", "output": "void", "state_mutated": "m_kWorld; collision object's world data", "calling_shape": "virtual; from UpdateDownwardPass AFTER controller update and BEFORE UpdateWorldBound (NiAVObject.cpp GB12 L118-136 esp. L128-132; downward pass order: controllers -> UpdateWorldData -> UpdateWorldBound)"}},
+    "GB_2_6": {"source_identity": {"file": "NiAVObject_Win32.cpp", "lines": "22-31"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "verbatim identical body to GB_1_2", "input": "none", "output": "void", "state_mutated": "m_kWorld; collision object's world data", "calling_shape": "idem (NiAVObject.cpp GB26 L174-182; L180-181)"}},
+    "GB_1_1_2": {"source_identity": {"file": "SDK\\Win32\\Include\\NiAVObject.h", "sha256": "3FC6C7101EC816EE27E116D495CF5A1E292F4AE261A0E9BFE58DBB6BCA99E6B", "lines": "245 (declaration only)"}, "confidence": "CONFIRMED-from-source (declaration only; no body in binary SDK)", "contract": {"body": "NOT_AVAILABLE (declaration: virtual void UpdateWorldData();)", "input": "none", "output": "void", "state_mutated": "UNKNOWN for GB_1_1_2 (no body held)", "calling_shape": "UNKNOWN for GB_1_1_2"}}
+   },
+   "transform_composition_reference": "NiTransform.inl operator* L15-24 (Win32): scale=sa*sb; rotate=Ra*Rb; translate=ta + sa*(Ra*tb) (cited in gb12core.py header canon)",
+   "semantic_role": "COMPUTED_WORLD_TRANSFORM derivation; NEVER a Eudoria world position (RUN_CONTRACT (l))"
+  },
+  "NiNode::AttachChild": {
+   "versions": {
+    "GB_1_2": {"source_identity": {"file": "CoreLibs\\NiMain\\NiNode.cpp", "sha256": "38C7A1DE1E166345068D296F70F34B1ADAE27C694E19EAD8FA0FBD8B62E0E016", "lines": "52-72"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "assert(pkChild); if (!pkChild) return; pkChild->IncRefCount(); pkChild->AttachParent(this); bFirstAvail ? m_kChildren.AddFirstEmpty(pkChild) : m_kChildren.Add(pkChild); assert(refcount >= 2); pkChild->DecRefCount();", "input": "NiAVObject* child, bool bFirstAvail=false", "output": "void", "state_mutated": "child->m_pkParent; m_kChildren array; transient refcount", "calling_shape": "NOT called during NIF load (children link via NiNode::LinkObject -> SetAt, NiNode.cpp GB12 L886-888); runtime scene assembly"}},
+    "GB_2_6": {"source_identity": {"file": "NiNode.cpp", "sha256": "C0414C8F85768BF52F741BD51030DB5F73943BD64CA8871D8714DD471084B984", "lines": "54-74"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "identical logic", "input": "idem", "output": "void", "state_mutated": "idem", "calling_shape": "idem"}},
+    "GB_1_1_2": {"source_identity": {"file": "SDK\\Win32\\Include\\NiNode.h (installed binary SDK; NiNode.inl sha 0C1E5765C58CB71246A8CA61CC153A46ECCCD293E6A581171903C1E1B16F06E7 companion)", "lines": "declaration only"}, "confidence": "STRONGLY_SUPPORTED (declaration held; body NOT_AVAILABLE)", "contract": {"body": "NOT_AVAILABLE", "input": "NiAVObject* child, bool bFirstAvail=false (from declaration)", "output": "void", "state_mutated": "UNKNOWN for GB_1_1_2", "calling_shape": "UNKNOWN for GB_1_1_2"}},
+    "GB_2_3": {"source_identity": {"file": "sdk\\Include\\NiNode.h (recovered from GB_2_3.iso GbEvaluationSDKSetup.exe Wise table)", "sha256": "8C4D29D68507CD4C4B538B5952E2335B18CF1CD88681E7FB138389BE22AE46D1", "lines": "40"}, "confidence": "STRONGLY_SUPPORTED (declaration only: virtual void AttachChild(NiAVObject* pkChild, bool bFirstAvail = false);)", "contract": {"body": "NOT_AVAILABLE", "input": "NiAVObject* child, bool bFirstAvail=false", "output": "void", "state_mutated": "UNKNOWN for GB_2_3", "calling_shape": "UNKNOWN for GB_2_3"}}
+   },
+   "semantic_role": "runtime scene assembly; the LOAD-TIME attachment is SetAt via LinkObject (see below)"
+  },
+  "NiNode::DetachChild": {
+   "versions": {
+    "GB_1_2": {"source_identity": {"file": "CoreLibs\\NiMain\\NiNode.cpp", "sha256": "38C7A1DE1E166345068D296F70F34B1ADAE27C694E19EAD8FA0FBD8B62E0E016", "lines": "DetachChildAt 74-90; DetachChild 92-106"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "linear scan for the child; on match: child->DetachParent(); m_kChildren.RemoveAt(i); returns NiAVObjectPtr (null if absent)", "input": "NiAVObject* child", "output": "NiAVObjectPtr (former child or null)", "state_mutated": "child->m_pkParent = 0 (DetachParent inl GB112 L17-20); m_kChildren", "calling_shape": "runtime; not part of NIF load"}},
+    "GB_2_6": {"source_identity": {"file": "NiNode.cpp", "sha256": "C0414C8F85768BF52F741BD51030DB5F73943BD64CA8871D8714DD471084B984", "lines": "76-92; 94-108"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "identical logic", "input": "idem", "output": "idem", "state_mutated": "idem", "calling_shape": "idem"}}
+   },
+   "semantic_role": "runtime scene disassembly"
+  },
+  "NiNode::SetAt": {
+   "versions": {
+    "GB_1_2": {"source_identity": {"file": "CoreLibs\\NiMain\\NiNode.cpp", "sha256": "38C7A1DE1E166345068D296F70F34B1ADAE27C694E19EAD8FA0FBD8B62E0E016", "lines": "108-130"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "if i beyond size: grow + AttachParent; else detach former child, attach new, m_kChildren.SetAt(i, pkChild); returns former child (NiAVObjectPtr)", "input": "unsigned int i, NiAVObject* child", "output": "NiAVObjectPtr (former child)", "state_mutated": "m_kChildren; child->m_pkParent; former child's m_pkParent", "calling_shape": "LOAD-TIME attachment: NiNode::LinkObject resolves ReadMultipleLinkIDs entries via GetObjectFromLinkID then SetAt (GB12 L886-888)"}},
+    "GB_2_6": {"source_identity": {"file": "NiNode.cpp", "sha256": "C0414C8F85768BF52F741BD51030DB5F73943BD64CA8871D8714DD471084B984", "lines": "110-132"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "identical logic", "input": "idem", "output": "idem", "state_mutated": "idem", "calling_shape": "GB26 identical link flow (GetObjectToLinkID null-safety added in the stream loop, not in SetAt)"}}
+   },
+   "semantic_role": "the mechanism by which serialized child links become runtime parent-child edges during NIF load"
+  },
+  "NiStream::Load / LoadStream / LinkObject / PostLinkObject orchestration": {
+   "versions": {
+    "GB_1_2": {"source_identity": {"file": "CoreLibs\\NiMain\\NiStream.cpp", "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25", "lines": "Load entry L637-660 (file)/L662-670 (memory)/L672-689 (stream) -> LoadStream L521-635; LoadHeader L303-360; LoadRTTI L415-449; LoadBinary loop L538-564; link L568-578; postlink L580-590; postprocess L602-622"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "LoadHeader gate [3.3.0.11, 10.2.0.0]; LoadRTTI factory lookup (unknown class -> RTTIError -> Load() false); LoadBinary: pkObject->LoadBinary(*this) per object in block order, single pass; link: pkObject->LinkObject(*this) per object in block order; postlink: pkObject->PostLinkObject(*this) per object; then LoadTopLevelObjects; EOF at exact position", "input": "NiBinaryStream / file path / memory block", "output": "bool (false = whole load failed, fail-closed)", "state_mutated": "the full loaded object graph (factory-created objects, resolved links)", "calling_shape": "client calls Load once per file; no partial-accept semantics (a post-header failure rejects the WHOLE load)"}},
+    "GB_2_6": {"source_identity": {"file": "NiStream.cpp", "sha256": "72781EEB0E22D42152E04FADD498EA30292D1807E5C60378F08BFD8563693BA2", "lines": "Load spine L795-950; header L374-467; RTTI L630-683; LoadBinary L823-877; link L881-889; postlink L893-904"}, "confidence": "CONFIRMED-from-source", "contract": {"body": "gate [10.1.0.114, 20.6.0.0] + endian check; skippable unknown classes for NIF >= 20.2.0.5 (SKIPPABLE_MASK 0x8000) -- 2.x-only semantics; + size-table Seek for skipped NULLs L855-867; GetObjectToLink null-safe link resolution", "input": "idem", "output": "bool", "state_mutated": "idem", "calling_shape": "idem; NOTE: the GB 2.6 min-gate REJECTS NIF 10.1.0.0 (source-proven, P7/E2 canon; the 10.1.0.0-relevant flow for the T-corpus is therefore the GB_1_2 track)"}}
+   },
+   "semantic_role": "the canonical load orchestration our oracle re-implements (gb12core.py) and compares against (compare adapter)"
+  }
+ },
+ "confidence_vocabulary": "CONFIRMED-from-source (body held+read) / STRONGLY_SUPPORTED (declaration held, body NOT_AVAILABLE) / UNKNOWN (nothing held) -- closed set per s28",
+ "not_available_disclosure": "GB_1_1_2 bodies are NOT_AVAILABLE (binary SDK: headers/inl only). GB_2_3 entries are declaration-only (recovered headers). No manufactured contracts; NOT_AVAILABLE is recorded, never inferred."
+}

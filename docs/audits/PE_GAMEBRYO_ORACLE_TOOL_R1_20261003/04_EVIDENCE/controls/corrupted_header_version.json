@@ -1,0 +1,223 @@
+{
+ "CODE_PATH": {
+  "mutation_logic": "copied verbatim from payload_controls()",
+  "runner": "04_EVIDENCE/scripts/c1_control_persist.py",
+  "test_file": "tools/gamebryo_oracle/tests/test_gb12.py",
+  "test_file_sha256": "323AAA6245605A191EF335A32397418F579A580C1DA86D686699D97C25F2289B"
+ },
+ "CONTROL_ID": "corrupted_header_version",
+ "EXECUTED": "2026-10-03 (correction round C1)",
+ "FAILURE_CASE_DETECTED": "a silent success in this control's failure class would FAIL the check; measured: DETECTED on ['T2', 'T1', 'STOCK']",
+ "INDEPENDENT_SOURCE_OF_TRUTH": "GB 1.2 NiStream version-gate semantics (NiStream.cpp sha256 E955C36E..., E1 source canon): a header version outside the supported window must be explicitly rejected, never silently accepted",
+ "MEASURED_QUANTITY": "gb12 adapter decode verdict (load_result.accepted / .error / .error_code) on a sandbox copy whose header version u32 was mutated (v XOR 0x00400000); the raw decode JSON of every run is embedded under 'runs'",
+ "RUN_ID": "PE_GAMEBRYO_ORACLE_TOOL_R1_20261003_C1",
+ "RUN_NOTE": "The initial C1 battery on the STOCK sample crashed at the link control (a blanket battery-exception entry was recorded); this follow-up (04_EVIDENCE/scripts/c1_followup.py) re-ran the STOCK controls individually and replaced that entry with this per-control result.",
+ "SANDBOX_DISCIPLINE": "mutations applied to in-memory bytearrays loaded from sandbox copies in the OS temp sandbox; pinned payloads read-only; sha256/size pins verified before use",
+ "WHY_NON_CIRCULAR": "the mutation is applied to payload bytes BEFORE decode; the verdict comes from the decoder under test while the expectation comes from the source-derived version gate, not from the decoder's own output",
+ "runs": [
+  {
+   "baseline_original_verdict": {
+    "accepted": false,
+    "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+    "error_code": "RTTIError",
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "error='LATER_VERSION: Unknown NIF version.'",
+     "expression": "load_result.accepted is False and load_result.error is not None",
+     "name": "corrupted_header_rejected",
+     "passed": true
+    },
+    "mutation": "header version u32 at offset 39: 0x0A010000 ^ 0x00400000 -> 0x0A410000",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.1.0.0",
+      "nif_version": "10.65.0.0",
+      "nif_version_u32": 172032000,
+      "path": "<corrupted-header-version>",
+      "sha256": "6839FB76F04337CB04D321FDFC90692A77DC080E6E7788FCB47444C4E0E9433D",
+      "size": 537
+     },
+     "load_result": {
+      "accepted": false,
+      "error": "LATER_VERSION: Unknown NIF version.",
+      "error_code": "LATER_VERSION",
+      "partial": false
+     },
+     "objects": [],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [],
+     "scene_graph": {
+      "edges": [],
+      "roots": []
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {},
+     "unknowns": [],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11"
+     },
+     "warnings": []
+    }
+   },
+   "payload": "T2",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\T2_sandbox_copy.nif",
+   "source_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\sandbox\\payloads\\533021.nif",
+   "source_sha256": "9CFF776D204AEC7B64377DD365AC11A71C9DCFA4A00A5905E642EE7420D5DC28"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": false,
+    "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+    "error_code": "RTTIError",
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "error='LATER_VERSION: Unknown NIF version.'",
+     "expression": "load_result.accepted is False and load_result.error is not None",
+     "name": "corrupted_header_rejected",
+     "passed": true
+    },
+    "mutation": "header version u32 at offset 39: 0x0A010000 ^ 0x00400000 -> 0x0A410000",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.1.0.0",
+      "nif_version": "10.65.0.0",
+      "nif_version_u32": 172032000,
+      "path": "<corrupted-header-version>",
+      "sha256": "DA8DC23F2F00AF776E90888FDB987BB224B9C323F4C7AD16E12D1DDEB707F96A",
+      "size": 57316
+     },
+     "load_result": {
+      "accepted": false,
+      "error": "LATER_VERSION: Unknown NIF version.",
+      "error_code": "LATER_VERSION",
+      "partial": false
+     },
+     "objects": [],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [],
+     "scene_graph": {
+      "edges": [],
+      "roots": []
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {},
+     "unknowns": [],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11"
+     },
+     "warnings": []
+    }
+   },
+   "payload": "T1",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\T1_sandbox_copy.nif",
+   "source_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\sandbox\\payloads\\218757.nif",
+   "source_sha256": "3E8A22C2213202207E374B55CD65B2C3BE039CCDD1E8D01A07FCAF44DE12CF36"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": true,
+    "error": null,
+    "error_code": null,
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "error='LATER_VERSION: Unknown NIF version.'",
+     "expression": "load_result.accepted is False and load_result.error is not None",
+     "name": "corrupted_header_rejected",
+     "passed": true
+    },
+    "mutation": "header version u32 at offset 40: 0x0A000112 ^ 0x00400000 -> 0x0A400112",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.0.1.18",
+      "nif_version": "10.64.1.18",
+      "nif_version_u32": 171966738,
+      "path": "<corrupted-header-version>",
+      "sha256": "4BA1038F6C2924A2D8BDC10132F7AC08373F3C974D220FDD4F65A25E01266AB9",
+      "size": 1689
+     },
+     "load_result": {
+      "accepted": false,
+      "error": "LATER_VERSION: Unknown NIF version.",
+      "error_code": "LATER_VERSION",
+      "partial": false
+     },
+     "objects": [],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [],
+     "scene_graph": {
+      "edges": [],
+      "roots": []
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {},
+     "unknowns": [],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11"
+     },
+     "warnings": []
+    }
+   },
+   "payload": "STOCK",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\STOCK_sandbox_copy.nif",
+   "source_path": "D:\\gamebyroengine\\Gamebryo 1.1.2 Evaluation\\Samples\\Models\\Collision\\NIF\\1310 HN (Plane).nif",
+   "source_sha256": "F26FB84346E32BE94AFD9FD3C62DA18FB49308480D7EC38476A216520F6DAC8F"
+  }
+ ]
+}

@@ -1,0 +1,259 @@
+{
+ "CODE_PATH": {
+  "mutation_logic": "copied verbatim from payload_controls()",
+  "runner": "04_EVIDENCE/scripts/c1_control_persist.py",
+  "test_file": "tools/gamebryo_oracle/tests/test_gb12.py",
+  "test_file_sha256": "323AAA6245605A191EF335A32397418F579A580C1DA86D686699D97C25F2289B"
+ },
+ "CONTROL_ID": "object_count_mutation",
+ "EXECUTED": "2026-10-03 (correction round C1)",
+ "FAILURE_CASE_DETECTED": "a silent success in this control's failure class would FAIL the check; measured: DETECTED on ['T2', 'STOCK']; NOT detected on ['T1'] (raw outputs recorded -- see per-run entries)",
+ "INDEPENDENT_SOURCE_OF_TRUTH": "GB 1.2 source invariant: header num_blocks vs decoded count (assert usRTTI < usRTTICount per source L440); a count mismatch must be detected, never silently accepted",
+ "MEASURED_QUANTITY": "gb12 adapter decode verdict on a sandbox copy whose header num_blocks was mutated +5 (object_count_check.match and/or error_code DECODE_ERROR / INVALID_TYPE_INDEX)",
+ "RUN_ID": "PE_GAMEBRYO_ORACLE_TOOL_R1_20261003_C1",
+ "RUN_NOTE": "The initial C1 battery on the STOCK sample crashed at the link control (a blanket battery-exception entry was recorded); this follow-up (04_EVIDENCE/scripts/c1_followup.py) re-ran the STOCK controls individually and replaced that entry with this per-control result.",
+ "SANDBOX_DISCIPLINE": "mutations applied to in-memory bytearrays loaded from sandbox copies in the OS temp sandbox; pinned payloads read-only; sha256/size pins verified before use",
+ "WHY_NON_CIRCULAR": "the count mutation precedes decode; the expectation comes from the source-derived invariant, not from the decoder; the decoder's object_count_check is the measured quantity",
+ "runs": [
+  {
+   "baseline_original_verdict": {
+    "accepted": false,
+    "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+    "error_code": "RTTIError",
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "count_check=None error='INVALID_TYPE_INDEX: block type index 10 out of range (num types 6)'",
+     "expression": "object_count_check.match is False or error_code in (DECODE_ERROR, INVALID_TYPE_INDEX)",
+     "name": "object_count_mismatch_detected",
+     "passed": true
+    },
+    "mutation": "header num_blocks 6 -> 11 at offset 47",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.1.0.0",
+      "nif_version": "10.1.0.0",
+      "nif_version_u32": 167837696,
+      "num_blocks_from_header": 11,
+      "path": "<count-mismatch>",
+      "sha256": "E8E72EABA8C8FDC80CE49D34F01B98760608486548CF8C217822E3BF2F2120FA",
+      "size": 537,
+      "user_defined_version": "0.0.0.0"
+     },
+     "load_result": {
+      "accepted": false,
+      "error": "INVALID_TYPE_INDEX: block type index 10 out of range (num types 6)",
+      "error_code": "INVALID_TYPE_INDEX",
+      "partial": false
+     },
+     "objects": [],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [],
+     "scene_graph": {
+      "edges": [],
+      "roots": []
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {},
+     "unknowns": [],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11",
+      "verdict": "ACCEPTED"
+     },
+     "warnings": []
+    }
+   },
+   "payload": "T2",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\T2_sandbox_copy.nif",
+   "source_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\sandbox\\payloads\\533021.nif",
+   "source_sha256": "9CFF776D204AEC7B64377DD365AC11A71C9DCFA4A00A5905E642EE7420D5DC28"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": false,
+    "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+    "error_code": "RTTIError",
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "count_check=None error='RTTIError(NiArkAnimationExtraData): cannot find create function.'",
+     "expression": "object_count_check.match is False or error_code in (DECODE_ERROR, INVALID_TYPE_INDEX)",
+     "name": "object_count_mismatch_detected",
+     "passed": false
+    },
+    "mutation": "header num_blocks 66 -> 71 at offset 47",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.1.0.0",
+      "nif_version": "10.1.0.0",
+      "nif_version_u32": 167837696,
+      "num_blocks_from_header": 71,
+      "path": "<count-mismatch>",
+      "sha256": "EBD344F16E7D7EFD80DE6B8731046748E05C9C447AC8B5649C9CF78F2451E184",
+      "size": 57316,
+      "user_defined_version": "0.0.0.0"
+     },
+     "load_result": {
+      "accepted": false,
+      "error": "RTTIError(NiArkAnimationExtraData): cannot find create function.",
+      "error_code": "RTTIError",
+      "partial": false
+     },
+     "objects": [],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [],
+     "rtti_gate": {
+      "file_type_count": 12,
+      "first_unregistered_scan_order": "NiArkAnimationExtraData",
+      "registered_class_count": 198,
+      "registry_provenance": "Gb12_Source CoreLibs *SDM.cpp NiRegisterStream/RegisterLoader census (see adapters/gb12/registry.py)",
+      "unregistered_types": [
+       "NiArkAnimationExtraData"
+      ]
+     },
+     "scene_graph": {
+      "edges": [],
+      "roots": []
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {
+      "NiArkAnimationExtraData": 1,
+      "NiArkImporterExtraData": 1,
+      "NiArkTextureExtraData": 1,
+      "NiArkViewportInfoExtraData": 1,
+      "NiDirectionalLight": 2,
+      "NiMaterialProperty": 9,
+      "NiNode": 16,
+      "NiStringExtraData": 1,
+      "NiTexturingProperty": 9,
+      "NiTriShape": 14,
+      "NiTriShapeData": 15,
+      "NiZBufferProperty": 1
+     },
+     "unknowns": [
+      {
+       "class": "NiArkAnimationExtraData",
+       "status": "UNREGISTERED_IN_GB12_FACTORY"
+      }
+     ],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11",
+      "verdict": "ACCEPTED"
+     },
+     "warnings": []
+    }
+   },
+   "payload": "T1",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\T1_sandbox_copy.nif",
+   "source_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_GAMEBRYO_ORACLE_TOOL_R1_20261003\\sandbox\\payloads\\218757.nif",
+   "source_sha256": "3E8A22C2213202207E374B55CD65B2C3BE039CCDD1E8D01A07FCAF44DE12CF36"
+  },
+  {
+   "baseline_original_verdict": {
+    "accepted": true,
+    "error": null,
+    "error_code": null,
+    "partial": false
+   },
+   "control": {
+    "check": {
+     "detail": "count_check=None error='INVALID_TYPE_INDEX: block type index 10 out of range (num types 8)'",
+     "expression": "object_count_check.match is False or error_code in (DECODE_ERROR, INVALID_TYPE_INDEX)",
+     "name": "object_count_mismatch_detected",
+     "passed": true
+    },
+    "mutation": "header num_blocks 10 -> 15 at offset 48",
+    "raw_output": {
+     "ORACLE_MODE": "SOURCE_DERIVED_REIMPLEMENTATION",
+     "adapter": "gb12",
+     "bounds": [],
+     "controllers": [],
+     "decode_continued_after_rtti_gate": false,
+     "era_category": "GB_1_2",
+     "input_identity": {
+      "header": "Gamebryo File Format, Version 10.0.1.18",
+      "nif_version": "10.0.1.18",
+      "nif_version_u32": 167772434,
+      "num_blocks_from_header": 15,
+      "path": "<count-mismatch>",
+      "sha256": "DEEB76E22624A62FA9C3767E6F593DD64B14ED080BB64E471D65F67B8CD487D6",
+      "size": 1689,
+      "user_defined_version": "0.0.0.0"
+     },
+     "load_result": {
+      "accepted": false,
+      "error": "INVALID_TYPE_INDEX: block type index 10 out of range (num types 8)",
+      "error_code": "INVALID_TYPE_INDEX",
+      "partial": false
+     },
+     "objects": [],
+     "oracle": {
+      "gamebryo_version": "GB_1_2 (Gamebryo 1.2.2, NIF write version 10.2.0.0)",
+      "loader_identity": "NiStream::Load -> LoadHeader -> LoadRTTI -> LoadBinary loop -> link -> postlink (GB 1.2.2 CoreLibs NiMain)",
+      "loader_source_identity": {
+       "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+       "semantics_provenance": "see gb12core.py header citation block",
+       "sha256": "E955C36EBBB442029E00BE8A154726741B8454A607F2DC043F1FD542B009DC25"
+      },
+      "tool_version": "gamebryo_oracle/1.0.0 gb12 source-derived reimplementation"
+     },
+     "properties": [],
+     "scene_graph": {
+      "edges": [],
+      "roots": []
+     },
+     "schema": "gamebryo_oracle/oracle_result@1.0",
+     "textures": [],
+     "type_histogram": {},
+     "unknowns": [],
+     "version_gate": {
+      "max": "10.2.0.0",
+      "min": "3.3.0.11",
+      "verdict": "ACCEPTED"
+     },
+     "warnings": []
+    }
+   },
+   "payload": "STOCK",
+   "sandbox_copy": "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\c1_gb_oracle_controls\\STOCK_sandbox_copy.nif",
+   "source_path": "D:\\gamebyroengine\\Gamebryo 1.1.2 Evaluation\\Samples\\Models\\Collision\\NIF\\1310 HN (Plane).nif",
+   "source_sha256": "F26FB84346E32BE94AFD9FD3C62DA18FB49308480D7EC38476A216520F6DAC8F"
+  }
+ ]
+}

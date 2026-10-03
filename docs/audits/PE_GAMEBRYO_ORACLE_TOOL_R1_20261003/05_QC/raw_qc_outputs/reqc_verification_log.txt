@@ -1,0 +1,61 @@
+=== 0. INTEGRITY BASELINES ===
+QC_REPORT.md sha=F2E8C434ACFDBFC92926BC98D0E4551EFD043FFD8240A5D885497FBFCE347CD4 (pre-C1 was F2E8C434ACFDBFC92926BC98D0E4551EFD043FFD8240A5D885497FBFCE347CD4)
+SELECTION.md sha=4A67C6B844B6DA65DF403AA5B87B8012FECB7CBBF60051422E306E93C733381C (lock pin 4A67C6B844B6DA65DF403AA5B87B8012FECB7CBBF60051422E306E93C733381C)
+
+=== 1. P1-1: controls/ raw outputs ===
+ corrupted_header_version.json hash=MATCH pin=ok labels4=True keys=['CODE_PATH', 'CONTROL_ID', 'EXECUTED', 'FAILURE_CASE_DETECTED', 'INDEPENDENT_SOURCE_OF_TRUTH', 'MEASURED_QUANTITY', 'RUN_ID', 'RUN_NOTE']
+ corrupted_midfile.json hash=MATCH pin=ok labels4=True keys=['CODE_PATH', 'CONTROL_ID', 'EXECUTED', 'FAILURE_CASE_DETECTED', 'INDEPENDENT_SOURCE_OF_TRUTH', 'MEASURED_QUANTITY', 'RUN_ID', 'RUN_NOTE']
+ unknown_class_mutation.json hash=MATCH pin=ok labels4=True keys=['CODE_PATH', 'CONTROL_ID', 'EXECUTED', 'FAILURE_CASE_DETECTED', 'INDEPENDENT_SOURCE_OF_TRUTH', 'MEASURED_QUANTITY', 'RUN_ID', 'RUN_NOTE']
+ link_failure_mutation.json hash=MATCH pin=ok labels4=True keys=['CODE_PATH', 'CONTROL_ID', 'EXECUTED', 'FAILURE_CASE_DETECTED', 'INDEPENDENT_SOURCE_OF_TRUTH', 'MEASURED_QUANTITY', 'RUN_ID', 'RUN_NOTE']
+ object_count_mutation.json hash=MATCH pin=ok labels4=True keys=['CODE_PATH', 'CONTROL_ID', 'EXECUTED', 'FAILURE_CASE_DETECTED', 'INDEPENDENT_SOURCE_OF_TRUTH', 'MEASURED_QUANTITY', 'RUN_ID', 'RUN_NOTE']
+ test_gb12.py sha=323AAA6245605A191EF335A32397418F579A580C1DA86D686699D97C25F2289B (C1 said verbatim-copy source 323AAA6245605A191EF335A32397418F579A580C1DA86D686699D97C25F2289B)
+--- pointers: FAIL_CLOSED_TESTS / TOOL_IMPL_REPORT / gates row ---
+ FAIL_CLOSED_TESTS sha=4B9C574C98491099A2EF17D81A1F6DD752F65E30B8DC829E5C275945FC860E3B (C1 pin 4B9C574C98491099A2EF17D81A1F6DD752F65E30B8DC829E5C275945FC860E3B)
+ addendum mentions controls/ + C1: True ; mentions 04_EVIDENCE/controls: True
+ TOOL_IMPL_REPORT sha=BF6A79A2EE14EA4CC26872D096B831796BFDEF2BFA0F12FE7F7A2DB03E3A002B (C1 pin BF6A79A2EE14EA4CC26872D096B831796BFDEF2BFA0F12FE7F7A2DB03E3A002B)
+ C1 note present (in-memory disclosure + C1 persisted): True
+ gates csv sha=2C40DF1A5AF3622377B534CD73DAF1A1B0EB758B349704CF1C93717D0229AB21 (C1 pin 2C40DF1A5AF3622377B534CD73DAF1A1B0EB758B349704CF1C93717D0229AB21)
+ G-TOOL-3 row now: G-TOOL-3,PASS,03_TOOL/FAIL_CLOSED_TESTS.md + 04_EVIDENCE/T_runs control outputs + 04_EVIDENCE/controls/ raw mutation-control JSONs (persisted in C1 2026-10-03; re-executed on sandb
+ G-TOOL-3 rows count=1; controls/ pointer in last row: True
+ G-MATRIX-1 row (residual-4 check): G-MATRIX-1,PASS,03_TOOL/GAMEBRYO_COMPATIBILITY_MATRIX.csv (13 columns per s16; zero blank cells; every cell in the closed set),2026-10-03,E2
+
+--- re-execution of ONE control: corrupted_header_version on T2 (my own run) ---
+ T2 pinned sha pre-use: 9CFF776D204AEC7B64377DD365AC11A71C9DCFA4A00A5905E642EE7420D5DC28
+ my result: nif_version=10.65.0.0 accepted=False partial=False error_code=LATER_VERSION error=LATER_VERSION: Unknown NIF version.
+ saved: 05_QC/raw_qc_outputs/reqc_reexec_corrupted_header_version_T2.json
+ their JSON: T2 mutation recorded (0x00400000): True ; LATER_VERSION recorded: True ; 10.65.0.0 recorded: True
+ their (version,error_code) pairs: []
+ REPRODUCED: False
+
+=== 2/3. P2-1/P2-2: matrix CSV parse + closed set ===
+ matrix sha=02D72F0AAA48E04AD00108AE1C0FDC370DE04BB0507C23438E07BC4D386E8A7A (C1 pin 02D72F0AAA48E04AD00108AE1C0FDC370DE04BB0507C23438E07BC4D386E8A7A)
+ header fields=14 ; data rows=9
+ rows with wrong field count: NONE ; blank cells: 0
+ verdict tokens outside closed set: [(2, 'SOURCE_AVAILABLE', 'FULL'), (3, 'SOURCE_AVAILABLE', 'SOURCE'), (4, 'SOURCE_AVAILABLE', 'SOURCE'), (5, 'SOURCE_AVAILABLE', 'NO'), (6, 'SOURCE_AVAILABLE', 'NO'), (7, 'SOURCE_AVAILABLE', 'FULL'), (8, 'SOURCE_AVAILABLE', 'SOURCE'), (9, 'SOURCE_AVAILABLE', 'NO'), (10, 'SOURCE_AVAILABLE', 'FULL')]
+ NOT_APPLICABLE anywhere outside NOTES: False ; FAIL-BY-DESIGN anywhere: False
+ all-quoted check (sample row1 raw line): "GB_1_2","NiStream load semantics (oracle gb12 adapter)","FULL (Gb12_Source CoreLibs)","NOT_TESTED (reimplementation)","
+ residual-5 (gb12 CONTROLLERS cell): PARTIAL (map fields + external flag; no NiSourceTexture blocks in T1)
+ OUR_TOOL BUILDS cell (residual-6): NOT_TESTED (reimplementation -- pure python; no build step)
+ OUR_TOOL CUSTOM_ARK cell: FAIL (original verdict RTTIError on NiArk*; extension records unknowns)
+
+=== 4. P2-3: gui log encodings ===
+ gui_attempts_log.txt: size=9413 UTF16BOM=False sha=MATCH pin=ok
+   spot lines: ['================ GB 2.6 PhysXNifViewer on T1 (P7) ================', 'tool: PhysXNifViewer.exe (GB_2_6, fresh sandbox copy) sha256=4543B4B52780849A38FE0C73052CB', "DIALOGS: label=gb26_physxnifviewer_T1 alive=True mainTitle='Settings' TOP class=#32770 tit"]
+ gui_attempts_log2.txt: size=4172 UTF16BOM=False sha=MATCH pin=ok
+   spot lines: ['================ GB 2.6 PhysXNifViewer on T1 (OK clicked) ================', 'clicking OK on Settings dialog', "CHILD class=Static caption='EGB_SHADER_LIBRARY_PATH environment variable not found' text=5"]
+ gui_attempts_log3.txt (residual-7): UTF8-BOM=True (EF BB BF) size=2034
+   log3 verbatim chain line still present: ["CHILD class=Static cap='Failed to load shader library!' txt: Failed to"]
+
+=== 5. P2-4: pyc + .gitignore ===
+ .pyc/__pycache__ entries under tools/gamebryo_oracle: 3 ['D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\tools\\gamebryo_oracle\\adapters\\gb12\\__pycache__\\registry.cpython-312.pyc', 'D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\tools\\gamebryo_oracle\\adapters\\gb12\\__pycache__\\__init__.cpython-312.pyc', 'D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\tools\\gamebryo_oracle\\__pycache__\\gb12core.cpython-312.pyc']
+ .gitignore exists=True sha=862263FA1F46C20F0D1E4DAC5FFCC75ABD55C08211B2C3864C5F8764B9D87793 (C1 pin 862263FA1F46C20F0D1E4DAC5FFCC75ABD55C08211B2C3864C5F8764B9D87793) lines=['__pycache__/', '*.pyc']
+
+=== 6. P2-5: TEST_MATRIX rows ===
+ TEST_MATRIX sha=A5D52F05960F38A5FEA6C7312D192C32540C8F8F3B07EE70725256B212CF3DA8 (C1 pin A5D52F05960F38A5FEA6C7312D192C32540C8F8F3B07EE70725256B212CF3DA8)
+ rows=30 fields=4
+ ROW T3_full_decode => PARTIAL | all ~25 T3 RTTI classes implemented (E3); honest PARTIAL decode 448/1288 blocks -- NOT EOF-exact (unknown-run closure assignment exceeds the search budget; residuals in 0
+ ROW G_SIG_signatures => PASS | produced in E3 per order s28: 02_ANALYSIS/GAMEBRYO_SEMANTIC_SIGNATURES.json (SetTranslate/SetRotate/SetScale/UpdateWorldData/AttachChild/DetachChild/SetAt + NiStream load
+
+=== 7. residual spot-checks in controls JSONs ===
+ corrupted_midfile: MIDFILE_STOCK_NOTE present=True ; T1 honest not-run note present=True ; accepted=true STOCK case recorded=True
+ link_failure: RUN_NOTE present=True ; LINK_FAILURE warning recorded=True ; measured SDK link warning present=True
