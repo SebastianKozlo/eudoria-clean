@@ -21,8 +21,17 @@ python tests/test_gb12.py --self            # pure-logic tests
 python tests/test_gb12.py --sandbox-payload <file>   # control battery
 ```
 
-Exit codes: 0 accepted, 2 rejected/failed (JSON still emitted), 3 IO error.
+Exit codes: 0 success, 2 rejected/failed (JSON still emitted), 3 IO error.
 All JSON output is DETERMINISTIC: no wall-clock timestamps, no random data.
+F2 CLI_SUCCESS_SEMANTICS (2026-10-03, `inspect` ONLY): for adapters that
+report the F2 axis `TOOL_VERDICT` (gb12), inspect exits 0 ONLY on
+`TOOL_VERDICT=PASS` -- i.e. `ADAPTER_DECODE_COVERAGE=COMPLETE` AND
+`ADAPTER_INTEGRITY=PASS` AND no source-predicted REJECTED. A
+REGISTERED_BUT_NOT_DECODED_BY_ADAPTER boundary-only block or a
+LINK_FAILURE / out-of-range link => exit 2 (the pre-F2 build promoted
+accepted=true / exit 0 in both cases -- Desktop post-audit finding F2/P1).
+Adapters without the F2 axes keep their accepted-based exit semantics;
+probe-version / compare / capabilities exit semantics are UNCHANGED.
 
 ## Adapters
 
@@ -81,6 +90,44 @@ object-index stage). The ORIGINAL verdict is reported in `load_result` and
 never silently merged. SOURCE_DERIVED output is never phrased as original
 execution (G-TOOL-4).
 
+### gb12 acceptance/coverage/link axes (F2 fix, 2026-10-03)
+
+The result carries FOUR EXPLICIT, SEPARATE axes (never conflated):
+
+- `SOURCE_PREDICTED_ORIGINAL_VERDICT` in {ACCEPTED, REJECTED, UNRESOLVED}:
+  what the ORIGINAL GB 1.2 Load() would do, predicted ONLY from pinned
+  source evidence. REJECTED = unambiguous source-proven rejection
+  (header "File Format" test, version gate, RTTI factory miss). UNRESOLVED
+  = evidence insufficient: a REGISTERED_BUT_NOT_DECODED_BY_ADAPTER class is
+  NOT an original rejection (the factory knows the class; its
+  LoadBinary/link/postlink path is simply not traced), and an out-of-range
+  link is UNRESOLVED, not REJECTED (GetObjectFromLinkID L245-256 has only a
+  DEBUG-only assert; NiTArray::GetAt L136-139 is an unchecked raw index --
+  release = UB, debug = assert; LinkObject is void and discarded at
+  LoadStream L576; L634 returns true unconditionally). ACCEPTED only when
+  the full pinned LoadStream path (L506-635) is content-valid for the
+  stream (every block decoded by a pinned-citation loader, every link NULL
+  or in range).
+- `ADAPTER_DECODE_COVERAGE` in {COMPLETE, INCOMPLETE, NOT_MEASURED} with
+  `adapter_decode_coverage_counters` (header_num_blocks,
+  semantically_decoded_blocks, boundary_only_blocks,
+  registered_but_not_decoded_blocks, unregistered_blocks,
+  unresolved_blocks): each counter is an integer when actually measured,
+  else null with an explicit per-counter reason (a measured ZERO is never a
+  substitute for unknown). After an early RTTI halt the object-level
+  counters are NOT derived from RTTI table names (a table entry is NOT an
+  object reference) and stay null/NOT_MEASURED.
+- `ADAPTER_INTEGRITY` in {PASS, FAIL, UNRESOLVED, NOT_MEASURED} covering
+  object-count consistency, structural closure and link integrity
+  (`adapter_integrity_checks`): an out-of-range link =>
+  LINK_INTEGRITY=FAIL => ADAPTER_INTEGRITY=FAIL (no longer a warning).
+- `TOOL_VERDICT` in {PASS, FAIL, UNRESOLVED} (derived in one place): PASS
+  only if coverage=COMPLETE AND integrity=PASS AND no source-predicted
+  REJECTED; FAIL if integrity=FAIL or source-predicted REJECTED (a known
+  detected invalid link must NEVER end UNRESOLVED); UNRESOLVED otherwise.
+  `load_result.accepted` is exactly (TOOL_VERDICT == PASS) (explicit
+  `accepted_semantics` note) and the CLI inspect exit is 0 only on PASS.
+
 ## Local dependency representation (s22)
 
 | item | LOCAL_PATH_DESCRIPTION | VERSION | SIZE | SHA256 | REPRODUCTION_METHOD |
@@ -115,7 +162,15 @@ failures never mask the source verdict); the F1-C1 extension-halt battery
 bytes under --full-decode halts AT the table failure with
 STOP_AT_TABLE_FAILURE -- structured JSON, earlier RTTIError preserved,
 no indices/groups/bodies/histogram/census/roots ever read from the
-undetermined table boundary); and (with `--sandbox-payload`)
+undetermined table boundary); the F2 acceptance/coverage/link battery
+(valid positive control => TOOL_VERDICT=PASS; registered-but-not-decoded
+counterexample => coverage INCOMPLETE + TOOL != PASS + source UNRESOLVED
+with the factory census independently confirming registration; out-of-range
+link counterexample => coverage COMPLETE + integrity FAIL + TOOL FAIL,
+never UNRESOLVED; zero-vs-NOT_MEASURED distinctness; early-halt and
+F1-C1-halt object-level counters null with reasons; the
+integrity-FAIL-implies-TOOL-FAIL and accepted==TOOL_PASS law); and (with
+`--sandbox-payload`)
 the fail-closed battery on a sandbox copy of a real payload: RTTIError
 reporting, unknown-class reporting (mutated RTTI name), corruption
 fail-not-silent, object-count mismatch detection, partial-load

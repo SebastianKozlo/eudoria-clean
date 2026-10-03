@@ -51,6 +51,35 @@
                        "description": "F1-C1: set to STOP_AT_TABLE_FAILURE when the --full-decode extension halts at an incomplete RTTI table read (no object data read past the undetermined table boundary)"},
     "object_reference_histogram": {"type": "object"},
     "object_reference_census": {"type": "object"},
+    "SOURCE_PREDICTED_ORIGINAL_VERDICT": {
+        "type": "string", "enum": ["ACCEPTED", "REJECTED", "UNRESOLVED"],
+        "description": "F2: what the ORIGINAL GB 1.2 Load() would do, predicted only from pinned source evidence (never from adapter success/failure)"},
+    "source_predicted_reason": {"type": "string"},
+    "ADAPTER_DECODE_COVERAGE": {
+        "type": "string", "enum": ["COMPLETE", "INCOMPLETE", "NOT_MEASURED"],
+        "description": "F2: OUR adapter's semantic decode coverage; NOT_MEASURED after early RTTI halts (object-level counters are never derived from RTTI table names)"},
+    "adapter_decode_coverage_counters": {
+        "type": "object",
+        "description": "F2: every counter is an integer when actually measured, else null with an explicit not_measured_reasons entry (a measured ZERO is never a substitute for unknown)",
+        "properties": {
+            "header_num_blocks": {"type": ["integer", "null"]},
+            "semantically_decoded_blocks": {"type": ["integer", "null"]},
+            "boundary_only_blocks": {"type": ["integer", "null"]},
+            "registered_but_not_decoded_blocks": {"type": ["integer", "null"]},
+            "unregistered_blocks": {"type": ["integer", "null"]},
+            "unresolved_blocks": {"type": ["integer", "null"]},
+            "not_measured_reasons": {"type": "object"},
+            "registered_but_not_decoded_classes": {"type": "array"}
+        }
+    },
+    "ADAPTER_INTEGRITY": {
+        "type": "string", "enum": ["PASS", "FAIL", "UNRESOLVED", "NOT_MEASURED"],
+        "description": "F2: object-count consistency + structural closure + link integrity; FAIL unconditionally implies TOOL_VERDICT=FAIL"},
+    "adapter_integrity_checks": {"type": "object"},
+    "TOOL_VERDICT": {
+        "type": "string", "enum": ["PASS", "FAIL", "UNRESOLVED"],
+        "description": "F2: PASS only if coverage=COMPLETE and integrity=PASS and no source-predicted REJECTED; the CLI inspect exit is 0 only on PASS"},
+    "tool_verdict_reason": {"type": "string"},
     "load_result": {
       "type": "object",
       "required": ["accepted", "partial", "error"],

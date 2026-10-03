@@ -542,11 +542,290 @@ def f1c1_extension_halt_tests():
           "unknowns=%r" % rfB["unknowns"])
 
 
+def _f2_fixtures():
+    """Hand-built synthetic fixtures for the F2 acceptance/coverage/link
+    regression battery (Desktop post-audit
+    C:\\Users\\User\\Documents\\ChatGPT\\PE\\
+    PE_GAMEBRYO_ORACLE_TOOL_DESKTOP_POST_AUDIT_20261003 REPORT.md finding
+    F2/P1; see run
+    PE_GAMEBRYO_ORACLE_F2_ACCEPTANCE_COVERAGE_LINK_R1_20261003 for the
+    derivation + SIZE/SHA256 pins). Byte layouts derived from the pinned
+    source canon, NOT from the adapter under correction. All bytes are OUR
+    OWN synthetic data; the committed package generator
+    (docs/audits/PE_GAMEBRYO_ORACLE_F2_ACCEPTANCE_COVERAGE_LINK_R1_20261003/
+    01_FIXTURES/build_fixtures_f2.py) reproduces the physical files
+    byte-identically in the run's EXTERNAL sandbox (repo *.nif policy)."""
+    import struct as _s
+
+    def _rtti(nm):
+        b = nm.encode("latin-1")
+        return _s.pack("<I", len(b)) + b
+
+    def _cstr(nm):
+        b = nm.encode("latin-1")
+        return _s.pack("<i", len(b)) + b
+
+    hdr = (b"Gamebryo File Format, Version 10.1.0.0\n"
+           + _s.pack("<I", 0x0A010000) + _s.pack("<I", 0))
+    nul = 0xFFFFFFFF
+
+    def node_body(name, children=()):
+        return (_s.pack("<I", 0) + _cstr(name) + _s.pack("<I", 0)
+                + _s.pack("<I", nul) + _s.pack("<H", 0)
+                + _s.pack("<3f", 0.0, 0.0, 0.0)
+                + _s.pack("<9f", 1.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                          0.0, 0.0, 1.0)
+                + _s.pack("<f", 1.0) + _s.pack("<I", 0)
+                + _s.pack("<I", nul)
+                + _s.pack("<I", len(children))
+                + b"".join(_s.pack("<I", c) for c in children)
+                + _s.pack("<I", 0))
+
+    def build(n_blocks, names, idxs, body, roots=(0,)):
+        out = hdr + _s.pack("<I", n_blocks) + _s.pack("<H", len(names))
+        for n in names:
+            out += _rtti(n)
+        for ix in idxs:
+            out += _s.pack("<H", ix)
+        out += _s.pack("<I", 0)  # object groups
+        out += body
+        out += _s.pack("<I", len(roots))
+        out += b"".join(_s.pack("<i", r) for r in roots)
+        return out
+
+    fx = {}
+    # VALID positive control: minimal fully-supported NiNode, no links
+    # (byte-identical to the F1 battery fixture A)
+    fx["VALID"] = build(1, ["NiNode"], [0], node_body("root"))
+    # REGISTERED_BUT_NOT_DECODED counterexample: NiNode / NiCamera (MIDDLE,
+    # registered but NO adapter loader) / NiNode
+    nicam = _s.pack("<I", 0) + b"\xFF" * 12   # synthetic opaque body
+    fx["REGNOTDEC"] = build(3, ["NiNode", "NiCamera"], [0, 1, 0],
+                            node_body("n0") + nicam + node_body("n2"))
+    # INVALID LINK counterexample: supported NiNode, children=[9999] with
+    # n_obj=1 (out of range), structurally closed to the link phase
+    fx["BADLINK"] = build(1, ["NiNode"], [0], node_body("root", (9999,)))
+    return fx
+
+
+def f2_acceptance_coverage_link_tests():
+    """F2 regression battery (Desktop post-audit finding F2/P1): the final
+    acceptance must be gated by ADAPTER_DECODE_COVERAGE and
+    ADAPTER_INTEGRITY -- a REGISTERED_BUT_NOT_DECODED_BY_ADAPTER
+    boundary-only placeholder is non-null but is NOT a semantic decode,
+    and a LINK_FAILURE / out-of-range link must FAIL acceptance (never a
+    mere warning). The four axes (SOURCE_PREDICTED_ORIGINAL_VERDICT,
+    ADAPTER_DECODE_COVERAGE, ADAPTER_INTEGRITY, TOOL_VERDICT) must stay
+    semantically separate; after an early RTTI halt the object-level
+    counters must be null/NOT_MEASURED (never derived from RTTI table
+    names -- a table entry is NOT an object reference)."""
+    fx = _f2_fixtures()
+    import registry  # noqa: E402  (independent factory census source)
+    print("== F2 acceptance/coverage/link battery (Desktop post-audit "
+          "finding F2/P1) ==")
+    print("MEASURED_QUANTITY: load_result.accepted + the four F2 axes + "
+          "coverage counters + integrity checks")
+    print("INDEPENDENT_SOURCE_OF_TRUTH: pinned NiStream.cpp LoadStream "
+          "L506-635 (link/postlink void returns discarded; unconditional "
+          "return true) + GetObjectFromLinkID L245-256 (debug-only assert) "
+          "+ NiTArray.inl L136-139 (unchecked GetAt) + the 198-class SDM "
+          "factory census (NiCamera registered, no adapter loader) + "
+          "hand-built fixtures derived BEFORE the fix")
+    print("WHY_NON_CIRCULAR: expectations were derived from the pinned "
+          "source semantics + the explicit F2 contract BEFORE the fix; "
+          "the pre-fix false-success (accepted=true/exit 0 on both "
+          "counterexamples) was reproduced on raw records on the base "
+          "SHA and is preserved in the run package")
+    print("FAILURE_CASE_DETECTED: an adapter that promotes accepted=true "
+          "with a boundary-only REGISTERED_BUT_NOT_DECODED_BY_ADAPTER "
+          "block, or leaves an out-of-range link a mere warning, or "
+          "conflates a measured 0 with NOT_MEASURED, or derives "
+          "object-level coverage from RTTI table names after an early "
+          "halt, FAILS these controls")
+
+    # POSITIVE CONTROL: fully-supported NiNode -> TOOL PASS, accepted
+    rV = gb12core.decode(fx["VALID"], path="<f2-VALID>")
+    check("f2_valid_positive_control_pass",
+          rV["load_result"]["accepted"] is True and
+          rV["TOOL_VERDICT"] == "PASS" and
+          rV["ADAPTER_DECODE_COVERAGE"] == "COMPLETE" and
+          rV["ADAPTER_INTEGRITY"] == "PASS" and
+          rV["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "ACCEPTED",
+          "tool=%s coverage=%s integrity=%s source=%s" % (
+              rV["TOOL_VERDICT"], rV["ADAPTER_DECODE_COVERAGE"],
+              rV["ADAPTER_INTEGRITY"],
+              rV["SOURCE_PREDICTED_ORIGINAL_VERDICT"]))
+    cV = rV["adapter_decode_coverage_counters"]
+    check("f2_valid_counters_measured",
+          cV["header_num_blocks"] == 1 and
+          cV["semantically_decoded_blocks"] == 1 and
+          cV["boundary_only_blocks"] == 0 and
+          cV["registered_but_not_decoded_blocks"] == 0 and
+          cV["unregistered_blocks"] == 0 and
+          cV["unresolved_blocks"] == 0 and
+          cV["not_measured_reasons"] == {},
+          "counters=%s" % {k: cV[k] for k in (
+              "header_num_blocks", "semantically_decoded_blocks",
+              "boundary_only_blocks")})
+
+    # COUNTEREXAMPLE A: registered-but-not-decoded must NOT be accepted
+    rA = gb12core.decode(fx["REGNOTDEC"], path="<f2-REGNOTDEC>")
+    cA = rA["adapter_decode_coverage_counters"]
+    check("f2_registered_not_decoded_no_false_success",
+          rA["load_result"]["accepted"] is False and
+          rA["TOOL_VERDICT"] != "PASS" and
+          rA["TOOL_VERDICT"] == "UNRESOLVED" and
+          rA["ADAPTER_DECODE_COVERAGE"] == "INCOMPLETE" and
+          cA["header_num_blocks"] == 3 and
+          cA["semantically_decoded_blocks"] == 2 and
+          cA["boundary_only_blocks"] == 1 and
+          cA["registered_but_not_decoded_blocks"] == 1 and
+          cA["registered_but_not_decoded_classes"] == ["NiCamera"],
+          "tool=%s coverage=%s counters=%s" % (
+              rA["TOOL_VERDICT"], rA["ADAPTER_DECODE_COVERAGE"],
+              {k: cA[k] for k in (
+                  "semantically_decoded_blocks", "boundary_only_blocks",
+                  "registered_but_not_decoded_blocks")}))
+    # factory_registration=YES from the independent registry census: the
+    # factory KNOWS NiCamera -- the false success must NOT be re-justified
+    # as ORIGINAL_GAMEBRYO_REJECTED
+    check("f2_registered_not_decoded_factory_registration_yes",
+          registry.is_registered("NiCamera") is True and
+          "NiCamera" not in gb12core.LOADERS and
+          any(o is not None and o.get("type") == "NiCamera" and
+              o.get("status") == "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"
+              for o in rA["objects"]) and
+          rA["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "UNRESOLVED",
+          "NiCamera in 198-class factory census, absent from the %d "
+          "LOADERS; source=%s (registered != original rejection; the "
+          "original class path is not traced in the pinned evidence)"
+          % (len(gb12core.LOADERS),
+             rA["SOURCE_PREDICTED_ORIGINAL_VERDICT"]))
+
+    # COUNTEREXAMPLE B: out-of-range link -> integrity FAIL -> TOOL FAIL
+    rB = gb12core.decode(fx["BADLINK"], path="<f2-BADLINK>")
+    iB = rB["adapter_integrity_checks"]
+    check("f2_invalid_link_no_false_success",
+          rB["load_result"]["accepted"] is False and
+          rB["ADAPTER_DECODE_COVERAGE"] == "COMPLETE" and
+          iB["link_integrity"] == "FAIL" and
+          iB["link_failure_count"] == 1 and
+          rB["ADAPTER_INTEGRITY"] == "FAIL" and
+          rB["TOOL_VERDICT"] == "FAIL",
+          "tool=%s coverage=%s integrity=%s link_failures=%s" % (
+              rB["TOOL_VERDICT"], rB["ADAPTER_DECODE_COVERAGE"],
+              rB["ADAPTER_INTEGRITY"], iB["link_failure_count"]))
+    check("f2_invalid_link_never_tool_unresolved",
+          rB["TOOL_VERDICT"] != "UNRESOLVED" and
+          rB["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "UNRESOLVED",
+          "a known detected invalid link must never end TOOL_VERDICT="
+          "UNRESOLVED (tool=%s); the SOURCE axis stays UNRESOLVED "
+          "(debug-only assert vs release UB -- axes stay separate)"
+          % rB["TOOL_VERDICT"])
+
+    # ZERO vs NOT_MEASURED are distinct: measured zeros are ints; unknown
+    # counters are None with an explicit per-counter reason
+    check("f2_zero_vs_not_measured_distinct",
+          cA["unregistered_blocks"] == 0 and
+          isinstance(cA["unregistered_blocks"], int) and
+          rB["adapter_decode_coverage_counters"]
+          ["registered_but_not_decoded_blocks"] == 0,
+          "measured 0 stays an int 0 (never a substitute for unknown)")
+
+    # early RTTI halt: object-level counters null/NOT_MEASURED with
+    # reasons (never derived from RTTI table names)
+    fxB = _f1_fixtures()["B"]  # [NiNode, NiXyzzyx] unused-entry miss
+    rH = gb12core.decode(fxB, path="<f2-early-halt>")
+    cH = rH["adapter_decode_coverage_counters"]
+    check("f2_early_rtti_halt_counters_not_measured",
+          rH["ADAPTER_DECODE_COVERAGE"] == "NOT_MEASURED" and
+          rH["ADAPTER_INTEGRITY"] == "NOT_MEASURED" and
+          cH["header_num_blocks"] == 1 and
+          cH["semantically_decoded_blocks"] is None and
+          cH["boundary_only_blocks"] is None and
+          cH["registered_but_not_decoded_blocks"] is None and
+          cH["unregistered_blocks"] is None and
+          cH["unresolved_blocks"] is None and
+          all(cH["not_measured_reasons"].get(k)
+              for k in ("semantically_decoded_blocks",
+                        "boundary_only_blocks",
+                        "registered_but_not_decoded_blocks",
+                        "unregistered_blocks", "unresolved_blocks")) and
+          rH["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "REJECTED" and
+          rH["TOOL_VERDICT"] == "FAIL" and
+          rH["objects"] == [],
+          "early halt: header measured from the header, object-level "
+          "null with reasons (a table entry is NOT an object reference); "
+          "source=REJECTED -> tool=FAIL")
+
+    # C1A/C1B (F1-C1 halt family): same NOT_MEASURED discipline
+    fxc1 = _f1c1_fixtures()
+    for key in ("C1A", "C1B"):
+        rc = gb12core.decode(fxc1[key], path="<f2-%s-full>" % key,
+                             full_decode=True)
+        cc = rc["adapter_decode_coverage_counters"]
+        check("f2_%s_counters_not_measured_after_table_failure" % key,
+              rc["ADAPTER_DECODE_COVERAGE"] == "NOT_MEASURED" and
+              cc["semantically_decoded_blocks"] is None and
+              cc["boundary_only_blocks"] is None and
+              cc["registered_but_not_decoded_blocks"] is None and
+              cc["unresolved_blocks"] is None and
+              bool(cc["not_measured_reasons"]) and
+              rc["objects"] == [] and
+              rc["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "REJECTED" and
+              rc["TOOL_VERDICT"] == "FAIL",
+              "STOP_AT_TABLE_FAILURE: no object-level census from the RTTI "
+              "table; source=REJECTED preserved -> tool=FAIL")
+
+    # integrity FAIL unconditionally implies TOOL FAIL, and accepted ==
+    # (TOOL_VERDICT == PASS) across every battery result (the exact law
+    # the CLI inspect exit keys on)
+    allres = (("VALID", rV), ("REGNOTDEC", rA), ("BADLINK", rB),
+              ("EARLYHALT", rH))
+    law_ok = True
+    detail = []
+    for label, r in allres:
+        if r["ADAPTER_INTEGRITY"] == "FAIL" and r["TOOL_VERDICT"] != "FAIL":
+            law_ok = False
+            detail.append("%s: integrity FAIL but tool=%s"
+                          % (label, r["TOOL_VERDICT"]))
+        if (r["load_result"]["accepted"] is not
+                (r["TOOL_VERDICT"] == "PASS")):
+            # accepted==True only ever on the PASS path; the early-halt
+            # path returns before the final predicate (accepted stays the
+            # initialized False == (TOOL != PASS)) -- the equivalence must
+            # hold everywhere
+            law_ok = False
+            detail.append("%s: accepted=%s tool=%s"
+                          % (label, r["load_result"]["accepted"],
+                             r["TOOL_VERDICT"]))
+    check("f2_integrity_fail_implies_tool_fail_and_accepted_eq_pass",
+          law_ok,
+          "integrity: %s; accepted==TOOL_PASS on all results: %s"
+          % (", ".join("%s=%s" % (l, r["ADAPTER_INTEGRITY"])
+                       for l, r in allres),
+             "OK" if law_ok else "; ".join(detail)))
+
+    # source/tool axis separation (central falsifier discipline): the
+    # tool verdict must never be justified by an unproven source verdict
+    check("f2_axes_never_conflated",
+          rA["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "UNRESOLVED" and
+          rA["TOOL_VERDICT"] == "UNRESOLVED" and
+          rB["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "UNRESOLVED" and
+          rB["TOOL_VERDICT"] == "FAIL" and
+          rH["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "REJECTED" and
+          rH["TOOL_VERDICT"] == "FAIL",
+          "source != tool allowed to differ (A: UNRESOLVED/UNRESOLVED; "
+          "B: UNRESOLVED/FAIL); neither ORIGINAL REJECTED nor TOOL PASS "
+          "is asserted for the registered-but-not-decoded case")
+
+
 def main():
     args = sys.argv[1:]
     self_tests()
     f1_rtti_table_tests()
     f1c1_extension_halt_tests()
+    f2_acceptance_coverage_link_tests()
     if "--sandbox-payload" in args:
         i = args.index("--sandbox-payload")
         payload_controls(args[i + 1])

@@ -9,8 +9,17 @@
 #        [--oracle-result <oracle_result.json>] [--out <file>]
 #   python oracle.py capabilities [--adapter ...]
 #
-# Exit codes: 0 = load accepted; 2 = rejected/failed (JSON still emitted);
+# Exit codes: 0 = success; 2 = rejected/failed (JSON still emitted);
 # 3 = usage/IO error. Output is deterministic (no wall-clock data).
+#
+# F2 CLI_SUCCESS_SEMANTICS (2026-10-03, applies to `inspect` ONLY): for
+# adapters that report the F2 axis TOOL_VERDICT (gb12), inspect exits 0 ONLY
+# on TOOL_VERDICT=PASS (ADAPTER_DECODE_COVERAGE=COMPLETE AND
+# ADAPTER_INTEGRITY=PASS AND no source-predicted REJECTED); any
+# REGISTERED_BUT_NOT_DECODED_BY_ADAPTER boundary-only block or
+# LINK_FAILURE/out-of-range link => exit != 0. Adapters without the F2 axes
+# keep their pre-F2 accepted-based exit semantics (unchanged).
+# probe-version / compare / capabilities exit semantics are UNCHANGED.
 
 import argparse
 import importlib.util
@@ -49,6 +58,15 @@ def cmd_inspect(args):
     ad = _get_adapter(args.adapter)
     res = ad.inspect(args.nif, full_decode=args.full_decode)
     _emit(res, args.out)
+    verdict = res.get("TOOL_VERDICT")
+    if verdict is not None:
+        # F2 (2026-10-03, inspect ONLY): exit 0 ONLY on TOOL_VERDICT=PASS
+        # (coverage COMPLETE + integrity PASS + no source-predicted
+        # REJECTED). A boundary-only REGISTERED_BUT_NOT_DECODED_BY_ADAPTER
+        # block or a LINK_FAILURE/out-of-range link => exit 2. No
+        # default-success fallback: an adapter that reports the F2 axes is
+        # gated by TOOL_VERDICT alone.
+        return 0 if verdict == "PASS" else 2
     lr = res.get("load_result", {})
     return 0 if lr.get("accepted") else 2
 

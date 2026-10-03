@@ -151,6 +151,65 @@
 # stage of a FULLY-read table halts separately (EXTENDED_INSPECTION_HALTED
 # at the object-index stage). The ORIGINAL verdict is always reported and
 # is never silently merged with the extension.
+#
+# F2 ACCEPTANCE AXES (2026-10-03, Desktop post-audit
+# PE_GAMEBRYO_ORACLE_TOOL_DESKTOP_POST_AUDIT_20261003 finding F2/P1): the
+#     pre-F2 final predicate promoted accepted=true when no unregistered
+#     RTTI entry existed and every objects[] slot was non-NULL -- a
+#     REGISTERED_BUT_NOT_DECODED_BY_ADAPTER boundary-only placeholder is
+#     non-NULL but is NOT a semantic decode (false success), and
+#     LINK_FAILURE / out-of-range links were only warnings. The result now
+#     carries FOUR EXPLICIT, SEPARATE axes (never conflated):
+#     SOURCE_PREDICTED_ORIGINAL_VERDICT in {ACCEPTED, REJECTED, UNRESOLVED}
+#       -- what the ORIGINAL GB 1.2 Load() would do, predicted ONLY from
+#       pinned source evidence: REJECTED = unambiguous source-proven
+#       rejection (LoadHeader L311-316 'File Format' test; version gate
+#       L320-332; LoadRTTI L427-433 factory miss -> RTTIError -> return
+#       false at LoadStream L524-525; legacy LoadObject L457-462 -> false
+#       at LoadStream L557-561); ACCEPTED = the full pinned LoadStream path
+#       (L506-635) is content-valid for the stream (every block decoded by
+#       a pinned-citation loader, every link NULL or in-range; link loop
+#       L569-578 and postlink loop L581-590 call void methods whose returns
+#       are DISCARDED; CheckConsistency is a Win32 no-op, NiStream.inl
+#       L193-196; return true at L634 is unconditional); UNRESOLVED =
+#       evidence insufficient -- CRITICALLY a registered-but-not-decoded
+#       class does NOT mean original rejection (the factory knows the
+#       class; its LoadBinary/link/postlink path is simply not traced in
+#       the pinned evidence), and an out-of-range link is UNRESOLVED, not
+#       REJECTED: GetObjectFromLinkID L245-256 has only a DEBUG-only
+#       assert(uiLinkID < m_kObjects.GetSize()) and NiTArray::GetAt
+#       (NiTArray.inl L136-139) is an UNCHECKED raw m_pBase[uiIndex] read
+#       (release = undefined behavior; debug = assert) -- no unambiguous
+#       propagated Load() rejection exists. Same for the object-index
+#       stage: LoadRTTI L441 assert(usRTTI < usRTTICount) is DEBUG-only;
+#       release calls ppfnCreate[usRTTI] out of bounds.
+#     ADAPTER_DECODE_COVERAGE in {COMPLETE, INCOMPLETE, NOT_MEASURED} with
+#       measurable counters (header_num_blocks, semantically_decoded_blocks,
+#       boundary_only_blocks, registered_but_not_decoded_blocks,
+#       unregistered_blocks, unresolved_blocks): each counter is an integer
+#       when actually measured, else null with an explicit per-counter
+#       reason (a measured ZERO is never a substitute for unknown). After
+#       an early RTTI halt (ordinary factory rejection or the F1-C1
+#       STOP_AT_TABLE_FAILURE) the object-level counters are NOT derived
+#       from RTTI table names -- an RTTI table entry is NOT an object
+#       reference -- and remain null/NOT_MEASURED; no extra object indices
+#       are read just to count coverage.
+#     ADAPTER_INTEGRITY in {PASS, FAIL, UNRESOLVED, NOT_MEASURED}
+#       explicitly covering object-count consistency, structural closure
+#       and link integrity. An out-of-range link => LINK_INTEGRITY=FAIL =>
+#       ADAPTER_INTEGRITY=FAIL (no longer just a warning). ADAPTER_
+#       INTEGRITY=FAIL unconditionally => TOOL_VERDICT=FAIL.
+#     TOOL_VERDICT in {PASS, FAIL, UNRESOLVED} -- derived in ONE place:
+#       PASS only if coverage=COMPLETE and integrity=PASS and no
+#       source-predicted REJECTED; FAIL if integrity=FAIL or the
+#       source-predicted verdict is REJECTED; UNRESOLVED otherwise. A
+#       known detected invalid link must NEVER end as TOOL_VERDICT=
+#       UNRESOLVED. load_result.accepted is exactly (TOOL_VERDICT == PASS)
+#       (explicit accepted_semantics note; it is the ADAPTER's own
+#       full-verified-decode verdict, never a claim about the original
+#       runtime) and the CLI inspect exit is 0 only on TOOL_VERDICT=PASS.
+#       CLI_SUCCESS_SEMANTICS applies to `oracle.py inspect` only;
+#       probe-version / compare / capabilities semantics are unchanged.
 
 import hashlib
 import json
@@ -1322,6 +1381,161 @@ def sha256_file(path):
     return h.hexdigest().upper()
 
 
+# --------------------------------------------------------------------------
+# F2 acceptance axes helpers (2026-10-03, Desktop post-audit finding F2/P1)
+# --------------------------------------------------------------------------
+
+_F2_COUNTER_KEYS = (
+    "semantically_decoded_blocks",
+    "boundary_only_blocks",
+    "registered_but_not_decoded_blocks",
+    "unregistered_blocks",
+    "unresolved_blocks",
+)
+
+
+def _f2_counters(header_num_blocks, reason=None, semantic=None, boundary=None,
+                 reg_nd=None, unreg=None, unresolved=None, classes=None):
+    """ADAPTER_DECODE_COVERAGE counters. Each counter is an integer when
+    actually measured, else null with an explicit per-counter reason. A
+    MEASURED ZERO is a real zero -- it is never a substitute for unknown
+    (COVERAGE_NOT_MEASURED_DISTINCT_FROM_ZERO)."""
+    counters = {
+        "header_num_blocks": header_num_blocks,
+        "semantically_decoded_blocks": semantic,
+        "boundary_only_blocks": boundary,
+        "registered_but_not_decoded_blocks": reg_nd,
+        "unregistered_blocks": unreg,
+        "unresolved_blocks": unresolved,
+    }
+    if reason is not None:
+        counters["not_measured_reasons"] = dict(
+            (k, reason) for k in _F2_COUNTER_KEYS)
+    else:
+        counters["not_measured_reasons"] = {}
+    if classes is not None:
+        counters["registered_but_not_decoded_classes"] = classes
+    return counters
+
+
+def _f2_integrity(count, closure, links, link_failures=None,
+                  link_measured=None, detail=""):
+    """ADAPTER_INTEGRITY from the three explicit sub-checks (object-count
+    consistency, structural closure, link integrity). FAIL dominates
+    (unconditionally => TOOL_VERDICT=FAIL); then UNRESOLVED; then
+    NOT_MEASURED; PASS only when every check is PASS."""
+    checks = {
+        "object_count_consistency": count,
+        "structural_closure": closure,
+        "link_integrity": links,
+        "detail": detail,
+    }
+    if link_failures is not None:
+        checks["link_failure_count"] = link_failures
+    if link_measured is not None:
+        checks["link_measured_blocks"] = link_measured
+    vals = (count, closure, links)
+    if "FAIL" in vals:
+        overall = "FAIL"
+    elif "UNRESOLVED" in vals:
+        overall = "UNRESOLVED"
+    elif "NOT_MEASURED" in vals:
+        overall = "NOT_MEASURED"
+    else:
+        overall = "PASS"
+    return overall, checks
+
+
+def _f2_set_axes(res, source, source_reason, coverage, counters, integrity,
+                 integrity_checks, tool_reason):
+    """Set the four F2 axes on `res` and DERIVE TOOL_VERDICT (single
+    derivation site; never set independently):
+      PASS  only if coverage=COMPLETE AND integrity=PASS AND no
+            source-predicted REJECTED (no unresolved condition);
+      FAIL  if integrity=FAIL (unconditional; a known detected invalid link
+            must never end UNRESOLVED) OR source-predicted REJECTED;
+      UNRESOLVED otherwise (coverage gap / unmeasured stages without a
+            detected integrity failure)."""
+    res["SOURCE_PREDICTED_ORIGINAL_VERDICT"] = source
+    res["source_predicted_reason"] = source_reason
+    res["ADAPTER_DECODE_COVERAGE"] = coverage
+    res["adapter_decode_coverage_counters"] = counters
+    res["ADAPTER_INTEGRITY"] = integrity
+    res["adapter_integrity_checks"] = integrity_checks
+    if integrity == "FAIL" or source == "REJECTED":
+        tool = "FAIL"
+    elif coverage == "COMPLETE" and integrity == "PASS":
+        tool = "PASS"
+    else:
+        tool = "UNRESOLVED"
+    res["TOOL_VERDICT"] = tool
+    res["tool_verdict_reason"] = tool_reason
+    return tool
+
+
+# canned F2 axis payloads for the early-rejection paths ------------------
+
+_F2_SRC_REJ_HEADER = (
+    "REJECTED (source-proven): NiStream.cpp L311-316 (SHA E955C36E): "
+    "strstr('File Format') == NULL -> NOT_NIF_FILE -> LoadHeader returns "
+    "false -> Load() returns false")
+_F2_SRC_REJ_VERSION = (
+    "REJECTED (source-proven): NiStream.cpp L320-332 (SHA E955C36E): the "
+    "packed-u32 version gate [3.3.0.11, 10.2.0.0] -> OLDER_VERSION/"
+    "LATER_VERSION -> LoadHeader returns false -> Load() returns false")
+_F2_SRC_REJ_RTTI = (
+    "REJECTED (source-proven): NiStream.cpp LoadRTTI L421-433 (SHA "
+    "E955C36E): the factory lookup miss on the first unregistered TABLE "
+    "entry -> RTTIError -> LoadRTTI returns false -> LoadStream L524-525 "
+    "returns false -> Load() returns false (fail-closed BEFORE any later "
+    "table name, object type index, object group or body byte)")
+_F2_SRC_REJ_LEGACY = (
+    "REJECTED (source-proven): NiStream.cpp LoadObject L451-468 (SHA "
+    "E955C36E): the inline-RTTI factory lookup miss -> RTTIError -> "
+    "LoadObject returns false -> LoadStream L557-561 returns false -> "
+    "Load() returns false (legacy < 5.0.0.1 layout)")
+_F2_SRC_UNRES_HDR = (
+    "UNRESOLVED: the header line could not be read by OUR stream reader; "
+    "the ORIGINAL NiBinaryStream::GetLine behavior on a missing newline/EOF "
+    "is not pinned in the traced source evidence, so neither an original "
+    "rejection nor acceptance is unambiguous for this input")
+_F2_SRC_UNRES_INDEX = (
+    "UNRESOLVED: NiStream.cpp L441 assert(usRTTI < usRTTICount) is "
+    "DEBUG-ONLY; a release build calls ppfnCreate[usRTTI] out of bounds "
+    "(undefined behavior) -- no unambiguous propagated Load() rejection is "
+    "provable for an invalid/truncated object-index stage")
+_F2_COV_EARLY_HALT = (
+    "EARLY_RTTI_HALT: object-level decode coverage NOT measured -- no "
+    "object type indices and no block bodies were read; an RTTI TABLE "
+    "entry is NOT an object reference, so object-level counters must not "
+    "be derived from table names (no extra object indices are read just "
+    "to count coverage)")
+_F2_COV_INDEX_HALT = (
+    "object-index stage failed/halted before any block body was decoded; "
+    "object-level counters NOT measured")
+_F2_INT_NOT_MEASURED = (
+    "no object structure was read past the halt; object-count, structural "
+    "closure and link integrity are NOT MEASURED")
+
+
+def _f2_axes_early_rejection(res, source_reason, header_num_blocks,
+                             coverage_reason):
+    """Early-rejection F2 axes (header/version/RTTI halt family): the
+    source verdict is REJECTED, object-level coverage is NOT_MEASURED with
+    the given reason, integrity is NOT_MEASURED -> TOOL_VERDICT=FAIL."""
+    return _f2_set_axes(
+        res, "REJECTED", source_reason, "NOT_MEASURED",
+        _f2_counters(header_num_blocks, reason=coverage_reason),
+        "NOT_MEASURED",
+        {"object_count_consistency": "NOT_MEASURED",
+         "structural_closure": "NOT_MEASURED",
+         "link_integrity": "NOT_MEASURED",
+         "detail": _F2_INT_NOT_MEASURED},
+        "TOOL_VERDICT=FAIL: SOURCE_PREDICTED_ORIGINAL_VERDICT=REJECTED "
+        "(source-proven); adapter coverage/integrity NOT measured past the "
+        "halt")
+
+
 def decode(data, path="<memory>", full_decode=False,
            registered_classes=None):
     """Run the GB 1.2 load semantics over `data`.
@@ -1376,6 +1590,20 @@ def decode(data, path="<memory>", full_decode=False,
         res["load_result"].update(accepted=False, error="NOT_NIF_FILE",
                                   error_code="NOT_NIF_FILE")
         res["warnings"].append("header line unreadable: %s" % e)
+        # F2: original verdict UNRESOLVED (GetLine-at-EOF not pinned)
+        _f2_set_axes(
+            res, "UNRESOLVED", _F2_SRC_UNRES_HDR, "NOT_MEASURED",
+            _f2_counters(None, reason=(
+                "load failed at the header line; the uiObjects field was "
+                "never read (NiStream.cpp L355) and no object decode was "
+                "attempted")),
+            "NOT_MEASURED",
+            {"object_count_consistency": "NOT_MEASURED",
+             "structural_closure": "NOT_MEASURED",
+             "link_integrity": "NOT_MEASURED",
+             "detail": _F2_INT_NOT_MEASURED},
+            "TOOL_VERDICT=UNRESOLVED: the original verdict is not "
+            "unambiguous and no adapter stage was measured")
         return res
     res["input_identity"]["header"] = header_line
     if "File Format" not in header_line:
@@ -1383,6 +1611,10 @@ def decode(data, path="<memory>", full_decode=False,
         res["load_result"].update(
             accepted=False, error="NOT_NIF_FILE: 'File Format' absent",
             error_code="NOT_NIF_FILE")
+        _f2_axes_early_rejection(res, _F2_SRC_REJ_HEADER, None, (
+            "load failed at the header line; the uiObjects field was "
+            "never read (NiStream.cpp L355) and no object decode was "
+            "attempted"))
         return res
     ver = r.u32()
     res["input_identity"]["nif_version"] = u32_to_ver(ver)
@@ -1393,12 +1625,18 @@ def decode(data, path="<memory>", full_decode=False,
             accepted=False,
             error="OLDER_VERSION: NIF version is too old.",
             error_code="OLDER_VERSION")
+        _f2_axes_early_rejection(res, _F2_SRC_REJ_VERSION, None, (
+            "version-gate rejection precedes the uiObjects read "
+            "(NiStream.cpp L355-357); no object decode was attempted"))
         return res
     if ver > V_MAX:
         res["load_result"].update(
             accepted=False,
             error="LATER_VERSION: Unknown NIF version.",
             error_code="LATER_VERSION")
+        _f2_axes_early_rejection(res, _F2_SRC_REJ_VERSION, None, (
+            "version-gate rejection precedes the uiObjects read "
+            "(NiStream.cpp L355-357); no object decode was attempted"))
         return res
     res["version_gate"]["verdict"] = "ACCEPTED"
     if ver >= V_USER_GATE:
@@ -1521,6 +1759,14 @@ def decode(data, path="<memory>", full_decode=False,
                 {"class": first_miss_name,
                  "status": "UNREGISTERED_IN_GB12_FACTORY"}]
             if not full_decode:
+                # F2: object-level coverage NOT_MEASURED (an RTTI table
+                # entry is NOT an object reference; nothing object-level
+                # was read past the miss)
+                _f2_axes_early_rejection(
+                    res,
+                    _F2_SRC_REJ_RTTI + " (first miss %s at table index %d)"
+                    % (first_miss_name, first_miss_table_index),
+                    n_obj, _F2_COV_EARLY_HALT)
                 return res
             # OUR extension: continue the decode (never original behavior)
             res["decode_continued_after_rtti_gate"] = True
@@ -1572,6 +1818,16 @@ def decode(data, path="<memory>", full_decode=False,
                 "verdict is preserved and NOTHING is read past the failed "
                 "table read (the RTTI table boundary is undetermined)"
                 % (len(type_names), n_types, extension_table_failure))
+            # F2: the F1-C1 halt is an EARLY RTTI HALT -- object-level
+            # coverage stays NOT_MEASURED (nothing object-level was read
+            # past the failed table read; the source verdict REJECTED is
+            # preserved) -> TOOL_VERDICT=FAIL
+            _f2_axes_early_rejection(
+                res,
+                _F2_SRC_REJ_RTTI + " (first miss %s at table index %d; the "
+                "extension then halted at the table failure)"
+                % (first_miss_name, first_miss_table_index),
+                n_obj, _F2_COV_EARLY_HALT)
             return res
         # per-object type indices (LoadRTTI L436-444) -- read ONLY after the
         # whole table validated (ordinary) or under the labeled extension
@@ -1608,6 +1864,14 @@ def decode(data, path="<memory>", full_decode=False,
                     "%s (the ORIGINAL loader never reads these indices)"
                     % index_stage_failed)
                 res["objects"] = []
+                # F2: source verdict stays REJECTED (the earlier factory
+                # miss); object-level coverage NOT_MEASURED -> TOOL=FAIL
+                _f2_axes_early_rejection(
+                    res,
+                    _F2_SRC_REJ_RTTI + " (first miss %s at table index %d; "
+                    "the extension then halted at the object-index stage)"
+                    % (first_miss_name, first_miss_table_index),
+                    n_obj, _F2_COV_INDEX_HALT)
                 return res
             res["load_result"].update(
                 accepted=False, partial=False,
@@ -1615,6 +1879,21 @@ def decode(data, path="<memory>", full_decode=False,
                 error_code=("INVALID_TYPE_INDEX"
                             if index_stage_failed.startswith("INVALID_TYPE_")
                             else "NOT_NIF_FILE"))
+            # F2: the original behavior at a bad/truncated object-index
+            # stage is assert/UB dependent (L441 debug-only) -- UNRESOLVED;
+            # no bodies decoded -> coverage/integrity NOT_MEASURED ->
+            # TOOL_VERDICT=UNRESOLVED
+            _f2_set_axes(
+                res, "UNRESOLVED", _F2_SRC_UNRES_INDEX, "NOT_MEASURED",
+                _f2_counters(n_obj, reason=_F2_COV_INDEX_HALT),
+                "NOT_MEASURED",
+                {"object_count_consistency": "NOT_MEASURED",
+                 "structural_closure": "NOT_MEASURED",
+                 "link_integrity": "NOT_MEASURED",
+                 "detail": _F2_INT_NOT_MEASURED},
+                "TOOL_VERDICT=UNRESOLVED: the original verdict at the "
+                "object-index stage is assert/UB dependent (not "
+                "unambiguous) and no adapter stage was measured")
             return res
         # OBJECT_REFERENCE_HISTOGRAM / OBJECT_REFERENCE_CENSUS (LoadRTTI
         # L436-444 artifacts; separate from RTTI_TABLE_VALIDATION).
@@ -2106,6 +2385,15 @@ def decode(data, path="<memory>", full_decode=False,
             res["unknowns"] = [
                 {"class": walk_err, "status": "UNREGISTERED_IN_GB12_FACTORY"}]
             if not full_decode:
+                # F2: early halt on the legacy inline-RTTI factory miss;
+                # no block bodies were read -> coverage NOT_MEASURED
+                _f2_axes_early_rejection(
+                    res, _F2_SRC_REJ_LEGACY + " (class %s)" % walk_err,
+                    n_obj, (
+                        "EARLY_RTTI_HALT (legacy inline layout): the walk "
+                        "stopped at the unregistered inline class before "
+                        "any block body was decoded; object-level "
+                        "coverage NOT measured"))
                 return res
             # OUR extension continues below (never original behavior)
             res["decode_continued_after_rtti_gate"] = True
@@ -2147,6 +2435,36 @@ def decode(data, path="<memory>", full_decode=False,
                 error_code="DECODE_ERROR")
         res["warnings"].append(closure_error)
         res["objects"] = [o for o in objects if o is not None]
+        # F2: closure failure -- structural_closure=FAIL -> integrity FAIL
+        # -> TOOL_VERDICT=FAIL. Per-block counters stay null: the leftover
+        # objects[] state comes from ABANDONED search branches and is not a
+        # valid coverage measurement. Source verdict: REJECTED if the RTTI
+        # table miss already proved the original rejection; otherwise
+        # UNRESOLVED (OUR closure search is OUR extension; the original
+        # sequential behavior on this content is not equivalently proven).
+        _src = ("REJECTED" if res["load_result"]["error_code"] == "RTTIError"
+                else "UNRESOLVED")
+        _srcreason = (
+            _F2_SRC_REJ_RTTI if _src == "REJECTED" else
+            "UNRESOLVED: the adapter closure search failed (no boundary "
+            "assignment closes the stream); the ORIGINAL sequential "
+            "LoadStream behavior on this content is not equivalently "
+            "proven from the pinned evidence")
+        _f2_set_axes(
+            res, _src, _srcreason, "NOT_MEASURED",
+            _f2_counters(n_obj, reason=(
+                "closure search failed -- no valid boundary assignment; "
+                "per-block state in objects[] comes from abandoned search "
+                "branches and is NOT a decode-coverage measurement")),
+            *_f2_integrity(
+                "UNRESOLVED", "FAIL", "NOT_MEASURED",
+                detail=("structural closure FAILED (%s); object-count "
+                        "consistency not validly measurable without a "
+                        "closing assignment; the link phase never ran"
+                        % closure_error)),
+            tool_reason=("TOOL_VERDICT=FAIL: ADAPTER_INTEGRITY=FAIL "
+                         "(structural closure failed) -- integrity FAIL "
+                         "unconditionally implies TOOL FAIL"))
     res["objects"] = objects
     if not b_new:
         # legacy files have no RTTI table; derive the histogram from the
@@ -2156,6 +2474,106 @@ def decode(data, path="<memory>", full_decode=False,
             if o and o.get("type"):
                 hist[o["type"]] = hist.get(o["type"], 0) + 1
         res["type_histogram"] = hist
+        # ---- F2 axes for the LEGACY (< 5.0.0.1) inline-RTTI layout ----
+        closed = footer_holder[0] is not None
+        if not closed:
+            # legacy closure failure: per-block state is from an abandoned
+            # walk branch; integrity FAIL via structural closure
+            _src = ("REJECTED" if res["load_result"]["error_code"] ==
+                    "RTTIError" else "UNRESOLVED")
+            _srcreason = (
+                _F2_SRC_REJ_LEGACY if _src == "REJECTED" else
+                "UNRESOLVED: the legacy closure walk failed; the ORIGINAL "
+                "sequential LoadObject behavior on this content is not "
+                "equivalently proven")
+            _f2_set_axes(
+                res, _src, _srcreason, "NOT_MEASURED",
+                _f2_counters(n_obj, reason=(
+                    "legacy closure walk failed -- per-block state comes "
+                    "from an abandoned walk branch and is NOT a "
+                    "decode-coverage measurement")),
+                *_f2_integrity(
+                    "UNRESOLVED", "FAIL", "NOT_MEASURED",
+                    detail=("legacy structural closure FAILED; the link "
+                            "resolution phase never ran")),
+                tool_reason=("TOOL_VERDICT=FAIL: ADAPTER_INTEGRITY=FAIL "
+                             "(structural closure failed)"))
+            return res
+        # legacy closure success: per-block state IS the final assignment
+        n_sem = sum(1 for o in objects
+                    if o is not None and "boundary_method" not in o)
+        n_bnd = sum(1 for o in objects
+                    if o is not None and "boundary_method" in o)
+        n_rnd = sum(1 for o in objects if o is not None and
+                    o.get("status") == "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER")
+        n_unreg = sum(1 for o in objects if o is not None and
+                      o.get("status") == "UNREGISTERED_IN_GB12_FACTORY")
+        n_none = sum(1 for o in objects if o is None)
+        rnd_classes = sorted({o["type"] for o in objects if o is not None and
+                              o.get("status") ==
+                              "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"})
+        raw_oob = 0
+        for i in range(n_obj):
+            for _f, lids in (links_all[i] or []):
+                for lid in lids:
+                    if lid != NULL_LINKID and lid >= n_obj:
+                        raw_oob += 1
+        coverage = ("COMPLETE" if n_sem == n_obj and n_none == 0
+                    else "INCOMPLETE")
+        # the legacy layout has NO link-resolution phase in this adapter:
+        # link integrity is NOT_MEASURED -> ADAPTER_INTEGRITY never PASS
+        # for legacy streams (honest fail-closed: the tool cannot VERIFY
+        # what it does not implement; the raw link IDs were still range-
+        # checked for the SOURCE prediction below)
+        _integrity, _ichecks = _f2_integrity(
+            "PASS" if (n_sem + n_bnd) == n_obj else "FAIL", "PASS",
+            "NOT_MEASURED",
+            detail=("legacy (< 5.0.0.1) streams: no link-resolution phase "
+                    "is implemented in this adapter; raw link IDs read by "
+                    "LoadBinary are reported but never resolved; "
+                    "raw_out_of_range_link_ids=%d" % raw_oob))
+        if res["load_result"]["error_code"] == "RTTIError":
+            _src, _srcreason = "REJECTED", _F2_SRC_REJ_LEGACY
+        elif walk_blocked is not None or n_rnd or raw_oob:
+            _src = "UNRESOLVED"
+            _srcreason = (
+                "UNRESOLVED: boundary-only/blocking class(es) %s -- the "
+                "ORIGINAL factory knows the registered class(es), but the "
+                "full original LoadBinary/LinkObject/PostLinkObject path "
+                "for them is not traced in the pinned source evidence; "
+                "raw out-of-range link IDs (count %d) make the original "
+                "GetObjectFromLinkID behavior assert/UB dependent "
+                "(NiStream.cpp L254 + NiTArray.inl L136-139)"
+                % (walk_blocked or ",".join(rnd_classes), raw_oob))
+        elif coverage == "COMPLETE":
+            _src = "ACCEPTED"
+            _srcreason = (
+                "ACCEPTED (source-predicted): LoadStream L506-635 -- every "
+                "pinned step is content-valid for this legacy stream "
+                "(LoadHeader gate; LoadObject L451-468 inline-RTTI factory "
+                "lookups all registered; per-block LoadBinary per the "
+                "pinned per-class citations; link/postlink loops call void "
+                "methods whose returns are discarded L576/L588; "
+                "CheckConsistency Win32 no-op NiStream.inl L193-196; "
+                "unconditional return true L634); every raw link ID is "
+                "NULL or in range")
+        else:
+            _src = "UNRESOLVED"
+            _srcreason = (
+                "UNRESOLVED: adapter/source evidence insufficient for the "
+                "original verdict on this legacy stream")
+        _f2_set_axes(
+            res, _src, _srcreason, coverage,
+            _f2_counters(n_obj, semantic=n_sem, boundary=n_bnd, reg_nd=n_rnd,
+                         unreg=n_unreg, unresolved=n_none,
+                         classes=rnd_classes),
+            _integrity, _ichecks,
+            ("TOOL_VERDICT=%s: legacy coverage=%s integrity=%s "
+             "source=%s" % (
+                 "FAIL" if (_integrity == "FAIL" or _src == "REJECTED")
+                 else ("PASS" if (coverage == "COMPLETE" and
+                                  _integrity == "PASS") else "UNRESOLVED"),
+                 coverage, _integrity, _src)))
         return res
 
     if fpos is None:
@@ -2173,6 +2591,7 @@ def decode(data, path="<memory>", full_decode=False,
     res["scene_graph"]["roots"] = tops
 
     # ---------------- link phase (GB12 semantics, per-object order) ------
+    link_failure_count = 0
     for i, o in enumerate(objects):
         if o is None or links_all[i] is None:
             continue
@@ -2183,6 +2602,7 @@ def decode(data, path="<memory>", full_decode=False,
                 if lid == NULL_LINKID:
                     resolved.append(None)
                 elif lid >= n_obj:
+                    link_failure_count += 1  # F2: counted, gates integrity
                     res["warnings"].append(
                         "LINK_FAILURE: block %d (%s) field %s link %d out of "
                         "range (num_blocks=%d)" % (i, tname, field, lid, n_obj))
@@ -2208,9 +2628,128 @@ def decode(data, path="<memory>", full_decode=False,
             "OBJECT_COUNT_MISMATCH: header %d vs decoded %d"
             % (n_obj, decoded_count))
 
+    # ---- F2 acceptance axes (final b_new path; measured states) ----
+    # coverage counters: measured (the body decode stage ran to closure)
+    n_sem = sum(1 for o in objects
+                if o is not None and "boundary_method" not in o)
+    n_bnd = sum(1 for o in objects
+                if o is not None and "boundary_method" in o)
+    n_rnd = sum(1 for o in objects if o is not None and
+                o.get("status") == "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER")
+    n_unreg = sum(1 for o in objects if o is not None and
+                  o.get("status") == "UNREGISTERED_IN_GB12_FACTORY")
+    n_none = sum(1 for o in objects if o is None)
+    rnd_classes = sorted({o["type"] for o in objects if o is not None and
+                          o.get("status") ==
+                          "REGISTERED_BUT_NOT_DECODED_BY_ADAPTER"})
+    coverage = ("COMPLETE" if (n_sem == n_obj and n_bnd == 0 and
+                               n_none == 0) else "INCOMPLETE")
+    # link integrity: FAIL on any detected out-of-range link (unconditional
+    # TOOL FAIL); UNRESOLVED when some decoded-adjacent blocks' links were
+    # never read (boundary-only bodies contribute no link list -- their
+    # links are UNMEASURED, which can never be claimed PASS); PASS only
+    # when every block's links were resolved with zero failures
+    link_measured = sum(1 for i in range(n_obj) if links_all[i] is not None)
+    if link_failure_count:
+        link_integrity = "FAIL"
+    elif link_measured < n_obj:
+        link_integrity = "UNRESOLVED"
+    else:
+        link_integrity = "PASS"
+    integrity, ichecks = _f2_integrity(
+        "PASS" if decoded_count == n_obj else "FAIL", "PASS", link_integrity,
+        link_failures=link_failure_count, link_measured=link_measured,
+        detail=("structural closure PASS (footer found, exact EOF by the "
+                "footer_at construction); link integrity measured over the "
+                "%d blocks whose bodies were semantically decoded (%d "
+                "boundary-only blocks contribute no link list); top-object "
+                "root IDs are reported as read and are not separately "
+                "range-checked in this run")
+               % (link_measured, n_bnd))
+    # source-predicted original verdict (final path)
+    if res["load_result"]["error_code"] == "RTTIError":
+        source = "REJECTED"
+        source_reason = (_F2_SRC_REJ_RTTI +
+                         " (first miss %s at table index %d; the "
+                         "--full-decode continuation is OUR extension and "
+                         "never changes the source verdict)"
+                         % (res["rtti_table_validation"]["first_rtti_miss"],
+                            res["rtti_table_validation"]
+                            ["first_miss_table_index"]))
+    elif n_rnd:
+        source = "UNRESOLVED"
+        source_reason = (
+            "UNRESOLVED: registered-but-not-decoded class(es) %s -- the "
+            "ORIGINAL GB 1.2 factory KNOWS the class (registry census: "
+            "factory registration is YES), so this is NOT an original "
+            "rejection, but the full original LoadBinary/LinkObject/"
+            "PostLinkObject path for the class on these bytes is NOT "
+            "traced in the pinned source evidence, so the original verdict "
+            "cannot be predicted (no new broad source RE is done to reach "
+            "ACCEPTED)" % ",".join(rnd_classes))
+    elif link_failure_count:
+        source = "UNRESOLVED"
+        source_reason = (
+            "UNRESOLVED: out-of-range link(s) detected (%d) -- the ORIGINAL "
+            "GetObjectFromLinkID (NiStream.cpp L245-256) has only a "
+            "DEBUG-only assert(uiLinkID < m_kObjects.GetSize()) and "
+            "NiTArray::GetAt (NiTArray.inl L136-139) is an UNCHECKED raw "
+            "m_pBase[uiIndex] read (release = undefined behavior, debug = "
+            "assert); LinkObject is void and its return is discarded at "
+            "LoadStream L576 and L634 returns true unconditionally -- the "
+            "original behavior is debug/release dependent, so neither an "
+            "unambiguous rejection nor acceptance is provable"
+            % link_failure_count)
+    elif coverage == "COMPLETE" and integrity == "PASS":
+        source = "ACCEPTED"
+        source_reason = (
+            "ACCEPTED (source-predicted): the full pinned LoadStream path "
+            "(NiStream.cpp L506-635) is content-valid for this stream -- "
+            "LoadHeader gate; LoadRTTI table + factory lookups all "
+            "registered; per-block LoadBinary per the pinned per-class "
+            "citations; LoadTopLevelObjects in range; the link loop "
+            "L569-578 and postlink loop L581-590 call VOID methods whose "
+            "returns are DISCARDED (NiNode.cpp L872-888 blind-casts and "
+            "stores resolved pointers without a link-time rejection path); "
+            "CheckConsistency is a Win32 no-op (NiStream.inl L193-196); "
+            "return true at L634 is unconditional. Every link is NULL or "
+            "in range and every block was decoded by a pinned-citation "
+            "loader. Link-target TYPE compatibility (blind C-casts) is not "
+            "per-pair re-verified; at load time the original stores the "
+            "resolved pointers without dereferencing them on the traced "
+            "paths")
+    else:
+        source = "UNRESOLVED"
+        source_reason = (
+            "UNRESOLVED: adapter/source evidence insufficient to predict "
+            "the original verdict (coverage=%s integrity=%s without a "
+            "source-proven rejection)" % (coverage, integrity))
+    tool = _f2_set_axes(
+        res, source, source_reason, coverage,
+        _f2_counters(n_obj, semantic=n_sem, boundary=n_bnd, reg_nd=n_rnd,
+                     unreg=n_unreg, unresolved=n_none, classes=rnd_classes),
+        integrity, ichecks,
+        "TOOL_VERDICT derived: PASS only if coverage=COMPLETE and "
+        "integrity=PASS and no source-predicted REJECTED; FAIL if "
+        "integrity=FAIL or source=REJECTED; UNRESOLVED otherwise "
+        "(coverage=%s integrity=%s source=%s)"
+        % (coverage, integrity, source))
+
     res["objects"] = objects
     had_unregistered = bool(res.get("rtti_gate", {}).get("unregistered_types"))
-    if not had_unregistered and all(o is not None for o in objects):
+    # F2 (2026-10-03): accepted is EXACTLY (TOOL_VERDICT == PASS). The
+    # pre-F2 predicate promoted accepted=true whenever no unregistered
+    # TABLE entry existed and every objects[] slot was non-None -- a
+    # REGISTERED_BUT_NOT_DECODED_BY_ADAPTER boundary-only placeholder is
+    # non-None but is NOT a semantic decode, and LINK_FAILURE was only a
+    # warning (Desktop post-audit finding F2/P1). Both now fail acceptance.
+    res["load_result"]["accepted_semantics"] = (
+        "load_result.accepted == (TOOL_VERDICT == PASS): the ADAPTER's own "
+        "full-verified-decode verdict (coverage COMPLETE + integrity PASS "
+        "+ no source-predicted REJECTED); it is NOT a claim about the "
+        "original Gamebryo runtime (see SOURCE_PREDICTED_ORIGINAL_VERDICT)")
+    if tool == "PASS" and not had_unregistered and \
+            all(o is not None for o in objects):
         res["load_result"].update(accepted=True, partial=False, error=None,
                                   error_code=None)
     else:
