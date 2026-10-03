@@ -1,0 +1,51 @@
+{
+  "run_id": "PE_935_STATIC_LANDMARK_4057_CALLSITE_TRACE_R1_20261003",
+  "stage": "S11_resource_index_pins",
+  "measured": {
+    "models_bnt_identity": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+      "size_bytes": 395412868,
+      "sha256": "C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0"
+    },
+    "volumes_bnt_identity": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Volumes\\Volumes.bnt",
+      "size_bytes": 3746375,
+      "sha256": "6AD8BA3C5AD6F7534F91C1956A0E36485A49BBEF3FFA918CBDDC0C68EDBABC09"
+    },
+    "models_bnt_index": {
+      "index_start": 395262727,
+      "entry_count": 5596,
+      "found": {
+        "296445.nif": 395268773,
+        "218757.nif": 395283797
+      },
+      "calibration_296445_nif": 395268773,
+      "target_218757_nif": 395283797
+    },
+    "volumes_bnt_index": {
+      "index_start": 3696320,
+      "entry_count": 1865,
+      "found": {
+        "296446.bvi": 3701937,
+        "218758.bvi": 3712726
+      },
+      "calibration_296446_bvi": 3701937,
+      "target_218758_bvi": 3712726
+    }
+  },
+  "interpreted": {
+    "models_calibration_ok": true,
+    "MODEL_INDEX_218757": "PRESENT",
+    "COLLISION_INDEX_218758": "PRESENT",
+    "NOTE": "index presence only \u2014 NO resource request/resolution claim at the 0x0059AB12 call-site (the falsifier fired; see 02_ANALYSIS/TEMPLATE_ROLE_TEST.md). These are data-side facts about the candidate resource names.",
+    "pin_provenance": {
+      "bnt2_index_pins": {
+        "MEASURED_QUANTITY": "presence + name_file_offset of 4 exact index names (2 calibration, 2 target) in the two BNT2 trailer indexes",
+        "INDEPENDENT_SOURCE_OF_TRUTH": "physical trailer/index bytes of Models.bnt / Volumes.bnt (re-hashed this run)",
+        "WHY_NON_CIRCULAR": "own parser; the Models.bnt side must reproduce the canon calibration (index_start/count/anchor offset) before the target lookups are trusted",
+        "FAILURE_CASE_DETECTED": "wrong entry stride desynchronizes the name walk (0x0A misses / walked != count) or displaces the calibration anchor; absent name => ABSENT"
+      }
+    }
+  },
+  "errors": []
+}

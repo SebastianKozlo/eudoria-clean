@@ -1,0 +1,107 @@
+{
+  "run_id": "PE_935_STATIC_LANDMARK_4057_CALLSITE_TRACE_R1_20261003",
+  "stage": "S2_callsite_raw_pin",
+  "measured": {
+    "exe_identity": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe",
+      "size_bytes": 8015872,
+      "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+    },
+    "pe_header": {
+      "machine": "0x014C",
+      "nsec": 5,
+      "image_base": "0x00400000",
+      "dll_characteristics": "0x0000",
+      "aslr": false,
+      "entry_rva": "0x0055DA11",
+      "sections": [
+        {
+          "name": ".text",
+          "virtual_size": 6764005,
+          "virtual_address": 4096,
+          "raw_size": 6766592,
+          "raw_ptr": 4096
+        },
+        {
+          "name": ".rdata",
+          "virtual_size": 1009001,
+          "virtual_address": 6770688,
+          "raw_size": 1011712,
+          "raw_ptr": 6770688
+        },
+        {
+          "name": ".data",
+          "virtual_size": 251620,
+          "virtual_address": 7782400,
+          "raw_size": 212992,
+          "raw_ptr": 7782400
+        },
+        {
+          "name": ".tls",
+          "virtual_size": 10,
+          "virtual_address": 8036352,
+          "raw_size": 4096,
+          "raw_ptr": 7995392
+        },
+        {
+          "name": ".rsrc",
+          "virtual_size": 15444,
+          "virtual_address": 8040448,
+          "raw_size": 16384,
+          "raw_ptr": 7999488
+        }
+      ]
+    },
+    "mapper_calibrations": {
+      "string_anchor": {
+        "va": "0x00A86D30",
+        "file_offset": 6843696,
+        "section": ".rdata",
+        "expected_file_offset": 6843696,
+        "bytes": "Parameters\\templates.vfs",
+        "ok": true
+      },
+      "code_anchor_push_3ED3": {
+        "va": "0x005B6597",
+        "file_offset": 1795479,
+        "section": ".text",
+        "bytes_hex": "68 d3 3e 00 00",
+        "ok": true
+      }
+    },
+    "callsite": {
+      "anchor_va": "0x0059AB12",
+      "file_offset": 1682194,
+      "section": ".text",
+      "rva": "0x0019AB12",
+      "bytes_at_anchor_hex": "68 d9 0f 00 00",
+      "expected_bytes_hex": "68 d9 0f 00 00",
+      "is_push_imm32_4057": true,
+      "imm32_value_if_push": 4057,
+      "preceding_16B_hex": "4c 24 20 50 8d 8c 24 d0 00 00 00 e8 de 48 34 00",
+      "following_16B_hex": "8d 8c 24 c8 00 00 00 e8 ad 51 34 00 8d 8c 24 8c"
+    },
+    "g1_byte_crosscheck": {
+      "pairs": 951,
+      "match": 951,
+      "mismatch_count": 0,
+      "mismatches": [],
+      "all_match": true
+    }
+  },
+  "interpreted": {
+    "INPUT_EXE_PIN_OK": true,
+    "MAPPER_CALIBRATED": true,
+    "IMMEDIATE_4057_RAW_PIN": "CONFIRMED",
+    "IMMEDIATE_4057_AT_0x0059AB12": "CONFIRMED",
+    "pin_provenance": {
+      "callsite_raw": {
+        "MEASURED_QUANTITY": "the 5 physical bytes at the file offset mapped from VA 0x0059AB12, plus surrounding bytes",
+        "INDEPENDENT_SOURCE_OF_TRUTH": "physical bytes of Entropia.exe (re-hashed this run) read via this run's own PE mapper (no disassembler involved)",
+        "WHY_NON_CIRCULAR": "the mapper is calibrated on two independent canon byte anchors (string @0x00A86D30->6,843,696; PUSH 0x3ED3 @0x005B6597) before the callsite bytes are trusted; the PUSH/4057 hypothesis enters only as the expected-value comparison",
+        "FAILURE_CASE_DETECTED": "wrong mapping => calibration anchors fail; bytes not 68 D9 0F 00 00 => IMMEDIATE_4057_RAW_PIN=REJECTED (STOP S1)"
+      }
+    }
+  },
+  "errors": []
+}

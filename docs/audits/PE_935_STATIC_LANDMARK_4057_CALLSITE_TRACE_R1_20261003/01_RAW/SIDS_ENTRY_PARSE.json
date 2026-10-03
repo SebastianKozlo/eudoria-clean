@@ -1,0 +1,82 @@
+{
+  "run_id": "PE_935_STATIC_LANDMARK_4057_CALLSITE_TRACE_R1_20261003",
+  "stage": "S10_sids_entry_parse",
+  "measured": {
+    "sids_container_record": {
+      "container_record_id": 1,
+      "size": 128996,
+      "ver": 1,
+      "crc_ok": false,
+      "file_size": 129040
+    },
+    "parse_trials": {
+      "u16len": {
+        "ok": true,
+        "count": 3887,
+        "entries": 3887
+      },
+      "u8len": {
+        "ok": false,
+        "count": null,
+        "entries": null
+      },
+      "asciiz": {
+        "ok": false,
+        "count": null,
+        "entries": null
+      }
+    },
+    "parse_result": {
+      "ok": true,
+      "encoding": "u16len",
+      "count": 3887,
+      "entries": 3887,
+      "unique_ids": 3887
+    },
+    "series_census_in_parsed_ids": {
+      "0xFD4": true,
+      "0xFD5": true,
+      "0xFD6": true,
+      "0xFD7": true,
+      "0xFD8": true,
+      "0xFD9": true,
+      "0x376": true,
+      "0xFAB": true,
+      "0xFAE": true,
+      "0xFAF": true,
+      "0xFB0": true,
+      "0xFB1": true,
+      "0xFB2": true
+    },
+    "series_entries_dump": {
+      "0xFD4": "S_REPAIR_UI_ADD_EQUIPPED_TOOLTIP",
+      "0xFD5": "S_REPAIR_UI_ADD_WEAPONS_TOOLTIP",
+      "0xFD6": "S_REPAIR_UI_ADD_ARMOR_TOOLTIP",
+      "0xFD7": "S_REPAIR_UI_ADD_TOOLS_TOOLTIP",
+      "0xFD8": "S_REPAIR_UI_ADD_ALL_TOOLTIP",
+      "0xFD9": "S_REPAIR_UI_CLEAR_TOOLTIP",
+      "0x376": "S_GENERIC_CLEAR",
+      "0xFAB": "S_REPAIR_UI_ADD_EQUIPPED",
+      "0xFAE": "S_REPAIR_UI_ADD_WEAPONS",
+      "0xFAF": "S_REPAIR_UI_ADD_ARMOR",
+      "0xFB0": "S_REPAIR_UI_ADD_TOOLS",
+      "0xFB1": "S_REPAIR_UI_ADD_ALL",
+      "0xFB2": "S_REPAIR_UI_DRAG_ITEMS_HERE"
+    }
+  },
+  "interpreted": {
+    "MEASURED_LAYOUT": "u16 count; count x (string[u16len], u32 id) \u2014 from g6 code (FUN_00821e70: FUN_0040de60(2)/FUN_0040de60(4) cursor reads; FUN_00413da0 insert), calibrated on the physical payload by exact-consumption",
+    "IMMEDIATE_4057_IS_SIDS_ENTRY_ID": true,
+    "IMMEDIATE_886_IS_SIDS_ENTRY_ID": true,
+    "SUPERSEDES": "SIDS_REPINS.json's container-level census (record ids): the sids.vfs container holds ONE record; the string-table ids are PAYLOAD entries, parsed per the measured layout here",
+    "pin_provenance": {
+      "sids_entry_parse": {
+        "MEASURED_QUANTITY": "sids.vfs single-record header + payload entry ids/strings parsed with the code-measured layout (u16 count; string; u32 id)",
+        "INDEPENDENT_SOURCE_OF_TRUTH": "physical bytes of sids.vfs (identity pinned in SIDS_REPINS.json); layout from the g6 decompile of the client's own parser FUN_00821e70 (byte-anchored listing, zero template-machinery hits)",
+        "WHY_NON_CIRCULAR": "two independent sides: the CODE (parser reads u16 count, string, u32 id) and the DATA (the payload closes exactly under that layout with the header count) \u2014 neither derives from the other; the 4057 hypothesis enters only as a census needle",
+        "FAILURE_CASE_DETECTED": "a wrong layout would not close the payload exactly (parse_trials recorded for all candidates); if 0xFD9 were absent from the parsed ids, IMMEDIATE_4057_IS_SIDS_ENTRY_ID would be False and the string-table reading would be downgraded to UNRESOLVED"
+      }
+    }
+  },
+  "errors": []
+}
