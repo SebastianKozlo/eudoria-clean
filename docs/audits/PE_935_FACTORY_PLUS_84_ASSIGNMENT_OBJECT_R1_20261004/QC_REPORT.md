@@ -1,0 +1,70 @@
+# QC_REPORT — PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004
+
+QC_SCOPE = SELF_CHECK_FACTORY_PLUS_84_ASSIGNMENT_OBJECT (executor self-check,
+explicitly NOT an independent PE-MASTER audit; the PE-MASTER review of this
+package is pending). Raw machine record: 01_RAW/S4_QC.json
+(03_SCRIPTS/s4_qc_battery.py). Every gate status below is DERIVED from measured
+inputs on disk — no hard-coded PASS. Outcome-conditional per the dispatch
+clarifications: absence of positive evidence for a claim this run does not make is
+NOT a QC defect (NOT_APPLICABLE/UNRESOLVED are legitimate states); FAIL is reserved
+for unsupported/contradicted positive claims, missing claimed-outcome evidence, or
+scope/governance violations.
+
+## Verdict
+
+**QC_VERDICT = QC_PASS (14/14 gates PASS, 0 failures).**
+
+## Gate table
+
+| Gate | Checks | Result | Key measured values |
+|---|---|---|---|
+| Q1 | baseline + EXE identity | PASS | local HEAD = origin/master = 288c53cc6b2552bbf9dc41907677e3fa1b6ab56d (BASE_SHA); EXE 8,015,872 B / SHA256 E7785430... exact pin match; untracked census = the 5 foreign PE_935_* packages + experiments/ + THIS package only |
+| Q2 | consumer field re-pin | PASS | S1 pin battery 0 failures; consumer = FUN_0070DCF0; gate CMP @0x0070DD1A + loads @0x0070DD6A/@0x0070DD7E; call targets 0x00971AD0/0x00971650 machine-verified |
+| Q3 | census integrity | PASS | CSV rows 2,604 == JSON hits 2,604; CSV header exact; classification totals re-summed from the CSV (2 CONFIRMED + 598 + 1,488 + 387 + 129 = 2,604) |
+| Q4 | confirmed write instructions | PASS | exactly 2 confirmed rows; store bytes re-read from the pinned EXE: 0x0070D013 = 89 9e 84 00 00 00; 0x0070C71E = 89 86 84 00 00 00 |
+| Q5 | factory identity at assignment | PASS | chain complete: dispatcher entry5 → 0x0073C8D8 getter; register call → 0x0073C870; 20006 ∈ [0x4E20, 0x4E4C); loop call → 0x0070C680; store @0x0070C71E; singleton refs = 9 |
+| Q6 | source operand classification | PASS | EAX = new(0xA4) + FUN_00972380 ctor result (or 0 on alloc-fail); ctor call target 0x00972380 machine-verified; OBJECT_POINTER |
+| Q7 | assigned object identity | PASS | ctor FUN_00972380, extent 0x00972380..0x009724D9, size 0xA4, NO vtable store (non-polymorphic), embedded 0x80-B record cursor |
+| Q8 | assignment→consumer field identity | PASS | both chains pinned to this+0x84; consumer reads + setter store machine-verified; CONFIRMED at static member level |
+| Q9 | NULL/init/reset/non-null consistency | PASS | NULL_INIT_COUNT=1 (0x0070D013); CLEAR_RESET_COUNT=0; NONNULL_ASSIGNMENT_COUNT=1 (0x0070C71E); UNRESOLVED_WRITE_COUNT=64 (boundary-verified non-stack dword-write candidates not resolved to any factory object — derived mechanically from the census CSV) |
+| Q10 | specific-consumer-event value | PASS | ASSIGNED_VALUE_AT_SPECIFIC_CONSUMER_EVENT = UNVERIFIED present in FINAL_REPORT (no runtime value-flow claim made anywhere) |
+| Q11 | write-to-consumer preservation | PASS | WRITE_TO_CONSUMER_VALUE_PRESERVATION = NOT_ESTABLISHED present in FINAL_REPORT |
+| Q12 | function ledger from disk | PASS | columns exact; 18 rows; structure valid; counted chain 0→...→8 intact; derived count 8 == declared 8 |
+| Q13 | budget limit + mutant battery | PASS | budget predicate PASS (8 ≤ 8); the mandatory 9-function mutant: structure_ok=True, derived_count=9, declared_count_match=True (declared 9), budget_ok=False — the budget-limit predicate FAILS on the mutant for the LIMIT, not a row-count mismatch (independence control: a declared-8/derived-9 case fails on count_match while the budget predicate is still evaluated separately) |
+| Q14 | forbidden scope + preserved predecessor science | PASS | all 11 required preserved-field strings verified in FINAL_REPORT; the open()-path scan of the instruments shows NO forbidden input opened (no .vfs/.bnt/.nif/.ark/http; the scripts read only the pinned EXE + package-internal files); the LEAD-ONLY discipline phrasing present |
+
+## QC hygiene notes (honest record)
+
+1. The S1 anchor battery caught 31 REAL executor pin VA slips (off-by-1/2/4 in
+   hand-decode notes) and 1 case-comparison bug during the run; every slip was
+   corrected and the battery re-run to 0 failures. The battery demonstrably fails
+   — its PASS is earned, not assumed. (The corrected pins are the machine values;
+   no claim in the docs rests on the pre-correction hand values.)
+2. The Q14 open()-path check is a heuristic string extraction of path literals
+   after `open(` in the instrument sources (it also picks a few mode/encoding
+   literals such as "rb"/"utf-8" as artifacts — recorded in
+   01_RAW/S4_QC.json `Q14.script_opened_paths`); its substantive predicate (no
+   forbidden input file opened) is exact.
+3. Q1's EXE comparison is case-insensitive on the SHA hex string (the QC's own
+   first execution falsely failed on lowercase-vs-uppercase hex — a QC bug caught
+   and fixed in-run; the underlying identity was always a byte-exact match).
+4. The FUNCTION_LEDGER.csv was regenerated byte-clean without a UTF-8 BOM after
+   the QC caught a BOM-induced header mismatch (an in-run hygiene fix; content
+   unchanged, re-verified by Q12 from disk).
+5. QC re-execution hygiene: the instruments write only into THIS package
+   (01_RAW/S4_QC.json etc.); no committed historical evidence is mutated by a
+   re-run. Git-historical queries (if any auditor wants the BASE-state docs) use
+   explicit refs (`git show <BASE_SHA>:<path>`), never the current HEAD.
+
+## Not applicable / unresolved states (outcome-conditional, legitimate)
+
+- No gate required positive evidence for a claim this run does not make: the
+  run CLAIMS a non-null assignment + object identity, and Q4-Q8 verify exactly
+  those claims positively; UNRESOLVED census rows (129 mechanical, 64
+  write-candidates) are honest bounds, not failures.
+- SPECIFIC_RUNTIME_GETTER_VALUE_PRODUCER = UNVERIFIED and
+  WRITE_TO_LATER_GETTER_VALUE_PRESERVATION = NOT_ESTABLISHED are PRESERVED
+  predecessor states (Q14) — this run did not reopen them.
+- The slot-predicate callback 0x0070BEF0's internal rule and FUN_0070BF40's
+  semantic role are NOT decoded (transcription level; not load-bearing — the
+  condition evaluation at any runtime event is runtime state).
