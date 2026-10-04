@@ -1,0 +1,343 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004",
+ "qc_scope": "SELF_CHECK_FACTORY_PLUS_84_C1_FORENSIC_QC_CORRECTION",
+ "gates": {
+  "Q1": "PASS",
+  "Q2": "PASS",
+  "Q3": "PASS",
+  "Q4": "PASS",
+  "Q5": "PASS",
+  "Q6": "PASS",
+  "Q7": "PASS",
+  "Q8": "PASS",
+  "Q9": "PASS",
+  "Q10": "PASS",
+  "Q11": "PASS",
+  "Q12": "PASS",
+  "Q13": "PASS",
+  "Q14": "PASS"
+ },
+ "gate_details": {
+  "Q1": {
+   "exe_size": 8015872,
+   "exe_sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+   "exe_pinned_match": true,
+   "local_head": "a0e176803aed23b19040d4310de1668efec4511f",
+   "origin_master": "a0e176803aed23b19040d4310de1668efec4511f",
+   "actual_remote_master": "a0e176803aed23b19040d4310de1668efec4511f",
+   "baseline_ok": true
+  },
+  "Q2": {
+   "records": 133,
+   "same_va_violations": [],
+   "field_mismatches": [],
+   "c1_battery_fail_count": 0,
+   "ok": true
+  },
+  "Q3": {
+   "CONTROL_A": true,
+   "CONTROL_B": true,
+   "CONTROL_C": true,
+   "CONTROL_D": true,
+   "CONTROL_E": true,
+   "CONTROL_F": true
+  },
+  "Q4": {
+   "mod1_rows_signed_minus_124": 385,
+   "mod1_rows_bad": [],
+   "positive_rows_effective_132": 2227,
+   "positive_rows_bad": [],
+   "known_store_displacements": {
+    "0x0070D013": 132,
+    "0x0070C71E": 132
+   },
+   "ok": true
+  },
+  "Q5": {
+   "unit_battery": [
+    {
+     "vector": "8B 04 85 00 00 00 00",
+     "expected": 7,
+     "measured": 7
+    },
+    {
+     "vector": "8B 04 24",
+     "expected": 3,
+     "measured": 3
+    },
+    {
+     "vector": "66 B8 01 00",
+     "expected": 4,
+     "measured": 4
+    },
+    {
+     "vector": "89 86 (truncated 2-byte buffer)",
+     "expected": "REJECT/None",
+     "measured": "REJECT/None"
+    }
+   ],
+   "redecode_bad_rows": 0,
+   "coverage": {
+    "setter": {
+     "decoded_instructions": 100,
+     "aborted": 0
+    },
+    "loop": {
+     "decoded_instructions": 54,
+     "aborted": 0
+    },
+    "driver": {
+     "decoded_instructions": 83,
+     "aborted": 0
+    },
+    "register": {
+     "decoded_instructions": 92,
+     "aborted": 0
+    },
+    "modeinit": {
+     "decoded_instructions": 42,
+     "aborted": 0
+    },
+    "stream_ctor": {
+     "decoded_instructions": 95,
+     "aborted": 0
+    },
+    "modecond": {
+     "decoded_instructions": 10,
+     "aborted": 0
+    },
+    "slotpred": {
+     "decoded_instructions": 39,
+     "aborted": 0
+    }
+   }
+  },
+  "Q6": {
+   "confirmed_rows_with_untrusted_source": [],
+   "forbidden_inference_hits": [],
+   "control_E": true,
+   "ok": true
+  },
+  "Q7": {
+   "rows_missing_ea_fields": [],
+   "sib_spotcheck": {
+    "0x00812944": {
+     "census": {
+      "base": "ESP",
+      "index": "NONE",
+      "scale": "1",
+      "signed": "132"
+     },
+     "fresh_decode": {
+      "base": "ESP",
+      "index": "NONE",
+      "scale": "1",
+      "signed": "132"
+     },
+     "historical_display_defect": "[ESP+ESP*1+0x84] (impossible: SIB index 100b = NO INDEX)"
+    }
+   },
+   "control_F": true,
+   "ok": true
+  },
+  "Q8": {
+   "wrong_object_rows_without_basis": [],
+   "stack_write_rows_not_unresolved": [],
+   "all_wrong_object_bases": [
+    "EAX",
+    "ESI",
+    "ESI",
+    "ESI",
+    "ESI"
+   ],
+   "ok": true
+  },
+  "Q9": {
+   "tally": {
+    "REJECTED_READ_NOT_WRITE": 1003,
+    "UNRESOLVED": 1217,
+    "NEGATIVE_DISP8_MINUS_0x7C_CONTROL": 385,
+    "REJECTED_WRONG_OBJECT_WITH_PROVEN_PROVENANCE": 5,
+    "KNOWN_CONFIRMED_FACTORY_PLUS_84_WRITE": 2
+   },
+   "tally_sum": 2612,
+   "raw_rows": 2612,
+   "derived_census_unresolved": 1217,
+   "derived_write_candidates": 828,
+   "derived_boundary_unresolved_reads": 389,
+   "summary_census_unresolved": 1217,
+   "summary_write_candidates": 828,
+   "denominators_distinct_definitions": {
+    "CENSUS_UNRESOLVED_ROWS": "all census rows with row_resolution=UNRESOLVED: boundary-unresolved read/LEA rows (no write established but instruction identity unproven) PLUS all unresolved write candidates",
+    "FACTORY_PLUS_84_UNRESOLVED_WRITE_CANDIDATES": "write-form positive-encoding rows (incl. linked-LEA) not resolved to a confirmed factory write or a proven wrong-object rejection",
+    "EXAMINED_ENCODING_CANDIDATE_CLOSURE": "CLOSED = every byte position of .text was tested against every declared family with the validated decoder; it does NOT mean all candidates were classified, and it is scoped to the declared encodings/effective-address forms only"
+   },
+   "ok": true
+  },
+  "Q10": {
+   "0x0070D013": {
+    "bytes": "89 9E 84 00 00 00",
+    "bytes_ok": true,
+    "boundary": "CONFIRMED",
+    "census_classification": "KNOWN_CONFIRMED_FACTORY_PLUS_84_WRITE",
+    "store_class_in_reason": true
+   },
+   "0x0070C71E": {
+    "bytes": "89 86 84 00 00 00",
+    "bytes_ok": true,
+    "boundary": "CONFIRMED",
+    "census_classification": "KNOWN_CONFIRMED_FACTORY_PLUS_84_WRITE",
+    "store_class_in_reason": true
+   },
+   "ok": true
+  },
+  "Q11": {
+   "measured_start": "0x00004E20",
+   "measured_bound": "0x00004E4C",
+   "selector": "0x4E26",
+   "membership_derived_from_measured": true,
+   "control_B_mutant_fails": true,
+   "second_range_measured": [
+    "0x00005DC1",
+    "0x00005DD2"
+   ],
+   "dispatcher_entry5_measured": "0x0073C8D8",
+   "ok": true
+  },
+  "Q12": {
+   "size_0xA4_164": true,
+   "factory_size_0x118_280": true,
+   "ctor_call_target_validated": true,
+   "ctor_extent_measured": true,
+   "cursor_pinned": true,
+   "tail_stores_pinned": true,
+   "wording_structural_identity": true,
+   "wording_semantic_role": true,
+   "wording_164": true,
+   "ok": true
+  },
+  "Q13": {
+   "direct_vptr_machine_search": "NOT_OBSERVED",
+   "search_completed": true,
+   "offset_zero_store_count": 1,
+   "global_vtable_unverified": true,
+   "global_polymorphism_not_established": true,
+   "callsites_direct_measured": true,
+   "superseded_phrase_sweep_hits": {},
+   "ok": true
+  },
+  "Q14": {
+   "missing_required_strings": [],
+   "instrument_open_calls": [
+    {
+     "file": "c1_pin_ledger.py",
+     "arg": "args.out, \"w\", newline=\"\\n\""
+    },
+    {
+     "file": "c1_pin_ledger.py",
+     "arg": "args.csv, \"w\", newline=\"\", encoding=\"utf-8\""
+    },
+    {
+     "file": "c2_census.py",
+     "arg": "args.out, \"w\", newline=\"\\n\""
+    },
+    {
+     "file": "c2_census.py",
+     "arg": "args.csv, \"w\", newline=\"\", encoding=\"utf-8\""
+    },
+    {
+     "file": "c3_object_scope.py",
+     "arg": "args.out, \"w\", newline=\"\\n\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, \"CORRECTED_PIN_LEDGER.csv\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, \"CORRECTED_FACTORY_PLUS_84_WRITE_CENSUS.csv\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, \"01_RAW\", \"C2_CENSUS.json\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, \"01_RAW\", \"C1_PIN_EVIDENCE.json\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, \"01_RAW\", \"C3_OBJECT_SCOPE.json\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "args.out_controls, \"w\", newline=\"\\n\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "args.out_decoder, \"w\", newline=\"\\n\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, \"FINAL_REPORT.md\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, sf"
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": ""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "..."
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, \"03_SCRIPTS\", fn"
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "os.path.join(RUN, \"03_SCRIPTS\", fn"
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "ledger_path, encoding=\"utf-8\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "src_path, encoding=\"utf-8\""
+    },
+    {
+     "file": "cqc_battery.py",
+     "arg": "args.out_final, \"w\", newline=\"\\n\""
+    },
+    {
+     "file": "pebnd.py",
+     "arg": "path, \"rb\""
+    }
+   ],
+   "opened_path_literals": [
+    "C1_PIN_EVIDENCE.json",
+    "C2_CENSUS.json",
+    "C3_OBJECT_SCOPE.json",
+    "CORRECTED_FACTORY_PLUS_84_WRITE_CENSUS.csv",
+    "CORRECTED_PIN_LEDGER.csv",
+    "FINAL_REPORT.md",
+    "n"
+   ],
+   "forbidden_extensions_opened": [],
+   "http_in_instruments": [],
+   "exe_only_plus_package_and_historical": true,
+   "ok": true
+  }
+ },
+ "aux_quotecheck": {
+  "records": 42,
+  "failures": [],
+  "ok": true
+ },
+ "QC_VERDICT": "QC_PASS",
+ "outcome_conditional_note": "QC PASS means the corrected claims accurately match evidence and uncertainty; it does NOT mean all census candidates were solved (828 unresolved write candidates and the NOT_ESTABLISHED invariants are the corrected honest states)"
+}

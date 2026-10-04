@@ -1,0 +1,63 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004",
+ "controls": {
+  "CONTROL_A": {
+   "description": "corrupted constructor entry bytes in a private synthetic mutant -> raw-evidence gate FAIL",
+   "canonical_gate": "PASS",
+   "mutant_gate": "FAIL",
+   "expected_mutant_gate": "FAIL",
+   "test_passed": true
+  },
+  "CONTROL_B": {
+   "description": "mutated measured enumeration range excludes 20006 -> membership gate FAIL (derived from measured evidence, never literal-only)",
+   "measured_start": "0x00004E20",
+   "measured_bound": "0x00004E4C",
+   "selector": "0x00004E26",
+   "canonical_membership_derived": true,
+   "mutated_bound": "0x00004E26",
+   "mutant_membership": false,
+   "test_passed": true
+  },
+  "CONTROL_C": {
+   "description": "non-CALL VA passed to the CALL validator -> CALL_VALIDATION=FAIL, no accepted target",
+   "byte": "0xBB",
+   "call_validation": "FAIL",
+   "target": null,
+   "test_passed": true
+  },
+  "CONTROL_D": {
+   "description": "callback immediate corrupted in a private synthetic mutant -> pin/immediate gate FAIL",
+   "canonical_gate": "PASS",
+   "mutant_gate": "FAIL",
+   "test_passed": true
+  },
+  "CONTROL_E": {
+   "description": "E8 inside another instruction immediate -> CALL_BOUNDARY_VALIDATION(offset 1) fails; opcode-byte coincidence + in-range-looking target insufficient",
+   "valid_starts_decode": {
+    "0": "MOV EAX,imm32 len=5",
+    "5": "ADD AL,AL (landed=True)",
+    "7": "RET"
+   },
+   "candidate_offset": 1,
+   "byte_at_offset1_is_E8": true,
+   "apparent_rel32": 1,
+   "apparent_target": "0x00A00007",
+   "validation_outcome": "NOT_VERIFIED",
+   "target_promoted": null,
+   "test_passed": true
+  },
+  "CONTROL_F": {
+   "description": "ESP SIB with unresolved index provenance -> ADDRESS_PROVENANCE=UNRESOLVED, CLASSIFICATION=UNRESOLVED (NOT REJECTED_WRONG_OBJECT)",
+   "decoded": true,
+   "base_register": "ESP",
+   "index_register": "EBP",
+   "scale": 1,
+   "signed_displacement": 132,
+   "effective_displacement": 132,
+   "address_provenance": "UNRESOLVED",
+   "classification": "UNRESOLVED",
+   "test_passed": true
+  }
+ },
+ "all_passed": true
+}
