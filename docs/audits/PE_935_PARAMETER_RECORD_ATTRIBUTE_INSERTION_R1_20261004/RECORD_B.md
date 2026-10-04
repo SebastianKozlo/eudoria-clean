@@ -27,20 +27,25 @@ list1_count=0, list2_count=0, f11=0; consumed == 28 == header size.
    the model-resource path, NOT the placement-construction lookup path of RECORD_A.
    This run re-verified the emitter's lookup call site (0x006C3F62 → FUN_0072F580) and
    the A-getter [ECX+8] reading the same registry value layout.
-3. **No static key**: an all-encodings imm32 scan of the whole .text for 0x119C (4508)
-   found exactly 3 occurrences, ALL of which are displacement constants, NOT key values:
+3. **Measured 4508 scan scope** ([C1/P3-corrected wording — supersedes the heading
+   "No static key" and its broad absence claim]): the performed whole-.text
+   PUSH-imm32 scan found ZERO `PUSH 0x119C` sites; the all-encodings imm32 scan for
+   0x119C (4508) found exactly 3 raw occurrences, ALL classified as displacement
+   operands, NOT key values:
    - 0x0053270C and 0x00532769: inside `LEA ECX,[ESP+0x119C]` (a 4,508-byte local
      buffer offset);
    - 0x0083427E: inside `MOV [ESI+0x119C],EBX` (a struct field displacement).
-   The PUSH-imm32 scan found ZERO `PUSH 0x119C` sites. No placement-construction
-   function looks up key 4508 statically — the discriminating contrast with
-   RECORD_A's byte-pinned `PUSH 0x3ED3` @0x005B6597.
+   SCOPE LIMIT: computed, indirect, and runtime-produced 4508 keys are NOT excluded by
+   this scan class, and NO absence claim is made beyond the measured scans
+   (PUSH-imm32 and raw imm32 census). The discriminating contrast with RECORD_A's
+   byte-pinned `PUSH 0x3ED3` @0x005B6597 stands, as measured.
 
 ## Control verdict
 
 RECORD_B (4508) reaches the same insertion (registry {4508 → its template object}) but,
-within the censused machinery, is read on the model-request path (runtime-keyed) and NOT
-by any placement-construction lookup with a static key — the control distinguishes
+within the censused machinery and the measured scan classes, is read on the model-request
+path (runtime-keyed) and NOT by any censused placement-construction lookup with a static
+key — the control distinguishes
 "inserted into the registry" (all records) from "looked up by the placement-construction
 static-key set" (RECORD_A's key 0x3ED3; plus FUN_00567170's key set, see
 PLACEMENT_CONSUMER_EDGE.md).

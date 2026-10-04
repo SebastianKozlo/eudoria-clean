@@ -1,0 +1,41 @@
+{
+ "measured": {
+  "QC_SCOPE": "SELF_CHECK_REPORT_QC_HANDOFF_CORRECTION",
+  "falsifier": "AB_MAPPING_MUTATION_FALSIFIER",
+  "design": "Copy the corrected PARSER_CHAIN.md to a private temp file, swap the documented A/B destination mapping, and re-run the SAME CLIENT_DESTINATION_MAPPING_CHECK verifier against the UNCHANGED pinned EXE and UNCHANGED templates.vfs. The check must FAIL for both mutants. This reproduces and closes the Desktop QC-7 counterexample class (a deliberate A/B documentation swap passed the published QC-7).",
+  "mutants": {
+   "mutantA_destination_cell_only_desktop_replica": {
+    "mutated_file": "temp copy of PARSER_CHAIN.md (canonical repo file untouched)",
+    "mutated_rows": [
+     "| payload[1] (A) | template+0x04 | MOV [EDI+0x08],EAX @0x00730CE6 |",
+     "| payload[2] (B) | template+0x08 | MOV [EDI+0x04],EAX @0x00730D14 |"
+    ],
+    "raw_vfs_values_unchanged_tq1_pass": true,
+    "destination_check_pass": false,
+    "destination_check_failed_rows": [
+     "payload[1] (A)",
+     "payload[2] (B)"
+    ],
+    "expected": "FAIL (mutation must be detected)",
+    "detected": true
+   },
+   "mutantB_self_consistent_swap": {
+    "mutated_file": "temp copy of PARSER_CHAIN.md (canonical repo file untouched)",
+    "mutated_rows": [
+     "| payload[1] (A) | template+0x04 | MOV [EDI+0x04],EAX @0x00730CE6 |",
+     "| payload[2] (B) | template+0x08 | MOV [EDI+0x08],EAX @0x00730D14 |"
+    ],
+    "raw_vfs_values_unchanged_tq1_pass": true,
+    "destination_check_pass": false,
+    "destination_check_failed_rows": [
+     "payload[1] (A)",
+     "payload[2] (B)"
+    ],
+    "expected": "FAIL (mutation must be detected)",
+    "detected": true
+   }
+  },
+  "AB_MAPPING_MUTATION_FALSIFIER": "DETECTED",
+  "pass": true
+ }
+}

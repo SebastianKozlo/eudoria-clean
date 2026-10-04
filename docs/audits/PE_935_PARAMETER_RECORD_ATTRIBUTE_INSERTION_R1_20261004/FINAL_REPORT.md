@@ -32,7 +32,10 @@ PLACEMENT_CARRIER_CONFIRMED.)
   domain, same key VALUE, same lookup function. But FUN_005B5F90 is a SIBLING
   constructor — NOT the contract's named family ("FUN_00567770 via FUN_00567C50").
 - The named builder FUN_00567770 itself reads the SAME registry (via its deriver
-  FUN_004C5580 @0x005678BA → FUN_004C5480: the entity's 0x4E26-property id2 →
+  FUN_004C5580 @0x005678BA → FUN_004C5480: [C2-corrected identity] the runtime value
+  returned by the class-selector-20006 (CLASS_SELECTOR 0x4E26=20006, pair @0x004C54C2 →
+  FUN_00703B80 @0x004C54CE) / property-tag-6 (PROPERTY_TAG 6, PUSH 6 @0x004C551F →
+  FUN_0070C180 @0x004C5523) getter on the exact receiver and branch →
   FUN_0072F880 lookup-with-copy → full value copy into the builder's local) — with a
   RUNTIME key whose value identity for RECORD_A is NOT statically provable.
 - The named driver FUN_00567C50's own tree (→ FUN_00567B40 queue push → FUN_00567170)
@@ -45,8 +48,11 @@ PLACEMENT_CARRIER_CONFIRMED.)
 
 RECORD_B = record id2=4508 (offset 96,496): same grammar/insertion; its established
 consumer is the model-request EMITTER (FUN_006C3F50 — E3, re-verified) — a different
-receiver path; NO static 4508 key exists (all 3 imm32 hits are ESP/struct
-displacements; 0 PUSH sites). The control discriminates inserted-vs-statically-looked-up.
+receiver path; [C1/P3-corrected to the measured scan scope — supersedes "NO static
+4508 key exists"] zero PUSH-imm32 0x119C sites in the performed whole-.text PUSH scan;
+the 3 raw imm32 0x119C occurrences are classified as ESP/struct displacement operands;
+computed/indirect/runtime 4508 keys are NOT excluded by this scan class. The control
+still discriminates inserted-vs-statically-looked-up within the measured classes.
 
 ## TERMINAL FIELDS (exact)
 
@@ -100,13 +106,21 @@ it is NOT placement recovery.
 
 ## FIRST_MISSING_EDGE + the ONE recommended next experiment (designed, NOT executed)
 
-FIRST_MISSING_EDGE = INSERTED_VALUE_TO_PLACEMENT_CONSUMER, precisely: the provenance
-of the RUNTIME KEY at the named builder's lookup (FUN_004C5480's 0x4E26/20006-family
-property value → FUN_0072F880). Recommended experiment: decode the WRITERS of the
-0x4E26-property value (the property-write counterparts of the FUN_00703B80/FUN_0042EAD0
-machinery) and determine whether that id2 is ever fed from a physical record — if yes,
-the named-family chain closes to CONFIRMED; if network/runtime-only, the named family's
-registry read is confirmed-as-mechanism but never record-keyed statically.
+FIRST_MISSING_EDGE = INSERTED_VALUE_TO_PLACEMENT_CONSUMER, precisely [C2-corrected]:
+the provenance of the SPECIFIC RUNTIME VALUE returned by the class-selector-20006 /
+property-tag-6 getter (FUN_004C5480: CLASS_SELECTOR 0x4E26=20006 pair @0x004C54C2 →
+FUN_00703B80 @0x004C54CE — a class-selector resolve, NOT a property-tag fetch →
+exact receiver → branch predicate → PROPERTY_TAG 6: PUSH 6 @0x004C551F → CALL
+FUN_0070C180 @0x004C5523) on the exact receiver and branch whose result is consumed
+as the FUN_0072F880 lookup key. Recommended experiment: trace the producer/provenance
+of that specific runtime value. Allowed provenance outcomes (OPEN taxonomy, no forced
+physical-vs-network binary): PHYSICAL_RECORD_DERIVED | CONSTANT_INITIALIZATION |
+LOCAL_COMPUTED | CACHE_PROVIDER | MESSAGE_DERIVED | FALLBACK_BRANCH | UNKNOWN. If the
+specific value is ever fed from a physical record (e.g. RECORD_A's id2 16083), the
+named-family chain closes to CONFIRMED; otherwise the named family's registry read is
+confirmed-as-mechanism but never record-keyed statically. Alternative/fallback branches
+(e.g. the flag-0xD82 path) remain SEPARATE/UNKNOWN — do NOT claim all getter results
+come from the normal tag-6 branch.
 (Adjacent RAW_OCCURRENCE_ONLY lead, no role claimed: imm32 0x3ED3/0x3ED2 in the
 property idiom at 0x0050F383/0x0050F2F3, function NOT decoded this run.)
 

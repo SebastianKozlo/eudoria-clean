@@ -44,11 +44,28 @@ feeds FUN_00567770.
 FUN_00567770 (builder)
   └─ CALL FUN_004C5580 @0x005678BA   (census-verified: 10 call sites; this one in the builder)
       ├─ FUN_004C5480(param_1) @0x004C55B5 (exactly 1 call site)
-      │   └─ reads the entity's 0x4E26-PROPERTY value = the id2:
-      │      FUN_00843DD0 @0x004C54AD (tree resolve; MOV ECX,[ECX+4] + find)
-      │      MOV [ESP+0x1C],0x4E26 @0x004C54C2 ← the 20006-family property id
-      │      CALL FUN_00703B80 @0x004C54CE (property machinery via FUN_00415470)
-      │      → returns the id2 (null-checked; flag 0xD82 path also present)
+      │   └─ [C2-corrected layered identity — CLASS_SELECTOR vs PROPERTY_TAG; the prior
+      │      "reads the entity's 0x4E26-PROPERTY value = the id2" wording conflated two
+      │      distinct identities:]
+      │      1. exact receiver: tree resolve CALL FUN_00843DD0 @0x004C54B2
+      │         (instruction start C1/P3-corrected — @0x004C54AD was mid-stream);
+      │         MOV EAX,[EAX] @0x004C54B7 (the resolved receiver);
+      │      2. CLASS_SELECTOR 20006: pair built with the constant 0x4E26 (=20006):
+      │         MOV [ESP+0x1C],0x4E26 @0x004C54C2 (C7 44 24 1C 26 4E 00 00) +
+      │         MOV [ESP+0x20],EAX @0x004C54CA (the exact receiver), resolved by the
+      │         wrapper CALL FUN_00703B80 @0x004C54CE — a CLASS-SELECTOR-20006
+      │         resolve operation, NOT a property-tag fetch of 20006;
+      │      3. branch predicate: the normal branch is gated by the flag-0xD82
+      │         alternative (PUSH 0xD82 @0x004C54DC → FUN_00844020 @0x004C54E4) —
+      │         the alternative/fallback branch is preserved as SEPARATE/UNKNOWN;
+      │      4. PROPERTY_TAG 6 getter on the audited normal branch:
+      │         exact receiver MOV ECX,[EAX+4] @0x004C551C; PUSH 6 (6A 06)
+      │         @0x004C551F; CALL FUN_0070C180 @0x004C5523 (rel32 byte-verified) →
+      │         returned descriptor/variant (null-check TEST ECX,ECX @0x004C552B;
+      │         predicate CMP ECX,1 @0x004C552F; value read MOV EAX,[EAX+8]
+      │         @0x004C5539 on the measured branch);
+      │      5. the returned RUNTIME VALUE — the id2 key used below. NOT every getter
+      │         result comes from the normal tag-6 branch (see 3).
       ├─ CALL FUN_0043A550 @0x004C55D2 (THE SAME REGISTRY)
       ├─ MOV ECX,EAX; CALL FUN_0072F880 @0x004C55D9 (lookup-with-copy, this run's decode:
       │    mapfind(key) → node+0x14 or default 0x00BA5800 → FUN_0072FCE0 validity
@@ -58,8 +75,10 @@ FUN_00567770 (builder)
          then reads its B via FUN_00746550 ([ECX+4]) @0x005678C9
 ```
 So the builder's own call tree READS the same container with the same lookup family and
-copies the full value object — **but the lookup KEY is a runtime value** (the entity's
-0x4E26-property id2). Whether the runtime key ever equals 16083 is NOT statically
+copies the full value object — **but the lookup KEY is a runtime value** (the value
+returned by the class-selector-20006 / property-tag-6 getter on the exact receiver and
+branch — a SPECIFIC getter result, not any 20006-family constant). Whether the runtime
+key ever equals 16083 is NOT statically
 provable. (The all-encodings imm32 scan found NO static 0x3ED3 anywhere inside
 FUN_00567770/FUN_00567C50 — the only static 0x3ED3 is the Chain-1 PUSH.)
 
@@ -102,18 +121,30 @@ placement / XYZ / model association (contract).
 
 ## FIRST_MISSING_EDGE
 
-**INSERTED_VALUE_TO_PLACEMENT_CONSUMER** — specifically: the provenance of the RUNTIME
-KEY at the named builder's lookup (FUN_004C5480's 0x4E26-property id2 →
-FUN_0072F880): who WRITES the 0x4E26-property value on the entity, and can it ever be
-fed from a physical record (RECORD_A's id2 16083 in particular)? If yes, Chain-2a
-closes to CONFIRMED for the named family; if network/runtime-only, the named family's
-registry read stays confirmed-as-mechanism but never record-keyed statically.
+**INSERTED_VALUE_TO_PLACEMENT_CONSUMER** — specifically [C2-corrected wording]: the
+provenance of the RUNTIME KEY at the named builder's lookup, i.e. the producer of the
+SPECIFIC RUNTIME VALUE returned by the class-selector-20006 (CLASS_SELECTOR 0x4E26 =
+20006, pair @0x004C54C2 → FUN_00703B80 @0x004C54CE) / property-tag-6 (PROPERTY_TAG 6,
+PUSH 6 @0x004C551F → CALL FUN_0070C180 @0x004C5523) getter on the EXACT receiver and
+branch whose result is consumed as the FUN_0072F880 lookup key. Can that specific value
+ever be fed from a physical record (RECORD_A's id2 16083 in particular)? If yes,
+Chain-2a closes to CONFIRMED for the named family; if not, the named family's registry
+read stays confirmed-as-mechanism but never record-keyed statically.
 
 ## NEXT EXPERIMENT (recommendation ONLY — designed, NOT executed)
 
-Decode the WRITERS of the 0x4E26 (20006-family) property value — the property-write
-counterparts of the FUN_00703B80/FUN_0042EAD0 property machinery — and determine their
-data sources. This is the single experiment that addresses FIRST_MISSING_EDGE directly.
+[C2-corrected experiment identity — supersedes "Decode the WRITERS of the 0x4E26
+(20006-family) property value", which chased a conflated identity.] Trace the
+producer/provenance of the SPECIFIC RUNTIME VALUE returned by the
+class-selector-20006 / property-tag-6 getter (FUN_004C5480 → pair 0x4E26 @0x004C54C2
+→ FUN_00703B80 @0x004C54CE → exact receiver → branch predicate → PUSH 6 @0x004C551F
+→ FUN_0070C180 @0x004C5523) on the exact receiver and branch whose result is consumed
+as the FUN_0072F880 lookup key. Allowed provenance outcomes (OPEN taxonomy, no forced
+physical-vs-network binary): PHYSICAL_RECORD_DERIVED | CONSTANT_INITIALIZATION |
+LOCAL_COMPUTED | CACHE_PROVIDER | MESSAGE_DERIVED | FALLBACK_BRANCH | UNKNOWN.
+Alternative/fallback branches (e.g. the flag-0xD82 path) are preserved as
+SEPARATE/UNKNOWN — do NOT assume all getter results come from the normal tag-6 branch.
+This is the single experiment that addresses FIRST_MISSING_EDGE directly.
 (Also observed, RAW_OCCURRENCE_ONLY, no consumer role claimed: the imm32 0x3ED3/0x3ED2
 appear in a property-machinery idiom at 0x0050F383/0x0050F2F3 inside the 0x0050Fxxx
 CWO-handler-region function — `MOV [ESP+0x1C],0x3ED3` + CALL FUN_0042EAD0 — a possible

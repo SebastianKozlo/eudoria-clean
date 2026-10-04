@@ -41,14 +41,20 @@ Payload layout (28 B) — this run's own byte-decode of the client parser FUN_00
 |---|---|---|---|---|---|
 | +0 (560,228) | d3 3e 00 00 | u32 LE | MOV [EDI],EAX @0x00730CB6 (fast path) | template+0x00 | id2 = 16083 |
 | +4 (560,232) | fc 43 06 00 | u32 LE | MOV [EDI+0x08],EAX @0x00730CE6 | template+0x08 (A) | A = 410620 (0x0643FC) |
-| +8 (560,236) | 00 00 00 00 | u32 LE | MOV [EDI+0x04],EAX @0x00730D16 | template+0x04 (B) | B = 0 |
-| +12 (560,240) | 00 00 00 00 | u32 LE | MOV [EDI+0x0C],EAX @0x00730D36 | template+0x0C (C) | C = 0 |
-| +16 (560,244) | 98 be ff 3e | f32 LE | FLD [EDX+EAX]; FSTP [EDI+0x10] @0x00730D6F | template+0x10 (D_f32) | D_f32 = 0.49950098991394043 (bits 0x3EFFBE98) |
+| +8 (560,236) | 00 00 00 00 | u32 LE | MOV [EDI+0x04],EAX @0x00730D14 | template+0x04 (B) | B = 0 |
+| +12 (560,240) | 00 00 00 00 | u32 LE | MOV [EDI+0x0C],EAX @0x00730D42 | template+0x0C (C) | C = 0 |
+| +16 (560,244) | 98 be ff 3e | f32 LE | FLD [EDX+EAX] @0x00730D69; FSTP [EDI+0x10] @0x00730D70 | template+0x10 (D_f32) | D_f32 = 0.49950098991394043 (bits 0x3EFFBE98) |
 | +20 (560,248) | 00 00 | u16 LE | list1 parser FUN_00730B70 (called @0x00730D8D) | template+0x14 (vector<string>) | list1_count = 0 |
 | +22 (560,250) | 00 00 | u16 LE | list2 parser FUN_00730970 (called @0x00730D97) | template+0x20 (vector<u32>) | list2_count = 0 |
 | +24 (560,252) | 00 00 00 00 | u32 LE | MOV [EDI+0x2C],EDX @0x00730DB6 | template+0x2C (f11) | f11 = 0 |
 
 - Parse consumes exactly 28 bytes = the header `size` field (consumed == size ✓).
+- [C1/P3 correction] The instruction starts in the decode table above were corrected
+  (B store @0x00730D14 89 47 04, was @0x00730D16; C store @0x00730D42 89 47 0C, was
+  @0x00730D36; FLD @0x00730D69 D9 04 10, was @0x00730D6F/D6D; FSTP @0x00730D70 was
+  already correct) — all byte-re-verified from the pinned EXE by the C1 correction
+  package (PE_935_PARAMETER_RECORD_ATTRIBUTE_INSERTION_C1_REPORT_QC_CORRECTION_
+  R1_20261004). The destination pairing (A→+0x08, B→+0x04) is UNCHANGED.
 - FIELD_SEMANTIC labels A/B/C/D_f32/list1/list2/f11 follow the established BRIDGE R1 E1
   semantic role ("templates.vfs = the static template registry {id2 → A (model nif id),
   B (collision bvi id), C, D_f32, name-list1, u32-list2}") — STRUCTURAL_PARSE is this

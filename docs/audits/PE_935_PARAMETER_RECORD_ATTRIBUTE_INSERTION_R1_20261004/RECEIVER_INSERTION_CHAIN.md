@@ -13,21 +13,33 @@ CONTAINER_ROLE = DEFINITION_REGISTRY; PARSER_TO_RUNTIME_VALUE_SEAM = CONFIRMED.
 - The registry root: `MOV EAX,[0x00BA1824]` @0x0043A571 inside FUN_0043A550
   (lazy singleton: if NULL → `PUSH 0x18` @0x0043A57A → allocation → ctor FUN_0052A260
   → `MOV [0x00BA1824],EAX`). Byte-verified this run (QC-8).
-- The reader loop fetches the registry via FUN_0043A550 and keeps it at [ESP+0x3C]
-  (MOV ECX,[ESP+0x3C] @0x0072FBD4 before the insert call @0x0072FBE5).
-- The same singleton feeds every consumer censused this run (35 call sites of
+- [C1/P3-corrected receiver provenance — SUPERSEDES the prior claim "The reader loop
+  fetches the registry via FUN_0043A550 and keeps it at [ESP+0x3C]", which was WRONG:
+  the loader FUN_0072FA30 does NOT itself call the singleton.] The registry pointer
+  ARRIVES as the loader's incoming ECX from the wrapper FUN_00452490:
+  `CALL FUN_0043A550` @0x00452490 → `MOV ECX,EAX` @0x00452495 → tail
+  `JMP FUN_0072FA30` @0x00452497 (all byte-verified from the pinned EXE). The loader
+  PRESERVES the incoming ECX (`MOV [ESP+0x38],ECX @0x0072FA6B`, bytes 89 4C 24 38 —
+  byte-verified; the Desktop post-audit report cited @0x0072FA6C, which is the ModRM
+  byte of this instruction, not its start) and recovers it before the insert
+  (`MOV ECX,[ESP+0x3C]` @0x0072FBD4; insert call @0x0072FBE5). The whole-.text E8
+  census of FUN_0043A550 contains NO call site inside FUN_0072FA30.
+- The same singleton feeds every OTHER consumer censused this run (35 call sites of
   FUN_0043A550; every FUN_0072F580/FUN_0072F880 call is preceded by one — pairing
   verified in the census JSON).
 
 ## Container class/structure (byte-decoded this run)
 
 - STL-style RB-tree (map<u32 id2, template_object>):
-  - node size **0x44 bytes** (`MOV [EBP-0x14],0x44` @0x0072F825 in FUN_0072F7F0 before
-    the allocation call) = 0x10 node header + pair {key 4B, value 0x30B};
+  - node size **0x44 bytes** (`MOV [EBP-0x14],0x44` @0x0072F822 in FUN_0072F7F0 before
+    the allocation call; C1/P3-corrected instruction start — @0x0072F825 was
+    mid-instruction; the R1 QC script's byte check already read C7 45 EC 44 at
+    0x0072F822) = 0x10 node header + pair {key 4B, value 0x30B};
   - **key at node+0x10** (mapfind FUN_004D1430 compares the searched key against
     node+0x10 — established E2, window re-verified);
   - **value at node+0x14** (lookup FUN_0072F580 returns `node+0x14` —
-    `ADD EAX,0x14` @0x0072F59E; miss default `MOV EAX,0x00BA5800` @0x0072F5A8).
+    `ADD EAX,0x14` @0x0072F59E; miss default `MOV EAX,0x00BA5800` @0x0072F5A5 —
+    C1/P3-corrected instruction start; @0x0072F5A8 was the operand byte).
 - Insert function: FUN_0072F8D0 (exactly 1 call site: the reader loop @0x0072FBE5);
   new node from FUN_0072F7F0 (established E1, re-verified).
 
