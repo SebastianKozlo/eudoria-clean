@@ -1,0 +1,43 @@
+step,identity,va,kind,role,evidence_status
+1,builder FUN_00567770,0x00567770,function,placement builder (prior canon; not re-decoded),PRIOR_CANON
+2,builder->wrapper call,0x005678BA,call,E8 machine-verified -> FUN_004C5580,CONFIRMED
+3,wrapper FUN_004C5580,0x004C5580,function,args (entity,&out_template); calls the getter then the registry lookup,CONFIRMED
+4,wrapper->getter call,0x004C55B5,call,E8 machine-verified -> FUN_004C5480 (exactly 1 caller),CONFIRMED
+5,getter FUN_004C5480,0x004C5480,function,the audited normal-branch getter,CONFIRMED
+6,receiver resolve FUN_00843DD0,0x00843DD0,function,[entity+4] -> FUN_00747970 -> resolved receiver,CONFIRMED (FUN_00747970 surface only)
+7,CLASS_SELECTOR pair write,0x004C54C2,instruction,"C7 44 24 1C 26 4E 00 00 = MOV [ESP+0x1C],0x4E26 (20006)",CONFIRMED
+8,pair receiver write,0x004C54CA,instruction,89 44 24 20 = MOV [ESP+0x20],EAX,CONFIRMED
+9,selector wrapper FUN_00703B80,0x00703B80,function,-> singleton FUN_00415470 -> FUN_00703D70,CONFIRMED
+10,manager singleton FUN_00415470,0x00415470,function,lazy 0x100-byte singleton at 0x00BA12E4,CONFIRMED
+11,selector machinery FUN_00703D70,0x00703D70,function,-> FUN_0073C870 -> FUN_0070E100,CONFIRMED
+12,selector dispatch FUN_0073C870,0x0073C870,function,20006 -> jump-table entry 5 -> [0x00BA590C],CONFIRMED
+13,20006 factory slot,0x00BA590C,static,0x118-byte factory object; lazy init 0x0073E2C7..0x0073E355,CONFIRMED
+14,factory ctor FUN_0073B820,0x0073B820,function,vtable 0x00A870C4; registers 0x4E26 via FUN_0070CF80,CONFIRMED
+15,factory initializer FUN_0070CF80,0x0070CF80,function,zeroes +0x80/+0x84/+0x88..; 4 fixed members; name string,CONFIRMED
+16,slot builder FUN_007374F0,0x007374F0,function,8 SLOT_ADD calls (tags 0-7 kinds {43141212}),CONFIRMED
+17,SLOT_ADD tag 6,0x00737598,call,args 50 6A 00 6A 00 6A 01 6A 06 @0x73758D (kind=1 int tag=6),CONFIRMED
+18,int traits factory FUN_00977A50,0x00977A50,function,vtable 0x00A9C670 -> static 0x00BA937C (20002 canon corroborated),CONFIRMED
+19,slot field init FUN_0075F5C0,0x0075F5C0,function,slot={+0 traits,+4 kind,+8 tag+4,+0xC p3},CONFIRMED
+20,slot appender FUN_0070C980,0x0070C980,function,sequential append; slot+8-4==count check,CONFIRMED
+21,get-or-create FUN_0070E100,0x0070E100,function,per-receiver cache map @factory+0x0C keyed by receiver ptr,CONFIRMED
+22,create+bind FUN_0070DE10,0x0070DE10,function,early record-read path vs +0x80 delegate bind path,CONFIRMED
+23,class_obj creator FUN_0070D990,0x0070D990,function,class_obj+4=FACTORY @0x0070D9A5; +0x40 table init + payload loop,CONFIRMED
+24,record-read early creator FUN_0070DCF0,0x0070DCF0,function,reads ONE record from factory+0x84 stream via FUN_00971AD0,shell CONFIRMED / value semantics UNRESOLVED
+25,per-record reader FUN_00971AD0,0x00971AD0,function,R1 canon (templates.vfs parser chain); machine-verified call site 0x0070DD75,PRIOR_CANON + call CONFIRMED
+26,record apply FUN_0070DC20,0x0070DC20,function,applies the read record to the receiver; THE leading value-writer candidate,IDENTIFIED_NOT_DECODED
+27,bind delegate slot,0x00BA590C+0x80,factory field,NULL at factory init; setter NOT identified,UNRESOLVED
+28,record stream slot,0x00BA590C+0x84,factory field,NULL at factory init; backing data NOT identified,UNRESOLVED
+29,branch predicate FUN_00844020,0x00844020,function,established attribute-flag reader; flag 0xD82,CONFIRMED (prior canon + narrow byte recheck)
+30,PROPERTY_TAG 6 push,0x004C551F,instruction,6A 06,CONFIRMED
+31,slot getter FUN_0070C180,0x0070C180,function,&[factory+0x88][tag*16]; 16-byte slots; default 0x00BA5108 (permanently zero),CONFIRMED
+32,selected value read,0x004C5539,instruction,8B 40 08 = MOV EAX,[EAX+8] (slot6+8 = attr id 10),CONFIRMED
+33,value-table index,0x004C553F,instruction,8D 0C 81 = LEA ECX,[ECX+EAX*4] -> &table[10],CONFIRMED
+34,table entry read (THE KEY),0x004C554E,instruction,8B 00 = MOV EAX,[EAX],CONFIRMED
+35,identity helper FUN_004926E0,0x004926E0,function,MOV EAX,ECX;RET,CONFIRMED
+36,registry singleton FUN_0043A550,0x0043A550,function,registry root DAT_00BA1824 (R1 canon; narrow recheck),CONFIRMED
+37,lookup-with-copy FUN_0072F880,0x0072F880,function,p1=KEY p2=OUT; default template 0x00BA5800,CONFIRMED
+38,mapfind FUN_004D1430,0x004D1430,function,key=*(u32*)key_ptr @0x004D143E; node+0x10 = id2,CONFIRMED
+39,validity check FUN_0072FCE0,0x0072FCE0,function,id2!=0 && (A!=0||B!=0||C!=0) (R1 canon),CONFIRMED
+40,full-field copy FUN_0072F7A0,0x0072F7A0,function,copy template into out buffer (R1 canon),CONFIRMED
+41,fallback static object,0x00BA9374,static,returned by FUN_00977780; permanently ZERO (no writers),CONFIRMED
+42,value table entry 10,[class_obj+0x40]+40,storage,THE LOOKUP KEY storage; initial 0; actual writer UNIDENTIFIED,STORAGE CONFIRMED / PRODUCER UNKNOWN
