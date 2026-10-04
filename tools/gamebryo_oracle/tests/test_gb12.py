@@ -820,12 +820,368 @@ def f2_acceptance_coverage_link_tests():
           "is asserted for the registered-but-not-decoded case")
 
 
+def _f2c1c2_fixtures():
+    """Hand-built synthetic fixtures for the F2-C1/F2-C2 acceptance-guard
+    battery (Desktop post-audit
+    C:\\Users\\User\\Documents\\ChatGPT\\PE\\
+    PE_GAMEBRYO_ORACLE_F2_DESKTOP_POST_AUDIT_20261003 REPORT.md findings
+    F2-C1/P2 + F2-C2/P2; see run
+    PE_GAMEBRYO_ORACLE_F2_C1_C2_ACCEPTANCE_GUARDS_R1_20261004 for the
+    derivation + SIZE/SHA256 pins). Byte layouts derived from the pinned
+    source canon (NiStream.cpp E955C36E), NOT from the adapter under
+    correction. All bytes are OUR OWN synthetic data; the committed package
+    generator (docs/audits/
+    PE_GAMEBRYO_ORACLE_F2_C1_C2_ACCEPTANCE_GUARDS_R1_20261003/01_FIXTURES/
+    build_fixtures_f2c1c2.py) reproduces the physical files
+    byte-identically in the run's EXTERNAL sandbox (repo *.nif policy).
+    Every mutant differs from the VALID base in EXACTLY ONE DWORD (the
+    user-version DWORD for C1; the footer/root DWORD for C2) -- the
+    discriminator pairs required as non-circular evidence."""
+    import struct as _s
+    import hashlib as _h
+
+    def _rtti(nm):
+        b = nm.encode("latin-1")
+        return _s.pack("<I", len(b)) + b
+
+    def _cstr(nm):
+        b = nm.encode("latin-1")
+        return _s.pack("<i", len(b)) + b
+
+    def _header(n_blocks, user_ver):
+        return (b"Gamebryo File Format, Version 10.1.0.0\n"
+                + _s.pack("<I", 0x0A010000)
+                + _s.pack("<I", user_ver)
+                + _s.pack("<I", n_blocks))
+
+    def _node_body(name):
+        nul = 0xFFFFFFFF
+        return (_s.pack("<I", 0) + _cstr(name) + _s.pack("<I", 0)
+                + _s.pack("<I", nul) + _s.pack("<H", 0)
+                + _s.pack("<3f", 0.0, 0.0, 0.0)
+                + _s.pack("<9f", 1.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                          0.0, 0.0, 1.0)
+                + _s.pack("<f", 1.0) + _s.pack("<I", 0)
+                + _s.pack("<I", nul)
+                + _s.pack("<I", 0)
+                + _s.pack("<I", 0))
+
+    def _build(user_ver, root):
+        return (_header(1, user_ver)
+                + _s.pack("<H", 1)
+                + _rtti("NiNode")
+                + _s.pack("<H", 0)
+                + _s.pack("<I", 0)
+                + _node_body("root")
+                + _s.pack("<I", 1)
+                + _s.pack("<I", root))
+
+    fx = {
+        "VALID": _build(0, 0),
+        "USERVER1": _build(1, 0),        # only the user-version DWORD
+        "ROOT9999": _build(0, 9999),     # only the footer/root DWORD
+        "ROOTFFFFFFFE": _build(0, 0xFFFFFFFE),
+        "ROOTFFFFFFFF": _build(0, 0xFFFFFFFF),
+    }
+    # pinned SIZE/SHA256 (INPUT_IDENTITIES.md of this run's package; the
+    # VALID base is additionally byte-identical to the F2 positive-control
+    # pin 48B24BB5..., and USERVER1/ROOT9999 are byte-identical to the
+    # Desktop auditor's independent fixtures C643F2D2.../D0E2A035...)
+    pins = {
+        "VALID": "48B24BB5100F424ABB266A8D10BB1F6C57A854C1960B53A46C27FEB"
+                 "901436984",
+        "USERVER1": "C643F2D295CA1F0DE347D1BFDE1A0BECD462E84E0C62ED78337B"
+                    "5CB67285CCC2",
+        "ROOT9999": "D0E2A0350849305A614734137F1BEEEF1FA7880F84866E0C7531B"
+                    "8416F4AE49F",
+        "ROOTFFFFFFFE": "EA49107A0AFDD0483E6C53DFAE2821BD7356457C74627C90B"
+                        "14900E88D9676FD",
+        "ROOTFFFFFFFF": "9EA4C739CF92F5BD281693A33DD53776FF150FAB87DD5823E"
+                        "82A775F39B8632D",
+    }
+    for k, data in fx.items():
+        sha = _h.sha256(data).hexdigest().upper()
+        assert len(data) == 167 and sha == pins[k], (
+            "%s fixture drift: size=%d sha256=%s (pinned 167 / %s)"
+            % (k, len(data), sha, pins[k]))
+    # discriminator verification: each mutant differs from the base in
+    # exactly one contiguous 4-byte window (the intended DWORD)
+    for k in ("USERVER1", "ROOT9999", "ROOTFFFFFFFE", "ROOTFFFFFFFF"):
+        diffs = [i for i in range(167)
+                 if fx["VALID"][i] != fx[k][i]]
+        assert diffs and max(diffs) - min(diffs) <= 3, \
+            "%s: not a single-DWORD mutant: %r" % (k, diffs)
+    return fx
+
+
+def f2c1c2_guard_tests():
+    """F2-C1/F2-C2 acceptance-guard battery (Desktop post-audit
+    PE_GAMEBRYO_ORACLE_F2_DESKTOP_POST_AUDIT_20261003 findings F2-C1/P2 +
+    F2-C2/P2): (C1) a source-proven invalid user-defined version must end
+    SOURCE_PREDICTED=REJECTED, TOOL_VERDICT=FAIL, accepted=false,
+    inspect exit != 0 in BOTH ordinary and --full-decode (--full-decode
+    must NOT bypass a source-proven LoadHeader rejection); with
+    COVERAGE=NOT_MEASURED and object-level counters null (the rejection
+    precedes the uiObjects read; no object bytes are decoded just to
+    obtain counts). (C2) a parsed non-NULL top-level root outside
+    [0, header_num_blocks) must end TOP_LEVEL_ROOT_LINK_INTEGRITY=FAIL =>
+    LINK_INTEGRITY=FAIL => ADAPTER_INTEGRITY=FAIL => TOOL_VERDICT=FAIL,
+    accepted=false, exit != 0 in BOTH modes, with the raw representation
+    preserved (scene_graph.roots), u32 normalization applied (signed -2 ==
+    0xFFFFFFFE must NOT bypass), and SOURCE=UNRESOLVED (never
+    auto-REJECTED). The NULL sentinel root 0xFFFFFFFF must NOT produce an
+    out-of-range-root failure. A valid user version 0.0.0.0 and a valid
+    root 0 must keep SOURCE=ACCEPTED, COVERAGE=COMPLETE, INTEGRITY=PASS,
+    TOOL=PASS, accepted=true, exit 0 (no over-fail-closed)."""
+    fx = _f2c1c2_fixtures()
+    print("== F2-C1/C2 acceptance-guard battery (Desktop post-audit "
+          "findings F2-C1/P2 + F2-C2/P2) ==")
+    print("MEASURED_QUANTITY: the four F2 axes + the user_version_gate "
+          "object + the top_level_root_* measured fields + "
+          "load_result.accepted, ordinary AND --full-decode")
+    print("INDEPENDENT_SOURCE_OF_TRUTH: pinned NiStream.cpp E955C36E "
+          "L46-50 (min=max user-defined version = GetVersion(0,0,0,0) = "
+          "0; NULL_LINKID=0xffffffff), L111-112 (constructor member 0), "
+          "L334-352 (LoadHeader reads the user-defined version iff "
+          "ver >= 10.0.1.8 and rejects out-of-gate BEFORE the uiObjects "
+          "read L355-357 -> LoadHeader false -> LoadStream L508-509 "
+          "false), L362-385 (LoadTopLevelObjects: NULL_LINKID -> NULL, "
+          "else DEBUG-only assert L380 + UNCHECKED GetAt L381; void), "
+          "NiTArray.inl L135-139 (unchecked m_pBase[uiIndex])")
+    print("WHY_NON_CIRCULAR: expectations were derived from the pinned "
+          "source semantics + the explicit F2-C1/C2 contract BEFORE the "
+          "fix; the pre-fix false-success (SOURCE=ACCEPTED + TOOL=PASS + "
+          "accepted=true + exit 0 on all four invalid mutants) was "
+          "reproduced on raw CLI records on the pristine base SHA "
+          "d497b44d and is preserved in the run package; fixtures differ "
+          "from the VALID base in exactly ONE DWORD")
+    print("FAILURE_CASE_DETECTED: an adapter that lets a nonzero "
+          "user-defined version reach TOOL PASS, or leaves an "
+          "out-of-range top-level root out of link-integrity, or lets a "
+          "signed -2/0xFFFFFFFE bypass the u32 range check, or treats "
+          "the NULL sentinel 0xFFFFFFFF as out-of-range, or "
+          "over-fail-closes the valid positive control, FAILS these "
+          "controls")
+
+    # ---- VALID positive control (both guards green): PASS/exit 0 -----
+    rV = gb12core.decode(fx["VALID"], path="<f2c1c2-VALID>")
+    iV = rV["adapter_integrity_checks"]
+    check("f2c1c2_valid_positive_control_pass",
+          rV["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "ACCEPTED" and
+          rV["ADAPTER_DECODE_COVERAGE"] == "COMPLETE" and
+          rV["ADAPTER_INTEGRITY"] == "PASS" and
+          rV["TOOL_VERDICT"] == "PASS" and
+          rV["load_result"]["accepted"] is True,
+          "source=%s coverage=%s integrity=%s tool=%s accepted=%s"
+          % (rV["SOURCE_PREDICTED_ORIGINAL_VERDICT"],
+             rV["ADAPTER_DECODE_COVERAGE"], rV["ADAPTER_INTEGRITY"],
+             rV["TOOL_VERDICT"], rV["load_result"]["accepted"]))
+    check("f2c1c2_valid_user_version_gate_measured_accepted",
+          rV["user_version_gate"]["read_from_stream"] is True and
+          rV["user_version_gate"]["measured_user_defined_version"] ==
+          "0.0.0.0" and
+          rV["user_version_gate"]["verdict"] == "ACCEPTED" and
+          rV["input_identity"]["user_defined_version_u32"] == 0,
+          "user_version_gate=%s" % rV["user_version_gate"]["verdict"])
+    check("f2c1c2_valid_top_level_roots_measured_pass",
+          iV["top_level_root_link_integrity"] == "PASS" and
+          iV["top_level_root_failure_count"] == 0 and
+          iV["top_level_root_checked_count"] == 1 and
+          iV["top_level_root_raw"] == [0] and
+          iV["top_level_root_normalized_u32"] == [0] and
+          rV["scene_graph"]["roots"] == [0],
+          "raw=%r normalized=%r integrity=%s"
+          % (iV["top_level_root_raw"],
+             iV["top_level_root_normalized_u32"],
+             iV["top_level_root_link_integrity"]))
+    # the ACCEPTED reason must cite the MEASURED top-level roots + the
+    # checked user-defined version gate (mandatory wording fix)
+    check("f2c1c2_accepted_reason_cites_measurements",
+          "top_level_root_checked_count=1" in
+          rV["source_predicted_reason"] and
+          "top_level_root_failure_count=0" in
+          rV["source_predicted_reason"] and
+          "link_failure_count=0" in
+          rV["source_predicted_reason"] and
+          "MEASURED: read user_defined_version=0.0.0.0" in
+          rV["source_predicted_reason"],
+          "the ACCEPTED reason carries the measured counts")
+
+    # ---- C1: invalid user-defined version -> source-proven REJECTED ---
+    rC1o = gb12core.decode(fx["USERVER1"], path="<f2c1c2-USERVER1>")
+    rC1f = gb12core.decode(fx["USERVER1"], path="<f2c1c2-USERVER1>",
+                           full_decode=True)
+    for label, rC1 in (("ordinary", rC1o), ("full", rC1f)):
+        cC1 = rC1["adapter_decode_coverage_counters"]
+        check("f2c1_invalid_user_version_rejected_%s" % label,
+              rC1["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "REJECTED" and
+              rC1["TOOL_VERDICT"] == "FAIL" and
+              rC1["load_result"]["accepted"] is False and
+              rC1["ADAPTER_DECODE_COVERAGE"] == "NOT_MEASURED" and
+              rC1["ADAPTER_INTEGRITY"] == "NOT_MEASURED" and
+              rC1["user_version_gate"]["verdict"] == "REJECTED" and
+              rC1["user_version_gate"]["measured_user_defined_version"] ==
+              "0.0.0.1" and
+              cC1["header_num_blocks"] is None and
+              all(cC1[k] is None for k in (
+                  "semantically_decoded_blocks", "boundary_only_blocks",
+                  "registered_but_not_decoded_blocks",
+                  "unregistered_blocks", "unresolved_blocks")) and
+              all(cC1["not_measured_reasons"].get(k) for k in (
+                  "semantically_decoded_blocks", "boundary_only_blocks",
+                  "registered_but_not_decoded_blocks",
+                  "unregistered_blocks", "unresolved_blocks")) and
+              rC1["objects"] == [],
+              "source=%s tool=%s accepted=%s user_gate=%s "
+              "header_num_blocks=%r (the uiObjects field was never read; "
+              "the 5 object-level counters are null with explicit "
+              "reasons; no object bytes decoded just to obtain counts)"
+              % (rC1["SOURCE_PREDICTED_ORIGINAL_VERDICT"],
+                 rC1["TOOL_VERDICT"], rC1["load_result"]["accepted"],
+                 rC1["user_version_gate"]["verdict"],
+                 cC1["header_num_blocks"]))
+    check("f2c1_both_modes_agree_and_no_full_decode_bypass",
+          rC1o["SOURCE_PREDICTED_ORIGINAL_VERDICT"] ==
+          rC1f["SOURCE_PREDICTED_ORIGINAL_VERDICT"] and
+          rC1o["TOOL_VERDICT"] == rC1f["TOOL_VERDICT"] == "FAIL" and
+          rC1o["load_result"]["accepted"] is False and
+          rC1f["load_result"]["accepted"] is False,
+          "ordinary and --full-decode agree on the guard outcome; "
+          "--full-decode does NOT bypass a source-proven LoadHeader "
+          "rejection")
+    check("f2c1_source_rejection_implies_tool_fail",
+          rC1o["TOOL_VERDICT"] == "FAIL" and
+          rC1f["TOOL_VERDICT"] == "FAIL",
+          "central invariant: SOURCE_PREDICTED=REJECTED => "
+          "TOOL_VERDICT=FAIL (a source rejection can never become "
+          "TOOL PASS)")
+
+    # ---- C2: root 9999 -> top-level root integrity FAIL --------------
+    rRo = gb12core.decode(fx["ROOT9999"], path="<f2c1c2-ROOT9999>")
+    rRf = gb12core.decode(fx["ROOT9999"], path="<f2c1c2-ROOT9999>",
+                          full_decode=True)
+    for label, rR in (("ordinary", rRo), ("full", rRf)):
+        iR = rR["adapter_integrity_checks"]
+        check("f2c2_root_9999_integrity_fail_%s" % label,
+              rR["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "UNRESOLVED" and
+              rR["ADAPTER_DECODE_COVERAGE"] == "COMPLETE" and
+              iR["top_level_root_link_integrity"] == "FAIL" and
+              iR["top_level_root_failure_count"] == 1 and
+              iR["top_level_root_checked_count"] == 1 and
+              iR["top_level_root_raw"] == [9999] and
+              iR["top_level_root_normalized_u32"] == [9999] and
+              rR["scene_graph"]["roots"] == [9999] and
+              iR["link_integrity"] == "FAIL" and
+              rR["ADAPTER_INTEGRITY"] == "FAIL" and
+              rR["TOOL_VERDICT"] == "FAIL" and
+              rR["load_result"]["accepted"] is False,
+              "source=%s coverage=%s top_root=%s link_int=%s "
+              "integrity=%s tool=%s accepted=%s (raw preserved; no "
+              "clamping/rewriting/silent dropping)"
+              % (rR["SOURCE_PREDICTED_ORIGINAL_VERDICT"],
+                 rR["ADAPTER_DECODE_COVERAGE"],
+                 iR["top_level_root_link_integrity"],
+                 iR["link_integrity"], rR["ADAPTER_INTEGRITY"],
+                 rR["TOOL_VERDICT"], rR["load_result"]["accepted"]))
+    check("f2c2_root_9999_both_modes_agree_no_false_pass",
+          rRo["TOOL_VERDICT"] == rRf["TOOL_VERDICT"] == "FAIL" and
+          rRo["load_result"]["accepted"] is False and
+          rRf["load_result"]["accepted"] is False,
+          "neither mode returns a false PASS for an invalid root")
+
+    # ---- C2: root 0xFFFFFFFE (raw -2) -> signedness bypass blocked ----
+    rEo = gb12core.decode(fx["ROOTFFFFFFFE"], path="<f2c1c2-ROOTFFFFFFFE")
+    rEf = gb12core.decode(fx["ROOTFFFFFFFE"], path="<f2c1c2-ROOTFFFFFFFE",
+                          full_decode=True)
+    for label, rE in (("ordinary", rEo), ("full", rEf)):
+        iE = rE["adapter_integrity_checks"]
+        check("f2c2_root_fffffffe_no_signed_bypass_%s" % label,
+              iE["top_level_root_raw"] == [-2] and
+              iE["top_level_root_normalized_u32"] == [0xFFFFFFFE] and
+              iE["top_level_root_link_integrity"] == "FAIL" and
+              iE["top_level_root_failure_count"] == 1 and
+              iE["link_integrity"] == "FAIL" and
+              rE["ADAPTER_INTEGRITY"] == "FAIL" and
+              rE["TOOL_VERDICT"] == "FAIL" and
+              rE["load_result"]["accepted"] is False and
+              rE["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "UNRESOLVED",
+              "raw=%r normalized=%r (0xFFFFFFFE != NULL_LINKID and >= "
+              "num_blocks -> FAIL; the signed representation cannot "
+              "bypass the u32-normalized range check)"
+              % (iE["top_level_root_raw"],
+                 iE["top_level_root_normalized_u32"]))
+
+    # ---- C2: root 0xFFFFFFFF (raw -1) = source NULL_LINKID sentinel ---
+    rNo = gb12core.decode(fx["ROOTFFFFFFFF"], path="<f2c1c2-ROOTFFFFFFFF")
+    rNf = gb12core.decode(fx["ROOTFFFFFFFF"], path="<f2c1c2-ROOTFFFFFFFF",
+                          full_decode=True)
+    for label, rN in (("ordinary", rNo), ("full", rNf)):
+        iN = rN["adapter_integrity_checks"]
+        check("f2c2_null_root_ffffffff_not_out_of_range_%s" % label,
+              iN["top_level_root_raw"] == [-1] and
+              iN["top_level_root_normalized_u32"] == [0xFFFFFFFF] and
+              iN["top_level_root_link_integrity"] == "PASS" and
+              iN["top_level_root_failure_count"] == 0 and
+              iN["top_level_root_checked_count"] == 1 and
+              not any("TOP_LEVEL_ROOT_FAILURE" in w
+                      for w in rN["warnings"]),
+              "raw=%r normalized=%r: the source NULL_LINKID sentinel "
+              "(NiStream.cpp L50, L374-377) maps to a NULL top object "
+              "-- NOT an out-of-range-root failure (verified by fixture "
+              "EXECUTION; permitting NULL does not independently prove "
+              "SOURCE=ACCEPTED or TOOL=PASS)"
+              % (iN["top_level_root_raw"],
+                 iN["top_level_root_normalized_u32"]))
+
+    # ---- cross-laws over every new battery result ----------------------
+    allres = (("VALID", rV), ("USERVER1", rC1o), ("USERVER1full", rC1f),
+              ("ROOT9999", rRo), ("ROOT9999full", rRf),
+              ("ROOTFFFFFFFE", rEo), ("ROOTFFFFFFFEfull", rEf),
+              ("ROOTFFFFFFFF", rNo), ("ROOTFFFFFFFFfull", rNf))
+    law_ok = True
+    detail = []
+    for label, r in allres:
+        if r["ADAPTER_INTEGRITY"] == "FAIL" and r["TOOL_VERDICT"] != "FAIL":
+            law_ok = False
+            detail.append("%s: integrity FAIL but tool=%s"
+                          % (label, r["TOOL_VERDICT"]))
+        if r["SOURCE_PREDICTED_ORIGINAL_VERDICT"] == "REJECTED" and \
+                r["TOOL_VERDICT"] != "FAIL":
+            law_ok = False
+            detail.append("%s: source REJECTED but tool=%s"
+                          % (label, r["TOOL_VERDICT"]))
+        if (r["load_result"]["accepted"] is not
+                (r["TOOL_VERDICT"] == "PASS")):
+            law_ok = False
+            detail.append("%s: accepted=%s tool=%s"
+                          % (label, r["load_result"]["accepted"],
+                             r["TOOL_VERDICT"]))
+    check("f2c1c2_integrity_fail_and_source_rejected_imply_tool_fail",
+          law_ok,
+          "integrity FAIL => TOOL FAIL and SOURCE REJECTED => TOOL FAIL "
+          "and accepted == (TOOL_VERDICT == PASS) across all %d results: %s"
+          % (len(allres), "OK" if law_ok else "; ".join(detail)))
+    # ordinary/full-decode guard-outcome agreement over every mutant
+    agree_ok = (rC1o["TOOL_VERDICT"] == rC1f["TOOL_VERDICT"] and
+                rRo["TOOL_VERDICT"] == rRf["TOOL_VERDICT"] and
+                rEo["TOOL_VERDICT"] == rEf["TOOL_VERDICT"] and
+                rNo["TOOL_VERDICT"] == rNf["TOOL_VERDICT"])
+    check("f2c1c2_ordinary_and_full_decode_guards_agree", agree_ok,
+          "tool verdicts by fixture (ordinary vs full): USERVER1 %s/%s, "
+          "ROOT9999 %s/%s, ROOTFFFFFFFE %s/%s, ROOTFFFFFFFF %s/%s"
+          % (rC1o["TOOL_VERDICT"], rC1f["TOOL_VERDICT"],
+             rRo["TOOL_VERDICT"], rRf["TOOL_VERDICT"],
+             rEo["TOOL_VERDICT"], rEf["TOOL_VERDICT"],
+             rNo["TOOL_VERDICT"], rNf["TOOL_VERDICT"]))
+
+
 def main():
     args = sys.argv[1:]
     self_tests()
     f1_rtti_table_tests()
     f1c1_extension_halt_tests()
     f2_acceptance_coverage_link_tests()
+    f2c1c2_guard_tests()
     if "--sandbox-payload" in args:
         i = args.index("--sandbox-payload")
         payload_controls(args[i + 1])

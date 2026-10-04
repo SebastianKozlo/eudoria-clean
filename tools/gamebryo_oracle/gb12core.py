@@ -210,6 +210,72 @@
 #       runtime) and the CLI inspect exit is 0 only on TOOL_VERDICT=PASS.
 #       CLI_SUCCESS_SEMANTICS applies to `oracle.py inspect` only;
 #       probe-version / compare / capabilities semantics are unchanged.
+#
+# F2-C1 USER-DEFINED VERSION GATE (2026-10-04, Desktop post-audit
+# PE_GAMEBRYO_ORACLE_F2_DESKTOP_POST_AUDIT_20261003 finding F2-C1/P2):
+#     the pre-C1 build read the user-defined version (input_identity.
+#     user_defined_version) but never enforced the pinned source gate, so
+#     a nonzero user-defined version could end SOURCE=ACCEPTED + TOOL=PASS
+#     although the pinned source rejects. The ORIGINAL gate (NiStream.cpp
+#     E955C36E): ms_uiNifMinUserDefinedVersion =
+#     ms_uiNifMaxUserDefinedVersion = GetVersion(0,0,0,0) = 0 (L46-50);
+#     LoadHeader READS the field iff the NIF file version >= 10.0.1.8
+#     (L334-338) and rejects OUT OF GATE with OLDER_VERSION (L340-345) /
+#     LATER_VERSION (L347-352) BEFORE the uiObjects read (L355-357) ->
+#     LoadHeader returns false -> LoadStream L508-509 returns false ->
+#     Load() returns false: an UNAMBIGUOUS source-proven propagated
+#     rejection. The adapter now enforces the same gate source-faithfully:
+#     SOURCE_PREDICTED_ORIGINAL_VERDICT=REJECTED, TOOL_VERDICT=FAIL,
+#     load_result.accepted=false, inspect exit != 0, in BOTH ordinary and
+#     --full-decode (--full-decode must NOT bypass a source-proven
+#     LoadHeader rejection -- the early rejection precedes every object
+#     byte). Coverage/integrity are NOT_MEASURED with header_num_blocks
+#     null (the rejection precedes the uiObjects read L355; no object
+#     bytes are decoded just to obtain counts after a source-proven
+#     header rejection). Central invariant: SOURCE_PREDICTED=REJECTED =>
+#     TOOL_VERDICT=FAIL. Streams below the 10.0.1.8 read threshold keep
+#     the source-faithful era semantics: the field is not read
+#     (L334-337) and the original compares the constructor-initialized
+#     member 0 (L111-112) against [0,0] -- trivially satisfied
+#     (user_version_gate.verdict=NOT_APPLICABLE_ERA, recorded honestly).
+#
+# F2-C2 TOP-LEVEL ROOT LINK INTEGRITY (2026-10-04, same audit finding
+# F2-C2/P2): the pre-C2 build reported the parsed top-level root IDs
+# (scene_graph.roots) but never range-validated them, so an out-of-range
+# LoadTopLevelObjects root could end ADAPTER_INTEGRITY=PASS + TOOL=PASS.
+#     The ORIGINAL (NiStream.cpp L362-385): per uiLinkID, NULL_LINKID
+#     (0xFFFFFFFF, L50) maps to a NULL top object (L374-377); any other
+#     value goes through a DEBUG-only assert(uiLinkID < GetSize()) (L380)
+#     + UNCHECKED NiTArray::GetAt (NiTArray.inl L135-139 raw
+#     m_pBase[uiIndex], L381); LoadTopLevelObjects is VOID (called at
+#     LoadStream L566 unconditionally, both eras) and its result is not
+#     a propagated load rejection (L634 returns true unconditionally).
+#     The adapter now validates the parsed top-level root IDs as part of
+#     overall link-integrity: the RAW representation is preserved for
+#     provenance (scene_graph.roots), validation normalizes each ID to
+#     u32 (raw & 0xFFFFFFFF; the parser's raw representation is signed
+#     i32, so -2 == 0xFFFFFFFE cannot bypass the check), and the valid
+#     domain is exactly the pinned source domain: NULL_LINKID 0xFFFFFFFF
+#     OR < header_num_blocks (no invented sentinels, no clamping, no
+#     silent dropping). Measured fields (schema-consistent, inside
+#     adapter_integrity_checks): top_level_root_link_integrity,
+#     top_level_root_failure_count, top_level_root_checked_count,
+#     top_level_root_raw, top_level_root_normalized_u32. A non-NULL
+#     normalized root outside [0, header_num_blocks) =>
+#     TOP_LEVEL_ROOT_LINK_INTEGRITY=FAIL => aggregate LINK_INTEGRITY=FAIL
+#     => ADAPTER_INTEGRITY=FAIL => TOOL_VERDICT=FAIL, accepted=false,
+#     inspect exit != 0, in BOTH modes; SOURCE stays UNRESOLVED for an
+#     invalid root (debug-only assert + unchecked GetAt + void -- no
+#     unambiguous propagated failure; never auto-REJECTED). SOURCE=
+#     ACCEPTED reasoning must never claim "LoadTopLevelObjects in range"
+#     or "every link is NULL or in range" unless the top-level root IDs
+#     were actually normalized, measured and passed (measured counts are
+#     cited in the reason); and source ACCEPTED must not claim the
+#     complete LoadHeader path content-valid unless the user-defined
+#     version gate was actually checked (the measured user_defined_
+#     version / era semantics are cited in the reason). The legacy
+#     (< 5.0.0.1) adapter path reads NO footer roots, so no
+#     LoadTopLevelObjects claim is made there.
 
 import hashlib
 import json
@@ -225,6 +291,13 @@ ERA_CATEGORY = "GB_1_2"
 GB12_NIF_MIN = (3, 3, 0, 11)
 GB12_NIF_MAX = (10, 2, 0, 0)
 USER_VERSION_GATE = (10, 0, 1, 8)
+# F2-C1 (2026-10-04): the ORIGINAL user-defined version gate (NiStream.cpp
+# L46-50, SHA E955C36E): ms_uiNifMinUserDefinedVersion =
+# ms_uiNifMaxUserDefinedVersion = GetVersion(0, 0, 0, 0) = 0. A nonzero
+# user-defined version is OUT OF GATE -> LoadHeader returns false ->
+# Load() returns false (unambiguous source-proven propagated rejection).
+GB12_USER_DEFINED_MIN = (0, 0, 0, 0)
+GB12_USER_DEFINED_MAX = (0, 0, 0, 0)
 NULL_LINKID = 0xFFFFFFFF
 
 
@@ -241,6 +314,8 @@ def u32_to_ver(v):
 V_MIN = ver_u32(*GB12_NIF_MIN)
 V_MAX = ver_u32(*GB12_NIF_MAX)
 V_USER_GATE = ver_u32(*USER_VERSION_GATE)
+V_USERDEF_MIN = ver_u32(*GB12_USER_DEFINED_MIN)
+V_USERDEF_MAX = ver_u32(*GB12_USER_DEFINED_MAX)
 V_BNEW = ver_u32(5, 0, 0, 1)
 V_GROUPS = ver_u32(5, 0, 0, 6)
 V_GROUPID_LO = ver_u32(5, 0, 0, 6)
@@ -1419,11 +1494,22 @@ def _f2_counters(header_num_blocks, reason=None, semantic=None, boundary=None,
 
 
 def _f2_integrity(count, closure, links, link_failures=None,
-                  link_measured=None, detail=""):
+                  link_measured=None, detail="",
+                  top_root_integrity=None, top_root_failures=None,
+                  top_root_checked=None, top_root_raw=None,
+                  top_root_u32=None):
     """ADAPTER_INTEGRITY from the three explicit sub-checks (object-count
     consistency, structural closure, link integrity). FAIL dominates
     (unconditionally => TOOL_VERDICT=FAIL); then UNRESOLVED; then
-    NOT_MEASURED; PASS only when every check is PASS."""
+    NOT_MEASURED; PASS only when every check is PASS.
+
+    F2-C2 (2026-10-04): when the footer roots were parsed, the top-level
+    root-link check participates in LINK_INTEGRITY via the caller (links
+    already aggregates it) and its measured fields are recorded here:
+    top_level_root_link_integrity / top_level_root_failure_count /
+    top_level_root_checked_count / top_level_root_raw (raw provenance,
+    signed i32 as read) / top_level_root_normalized_u32 (validation
+    domain: NULL_LINKID 0xFFFFFFFF or < header_num_blocks)."""
     checks = {
         "object_count_consistency": count,
         "structural_closure": closure,
@@ -1434,6 +1520,16 @@ def _f2_integrity(count, closure, links, link_failures=None,
         checks["link_failure_count"] = link_failures
     if link_measured is not None:
         checks["link_measured_blocks"] = link_measured
+    if top_root_integrity is not None:
+        checks["top_level_root_link_integrity"] = top_root_integrity
+    if top_root_failures is not None:
+        checks["top_level_root_failure_count"] = top_root_failures
+    if top_root_checked is not None:
+        checks["top_level_root_checked_count"] = top_root_checked
+    if top_root_raw is not None:
+        checks["top_level_root_raw"] = top_root_raw
+    if top_root_u32 is not None:
+        checks["top_level_root_normalized_u32"] = top_root_u32
     vals = (count, closure, links)
     if "FAIL" in vals:
         overall = "FAIL"
@@ -1483,6 +1579,15 @@ _F2_SRC_REJ_VERSION = (
     "REJECTED (source-proven): NiStream.cpp L320-332 (SHA E955C36E): the "
     "packed-u32 version gate [3.3.0.11, 10.2.0.0] -> OLDER_VERSION/"
     "LATER_VERSION -> LoadHeader returns false -> Load() returns false")
+_F2_SRC_REJ_USER_VERSION = (
+    "REJECTED (source-proven): NiStream.cpp LoadHeader L334-352 (SHA "
+    "E955C36E): the user-defined NIF version gate "
+    "[ms_uiNifMinUserDefinedVersion, ms_uiNifMaxUserDefinedVersion] = "
+    "[0.0.0.0, 0.0.0.0] (L46-50) -> OLDER_VERSION/LATER_VERSION -> "
+    "LoadHeader returns false -> LoadStream L508-509 returns false -> "
+    "Load() returns false (BEFORE the uiObjects read L355-357, any RTTI "
+    "table entry, the object groups or any body byte; --full-decode "
+    "cannot bypass a source-proven LoadHeader rejection)")
 _F2_SRC_REJ_RTTI = (
     "REJECTED (source-proven): NiStream.cpp LoadRTTI L421-433 (SHA "
     "E955C36E): the factory lookup miss on the first unregistered TABLE "
@@ -1639,8 +1744,99 @@ def decode(data, path="<memory>", full_decode=False,
             "(NiStream.cpp L355-357); no object decode was attempted"))
         return res
     res["version_gate"]["verdict"] = "ACCEPTED"
+    # ---- F2-C1 (2026-10-04): the ORIGINAL user-defined version gate ----
+    # NiStream.cpp L334-352 (SHA E955C36E): the field is READ iff the NIF
+    # file version >= 10.0.1.8, then gated against
+    # [ms_uiNifMinUserDefinedVersion, ms_uiNifMaxUserDefinedVersion] =
+    # [0.0.0.0, 0.0.0.0] (L46-50): < min -> OLDER_VERSION (L340-345),
+    # > max -> LATER_VERSION (L347-352), both return false BEFORE the
+    # uiObjects read (L355-357) -> LoadHeader false -> LoadStream L508-509
+    # false -> Load() false. Enforced here source-faithfully: a nonzero
+    # user-defined version is a source-proven UNAMBIGUOUS propagated
+    # rejection -> SOURCE_PREDICTED=REJECTED -> TOOL_VERDICT=FAIL,
+    # accepted=false, inspect exit != 0, in BOTH modes (--full-decode
+    # must NOT bypass a source-proven LoadHeader rejection). Below the
+    # 10.0.1.8 threshold the source does NOT read the field (L334-337)
+    # and compares the constructor-initialized member 0 (L111-112)
+    # against [0,0] -- trivially satisfied (era semantics recorded
+    # honestly, never claimed as a measured read).
+    res["user_version_gate"] = {
+        "min": u32_to_ver(V_USERDEF_MIN),
+        "max": u32_to_ver(V_USERDEF_MAX),
+        "read_from_stream": ver >= V_USER_GATE,
+        "measured_user_defined_version": None,
+        "verdict": None,
+        "reason": None,
+    }
     if ver >= V_USER_GATE:
-        res["input_identity"]["user_defined_version"] = u32_to_ver(r.u32())
+        user_ver = r.u32()
+        res["input_identity"]["user_defined_version"] = \
+            u32_to_ver(user_ver)
+        res["input_identity"]["user_defined_version_u32"] = user_ver
+        res["user_version_gate"][
+            "measured_user_defined_version"] = u32_to_ver(user_ver)
+        if user_ver < V_USERDEF_MIN:
+            # NiStream.cpp L340-345
+            res["user_version_gate"]["verdict"] = "REJECTED"
+            res["user_version_gate"]["reason"] = (
+                "measured user-defined version %s < min 0.0.0.0 -> "
+                "OLDER_VERSION (NiStream.cpp L340-345)"
+                % u32_to_ver(user_ver))
+            res["load_result"].update(
+                accepted=False,
+                error="OLDER_VERSION: NIF user defined version is too "
+                      "old.",
+                error_code="OLDER_VERSION")
+            res["warnings"].append(
+                "USER_DEFINED_VERSION_GATE: user-defined version %s is "
+                "below the pinned source gate min 0.0.0.0 (NiStream.cpp "
+                "L46-50, L340-345) -- LoadHeader returns false -> Load() "
+                "returns false" % u32_to_ver(user_ver))
+            _f2_axes_early_rejection(
+                res, _F2_SRC_REJ_USER_VERSION + " (measured user-defined "
+                "version %s < min 0.0.0.0; OLDER_VERSION L340-345)"
+                % u32_to_ver(user_ver), None,
+                "user-version-gate rejection precedes the uiObjects read "
+                "(NiStream.cpp L355-357); no object decode was attempted")
+            return res
+        if user_ver > V_USERDEF_MAX:
+            # NiStream.cpp L347-352
+            res["user_version_gate"]["verdict"] = "REJECTED"
+            res["user_version_gate"]["reason"] = (
+                "measured user-defined version %s > max 0.0.0.0 -> "
+                "LATER_VERSION (NiStream.cpp L347-352)"
+                % u32_to_ver(user_ver))
+            res["load_result"].update(
+                accepted=False,
+                error="LATER_VERSION: Unknown NIF user defined version.",
+                error_code="LATER_VERSION")
+            res["warnings"].append(
+                "USER_DEFINED_VERSION_GATE: user-defined version %s is "
+                "above the pinned source gate max 0.0.0.0 (NiStream.cpp "
+                "L46-50, L347-352) -- LoadHeader returns false -> Load() "
+                "returns false" % u32_to_ver(user_ver))
+            _f2_axes_early_rejection(
+                res, _F2_SRC_REJ_USER_VERSION + " (measured user-defined "
+                "version %s > max 0.0.0.0; LATER_VERSION L347-352)"
+                % u32_to_ver(user_ver), None,
+                "user-version-gate rejection precedes the uiObjects read "
+                "(NiStream.cpp L355-357); no object decode was attempted")
+            return res
+        res["user_version_gate"]["verdict"] = "ACCEPTED"
+        res["user_version_gate"]["reason"] = (
+            "measured user-defined version %s within the pinned source "
+            "gate [0.0.0.0, 0.0.0.0] (NiStream.cpp L46-50, L334-352)"
+            % u32_to_ver(user_ver))
+    else:
+        res["user_version_gate"]["verdict"] = "NOT_APPLICABLE_ERA"
+        res["user_version_gate"]["reason"] = (
+            "the user-defined version field is read only for NIF file "
+            "version >= 10.0.1.8 (NiStream.cpp L334-337); this stream is "
+            "below the era threshold, so the ORIGINAL compares the "
+            "constructor-initialized member 0 (L111-112) against "
+            "[0.0.0.0, 0.0.0.0] (L46-50, L340-352) -- trivially "
+            "satisfied (no stream read was skipped that the source "
+            "performs)")
     n_obj = r.u32()
     res["input_identity"]["num_blocks_from_header"] = n_obj
     # decode_rest() recurses once per block; T3-scale files (1288 blocks)
@@ -2547,16 +2743,35 @@ def decode(data, path="<memory>", full_decode=False,
                 % (walk_blocked or ",".join(rnd_classes), raw_oob))
         elif coverage == "COMPLETE":
             _src = "ACCEPTED"
+            # F2-C1/C2 wording discipline (2026-10-04): the legacy path
+            # reads NO footer roots, so NO LoadTopLevelObjects claim is
+            # made here; "every raw link ID" is the MEASURED raw_oob=0
+            # body-link check; the LoadHeader claim explicitly carries the
+            # era-conditional user-defined-version gate semantics (legacy
+            # streams are always below the 10.0.1.8 read threshold).
             _srcreason = (
                 "ACCEPTED (source-predicted): LoadStream L506-635 -- every "
                 "pinned step is content-valid for this legacy stream "
-                "(LoadHeader gate; LoadObject L451-468 inline-RTTI factory "
-                "lookups all registered; per-block LoadBinary per the "
-                "pinned per-class citations; link/postlink loops call void "
-                "methods whose returns are discarded L576/L588; "
+                "(LoadHeader gates checked: version gate in range; the "
+                "user-defined version gate is era-conditional -- the "
+                "field is read only for NIF file version >= 10.0.1.8 "
+                "(NiStream.cpp L334-337) and this legacy stream is below "
+                "the threshold, so the ORIGINAL compares the "
+                "constructor-initialized member 0 (L111-112) against "
+                "[0.0.0.0, 0.0.0.0] (L46-50) -- trivially satisfied; "
+                "checked, not assumed); LoadObject L451-468 inline-RTTI "
+                "factory lookups all registered; per-block LoadBinary per "
+                "the pinned per-class citations; link/postlink loops call "
+                "void methods whose returns are discarded L576/L588; "
                 "CheckConsistency Win32 no-op NiStream.inl L193-196; "
-                "unconditional return true L634); every raw link ID is "
-                "NULL or in range")
+                "unconditional return true L634); every raw BODY link ID "
+                "read by the per-class LoadBinary loaders is MEASURED "
+                "NULL or in range (raw_out_of_range_link_ids=0); the "
+                "legacy (< 5.0.0.1) adapter path reads NO top-level "
+                "footer roots, so NO LoadTopLevelObjects in-range claim "
+                "is made (LoadTopLevelObjects L362-385 is called at "
+                "LoadStream L566 in the original; its root IDs stay "
+                "unmeasured in this adapter path)")
         else:
             _src = "UNRESOLVED"
             _srcreason = (
@@ -2589,6 +2804,34 @@ def decode(data, path="<memory>", full_decode=False,
     if rr.pos != len(data):
         res["warnings"].append("TRAILING_BYTES after footer")
     res["scene_graph"]["roots"] = tops
+
+    # ---- F2-C2 (2026-10-04): top-level root IDs participate in overall
+    # link-integrity. RAW representation preserved for provenance above
+    # (scene_graph.roots, signed i32 as read); VALIDATION normalizes each
+    # ID to u32 (raw & 0xFFFFFFFF) so a signed -2 (0xFFFFFFFE) cannot
+    # bypass the range check. Valid domain = exactly the pinned source
+    # domain (NiStream.cpp L362-385): NULL_LINKID 0xFFFFFFFF (L50; L374-377
+    # maps it to a NULL top object) OR < header_num_blocks (the L380
+    # assert bound). No clamping, no rewriting, no silent dropping, no
+    # invented sentinels. A non-NULL normalized root outside
+    # [0, header_num_blocks) => TOP_LEVEL_ROOT_LINK_INTEGRITY=FAIL =>
+    # aggregate LINK_INTEGRITY=FAIL => ADAPTER_INTEGRITY=FAIL =>
+    # TOOL_VERDICT=FAIL, accepted=false, exit != 0, in BOTH modes.
+    top_raw = tops
+    top_u32 = [t & 0xFFFFFFFF for t in tops]
+    top_root_failure_count = 0
+    for ri in range(n_top):
+        u = top_u32[ri]
+        if u != NULL_LINKID and u >= n_obj:
+            top_root_failure_count += 1
+            res["warnings"].append(
+                "TOP_LEVEL_ROOT_FAILURE: top-level root %d raw=%d "
+                "normalized_u32=%d out of range (num_blocks=%d) and not "
+                "the NULL_LINKID sentinel 0xFFFFFFFF (NiStream.cpp "
+                "L374-381: DEBUG-only assert + UNCHECKED GetAt)"
+                % (ri, top_raw[ri], u, n_obj))
+    top_level_root_integrity = ("FAIL" if top_root_failure_count
+                                else "PASS")
 
     # ---------------- link phase (GB12 semantics, per-object order) ------
     link_failure_count = 0
@@ -2650,7 +2893,11 @@ def decode(data, path="<memory>", full_decode=False,
     # links are UNMEASURED, which can never be claimed PASS); PASS only
     # when every block's links were resolved with zero failures
     link_measured = sum(1 for i in range(n_obj) if links_all[i] is not None)
-    if link_failure_count:
+    # F2-C2: the aggregate link integrity FAILS on any detected
+    # out-of-range BODY link OR any out-of-range TOP-LEVEL ROOT (the
+    # roots participate in overall link-integrity; a root failure can
+    # never leave integrity PASS in either mode)
+    if link_failure_count or top_root_failure_count:
         link_integrity = "FAIL"
     elif link_measured < n_obj:
         link_integrity = "UNRESOLVED"
@@ -2659,13 +2906,20 @@ def decode(data, path="<memory>", full_decode=False,
     integrity, ichecks = _f2_integrity(
         "PASS" if decoded_count == n_obj else "FAIL", "PASS", link_integrity,
         link_failures=link_failure_count, link_measured=link_measured,
+        top_root_integrity=top_level_root_integrity,
+        top_root_failures=top_root_failure_count,
+        top_root_checked=n_top,
+        top_root_raw=top_raw,
+        top_root_u32=top_u32,
         detail=("structural closure PASS (footer found, exact EOF by the "
                 "footer_at construction); link integrity measured over the "
                 "%d blocks whose bodies were semantically decoded (%d "
-                "boundary-only blocks contribute no link list); top-object "
-                "root IDs are reported as read and are not separately "
-                "range-checked in this run")
-               % (link_measured, n_bnd))
+                "boundary-only blocks contribute no link list) AND over "
+                "the %d parsed top-level root IDs (raw provenance "
+                "preserved; u32-normalized for validation; valid domain "
+                "per pinned source NiStream.cpp L362-385: NULL_LINKID "
+                "0xFFFFFFFF or < header_num_blocks)"
+                % (link_measured, n_bnd, n_top)))
     # source-predicted original verdict (final path)
     if res["load_result"]["error_code"] == "RTTIError":
         source = "REJECTED"
@@ -2700,24 +2954,82 @@ def decode(data, path="<memory>", full_decode=False,
             "original behavior is debug/release dependent, so neither an "
             "unambiguous rejection nor acceptance is provable"
             % link_failure_count)
+    elif top_root_failure_count:
+        # F2-C2: an out-of-range top-level root is NOT auto-REJECTED: the
+        # pinned source (NiStream.cpp L362-385) maps only NULL_LINKID to a
+        # NULL top object; any other ID goes through a DEBUG-only assert
+        # (L380) + UNCHECKED GetAt (L381; NiTArray.inl L135-139) and
+        # LoadTopLevelObjects is VOID (called at LoadStream L566; its
+        # result is not a propagated load rejection) -- the original
+        # behavior is debug/release dependent, so SOURCE=UNRESOLVED (the
+        # measured ADAPTER integrity FAIL is the separate second axis).
+        source = "UNRESOLVED"
+        source_reason = (
+            "UNRESOLVED: out-of-range top-level root ID(s) detected (%d) "
+            "-- the ORIGINAL LoadTopLevelObjects (NiStream.cpp L362-385) "
+            "maps only NULL_LINKID 0xFFFFFFFF to a NULL top object "
+            "(L374-377); any other link ID goes through a DEBUG-only "
+            "assert(uiLinkID < m_kObjects.GetSize()) (L380) and an "
+            "UNCHECKED GetAt (L381; NiTArray.inl L135-139 raw "
+            "m_pBase[uiIndex]); LoadTopLevelObjects is void and its "
+            "result is not a propagated load rejection (LoadStream "
+            "returns true unconditionally at L634) -- the original "
+            "behavior is debug/release dependent, so neither an "
+            "unambiguous rejection nor acceptance is provable (the "
+            "adapter's TOP_LEVEL_ROOT_LINK_INTEGRITY=FAIL is the "
+            "measured second axis)"
+            % top_root_failure_count)
     elif coverage == "COMPLETE" and integrity == "PASS":
         source = "ACCEPTED"
+        # F2-C1/C2 (2026-10-04): every formerly measured-later claim is
+        # now phrased from MEASURED fields -- the user-defined version
+        # gate (F2-C1) and the top-level root normalization/measurement
+        # (F2-C2). It is FORBIDDEN to claim "LoadTopLevelObjects in
+        # range" or "every link is NULL or in range" unless the top-level
+        # root IDs were actually normalized, measured and passed, and the
+        # LoadHeader path is claimed content-valid only with the
+        # user-defined version gate actually checked (read+gated for
+        # this era, or the era-conditional member semantics below the
+        # 10.0.1.8 read threshold).
+        _uvg = res.get("user_version_gate", {})
+        if _uvg.get("read_from_stream"):
+            _uvg_txt = (
+                "the user-defined version gate was MEASURED: read "
+                "user_defined_version=%s within the pinned gate "
+                "[0.0.0.0, 0.0.0.0] (NiStream.cpp L46-50, L334-352)"
+                % _uvg.get("measured_user_defined_version"))
+        else:
+            _uvg_txt = (
+                "the user-defined version gate is era-conditional for "
+                "this stream: the field is read only for NIF file version "
+                ">= 10.0.1.8 (NiStream.cpp L334-337), so the ORIGINAL "
+                "compares the constructor-initialized member 0 (L111-112) "
+                "against [0.0.0.0, 0.0.0.0] (L46-50) -- trivially "
+                "satisfied (checked, not assumed)")
         source_reason = (
             "ACCEPTED (source-predicted): the full pinned LoadStream path "
             "(NiStream.cpp L506-635) is content-valid for this stream -- "
-            "LoadHeader gate; LoadRTTI table + factory lookups all "
-            "registered; per-block LoadBinary per the pinned per-class "
-            "citations; LoadTopLevelObjects in range; the link loop "
-            "L569-578 and postlink loop L581-590 call VOID methods whose "
-            "returns are DISCARDED (NiNode.cpp L872-888 blind-casts and "
-            "stores resolved pointers without a link-time rejection path); "
-            "CheckConsistency is a Win32 no-op (NiStream.inl L193-196); "
-            "return true at L634 is unconditional. Every link is NULL or "
-            "in range and every block was decoded by a pinned-citation "
-            "loader. Link-target TYPE compatibility (blind C-casts) is not "
-            "per-pair re-verified; at load time the original stores the "
-            "resolved pointers without dereferencing them on the traced "
-            "paths")
+            "LoadHeader gates checked (version gate in range; %s); "
+            "LoadRTTI table + factory lookups all registered; per-block "
+            "LoadBinary per the pinned per-class citations; "
+            "LoadTopLevelObjects MEASURED in range "
+            "(top_level_root_checked_count=%d, "
+            "top_level_root_failure_count=0: every root is the "
+            "NULL_LINKID sentinel or < header_num_blocks after u32 "
+            "normalization, raw representation preserved); the link "
+            "loop L569-578 and postlink loop L581-590 call VOID methods "
+            "whose returns are DISCARDED (NiNode.cpp L872-888 "
+            "blind-casts and stores resolved pointers without a "
+            "link-time rejection path); CheckConsistency is a Win32 "
+            "no-op (NiStream.inl L193-196); return true at L634 is "
+            "unconditional. Every body link and every top-level root is "
+            "MEASURED NULL or in range (link_failure_count=0, "
+            "top_level_root_failure_count=0) and every block was "
+            "decoded by a pinned-citation loader. Link-target TYPE "
+            "compatibility (blind C-casts) is not per-pair re-verified; "
+            "at load time the original stores the resolved pointers "
+            "without dereferencing them on the traced paths"
+            % (_uvg_txt, n_top))
     else:
         source = "UNRESOLVED"
         source_reason = (

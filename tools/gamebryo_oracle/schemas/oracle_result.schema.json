@@ -29,6 +29,8 @@
         "nif_version": {"type": ["string", "null"]},
         "nif_version_u32": {"type": ["integer", "null"]},
         "user_defined_version": {"type": ["string", "null"]},
+        "user_defined_version_u32": {"type": ["integer", "null"],
+          "description": "F2-C1: the measured user-defined version DWORD (present iff the era reads it, ver >= 10.0.1.8)"},
         "num_blocks_from_header": {"type": ["integer", "null"]}
       }
     },
@@ -45,6 +47,18 @@
       }
     },
     "version_gate": {"type": "object"},
+    "user_version_gate": {
+        "type": "object",
+        "description": "F2-C1: the ORIGINAL user-defined NIF version gate [0.0.0.0, 0.0.0.0] (NiStream.cpp L46-50, L334-352); read_from_stream iff NIF file version >= 10.0.1.8; verdict REJECTED (source-proven propagated rejection -> TOOL_VERDICT=FAIL) or ACCEPTED (measured in gate) or NOT_APPLICABLE_ERA (below the read threshold: the original compares the constructor-initialized member 0 -- trivially satisfied)",
+        "properties": {
+            "min": {"type": "string"},
+            "max": {"type": "string"},
+            "read_from_stream": {"type": "boolean"},
+            "measured_user_defined_version": {"type": ["string", "null"]},
+            "verdict": {"type": ["string", "null"]},
+            "reason": {"type": ["string", "null"]}
+        }
+    },
     "rtti_gate": {"type": "object"},
     "rtti_table_validation": {"type": "object"},
     "extension_halt": {"type": "string",
@@ -75,7 +89,10 @@
     "ADAPTER_INTEGRITY": {
         "type": "string", "enum": ["PASS", "FAIL", "UNRESOLVED", "NOT_MEASURED"],
         "description": "F2: object-count consistency + structural closure + link integrity; FAIL unconditionally implies TOOL_VERDICT=FAIL"},
-    "adapter_integrity_checks": {"type": "object"},
+    "adapter_integrity_checks": {
+        "type": "object",
+        "description": "F2: object_count_consistency + structural_closure + link_integrity (+ link_failure_count / link_measured_blocks when the link phase ran). F2-C2: for parsed footers it also carries top_level_root_link_integrity (PASS/FAIL), top_level_root_failure_count, top_level_root_checked_count, top_level_root_raw (raw provenance, signed i32 as read) and top_level_root_normalized_u32 (validation domain: NULL_LINKID 0xFFFFFFFF or < header_num_blocks); a top-level root failure makes aggregate link_integrity FAIL"
+    },
     "TOOL_VERDICT": {
         "type": "string", "enum": ["PASS", "FAIL", "UNRESOLVED"],
         "description": "F2: PASS only if coverage=COMPLETE and integrity=PASS and no source-predicted REJECTED; the CLI inspect exit is 0 only on PASS"},

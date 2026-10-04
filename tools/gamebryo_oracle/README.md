@@ -37,7 +37,7 @@ probe-version / compare / capabilities exit semantics are UNCHANGED.
 
 | adapter | ORACLE_MODE | era | semantics |
 |---|---|---|---|
-| gb12 | SOURCE_DERIVED_REIMPLEMENTATION | GB_1_2 | Gamebryo 1.2.2 NiStream load semantics re-implemented from the original source tree (`gb12core.py` header = full citation block with per-file SHA256): "File Format" header test; packed-u32 gate 3.3.0.11..10.2.0.0 with the original error strings; user-defined version iff file >= 10.0.1.8; RTTI string table + factory with the ORIGINAL fail-closed behavior (unregistered class -> RTTIError -> Load() false); per-block GroupID u32 iff 5.0.0.6 <= v < 10.1.0.114 (P2); LoadBinary/link/postlink phases; EOF-exact closure. |
+| gb12 | SOURCE_DERIVED_REIMPLEMENTATION | GB_1_2 | Gamebryo 1.2.2 NiStream load semantics re-implemented from the original source tree (`gb12core.py` header = full citation block with per-file SHA256): "File Format" header test; packed-u32 gate 3.3.0.11..10.2.0.0 with the original error strings; user-defined version read + GATE [0.0.0.0, 0.0.0.0] ENFORCED iff file >= 10.0.1.8 (F2-C1, 2026-10-04); RTTI string table + factory with the ORIGINAL fail-closed behavior (unregistered class -> RTTIError -> Load() false); per-block GroupID u32 iff 5.0.0.6 <= v < 10.1.0.114 (P2); LoadBinary/link/postlink phases; EOF-exact closure; top-level root IDs u32-normalized + range-validated as part of link integrity (F2-C2, 2026-10-04). |
 | gb26 | SOURCE_DERIVED_REIMPLEMENTATION | GB_2_6 | version gate ONLY (min 10.1.0.114, NiStream.cpp sha 72781EEB...): the wrong-version negative control. In-range files report NOT_IMPLEMENTED_BEYOND_GATE (no fake GB 2.6 decode). |
 | gb112 | ORIGINAL_TOOL_EXECUTION | GB_1_1_2 | runs the INSTALLED original Gamebryo 1.1.2 Evaluation tools (unmodified, sandbox-local VC71 runtime DLLs) on sandbox copies; parses stdout/exit; version-range claims stay UNKNOWN (binary lib). Exact blocker classes are recorded when a tool cannot run. |
 | gb23 | SOURCE_DERIVED_REIMPLEMENTATION (header-only) | GB_2_3 | metadata-only: engine identity from the recovered NiVersion.h (sha DFCCD6EC...); read range UNKNOWN (binary); execution NOT_TESTED (installer never installed; nothing is installed by this tool). |
@@ -128,6 +128,57 @@ The result carries FOUR EXPLICIT, SEPARATE axes (never conflated):
   `load_result.accepted` is exactly (TOOL_VERDICT == PASS) (explicit
   `accepted_semantics` note) and the CLI inspect exit is 0 only on PASS.
 
+### gb12 acceptance guards F2-C1 / F2-C2 (fix, 2026-10-04)
+
+Desktop post-audit
+`PE_GAMEBRYO_ORACLE_F2_DESKTOP_POST_AUDIT_20261003` findings F2-C1/P2 +
+F2-C2/P2, fixed:
+
+- **F2-C1 user-defined version gate**: the ORIGINAL gate
+  (`ms_uiNifMinUserDefinedVersion = ms_uiNifMaxUserDefinedVersion =
+  GetVersion(0,0,0,0) = 0`, NiStream.cpp L46-50; the field is read iff the
+  NIF file version >= 10.0.1.8, L334-337; out-of-gate -> OLDER_VERSION /
+  LATER_VERSION -> LoadHeader false BEFORE the uiObjects read L355-357 ->
+  Load() false, L340-352 + LoadStream L508-509) is now enforced:
+  a nonzero user-defined version ends
+  `SOURCE_PREDICTED_ORIGINAL_VERDICT=REJECTED`, `TOOL_VERDICT=FAIL`,
+  `accepted=false`, inspect exit != 0 in BOTH ordinary and --full-decode
+  (full-decode must NOT bypass a source-proven LoadHeader rejection).
+  Coverage/integrity are NOT_MEASURED with object-level counters null
+  (the rejection precedes the uiObjects read; no object bytes are decoded
+  just to obtain counts). The measured gate state is reported in the
+  `user_version_gate` object (`read_from_stream`,
+  `measured_user_defined_version`, `verdict` ACCEPTED / REJECTED /
+  NOT_APPLICABLE_ERA); streams below the 10.0.1.8 read threshold keep the
+  source-faithful era semantics (the original compares the
+  constructor-initialized member 0, NiStream.cpp L111-112, against
+  [0,0] -- trivially satisfied). Central invariant: SOURCE_PREDICTED=
+  REJECTED => TOOL_VERDICT=FAIL.
+- **F2-C2 top-level root link integrity**: the parsed top-level root IDs
+  (LoadTopLevelObjects, NiStream.cpp L362-385) now participate in overall
+  link-integrity. The RAW representation is preserved for provenance
+  (`scene_graph.roots`, signed i32 as read); validation normalizes each
+  ID to u32 (so a signed -2 == 0xFFFFFFFE cannot bypass) and the valid
+  domain is exactly the pinned source domain: NULL_LINKID 0xFFFFFFFF
+  (the source NULL sentinel, L50 + L374-377) OR < header_num_blocks. No
+  clamping, rewriting, silent dropping or invented sentinels. A non-NULL
+  normalized root outside [0, header_num_blocks) =>
+  `top_level_root_link_integrity=FAIL` =>
+  aggregate `link_integrity=FAIL` => `ADAPTER_INTEGRITY=FAIL` =>
+  `TOOL_VERDICT=FAIL`, `accepted=false`, exit != 0, in BOTH modes; SOURCE
+  stays UNRESOLVED for an invalid root (DEBUG-only assert L380 +
+  UNCHECKED GetAt L381 + LoadTopLevelObjects is void -- no unambiguous
+  propagated failure; never auto-REJECTED). Measured fields inside
+  `adapter_integrity_checks`: `top_level_root_link_integrity`,
+  `top_level_root_failure_count`, `top_level_root_checked_count`,
+  `top_level_root_raw`, `top_level_root_normalized_u32`. The SOURCE=
+  ACCEPTED reason now cites the MEASURED counts (it is forbidden to claim
+  "LoadTopLevelObjects in range" or "every link is NULL or in range"
+  unless the roots were actually normalized, measured and passed, and the
+  LoadHeader path is claimed content-valid only with the user-defined
+  version gate actually checked). The legacy (< 5.0.0.1) adapter path
+  reads NO footer roots, so no LoadTopLevelObjects claim is made there.
+
 ## Local dependency representation (s22)
 
 | item | LOCAL_PATH_DESCRIPTION | VERSION | SIZE | SHA256 | REPRODUCTION_METHOD |
@@ -169,8 +220,17 @@ with the factory census independently confirming registration; out-of-range
 link counterexample => coverage COMPLETE + integrity FAIL + TOOL FAIL,
 never UNRESOLVED; zero-vs-NOT_MEASURED distinctness; early-halt and
 F1-C1-halt object-level counters null with reasons; the
-integrity-FAIL-implies-TOOL-FAIL and accepted==TOOL_PASS law); and (with
-`--sandbox-payload`)
+integrity-FAIL-implies-TOOL-FAIL and accepted==TOOL_PASS law); the
+F2-C1/C2 acceptance-guard battery (2026-10-04; single-DWORD-mutant
+fixtures: a nonzero user-defined version => SOURCE=REJECTED +
+TOOL=FAIL + NOT_MEASURED counters in BOTH modes, no full-decode bypass;
+an out-of-range top-level root 9999 / 0xFFFFFFFE (raw -2) =>
+top_level_root_link_integrity=FAIL => integrity FAIL => TOOL FAIL in
+BOTH modes with the raw representation preserved and no signedness
+bypass; the NULL sentinel 0xFFFFFFFF (raw -1) is NOT an out-of-range
+failure; the valid user-version-0 / root-0 positive control stays
+TOOL PASS / exit 0 -- no over-fail-closed; ordinary and --full-decode
+agree on every guard outcome); and (with `--sandbox-payload`)
 the fail-closed battery on a sandbox copy of a real payload: RTTIError
 reporting, unknown-class reporting (mutated RTTI name), corruption
 fail-not-silent, object-count mismatch detection, partial-load
@@ -186,6 +246,7 @@ nif_version}`, `oracle{gamebryo_version,loader_identity,
 loader_source_identity,tool_version}`, `load_result{accepted,partial,
 error}`, `objects[]`, `scene_graph`, `type_histogram`, `controllers`,
 `properties`, `textures`, `bounds`, `warnings`, `unknowns`) plus extensions
-(`version_gate`, `rtti_gate` (deprecated compact alias), `rtti_table_validation`,
-`object_reference_histogram`, `object_reference_census`, `tool_reports`,
-`object_count_check`).
+(`version_gate`, `user_version_gate` (F2-C1), `rtti_gate` (deprecated
+compact alias), `rtti_table_validation`, `object_reference_histogram`,
+`object_reference_census`, `tool_reports`, `object_count_check`,
+`adapter_integrity_checks.top_level_root_*` (F2-C2)).
