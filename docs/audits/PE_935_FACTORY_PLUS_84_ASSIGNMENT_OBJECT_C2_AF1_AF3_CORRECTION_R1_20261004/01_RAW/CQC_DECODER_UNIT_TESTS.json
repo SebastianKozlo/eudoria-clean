@@ -1,0 +1,221 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C2_AF1_AF3_CORRECTION_R1_20261004",
+ "unit_battery": [
+  {
+   "vector": "8B 04 85 00 00 00 00",
+   "expected": 7,
+   "measured": 7,
+   "segment": null,
+   "note": "SIB base+index+disp32",
+   "ok": true
+  },
+  {
+   "vector": "8B 04 24",
+   "expected": 3,
+   "measured": 3,
+   "segment": null,
+   "note": "SIB [ESP]",
+   "ok": true
+  },
+  {
+   "vector": "66 B8 01 00",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "66 imm16 (unchanged C1 rule)",
+   "ok": true
+  },
+  {
+   "vector": "89 86",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "truncated modrm+disp -> fail-closed",
+   "ok": true
+  },
+  {
+   "vector": "0F C6 C0 E8 00 00 00 00",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "AF2 class B: SHUFPS 0F C6 /r ib - imm8 is part of the instruction (C1 measured 3, the defect)",
+   "ok": true
+  },
+  {
+   "vector": "0F C6 C0",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "SHUFPS truncated (ModRM without the imm8) -> fail-closed",
+   "ok": true
+  },
+  {
+   "vector": "0F C4 C0 E8 00 00 00 00",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "PINSRW /r ib (imm8, class-B family fix)",
+   "ok": true
+  },
+  {
+   "vector": "0F C5 C0 E8 00 00 00 00",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "PEXTRW /r ib (imm8, class-B family fix)",
+   "ok": true
+  },
+  {
+   "vector": "67 8B 06 84 00 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "AF2 class C: 16-bit address form MOV EAX,[0x0084] (C1 fabricated 32-bit ModRM length 3; Capstone reference 5)",
+   "ok": true
+  },
+  {
+   "vector": "67 8B 06 E8 00 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "class C with E8 inside disp16 - length must stay 5",
+   "ok": true
+  },
+  {
+   "vector": "66 E8 01 00 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "AF2 class D: 66 E8 = CALL rel16, length 4 (C1 parsed as 6-byte ordinary rel32; Capstone reference 4)",
+   "ok": true
+  },
+  {
+   "vector": "B8 CC CC E8 00",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "class A: MOV EAX,0x00E8CCCC - the E8 is immediate data",
+   "ok": true
+  },
+  {
+   "vector": "64 A3 00 00 00 00",
+   "expected": 6,
+   "measured": 6,
+   "segment": "FS",
+   "note": "P3-A: MOV FS:[0],EAX (MOFFS + FS) - segment recorded",
+   "ok": true
+  },
+  {
+   "vector": "64 89 0D 00 00 00 00",
+   "expected": 7,
+   "measured": 7,
+   "segment": "FS",
+   "note": "P3-A: MOV FS:[0],ECX ([disp32] + FS)",
+   "ok": true
+  },
+  {
+   "vector": "9A 11 22 33 44 55 66 77",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "CALL far not in table -> fail-closed reject",
+   "ok": true
+  },
+  {
+   "vector": "EA 11 22 33 44 55 66 77",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "JMP far not in table -> fail-closed reject",
+   "ok": true
+  },
+  {
+   "vector": "67 E8 01 00 00 00 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "address-size-prefixed near branch -> fail-closed reject",
+   "ok": true
+  },
+  {
+   "vector": "26 2E 64 36 3E 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "two+ segment prefixes (6 prefix bytes) -> fail-closed reject",
+   "ok": true
+  },
+  {
+   "vector": "64 A3 00 00 00 00",
+   "segment": "FS",
+   "expected_segment": "FS",
+   "ok": true,
+   "note": "P3-A segment prefix recorded on MOFFS store"
+  },
+  {
+   "vector": "64 89 0D 00 00 00 00",
+   "segment": "FS",
+   "expected_segment": "FS",
+   "ok": true,
+   "note": "P3-A segment prefix recorded on [disp32] store"
+  },
+  {
+   "vector": "B8 CC CC E8 00 00 00 00",
+   "imm_raw": "0x00E8CCCC",
+   "expected_imm": "0x00E8CCCC",
+   "ok": true,
+   "note": "class A: the E8 byte is immediate data of MOV EAX,imm32"
+  },
+  {
+   "vector": "66 E8 01 00",
+   "rel16": true,
+   "imm_signed": 1,
+   "ok": true,
+   "note": "class D: operand-size-prefixed CALL decoded at its actual width"
+  }
+ ],
+ "unit_battery_ok": true,
+ "redecode_bad_rows": [],
+ "coverage_windows": {
+  "setter": {
+   "decoded_instructions": 100,
+   "aborted": 0
+  },
+  "loop": {
+   "decoded_instructions": 54,
+   "aborted": 0
+  },
+  "driver": {
+   "decoded_instructions": 83,
+   "aborted": 0
+  },
+  "register": {
+   "decoded_instructions": 92,
+   "aborted": 0
+  },
+  "modeinit": {
+   "decoded_instructions": 42,
+   "aborted": 0
+  },
+  "stream_ctor": {
+   "decoded_instructions": 95,
+   "aborted": 0
+  },
+  "modecond": {
+   "decoded_instructions": 10,
+   "aborted": 0
+  },
+  "slotpred": {
+   "decoded_instructions": 39,
+   "aborted": 0
+  },
+  "consumer": {
+   "decoded_instructions": 65,
+   "aborted": 0
+  },
+  "manager_ctor": {
+   "decoded_instructions": 46,
+   "aborted": 0
+  }
+ }
+}

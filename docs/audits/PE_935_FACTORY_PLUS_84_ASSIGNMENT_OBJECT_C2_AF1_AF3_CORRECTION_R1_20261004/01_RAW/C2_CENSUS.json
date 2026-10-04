@@ -1,0 +1,102 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C2_AF1_AF3_CORRECTION_R1_20261004",
+ "stage": "C2",
+ "exe": {
+  "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+  "size": 8015872,
+  "pinned_match": true
+ },
+ "declared_examined_encoding_families": [
+  "89 r/m32,r32 mod01/mod10 incl SIB",
+  "8B r32,r/m32 mod01/mod10 incl SIB",
+  "39 r/m32,r32 mod01/mod10 incl SIB",
+  "8D r32,m mod01/mod10 incl SIB",
+  "C7 /0 mod01/mod10 incl SIB",
+  "88 r/m8,r8 mod01/mod10 incl SIB",
+  "C6 /0 mod01/mod10 incl SIB",
+  "66 89 mod01/mod10 NON-SIB (word)",
+  "66 C7 /0 mod01/mod10 NON-SIB (word)"
+ ],
+ "DECLARED_ENCODING_FAMILY_COUNT": 9,
+ "declared_family_note": "P3-B correction: derived from the actual scanner family table (len(FAMILIES)=9); metadata, JSON, CSV and report agree. The C1 metadata value declared_families=10 with an explicit list of 9 is SUPERSEDED.",
+ "disclosed_but_out_of_scope_families": [
+  "66-form SIB variants (66 89 / 66 C7 with SIB) - not in the historical examined families; disclosed scope boundary",
+  "mod00 absolute forms ([disp32]) - not object+0x84 encodings; never in the examined families",
+  "67-prefixed (16-bit-address) variants - not in the examined families"
+ ],
+ "boundary_policy": "AF2-CORRECTED: strong anchors only (KNOWN_FUNCTION_ENTRY with recorded anchor provenance); heuristic starts (C1 T2/T3) recorded but NEVER confirming; proven mid-instruction coverage REFUTES the candidate; no inference from failed decodes",
+ "measured_quantities": {
+  "RAW_PATTERN_ROWS": 2612,
+  "POSITIVE_PLUS_84_ENCODING_ROWS": 2227,
+  "NEGATIVE_DISP8_MINUS_0x7C_CONTROL_ROWS": 385,
+  "BOUNDARY_CONFIRMED_POSITIVE_PLUS_84_ROWS": 10,
+  "BOUNDARY_REFUTED_MID_INSTRUCTION_ROWS": 0,
+  "KNOWN_CONFIRMED_FACTORY_PLUS_84_WRITES": 2,
+  "CENSUS_UNRESOLVED_ROWS": 2218,
+  "FACTORY_PLUS_84_UNRESOLVED_WRITE_CANDIDATES": 832,
+  "REJECTED_WRONG_OBJECT_WITH_PROVEN_PROVENANCE": 1,
+  "REJECTED_READ_NOT_WRITE": 6,
+  "REJECTED_MID_INSTRUCTION_PER_PROVEN_DECODE": 0,
+  "ADDRESS_PROVENANCE_UNRESOLVED": 832,
+  "DECODER_REJECT_ROWS": 0
+ },
+ "definitions": {
+  "CENSUS_UNRESOLVED_ROWS": "all census rows with row_resolution=UNRESOLVED: boundary-unresolved read/LEA rows (no write established but instruction identity unproven) PLUS all unresolved write candidates (incl. the four AF3-downgraded layout controls)",
+  "FACTORY_PLUS_84_UNRESOLVED_WRITE_CANDIDATES": "write-form positive-encoding rows (incl. linked-LEA) not resolved to a confirmed factory write or a proven wrong-object rejection",
+  "REJECTED_MID_INSTRUCTION_PER_PROVEN_DECODE": "positive-encoding rows REFUTED by a strong-anchor decode that covers the position strictly inside one instruction (successful-decode refutation, never an inference from a failed decode)",
+  "EXAMINED_ENCODING_CANDIDATE_CLOSURE": "CLOSED = every byte position of .text was tested against every declared family (raw byte-grammar enumeration); it does NOT mean all candidates were boundary-classified, and it is scoped to the declared encodings/effective-address forms only"
+ },
+ "closure": {
+  "EXAMINED_ENCODING_CANDIDATE_CLOSURE": "CLOSED",
+  "closure_scope_note": "the AF2 correction reduces BOUNDARY/IDENTITY coverage inside the closed enumeration (only strong-anchor-reachable rows are boundary-classified); the raw byte-grammar enumeration itself is unchanged and closed",
+  "scan_coverage": {
+   "positions_tested": 6766592,
+   "text_size": 6766592,
+   "declared_families": 9,
+   "skip_ahead": false
+  },
+  "EXHAUSTIVE_FACTORY_PLUS_84_WRITE_CLOSURE": "NOT_ESTABLISHED",
+  "exhaustive_note": "invariant: even complete resolution of every corrected-scanner row cannot exclude alias writes, helper-mediated writes, bulk/memory-copy writes, other address constructions, unexamined encodings or runtime mutation"
+ },
+ "af3_note": "AF3 correction: REJECTED_WRONG_OBJECT_WITH_PROVEN_PROVENANCE requires a concrete identity chain persisted per row in AF3_PROVENANCE_LEDGER.csv; the four C1 layout-evidence rejections are downgraded to UNRESOLVED (grammar hypotheses, not identity chains); the 0x0075138F ArkEstateObject lead is physically re-verified but NOT promoted (no strong anchor for the containing function)",
+ "ark_estate_lead": {
+  "lead_vptr": "0x00A87410",
+  "window_vptr_immediate_hits": [
+   "0x00751370"
+  ],
+  "window_bytes": "00 00 00 00 8B F1 89 74 24 0C 8B 44 24 20 8B 0D B0 5D BA 00 50 51 8B CE E8 04 5B FD FF 33 FF C7 06 10 74 A8 00 89 7C 24 18 89 7E 58 89 7E 78 8D 8E 88 00 00 00 C6 44 24 18 01 89 BE 80 00 00 00 89 BE 84 00 00 00 E8 66 04 00 00 8D 8E AC 00 00 00 C6 44 24 18 02 89 BE A8 00 00 00 E8 B0 8E DD FF 8D 86 C4 00 00 00 8D 48 06 3B C1 74 0D 8D 49 00 66 89 38 83 C0 02 3B C1 75 F6 8B C1 8D 48 06",
+  "vptr_minus_4_col_va": "0x00AA9AD4",
+  "col_plus_0xc_td_va": "0x00B8E9D4",
+  "td_name": ".?AVArkEstateObject@@",
+  "td_name_matches_desktop_lead": true
+ },
+ "known_stores": {
+  "0x0070C71E": {
+   "store_class": "CONDITIONAL_OBJECT_OR_NULL_ATTACH_STORE",
+   "classification": "KNOWN_CONFIRMED_FACTORY_PLUS_84_WRITE",
+   "boundary": "CONFIRMED",
+   "containing_function": "FUN_0070C680_stream_attach_setter",
+   "base_register": "ESI",
+   "signed_displacement": 132,
+   "address_provenance_status": "THIS_OF_KNOWN_FUNCTION:FUN_0070C680_stream_attach_setter"
+  },
+  "0x0070D013": {
+   "store_class": "INITIALIZATION_NULL",
+   "classification": "KNOWN_CONFIRMED_FACTORY_PLUS_84_WRITE",
+   "boundary": "CONFIRMED",
+   "containing_function": "FUN_0070CF80_factory_base_ctor",
+   "base_register": "ESI",
+   "signed_displacement": 132,
+   "address_provenance_status": "THIS_OF_KNOWN_FUNCTION:FUN_0070CF80_factory_base_ctor"
+  }
+ },
+ "clear_reset_confirmed_count": 0,
+ "clear_reset_note": "CLEAR_RESET_CONFIRMED_COUNT=0 means no clear/reset store of the member was CONFIRMED within the examined census; it does NOT mean clear/reset is proven absent",
+ "classification_tally": {
+  "UNRESOLVED": 2218,
+  "NEGATIVE_DISP8_MINUS_0x7C_CONTROL": 385,
+  "REJECTED_WRONG_OBJECT_WITH_PROVEN_PROVENANCE": 1,
+  "REJECTED_READ_NOT_WRITE": 6,
+  "KNOWN_CONFIRMED_FACTORY_PLUS_84_WRITE": 2
+ }
+}

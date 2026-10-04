@@ -1,0 +1,401 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C2_AF1_AF3_CORRECTION_R1_20261004",
+ "counterexamples": [
+  {
+   "CASE_ID": "A1_B8_CC_CC_E8_imm",
+   "BYTES": "B8 CC CC E8 00 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 3,
+   "EXPECTED_DECODE": "MOV EAX,0x00E8CCCC length 5; the E8 at +3 is immediate data",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: nearest-first T2 CC-padding start at +3 (trivial exact landing) confirmed the candidate and PROMOTED the CALL (CALL_VALIDATION=PASS, boundary_source=CC_PADDING_DELIMITED_START, target=0x00A00008)",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "A2_B8_C3_CC_E8_imm",
+   "BYTES": "B8 C3 CC E8 00 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 3,
+   "EXPECTED_DECODE": "MOV EAX,0x00E8CCC3 length 5; the E8 at +3 is immediate data",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: nearest-first T3 RET-delimited start at +3 confirmed the candidate and PROMOTED the CALL (boundary_source=RET_DELIMITED_START)",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "B_0F_C6_shufps_imm8",
+   "BYTES": "0F C6 C0 E8 00 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 3,
+   "EXPECTED_DECODE": "SHUFPS xmm0,xmm0,imm8 length 4 (0F C6 C0 E8); the E8 at +3 is the SHUFPS imm8",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: the decoder measured 0F C6 C0 as 3 bytes (missing imm8), the proven decode landed ON the E8 and PROMOTED it as CALL even with KNOWN_FUNCTION_ENTRY",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "C_67_8B_06_disp16",
+   "BYTES": "67 8B 06 E8 00 90 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 3,
+   "EXPECTED_DECODE": "MOV EAX,[0x00E8] 16-bit address form length 5 (67 8B 06 E8 00); the E8 at +3 is disp16 data",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: _parse_modrm ignored has67 and fabricated a 32-bit ModRM length (3), so the disp16 bytes were exposed as instruction starts",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "D_66_E8_rel16",
+   "BYTES": "66 E8 01 00 90 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 1,
+   "EXPECTED_DECODE": "CALL rel16 (66 E8 01 00) length 4; the E8 at +1 is the opcode of a DIFFERENT encoding than the examined five-byte E8 rel32",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: the REL32 handler ignored has66 and silently parsed 66 E8 as an ordinary five-byte E8 rel32 (measured length 6)",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "E_positive_real_call",
+   "BYTES": "B8 01 00 00 00 E8 05 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 5,
+   "EXPECTED_DECODE": "MOV EAX,1 length 5 then CALL rel32 at +5 (instruction boundary)",
+   "ACTUAL_DECODE": "boundary CONFIRMED (source=KNOWN_FUNCTION_ENTRY)",
+   "EXPECTED_CALL_PROMOTION": "PROMOTE",
+   "ACTUAL_CALL_PROMOTION": "PROMOTED->0x00A0000F",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "CONFIRMED",
+   "C1_DEFECT_NOTE": "positive control: an ordinary correctly-aligned E8 rel32 from an independently established entry must still validate and resolve its target",
+   "CALL_VALIDATION": "PASS",
+   "test_passed": true
+  }
+ ],
+ "real_positive_controls": [
+  {
+   "va": "0x0070C715",
+   "call_validation": "PASS",
+   "boundary_source": "KNOWN_FUNCTION_ENTRY",
+   "target": "0x00972380",
+   "expected_target": "0x00972380",
+   "ok": true
+  },
+  {
+   "va": "0x0070DD75",
+   "call_validation": "PASS",
+   "boundary_source": "KNOWN_FUNCTION_ENTRY",
+   "target": "0x00971AD0",
+   "expected_target": "0x00971AD0",
+   "ok": true
+  },
+  {
+   "va": "0x0070C742",
+   "call_validation": "PASS",
+   "boundary_source": "KNOWN_FUNCTION_ENTRY",
+   "target": "0x00972DF0",
+   "expected_target": "0x00972DF0",
+   "ok": true
+  }
+ ],
+ "control_nonE8": true,
+ "anchor_registry": [
+  {
+   "ANCHOR_VA": "0x00415470",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00415470_manager_getter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x004B0980",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_004B0980_attach_driver",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00703CD0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00703CD0_manager_mode_cond",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00703E80",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00703E80_bulk_attach_loop",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00707E50",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00707E50_manager_ctor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00707FB0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00707FB0_register_factory",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x007080C0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_007080C0_manager_mode_and_class_enum",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070BF10",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070BF10_ready_flag_reader",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070BF20",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070BF20_flag_or_setter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070BF40",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070BF40_flag_bit_test",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070BFD0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070BFD0_stream_bridge_method",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070C150",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070C150_factory_finalize",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070C180",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070C180_slot_addr_getter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070C680",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070C680_stream_attach_setter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070CBC0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070CBC0_slot_add",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070CC80",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070CC80_slot_predicate_scan",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070CF80",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070CF80_factory_base_ctor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070D990",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070D990_component_creator",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070DC20",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070DC20_record_apply",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070DCF0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070DCF0_consumer_record_reader",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070DE10",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070DE10_cache_miss_creator",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070E100",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070E100_component_get_or_create",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070E2F0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070E2F0_factory_vec_init",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0071B820",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0071B820_UNKNOWN",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0072FA30",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0072FA30_templates_reader_region",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x007374F0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_007374F0_schema_init",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073B820",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073B820_factory20006_ctor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073B8C0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073B8C0_factory20006_create_component",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073C6C0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073C6C0_factory20006_dtor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073C870",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073C870_class_dispatcher",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073C8D8",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073C8D8_factory20006_getter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00971650",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00971650_stream_advance",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00971AD0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00971AD0_record_reader",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00972380",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00972380_stream_ctor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  }
+ ],
+ "census_discipline": {
+  "confirmed_with_untrusted_source": [],
+  "refuted_without_anchor": [],
+  "pins_confirmed_with_untrusted_source": []
+ }
+}

@@ -1,0 +1,266 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C2_AF1_AF3_CORRECTION_R1_20261004",
+ "stage": "C3",
+ "exe": {
+  "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+  "size": 8015872,
+  "pinned_match": true
+ },
+ "examined_ctor": {
+  "entry": "0x00972380",
+  "known_label": "FUN_00972380_stream_ctor",
+  "decode_status": "RET_REACHED",
+  "insn_count": 93,
+  "extent_end": "0x009724DA",
+  "extent_end_note": "the extent end = the first RET (C3) reached by the sequential decode; first CC padding after it is the function boundary",
+  "this_registers_from_entry_mov_ecx": [
+   "ESI"
+  ],
+  "first_cc_pair_after": "0x009724DA",
+  "offset_zero_store_census_scope": "P3-A CORRECTED SCOPE: every memory-WRITE encoding in the examined extent whose effective displacement is 0 - explicit MOV-to-memory stores (89/88, C7/C6 /0, incl. 66 word variants), MOFFS stores (A2/A3) and RMW forms (NOT/NEG/INC/DEC r/m) - with the SEGMENT prefix persisted per store; implicit-destination string stores (AA/AB/AE/AF) and implicit stack writes (PUSH) are not store-form encodings here and their presence is machine-checked and disclosed instead",
+  "offset_zero_stores": [
+   {
+    "va": "0x009723A0",
+    "bytes": "64 A3 00 00 00 00",
+    "store_form": "MOV moffs,AL/EAX",
+    "segment": "FS",
+    "ea_text": "FS:[0x00000000]",
+    "base_register": null,
+    "index_register": null,
+    "scale": 1,
+    "raw_displacement": "0x00000000",
+    "effective_displacement": 0,
+    "imm": null,
+    "base_is_this_register": false,
+    "segment_relative": true,
+    "p3a_class": "SEGMENT_RELATIVE_SEH_TLS_STORE"
+   },
+   {
+    "va": "0x00972452",
+    "bytes": "89 07",
+    "store_form": "MOV [r],r",
+    "segment": null,
+    "ea_text": "[EDI]",
+    "base_register": "EDI",
+    "index_register": null,
+    "scale": 1,
+    "raw_displacement": "NONE",
+    "effective_displacement": 0,
+    "imm": null,
+    "base_is_this_register": false,
+    "segment_relative": false,
+    "p3a_class": "REGISTER_BASED_ZERO_OFFSET_STORE"
+   },
+   {
+    "va": "0x009724CB",
+    "bytes": "64 89 0D 00 00 00 00",
+    "store_form": "MOV [r],r",
+    "segment": "FS",
+    "ea_text": "FS:[0x00000000]",
+    "base_register": null,
+    "index_register": null,
+    "scale": 1,
+    "raw_displacement": "0x00000000",
+    "effective_displacement": 0,
+    "imm": null,
+    "base_is_this_register": false,
+    "segment_relative": true,
+    "p3a_class": "SEGMENT_RELATIVE_SEH_TLS_STORE"
+   }
+  ],
+  "string_store_opcode_hits_in_extent": []
+ },
+ "direct_vptr_store_in_examined_ctor": {
+  "DIRECT_VPTR_STORE_IN_EXAMINED_CTOR": "NOT_OBSERVED",
+  "search_scope": "every memory-write encoding with effective displacement 0 in the examined ctor extent 0x00972380..0x009724D9 (P3-A corrected: ALL write forms, segment semantics represented); a direct vptr store is a NON-SEGMENT-RELATIVE store to [this+0]",
+  "offset_zero_stores_found": 3,
+  "segment_relative_stores": 2,
+  "segment_relative_store_vas": [
+   "0x009723A0",
+   "0x009724CB"
+  ],
+  "with_this_base_non_segment": 0,
+  "segment_exclusion_rule": "segment-relative stores (FS/GS...) are TLS/SEH-style writes to a SEGMENT-RELATIVE address, NOT offset-zero writes to the assigned object's this - they can NEVER become DIRECT_VPTR_STORE_IN_EXAMINED_CTOR or object-member offset-zero evidence",
+  "segment_relative_detail": [
+   {
+    "va": "0x009723A0",
+    "segment": "FS",
+    "bytes": "64 A3 00 00 00 00",
+    "store_form": "MOV moffs,AL/EAX",
+    "ea_text": "FS:[0x00000000]"
+   },
+   {
+    "va": "0x009724CB",
+    "segment": "FS",
+    "bytes": "64 89 0D 00 00 00 00",
+    "store_form": "MOV [r],r",
+    "ea_text": "FS:[0x00000000]"
+   }
+  ],
+  "note": "NOT_OBSERVED is a direct observation over the EXAMINED ctor extent only; the object may delegate vptr installation to a base/helper constructor (not entered here), so the global fields stay ASSIGNED_OBJECT_VTABLE=UNVERIFIED and OBJECT_POLYMORPHISM=NOT_ESTABLISHED"
+ },
+ "known_examined_callsites_direct": {
+  "KNOWN_EXAMINED_CALLSITES_ARE_DIRECT": "YES",
+  "callsites": [
+   {
+    "va": "0x0070DD75",
+    "byte_is_E8": true,
+    "call_validation": "PASS",
+    "boundary_status": "CONFIRMED",
+    "target": "0x00971AD0",
+    "indirect_FF2": false
+   },
+   {
+    "va": "0x0070DD84",
+    "byte_is_E8": true,
+    "call_validation": "PASS",
+    "boundary_status": "CONFIRMED",
+    "target": "0x00971650",
+    "indirect_FF2": false
+   },
+   {
+    "va": "0x0070C742",
+    "byte_is_E8": true,
+    "call_validation": "PASS",
+    "boundary_status": "CONFIRMED",
+    "target": "0x00972DF0",
+    "indirect_FF2": false
+   }
+  ],
+  "note": "measured over the EXAMINED callsites only (the consumer's two stream-method calls + the setter's post-attach call); NO claim about 'all methods' of the object"
+ },
+ "ctor_callsite_census": {
+  "target": "0x00972380",
+  "raw_E8_rel32_target_matches": 10,
+  "raw_sites": [
+   "0x0041607C",
+   "0x004160EC",
+   "0x006EC7A4",
+   "0x0070C715",
+   "0x0072FA76",
+   "0x00766A3F",
+   "0x00821FEF",
+   "0x00828854",
+   "0x0094E031",
+   "0x0094FE71"
+  ],
+  "boundary_confirmed_count": 2,
+  "boundary_confirmed_sites": [
+   "0x0070C715",
+   "0x0072FA76"
+  ],
+  "historical_prefilled_value_superseded": 10,
+  "note": "machine-measured: raw E8 opcode positions whose rel32 targets the ctor; the boundary-confirmed subset counts ONLY strong-anchor-confirmed positions under the AF2-corrected policy (the C1 padding-derived confirmations are demoted to heuristic candidates - recorded, never confirming)"
+ },
+ "fun_0070bf40_literal_transcription": {
+  "instructions": [
+   {
+    "va": "0x0070BF40",
+    "bytes": "8B 41 04",
+    "opcode": "0x8B",
+    "memop": "[ECX+0x4]",
+    "imm": null
+   },
+   {
+    "va": "0x0070BF43",
+    "bytes": "23 44 24 04",
+    "opcode": "0x23",
+    "memop": "[ESP+0x4]",
+    "imm": null
+   },
+   {
+    "va": "0x0070BF47",
+    "bytes": "F7 D8",
+    "opcode": "0xF7",
+    "memop": null,
+    "imm": null
+   },
+   {
+    "va": "0x0070BF49",
+    "bytes": "1B C0",
+    "opcode": "0x1B",
+    "memop": null,
+    "imm": null
+   },
+   {
+    "va": "0x0070BF4B",
+    "bytes": "F7 D8",
+    "opcode": "0xF7",
+    "memop": null,
+    "imm": null
+   },
+   {
+    "va": "0x0070BF4D",
+    "bytes": "C2 04 00",
+    "opcode": "0xC2",
+    "memop": null,
+    "imm": null
+   },
+   {
+    "va": "0x0070BF50",
+    "bytes": "6A FF",
+    "opcode": "0x6A",
+    "memop": null,
+    "imm": "0xFF"
+   },
+   {
+    "va": "0x0070BF52",
+    "bytes": "68 BB C3 A0 00",
+    "opcode": "0x68",
+    "memop": null,
+    "imm": "0xA0C3BB"
+   },
+   {
+    "va": "0x0070BF57",
+    "bytes": "64 A1 00 00 00 00",
+    "opcode": "0xA1",
+    "memop": "[0x00000000]",
+    "imm": null
+   },
+   {
+    "va": "0x0070BF5D",
+    "bytes": "50",
+    "opcode": "0x50",
+    "memop": null,
+    "imm": null
+   },
+   {
+    "va": "0x0070BF5E",
+    "bytes": "51",
+    "opcode": "0x51",
+    "memop": null,
+    "imm": null
+   },
+   {
+    "va": "0x0070BF5F",
+    "bytes": "56",
+    "opcode": "0x56",
+    "memop": null,
+    "imm": null
+   }
+  ],
+  "literal_operation": "loads [ECX+4]; ANDs with the supplied argument; normalizes the result to a boolean-like return (measured transcription; NO semantic-role promotion beyond the literal examined operation)",
+  "function_ledger_hygiene": {
+   "HISTORICAL_FUNCTION_BUDGET_COUNT": "8_DECLARED_AND_MECHANICALLY_REPRODUCED",
+   "PRE_ANALYSIS_CHRONOLOGY_INDEPENDENTLY_ESTABLISHED": "NO",
+   "ACTUAL_HISTORICAL_BUDGET_OVERRUN": "NOT_ESTABLISHED",
+   "note": "the existing historical ledger mechanically reproduces 8 counted + 10 excluded rows; this correction does NOT claim a historical budget overrun"
+  }
+ },
+ "allocation_size_facts": {
+  "ASSIGNED_OBJECT_SIZE_HEX": "0xA4",
+  "ASSIGNED_OBJECT_SIZE_DECIMAL": 164,
+  "P3_note": "0xA4 = 164 bytes (the ASSIGNED OBJECT allocation at the setter); the historical '0xA4 bytes (280)' decimal was wrong - 280 = 0x118 is the FACTORY allocation size",
+  "FACTORY_SIZE_HEX": "0x118",
+  "FACTORY_SIZE_DECIMAL": 280
+ },
+ "preserved_structural_facts": {
+  "ASSIGNED_OBJECT_CONSTRUCTOR": "FUN_00972380",
+  "measured_cursor_plus_0x3C": "LEA EDI,[ESI+0x3C] @0x00972427; size store [EDI+4]=0x80 @0x00972443; buffer new(0x80) CALL @0x0097244A -> 0x0095D3BE; buffer store [EDI]=EAX @0x00972452; flag [EDI+0x11]=1 @0x00972454",
+  "measured_tail_stores": "+0x88<-dword @0x00972499; +0x8C<-0x80 imm32 @0x0097249F; +0x90 @0x009724A9; +0x94 @0x009724AF; +0x98<-0x80 imm32 @0x009724B5; +0x9C @0x009724BF",
+  "constructor_returns_this": "MOV EAX,ESI @0x009724C5; RET @0x009724D9",
+  "ASSIGNED_OBJECT_STRUCTURAL_IDENTITY": "CONFIRMED_WITHIN_EXAMINED_LAYOUT",
+  "FINAL_SEMANTIC_ROLE_RECORD_STREAM": "STRONGLY_SUPPORTED",
+  "terminology_note": "structural identity confirmed WITHIN THE EXAMINED LAYOUT (0xA4 allocation + FUN_00972380 construction + examined internal stores + embedded cursor/buffer + known direct callsites); 'record-stream' is semantic NAMING, STRONGLY_SUPPORTED not CONFIRMED from structural observations alone"
+ }
+}
