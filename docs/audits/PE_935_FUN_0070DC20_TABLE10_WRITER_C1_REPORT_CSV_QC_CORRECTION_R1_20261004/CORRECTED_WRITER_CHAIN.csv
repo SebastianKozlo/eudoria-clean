@@ -1,0 +1,27 @@
+step,actor,va,operation,structural_identity,evidence_pin
+1,FUN_0070DCF0,0x0070DD75,"CALL FUN_00971AD0(stream=factory+0x84; receiver, &cursor, &size)",read ONE record into the 0x80-B buffer (canon reader),machine-verified rel32
+2,FUN_0070DCF0,0x0070DDA8,"CALL FUN_0040DE60(&cursor, 8)",skip the 8-byte record framing,machine-verified rel32
+3,FUN_0070DCF0,0x0070DDBD,"CALL FUN_0070DC20(factory; receiver, &cursor, 2)",apply the record; result becomes the class_obj,machine-verified rel32 (E8 5E FE FF FF)
+4,FUN_0070DC20,0x0070DC3F,"CALL FUN_0070D990(factory, receiver, 0)",class_obj = per-receiver 0x58-B component vtable 0x00A86F2C; table 12 entries at [class_obj+0x40]; DEFAULT 0,machine-verified rel32 + canon pins
+5,FUN_0070DC20,0x0070DC4B,CALL FUN_0075D8D0(&cursor),"mode word AX=1 (mov ax,1; ret); cursor arg stays on the stack",bytes 66 B8 01 00 C3
+6,FUN_0070DC20,0x0070DC53,"CALL FUN_00726900(class_obj; mode=1, cursor)",apply loop on the NEWLY created class_obj,machine-verified rel32
+7,FUN_00726900,0x00726912,CALL FUN_00413440(class_obj+8),EnterCriticalSection (KERNEL32 IAT 0x00A75064 hint 152),IAT-resolved
+8,FUN_00726900,0x00726948..0x007269BC,read u16 value1 [if 0xFFFF: u16 value2] + u16 count,record payload header (flags / count),byte pins @0x0072694B/@0x00726986/@0x007269BC
+9,FUN_00726900,0x007269E7,"MOVZX EDI,WORD [EAX+ECX]",TAG = u16 from the record cursor (per loop entry),byte pin 0F B7 3C 08
+10,FUN_00726900,0x007269EF,"CALL FUN_0040DE60(cursor, 2)",advance past the tag,machine-verified rel32
+11,FUN_00726900,0x00726A03,"CALL FUN_0070C180(factory, tag)",slot = &factory->slot_array[tag] (array @factory+0x88; this=factory from [class_obj+4] @0x007269FC),machine-verified rel32
+12,FUN_00726900,0x00726A08,"CMP [EAX+4],0 / JE",slot->kind == 0 -> skip (audited slot 6 kind=1),byte pin 83 78 04 00
+13,FUN_00726900,0x00726A0E,"MOV ECX,[EAX+8]",ID = slot->id (schema: id = tag+4 via 83 C1 04 @0x0070CBF6; tag 6 -> 10),byte pin 8B 48 08
+14,FUN_00726900,0x00726A11,"MOV EDX,[EBP+0x40]",TABLE = [class_obj+0x40] (the per-receiver value table pointer),byte pin 8B 55 40
+15,FUN_00726900,0x00726A14,"LEA ECX,[EDX+ECX*4]",DEST = &table[id] = [class_obj+0x40]+id*4 (id 10 -> &table[10]),byte pin 8D 0C 8A
+16,FUN_00726900,0x00726A17-1B,"PUSH DEST; PUSH cursor; MOV ECX,EAX; CALL FUN_0075F660(slot; cursor, &dest)",traits dispatch,machine-verified rel32
+17,FUN_0075F660,0x0075F676,"MOV EAX,[EAX+0x14]",traits->vtable slot 5 (int traits: dword @0x00A9C684 = 0x009777F0),byte pin 8B 40 14
+18,FUN_0075F660,0x0075F67B,CALL EAX,"FUN_009777F0(traits; cursor, &dest)",byte pin FF D0
+19,FUN_009777F0,0x00977807,"MOV EAX,[EDX+EAX]",VALUE = u32 at [cursor.base + cursor.pos] (RECORD_FIELD),byte pin 8B 04 10
+20,FUN_009777F0,0x00977810,"MOV [EDX],EAX",*** THE EXACT WRITE: *(&table[10]) = VALUE ***,byte pin 89 02
+21,FUN_009777F0,0x00977812,"CALL FUN_0040DE60(cursor, 4)",advance past the value,machine-verified rel32
+22,FUN_00726900,0x00726A35,JB 0x007269D0,loop for count entries; then post-loop flags OR into class_obj+0x30; mode-1 typed blob via class_obj->vtable[3] (undecoded),branch pin
+23,FUN_00726900,0x00726AB7,CALL FUN_00413450(class_obj+8),LeaveCriticalSection (KERNEL32 IAT 0x00A7506C hint 593),IAT-resolved
+24,FUN_0070DC20,0x0070DC7C,"CALL FUN_0092B660(factory+0x0C map; &value, &key)",INSERT (receiver -> class_obj) into THE getter-side cache map (key slot @0x0070DC74 = receiver; value slot @0x0070DC78 = class_obj),machine-verified rel32 + byte pins
+25,getter side (canon re-pinned),0x0070E11E/0x0070E124/0x0070E131,"LEA factory+0x0C; CALL FUN_004D1430; MOV EBP,[EAX+0x14]",lookup of the SAME map returns THE SAME class_obj for the SAME receiver key,byte pins
+26,getter side (canon re-pinned),0x004C5539/0x004C553C/0x004C553F/0x004C554E,"id=slot->id (10); table=[class_obj+0x40]; &table[id]; MOV EAX,[EAX]",the audited getter reads the CURRENT value of table[10] of the SAME storage entry the audited writer mechanism can write (storage identity CONFIRMED_STATIC_CONDITIONAL; whether the value written by a particular apply event persists unchanged until this getter event is NOT_ESTABLISHED by this static run),byte pins

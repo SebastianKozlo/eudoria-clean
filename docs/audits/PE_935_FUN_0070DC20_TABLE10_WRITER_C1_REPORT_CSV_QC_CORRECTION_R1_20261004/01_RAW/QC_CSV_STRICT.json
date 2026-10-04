@@ -1,0 +1,143 @@
+{
+ "run": "PE_935_FUN_0070DC20_TABLE10_WRITER_C1_REPORT_CSV_QC_CORRECTION_R1_20261004",
+ "generated_utc": "2026-10-04T15:54:09Z",
+ "qc_scope": "SELF_CHECK_TABLE10_WRITER_C1",
+ "mode": "STATIC-ONLY correction QC (no new reverse engineering)",
+ "gates": {
+  "Q3_corrected_ledger_strict_csv": {
+   "gate": "Q3_corrected_ledger_strict_csv",
+   "file": "CORRECTED_FUNCTION_LEDGER.csv",
+   "utf8_round_trip": true,
+   "csv_reader_parse_succeeds": true,
+   "header": [
+    "ordinal",
+    "function",
+    "reason_entered",
+    "count_before",
+    "analysis_started",
+    "count_after",
+    "result"
+   ],
+   "header_column_count": 7,
+   "header_correct": true,
+   "data_row_count": 8,
+   "row_count_preserved": true,
+   "row_widths": [
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7
+   ],
+   "all_rows_exact_header_width": true,
+   "csv_width_mismatches": 0,
+   "csv_extra_fields": 0,
+   "dictreader_none_key_rows": 0,
+   "dictreader_missing_field_rows": 0,
+   "ordinal_unique": true,
+   "ordinal_count": 8,
+   "rows_with_embedded_separators_kept_as_content": 8,
+   "write_read_write_round_trip": true,
+   "STRICT_CSV_STATUS": "PASS",
+   "historical_measurement": {
+    "header_column_count": 7,
+    "data_row_count": 8,
+    "malformed_width_rows": 5,
+    "well_formed_rows": 3
+   },
+   "logical_content_diffs": [
+    {
+     "key": "7",
+     "field_index": 2,
+     "old": "canon function (20002_PAYLOAD30) - COUNTED conservatively because this run derived NEW semantics beyond the reverified canon pins (fail-path zero store @0x0097781A + advance-by-4 call)",
+     "new": "canon function (20002_PAYLOAD30) - COUNTED conservatively because this run derived NEW semantics beyond the reverified canon pins (fail-path zero store @0x0097781E + advance-by-4 call)"
+    }
+   ],
+   "logical_content_preserved_except_authorized": true,
+   "authorized_changes_exactly_applied": true,
+   "FUNCTION_LEDGER_CSV": "CORRECTED_VALID",
+   "declared_in_terminal_state": "CORRECTED_VALID",
+   "declared_matches_measured": true,
+   "status": "PASS"
+  },
+  "Q4_corrected_writer_chain_strict_csv": {
+   "gate": "Q4_corrected_writer_chain_strict_csv",
+   "file": "CORRECTED_WRITER_CHAIN.csv",
+   "utf8_round_trip": true,
+   "csv_reader_parse_succeeds": true,
+   "header": [
+    "step",
+    "actor",
+    "va",
+    "operation",
+    "structural_identity",
+    "evidence_pin"
+   ],
+   "header_column_count": 6,
+   "header_correct": true,
+   "data_row_count": 26,
+   "row_count_preserved": true,
+   "row_widths": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "all_rows_exact_header_width": true,
+   "csv_width_mismatches": 0,
+   "csv_extra_fields": 0,
+   "dictreader_none_key_rows": 0,
+   "dictreader_missing_field_rows": 0,
+   "step_unique": true,
+   "step_count": 26,
+   "rows_with_embedded_separators_kept_as_content": 26,
+   "write_read_write_round_trip": true,
+   "STRICT_CSV_STATUS": "PASS",
+   "historical_measurement": {
+    "header_column_count": 6,
+    "data_row_count": 26,
+    "malformed_width_rows": 22,
+    "well_formed_rows": 4
+   },
+   "logical_content_diffs": [
+    {
+     "key": "26",
+     "field_index": 4,
+     "old": "the audited getter reads table[10] = the value WRITTEN at step 20",
+     "new": "the audited getter reads the CURRENT value of table[10] of the SAME storage entry the audited writer mechanism can write (storage identity CONFIRMED_STATIC_CONDITIONAL; whether the value written by a particular apply event persists unchanged until this getter event is NOT_ESTABLISHED by this static run)"
+    }
+   ],
+   "logical_content_preserved_except_authorized": true,
+   "authorized_changes_exactly_applied": true,
+   "WRITER_CHAIN_CSV": "CORRECTED_VALID",
+   "declared_in_terminal_state": "CORRECTED_VALID",
+   "declared_matches_measured": true,
+   "status": "PASS"
+  }
+ }
+}
