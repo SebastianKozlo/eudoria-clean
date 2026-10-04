@@ -1,0 +1,162 @@
+{
+ "oracle_definition": "HARD-CODED in 03_SCRIPTS/qc_targeted_c1c1.py (ORACLE_U32/ORACLE_D/ORACLE_READS): payload-index -> exact store instruction VA -> destination template offset -> expected instruction bytes",
+ "independent_source_of_truth": "pinned Entropia.exe bytes (SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31) + the independently fixed normal parser instruction order of FUN_00730C90 (payload fields are read in payload order; each store follows its read; the six store/FLD/FSTP VAs strictly increase with payload index)",
+ "why_non_circular": "the expected payload-index -> VA mapping is fixed BEFORE and INDEPENDENT of the tested document and is byte-backed from the pinned EXE; the tested PARSER_CHAIN table is NEVER used to generate the expected mapping; a document row pointing at ANY other real MOV with the right displacement FAILS, because the oracle fixes which store VA belongs to which payload index",
+ "failure_case_detected": "Desktop mutant C \u2014 BASE false PASS reproduced in 01_RAW/BASE_MUTANT_C_REPRODUCTION.json; POST-FIX detection in 01_RAW/QC_MUTATION_BATTERY_POST_FIX.json",
+ "oracle_byte_backing": {
+  "definition": "HARD-CODED parser-sequence oracle (03_SCRIPTS/qc_targeted_c1c1.py ORACLE_U32/ORACLE_D); NEVER derived from the tested document",
+  "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+  "exe_sha_match": true,
+  "pins": [
+   {
+    "pin": "payload[0] (id2) store",
+    "va": "0x00730CB6",
+    "expected": "89 07",
+    "actual": "89 07",
+    "ok": true
+   },
+   {
+    "pin": "payload[1] (A) store",
+    "va": "0x00730CE6",
+    "expected": "89 47 08",
+    "actual": "89 47 08",
+    "ok": true
+   },
+   {
+    "pin": "payload[2] (B) store",
+    "va": "0x00730D14",
+    "expected": "89 47 04",
+    "actual": "89 47 04",
+    "ok": true
+   },
+   {
+    "pin": "payload[3] (C) store",
+    "va": "0x00730D42",
+    "expected": "89 47 0C",
+    "actual": "89 47 0C",
+    "ok": true
+   },
+   {
+    "pin": "payload[4] (D_f32) FLD",
+    "va": "0x00730D69",
+    "expected": "D9 04 10",
+    "actual": "D9 04 10",
+    "ok": true
+   },
+   {
+    "pin": "payload[4] (D_f32) FSTP",
+    "va": "0x00730D70",
+    "expected": "D9 5F 10",
+    "actual": "D9 5F 10",
+    "ok": true
+   }
+  ],
+  "reads": [
+   {
+    "pin": "payload[0] read",
+    "va": "0x00730CAB",
+    "expected": "8B 04 10",
+    "actual": "8B 04 10",
+    "ok": true
+   },
+   {
+    "pin": "payload[1] read",
+    "va": "0x00730CDF",
+    "expected": "8B 04 10",
+    "actual": "8B 04 10",
+    "ok": true
+   },
+   {
+    "pin": "payload[2] read",
+    "va": "0x00730D0D",
+    "expected": "8B 04 10",
+    "actual": "8B 04 10",
+    "ok": true
+   },
+   {
+    "pin": "payload[3] read",
+    "va": "0x00730D3B",
+    "expected": "8B 04 10",
+    "actual": "8B 04 10",
+    "ok": true
+   },
+   {
+    "pin": "payload[4] read",
+    "va": "0x00730D69",
+    "expected": "D9 04 10",
+    "actual": "D9 04 10",
+    "ok": true
+   }
+  ],
+  "store_va_order_strictly_increasing_with_payload_index": true,
+  "pass": true
+ },
+ "normal_read_store_sequence": {
+  "payload[0] id2": {
+   "read": "MOV EAX,[EDX+EAX] @0x00730CAB (8B 04 10)",
+   "store": "MOV [EDI],EAX @0x00730CB6 (89 07) -> template+0x00",
+   "zero_path": "MOV [EDI],EBX @0x00730CC3 (89 1F)"
+  },
+  "payload[1] A": {
+   "read": "MOV EAX,[EDX+EAX] @0x00730CDF (8B 04 10)",
+   "store": "MOV [EDI+0x08],EAX @0x00730CE6 (89 47 08) -> template+0x08",
+   "zero_path": "MOV [EDI+8],EBX @0x00730CF0 (89 5F 08)"
+  },
+  "payload[2] B": {
+   "read": "MOV EAX,[EDX+EAX] @0x00730D0D (8B 04 10)",
+   "store": "MOV [EDI+0x04],EAX @0x00730D14 (89 47 04) -> template+0x04",
+   "zero_path": "MOV [EDI+4],EBX @0x00730D1E (89 5F 04)"
+  },
+  "payload[3] C": {
+   "read": "MOV EAX,[EDX+EAX] @0x00730D3B (8B 04 10)",
+   "store": "MOV [EDI+0x0C],EAX @0x00730D42 (89 47 0C) -> template+0x0C",
+   "zero_path": "MOV [EDI+0xC],EBX @0x00730D4C (89 5F 0C)"
+  },
+  "payload[4] D_f32": {
+   "read": "FLD [EDX+EAX] @0x00730D69 (D9 04 10)",
+   "store": "FSTP [EDI+0x10] @0x00730D70 (D9 5F 10) -> template+0x10",
+   "zero_path": "FLDZ @0x00730D7A (D9 EE) + FSTP [EDI+0x10] @0x00730D7C (D9 5F 10)"
+  }
+ },
+ "byte_identical_fstp_twin_note": "FSTP [EDI+0x10] (D9 5F 10) appears TWICE in FUN_00730C90: the normal store @0x00730D70 and the zero-path store @0x00730D7C \u2014 byte-identical. A document row pointing the D store at 0x00730D7C would ALSO have passed the BASE verifier (same bytes); only the VA identity of the corrected oracle rejects it. Recorded as an additional closed class; not part of the A/B/C battery.",
+ "byte_windows": [
+  {
+   "label": "FUN_00730C90 parse body (reads + stores + zero-writes + FLD/FSTP/FLDZ)",
+   "va": "0x00730C90",
+   "size": 304,
+   "bytes": "53 56 8B 74 24 0C 33 DB 38 5E 11 57 74 21 8B 46 0C 8D 48 04 3B 4E 08 77 16 8B 16 8B 04 10 8B 7C 24 14 6A 04 8B CE 89 07 E8 A3 D1 CD FF EB 0E 8B 7C 24 14 89 1F 38 5E 11 74 26 88 5E 11 38 5E 11 74 1E 8B 46 0C 8D 48 04 3B 4E 08 77 13 8B 16 8B 04 10 6A 04 8B CE 89 47 08 E8 72 D1 CD FF EB 0B 89 5F 08 38 5E 11 74 26 88 5E 11 38 5E 11 74 1E 8B 46 0C 8D 48 04 3B 4E 08 77 13 8B 16 8B 04 10 6A 04 8B CE 89 47 04 E8 44 D1 CD FF EB 0B 89 5F 04 38 5E 11 74 26 88 5E 11 38 5E 11 74 1E 8B 46 0C 8D 48 04 3B 4E 08 77 13 8B 16 8B 04 10 6A 04 8B CE 89 47 0C E8 16 D1 CD FF EB 0B 89 5F 0C 38 5E 11 74 26 88 5E 11 38 5E 11 74 1E 8B 46 0C 8D 48 04 3B 4E 08 77 13 8B 16 D9 04 10 6A 04 8B CE D9 5F 10 E8 E8 D0 CD FF EB 0D D9 EE D9 5F 10 38 5E 11 74 03 88 5E 11 8D 47 14 50 8B CE E8 DE FD FF FF 8D 4F 20 51 8B CE E8 D3 FB FF FF 38 5E 11 74 22 8B 46 0C 8D 50 04 3B 56 08 77 17 8B 0E 8B 14 08 6A 04 8B CE 89 57 2C E8 A2 D0 CD FF 5F 8B"
+  },
+  {
+   "label": "payload[0] id2 block: read @0x00730CAB; store @0x00730CB6; zero @0x00730CC3",
+   "va": "0x00730CA9",
+   "size": 36,
+   "bytes": "8B 16 8B 04 10 8B 7C 24 14 6A 04 8B CE 89 07 E8 A3 D1 CD FF EB 0E 8B 7C 24 14 89 1F 38 5E 11 74 26 88 5E 11"
+  },
+  {
+   "label": "payload[1] A block: read @0x00730CDF; store @0x00730CE6; zero @0x00730CF0",
+   "va": "0x00730CDD",
+   "size": 31,
+   "bytes": "8B 16 8B 04 10 6A 04 8B CE 89 47 08 E8 72 D1 CD FF EB 0B 89 5F 08 38 5E 11 74 26 88 5E 11 38"
+  },
+  {
+   "label": "payload[2] B block: read @0x00730D0D; store @0x00730D14; zero @0x00730D1E",
+   "va": "0x00730D0B",
+   "size": 23,
+   "bytes": "8B 16 8B 04 10 6A 04 8B CE 89 47 04 E8 44 D1 CD FF EB 0B 89 5F 04 38"
+  },
+  {
+   "label": "payload[3] C block: read @0x00730D3B; store @0x00730D42; zero @0x00730D4C",
+   "va": "0x00730D39",
+   "size": 27,
+   "bytes": "8B 16 8B 04 10 6A 04 8B CE 89 47 0C E8 16 D1 CD FF EB 0B 89 5F 0C 38 5E 11 74 26"
+  },
+  {
+   "label": "payload[4] D_f32 block: FLD @0x00730D69; FSTP @0x00730D70; FLDZ @0x00730D7A; zero-FSTP @0x00730D7C",
+   "va": "0x00730D67",
+   "size": 25,
+   "bytes": "8B 16 D9 04 10 6A 04 8B CE D9 5F 10 E8 E8 D0 CD FF EB 0D D9 EE D9 5F 10 38"
+  }
+ ],
+ "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+ "pass": true
+}

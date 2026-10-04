@@ -1,0 +1,92 @@
+{
+ "measured": {
+  "QC_SCOPE": "SELF_CHECK_C1_C1_STORE_IDENTITY",
+  "falsifier": "POST_FIX_MUTATION_BATTERY (canonical negative control + mutants A/B/C)",
+  "design": "Run the CORRECTED CLIENT_DESTINATION_MAPPING_CHECK (three simultaneous identities against the independent hard-coded parser-sequence oracle) against: (0) an unmutated private copy of the canonical document (MUST PASS \u2014 negative control proving a correct field-index/name/VA/destination tuple passes); (A) destination-cell-only swap (MUST FAIL); (B) destination+displacement swap with the OLD VAs (MUST FAIL); (C) destination+displacement+MATCHING REAL STORE VA swap \u2014 each row at the OTHER field's real store (MUST FAIL; the class the BASE verifier passed undetected). Raw VFS values stay unchanged in every case; the full QC is re-run per case and must FAIL whenever TQ2 fails.",
+  "inputs": {
+   "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+   "tpl_sha256": "BE57818C7516F8C6C8A68DF427591567DD0E5A421934AC24ADA57E8261F65B77",
+   "canonical_parser_chain_sha256": "6BA91A1FB6181DE8CAFD4CC9A863254C69136FA074291BECD151B5758AB3EEE0"
+  },
+  "cases": {
+   "canonical_copy_negative_control": {
+    "description": "unmutated private copy of the canonical document (nothing replaced)",
+    "document_sha256": "6BA91A1FB6181DE8CAFD4CC9A863254C69136FA074291BECD151B5758AB3EEE0",
+    "mutated_rows": [],
+    "PAYLOAD_FIELD_DECODE_CHECK": "PASS",
+    "PAYLOAD_INDEX_STORE_IDENTITY_CHECK": "PASS",
+    "CLIENT_DESTINATION_MAPPING_CHECK": "PASS",
+    "per_row_reasons": [],
+    "FULL_QC": "QC_PASS",
+    "expected": "PASS",
+    "detected": false
+   },
+   "mutantA_destination_cell_only": {
+    "description": "destination cells swapped only (Desktop replica): payload[1] dest +0x04 / payload[2] dest +0x08, instruction cells unchanged",
+    "document_sha256": "0AEC1DB4FC646E487FCEE2ECA159B79B6A1DF805ACD7D67B6FC9D112F4DF31A0",
+    "mutated_rows": [
+     "| payload[1] (A) | template+0x04 | MOV [EDI+0x08],EAX @0x00730CE6 |",
+     "| payload[2] (B) | template+0x08 | MOV [EDI+0x04],EAX @0x00730D14 |"
+    ],
+    "PAYLOAD_FIELD_DECODE_CHECK": "PASS",
+    "PAYLOAD_INDEX_STORE_IDENTITY_CHECK": "FAIL",
+    "CLIENT_DESTINATION_MAPPING_CHECK": "FAIL",
+    "per_row_reasons": [
+     "payload[1] (A): DESTINATION FIELD IDENTITY FAIL: documented destination template+0x04 != oracle destination template+0x08 for payload[1] (A)",
+     "payload[2] (B): DESTINATION FIELD IDENTITY FAIL: documented destination template+0x08 != oracle destination template+0x04 for payload[2] (B)"
+    ],
+    "FULL_QC": "QC_FAIL",
+    "expected": "FAIL",
+    "detected": true
+   },
+   "mutantB_destination_disp_old_va": {
+    "description": "destination+displacement swap with the OLD store VAs kept (@0x00730CE6 / @0x00730D14)",
+    "document_sha256": "2901BD5747831DF8713252187C425F498A1601B186812242B180C9CF340F2C27",
+    "mutated_rows": [
+     "| payload[1] (A) | template+0x04 | MOV [EDI+0x04],EAX @0x00730CE6 |",
+     "| payload[2] (B) | template+0x08 | MOV [EDI+0x08],EAX @0x00730D14 |"
+    ],
+    "PAYLOAD_FIELD_DECODE_CHECK": "PASS",
+    "PAYLOAD_INDEX_STORE_IDENTITY_CHECK": "FAIL",
+    "CLIENT_DESTINATION_MAPPING_CHECK": "FAIL",
+    "per_row_reasons": [
+     "payload[1] (A): DESTINATION FIELD IDENTITY FAIL: documented destination template+0x04 != oracle destination template+0x08 for payload[1] (A)",
+     "payload[1] (A): documented instruction displacement 0x04 != oracle destination 0x08 of payload[1] (A)'s assigned store instruction",
+     "payload[2] (B): DESTINATION FIELD IDENTITY FAIL: documented destination template+0x08 != oracle destination template+0x04 for payload[2] (B)",
+     "payload[2] (B): documented instruction displacement 0x08 != oracle destination 0x04 of payload[2] (B)'s assigned store instruction"
+    ],
+    "FULL_QC": "QC_FAIL",
+    "expected": "FAIL",
+    "detected": true
+   },
+   "mutantC_destination_disp_real_store_va_swap": {
+    "description": "destination+displacement+MATCHING REAL STORE VA swap: payload[1](A)->template+0x04->MOV [EDI+0x04],EAX @0x00730D14; payload[2](B)->template+0x08->MOV [EDI+0x08],EAX @0x00730CE6 (each row at the OTHER payload field's REAL store)",
+    "document_sha256": "7C0809CD59198CF38413DA962E4AB90974BA94E50631F90D815090D2ADF68C28",
+    "mutated_rows": [
+     "| payload[1] (A) | template+0x04 | MOV [EDI+0x04],EAX @0x00730D14 |",
+     "| payload[2] (B) | template+0x08 | MOV [EDI+0x08],EAX @0x00730CE6 |"
+    ],
+    "PAYLOAD_FIELD_DECODE_CHECK": "PASS",
+    "PAYLOAD_INDEX_STORE_IDENTITY_CHECK": "FAIL",
+    "CLIENT_DESTINATION_MAPPING_CHECK": "FAIL",
+    "per_row_reasons": [
+     "payload[1] (A): STORE INSTRUCTION IDENTITY FAIL: documented store VA 0x00730D14 is the store of payload[2] (B) per the independent parser-sequence oracle, NOT the store of payload[1] (A) (oracle assigns payload[1] (A) store VA 0x00730CE6, bytes 89 47 08)",
+     "payload[1] (A): DESTINATION FIELD IDENTITY FAIL: documented destination template+0x04 != oracle destination template+0x08 for payload[1] (A)",
+     "payload[1] (A): documented instruction displacement 0x04 != oracle destination 0x08 of payload[1] (A)'s assigned store instruction",
+     "payload[2] (B): STORE INSTRUCTION IDENTITY FAIL: documented store VA 0x00730CE6 is the store of payload[1] (A) per the independent parser-sequence oracle, NOT the store of payload[2] (B) (oracle assigns payload[2] (B) store VA 0x00730D14, bytes 89 47 04)",
+     "payload[2] (B): DESTINATION FIELD IDENTITY FAIL: documented destination template+0x08 != oracle destination template+0x04 for payload[2] (B)",
+     "payload[2] (B): documented instruction displacement 0x08 != oracle destination 0x04 of payload[2] (B)'s assigned store instruction"
+    ],
+    "FULL_QC": "QC_FAIL",
+    "expected": "FAIL",
+    "detected": true
+   }
+  },
+  "MUTANT_A_DETECTED": "YES",
+  "MUTANT_B_DETECTED": "YES",
+  "MUTANT_C_POST_FIX_DETECTED": "YES",
+  "canonical_negative_control_pass": true,
+  "battery_pass": true,
+  "pass": true
+ }
+}

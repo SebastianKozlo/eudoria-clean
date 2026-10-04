@@ -1,0 +1,101 @@
+{
+ "measured": {
+  "QC_SCOPE": "SELF_CHECK_C1_C1_STORE_IDENTITY",
+  "falsifier": "BASE_MUTANT_C_FALSE_PASS_REPRODUCTION",
+  "design": "On the pristine BASE (97bdf959cb742490a0e974bddf5a2dd25f93f5f7) historical CLIENT_DESTINATION_MAPPING_CHECK verifier, swap ONLY the destination documentation: payload[1](A) -> template+0x04 -> MOV [EDI+0x04],EAX @0x00730D14 AND payload[2](B) -> template+0x08 -> MOV [EDI+0x08],EAX @0x00730CE6 \u2014 both VAs are REAL stores with MATCHING displacements belonging to the OTHER payload field. EXE unchanged, VFS unchanged, canonical docs unchanged. Expected BASE behavior: PAYLOAD_FIELD_DECODE_CHECK=PASS, CLIENT_DESTINATION_MAPPING_CHECK=PASS, FULL_QC=QC_PASS \u2014 the FALSE PASS (the C1-C1/P2 defect).",
+  "historical_instrument": {
+   "path": "docs/audits/PE_935_PARAMETER_RECORD_ATTRIBUTE_INSERTION_C1_REPORT_QC_CORRECTION_R1_20261004/03_SCRIPTS/qc_targeted.py",
+   "sha256": "CB4587C19ACBD4B7B9DE798A598251D63D97C0DE0CDB5BF80CC09BAA98E734E8",
+   "imported_read_only": true,
+   "unmodified_base_verifier": true
+  },
+  "inputs": {
+   "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+   "exe_sha_match": true,
+   "tpl_sha256": "BE57818C7516F8C6C8A68DF427591567DD0E5A421934AC24ADA57E8261F65B77",
+   "tpl_sha_match": true,
+   "canonical_parser_chain_sha256": "6BA91A1FB6181DE8CAFD4CC9A863254C69136FA074291BECD151B5758AB3EEE0"
+  },
+  "base_canonical_qc": {
+   "QC_VERDICT": "QC_PASS",
+   "checks_passed": 10,
+   "checks_total": 10,
+   "tq1_payload_field_decode_pass": true,
+   "tq2_client_destination_mapping_pass": true
+  },
+  "base_ab_mutation_falsifier": {
+   "AB_MAPPING_MUTATION_FALSIFIER": "DETECTED",
+   "mutantA_detected": true,
+   "mutantB_detected": true
+  },
+  "base_mutant_c": {
+   "mutation_text": "payload[1](A) row -> template+0x04 -> MOV [EDI+0x04],EAX @0x00730D14; payload[2](B) row -> template+0x08 -> MOV [EDI+0x08],EAX @0x00730CE6 (both VAs REAL stores with MATCHING displacements belonging to the OTHER payload field)",
+   "mutated_parser_chain_sha256": "7C0809CD59198CF38413DA962E4AB90974BA94E50631F90D815090D2ADF68C28",
+   "mutated_rows": [
+    "| payload[1] (A) | template+0x04 | MOV [EDI+0x04],EAX @0x00730D14 |",
+    "| payload[2] (B) | template+0x08 | MOV [EDI+0x08],EAX @0x00730CE6 |"
+   ],
+   "raw_vfs_values_unchanged": true,
+   "PAYLOAD_FIELD_DECODE_CHECK": "PASS",
+   "CLIENT_DESTINATION_MAPPING_CHECK": "PASS",
+   "tq2_row_results": [
+    {
+     "payload": "payload[0] (id2)",
+     "documented_dest": "template+0x00",
+     "documented_instr_disp": 0,
+     "instr_va": "0x00730CB6",
+     "bytes_match": true,
+     "dest_eq_disp": true,
+     "pass": true
+    },
+    {
+     "payload": "payload[1] (A)",
+     "documented_dest": "template+0x04",
+     "documented_instr_disp": 4,
+     "instr_va": "0x00730D14",
+     "bytes_match": true,
+     "dest_eq_disp": true,
+     "pass": true
+    },
+    {
+     "payload": "payload[2] (B)",
+     "documented_dest": "template+0x08",
+     "documented_instr_disp": 8,
+     "instr_va": "0x00730CE6",
+     "bytes_match": true,
+     "dest_eq_disp": true,
+     "pass": true
+    },
+    {
+     "payload": "payload[3] (C)",
+     "documented_dest": "template+0x0C",
+     "documented_instr_disp": 12,
+     "instr_va": "0x00730D42",
+     "bytes_match": true,
+     "dest_eq_disp": true,
+     "pass": true
+    },
+    {
+     "payload": "payload[4] (D_f32)",
+     "documented_dest": "template+0x10 (FLD/FSTP)",
+     "documented_instr_disp": null,
+     "instr_va": "FLD 0x00730D69; FSTP 0x00730D70",
+     "bytes_match": true,
+     "dest_eq_disp": null,
+     "pass": true
+    }
+   ],
+   "FULL_QC": "QC_PASS",
+   "checks_passed": 10,
+   "checks_total": 10,
+   "expected_base_behavior": {
+    "PAYLOAD_FIELD_DECODE_CHECK": "PASS",
+    "CLIENT_DESTINATION_MAPPING_CHECK": "PASS (the FALSE PASS \u2014 the defect)",
+    "FULL_QC": "QC_PASS (the FALSE PASS \u2014 the defect)"
+   },
+   "false_pass_reproduced": true
+  },
+  "BASE_MUTANT_C_FALSE_PASS_REPRODUCED": "YES",
+  "pass": true
+ }
+}
