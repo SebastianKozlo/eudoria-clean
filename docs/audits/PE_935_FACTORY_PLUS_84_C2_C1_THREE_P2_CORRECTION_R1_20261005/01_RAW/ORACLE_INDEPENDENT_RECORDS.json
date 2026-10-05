@@ -1,0 +1,721 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005",
+ "oracle_tool": "GNU objdump (WSL, Debian)",
+ "oracle_version_raw": [
+  "GNU objdump (GNU Binutils for Debian) 2.44",
+  "Copyright (C) 2025 Free Software Foundation, Inc."
+ ],
+ "oracle_scope_note": "INDEPENDENT oracle for SYNTHETIC FIXTURES ONLY; the production decoder is never its own source of truth; expected boundaries below were locked from objdump BEFORE the corrected decoder was written; the real-EXE re-derivations of the QC gates use the production decoder (the established Q2/Q3 pattern, disclosed)",
+ "fixtures": [
+  {
+   "name": "NEW_G_66_0F_84_je_rel16",
+   "bytes": "66 0F 84 00 00 B8 00 E8 01 00 00 00 C3",
+   "role": "P2-2 NEW-G falsifier: the C2 decoder measured the first instruction as 7 and fabricated a CALL edge from the E8 at +7",
+   "expected_boundaries": "je rel16 +0..+5 (5 B); mov eax,0x1e800 +5..+10; add [eax],al +10..+12; ret +12",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/NEW_G_66_0F_84_je_rel16.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/NEW_G_66_0F_84_je_rel16.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 84 00 00       \tje     0x5\n   5:\tb8 00 e8 01 00       \tmov    eax,0x1e800\n   a:\t00 00                \tadd    BYTE PTR [eax],al\n   c:\tc3                   \tret\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "JCC_REL32_0F_84",
+   "bytes": "0F 84 00 00 00 00",
+   "role": "P2-2 unit: unprefixed near Jcc rel32",
+   "expected_boundaries": "je rel32 +0..+6 (6 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/JCC_REL32_0F_84.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/JCC_REL32_0F_84.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 84 00 00 00 00    \tje     0x6\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "JCC_66REL16_0F_84",
+   "bytes": "66 0F 84 00 00",
+   "role": "P2-2 unit: 66 0F 84 rel16",
+   "expected_boundaries": "je rel16 +0..+5 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/JCC_66REL16_0F_84.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/JCC_66REL16_0F_84.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 84 00 00       \tje     0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "JCC_66REL16_0F_8F",
+   "bytes": "66 0F 8F 00 00",
+   "role": "P2-2 unit: 66 0F 8F rel16 (whole 0x80..0x8F class)",
+   "expected_boundaries": "jg rel16 +0..+5 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/JCC_66REL16_0F_8F.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/JCC_66REL16_0F_8F.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 8f 00 00       \tjg     0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "E8_REL32",
+   "bytes": "E8 01 00 00 00",
+   "role": "P2-2 unit: ordinary E8 rel32 positive form",
+   "expected_boundaries": "call rel32 +0..+5 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/E8_REL32.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/E8_REL32.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\te8 01 00 00 00       \tcall   0x6\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "E8_66_REL16",
+   "bytes": "66 E8 01 00",
+   "role": "P2-2 unit: existing 66 E8 rel16 case",
+   "expected_boundaries": "callw rel16 +0..+4 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/E8_66_REL16.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/E8_66_REL16.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 e8 01 00          \tcallw  0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "SHUFPS_0F_C6_ib",
+   "bytes": "0F C6 C0 E8 00",
+   "role": "P2-2 unit: existing 0F C6 /r ib case",
+   "expected_boundaries": "shufps xmm0,xmm0,0xe8 +0..+4 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/SHUFPS_0F_C6_ib.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/SHUFPS_0F_C6_ib.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f c6 c0 e8          \tshufps xmm0,xmm0,0xe8\n\t...\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "ADDR16_67_8B_06",
+   "bytes": "67 8B 06 84 00 90",
+   "role": "P2-2 unit: existing 67-address-size case",
+   "expected_boundaries": "mov eax,[0x84] (16-bit addr) +0..+5 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/ADDR16_67_8B_06.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/ADDR16_67_8B_06.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 06 84 00       \tmov    eax,DWORD PTR ds:0x84\n   5:\t90                   \tnop\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "NEW_F_anchor_conflict",
+   "bytes": "B8 00 E8 01 00 00 00 90 CC",
+   "role": "P2-1 NEW-F falsifier: anchor A covers the E8 at +2 as immediate data; anchor B lands exactly at +2 -> ANCHOR_CONFLICT",
+   "expected_boundaries": "mov eax,0x1e800 +0..+5; add [eax],al +5..+7; nop +7; int3 +8",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/NEW_F_anchor_conflict.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/NEW_F_anchor_conflict.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\tb8 00 e8 01 00       \tmov    eax,0x1e800\n   5:\t00 00                \tadd    BYTE PTR [eax],al\n   7:\t90                   \tnop\n   8:\tcc                   \tint3\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "A1_B8_CC_CC_E8_imm",
+   "bytes": "B8 CC CC E8 00 00 00 00 C3",
+   "role": "AF2 counterexample A1",
+   "expected_boundaries": "mov eax,0xe8cccc +0..+5; ...",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/A1_B8_CC_CC_E8_imm.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/A1_B8_CC_CC_E8_imm.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\tb8 cc cc e8 00       \tmov    eax,0xe8cccc\n   5:\t00 00                \tadd    BYTE PTR [eax],al\n   7:\t00 c3                \tadd    bl,al\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "A2_B8_C3_CC_E8_imm",
+   "bytes": "B8 C3 CC E8 00 00 00 00 C3",
+   "role": "AF2 counterexample A2",
+   "expected_boundaries": "mov eax,0xe8ccc3 +0..+5; ...",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/A2_B8_C3_CC_E8_imm.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/A2_B8_C3_CC_E8_imm.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\tb8 c3 cc e8 00       \tmov    eax,0xe8ccc3\n   5:\t00 00                \tadd    BYTE PTR [eax],al\n   7:\t00 c3                \tadd    bl,al\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "B_0F_C6_shufps_imm8",
+   "bytes": "0F C6 C0 E8 00 00 00 00 C3",
+   "role": "AF2 counterexample B",
+   "expected_boundaries": "shufps +0..+4; ...",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/B_0F_C6_shufps_imm8.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/B_0F_C6_shufps_imm8.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f c6 c0 e8          \tshufps xmm0,xmm0,0xe8\n   4:\t00 00                \tadd    BYTE PTR [eax],al\n   6:\t00 00                \tadd    BYTE PTR [eax],al\n   8:\tc3                   \tret\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "C_67_8B_06_disp16",
+   "bytes": "67 8B 06 E8 00 90 C3",
+   "role": "AF2 counterexample C",
+   "expected_boundaries": "mov eax,[0xe8] +0..+5; nop +5; ret +6",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/C_67_8B_06_disp16.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/C_67_8B_06_disp16.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 06 e8 00       \tmov    eax,DWORD PTR ds:0xe8\n   5:\t90                   \tnop\n   6:\tc3                   \tret\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "D_66_E8_rel16",
+   "bytes": "66 E8 01 00 90 C3",
+   "role": "AF2 counterexample D",
+   "expected_boundaries": "callw +0..+4; nop +4; ret +5",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/D_66_E8_rel16.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/D_66_E8_rel16.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 e8 01 00          \tcallw  0x5\n   4:\t90                   \tnop\n   5:\tc3                   \tret\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "E_positive_real_call",
+   "bytes": "B8 01 00 00 00 E8 05 00 00 00 C3",
+   "role": "AF2 counterexample E (positive control)",
+   "expected_boundaries": "mov eax,1 +0..+5; call 0xf +5..+10; ret +10",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/E_positive_real_call.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/E_positive_real_call.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\tb8 01 00 00 00       \tmov    eax,0x1\n   5:\te8 05 00 00 00       \tcall   0xf\n   a:\tc3                   \tret\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD0_RM0",
+   "bytes": "67 8B 00",
+   "role": "H1 rm table: rm=0 mod=0",
+   "expected_boundaries": "mov eax,[bx+si] (3 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM0.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM0.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 00             \tmov    eax,DWORD PTR [bx+si]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD0_RM1",
+   "bytes": "67 8B 01",
+   "role": "H1 rm table: rm=1 mod=0",
+   "expected_boundaries": "mov eax,[bx+di] (3 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM1.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM1.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 01             \tmov    eax,DWORD PTR [bx+di]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD0_RM2",
+   "bytes": "67 8B 02",
+   "role": "H1 rm table: rm=2 mod=0",
+   "expected_boundaries": "mov eax,[bp+si] (3 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM2.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM2.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 02             \tmov    eax,DWORD PTR [bp+si]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD0_RM3",
+   "bytes": "67 8B 03",
+   "role": "H1 rm table: rm=3 mod=0",
+   "expected_boundaries": "mov eax,[bp+di] (3 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM3.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM3.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 03             \tmov    eax,DWORD PTR [bp+di]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD0_RM4",
+   "bytes": "67 8B 04",
+   "role": "H1 rm table: rm=4 mod=0",
+   "expected_boundaries": "mov eax,[si] (3 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM4.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM4.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 04             \tmov    eax,DWORD PTR [si]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD0_RM5",
+   "bytes": "67 8B 05",
+   "role": "H1 rm table: rm=5 mod=0",
+   "expected_boundaries": "mov eax,[di] (3 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM5.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM5.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 05             \tmov    eax,DWORD PTR [di]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD0_RM6",
+   "bytes": "67 8B 06 34 12",
+   "role": "H1 rm table: rm=6 mod=0 [disp16]",
+   "expected_boundaries": "mov eax,ds:0x1234 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM6.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM6.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 06 34 12       \tmov    eax,DWORD PTR ds:0x1234\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD0_RM7",
+   "bytes": "67 8B 07",
+   "role": "H1 rm table: rm=7 mod=0 [BX] - the H1 defect (C2 said [BP])",
+   "expected_boundaries": "mov eax,[bx] (3 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM7.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD0_RM7.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 07             \tmov    eax,DWORD PTR [bx]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD1_RM0",
+   "bytes": "67 8B 40 05",
+   "role": "H1 rm table: rm=0 mod=1",
+   "expected_boundaries": "mov eax,[bx+si+0x5] (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM0.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM0.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 40 05          \tmov    eax,DWORD PTR [bx+si+0x5]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD1_RM1",
+   "bytes": "67 8B 41 05",
+   "role": "H1 rm table: rm=1 mod=1",
+   "expected_boundaries": "mov eax,[bx+di+0x5] (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM1.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM1.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 41 05          \tmov    eax,DWORD PTR [bx+di+0x5]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD1_RM2",
+   "bytes": "67 8B 42 05",
+   "role": "H1 rm table: rm=2 mod=1",
+   "expected_boundaries": "mov eax,[bp+si+0x5] (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM2.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM2.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 42 05          \tmov    eax,DWORD PTR [bp+si+0x5]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD1_RM3",
+   "bytes": "67 8B 43 05",
+   "role": "H1 rm table: rm=3 mod=1",
+   "expected_boundaries": "mov eax,[bp+di+0x5] (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM3.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM3.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 43 05          \tmov    eax,DWORD PTR [bp+di+0x5]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD1_RM4",
+   "bytes": "67 8B 44 05",
+   "role": "H1 rm table: rm=4 mod=1",
+   "expected_boundaries": "mov eax,[si+0x5] (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM4.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM4.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 44 05          \tmov    eax,DWORD PTR [si+0x5]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD1_RM5",
+   "bytes": "67 8B 45 05",
+   "role": "H1 rm table: rm=5 mod=1",
+   "expected_boundaries": "mov eax,[di+0x5] (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM5.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM5.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 45 05          \tmov    eax,DWORD PTR [di+0x5]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD1_RM6",
+   "bytes": "67 8B 46 05",
+   "role": "H1 rm table: rm=6 mod=1 [BP+disp]",
+   "expected_boundaries": "mov eax,[bp+0x5] (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM6.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM6.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 46 05          \tmov    eax,DWORD PTR [bp+0x5]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD1_RM7",
+   "bytes": "67 8B 47 05",
+   "role": "H1 rm table: rm=7 mod=1 [BX+disp] - the H1 defect",
+   "expected_boundaries": "mov eax,[bx+0x5] (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM7.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD1_RM7.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 47 05          \tmov    eax,DWORD PTR [bx+0x5]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD2_RM0",
+   "bytes": "67 8B 80 34 12",
+   "role": "H1 rm table: rm=0 mod=2",
+   "expected_boundaries": "mov eax,[bx+si+0x1234] (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD2_RM0.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD2_RM0.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 80 34 12       \tmov    eax,DWORD PTR [bx+si+0x1234]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD2_RM6",
+   "bytes": "67 8B 86 34 12",
+   "role": "H1 rm table: rm=6 mod=2 [BP+disp16]",
+   "expected_boundaries": "mov eax,[bp+0x1234] (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD2_RM6.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD2_RM6.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 86 34 12       \tmov    eax,DWORD PTR [bp+0x1234]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H1_MOD2_RM7",
+   "bytes": "67 8B 87 34 12",
+   "role": "H1 rm table: rm=7 mod=2 [BX+disp16] - the H1 defect",
+   "expected_boundaries": "mov eax,[bx+0x1234] (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD2_RM7.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H1_MOD2_RM7.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t67 8b 87 34 12       \tmov    eax,DWORD PTR [bx+0x1234]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_BA_REG4_BT",
+   "bytes": "0F BA E0 05",
+   "role": "H2 positive: 0F BA /4 BT r,imm8",
+   "expected_boundaries": "bt eax,0x5 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG4_BT.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG4_BT.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f ba e0 05          \tbt     eax,0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_BA_REG5_BTS",
+   "bytes": "0F BA 6D 00 05",
+   "role": "H2 positive: 0F BA /5 BTS m,imm8 (memory form legal)",
+   "expected_boundaries": "bts [ebp+0x0],0x5 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG5_BTS.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG5_BTS.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f ba 6d 00 05       \tbts    DWORD PTR [ebp+0x0],0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_BA_REG4_MEM",
+   "bytes": "0F BA 25 78 56 34 12 05",
+   "role": "H2 positive: 0F BA /4 BT [disp32],imm8",
+   "expected_boundaries": "bt [0x12345678],0x5 (8 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG4_MEM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG4_MEM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f ba 25 78 56 34 12 \tbt     DWORD PTR ds:0x12345678,0x5\n   7:\t05 \n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_71_REG2_PSRLW",
+   "bytes": "0F 71 D0 02",
+   "role": "H2 positive: MMX 0F 71 /2",
+   "expected_boundaries": "psrlw mm0,0x2 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG2_PSRLW.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG2_PSRLW.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 71 d0 02          \tpsrlw  mm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_71_REG4_PSRAW",
+   "bytes": "0F 71 E2 02",
+   "role": "H2 positive: MMX 0F 71 /4",
+   "expected_boundaries": "psraw mm2,0x2 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG4_PSRAW.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG4_PSRAW.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 71 e2 02          \tpsraw  mm2,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_71_REG6_PSLLW",
+   "bytes": "0F 71 F0 02",
+   "role": "H2 positive: MMX 0F 71 /6",
+   "expected_boundaries": "psllw mm0,0x2 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG6_PSLLW.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG6_PSLLW.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 71 f0 02          \tpsllw  mm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_72_REG2_PSRLD",
+   "bytes": "0F 72 D0 02",
+   "role": "H2 positive: MMX 0F 72 /2",
+   "expected_boundaries": "psrld mm0,0x2 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_72_REG2_PSRLD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_72_REG2_PSRLD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 72 d0 02          \tpsrld  mm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_72_REG6_PSLLD",
+   "bytes": "0F 72 F0 02",
+   "role": "H2 positive: MMX 0F 72 /6",
+   "expected_boundaries": "pslld mm0,0x2 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_72_REG6_PSLLD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_72_REG6_PSLLD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 72 f0 02          \tpslld  mm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_73_REG2_PSRLQ",
+   "bytes": "0F 73 D0 02",
+   "role": "H2 positive: MMX 0F 73 /2",
+   "expected_boundaries": "psrlq mm0,0x2 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_73_REG2_PSRLQ.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_73_REG2_PSRLQ.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 73 d0 02          \tpsrlq  mm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_73_REG6_PSLLQ",
+   "bytes": "0F 73 F0 02",
+   "role": "H2 positive: MMX 0F 73 /6",
+   "expected_boundaries": "psllq mm0,0x2 (4 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_73_REG6_PSLLQ.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_73_REG6_PSLLQ.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 73 f0 02          \tpsllq  mm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_71_REG2_PSRLW_XMM",
+   "bytes": "66 0F 71 D0 02",
+   "role": "H2 positive: SSE2 66 0F 71 /2",
+   "expected_boundaries": "psrlw xmm0,0x2 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG2_PSRLW_XMM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG2_PSRLW_XMM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 71 d0 02       \tpsrlw  xmm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_71_REG4_PSRAW_XMM",
+   "bytes": "66 0F 71 E2 02",
+   "role": "H2 positive: SSE2 66 0F 71 /4",
+   "expected_boundaries": "psraw xmm2,0x2 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG4_PSRAW_XMM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG4_PSRAW_XMM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 71 e2 02       \tpsraw  xmm2,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_71_REG6_PSLLW_XMM",
+   "bytes": "66 0F 71 F0 02",
+   "role": "H2 positive: SSE2 66 0F 71 /6",
+   "expected_boundaries": "psllw xmm0,0x2 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG6_PSLLW_XMM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG6_PSLLW_XMM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 71 f0 02       \tpsllw  xmm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_72_REG2_PSRLD_XMM",
+   "bytes": "66 0F 72 D0 02",
+   "role": "H2 positive: SSE2 66 0F 72 /2",
+   "expected_boundaries": "psrld xmm0,0x2 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_72_REG2_PSRLD_XMM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_72_REG2_PSRLD_XMM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 72 d0 02       \tpsrld  xmm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_72_REG6_PSLLD_XMM",
+   "bytes": "66 0F 72 F0 02",
+   "role": "H2 positive: SSE2 66 0F 72 /6",
+   "expected_boundaries": "pslld xmm0,0x2 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_72_REG6_PSLLD_XMM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_72_REG6_PSLLD_XMM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 72 f0 02       \tpslld  xmm0,0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_73_REG6_PSLLQ_XMM",
+   "bytes": "66 0F 73 F3 03",
+   "role": "H2 positive: SSE2 66 0F 73 /6",
+   "expected_boundaries": "psllq xmm3,0x3 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG6_PSLLQ_XMM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG6_PSLLQ_XMM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 73 f3 03       \tpsllq  xmm3,0x3\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_73_REG3_PSRLDQ",
+   "bytes": "66 0F 73 DB 03",
+   "role": "H2 positive: SSE2 66 0F 73 /3 PSRLDQ (mod=3) - must NOT be misreported as reserved",
+   "expected_boundaries": "psrldq xmm3,0x3 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG3_PSRLDQ.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG3_PSRLDQ.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 73 db 03       \tpsrldq xmm3,0x3\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_73_REG7_PSLLDQ",
+   "bytes": "66 0F 73 FB 03",
+   "role": "H2 positive: SSE2 66 0F 73 /7 PSLLDQ (mod=3) - must NOT be misreported as reserved",
+   "expected_boundaries": "pslldq xmm3,0x3 (5 B)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG7_PSLLDQ.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG7_PSLLDQ.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 73 fb 03       \tpslldq xmm3,0x3\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_BA_REG0_BAD",
+   "bytes": "0F BA C0 05",
+   "role": "H2 negative: 0F BA /0 reserved",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG0_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG0_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f ba                \t(bad)\n   2:\tc0                   \t.byte 0xc0\n   3:\t05                   \t.byte 0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_BA_REG1_BAD",
+   "bytes": "0F BA C1 05",
+   "role": "H2 negative: 0F BA /1 reserved",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG1_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG1_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f ba                \t(bad)\n   2:\tc1                   \t.byte 0xc1\n   3:\t05                   \t.byte 0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_BA_REG2_BAD",
+   "bytes": "0F BA C2 05",
+   "role": "H2 negative: 0F BA /2 reserved",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG2_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG2_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f ba                \t(bad)\n   2:\tc2                   \t.byte 0xc2\n   3:\t05                   \t.byte 0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_BA_REG3_BAD",
+   "bytes": "0F BA C3 05",
+   "role": "H2 negative: 0F BA /3 reserved",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG3_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_BA_REG3_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f ba                \t(bad)\n   2:\tc3                   \tret\n   3:\t05                   \t.byte 0x5\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_71_REG1_BAD",
+   "bytes": "0F 71 C8 02",
+   "role": "H2 negative: 0F 71 /1 reserved",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG1_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG1_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 71                \t(bad)\n   2:\tc8                   \t.byte 0xc8\n   3:\t02                   \t.byte 0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_71_REG3_BAD",
+   "bytes": "0F 71 D8 02",
+   "role": "H2 negative: 0F 71 /3 reserved",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG3_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG3_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 71                \t(bad)\n   2:\td8 02                \tfadd   DWORD PTR [edx]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_71_REG5_BAD",
+   "bytes": "0F 71 E8 02",
+   "role": "H2 negative: 0F 71 /5 reserved",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG5_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG5_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 71                \t(bad)\n   2:\te8                   \t.byte 0xe8\n   3:\t02                   \t.byte 0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_71_REG7_BAD",
+   "bytes": "0F 71 F8 02",
+   "role": "H2 negative: 0F 71 /7 reserved",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG7_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_71_REG7_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 71                \t(bad)\n   2:\tf8                   \tclc\n   3:\t02                   \t.byte 0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_73_REG3_NO66_BAD",
+   "bytes": "0F 73 D8 02",
+   "role": "H2 negative: 0F 73 /3 without 66 reserved (PSRLDQ requires 66)",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_73_REG3_NO66_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_73_REG3_NO66_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 73                \t(bad)\n   2:\td8 02                \tfadd   DWORD PTR [edx]\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_73_REG7_NO66_BAD",
+   "bytes": "0F 73 F8 02",
+   "role": "H2 negative: 0F 73 /7 without 66 reserved (PSLLDQ requires 66)",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_73_REG7_NO66_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_73_REG7_NO66_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 73                \t(bad)\n   2:\tf8                   \tclc\n   3:\t02                   \t.byte 0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_71_REG1_BAD",
+   "bytes": "66 0F 71 C8 02",
+   "role": "H2 negative: 66 does not legalize 0F 71 /1",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG1_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG1_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 71             \tdata16 (bad)\n   3:\tc8                   \t.byte 0xc8\n   4:\t02                   \t.byte 0x2\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_MMX_71_REG2_MEM",
+   "bytes": "0F 71 00 02",
+   "role": "H2 negative: MMX imm-shift memory form (mod!=3) invalid",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_MMX_71_REG2_MEM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_MMX_71_REG2_MEM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 71                \t(bad)\n   2:\t00 02                \tadd    BYTE PTR [edx],al\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_MMX_72_REG2_MEM",
+   "bytes": "0F 72 00 02",
+   "role": "H2 negative: MMX imm-shift memory form (mod!=3) invalid",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_MMX_72_REG2_MEM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_MMX_72_REG2_MEM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 72                \t(bad)\n   2:\t00 02                \tadd    BYTE PTR [edx],al\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_MMX_73_REG2_MEM",
+   "bytes": "0F 73 00 02",
+   "role": "H2 negative: MMX imm-shift memory form (mod!=3) invalid",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_MMX_73_REG2_MEM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_MMX_73_REG2_MEM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t0f 73                \t(bad)\n   2:\t00 02                \tadd    BYTE PTR [edx],al\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_71_REG2_MEM",
+   "bytes": "66 0F 71 00 02",
+   "role": "H2 negative: SSE2 imm-shift memory form (mod!=3) invalid",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG2_MEM.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_71_REG2_MEM.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 71             \tdata16 (bad)\n   3:\t00 02                \tadd    BYTE PTR [edx],al\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_73_REG3_MEM_BAD_FIXED",
+   "bytes": "66 0F 73 5B 00 03",
+   "role": "H2 negative: 66 0F 73 /3 PSRLDQ memory form (mod!=3) invalid",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG3_MEM_BAD_FIXED.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG3_MEM_BAD_FIXED.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 73             \tpsrldq (bad),0x73\n   3:\t5b                   \tpop    ebx\n   4:\t00 03                \tadd    BYTE PTR [ebx],al\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_66_73_REG7_MEM_BAD_FIXED",
+   "bytes": "66 0F 73 7B 00 03",
+   "role": "H2 negative: 66 0F 73 /7 PSLLDQ memory form (mod!=3) invalid",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG7_MEM_BAD_FIXED.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_66_73_REG7_MEM_BAD_FIXED.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\t66 0f 73             \tpslldq (bad),0x73\n   3:\t7b 00                \tjnp    0x5\n   5:\t03                   \t.byte 0x3\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_F3_71_BAD",
+   "bytes": "F3 0F 71 D0 02",
+   "role": "H2 negative: F3-prefixed imm-shift group - no legal form",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_F3_71_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_F3_71_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\tf3 0f 71             \t(bad)\n   3:\td0 02                \trol    BYTE PTR [edx],1\n",
+   "raw_stderr": "",
+   "returncode": 0
+  },
+  {
+   "name": "H2_F2_71_BAD",
+   "bytes": "F2 0F 71 D0 02",
+   "role": "H2 negative: F2-prefixed imm-shift group - no legal form",
+   "expected_boundaries": "(bad)",
+   "command_line": "wsl -e sh -c \"objdump -D -b binary -m i386 -M intel \"/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_F2_71_BAD.bin\"\"",
+   "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/p2fix_oracle/H2_F2_71_BAD.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00000000 <.data>:\n   0:\tf2 0f 71             \t(bad)\n   3:\td0 02                \trol    BYTE PTR [edx],1\n",
+   "raw_stderr": "",
+   "returncode": 0
+  }
+ ]
+}
