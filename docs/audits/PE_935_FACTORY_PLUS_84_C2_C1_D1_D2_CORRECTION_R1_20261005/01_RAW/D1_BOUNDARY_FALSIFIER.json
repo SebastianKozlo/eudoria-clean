@@ -1,0 +1,44 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
+ "falsifier_discipline": "MANDATORY downstream falsifier (D1): synthetic bytes, synthetic strong entry at the first byte; the invalid initial instruction must STOP justified sequential decoding; the E8 at offset +4 must NOT receive CALL_VALIDATION=PASS or a promoted target; the VA/fixture is never special-cased; the BEFORE outcome is MEASURED in-run through the committed BASE (THREE-P2) modules",
+ "record": {
+  "CASE_ID": "D1_0F73_4_DOWNSTREAM_FALSIFIER",
+  "BYTES": "0F 73 E0 02 E8 05 00 00 00 C3",
+  "START_OFFSET": 0,
+  "CANDIDATE_OFFSET": 4,
+  "EXPECTED_DECODE": "the first instruction 0F 73 E0 02 is an INVALID 0F 73 /4 encoding (reserved in both MMX and SSE2 classes; independent oracle GNU objdump returns (bad)) - a justified sequential decode MUST stop at it; there is NO justified instruction continuity through the first opcode to the E8 at +4 (the D1 per-opcode repair makes the decoder REJECT it; the stream aborts at offset 0)",
+  "ACTUAL_DECODE": "boundary UNRESOLVED (source=None) - the sequential decode aborted at the invalid first instruction",
+  "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+  "ACTUAL_CALL_PROMOTION": "NONE(NOT_VERIFIED)",
+  "BOUNDARY_SOURCE": null,
+  "BOUNDARY_STATUS": "UNRESOLVED",
+  "C1_DEFECT_NOTE": "THREE-P2 (BASE) measured outcome, reproduced in-run through the committed BASE modules (READ-ONLY import; identities recorded below): boundary CONFIRMED (source=KNOWN_FUNCTION_ENTRY), CALL_VALIDATION=PASS target=0x00A0000E - the BASE decoder decoded the invalid 0F 73 /4 form as a 4-byte instruction, the anchor stream advanced onto the E8 at +4 and boundary-certified it with an UNEARNED CALL_VALIDATION=PASS and a promoted target",
+  "CALL_VALIDATION": "NOT_VERIFIED",
+  "ANCHORS": "0x00A00000",
+  "MEASURED_BOUNDARIES": [
+   "NONE - the sequential decode aborted at the invalid first instruction (offset 0)"
+  ],
+  "FAILURE_CONDITION_DETECTED": "invalid grouped-opcode initial instruction followed by E8 data: decoding the invalid form as valid grants unearned boundary continuity to the E8 (an unsafe boundary-certification path for reuse)",
+  "BASE_REPRODUCTION": {
+   "boundary_status": "CONFIRMED",
+   "boundary_source": "KNOWN_FUNCTION_ENTRY",
+   "call_validation": "PASS",
+   "target": "0x00A0000E",
+   "base_module_identities": {
+    "base_x86dec_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005\\03_SCRIPTS\\x86dec.py",
+    "base_x86dec_sha256": "925963BDFC08F286EB754C20D5FA647184E47654E77FA57A39FD1DB3313EF221",
+    "base_pebnd_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005\\03_SCRIPTS\\pebnd.py",
+    "base_pebnd_sha256": "0ACA015B0055BA90C8378D443259264E6E27626DE41D7DD8A81319D843C251D2",
+    "note": "READ-ONLY import of the committed BASE modules (no historical file modified; bytecode writes disabled)"
+   }
+  },
+  "TEXT_PATTERN_CENSUS": {
+   "pattern_0F73_mod3_reg4": 0,
+   "pattern_66_0F73_mod3_reg4": 0,
+   "occurrence_in_anchor_decode_streams": "NOT_CHECKED (zero raw occurrences)"
+  },
+  "SYNTHETIC_FIXTURE_NOTE": "synthetic bytes - NOT evidence that this pattern occurs in PCG; the .text census field measures actual occurrence; the census/pin regression is measured separately in REGRESSION_DIFF.json",
+  "test_passed": true
+ },
+ "production_gate": "Q5 (boundary test matrix case D1_0F73_4_DOWNSTREAM_FALSIFIER)"
+}

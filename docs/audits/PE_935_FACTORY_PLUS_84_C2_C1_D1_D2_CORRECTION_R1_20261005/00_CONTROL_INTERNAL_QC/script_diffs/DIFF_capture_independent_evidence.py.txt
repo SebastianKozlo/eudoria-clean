@@ -1,0 +1,165 @@
+--- BASE/capture_independent_evidence.py
++++ NEW/capture_independent_evidence.py
+@@ -1,18 +1,23 @@
+ # capture_independent_evidence.py
+-# RUN: PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005
++# RUN: PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005
+ # Independent-evidence capture for the synthetic fixtures ONLY:
+ #   (1) GNU objdump (WSL, GNU Binutils for Debian 2.44) raw disassembly of
+-#       every synthetic fixture used by this run's falsifiers (NEW-G, NEW-F,
+-#       A1/A2/B/C/D/E, the H1 16-bit rm table, the H2 grouped-opcode
+-#       positive/negative controls, the P2-2 decoder unit vectors);
+-#   (2) the VERBATIM C2 commit message (immutable history; the S-P2 ledger
+-#       supersession records reference it - history is never edited).
++#       every synthetic fixture used by this run's falsifiers and controls
++#       (NEW-G, NEW-F, A1/A2/B/C/D/E, the H1 16-bit rm table, the H2
++#       grouped-opcode positive/negative controls, the P2-2 decoder unit
++#       vectors, and THIS RUN's D1 fixtures: the two 0F 73 /4 negative
++#       forms, the six contract legal controls and the D1 downstream
++#       falsifier stream);
++#   (2) the VERBATIM BASE (THREE-P2) commit message (immutable history; this
++#       run's supersession ledger quotes it - history is never edited).
+ # The production decoder is NEVER its own source of truth: every expected
+-# instruction boundary below was locked from objdump BEFORE the corrected
+-# decoder was written (oracle_probe runs, temp dir outside the repo).
+-# Outputs: 01_RAW/ORACLE_INDEPENDENT_RECORDS.json,
+-#          01_RAW/C2_COMMIT_MESSAGE_VERBATIM.txt (--out/--out-cm overrides).
++# instruction boundary below is locked from the D1 contract + the ISA
++# reference BEFORE the corrected decoder's D1 behaviour is evaluated
++# against these records (the fixtures' expected values are fixed in this
++# file; objdump is run to capture the raw oracle; the corrected decoder is
++# then checked AGAINST these - never the reverse).
++# Outputs: 01_RAW/D1_INDEPENDENT_ORACLE_RECORDS.json,
++#          01_RAW/BASE_COMMIT_MESSAGE_VERBATIM.txt (--out/--out-cm overrides).
+ 
+ import argparse
+-import hashlib
+ import json
+@@ -28,10 +33,11 @@
+ RUN = (r"D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits"
+-       r"\PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005")
++       r"\PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005")
+ REPO = r"D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean"
+-BASE_SHA = "c4cb60f719b5bbab0b7549b1e9cc36d18430cdcd"
+-TMP = r"C:\Users\User\AppData\Local\Temp\opencode\p2fix_oracle"
+-
+-# Every synthetic fixture oracle-checked this run. EXPECTED_* values were
+-# locked from the objdump output BEFORE the corrected decoder was written;
+-# the production decoder is then checked AGAINST these (never the reverse).
++BASE_SHA = "9d31a82b6589f46e9ca6c75c6e323b433c1ebf92"
++TMP = r"C:\Users\User\AppData\Local\Temp\opencode\d1d2_oracle"
++
++# Every synthetic fixture oracle-checked this run. EXPECTED_* values are
++# locked from the D1 contract + the ISA reference BEFORE the corrected
++# decoder is evaluated; the production decoder is then checked AGAINST
++# these (never the reverse).
+ FIXTURES = [
+@@ -40,3 +46,3 @@
+      "je rel16 +0..+5 (5 B); mov eax,0x1e800 +5..+10; add [eax],al +10..+12; ret +12",
+-     "P2-2 NEW-G falsifier: the C2 decoder measured the first instruction as 7 and fabricated a CALL edge from the E8 at +7"),
++     "P2-2 NEW-G falsifier (REPRODUCED this run): the C2 decoder measured the first instruction as 7 and fabricated a CALL edge from the E8 at +7"),
+     ("JCC_REL32_0F_84", "0F 84 00 00 00 00",
+@@ -57,16 +63,16 @@
+      "mov eax,0x1e800 +0..+5; add [eax],al +5..+7; nop +7; int3 +8",
+-     "P2-1 NEW-F falsifier: anchor A covers the E8 at +2 as immediate data; anchor B lands exactly at +2 -> ANCHOR_CONFLICT"),
++     "P2-1 NEW-F falsifier (REPRODUCED this run, cached + uncached): anchor A covers the E8 at +2 as immediate data; anchor B lands exactly at +2 -> ANCHOR_CONFLICT"),
+     ("A1_B8_CC_CC_E8_imm", "B8 CC CC E8 00 00 00 00 C3",
+-     "mov eax,0xe8cccc +0..+5; ...", "AF2 counterexample A1"),
++     "mov eax,0xe8cccc +0..+5; ...", "AF2 counterexample A1 (REPRODUCED this run)"),
+     ("A2_B8_C3_CC_E8_imm", "B8 C3 CC E8 00 00 00 00 C3",
+-     "mov eax,0xe8ccc3 +0..+5; ...", "AF2 counterexample A2"),
++     "mov eax,0xe8ccc3 +0..+5; ...", "AF2 counterexample A2 (REPRODUCED this run)"),
+     ("B_0F_C6_shufps_imm8", "0F C6 C0 E8 00 00 00 00 C3",
+-     "shufps +0..+4; ...", "AF2 counterexample B"),
++     "shufps +0..+4; ...", "AF2 counterexample B (REPRODUCED this run)"),
+     ("C_67_8B_06_disp16", "67 8B 06 E8 00 90 C3",
+-     "mov eax,[0xe8] +0..+5; nop +5; ret +6", "AF2 counterexample C"),
++     "mov eax,[0xe8] +0..+5; nop +5; ret +6", "AF2 counterexample C (REPRODUCED this run)"),
+     ("D_66_E8_rel16", "66 E8 01 00 90 C3",
+-     "callw +0..+4; nop +4; ret +5", "AF2 counterexample D"),
++     "callw +0..+4; nop +4; ret +5", "AF2 counterexample D (REPRODUCED this run)"),
+     ("E_positive_real_call", "B8 01 00 00 00 E8 05 00 00 00 C3",
+-     "mov eax,1 +0..+5; call 0xf +5..+10; ret +10", "AF2 counterexample E (positive control)"),
+-    # H1: the complete 16-bit addressing rm table (67 prefix)
++     "mov eax,1 +0..+5; call 0xf +5..+10; ret +10", "AF2 counterexample E (positive control, REPRODUCED this run)"),
++    # H1: the complete 16-bit addressing rm table (67 prefix) - REPRODUCED this run
+     ("H1_MOD0_RM0", "67 8B 00", "mov eax,[bx+si] (3 B)", "H1 rm table: rm=0 mod=0"),
+@@ -90,3 +96,3 @@
+     ("H1_MOD2_RM7", "67 8B 87 34 12", "mov eax,[bx+0x1234] (5 B)", "H1 rm table: rm=7 mod=2 [BX+disp16] - the H1 defect"),
+-    # H2: grouped-opcode positive controls
++    # H2: grouped-opcode positive controls (carried)
+     ("H2_BA_REG4_BT", "0F BA E0 05", "bt eax,0x5 (4 B)", "H2 positive: 0F BA /4 BT r,imm8"),
+@@ -131,2 +137,33 @@
+     ("H2_F2_71_BAD", "F2 0F 71 D0 02", "(bad)", "H2 negative: F2-prefixed imm-shift group - no legal form"),
++    # ---- D1 (THIS RUN): the 0F 73 /4 defect pair + the six contract legal
++    # controls + the downstream falsifier stream. Expected verdicts locked
++    # from the D1 contract + the ISA reference BEFORE the corrected decoder
++    # is evaluated (Desktop post-audit
++    # PE_935_F84_C2_C1_DESKTOP_POST_AUDIT_20261005 finding D1). ----
++    ("D1_NEG_73_4_E0", "0F 73 E0 02", "(bad)",
++     "D1 NEGATIVE: 0F 73 /4 mod=3 WITHOUT 66 is reserved (no PSRADQ exists; "
++     "MMX 73 = /2,/6 only) - the THREE-P2 decoder ACCEPTED it (decoded "
++     "length 4)"),
++    ("D1_NEG_73_4_E0_66", "66 0F 73 E0 02", "data16 (bad)",
++     "D1 NEGATIVE: 66 0F 73 /4 mod=3 WITH 66 is reserved (SSE2 73 forms are "
++     "/2,/3,/6,/7 only) - the THREE-P2 SSE2 branch RETAINED /4 (decoded "
++     "length 5)"),
++    ("D1_POS_71_4_E0", "0F 71 E0 02", "psraw mm0,0x2 (4 B)",
++     "D1 legal control: /4 STAYS legal for 0F 71 (mod=3)"),
++    ("D1_POS_72_4_E0", "0F 72 E0 02", "psrad mm0,0x2 (4 B)",
++     "D1 legal control: /4 STAYS legal for 0F 72 (mod=3)"),
++    ("D1_POS_73_2_D0", "0F 73 D0 02", "psrlq mm0,0x2 (4 B)",
++     "D1 legal control: 0F 73 /2 PSRLQ register form stays legal"),
++    ("D1_POS_73_6_F0", "0F 73 F0 02", "psllq mm0,0x2 (4 B)",
++     "D1 legal control: 0F 73 /6 PSLLQ register form stays legal"),
++    ("D1_POS_66_73_3_D8", "66 0F 73 D8 02", "psrldq xmm0,0x2 (5 B)",
++     "D1 legal control: 66 0F 73 /3 PSRLDQ mod=3 stays legal (NOT misreported as reserved)"),
++    ("D1_POS_66_73_7_F8", "66 0F 73 F8 02", "pslldq xmm7,0x2 (5 B)",
++     "D1 legal control: 66 0F 73 /7 PSLLDQ mod=3 stays legal (NOT misreported as reserved)"),
++    ("D1_DOWNSTREAM_FALSIFIER", "0F 73 E0 02 E8 05 00 00 00 C3",
++     "(bad) at +0; objdump recovery disassembly after (bad) is NOT treated "
++     "as execution evidence",
++     "D1 downstream falsifier stream: the invalid initial instruction must "
++     "STOP justified sequential decoding (the production boundary outcome "
++     "is measured separately in 01_RAW/D1_BOUNDARY_FALSIFIER.json)"),
+ ]
+@@ -139,3 +176,3 @@
+     records = {
+-        "run": "PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005",
++        "run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
+         "oracle_tool": "GNU objdump (WSL, Debian)",
+@@ -143,8 +180,9 @@
+         "oracle_scope_note": ("INDEPENDENT oracle for SYNTHETIC FIXTURES ONLY; "
+-                             "the production decoder is never its own source "
+-                             "of truth; expected boundaries below were locked "
+-                             "from objdump BEFORE the corrected decoder was "
+-                             "written; the real-EXE re-derivations of the QC "
+-                             "gates use the production decoder (the established "
+-                             "Q2/Q3 pattern, disclosed)"),
++                              "the production decoder is never its own source "
++                              "of truth; this run's D1 expected boundaries were "
++                              "locked from the D1 contract + the ISA reference "
++                              "BEFORE the corrected decoder's D1 behaviour was "
++                              "evaluated; the real-EXE re-derivations of the "
++                              "QC gates use the production decoder (the "
++                              "established Q2/Q3 pattern, disclosed)"),
+         "fixtures": [],
+@@ -172,4 +210,4 @@
+     msg = subprocess.check_output(
+-        ["git", "log", "-1", "--format=%B", BASE_SHA],
+-        cwd=REPO).decode("utf-8", errors="replace")
++        ["git", "-C", REPO, "log", "-1", "--format=%B", BASE_SHA],
++        ).decode("utf-8", errors="replace")
+     return msg
+@@ -179,4 +217,4 @@
+     ap = argparse.ArgumentParser()
+-    ap.add_argument("--out", default=os.path.join(RUN, "01_RAW", "ORACLE_INDEPENDENT_RECORDS.json"))
+-    ap.add_argument("--out-cm", default=os.path.join(RUN, "01_RAW", "C2_COMMIT_MESSAGE_VERBATIM.txt"))
++    ap.add_argument("--out", default=os.path.join(RUN, "01_RAW", "D1_INDEPENDENT_ORACLE_RECORDS.json"))
++    ap.add_argument("--out-cm", default=os.path.join(RUN, "01_RAW", "BASE_COMMIT_MESSAGE_VERBATIM.txt"))
+     args = ap.parse_args()
+@@ -188,3 +226,3 @@
+         f.write(cm)
+-    print("oracle fixtures=%d commit_message_bytes=%d" % (len(rec["fixtures"]), len(cm)))
++    print("oracle fixtures=%d base_commit_message_bytes=%d" % (len(rec["fixtures"]), len(cm)))
+ 

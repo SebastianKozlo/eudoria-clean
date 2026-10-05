@@ -1,0 +1,624 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
+ "unit_battery": [
+  {
+   "vector": "8B 04 85 00 00 00 00",
+   "expected": 7,
+   "measured": 7,
+   "segment": null,
+   "note": "SIB base+index+disp32",
+   "ok": true
+  },
+  {
+   "vector": "8B 04 24",
+   "expected": 3,
+   "measured": 3,
+   "segment": null,
+   "note": "SIB [ESP]",
+   "ok": true
+  },
+  {
+   "vector": "66 B8 01 00",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "66 imm16 (unchanged C1 rule)",
+   "ok": true
+  },
+  {
+   "vector": "89 86",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "truncated modrm+disp -> fail-closed",
+   "ok": true
+  },
+  {
+   "vector": "0F C6 C0 E8 00 00 00 00",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "AF2 class B: SHUFPS 0F C6 /r ib - imm8 is part of the instruction (C1 measured 3, the defect)",
+   "ok": true
+  },
+  {
+   "vector": "0F C6 C0",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "SHUFPS truncated (ModRM without the imm8) -> fail-closed",
+   "ok": true
+  },
+  {
+   "vector": "0F C4 C0 E8 00 00 00 00",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "PINSRW /r ib (imm8, class-B family fix)",
+   "ok": true
+  },
+  {
+   "vector": "0F C5 C0 E8 00 00 00 00",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "PEXTRW /r ib (imm8, class-B family fix)",
+   "ok": true
+  },
+  {
+   "vector": "67 8B 06 84 00 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "AF2 class C: 16-bit address form MOV EAX,[0x0084] (C1 fabricated 32-bit ModRM length 3; Capstone reference 5)",
+   "ok": true
+  },
+  {
+   "vector": "67 8B 06 E8 00 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "class C with E8 inside disp16 - length must stay 5",
+   "ok": true
+  },
+  {
+   "vector": "66 E8 01 00 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "AF2 class D: 66 E8 = CALL rel16, length 4 (C1 parsed as 6-byte ordinary rel32; Capstone reference 4)",
+   "ok": true
+  },
+  {
+   "vector": "B8 CC CC E8 00",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "class A: MOV EAX,0x00E8CCCC - the E8 is immediate data",
+   "ok": true
+  },
+  {
+   "vector": "64 A3 00 00 00 00",
+   "expected": 6,
+   "measured": 6,
+   "segment": "FS",
+   "note": "P3-A: MOV FS:[0],EAX (MOFFS + FS) - segment recorded",
+   "ok": true
+  },
+  {
+   "vector": "64 89 0D 00 00 00 00",
+   "expected": 7,
+   "measured": 7,
+   "segment": "FS",
+   "note": "P3-A: MOV FS:[0],ECX ([disp32] + FS)",
+   "ok": true
+  },
+  {
+   "vector": "9A 11 22 33 44 55 66 77",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "CALL far not in table -> fail-closed reject",
+   "ok": true
+  },
+  {
+   "vector": "EA 11 22 33 44 55 66 77",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "JMP far not in table -> fail-closed reject",
+   "ok": true
+  },
+  {
+   "vector": "67 E8 01 00 00 00 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "address-size-prefixed near branch -> fail-closed reject",
+   "ok": true
+  },
+  {
+   "vector": "26 2E 64 36 3E 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "two+ segment prefixes (6 prefix bytes) -> fail-closed reject",
+   "ok": true
+  },
+  {
+   "vector": "0F 84 00 00 00 00 90",
+   "expected": 6,
+   "measured": 6,
+   "segment": null,
+   "note": "P2-2: ordinary 0F 84 rel32 near Jcc (unprefixed) = 6 bytes",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 84 00 00 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "P2-2 branch A: 66 0F 84 rel16 near Jcc = 5 bytes (C2 measured 7; objdump je rel16 5)",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 8F 00 00 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "P2-2 branch A: 66 0F 8F rel16 (JG) = 5 bytes - whole 0x80..0x8F class",
+   "ok": true
+  },
+  {
+   "vector": "67 0F 84 00 00 00 00",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "P2-2: 67-prefixed near Jcc -> fail-closed reject (same policy as 67 E8/E9)",
+   "ok": true
+  },
+  {
+   "vector": "67 8B 07 90",
+   "expected": 3,
+   "measured": 3,
+   "segment": null,
+   "note": "H1: 67 8B 07 = MOV EAX,[BX] (rm=7 mod=0 is [BX], C2 wrongly said [BP])",
+   "ok": true
+  },
+  {
+   "vector": "67 8B 47 05 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H1: 67 8B 47 05 = MOV EAX,[BX+0x5] (rm=7 mod=1 is [BX+disp])",
+   "ok": true
+  },
+  {
+   "vector": "67 8B 46 05 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H1: 67 8B 46 05 = MOV EAX,[BP+0x5] (rm=6 mod!=0 is [BP+disp])",
+   "ok": true
+  },
+  {
+   "vector": "67 8B 06 34 12 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "H1: 67 8B 06 disp16 = MOV EAX,[0x1234] (rm=6 mod=0 absolute)",
+   "ok": true
+  },
+  {
+   "vector": "0F BA E0 05 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H2 positive: 0F BA /4 BT EAX,imm8 (reg 4..7 legal)",
+   "ok": true
+  },
+  {
+   "vector": "0F BA 6D 00 05 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "H2 positive: 0F BA /5 BTS [EBP+0],imm8 (memory forms legal for 0F BA)",
+   "ok": true
+  },
+  {
+   "vector": "0F BA C0 05 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F BA /0 reserved -> fail-closed",
+   "ok": true
+  },
+  {
+   "vector": "0F BA C1 05 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F BA /1 reserved -> fail-closed",
+   "ok": true
+  },
+  {
+   "vector": "0F BA C2 05 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F BA /2 reserved -> fail-closed",
+   "ok": true
+  },
+  {
+   "vector": "0F BA C3 05 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F BA /3 reserved -> fail-closed",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 D0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H2 positive: 0F 71 /2 PSRLW mm,imm8 (MMX reg {2,4,6} legal, mod=3)",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 E2 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H2 positive: 0F 71 /4 PSRAW mm,imm8",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 F0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H2 positive: 0F 71 /6 PSLLW mm,imm8",
+   "ok": true
+  },
+  {
+   "vector": "0F 72 D0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H2 positive: 0F 72 /2 PSRLD mm,imm8",
+   "ok": true
+  },
+  {
+   "vector": "0F 73 D0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H2 positive: 0F 73 /2 PSRLQ mm,imm8",
+   "ok": true
+  },
+  {
+   "vector": "0F 73 F0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "H2 positive: 0F 73 /6 PSLLQ mm,imm8",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 71 D0 02 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "H2 positive: 66 0F 71 /2 PSRLW xmm,imm8 (SSE2, mod=3)",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 72 D0 02 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "H2 positive: 66 0F 72 /2 PSRLD xmm,imm8 (SSE2)",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 73 DB 03 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "H2 positive: 66 0F 73 /3 PSRLDQ xmm,imm8 (mod=3 - legal, NOT reserved)",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 73 FB 03 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "H2 positive: 66 0F 73 /7 PSLLDQ xmm,imm8 (mod=3 - legal, NOT reserved)",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 C8 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F 71 /1 reserved in every prefix combination",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 D8 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F 71 /3 reserved (MMX)",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 E8 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F 71 /5 reserved",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 F8 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F 71 /7 reserved (only 0F 73 /3,/7 with 66 are PSRLDQ/PSLLDQ)",
+   "ok": true
+  },
+  {
+   "vector": "0F 73 D8 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F 73 /3 without 66 is reserved (PSRLDQ requires the 66 form)",
+   "ok": true
+  },
+  {
+   "vector": "0F 73 F8 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 0F 73 /7 without 66 is reserved (PSLLDQ requires the 66 form)",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 71 C8 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 66 does not make 0F 71 /1 legal",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 00 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: MMX imm-shift memory form (mod!=3) - invalid, never guessed as a shift",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 71 00 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: SSE2 imm-shift memory form (mod!=3) - invalid",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 73 5B 00 03 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 66 0F 73 /3 PSRLDQ memory form (mod!=3) - invalid",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 73 7B 00 03 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: 66 0F 73 /7 PSLLDQ memory form (mod!=3) - invalid",
+   "ok": true
+  },
+  {
+   "vector": "F3 0F 71 D0 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: F3-prefixed imm-shift group - no legal form",
+   "ok": true
+  },
+  {
+   "vector": "F2 0F 71 D0 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "H2 negative: F2-prefixed imm-shift group - no legal form",
+   "ok": true
+  },
+  {
+   "vector": "0F 71 E0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "D1 legal control: 0F 71 /4 PSRAW mm0,imm8 (mod=3; reg 4 STAYS legal for 0F 71)",
+   "ok": true
+  },
+  {
+   "vector": "0F 72 E0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "D1 legal control: 0F 72 /4 PSRAD mm0,imm8 (mod=3; reg 4 STAYS legal for 0F 72)",
+   "ok": true
+  },
+  {
+   "vector": "0F 73 E0 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "D1 NEGATIVE: 0F 73 /4 WITHOUT 66 is reserved (no PSRADQ exists; only /2,/6 legal) - the THREE-P2 decoder decoded it (length 4)",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 73 E0 02 90",
+   "expected": "REJECT",
+   "measured": "REJECT",
+   "segment": null,
+   "note": "D1 NEGATIVE: 66 0F 73 /4 WITH 66 is reserved (SSE2 73 forms are /2,/3,/6,/7 only) - the THREE-P2 SSE2 branch retained /4",
+   "ok": true
+  },
+  {
+   "vector": "0F 73 D0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "D1 legal control: 0F 73 /2 PSRLQ mm0,imm8 (register form stays legal)",
+   "ok": true
+  },
+  {
+   "vector": "0F 73 F0 02 90",
+   "expected": 4,
+   "measured": 4,
+   "segment": null,
+   "note": "D1 legal control: 0F 73 /6 PSLLQ mm0,imm8 (register form stays legal)",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 73 D8 02 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "D1 legal control: 66 0F 73 /3 PSRLDQ xmm0,imm8 (mod=3 legal - NOT misreported as reserved)",
+   "ok": true
+  },
+  {
+   "vector": "66 0F 73 F8 02 90",
+   "expected": 5,
+   "measured": 5,
+   "segment": null,
+   "note": "D1 legal control: 66 0F 73 /7 PSLLDQ (reg 7 selects the operation, rm=0 -> xmm0 destination; mod=3 legal - NOT misreported as reserved)",
+   "ok": true
+  },
+  {
+   "vector": "64 A3 00 00 00 00",
+   "segment": "FS",
+   "expected_segment": "FS",
+   "ok": true,
+   "note": "P3-A segment prefix recorded on MOFFS store"
+  },
+  {
+   "vector": "64 89 0D 00 00 00 00",
+   "segment": "FS",
+   "expected_segment": "FS",
+   "ok": true,
+   "note": "P3-A segment prefix recorded on [disp32] store"
+  },
+  {
+   "vector": "B8 CC CC E8 00 00 00 00",
+   "imm_raw": "0x00E8CCCC",
+   "expected_imm": "0x00E8CCCC",
+   "ok": true,
+   "note": "class A: the E8 byte is immediate data of MOV EAX,imm32"
+  },
+  {
+   "vector": "66 E8 01 00",
+   "rel16": true,
+   "imm_signed": 1,
+   "ok": true,
+   "note": "class D: operand-size-prefixed CALL decoded at its actual width"
+  },
+  {
+   "vector": "66 0F 84 00 00",
+   "rel16": true,
+   "length": 5,
+   "imm_raw": "0x0000",
+   "expected_length": 5,
+   "expected_imm_raw": "0x0000",
+   "ok": true,
+   "note": "P2-2 branch A: 66-prefixed near Jcc = rel16 form, operand recorded (objdump: je rel16, 5 B)"
+  },
+  {
+   "vector": "67 8B 07",
+   "ea16": true,
+   "base_register": "BX",
+   "expected_base_register": "BX",
+   "ok": true,
+   "note": "H1: rm=7 mod=0 in 16-bit addressing is [BX] (C2 said [BP]; objdump: mov eax,[bx])"
+  },
+  {
+   "vector": "67 8B 47 05",
+   "ea16": true,
+   "base_register": "BX",
+   "expected_base_register": "BX",
+   "ok": true,
+   "note": "H1: rm=7 mod=1 in 16-bit addressing is [BX+disp] (objdump: mov eax,[bx+0x5])"
+  },
+  {
+   "vector": "67 8B 46 05",
+   "ea16": true,
+   "base_register": "BP",
+   "expected_base_register": "BP",
+   "ok": true,
+   "note": "H1: rm=6 mod!=0 stays [BP+disp] (objdump: mov eax,[bp+0x5])"
+  },
+  {
+   "vector": "67 8B 06 34 12",
+   "ea16": true,
+   "base_register": null,
+   "disp_raw": "0x1234",
+   "expected_disp_raw": "0x1234",
+   "ok": true,
+   "note": "H1: rm=6 mod=0 stays the [disp16] absolute form (objdump: mov eax,ds:0x1234)"
+  }
+ ],
+ "unit_battery_ok": true,
+ "redecode_bad_rows": [],
+ "coverage_windows": {
+  "setter": {
+   "decoded_instructions": 100,
+   "aborted": 0
+  },
+  "loop": {
+   "decoded_instructions": 54,
+   "aborted": 0
+  },
+  "driver": {
+   "decoded_instructions": 83,
+   "aborted": 0
+  },
+  "register": {
+   "decoded_instructions": 92,
+   "aborted": 0
+  },
+  "modeinit": {
+   "decoded_instructions": 42,
+   "aborted": 0
+  },
+  "stream_ctor": {
+   "decoded_instructions": 95,
+   "aborted": 0
+  },
+  "modecond": {
+   "decoded_instructions": 10,
+   "aborted": 0
+  },
+  "slotpred": {
+   "decoded_instructions": 39,
+   "aborted": 0
+  },
+  "consumer": {
+   "decoded_instructions": 65,
+   "aborted": 0
+  },
+  "manager_ctor": {
+   "decoded_instructions": 46,
+   "aborted": 0
+  }
+ }
+}

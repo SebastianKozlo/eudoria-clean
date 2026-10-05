@@ -1,0 +1,1881 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
+ "counterexamples": [
+  {
+   "CASE_ID": "A1_B8_CC_CC_E8_imm",
+   "BYTES": "B8 CC CC E8 00 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 3,
+   "EXPECTED_DECODE": "MOV EAX,0x00E8CCCC length 5; the E8 at +3 is immediate data",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: nearest-first T2 CC-padding start at +3 (trivial exact landing) confirmed the candidate and PROMOTED the CALL (CALL_VALIDATION=PASS, boundary_source=CC_PADDING_DELIMITED_START, target=0x00A00008)",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "ANCHORS": "0x00A00000",
+   "MEASURED_BOUNDARIES": [
+    "+0..+5",
+    "+5..+7",
+    "+7..+9"
+   ],
+   "FAILURE_CONDITION_DETECTED": "candidate E8 byte covered as operand/interior data of a proven anchor decode",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "A2_B8_C3_CC_E8_imm",
+   "BYTES": "B8 C3 CC E8 00 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 3,
+   "EXPECTED_DECODE": "MOV EAX,0x00E8CCC3 length 5; the E8 at +3 is immediate data",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: nearest-first T3 RET-delimited start at +3 confirmed the candidate and PROMOTED the CALL (boundary_source=RET_DELIMITED_START)",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "ANCHORS": "0x00A00000",
+   "MEASURED_BOUNDARIES": [
+    "+0..+5",
+    "+5..+7",
+    "+7..+9"
+   ],
+   "FAILURE_CONDITION_DETECTED": "candidate E8 byte covered as operand/interior data of a proven anchor decode",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "B_0F_C6_shufps_imm8",
+   "BYTES": "0F C6 C0 E8 00 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 3,
+   "EXPECTED_DECODE": "SHUFPS xmm0,xmm0,imm8 length 4 (0F C6 C0 E8); the E8 at +3 is the SHUFPS imm8",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: the decoder measured 0F C6 C0 as 3 bytes (missing imm8), the proven decode landed ON the E8 and PROMOTED it as CALL even with KNOWN_FUNCTION_ENTRY",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "ANCHORS": "0x00A00000",
+   "MEASURED_BOUNDARIES": [
+    "+0..+4",
+    "+4..+6",
+    "+6..+8",
+    "+8..+9"
+   ],
+   "FAILURE_CONDITION_DETECTED": "candidate E8 byte covered as operand/interior data of a proven anchor decode",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "C_67_8B_06_disp16",
+   "BYTES": "67 8B 06 E8 00 90 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 3,
+   "EXPECTED_DECODE": "MOV EAX,[0x00E8] 16-bit address form length 5 (67 8B 06 E8 00); the E8 at +3 is disp16 data",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: _parse_modrm ignored has67 and fabricated a 32-bit ModRM length (3), so the disp16 bytes were exposed as instruction starts",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "ANCHORS": "0x00A00000",
+   "MEASURED_BOUNDARIES": [
+    "+0..+5",
+    "+5..+6",
+    "+6..+7"
+   ],
+   "FAILURE_CONDITION_DETECTED": "candidate E8 byte covered as operand/interior data of a proven anchor decode",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "D_66_E8_rel16",
+   "BYTES": "66 E8 01 00 90 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 1,
+   "EXPECTED_DECODE": "CALL rel16 (66 E8 01 00) length 4; the E8 at +1 is the opcode of a DIFFERENT encoding than the examined five-byte E8 rel32",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C1: the REL32 handler ignored has66 and silently parsed 66 E8 as an ordinary five-byte E8 rel32 (measured length 6)",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "ANCHORS": "0x00A00000",
+   "MEASURED_BOUNDARIES": [
+    "+0..+4",
+    "+4..+5",
+    "+5..+6"
+   ],
+   "FAILURE_CONDITION_DETECTED": "candidate E8 byte covered as operand/interior data of a proven anchor decode",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "E_positive_real_call",
+   "BYTES": "B8 01 00 00 00 E8 05 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 5,
+   "EXPECTED_DECODE": "MOV EAX,1 length 5 then CALL rel32 at +5 (instruction boundary)",
+   "ACTUAL_DECODE": "boundary CONFIRMED (source=KNOWN_FUNCTION_ENTRY)",
+   "EXPECTED_CALL_PROMOTION": "PROMOTE",
+   "ACTUAL_CALL_PROMOTION": "PROMOTED->0x00A0000F",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "CONFIRMED",
+   "C1_DEFECT_NOTE": "positive control: an ordinary correctly-aligned E8 rel32 from an independently established entry must still validate and resolve its target",
+   "CALL_VALIDATION": "PASS",
+   "ANCHORS": "0x00A00000",
+   "MEASURED_BOUNDARIES": [
+    "+0..+5",
+    "+5..+10",
+    "+10..+11"
+   ],
+   "FAILURE_CONDITION_DETECTED": "none expected - positive control (an aligned E8 rel32 at a strong-anchor boundary promotes)",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "NEW_G_66_0F_84_false_E8",
+   "BYTES": "66 0F 84 00 00 B8 00 E8 01 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 7,
+   "EXPECTED_DECODE": "first instruction = 66 0F 84 rel16 JE length 5 (oracle-verified); E8 at +7 lies interior to the following MOV EAX,0x0001E800 (+5..+10)",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x00A00000",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL_MID_INSTRUCTION)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C2: _2BYTE[0x80..0x8F] fixed 6-byte rel32 forms ignored the 66 operand-size override, measured 7, landed the anchor stream on the interior E8 at +7 and PROMOTED a fabricated CALL edge (CALL_VALIDATION=PASS, target 0x00A0000D) from a data byte",
+   "CALL_VALIDATION": "FAIL_MID_INSTRUCTION",
+   "ANCHORS": "0x00A00000",
+   "MEASURED_BOUNDARIES": [
+    "+0..+5",
+    "+5..+10",
+    "+10..+12",
+    "+12..+13"
+   ],
+   "FAILURE_CONDITION_DETECTED": "candidate E8 byte covered as operand/interior data of a proven anchor decode",
+   "test_passed": true,
+   "INTERNAL_E8_PROMOTED": "NO",
+   "INDEPENDENT_ORACLE": "GNU objdump (GNU Binutils for Debian) 2.44: `66 0f 84 00 00  je 0x5` (5 bytes) - raw record in 01_RAW/D1_INDEPENDENT_ORACLE_RECORDS.json"
+  },
+  {
+   "CASE_ID": "NEW_F_unordered_extents_anchor_conflict",
+   "BYTES": "B8 00 E8 01 00 00 00 90 CC",
+   "START_OFFSET": "anchorA=+0;anchorB=+2",
+   "CANDIDATE_OFFSET": 2,
+   "EXPECTED_DECODE": "stream A: MOV EAX,0x0001E800 covers +0..+5 (the E8 at +2 is immediate data); stream B: E8 01 00 00 00 lands exactly at +2",
+   "ACTUAL_DECODE": "boundary UNRESOLVED (source=ANCHOR_CONFLICT)",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(NOT_VERIFIED)",
+   "BOUNDARY_SOURCE": "ANCHOR_CONFLICT",
+   "BOUNDARY_STATUS": "UNRESOLVED",
+   "C1_DEFECT_NOTE": "C2: _BoundaryCache stored extents as a SET and covers_mid_instruction early-broke at a >= target_off over UNORDERED iteration; A's coverage of the E8 was lost and B's exact landing could yield CONFIRMED -> CALL_VALIDATION=PASS, target 0x00A00008 - a FALSE CALL promotion from the anchor-conflict suppression",
+   "CALL_VALIDATION": "NOT_VERIFIED",
+   "ANCHORS": "0x00A00000, 0x00A00002",
+   "MEASURED_BOUNDARIES": {
+    "stream_A": [
+     "+0..+5",
+     "+5..+7",
+     "+7..+8"
+    ],
+    "stream_B": [
+     "+2..+7",
+     "+7..+8"
+    ]
+   },
+   "FAILURE_CONDITION_DETECTED": "anchor conflict: one stream covers the candidate mid-instruction while another lands exactly on it -> UNRESOLVED, never a promotion",
+   "UNCACHED_CROSSCHECK": {
+    "boundary_status": "UNRESOLVED",
+    "boundary_source": "ANCHOR_CONFLICT",
+    "call_validation": "NOT_VERIFIED",
+    "target": null,
+    "matches_cached": true
+   },
+   "ORDER_PERMUTATION_PROOFS": {
+    "synthetic_permutations_tested": 56,
+    "synthetic_all_expected": true,
+    "real_stream_permutations_tested": 50,
+    "real_stream_all_match_baseline": true,
+    "real_stream_baseline": {
+     "719362": true,
+     "719393": true,
+     "719390": false
+    },
+    "records": [
+     {
+      "stream": "A",
+      "permutation_index": 0,
+      "order": [
+       [
+        0,
+        5
+       ],
+       [
+        5,
+        7
+       ],
+       [
+        7,
+        8
+       ]
+      ],
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": 1,
+      "order": [
+       [
+        0,
+        5
+       ],
+       [
+        7,
+        8
+       ],
+       [
+        5,
+        7
+       ]
+      ],
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": 2,
+      "order": [
+       [
+        5,
+        7
+       ],
+       [
+        0,
+        5
+       ],
+       [
+        7,
+        8
+       ]
+      ],
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": 3,
+      "order": [
+       [
+        5,
+        7
+       ],
+       [
+        7,
+        8
+       ],
+       [
+        0,
+        5
+       ]
+      ],
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": 4,
+      "order": [
+       [
+        7,
+        8
+       ],
+       [
+        0,
+        5
+       ],
+       [
+        5,
+        7
+       ]
+      ],
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": 5,
+      "order": [
+       [
+        7,
+        8
+       ],
+       [
+        5,
+        7
+       ],
+       [
+        0,
+        5
+       ]
+      ],
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_0",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_1",
+      "order_sha256": "348c245ac80e2ab8",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_2",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_3",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_4",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_5",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_6",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_7",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_8",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_9",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_10",
+      "order_sha256": "7cd9a9a632150723",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_11",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_12",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_13",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_14",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_15",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_16",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_17",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_18",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_19",
+      "order_sha256": "de72ef9a3fd8d306",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_20",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_21",
+      "order_sha256": "de72ef9a3fd8d306",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_22",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_23",
+      "order_sha256": "348c245ac80e2ab8",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_24",
+      "order_sha256": "348c245ac80e2ab8",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_25",
+      "order_sha256": "de72ef9a3fd8d306",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_26",
+      "order_sha256": "de72ef9a3fd8d306",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_27",
+      "order_sha256": "348c245ac80e2ab8",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_28",
+      "order_sha256": "7cd9a9a632150723",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_29",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_30",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_31",
+      "order_sha256": "de72ef9a3fd8d306",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_32",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_33",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_34",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_35",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_36",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_37",
+      "order_sha256": "7cd9a9a632150723",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_38",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_39",
+      "order_sha256": "7cd9a9a632150723",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_40",
+      "order_sha256": "7cd9a9a632150723",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_41",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_42",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_43",
+      "order_sha256": "3cb6b32d2760aab7",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_44",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_45",
+      "order_sha256": "9c8461fe31b4d1f6",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_46",
+      "order_sha256": "de72ef9a3fd8d306",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_47",
+      "order_sha256": "de72ef9a3fd8d306",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_48",
+      "order_sha256": "84d81c495b3bf320",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "A",
+      "permutation_index": "shuffle_49",
+      "order_sha256": "7cd9a9a632150723",
+      "order_len": 3,
+      "target_offset": 2,
+      "covers_mid": true,
+      "expected": true
+     },
+     {
+      "stream": "B",
+      "permutation_index": 0,
+      "order": [
+       [
+        2,
+        7
+       ],
+       [
+        7,
+        8
+       ]
+      ],
+      "target_offset": 2,
+      "covers_mid": false,
+      "expected": false
+     },
+     {
+      "stream": "B",
+      "permutation_index": 1,
+      "order": [
+       [
+        7,
+        8
+       ],
+       [
+        2,
+        7
+       ]
+      ],
+      "target_offset": 2,
+      "covers_mid": false,
+      "expected": false
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_0",
+      "order_sha256": "068569f1ca542a6e",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_1",
+      "order_sha256": "64cb0642d14f7341",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_2",
+      "order_sha256": "d83053e527b8b0f1",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_3",
+      "order_sha256": "930d03e80ca04c62",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_4",
+      "order_sha256": "cdccaf0b7fe38b9b",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_5",
+      "order_sha256": "2a62706df8088f12",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_6",
+      "order_sha256": "2cd8ceff2f97e196",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_7",
+      "order_sha256": "50f6ec64cd48a3af",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_8",
+      "order_sha256": "437219f93e292c59",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_9",
+      "order_sha256": "4dccb592933bf264",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_10",
+      "order_sha256": "456a6423b9399480",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_11",
+      "order_sha256": "fcfb4a88f4ff9b9f",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_12",
+      "order_sha256": "08a0bc500e78fb3a",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_13",
+      "order_sha256": "ce6b54338a38920f",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_14",
+      "order_sha256": "1f62bd72f66f439b",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_15",
+      "order_sha256": "193a1dce67c80935",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_16",
+      "order_sha256": "d595731f9d70e68d",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_17",
+      "order_sha256": "a83a84085343c54a",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_18",
+      "order_sha256": "7241a5946702caeb",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_19",
+      "order_sha256": "564c442f93743cd1",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_20",
+      "order_sha256": "808bc067c51656bf",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_21",
+      "order_sha256": "3ff7955faed4a431",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_22",
+      "order_sha256": "7931b72959d36bd5",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_23",
+      "order_sha256": "9ceb085790216747",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_24",
+      "order_sha256": "11b485ee9e5705a4",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_25",
+      "order_sha256": "0106c2dd151dcf46",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_26",
+      "order_sha256": "cece596a19264c0a",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_27",
+      "order_sha256": "d03e92b65b51713e",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_28",
+      "order_sha256": "be0d72a2cc871021",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_29",
+      "order_sha256": "32d408594d81d479",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_30",
+      "order_sha256": "b22b245e1e6d4e07",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_31",
+      "order_sha256": "e22ab504ec60b45b",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_32",
+      "order_sha256": "df20cf662d23e354",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_33",
+      "order_sha256": "78b6f9e6d66f43fb",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_34",
+      "order_sha256": "edb2a83f3b5bcc14",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_35",
+      "order_sha256": "5d4997c51c8d6e2c",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_36",
+      "order_sha256": "2e2d0569e558fd3e",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_37",
+      "order_sha256": "17f318e7bb4aaf87",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_38",
+      "order_sha256": "11d5d62a14848a87",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_39",
+      "order_sha256": "6c6d6fcc320f4211",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_40",
+      "order_sha256": "dfcff186b211fb4d",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_41",
+      "order_sha256": "699d6457ec1dc322",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_42",
+      "order_sha256": "f865a0427192785a",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_43",
+      "order_sha256": "9dd84068a293dfcd",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_44",
+      "order_sha256": "d53c9b5864e31051",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_45",
+      "order_sha256": "3fc0f0d8e3f4a44d",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_46",
+      "order_sha256": "cd47ada03d267e7c",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_47",
+      "order_sha256": "7cf14a55013d2e59",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_48",
+      "order_sha256": "e9c4e119d27d9646",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     },
+     {
+      "stream": "REAL_0x004B0980",
+      "permutation_index": "shuffle_49",
+      "order_sha256": "1c6a733edcd8ae9a",
+      "order_len": 75,
+      "targets_covered": {
+       "719362": true,
+       "719393": true,
+       "719390": false
+      },
+      "all_match_baseline": true
+     }
+    ]
+   },
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "D1_0F73_4_DOWNSTREAM_FALSIFIER",
+   "BYTES": "0F 73 E0 02 E8 05 00 00 00 C3",
+   "START_OFFSET": 0,
+   "CANDIDATE_OFFSET": 4,
+   "EXPECTED_DECODE": "the first instruction 0F 73 E0 02 is an INVALID 0F 73 /4 encoding (reserved in both MMX and SSE2 classes; independent oracle GNU objdump returns (bad)) - a justified sequential decode MUST stop at it; there is NO justified instruction continuity through the first opcode to the E8 at +4 (the D1 per-opcode repair makes the decoder REJECT it; the stream aborts at offset 0)",
+   "ACTUAL_DECODE": "boundary UNRESOLVED (source=None) - the sequential decode aborted at the invalid first instruction",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(NOT_VERIFIED)",
+   "BOUNDARY_SOURCE": null,
+   "BOUNDARY_STATUS": "UNRESOLVED",
+   "C1_DEFECT_NOTE": "THREE-P2 (BASE) measured outcome, reproduced in-run through the committed BASE modules (READ-ONLY import; identities recorded below): boundary CONFIRMED (source=KNOWN_FUNCTION_ENTRY), CALL_VALIDATION=PASS target=0x00A0000E - the BASE decoder decoded the invalid 0F 73 /4 form as a 4-byte instruction, the anchor stream advanced onto the E8 at +4 and boundary-certified it with an UNEARNED CALL_VALIDATION=PASS and a promoted target",
+   "CALL_VALIDATION": "NOT_VERIFIED",
+   "ANCHORS": "0x00A00000",
+   "MEASURED_BOUNDARIES": [
+    "NONE - the sequential decode aborted at the invalid first instruction (offset 0)"
+   ],
+   "FAILURE_CONDITION_DETECTED": "invalid grouped-opcode initial instruction followed by E8 data: decoding the invalid form as valid grants unearned boundary continuity to the E8 (an unsafe boundary-certification path for reuse)",
+   "BASE_REPRODUCTION": {
+    "boundary_status": "CONFIRMED",
+    "boundary_source": "KNOWN_FUNCTION_ENTRY",
+    "call_validation": "PASS",
+    "target": "0x00A0000E",
+    "base_module_identities": {
+     "base_x86dec_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005\\03_SCRIPTS\\x86dec.py",
+     "base_x86dec_sha256": "925963BDFC08F286EB754C20D5FA647184E47654E77FA57A39FD1DB3313EF221",
+     "base_pebnd_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005\\03_SCRIPTS\\pebnd.py",
+     "base_pebnd_sha256": "0ACA015B0055BA90C8378D443259264E6E27626DE41D7DD8A81319D843C251D2",
+     "note": "READ-ONLY import of the committed BASE modules (no historical file modified; bytecode writes disabled)"
+    }
+   },
+   "TEXT_PATTERN_CENSUS": {
+    "pattern_0F73_mod3_reg4": 0,
+    "pattern_66_0F73_mod3_reg4": 0,
+    "occurrence_in_anchor_decode_streams": "NOT_CHECKED (zero raw occurrences)"
+   },
+   "SYNTHETIC_FIXTURE_NOTE": "synthetic bytes - NOT evidence that this pattern occurs in PCG; the .text census field measures actual occurrence; the census/pin regression is measured separately in REGRESSION_DIFF.json",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "REAL_REFUTE_0x004B0A02",
+   "BYTES": "50 8D 4C 24 4C BB 01 00 00 00 51 88 9C 24",
+   "START_OFFSET": "0x004B0980 (production anchor FUN_004B0980, PRIOR_CANON_ANCHOR_INPUT)",
+   "CANDIDATE_OFFSET": "0x004B0A02",
+   "EXPECTED_DECODE": "the pin VA 0x004B0A02 is interior to `BB 01 00 00 00` MOV EBX,1 @0x004B0A01; the correct boundary result is REFUTED_MID_INSTRUCTION with refuted_by=0x004B0980 (the C2 cache missed the covering extent and left the pin UNRESOLVED/HEURISTIC_START_CANDIDATE)",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x004B0980",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C2 committed boundary: UNRESOLVED / HEURISTIC_START_CANDIDATE / refuted_by=none (the unordered-extents underclaim); the DECLASSIFIED_NOT_A_CALL ledger status is unchanged - the declassification as not-a-CALL remains correct, now with the stronger proven reason",
+   "CALL_VALIDATION": "FAIL",
+   "ANCHORS": "0x004B0980",
+   "MEASURED_BOUNDARIES": [
+    "0x004B0A01..0x004B0A06"
+   ],
+   "FAILURE_CONDITION_DETECTED": "unordered-extents coverage underclaim: the pin is interior data on the 0x004B0980 proven decode path",
+   "REFUTED_BY": "0x004B0980",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "REAL_REFUTE_0x004B0A21",
+   "BYTES": "5C 24 34 E8 4D 14 F5 FF 83 C4 18 8D 54 24",
+   "START_OFFSET": "0x004B0980 (production anchor FUN_004B0980, PRIOR_CANON_ANCHOR_INPUT)",
+   "CANDIDATE_OFFSET": "0x004B0A21",
+   "EXPECTED_DECODE": "the pin VA 0x004B0A21 is interior to `E8 4D 14 F5 FF` the real CALL @0x004B0A1E; the correct boundary result is REFUTED_MID_INSTRUCTION with refuted_by=0x004B0980 (the C2 cache missed the covering extent and left the pin UNRESOLVED/HEURISTIC_START_CANDIDATE)",
+   "ACTUAL_DECODE": "covered mid-instruction by proven decode from anchor 0x004B0980",
+   "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
+   "ACTUAL_CALL_PROMOTION": "NONE(FAIL)",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "REFUTED_MID_INSTRUCTION",
+   "C1_DEFECT_NOTE": "C2 committed boundary: UNRESOLVED / HEURISTIC_START_CANDIDATE / refuted_by=none (the unordered-extents underclaim); the DECLASSIFIED_NOT_A_CALL ledger status is unchanged - the declassification as not-a-CALL remains correct, now with the stronger proven reason",
+   "CALL_VALIDATION": "FAIL",
+   "ANCHORS": "0x004B0980",
+   "MEASURED_BOUNDARIES": [
+    "0x004B0A1E..0x004B0A23"
+   ],
+   "FAILURE_CONDITION_DETECTED": "unordered-extents coverage underclaim: the pin is interior data on the 0x004B0980 proven decode path",
+   "REFUTED_BY": "0x004B0980",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "REAL_positive_call_0x0070C715",
+   "BYTES": "E8 66 5C 26 00",
+   "START_OFFSET": "0x0070C680 (production anchor; PRIOR_CANON_ANCHOR_INPUT)",
+   "CANDIDATE_OFFSET": "0x0070C715",
+   "EXPECTED_DECODE": "ordinary unprefixed E8 rel32 at a strong-anchor-confirmed boundary; target 0x00972380",
+   "ACTUAL_DECODE": "boundary CONFIRMED (source=KNOWN_FUNCTION_ENTRY, start=0x0070C680)",
+   "EXPECTED_CALL_PROMOTION": "PROMOTE",
+   "ACTUAL_CALL_PROMOTION": "PROMOTED->0x00972380",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "CONFIRMED",
+   "C1_DEFECT_NOTE": "regression control: the P2-1/P2-2/H1/H2 repairs must NOT untrack the three current real positive CALL controls",
+   "CALL_VALIDATION": "PASS",
+   "ANCHORS": "0x0070C680",
+   "MEASURED_BOUNDARIES": [
+    "0x0070C711..0x0070C713",
+    "0x0070C713..0x0070C715",
+    "0x0070C715..0x0070C71A",
+    "0x0070C71A..0x0070C71C",
+    "0x0070C71C..0x0070C71E"
+   ],
+   "FAILURE_CONDITION_DETECTED": "none expected - positive control",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "REAL_positive_call_0x0070DD75",
+   "BYTES": "E8 56 3D 26 00",
+   "START_OFFSET": "0x0070DC20 (production anchor; PRIOR_CANON_ANCHOR_INPUT)",
+   "CANDIDATE_OFFSET": "0x0070DD75",
+   "EXPECTED_DECODE": "ordinary unprefixed E8 rel32 at a strong-anchor-confirmed boundary; target 0x00971AD0",
+   "ACTUAL_DECODE": "boundary CONFIRMED (source=KNOWN_FUNCTION_ENTRY, start=0x0070DC20)",
+   "EXPECTED_CALL_PROMOTION": "PROMOTE",
+   "ACTUAL_CALL_PROMOTION": "PROMOTED->0x00971AD0",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "CONFIRMED",
+   "C1_DEFECT_NOTE": "regression control: the P2-1/P2-2/H1/H2 repairs must NOT untrack the three current real positive CALL controls",
+   "CALL_VALIDATION": "PASS",
+   "ANCHORS": "0x0070DC20",
+   "MEASURED_BOUNDARIES": [
+    "0x0070DD70..0x0070DD71",
+    "0x0070DD71..0x0070DD75",
+    "0x0070DD75..0x0070DD7A",
+    "0x0070DD7A..0x0070DD7C",
+    "0x0070DD7C..0x0070DD7E"
+   ],
+   "FAILURE_CONDITION_DETECTED": "none expected - positive control",
+   "test_passed": true
+  },
+  {
+   "CASE_ID": "REAL_positive_call_0x0070C742",
+   "BYTES": "E8 A9 66 26 00",
+   "START_OFFSET": "0x0070C680 (production anchor; PRIOR_CANON_ANCHOR_INPUT)",
+   "CANDIDATE_OFFSET": "0x0070C742",
+   "EXPECTED_DECODE": "ordinary unprefixed E8 rel32 at a strong-anchor-confirmed boundary; target 0x00972DF0",
+   "ACTUAL_DECODE": "boundary CONFIRMED (source=KNOWN_FUNCTION_ENTRY, start=0x0070C680)",
+   "EXPECTED_CALL_PROMOTION": "PROMOTE",
+   "ACTUAL_CALL_PROMOTION": "PROMOTED->0x00972DF0",
+   "BOUNDARY_SOURCE": "KNOWN_FUNCTION_ENTRY",
+   "BOUNDARY_STATUS": "CONFIRMED",
+   "C1_DEFECT_NOTE": "regression control: the P2-1/P2-2/H1/H2 repairs must NOT untrack the three current real positive CALL controls",
+   "CALL_VALIDATION": "PASS",
+   "ANCHORS": "0x0070C680",
+   "MEASURED_BOUNDARIES": [
+    "0x0070C73A..0x0070C73B",
+    "0x0070C73B..0x0070C73D",
+    "0x0070C73D..0x0070C742",
+    "0x0070C742..0x0070C747",
+    "0x0070C747..0x0070C749",
+    "0x0070C749..0x0070C74D"
+   ],
+   "FAILURE_CONDITION_DETECTED": "none expected - positive control",
+   "test_passed": true
+  }
+ ],
+ "real_positive_controls": [
+  {
+   "va": "0x0070C715",
+   "call_validation": "PASS",
+   "boundary_source": "KNOWN_FUNCTION_ENTRY",
+   "target": "0x00972380",
+   "expected_target": "0x00972380",
+   "ok": true
+  },
+  {
+   "va": "0x0070DD75",
+   "call_validation": "PASS",
+   "boundary_source": "KNOWN_FUNCTION_ENTRY",
+   "target": "0x00971AD0",
+   "expected_target": "0x00971AD0",
+   "ok": true
+  },
+  {
+   "va": "0x0070C742",
+   "call_validation": "PASS",
+   "boundary_source": "KNOWN_FUNCTION_ENTRY",
+   "target": "0x00972DF0",
+   "expected_target": "0x00972DF0",
+   "ok": true
+  }
+ ],
+ "control_nonE8": true,
+ "anchor_registry": [
+  {
+   "ANCHOR_VA": "0x00415470",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00415470_manager_getter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x004B0980",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_004B0980_attach_driver",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00703CD0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00703CD0_manager_mode_cond",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00703E80",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00703E80_bulk_attach_loop",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00707E50",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00707E50_manager_ctor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00707FB0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00707FB0_register_factory",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x007080C0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_007080C0_manager_mode_and_class_enum",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070BF10",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070BF10_ready_flag_reader",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070BF20",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070BF20_flag_or_setter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070BF40",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070BF40_flag_bit_test",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070BFD0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070BFD0_stream_bridge_method",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070C150",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070C150_factory_finalize",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070C180",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070C180_slot_addr_getter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070C680",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070C680_stream_attach_setter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070CBC0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070CBC0_slot_add",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070CC80",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070CC80_slot_predicate_scan",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070CF80",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070CF80_factory_base_ctor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070D990",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070D990_component_creator",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070DC20",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070DC20_record_apply",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070DCF0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070DCF0_consumer_record_reader",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070DE10",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070DE10_cache_miss_creator",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070E100",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070E100_component_get_or_create",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0070E2F0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0070E2F0_factory_vec_init",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0071B820",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0071B820_UNKNOWN",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0072FA30",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0072FA30_templates_reader_region",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x007374F0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_007374F0_schema_init",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073B820",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073B820_factory20006_ctor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073B8C0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073B8C0_factory20006_create_component",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073C6C0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073C6C0_factory20006_dtor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073C870",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073C870_class_dispatcher",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x0073C8D8",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_0073C8D8_factory20006_getter",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00971650",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00971650_stream_advance",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00971AD0",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00971AD0_record_reader",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  },
+  {
+   "ANCHOR_VA": "0x00972380",
+   "ANCHOR_CLASS": "KNOWN_FUNCTION_ENTRY",
+   "ANCHOR_NAME": "FUN_00972380_stream_ctor",
+   "EXISTING_PHYSICAL_EVIDENCE": "prior-canon function entry table carried by the F84 chain packages (R1 FUNCTION_LEDGER anchor battery / C1 same-VA pin chains); entry bytes re-verified this run at the pinned VA; used ONLY as a decode origin, independent of every candidate validated against it",
+   "EVIDENCE_SOURCE": "docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_R1_20261004 + docs/audits/PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C1_FORENSIC_QC_CORRECTION_R1_20261004 (committed prior canon) + THIS run same-VA byte re-verification",
+   "EVIDENCE_STATUS": "PRIOR_CANON_ENTRY_BYTE_REVERIFIED_THIS_RUN"
+  }
+ ],
+ "census_discipline": {
+  "confirmed_with_untrusted_source": [],
+  "refuted_without_anchor": [],
+  "pins_confirmed_with_untrusted_source": []
+ }
+}

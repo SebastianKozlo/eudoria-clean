@@ -1,0 +1,82 @@
+--- BASE/x86dec.py
++++ NEW/x86dec.py
+@@ -1,9 +1,35 @@
+ # x86dec.py
+-# RUN: PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005
++# RUN: PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005
+ # Shared corrected fail-closed 32-bit x86 instruction decoder.
+-# Copy lineage: C2 AF2 decoder + THIS run's P2-2/H1/H2 bounded hygiene
+-# corrections (Desktop post-audit PE_935_F84_C2_DESKTOP_POST_AUDIT_20261004
+-# findings C2-C2/P2 and the two bounded hygiene items H1/H2).
++# Copy lineage: C2 AF2 decoder + the THREE-P2 run's P2-2/H1/H2 corrections +
++# THIS run's D1 per-opcode H2 correction (Desktop post-audit
++# PE_935_F84_C2_C1_DESKTOP_POST_AUDIT_20261005 finding D1/P2).
+ #
+-# THIS RUN'S CORRECTIONS vs the C2 decoder:
++# THIS RUN'S CORRECTION (D1) vs the THREE-P2 decoder:
++#   D1 (0F 73 /4, per-opcode H2 tables): the THREE-P2 `_group_imm8_ok` shared
++#      the reg whitelist {2,4,6} across opcodes 0F 71/72/73 (both the MMX and
++#      the SSE2 branch), so `0F 73 /4` was ACCEPTED with and without the 66
++#      prefix (decoded length 4 / 5). Per the ISA there is NO 0F 73 /4 form in
++#      either class (no PSRADQ: MMX 0F 73 is PSRLQ /2 and PSLLQ /6 only; the
++#      66 SSE2 0F 73 forms are PSRLQ /2, PSRLDQ /3, PSLLQ /6, PSLLDQ /7);
++#      the independent oracle (GNU objdump Binutils 2.44) returns (bad) for
++#      both `0F 73 E0 02` and `66 0F 73 E0 02`. FIX: PER-OPCODE legal-reg
++#      tables, per the D1 contract:
++#        * 0F 71: without 66 reg {2,4,6}; with 66 reg {2,4,6}
++#        * 0F 72: without 66 reg {2,4,6}; with 66 reg {2,4,6}
++#        * 0F 73: without 66 reg {2,6}; with 66 reg {2,3,6,7}
++#      /4 remains LEGAL for 71/72 (PSRAW/PSRAD); 0F 73 /3,/7 remain legal with
++#      66 only (PSRLDQ/PSLLDQ); the register-only (mod=3) requirement, the
++#      memory-form rejection, the F2/F3 rejection and the 0F BA behaviour are
++#      UNCHANGED (the THREE-P2/P2-2/H1 fixes and all earlier C2 fixes are
++#      preserved verbatim below). A downstream consequence is measured by the
++#      D1 boundary falsifier: with the invalid first instruction REJECTED, a
++#      justified sequential decode STOPS at it and an E8 at +4 can no longer
++#      be boundary-certified through that stream (the THREE-P2 decoder
++#      measured the invalid form as 4 bytes and certified the E8 - see
++#      01_RAW/D1_BOUNDARY_FALSIFIER.json).
++#   (H2 remains a BOUNDED grouped-opcode validity rule for the examined
++#   families - this decoder is NOT a general-purpose x86 decoder.)
++#
++# THREE-P2 RUN CORRECTIONS vs the C2 decoder:
+ #   P2-2 (66 0F 8x near Jcc, BRANCH A): _2BYTE[0x80..0x8F] fixed 6-byte rel32
+@@ -86,2 +112,18 @@
+ 
++# D1: PER-OPCODE legal-reg tables for the 0F 71/72/73 immediate-shift group
++# (the THREE-P2 decoder wrongly shared {2,4,6} across all three opcodes, so
++# the non-existent 0F 73 /4 form was accepted in both MMX and SSE2 classes -
++# Desktop post-audit PE_935_F84_C2_C1_DESKTOP_POST_AUDIT_20261005 D1/P2).
++#   0F 71: no-66 {2,4,6} (PSRLW/PSRAW/PSLLW); 66 {2,4,6} (SSE2 forms)
++#   0F 72: no-66 {2,4,6} (PSRLD/PSRAD/PSLLD); 66 {2,4,6} (SSE2 forms)
++#   0F 73: no-66 {2,6}   (PSRLQ/PSLLQ; NO /4 - there is no PSRADQ);
++#          66    {2,3,6,7} (PSRLQ/PSRLDQ/PSLLQ/PSLLDQ)
++# Oracle: GNU objdump Binutils 2.44 returns (bad) for 0F 73 E0 02 and for
++# 66 0F 73 E0 02, and legal verdicts for all six D1 legal controls -
++# see 01_RAW/D1_INDEPENDENT_ORACLE_RECORDS.json (D1_NEG_73_4_E0,
++# D1_NEG_73_4_E0_66, D1_POS_71_4_E0, D1_POS_72_4_E0, D1_POS_73_2_D0,
++# D1_POS_73_6_F0, D1_POS_66_73_3_D8, D1_POS_66_73_7_F8).
++_D1_LEGAL_REG_NO66 = {0x71: (2, 4, 6), 0x72: (2, 4, 6), 0x73: (2, 6)}
++_D1_LEGAL_REG_66 = {0x71: (2, 4, 6), 0x72: (2, 4, 6), 0x73: (2, 3, 6, 7)}
++
+ 
+@@ -91,4 +133,6 @@
+     Reserved/invalid sub-opcodes -> False (REJECT fail-closed; the C2 decoder
+-    decoded every reg with its imm8). Oracle: GNU objdump Binutils 2.44
+-    ((bad) verdicts); see ORACLE_INDEPENDENT_RECORDS.json."""
++    decoded every reg with its imm8). D1: the legal-reg set is now selected
++    PER OPCODE (71/72/73 differ; 0F 73 has no /4 form in either prefix
++    class), never one shared whitelist. Oracle: GNU objdump Binutils 2.44
++    ((bad) verdicts); see 01_RAW/D1_INDEPENDENT_ORACLE_RECORDS.json."""
+     if op2 == 0xBA:
+@@ -104,6 +148,6 @@
+         if 0x66 in prefixes:
+-            # SSE2: 71/72/73 reg {2,4,6}; 73 reg {3,7} = PSRLDQ/PSLLDQ
+-            return reg in (2, 4, 6) or (op2 == 0x73 and reg in (3, 7))
+-        # MMX: 71/72/73 reg {2,4,6}; 0F 73 reg {3,7} reserved without 66
+-        return reg in (2, 4, 6)
++            # SSE2, per-opcode tables (D1); 73 includes PSRLDQ/PSLLDQ /3,/7
++            return reg in _D1_LEGAL_REG_66[op2]
++        # MMX, per-opcode tables (D1); 0F 73 /4 has no MMX form at all
++        return reg in _D1_LEGAL_REG_NO66[op2]
+     return False

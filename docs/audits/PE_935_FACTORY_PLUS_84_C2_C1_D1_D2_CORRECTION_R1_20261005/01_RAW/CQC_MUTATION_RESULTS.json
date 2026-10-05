@@ -1,0 +1,189 @@
+{
+ "run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
+ "mutation_discipline": "the RETAINED seven M1-M4 + AF3/Q8 (compound, all changed fields listed) + M5/M6 controls: the SAME production gate must show UNMUTATED=PASS and MUTATED=FAIL; the mutation target is a TEMPORARY COPY of the ACTUAL final artifact (never a fixture, never the canonical committed artifact; temp tree OUTSIDE the repo, deleted after the run); corrupted copies are never persisted; exact before/after values and failing predicates recorded per mutation. The eight NEW D2 completeness controls are persisted separately in 01_RAW/D2_MUTATION_RESULTS.json",
+ "results": [
+  {
+   "MUTATION_ID": "M1",
+   "MUTATED_ARTIFACT": "01_RAW/C1_PIN_EVIDENCE.json",
+   "FIELD": "corrupt the constructor opcode_bytes (stream_ctor_entry 6A FF -> EB FF)",
+   "BEFORE": "clean committed artifact (production package)",
+   "AFTER": "temporary mutated copy at C:\\Users\\User\\AppData\\Local\\Temp\\p2fix_mut_c_72pefe_out\\M1 (deleted after the test; never persisted as a canonical artifact)",
+   "BEFORE_VALUE": "stream_ctor_entry.opcode_bytes = '6A FF'",
+   "AFTER_VALUE": "stream_ctor_entry.opcode_bytes = 'EB FF'",
+   "FAILING_PREDICATES": [
+    {
+     "claim": "stream_ctor_entry",
+     "field": "opcode_bytes",
+     "json": "EB FF",
+     "derived": "6A FF"
+    }
+   ],
+   "PRODUCTION_GATE_ID": "Q2",
+   "UNMUTATED_RESULT": "PASS",
+   "MUTATED_RESULT": "FAIL",
+   "EXPECTED_CAUSALITY": "UNMUTATED=PASS -> MUTATED=FAIL",
+   "ACTUAL_CAUSALITY": "CAUSAL_PASS",
+   "IDENTITY_PRESERVED_BETWEEN_EXECUTIONS": "EXE identity: unchanged (pinned E7785430E81D / 8015872 bytes re-hashed by the loader at both executions); git baseline: unchanged during QC; unrelated artifacts: copied byte-identical from the production package; unrelated QC inputs: unchanged; gate implementation: the SAME gate function object executed for both results"
+  },
+  {
+   "MUTATION_ID": "M2",
+   "MUTATED_ARTIFACT": "CORRECTED_PIN_LEDGER.csv",
+   "FIELD": "corrupt the callback measured_operand (0x70BEF0 -> 0x70BEF0B8) in the CSV",
+   "BEFORE": "clean committed artifact (production package)",
+   "AFTER": "temporary mutated copy at C:\\Users\\User\\AppData\\Local\\Temp\\p2fix_mut_c_72pefe_out\\M2 (deleted after the test; never persisted as a canonical artifact)",
+   "BEFORE_VALUE": "slotpred_callback_MOV_EAX_imm32.measured_operand = '0x70BEF0 (7388912)'",
+   "AFTER_VALUE": "'0x70BEF0B8 (118482808)'",
+   "FAILING_PREDICATES": [
+    {
+     "claim": "slotpred_callback_MOV_EAX_imm32",
+     "field": "measured_operand",
+     "csv": "0x70BEF0B8 (118482808)",
+     "derived": "0x70BEF0 (7388912)"
+    }
+   ],
+   "PRODUCTION_GATE_ID": "Q3",
+   "UNMUTATED_RESULT": "PASS",
+   "MUTATED_RESULT": "FAIL",
+   "EXPECTED_CAUSALITY": "UNMUTATED=PASS -> MUTATED=FAIL",
+   "ACTUAL_CAUSALITY": "CAUSAL_PASS",
+   "IDENTITY_PRESERVED_BETWEEN_EXECUTIONS": "EXE identity: unchanged (pinned E7785430E81D / 8015872 bytes re-hashed by the loader at both executions); git baseline: unchanged during QC; unrelated artifacts: copied byte-identical from the production package; unrelated QC inputs: unchanged; gate implementation: the SAME gate function object executed for both results"
+  },
+  {
+   "MUTATION_ID": "M3",
+   "MUTATED_ARTIFACT": "01_RAW/C3_OBJECT_SCOPE.json",
+   "FIELD": "remove the measured offset-zero store collection from C3",
+   "BEFORE": "clean committed artifact (production package)",
+   "AFTER": "temporary mutated copy at C:\\Users\\User\\AppData\\Local\\Temp\\p2fix_mut_c_72pefe_out\\M3 (deleted after the test; never persisted as a canonical artifact)",
+   "BEFORE_VALUE": "examined_ctor.offset_zero_stores = [3 measured stores]",
+   "AFTER_VALUE": "[] (collection removed)",
+   "FAILING_PREDICATES": [
+    {
+     "why": "offset-zero store collection count mismatch (collection removed/corrupted?)",
+     "json_count": 0,
+     "derived_count": 3
+    },
+    {
+     "why": "P3-A FS:[0] store set mismatch",
+     "expected": [
+      "0x009723A0",
+      "0x009724CB"
+     ],
+     "json": []
+    }
+   ],
+   "PRODUCTION_GATE_ID": "Q8",
+   "UNMUTATED_RESULT": "PASS",
+   "MUTATED_RESULT": "FAIL",
+   "EXPECTED_CAUSALITY": "UNMUTATED=PASS -> MUTATED=FAIL",
+   "ACTUAL_CAUSALITY": "CAUSAL_PASS",
+   "IDENTITY_PRESERVED_BETWEEN_EXECUTIONS": "EXE identity: unchanged (pinned E7785430E81D / 8015872 bytes re-hashed by the loader at both executions); git baseline: unchanged during QC; unrelated artifacts: copied byte-identical from the production package; unrelated QC inputs: unchanged; gate implementation: the SAME gate function object executed for both results"
+  },
+  {
+   "MUTATION_ID": "M4",
+   "MUTATED_ARTIFACT": "CORRECTED_FACTORY_PLUS_84_WRITE_CENSUS.csv",
+   "FIELD": "corrupt a boundary-confirmed row's containing_function (entry~0xDEADBEEF)",
+   "BEFORE": "clean committed artifact (production package)",
+   "AFTER": "temporary mutated copy at C:\\Users\\User\\AppData\\Local\\Temp\\p2fix_mut_c_72pefe_out\\M4 (deleted after the test; never persisted as a canonical artifact)",
+   "BEFORE_VALUE": "census[0x0070DD1A].containing_function = 'FUN_0070DCF0_consumer_record_reader'",
+   "AFTER_VALUE": "'entry~0xDEADBEEF'",
+   "FAILING_PREDICATES": [
+    {
+     "va": "0x0070DD1A",
+     "field": "containing_function",
+     "csv": "entry~0xDEADBEEF",
+     "derived": "FUN_0070DC20_record_apply"
+    }
+   ],
+   "PRODUCTION_GATE_ID": "Q6",
+   "UNMUTATED_RESULT": "PASS",
+   "MUTATED_RESULT": "FAIL",
+   "EXPECTED_CAUSALITY": "UNMUTATED=PASS -> MUTATED=FAIL",
+   "ACTUAL_CAUSALITY": "CAUSAL_PASS",
+   "IDENTITY_PRESERVED_BETWEEN_EXECUTIONS": "EXE identity: unchanged (pinned E7785430E81D / 8015872 bytes re-hashed by the loader at both executions); git baseline: unchanged during QC; unrelated artifacts: copied byte-identical from the production package; unrelated QC inputs: unchanged; gate implementation: the SAME gate function object executed for both results"
+  },
+  {
+   "MUTATION_ID": "AF3/Q8",
+   "MUTATED_ARTIFACT": "AF3_PROVENANCE_LEDGER.csv",
+   "FIELD": "COMPOUND (all changed fields listed, NOT one-field): the manager PROVEN row's IDENTITY_EDGE='' + IDENTIFIED_OBJECT='' + IDENTITY_EVIDENCE='' + ADDRESS_PROVENANCE_STATUS='UNRESOLVED' (candidate bytes unchanged)",
+   "BEFORE": "clean committed artifact (production package)",
+   "AFTER": "temporary mutated copy at C:\\Users\\User\\AppData\\Local\\Temp\\p2fix_mut_c_72pefe_out\\AF3/Q8 (deleted after the test; never persisted as a canonical artifact)",
+   "BEFORE_VALUE": "manager row: IDENTITY_EDGE=<machine-checked this flow chain>; IDENTIFIED_OBJECT=<the MANAGER object...>; IDENTITY_EVIDENCE=<entry this-flow + singleton census + prior canon>; ADDRESS_PROVENANCE_STATUS='THIS_OF_KNOWN_FUNCTION:FUN_00707E50_manager_ctor'",
+   "AFTER_VALUE": "IDENTITY_EDGE=''; IDENTIFIED_OBJECT=''; IDENTITY_EVIDENCE=''; ADDRESS_PROVENANCE_STATUS='UNRESOLVED' (ALL FOUR fields changed - compound)",
+   "FAILING_PREDICATES": [
+    {
+     "why": "PROVEN row without the resolved manager-this provenance",
+     "CANDIDATE_VA": "0x00707EC0",
+     "ADDRESS_PROVENANCE_STATUS": "UNRESOLVED"
+    },
+    {
+     "why": "PROVEN row with empty IDENTITY_EDGE (identity edge removed/corrupted)",
+     "CANDIDATE_VA": "0x00707EC0"
+    },
+    {
+     "why": "PROVEN row without an IDENTIFIED_OBJECT",
+     "CANDIDATE_VA": "0x00707EC0"
+    },
+    {
+     "why": "PROVEN row without IDENTITY_EVIDENCE",
+     "CANDIDATE_VA": "0x00707EC0"
+    },
+    {
+     "why": "PROVEN row evidence lost the manager singleton identity",
+     "CANDIDATE_VA": "0x00707EC0"
+    }
+   ],
+   "PRODUCTION_GATE_ID": "Q7",
+   "UNMUTATED_RESULT": "PASS",
+   "MUTATED_RESULT": "FAIL",
+   "EXPECTED_CAUSALITY": "UNMUTATED=PASS -> MUTATED=FAIL",
+   "ACTUAL_CAUSALITY": "CAUSAL_PASS",
+   "IDENTITY_PRESERVED_BETWEEN_EXECUTIONS": "EXE identity: unchanged (pinned E7785430E81D / 8015872 bytes re-hashed by the loader at both executions); git baseline: unchanged during QC; unrelated artifacts: copied byte-identical from the production package; unrelated QC inputs: unchanged; gate implementation: the SAME gate function object executed for both results"
+  },
+  {
+   "MUTATION_ID": "M5",
+   "MUTATED_ARTIFACT": "01_RAW/C1_PIN_EVIDENCE.json",
+   "FIELD": "P2-3: THE_STORE_plus_84 effective_address.base_register ESI -> EAX (the JSON field the C2 Q2 did not re-derive)",
+   "BEFORE": "clean committed artifact (production package)",
+   "AFTER": "temporary mutated copy at C:\\Users\\User\\AppData\\Local\\Temp\\p2fix_mut_c_72pefe_out\\M5 (deleted after the test; never persisted as a canonical artifact)",
+   "BEFORE_VALUE": "THE_STORE_plus_84.effective_address.base_register = 'ESI'",
+   "AFTER_VALUE": "'EAX'",
+   "FAILING_PREDICATES": [
+    {
+     "claim": "THE_STORE_plus_84",
+     "field": "effective_address.base_register",
+     "json": "EAX",
+     "derived": "ESI"
+    }
+   ],
+   "PRODUCTION_GATE_ID": "Q2",
+   "UNMUTATED_RESULT": "PASS",
+   "MUTATED_RESULT": "FAIL",
+   "EXPECTED_CAUSALITY": "UNMUTATED=PASS -> MUTATED=FAIL",
+   "ACTUAL_CAUSALITY": "CAUSAL_PASS",
+   "IDENTITY_PRESERVED_BETWEEN_EXECUTIONS": "EXE identity: unchanged (pinned E7785430E81D / 8015872 bytes re-hashed by the loader at both executions); git baseline: unchanged during QC; unrelated artifacts: copied byte-identical from the production package; unrelated QC inputs: unchanged; gate implementation: the SAME gate function object executed for both results"
+  },
+  {
+   "MUTATION_ID": "M6",
+   "MUTATED_ARTIFACT": "01_RAW/C1_PIN_EVIDENCE.json",
+   "FIELD": "P2-3: THE_STORE_plus_84 effective_address.address_provenance_status -> THIS_OF_KNOWN_FUNCTION:FUN_00000000_FAKE (fake provenance)",
+   "BEFORE": "clean committed artifact (production package)",
+   "AFTER": "temporary mutated copy at C:\\Users\\User\\AppData\\Local\\Temp\\p2fix_mut_c_72pefe_out\\M6 (deleted after the test; never persisted as a canonical artifact)",
+   "BEFORE_VALUE": "THE_STORE_plus_84.effective_address.address_provenance_status = 'THIS_OF_KNOWN_FUNCTION:FUN_0070C680_stream_attach_setter'",
+   "AFTER_VALUE": "'THIS_OF_KNOWN_FUNCTION:FUN_00000000_FAKE'",
+   "FAILING_PREDICATES": [
+    {
+     "claim": "THE_STORE_plus_84",
+     "field": "effective_address.address_provenance_status",
+     "json": "THIS_OF_KNOWN_FUNCTION:FUN_00000000_FAKE",
+     "derived": "THIS_OF_KNOWN_FUNCTION:FUN_0070C680_stream_attach_setter"
+    }
+   ],
+   "PRODUCTION_GATE_ID": "Q2",
+   "UNMUTATED_RESULT": "PASS",
+   "MUTATED_RESULT": "FAIL",
+   "EXPECTED_CAUSALITY": "UNMUTATED=PASS -> MUTATED=FAIL",
+   "ACTUAL_CAUSALITY": "CAUSAL_PASS",
+   "IDENTITY_PRESERVED_BETWEEN_EXECUTIONS": "EXE identity: unchanged (pinned E7785430E81D / 8015872 bytes re-hashed by the loader at both executions); git baseline: unchanged during QC; unrelated artifacts: copied byte-identical from the production package; unrelated QC inputs: unchanged; gate implementation: the SAME gate function object executed for both results"
+  }
+ ]
+}

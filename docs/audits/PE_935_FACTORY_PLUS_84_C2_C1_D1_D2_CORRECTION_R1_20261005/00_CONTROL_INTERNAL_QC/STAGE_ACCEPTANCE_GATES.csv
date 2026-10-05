@@ -1,0 +1,27 @@
+gate_id,gate_description,method,measured_result,verdict
+QC-G01,BASE_SHA/HEAD/origin/actual-remote all equal 9d31a82 and package untracked with nothing staged,git rev-parse + ls-remote + status (own),HEAD=origin=remote=9d31a82; status: 7 untracked paths only; AUDIT_ENTRYPOINT diff vs BASE empty,PASS
+QC-G02,EXE identity pin (size+SHA256),own re-hash,8015872 B / E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 match,PASS
+QC-G03,Desktop report identity pin,own re-hash,15535 B / 31AA87BC7C38089C7F648B5C749E196D80C4C6ED37823A96D5379CF84E78E61E match,PASS
+QC-G04,Source manifest identity pin (BASE package),own re-hash,5613 B / A407694EC96BBDDE8A8CE2E1D5808BACF39762017EE80B9A8A03D5AC6125897E match,PASS
+QC-G05,PINS roster == BASE Git blob == on-disk script == EXPECTED_PIN_REGISTRY (133 claims; full field compare),AST literal eval + field compare,133/133; 0 mismatches; 0 duplicates; PINS never edited,PASS
+QC-G06,JSON claim multiset == CSV claim multiset == roster multiset 133/133/133 bidirectional,own CSV/JSON recount,133/133/133; dups/missing/extra all empty; gate_q2 code implements true bidirectional Counter checks (read in full),PASS
+QC-G07,Status tally 120/2/4/5/2 and declared totals agreement,own CSV recount,identical; declared == measured,PASS
+QC-G08,EA applicability from EXPECTED role (46/46 re-derived); kind mutation cannot disable EA validation,code read (gate_q2 lines 430-506) + D2-M1/M3 failing predicates,ea_required=(exp_role=='mem'); D2-M1/M3 fail on role mismatch + required-EA missing; 46/46,PASS
+QC-G09,8 D2 mutations causal on gate_q2 OWN predicates (no manifest/Git/other-gate substitute),per-case FAILING_PREDICATES + harness code read,8/8 CAUSAL_PASS; input-hash census: only declared targets changed; substitute-failure check structurally true,PASS
+QC-G10,7 retained mutations causal (M1-M4+AF3/Q8+M5+M6) through same gates,AF1 matrix + CQC_MUTATION_RESULTS recount,7/7 PASS->FAIL,PASS
+QC-G11,D1 negatives REJECT + 6 legal controls + /4 legal for 71/72 + 66 73 /3,/7 legal + 0F BA/memory/F2F3 unchanged,own in-memory execution of on-disk decoder incl. exhaustive (op2,reg,prefix) sweep,all match contract tables exactly; 0F BA reg0-3 REJECT reg4-7 legal any mod; memory/F2/F3 REJECT,PASS
+QC-G12,D1 downstream falsifier: corrected stops decoding (no PASS/no promotion); BASE reproduces defect,in-memory execution through both module pairs (corrected + committed BASE read-only),corrected: UNRESOLVED/NOT_VERIFIED/None; BASE: CONFIRMED/PASS/0x00A0000E == persisted record,PASS
+QC-G13,.text zero occurrences of 0F 73 mod=3 reg=4 (both forms),own full .text scan with own PE parser,0 and 0 == declared,PASS
+QC-G14,3 CSV artifacts byte-identical to BASE,direct byte-compare vs git show BASE blobs,identical (43A39A9A/56A59917/BF0968E3 both sides),PASS
+QC-G15,Regenerated JSON identities vs REGRESSION_DIFF sha256_new (6 artifacts),own re-hash,5/6 match; CQC_MUTATION_RESULTS MISMATCH (A83B0B71 declared vs EB2707AF actual),FAIL->F2
+QC-G16,Unit battery 72 entries 0 failures incl. 8 D1 entries (6 distinct + 2 disclosed byte-duplicates),full parse,72 entries; ok=false: 0; composition as declared,PASS
+QC-G17,Boundary case set 14 (13 carried + D1 falsifier); only NEW_G changed and only in the oracle-record filename field,field-level diff vs BASE blob,14 cases; NEW_G changed only in INDEPENDENT_ORACLE field (filename),PASS
+QC-G18,Oracle fixtures 80 (71 carried + 9 D1) with verbatim objdump outputs,full parse,80; D1 records carry full command lines + raw stdout ((bad)/data16 (bad) for negatives; legal disassembly for controls),PASS
+QC-G19,Supersession ledger 9 records / quotecheck verbatim,own independent parser,9 records; 20 excerpts; 0 failures; declared==measured,PASS
+QC-G20,Manifest 38 rows bijection size+SHA,full re-hash of all 38 paths,38/38; 0 missing/extra/dup; 0 size/SHA mismatches; self-excluded; entrypoint at BASE state,PASS
+QC-G21,Core status algebra not promoted (UNVERIFIED/NOT_ESTABLISHED/UNKNOWN/NO preserved),string verification in FINAL_REPORT,all 11 non-claim strings present verbatim; no promotion found,PASS
+QC-G22,Forbidden/overclaim phrase sweep on active surfaces,own independent sweep with ledger-excerpt exception rule,0 real hits,PASS
+QC-G23,Scope restrictions (no 0xA4 source/placement/VFS/RECORD_A/Model194013/client execution),own instrument literal scan + Q14 record,only the census check-tuple contains the forbidden extensions; no forbidden input opened; nonclaims present,PASS
+QC-G24,CQC_FINAL.json qc_scope field consistency with the declared QC_SCOPE,direct field read vs 4 documents,MISMATCH (THREE_P2 name in record vs D1_D2 declared) -> F1,FAIL->F1
+QC-G25,Bare-except / silent-failure scan over all 11 instruments,regex scan,0 bare except; 4 'except Exception' in cqc_battery all fail-closed (append mismatch / set cm_ok=False),PASS
+QC-G26,Off-by-one check in D1 legal-reg tables,exhaustive reg 0-7 sweep,tables exact: 71/72 {246}/{246}; 73 {26}/{2367}; no off-by-one,PASS

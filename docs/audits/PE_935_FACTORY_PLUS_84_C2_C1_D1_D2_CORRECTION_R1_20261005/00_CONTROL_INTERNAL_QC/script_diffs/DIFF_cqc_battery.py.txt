@@ -1,0 +1,1177 @@
+--- BASE/cqc_battery.py
++++ NEW/cqc_battery.py
+@@ -1,35 +1,62 @@
+ # cqc_battery.py
+-# RUN: PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005
+-# Fresh production QC for the THREE-P2 correction package.
++# RUN: PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005
++# Fresh production QC for the D1/D2 correction package (Desktop post-audit
++# PE_935_F84_C2_C1_DESKTOP_POST_AUDIT_20261005, verdict REQUIRE_CORRECTIONS,
++# findings D1/P2 + D2/P2; the THREE-P2 repairs P2-1/P2-2/P2-3/H1/H2 are
++# PRESERVED and reproduced as controls).
+ #
+-# THIS RUN'S REPAIRS vs the C2 battery (Desktop post-audit
+-# PE_935_F84_C2_DESKTOP_POST_AUDIT_20261004):
+-#   P2-3 (gate_q2): the C2 Q2 re-derived only opcode_bytes,
+-#      instruction_length, boundary_status/source + limited JSON<->CSV
+-#      fields and did NOT validate the JSON pins' effective_address object
+-#      (Desktop mutants M5 base_register ESI->EAX and M6 fake
+-#      address_provenance_status passed ALL gates). THIS Q2 independently
+-#      re-derives, for every JSON pin where a field is semantically
+-#      applicable: effective_address present/memop state; operand_width;
+-#      segment; base_register; index_register; scale; raw_displacement;
+-#      signed_displacement; effective_displacement (displacement width is
+-#      enforced through raw_displacement's NONE-vs-value derivation, and
+-#      the derived width is recorded); address_provenance_status (EXE
+-#      decode + independently derived boundary/function context - the
+-#      entry this-flow; the battery re-derives from the pinned EXE, NOT by
+-#      comparing JSON to another field copied from the same generator).
+-#      Missing field where semantically required = FAIL; mismatch = FAIL.
+-#      Secondary consistency: the JSON EA fields are cross-checked against
+-#      the CSV row's separately-serialized measured_operand representation.
+-#      The C2 HANDOFF wording "gate Q2 re-derives every C1-JSON pin field"
+-#      and the C2 commit-message "re-derived field-by-field" are SUPERSEDED
+-#      (see SUPERSESSION_LEDGER.md): the corrected Q2 covers EXACTLY the
+-#      fields listed in Q2_EFFECTIVE_ADDRESS_COVERAGE below.
+-#   Mutations M5/M6 (P2-3) + the inherited M1/M2/M3/M4 + AF3/Q8 (compound,
+-#   all changed fields listed) = 7 causal mutations, each routed through
+-#   the SAME production gate on a TEMPORARY COPY of the ACTUAL final
+-#   artifact (temp tree OUTSIDE the repo, deleted after; never persisted).
+-#   NEW-F/NEW-G boundary fixtures (P2-1/P2-2 falsifiers, incl. the
+-#   order-permutation proofs) + REAL-REFUTE (the two real driver pins)
+-#   added to the boundary test matrix.
++# THIS RUN'S REPAIRS vs the THREE-P2 battery:
++#   D1 (decoder, in x86dec.py - this battery MEASURES it): 0F 73 /4 accepted
++#      by the shared {2,4,6} reg whitelist in both MMX and SSE2 forms.
++#      The corrected decoder uses PER-OPCODE legal-reg tables (0F 71/72:
++#      {2,4,6}/{2,4,6}; 0F 73: {2,6}/{2,3,6,7}). This battery adds the two
++#      D1 negative unit vectors (`0F 73 E0 02`, `66 0F 73 E0 02` -> REJECT),
++#      the six contract legal controls, and the MANDATORY downstream
++#      falsifier `0F 73 E0 02 E8 05 00 00 00 C3` with a synthetic strong
++#      entry at the first byte: the invalid initial instruction must STOP
++#      justified sequential decoding, so the E8 at +4 must NOT receive
++#      CALL_VALIDATION=PASS or a promoted target. The THREE-P2 defect is
++#      reproduced BEFORE/AFTER through the committed BASE modules
++#      (READ-ONLY import; measured in 01_RAW/D1_BOUNDARY_FALSIFIER.json).
++#   D2 (gate_q2, HERE): the THREE-P2 Q2 iterated only the JSON's supplied
++#      pins, decided EA applicability solely from the mutable JSON field
++#      `pin.kind == 'mem'`, and trusted `pin_totals.fail_count == 0` - so a
++#      relabelled kind, a removed EA object, a DELETED load-bearing pin or a
++#      DUPLICATED/EXTRA claim all still passed. CORRECTED Q2 binds the
++#      expected pin universe to the BASE-pinned
++#      03_SCRIPTS/c1_pin_ledger.py::PINS roster, re-extracted IN-RUN from
++#      the BASE Git blob (ast literal evaluation - no historical code is
++#      executed; see pin_roster.py), and requires:
++#        * JSON claim multiset == CSV claim multiset == expected roster
++#          multiset (each expected claim EXACTLY ONCE; missing/extra/
++#          duplicate = FAIL - bidirectional, not count-only);
++#        * claim_id + instruction_va + declared kind(role) agreement with
++#          the roster per claim (role mapping explicit against PINS, never
++#          derived from the checked artifacts);
++#        * declared totals agreement: pin_totals.total_pins == roster
++#          cardinality == measured JSON/CSV row counts; status_tally ==
++#          the CSV-recomputed tally; fail_count == 0 (carried);
++#        * EA applicability derived from the EXPECTED role (kind mutation
++#          FAILS the role check AND cannot disable EA validation);
++#        * the persisted EXPECTED_PIN_REGISTRY.json must equal the
++#          in-run git-derived roster (registry tamper = FAIL);
++#        * the EXE-derived EA is additionally cross-checked against the
++#          roster's pinned expect_ea spec (base/index/scale/displacement).
++#      The carried effective_address EXE re-derivation (46 mem pins,
++#      M5/M6 detection, missing-EA rejection) is preserved verbatim.
++#   D2 (gate_q3, HERE): the CSV operand_kind is no longer trusted as a
++#      role oracle - Q3 verifies every row's operand_kind against the
++#      EXE-derived kind (generator convention: imm overrides the mem class
++#      for mem+imm forms) and checks row membership/VA against the roster.
++#   Mutations: the inherited M1/M2/M3/M4 + AF3/Q8 (compound) + M5/M6 are
++#   RETAINED (7 causal controls, each UNMUTATED=PASS -> MUTATED=FAIL
++#   through the SAME production gate) + 8 NEW D2 completeness controls
++#   (D2-M1..D2-M8: the two mandatory compound kind+EA removals, the two
++#   whole-pin deletions, the JSON duplicate, the JSON extra, the CSV extra
++#   and the synchronized JSON+CSV omission with adjusted declared totals -
++#   all must flip clean Q2 PASS -> mutated Q2 FAIL with no substitute
++#   failure; exact semantic deltas, before/after artifact hashes and
++#   per-mutation input-hash censuses persisted).
++#   NEW-F/NEW-G/REAL-REFUTE boundary fixtures (incl. the order-permutation
++#   proofs and the cached+uncached crosscheck) are REPRODUCED unchanged.
+ #
+@@ -73,2 +100,3 @@
+ import hashlib
++import importlib.util
+ import json
+@@ -81,2 +109,3 @@
+ import tempfile
++from collections import Counter
+ 
+@@ -90,7 +119,8 @@
+ import c2_census as c2mod  # noqa: E402  (family table import for P3-B)
++import pin_roster  # noqa: E402  (D2: the expected pin universe, BASE-pinned)
+ 
+ RUN = (r"D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits"
+-       r"\PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005")
++       r"\PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005")
+ SOURCE_PACKAGE = (r"D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits"
+-                  r"\PE_935_FACTORY_PLUS_84_ASSIGNMENT_OBJECT_C2_AF1_AF3_CORRECTION_R1_20261004")
++                  r"\PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005")
+ C1_PACKAGE = (r"D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits"
+@@ -98,3 +128,5 @@
+ REPO = r"D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean"
+-BASE_SHA = "c4cb60f719b5bbab0b7549b1e9cc36d18430cdcd"
++BASE_SHA = "9d31a82b6589f46e9ca6c75c6e323b433c1ebf92"
++EXPECTED_PIN_REGISTRY = os.path.join(RUN, "EXPECTED_PIN_REGISTRY.json")
++BASE_COMMIT_MESSAGE_VERBATIM = os.path.join(RUN, "01_RAW", "BASE_COMMIT_MESSAGE_VERBATIM.txt")
+ 
+@@ -105,9 +137,32 @@
+ Q2_EFFECTIVE_ADDRESS_COVERAGE = (
+-    "effective_address present/memop state (required iff kind=mem AND the "
+-    "EXE decode at the pin VA succeeds with memop=True; must be ABSENT "
+-    "otherwise); operand_width; segment; base_register; index_register; "
+-    "scale; raw_displacement (displacement width enforced through the "
+-    "NONE-vs-value derivation; derived width recorded per pin); "
+-    "signed_displacement; effective_displacement; address_provenance_status "
+-    "(EXE decode + boundary/function context: entry this-flow)"
++    "effective_address present/memop state (D2: required iff the EXPECTED "
++    "ROSTER role is mem AND the EXE decode at the pin VA succeeds with "
++    "memop=True; must be ABSENT otherwise - applicability is driven by the "
++    "pinned expected role, never by the mutable JSON kind); operand_width; "
++    "segment; base_register; index_register; scale; raw_displacement "
++    "(displacement width enforced through the NONE-vs-value derivation; "
++    "derived width recorded per pin); signed_displacement; "
++    "effective_displacement; address_provenance_status (EXE decode + "
++    "boundary/function context: entry this-flow); PLUS the D2 spec "
++    "cross-check of the EXE-derived EA against the roster's pinned "
++    "expect_ea (base/index/scale/displacement)"
++)
++
++# D2: the pin-universe coverage of the corrected gate Q2 (the Desktop D2
++# defect: the THREE-P2 Q2 iterated only the JSON's supplied pins, decided
++# EA applicability from the mutable JSON kind, and trusted the declared
++# fail_count - a removed load-bearing pin, a relabelled kind or a
++# duplicated claim all passed).
++Q2_PIN_UNIVERSE_COVERAGE = (
++    "expected roster = BASE-pinned 03_SCRIPTS/c1_pin_ledger.py::PINS "
++    "(Git blob of BASE_SHA, ast literal extraction - no historical code "
++    "executed; re-derived IN-RUN by pin_roster.expected_from_git(), never "
++    "taken from the checked artifacts); JSON claim multiset == CSV claim "
++    "multiset == expected roster multiset (each expected claim EXACTLY "
++    "ONCE; missing/extra/duplicate = FAIL, bidirectional); claim_id + "
++    "instruction_va + declared kind(role) agreement per claim; declared "
++    "totals agreement (total_pins == roster cardinality == measured JSON "
++    "count == measured CSV count; status_tally == CSV-recomputed tally; "
++    "fail_count == 0); EA applicability from the EXPECTED role; "
++    "EXPECTED_PIN_REGISTRY.json == git-derived roster (registry tamper = FAIL)"
+ )
+@@ -210,12 +265,16 @@
+ 
+-# ============ Q2 [M1 + M5 + M6]: C1 pin JSON integrity vs fresh EXE derivation ============
++# ============ Q2 [M1 + M5 + M6 + D2]: pin JSON integrity + D2 pin universe ============
+ def gate_q2(pkg, ctx):
+-    """P2-3 CORRECTED Q2. Independently re-derives from the pinned EXE
+-    (production decoder + boundary/function context - the established Q2/Q3
+-    pattern, NOT a JSON-to-JSON comparison): opcode_bytes, instruction_length,
+-    boundary_status, boundary_source AND - for every pin where semantically
+-    applicable - the effective_address object (base/index/scale/displacement
+-    family/segment/provenance; see Q2_EFFECTIVE_ADDRESS_COVERAGE). Missing
+-    field where required = FAIL; mismatch = FAIL. Secondary consistency:
+-    JSON EA fields vs the CSV row's separately-serialized measured_operand."""
++    """D2-CORRECTED Q2. Binds the expected pin universe to the BASE-pinned
++    PINS roster (re-derived IN-RUN from the BASE Git blob by pin_roster - no
++    historical code executed) BEFORE any per-pin derivation: missing/extra/
++    duplicate claims, address/role disagreements, declared-total
++    disagreements and EXPECTED_PIN_REGISTRY tamper all FAIL independently,
++    and the carried EXE re-derivation (opcode_bytes, instruction_length,
++    boundary_status/source, effective_address for every EXPECTED mem-role
++    pin - the established Q2/Q3 pattern, NOT a JSON-to-JSON comparison) is
++    preserved. EA applicability is decided by the EXPECTED role, so a
++    mutated JSON kind can neither pass the role check nor disable EA
++    validation. Secondary consistency: JSON EA fields vs the CSV row's
++    separately-serialized measured_operand."""
+     q2 = {"json_pins": len(pkg["c1"]["pins"]), "mismatches": [],
+@@ -223,3 +282,114 @@
+           "effective_address_coverage": Q2_EFFECTIVE_ADDRESS_COVERAGE,
+-          "ea_pins_checked": 0, "derived_ea_pins": 0}
++          "pin_universe_coverage": Q2_PIN_UNIVERSE_COVERAGE,
++          "ea_pins_checked": 0, "derived_ea_pins": 0,
++          "d2_pin_universe": {}}
++    # ---- D2: the expected roster, re-derived in-run from the BASE Git blob ----
++    try:
++        roster = pin_roster.expected_from_git()
++    except Exception as e:  # fail-closed: no roster -> every claim unverifiable
++        q2["mismatches"].append({"claim": "<ROSTER>", "field": "expected_roster",
++                                 "json": "UNAVAILABLE", "derived": str(e)})
++        roster = {}
++    q2["d2_roster_source"] = pin_roster.roster_identity() if roster else None
++    q2["d2_pin_universe"]["expected_claims"] = len(roster)
++    # the persisted EXPECTED_PIN_REGISTRY.json must EQUAL the git-derived roster
++    if os.path.exists(EXPECTED_PIN_REGISTRY):
++        try:
++            with open(EXPECTED_PIN_REGISTRY, encoding="utf-8") as f:
++                reg_on_disk = json.load(f)
++        except Exception as e:
++            reg_on_disk = None
++            q2["mismatches"].append({"claim": "<REGISTRY>",
++                                     "field": "EXPECTED_PIN_REGISTRY.json",
++                                     "json": "unreadable", "derived": str(e)})
++        if reg_on_disk is not None:
++            reg_pins = {p.get("claim_id"): p for p in reg_on_disk.get("pins", [])}
++            if set(reg_pins) != set(roster):
++                q2["mismatches"].append({"claim": "<REGISTRY>",
++                                        "field": "registry claim set",
++                                        "json": sorted(set(reg_pins) ^ set(roster))[:8],
++                                        "derived": "registry == git-derived roster"})
++            else:
++                for rcid, rex in roster.items():
++                    rp = reg_pins[rcid]
++                    rv = rp.get("va")
++                    rv = int(rv, 16) if isinstance(rv, str) else rv
++                    if rv != rex["va"] or rp.get("role") != rex["role"]:
++                        q2["mismatches"].append({"claim": rcid,
++                                                "field": "registry va/role",
++                                                "json": (rp.get("va"), rp.get("role")),
++                                                "derived": ("0x%08X" % rex["va"], rex["role"])})
++    else:
++        q2["mismatches"].append({"claim": "<REGISTRY>",
++                                 "field": "EXPECTED_PIN_REGISTRY.json",
++                                 "json": "MISSING",
++                                 "derived": "required (D2 roster artifact)"})
++    # ---- D2: bidirectional claim multiset checks (JSON + CSV) ----
++    json_ids = [p.get("claim_id") for p in pkg["c1"]["pins"]]
++    json_counter = Counter(json_ids)
++    dup_json = sorted([c for c, n in json_counter.items() if n > 1])
++    missing_json = sorted(set(roster) - set(json_counter))
++    extra_json = sorted(set(json_counter) - set(roster))
++    csv_ids = [r.get("claim_id") for r in pkg["pins"]]
++    csv_counter = Counter(csv_ids)
++    dup_csv = sorted([c for c, n in csv_counter.items() if n > 1])
++    missing_csv = sorted(set(roster) - set(csv_counter))
++    extra_csv = sorted(set(csv_counter) - set(roster))
++    uni = q2["d2_pin_universe"]
++    uni.update({"json_claim_count": len(json_ids),
++                "csv_claim_count": len(csv_ids),
++                "json_duplicates": dup_json, "json_missing": missing_json,
++                "json_extra": extra_json, "csv_duplicates": dup_csv,
++                "csv_missing": missing_csv, "csv_extra": extra_csv})
++    if dup_json:
++        q2["mismatches"].append({"claim": dup_json[0],
++                                 "field": "pin claim multiplicity (JSON)",
++                                 "json": "DUPLICATE claim_id",
++                                 "derived": "each expected claim EXACTLY ONCE"})
++    if missing_json:
++        q2["mismatches"].append({"claim": missing_json[0],
++                                 "field": "pin presence (JSON)",
++                                 "json": "MISSING",
++                                 "derived": "expected roster requires this claim"})
++    if extra_json:
++        q2["mismatches"].append({"claim": extra_json[0],
++                                 "field": "pin presence (JSON)",
++                                 "json": "EXTRA (not in the expected roster)",
++                                 "derived": "no claim outside the roster"})
++    if dup_csv:
++        q2["mismatches"].append({"claim": dup_csv[0],
++                                 "field": "pin claim multiplicity (CSV)",
++                                 "json": "DUPLICATE claim_id",
++                                 "derived": "each expected claim EXACTLY ONCE"})
++    if missing_csv:
++        q2["mismatches"].append({"claim": missing_csv[0],
++                                 "field": "pin presence (CSV)",
++                                 "json": "MISSING",
++                                 "derived": "CSV claim multiset == expected roster"})
++    if extra_csv:
++        q2["mismatches"].append({"claim": extra_csv[0],
++                                 "field": "pin presence (CSV)",
++                                 "json": "EXTRA (not in the expected roster)",
++                                 "derived": "CSV claim multiset == expected roster"})
++    # ---- D2: declared totals agreement (measured, not trusted) ----
++    declared = pkg["c1"].get("pin_totals") or {}
++    uni["declared_total_pins"] = declared.get("total_pins")
++    uni["declared_fail_count"] = declared.get("fail_count")
++    if declared.get("total_pins") != len(roster):
++        q2["mismatches"].append({"claim": "<TOTALS>",
++                                 "field": "pin_totals.total_pins",
++                                 "json": declared.get("total_pins"),
++                                 "derived": len(roster)})
++    if declared.get("fail_count") != 0:
++        q2["mismatches"].append({"claim": "<TOTALS>",
++                                 "field": "pin_totals.fail_count",
++                                 "json": declared.get("fail_count"), "derived": 0})
++    measured_tally = Counter(r["status"] for r in pkg["pins"])
++    declared_tally = declared.get("status_tally") or {}
++    uni["measured_csv_status_tally"] = dict(measured_tally)
++    if {k: int(v) for k, v in declared_tally.items()} != dict(measured_tally):
++        q2["mismatches"].append({"claim": "<TOTALS>",
++                                 "field": "pin_totals.status_tally",
++                                 "json": declared_tally,
++                                 "derived": dict(measured_tally)})
+     csv_by_id = {p["claim_id"]: p for p in pkg["pins"]}
+@@ -227,3 +397,15 @@
+         cid = pin["claim_id"]
+-        va = int(pin["instruction_va"], 16)
++        expected = roster.get(cid)
++        if expected is None:
++            continue  # an extra claim: already recorded by the multiset check
++        exp_role = expected["role"]
++        va = expected["va"]
++        if int(pin.get("instruction_va", "0x0"), 16) != va:
++            q2["mismatches"].append({"claim": cid, "field": "instruction_va",
++                                     "json": pin.get("instruction_va"),
++                                     "derived": "0x%08X" % va})
++        if pin.get("kind") != exp_role:
++            q2["mismatches"].append({"claim": cid,
++                                     "field": "kind (role vs EXPECTED roster)",
++                                     "json": pin.get("kind"), "derived": exp_role})
+         off = va - ctx.tva
+@@ -247,4 +429,7 @@
+                                      "derived": bsrc})
+-        # ---- P2-3: effective_address re-derivation (M5/M6 detection) ----
+-        ea_required = (pin.get("kind") == "mem")
++        # ---- D2/P2-3: effective_address re-derivation (M5/M6 detection);
++        # applicability is decided by the EXPECTED roster role (never by the
++        # mutable JSON kind: a kind mutation FAILS the role check above AND
++        # cannot disable the EA validation here) ----
++        ea_required = (exp_role == "mem")
+         if ea_required:
+@@ -281,2 +466,24 @@
+                     ins, bstatus, bsrc, bstart)
++                # D2 spec cross-check: the EXE-derived EA must ALSO agree
++                # with the roster's pinned expect_ea spec (base/index/scale/
++                # displacement) - the expected roster binds the artifacts,
++                # the EXE binds the physics; a disagreement of EITHER side
++                # is a FAIL, never silently resolved
++                spec = expected.get("expect_ea")
++                if spec is not None:
++                    eb, ei, esc, ed = spec
++                    if eb is None and ei is None:
++                        spec_ok = (ins.ea_base is None and ins.ea_index is None
++                                   and ins.disp_raw == ed)
++                    else:
++                        spec_ok = (derived_ea["base_register"] == eb
++                                   and derived_ea["index_register"] == ei
++                                   and ins.ea_scale == esc
++                                   and ins.disp_signed == ed)
++                    if not spec_ok:
++                        q2["mismatches"].append(
++                            {"claim": cid,
++                             "field": "effective_address vs roster expect_ea spec",
++                             "json": "EXE-derived EA %s" % derived_ea,
++                             "derived": "pinned spec %s" % (spec,)})
+                 for fld, dval in derived_ea.items():
+@@ -291,3 +498,4 @@
+         else:
+-            # not semantically applicable: the pin must NOT carry an EA object
++            # not semantically applicable (EXPECTED role != mem): the pin must
++            # NOT carry an EA object
+             if "effective_address" in pin:
+@@ -295,4 +503,5 @@
+                                          "json": "present",
+-                                         "derived": "NOT APPLICABLE (kind=%s, no EA claim)"
+-                                                   % pin.get("kind")})
++                                         "derived": "NOT APPLICABLE (expected role=%s "
++                                                    "per the roster; JSON kind=%s)"
++                                                    % (exp_role, pin.get("kind"))})
+         # JSON <-> CSV consistency for the same claim
+@@ -332,3 +541,4 @@
+     q2["ok"] = (not q2["mismatches"] and not q2["json_csv_inconsistencies"]
+-                and pkg["c1"]["pin_totals"]["fail_count"] == 0)
++                and declared.get("fail_count") == 0
++                and len(json_ids) == len(roster) and len(csv_ids) == len(roster))
+     return ("PASS" if q2["ok"] else "FAIL"), q2
+@@ -343,2 +553,27 @@
+                                  "csv": got, "derived": exp})
++
++    # D2: the CSV operand_kind is no longer a trusted role oracle - every
++    # row's kind is re-derived from the EXE decode (generator convention:
++    # an immediate OVERRIDES the mem class for mem+imm forms such as
++    # C7/C6/83 stores; a mem pin with disp serializes mem32/mem8/mem0;
++    # call rows are rel32; declassified rows carry no operand claim) and
++    # cross-checked against the EXPECTED roster role.
++    q3_roster = pin_roster.expected_from_git()
++
++    def derived_operand_kind(ins, role):
++        if role == "call":
++            return "rel32"
++        if role == "declassified":
++            return "none"
++        if ins is None:
++            return None
++        if ins.imm_width:
++            return "imm%d" % (ins.imm_width * 8)
++        if ins.memop:
++            if ins.disp_width == 4:
++                return "mem32"
++            if ins.disp_width == 1:
++                return "mem8"
++            return "mem0"
++        return "none"
+ 
+@@ -349,2 +584,14 @@
+         ins = x86dec.decode(ctx.text, off) if 0 <= off < len(ctx.text) else None
++        # ---- D2: roster membership + VA agreement + EXE-derived kind ----
++        exp3 = q3_roster.get(cid)
++        if exp3 is None:
++            mm(cid, "claim_id (roster membership)", cid,
++               "no CSV claim outside the expected roster")
++        else:
++            if va != exp3["va"]:
++                mm(cid, "instruction_va (roster agreement)",
++                   p["instruction_va"], "0x%08X" % exp3["va"])
++            dk = derived_operand_kind(ins, exp3["role"])
++            if dk is not None and p["operand_kind"] != dk:
++                mm(cid, "operand_kind (EXE-derived)", p["operand_kind"], dk)
+         derived_bytes = ctx.text[off:off + (ins.length if ins else 1)].hex(" ").upper()
+@@ -499,2 +746,14 @@
+     ("F2 0F 71 D0 02 90", "REJECT", "H2 negative: F2-prefixed imm-shift group - no legal form"),
++    # ---- D1 (0F 73 /4 per-opcode tables; oracle-checked vs GNU objdump
++    # Binutils 2.44: the two negative forms return (bad); the THREE-P2
++    # decoder ACCEPTED both via the shared {2,4,6} whitelist - Desktop
++    # post-audit PE_935_F84_C2_C1_DESKTOP_POST_AUDIT_20261005 finding D1) ----
++    ("0F 71 E0 02 90", 4, "D1 legal control: 0F 71 /4 PSRAW mm0,imm8 (mod=3; reg 4 STAYS legal for 0F 71)"),
++    ("0F 72 E0 02 90", 4, "D1 legal control: 0F 72 /4 PSRAD mm0,imm8 (mod=3; reg 4 STAYS legal for 0F 72)"),
++    ("0F 73 E0 02 90", "REJECT", "D1 NEGATIVE: 0F 73 /4 WITHOUT 66 is reserved (no PSRADQ exists; only /2,/6 legal) - the THREE-P2 decoder decoded it (length 4)"),
++    ("66 0F 73 E0 02 90", "REJECT", "D1 NEGATIVE: 66 0F 73 /4 WITH 66 is reserved (SSE2 73 forms are /2,/3,/6,/7 only) - the THREE-P2 SSE2 branch retained /4"),
++    ("0F 73 D0 02 90", 4, "D1 legal control: 0F 73 /2 PSRLQ mm0,imm8 (register form stays legal)"),
++    ("0F 73 F0 02 90", 4, "D1 legal control: 0F 73 /6 PSLLQ mm0,imm8 (register form stays legal)"),
++    ("66 0F 73 D8 02 90", 5, "D1 legal control: 66 0F 73 /3 PSRLDQ xmm0,imm8 (mod=3 legal - NOT misreported as reserved)"),
++    ("66 0F 73 F8 02 90", 5, "D1 legal control: 66 0F 73 /7 PSLLDQ (reg 7 selects the operation, rm=0 -> xmm0 destination; mod=3 legal - NOT misreported as reserved)"),
+ ]
+@@ -603,2 +862,48 @@
+ 
++# ---- D1: READ-ONLY BASE (THREE-P2) module pair for the before/after
++# measurement. The BASE modules are imported as data-instruments from their
++# committed package path (nothing under the historical package is modified;
++# sys.dont_write_bytecode is set so no __pycache__ is created there); the
++# file identities are recorded in the falsifier record.
++def _sha256_file(path):
++    h = hashlib.sha256()
++    with open(path, "rb") as f:
++        for blk in iter(lambda: f.read(1 << 20), b""):
++            h.update(blk)
++    return h.hexdigest().upper()
++
++
++def _load_base_module_pair():
++    """Load the committed BASE (THREE-P2) x86dec+pebnd pair under isolated
++    module names so its pebnd binds to the BASE x86dec (the defect carrier).
++    The corrected modules imported by this battery are untouched."""
++    base_dir = os.path.join(SOURCE_PACKAGE, "03_SCRIPTS")
++    x_path = os.path.join(base_dir, "x86dec.py")
++    b_path = os.path.join(base_dir, "pebnd.py")
++    saved = sys.modules.get("x86dec")
++    try:
++        spec_x = importlib.util.spec_from_file_location("x86dec", x_path)
++        mod_x = importlib.util.module_from_spec(spec_x)
++        sys.modules["x86dec"] = mod_x
++        spec_x.loader.exec_module(mod_x)
++        spec_b = importlib.util.spec_from_file_location("pebnd_base", b_path)
++        mod_b = importlib.util.module_from_spec(spec_b)
++        spec_b.loader.exec_module(mod_b)
++        ids = {
++            "base_x86dec_path": x_path,
++            "base_x86dec_sha256": _sha256_file(x_path),
++            "base_pebnd_path": b_path,
++            "base_pebnd_sha256": _sha256_file(b_path),
++            "note": ("READ-ONLY import of the committed BASE modules "
++                     "(no historical file modified; bytecode writes "
++                     "disabled)"),
++        }
++        return mod_b, ids
++    finally:
++        if saved is not None:
++            sys.modules["x86dec"] = saved
++        else:
++            sys.modules.pop("x86dec", None)
++
++
+ # ============ Q5: AF2 boundary counterexamples + discipline sweep ============
+@@ -714,3 +1019,3 @@
+     # Independent oracle (GNU objdump Binutils 2.44, verbatim in
+-    # ORACLE_INDEPENDENT_RECORDS.json): first instruction
++    # 01_RAW/D1_INDEPENDENT_ORACLE_RECORDS.json): first instruction
+     # `66 0f 84 00 00` = je rel16, length 5; then MOV at +5..+10.
+@@ -720,3 +1025,3 @@
+     # bytes; the E8 at +7 is interior -> REFUTED_MID_INSTRUCTION;
+-    # INTERNAL_E8_PROMOTED = NO.
++    # INTERNAL_E8_PROMOTED = NO. (REPRODUCED this run as a carried control.)
+     newg = add_case("NEW_G_66_0F_84_false_E8", "66 0F 84 00 00 B8 00 E8 01 00 00 00 C3", 0, 7,
+@@ -734,3 +1039,3 @@
+                                   "`66 0f 84 00 00  je 0x5` (5 bytes) - raw "
+-                                  "record in 01_RAW/ORACLE_INDEPENDENT_RECORDS.json")
++                                  "record in 01_RAW/D1_INDEPENDENT_ORACLE_RECORDS.json")
+     newg["test_passed"] = (newg["BOUNDARY_STATUS"] == "REFUTED_MID_INSTRUCTION"
+@@ -866,2 +1171,113 @@
+ 
++    # ---- D1 (0F 73 /4 downstream falsifier): the invalid initial
++    # instruction must STOP justified sequential decoding; the E8 at +4
++    # must NOT receive CALL_VALIDATION=PASS or a promoted target ----
++    d1buf = bytes.fromhex("0F 73 E0 02 E8 05 00 00 00 C3")
++    d1entries = {SYN_BASE + 0: "TEST_D1_TRUE_ENTRY"}
++    d1cand = SYN_BASE + 4
++    dst, dsrc, dstart, drefuted = pebnd.boundary_confirm(
++        d1buf, SYN_BASE, d1cand, cache=None, entries=d1entries)
++    dcv = pebnd.validate_direct_call(d1buf, SYN_BASE, d1cand, cache=None,
++                                     entries=d1entries)
++    # BEFORE: the same bytes through the committed BASE (THREE-P2) modules
++    # (READ-ONLY import; the defect is MEASURED, not asserted)
++    base_pebnd, base_ids = _load_base_module_pair()
++    bst, bsrcv, bstartv, brefv = base_pebnd.boundary_confirm(
++        d1buf, SYN_BASE, d1cand, cache=None, entries=d1entries)
++    bcv = base_pebnd.validate_direct_call(d1buf, SYN_BASE, d1cand, cache=None,
++                                          entries=d1entries)
++    # honest scope measurement: do the D1-relevant byte patterns occur in
++    # the pinned EXE .text at all? (synthetic fixtures are NOT evidence of
++    # PCG occurrence; this census measures it; boundary-relevant overlap
++    # with anchor decode streams is checked only when a raw hit exists)
++    d1_text = {"pattern_0F73_mod3_reg4": 0, "pattern_66_0F73_mod3_reg4": 0,
++               "occurrence_in_anchor_decode_streams": "NOT_CHECKED (zero raw "
++               "occurrences)"}
++    n_text = len(ctx.text)
++    for i in range(n_text - 3):
++        if ctx.text[i] == 0x0F and ctx.text[i + 1] == 0x73:
++            m = ctx.text[i + 2]
++            if (m >> 6) == 3 and ((m >> 3) & 7) == 4:
++                d1_text["pattern_0F73_mod3_reg4"] += 1
++        if (ctx.text[i] == 0x66 and i + 3 < n_text
++                and ctx.text[i + 1] == 0x0F and ctx.text[i + 2] == 0x73):
++            m = ctx.text[i + 3]
++            if (m >> 6) == 3 and ((m >> 3) & 7) == 4:
++                d1_text["pattern_66_0F73_mod3_reg4"] += 1
++    if d1_text["pattern_0F73_mod3_reg4"] or d1_text["pattern_66_0F73_mod3_reg4"]:
++        hits_in_streams = 0
++        for anchor in pebnd.KNOWN_ENTRIES:
++            for (a, b) in ctx.cache.extents(anchor):
++                for i in range(a, b):
++                    if i + 3 < n_text:
++                        m = ctx.text[i + 2] if ctx.text[i] == 0x0F and ctx.text[i + 1] == 0x73 else None
++                        if m is not None and (m >> 6) == 3 and ((m >> 3) & 7) == 4:
++                            hits_in_streams += 1
++                        if ctx.text[i] == 0x66 and ctx.text[i + 1] == 0x0F and ctx.text[i + 2] == 0x73:
++                            m2 = ctx.text[i + 3]
++                            if (m2 >> 6) == 3 and ((m2 >> 3) & 7) == 4:
++                                hits_in_streams += 1
++        d1_text["occurrence_in_anchor_decode_streams"] = hits_in_streams
++    d1_rec = {
++        "CASE_ID": "D1_0F73_4_DOWNSTREAM_FALSIFIER",
++        "BYTES": "0F 73 E0 02 E8 05 00 00 00 C3",
++        "START_OFFSET": 0,
++        "CANDIDATE_OFFSET": 4,
++        "EXPECTED_DECODE": ("the first instruction 0F 73 E0 02 is an INVALID "
++                            "0F 73 /4 encoding (reserved in both MMX and SSE2 "
++                            "classes; independent oracle GNU objdump returns "
++                            "(bad)) - a justified sequential decode MUST stop "
++                            "at it; there is NO justified instruction "
++                            "continuity through the first opcode to the E8 at "
++                            "+4 (the D1 per-opcode repair makes the decoder "
++                            "REJECT it; the stream aborts at offset 0)"),
++        "ACTUAL_DECODE": ("boundary %s (source=%s) - the sequential decode "
++                          "aborted at the invalid first instruction"
++                          % (dst, dsrc)),
++        "EXPECTED_CALL_PROMOTION": "NO_PROMOTION",
++        "ACTUAL_CALL_PROMOTION": ("PROMOTED->0x%08X" % dcv["target"]) if dcv["target"]
++                                  else ("NONE(%s)" % dcv["call_validation"]),
++        "BOUNDARY_SOURCE": dsrc,
++        "BOUNDARY_STATUS": dst,
++        "C1_DEFECT_NOTE": ("THREE-P2 (BASE) measured outcome, reproduced "
++                           "in-run through the committed BASE modules "
++                           "(READ-ONLY import; identities recorded below): "
++                           "boundary %s (source=%s), CALL_VALIDATION=%s%s - "
++                           "the BASE decoder decoded the invalid 0F 73 /4 "
++                           "form as a 4-byte instruction, the anchor stream "
++                           "advanced onto the E8 at +4 and boundary-"
++                           "certified it with an UNEARNED "
++                           "CALL_VALIDATION=PASS and a promoted target"
++                           % (bst, bsrcv, bcv["call_validation"],
++                              (" target=0x%08X" % bcv["target"]) if bcv["target"] else "")),
++        "CALL_VALIDATION": dcv["call_validation"],
++        "ANCHORS": "0x%08X" % (SYN_BASE + 0),
++        "MEASURED_BOUNDARIES": ["NONE - the sequential decode aborted at the "
++                                "invalid first instruction (offset 0)"],
++        "FAILURE_CONDITION_DETECTED": ("invalid grouped-opcode initial "
++                                       "instruction followed by E8 data: "
++                                       "decoding the invalid form as valid "
++                                       "grants unearned boundary continuity "
++                                       "to the E8 (an unsafe boundary-"
++                                       "certification path for reuse)"),
++        "BASE_REPRODUCTION": {
++            "boundary_status": bst, "boundary_source": bsrcv,
++            "call_validation": bcv["call_validation"],
++            "target": ("0x%08X" % bcv["target"]) if bcv["target"] else None,
++            "base_module_identities": base_ids,
++        },
++        "TEXT_PATTERN_CENSUS": d1_text,
++        "SYNTHETIC_FIXTURE_NOTE": ("synthetic bytes - NOT evidence that this "
++                                   "pattern occurs in PCG; the .text census "
++                                   "field measures actual occurrence; the "
++                                   "census/pin regression is measured "
++                                   "separately in REGRESSION_DIFF.json"),
++        "test_passed": (dst != "CONFIRMED" and dcv["call_validation"] != "PASS"
++                        and dcv["target"] is None
++                        and bst == "CONFIRMED" and bcv["call_validation"] == "PASS"
++                        and bcv["target"] is not None),
++    }
++    ce.append(d1_rec)
++    d1_falsifier_record = d1_rec
++
+     # ---- REAL-REFUTE: the two real driver pins re-derive REFUTED_MID_INSTRUCTION ----
+@@ -990,2 +1406,3 @@
+           "control_nonE8": ctrl_c_ok,
++          "d1_falsifier_record": d1_falsifier_record,
+           "census_confirmed_with_untrusted_source": bad_confirmed,
+@@ -1420,3 +1837,3 @@
+     required = [
+-        "FACTORY_PLUS_84_ASSIGNMENT_CORE = CONFIRMED_STATIC_CONDITIONAL",
++        "FACTORY_PLUS_84_ASSIGNMENT_CORE = PRESERVED_CONFIRMED_STATIC_CONDITIONAL",
+         "ASSIGNMENT_FUNCTION = FUN_0070C680",
+@@ -1452,8 +1869,16 @@
+         "CLEAR_RESET_CONFIRMED_COUNT = 0",
+-        # ---- THIS RUN's correction statuses + phase-1 semantics ----
+-        "P2_1_BOUNDARY_CACHE = CORRECTED_SORTED_EXTENTS",
+-        "P2_2_66_0F8X_NEAR_JCC = CORRECTED_BRANCH_A_REL16",
+-        "P2_3_Q2_EFFECTIVE_ADDRESS = CORRECTED_RE_DERIVED_FROM_EXE",
+-        "H1_REG16_RM7 = CORRECTED_BX_TABLE",
+-        "H2_GROUP_OPCODES = CORRECTED_FAIL_CLOSED_VALIDITY",
++        "ARK_ESTATE_INSTRUCTION_START_VA = 0x0075136E",
++        "ARK_ESTATE_IMMEDIATE_LOCATION_VA = 0x00751370",
++        "PRIOR_CANON_ANCHOR_INPUT",
++        # ---- THIS RUN's D1/D2 correction statuses (measured, not inherited) ----
++        "D1_H2_0F73_4_STATUS = CORRECTED_PER_OPCODE_LEGAL_REG_TABLES",
++        "D1_INVALID_FIXTURES = 2/2_REJECTED",
++        "D1_DOWNSTREAM_CALL_STATUS = CORRECTED_NO_PASS_NO_PROMOTION_NOT_VERIFIED",
++        "D2_PINSET_STATUS = CORRECTED_ROSTER_BOUND_BIDIRECTIONAL_MULTISET",
++        "D2_ROLE_APPLICABILITY_STATUS = CORRECTED_EXPECTED_ROLE_DRIVEN_EA",
++        "P2_1_BOUNDARY_CACHE = PRESERVED_CORRECTED_SORTED_EXTENTS (REPRODUCED_THIS_RUN)",
++        "P2_2_66_0F8X_NEAR_JCC = PRESERVED_CORRECTED_BRANCH_A_REL16 (REPRODUCED_THIS_RUN)",
++        "P2_3_Q2_EFFECTIVE_ADDRESS = PRESERVED_CORRECTED_RE_DERIVED_FROM_EXE (D2_EXTENDS)",
++        "H1_REG16_RM7 = PRESERVED_CORRECTED_BX_TABLE (REPRODUCED_THIS_RUN)",
++        "H2_GROUP_OPCODES = CORRECTED_PER_OPCODE_VALIDITY_TABLES",
+         "Q2_EFFECTIVE_ADDRESS_FIELDS = effective_address present/memop state; "
+@@ -1462,13 +1887,15 @@
+         "address_provenance_status",
+-        "MUTATION_TOTAL = 7",
++        "OLD_MUTATION_TOTAL = 7",
++        "D2_NEW_MUTATION_TOTAL = 8",
++        "MUTATION_TOTAL = 15",
+         "NEW_F_INTERNAL_E8_PROMOTED = NO",
+         "NEW_G_INTERNAL_E8_PROMOTED = NO",
+-        "ARK_ESTATE_INSTRUCTION_START_VA = 0x0075136E",
+-        "ARK_ESTATE_IMMEDIATE_LOCATION_VA = 0x00751370",
+-        "PHASE_1_MANIFEST_GENERATED = NO",
+-        "PHASE_1_ENTRYPOINT_MODIFIED = NO",
+-        "PHASE_1_COMMIT_OR_PUSH_PERFORMED = NO",
+-        "PHASE_1_ONLY_REVIEW_PENDING = YES",
+-        "PRIOR_CANON_ANCHOR_INPUT",
+-        "PE-MASTER INTERNAL PRE-PUBLICATION REVIEW = NOT_PERFORMED_AT_PHASE_1",
++        "D1_INTERNAL_E8_PROMOTED = NO",
++        # ---- phase semantics of THIS executor run (persistence by the
++        # PE-MASTER phase: review verdict, entrypoint row, commit/push) ----
++        "PE_MASTER_REVIEW_PERFORMED_BY_THIS_RUN = NO",
++        "AUDIT_ENTRYPOINT_MODIFIED = NO",
++        "COMMIT_OR_PUSH_PERFORMED = NO",
++        "MANIFEST_PREPARED_FOR_PERSISTENCE_PHASE = YES",
++        "NEXT_EXPERIMENT_AUTHORIZED = NO",
+     ]
+@@ -1482,4 +1909,4 @@
+                          "declared_families\": 10", "declared_families = 10",
+-                         # ---- THIS RUN's superseded wordings (active surfaces
+-                         # must not reuse them; only the ledger quotes them) ----
++                         # ---- superseded wordings carried from C2 (active
++                         # surfaces must not reuse them) ----
+                          "re-derives every C1-JSON pin field",
+@@ -1488,3 +1915,14 @@
+                          "safe for promotion",
+-                         "underclaim-only"]
++                         "underclaim-only",
++                         # ---- THIS RUN's retractions of the THREE-P2 BASE
++                         # claims (D1/D2): they may appear ONLY as ledger
++                         # ORIGINAL_EXCERPT quotes, never as active claims ----
++                         "H2_GROUP_OPCODES = CORRECTED_FAIL_CLOSED_VALIDITY",
++                         "the repair is COMPLETE for the three P2 + H1 + H2",
++                         "No defect was found that could not be fixed",
++                         "for every pin where semantically applicable",
++                         "complete H2 closure",
++                         "complete Q2 JSON closure",
++                         "unrestricted dependent reuse",
++                         "no remaining blocker"]
+     sweep_hits = {}
+@@ -1548,6 +1986,8 @@
+                                                    "excerpt": excerpt[:120]})
+-    # NEW_SUPERSESSION_RECORD_COUNT = the number of S-P2-NN ledger RECORDS
++    # NEW_SUPERSESSION_RECORD_COUNT = the number of S-* ledger RECORDS
+     # (headers), measured independently of the excerpt-line count (records may
+-    # carry multiple ORIGINAL_EXCERPT lines).
+-    record_headers = re.findall(r"^## (S-P2-\d+)", led, re.M)
++    # carry multiple ORIGINAL_EXCERPT lines). THIS run's ledger uses the
++    # S-D1-*/S-D2-*/S-CM-*/S-AUD-* prefixes.
++    record_headers = re.findall(
++        r"^## (S-(?:D1|D2|CM|AUD)-\d+)", led, re.M)
+     record_count = len(set(record_headers))
+@@ -1580,7 +2020,7 @@
+         fail("P3-C verification failed: %s" % p3c)
+-    # commit-message verbatim fidelity: the S-P2 ledger records supersede
+-    # wordings in the IMMUTABLE historical C2 commit message (history is not
+-    # edited); the verbatim copy under 01_RAW must equal the actual git
+-    # object at BASE_SHA (machine-checked here, not trusted)
+-    cm_path = os.path.join(RUN, "01_RAW", "C2_COMMIT_MESSAGE_VERBATIM.txt")
++    # commit-message verbatim fidelity: THIS run's supersession ledger quotes
++    # the IMMUTABLE historical BASE (THREE-P2) commit message at 9d31a82
++    # (history is not edited); the verbatim copy under 01_RAW must equal the
++    # actual git object at BASE_SHA (machine-checked here, not trusted)
++    cm_path = BASE_COMMIT_MESSAGE_VERBATIM
+     try:
+@@ -1596,3 +2036,27 @@
+     if not cm_ok:
+-        fail("C2_COMMIT_MESSAGE_VERBATIM.txt does not match git log -1 BASE_SHA")
++        fail("BASE_COMMIT_MESSAGE_VERBATIM.txt does not match git log -1 BASE_SHA")
++    # required package files (the D1/D2 contract's package list; CQC_FINAL.json
++    # is the battery's own LAST output and is verified by the manifest +
++    # HANDOFF declarations instead)
++    required_files = [
++        "INPUT_IDENTITIES.md", "GENERATION_RECORD.md", "FINAL_REPORT.md",
++        "QC_REPORT.md", "EVIDENCE_INDEX.md", "PE_MASTER_REVIEW.md",
++        "HANDOFF.md", "SUPERSESSION_LEDGER.md", "REGRESSION_DIFF.json",
++        "EXPECTED_PIN_REGISTRY.json", "CORRECTED_PIN_LEDGER.csv",
++        "CORRECTED_FACTORY_PLUS_84_WRITE_CENSUS.csv",
++        "AF3_PROVENANCE_LEDGER.csv",
++        os.path.join("01_RAW", "C1_PIN_EVIDENCE.json"),
++        os.path.join("01_RAW", "C2_CENSUS.json"),
++        os.path.join("01_RAW", "C3_OBJECT_SCOPE.json"),
++        os.path.join("01_RAW", "CQC_MUTATION_RESULTS.json"),
++        os.path.join("01_RAW", "D1_INDEPENDENT_ORACLE_RECORDS.json"),
++        os.path.join("01_RAW", "D1_BOUNDARY_FALSIFIER.json"),
++        os.path.join("01_RAW", "D2_MUTATION_RESULTS.json"),
++        os.path.join("01_RAW", "BASE_COMMIT_MESSAGE_VERBATIM.txt"),
++    ]
++    missing_files = [rf for rf in required_files
++                     if not os.path.exists(os.path.join(RUN, rf))]
++    q14["required_files_missing"] = missing_files
++    if missing_files:
++        fail("required package files missing: %s" % missing_files)
+     # forbidden-input census over the instruments
+@@ -1832,2 +2296,279 @@
+ 
++# ============================ D2 MUTATION HARNESS ============================
++# The D2 completeness controls (Desktop finding D2/P2). Each case mutates an
++# ISOLATED TEMP COPY of the ACTUAL newly generated C1 JSON/CSV (same EXE,
++# same loader, same production gate_q2) and must flip clean Q2 PASS ->
++# mutated Q2 FAIL with NO substitute failure from a manifest, Git baseline
++# or another gate. Exact semantic deltas, before/after artifact hashes and a
++# per-case input-hash census (proving the unrelated inputs are byte-identical
++# to the production package) are persisted in 01_RAW/D2_MUTATION_RESULTS.json.
++D2_MUT_TMP_BASE = r"C:\Users\User\AppData\Local\Temp\opencode\d1d2_mut"
++
++
++def _sha256_file(path):
++    h = hashlib.sha256()
++    with open(path, "rb") as f:
++        for blk in iter(lambda: f.read(1 << 20), b""):
++            h.update(blk)
++    return h.hexdigest().upper()
++
++
++def _pkg_input_census(pkg_root, rels):
++    return {rel: _sha256_file(os.path.join(pkg_root, *rel.split("/")))
++            for rel in rels}
++
++
++def run_d2_mutations(ctx, prod_pkg, gate_results):
++    results = []
++    os.makedirs(D2_MUT_TMP_BASE, exist_ok=True)
++    tmp = tempfile.mkdtemp(prefix="d1d2_pkg_", dir=D2_MUT_TMP_BASE)
++    input_rels = sorted(
++        [name if not sub else (sub + "/" + name)
++         for (sub, name, _k) in MUTATABLE.values()]
++        + ["01_RAW/C2_CENSUS.json"])
++    production_census = _pkg_input_census(RUN, input_rels)
++    try:
++        def build_pkg_root(mid):
++            pkg_root = os.path.join(tmp, mid)
++            os.makedirs(os.path.join(pkg_root, "01_RAW"), exist_ok=True)
++            for key, (sub, name, _k) in MUTATABLE.items():
++                s = os.path.join(RUN, sub, name) if sub else os.path.join(RUN, name)
++                d = os.path.join(pkg_root, sub, name) if sub else os.path.join(pkg_root, name)
++                os.makedirs(os.path.dirname(d), exist_ok=True)
++                shutil.copy2(s, d)
++            for (sub, name) in COPY_ONLY:
++                s = os.path.join(RUN, sub, name) if sub else os.path.join(RUN, name)
++                d = os.path.join(pkg_root, sub, name) if sub else os.path.join(pkg_root, name)
++                os.makedirs(os.path.dirname(d), exist_ok=True)
++                shutil.copy2(s, d)
++            return pkg_root
++
++        def load_j(p):
++            with open(p, encoding="utf-8") as f:
++                return json.load(f)
++
++        def save_j(p, obj):
++            with open(p, "w", newline="\n", encoding="utf-8") as f:
++                json.dump(obj, f, indent=1)
++
++        def load_c(p):
++            with open(p, newline="", encoding="utf-8") as f:
++                rows = list(csv.DictReader(f))
++                fields = list(rows[0].keys()) if rows else []
++            return rows, fields
++
++        def save_c(p, rows, fields):
++            with open(p, "w", newline="", encoding="utf-8") as f:
++                w = csv.DictWriter(f, fieldnames=fields)
++                w.writeheader()
++                for r in rows:
++                    w.writerow(r)
++
++        def apply_d2(mid, pkg_root):
++            jpath = os.path.join(pkg_root, "01_RAW", "C1_PIN_EVIDENCE.json")
++            cpath = os.path.join(pkg_root, "CORRECTED_PIN_LEDGER.csv")
++            if mid == "D2-M1":
++                obj = load_j(jpath)
++                for p in obj["pins"]:
++                    if p["claim_id"] == "THE_STORE_plus_84":
++                        p["kind"] = "code_entry"
++                        del p["effective_address"]
++                save_j(jpath, obj)
++                return ("COMPOUND TWO-FIELD mutation: THE_STORE_plus_84 JSON "
++                        "kind mem->code_entry AND its effective_address "
++                        "object removed (EA validation must remain enforced "
++                        "by the EXPECTED roster role)",
++                        "kind='mem'; effective_address present",
++                        "kind='code_entry'; effective_address ABSENT",
++                        ["01_RAW/C1_PIN_EVIDENCE.json"])
++            if mid == "D2-M2":
++                obj = load_j(jpath)
++                obj["pins"] = [p for p in obj["pins"]
++                               if p["claim_id"] != "THE_STORE_plus_84"]
++                save_j(jpath, obj)
++                return ("whole-pin deletion: the ENTIRE THE_STORE_plus_84 "
++                        "JSON pin removed (CSV and declared totals "
++                        "unchanged - the load-bearing pin must still be "
++                        "missed by Q2)",
++                        "THE_STORE_plus_84 present (133 JSON pins)",
++                        "THE_STORE_plus_84 ABSENT (132 JSON pins)",
++                        ["01_RAW/C1_PIN_EVIDENCE.json"])
++            if mid == "D2-M3":
++                obj = load_j(jpath)
++                for p in obj["pins"]:
++                    if p["claim_id"] == "stream_ctor_buffer_store":
++                        p["kind"] = "code_entry"
++                        del p["effective_address"]
++                save_j(jpath, obj)
++                return ("COMPOUND TWO-FIELD mutation: "
++                        "stream_ctor_buffer_store JSON kind mem->code_entry "
++                        "AND its effective_address object removed (the "
++                        "second load-bearing constructor pin)",
++                        "kind='mem'; effective_address present",
++                        "kind='code_entry'; effective_address ABSENT",
++                        ["01_RAW/C1_PIN_EVIDENCE.json"])
++            if mid == "D2-M4":
++                obj = load_j(jpath)
++                obj["pins"] = [p for p in obj["pins"]
++                               if p["claim_id"] != "stream_ctor_buffer_store"]
++                save_j(jpath, obj)
++                return ("whole-pin deletion: the ENTIRE "
++                        "stream_ctor_buffer_store JSON pin removed (CSV "
++                        "and declared totals unchanged)",
++                        "stream_ctor_buffer_store present (133 JSON pins)",
++                        "stream_ctor_buffer_store ABSENT (132 JSON pins)",
++                        ["01_RAW/C1_PIN_EVIDENCE.json"])
++            if mid == "D2-M5":
++                obj = load_j(jpath)
++                dup = None
++                for p in obj["pins"]:
++                    if p["claim_id"] == "THE_STORE_plus_84":
++                        dup = copy.deepcopy(p)
++                        break
++                obj["pins"].append(dup)
++                save_j(jpath, obj)
++                return ("duplicate-claim protection: an EXACT duplicate of "
++                        "the THE_STORE_plus_84 JSON pin appended (same "
++                        "claim_id twice; multiplicity must FAIL, not just "
++                        "count)",
++                        "THE_STORE_plus_84 occurs once",
++                        "THE_STORE_plus_84 occurs twice (exact duplicate)",
++                        ["01_RAW/C1_PIN_EVIDENCE.json"])
++            if mid == "D2-M6":
++                obj = load_j(jpath)
++                clone = None
++                for p in obj["pins"]:
++                    if p["claim_id"] == "THE_STORE_plus_84":
++                        clone = copy.deepcopy(p)
++                        break
++                clone["claim_id"] = "FAKE_EXTRA_PIN_0xDEADBEEF"
++                obj["pins"].append(clone)
++                save_j(jpath, obj)
++                return ("extra-claim protection (JSON): a foreign pin "
++                        "claim_id NOT in the expected roster appended "
++                        "(cloned from THE_STORE_plus_84)",
++                        "133 JSON claims, all in the roster",
++                        "134 JSON claims incl. FAKE_EXTRA_PIN_0xDEADBEEF",
++                        ["01_RAW/C1_PIN_EVIDENCE.json"])
++            if mid == "D2-M7":
++                rows, fields = load_c(cpath)
++                clone = dict(rows[0])
++                clone["claim_id"] = "FAKE_EXTRA_CSV_ROW_0xDEADBEEF"
++                rows.append(clone)
++                save_c(cpath, rows, fields)
++                return ("extra-claim protection (CSV): a foreign CSV row "
++                        "claim_id NOT in the expected roster appended "
++                        "(JSON unchanged)",
++                        "133 CSV claims, all in the roster",
++                        "134 CSV claims incl. FAKE_EXTRA_CSV_ROW_0xDEADBEEF",
++                        ["CORRECTED_PIN_LEDGER.csv"])
++            if mid == "D2-M8":
++                obj = load_j(jpath)
++                obj["pins"] = [p for p in obj["pins"]
++                               if p["claim_id"] != "THE_STORE_plus_84"]
++                obj["pin_totals"]["total_pins"] = len(obj["pins"])
++                if "VALIDATED" in obj["pin_totals"]["status_tally"]:
++                    obj["pin_totals"]["status_tally"]["VALIDATED"] -= 1
++                save_j(jpath, obj)
++                rows, fields = load_c(cpath)
++                rows = [r for r in rows if r["claim_id"] != "THE_STORE_plus_84"]
++                save_c(cpath, rows, fields)
++                return ("synchronized JSON+CSV omission with INTERNALLY "
++                        "CONSISTENT adjusted declared totals (132/132, "
++                        "tally adjusted): the pin disappears from BOTH "
++                        "artifacts and the declared totals no longer "
++                        "contradict the content - it must still FAIL "
++                        "against the SEPARATELY PINNED expected roster "
++                        "(cardinality is a coverage contract, not a "
++                        "padding target)",
++                        "THE_STORE_plus_84 present in JSON+CSV; declared "
++                        "total 133",
++                        "THE_STORE_plus_84 absent from JSON+CSV; declared "
++                        "total 132 (internally consistent)",
++                        ["01_RAW/C1_PIN_EVIDENCE.json",
++                         "CORRECTED_PIN_LEDGER.csv"])
++            raise SystemExit("unknown D2 mutation %s" % mid)
++
++        D2_META = {
++            "D2-M1": "COMPOUND_KIND_CHANGE_PLUS_EA_REMOVAL (mandatory)",
++            "D2-M2": "ENTIRE_PIN_DELETION_JSON (mandatory)",
++            "D2-M3": "COMPOUND_KIND_CHANGE_PLUS_EA_REMOVAL (mandatory)",
++            "D2-M4": "ENTIRE_PIN_DELETION_JSON (mandatory)",
++            "D2-M5": "DUPLICATE_CLAIM_PROTECTION",
++            "D2-M6": "EXTRA_CLAIM_PROTECTION_JSON",
++            "D2-M7": "EXTRA_CLAIM_PROTECTION_CSV",
++            "D2-M8": "SYNCHRONIZED_JSON_CSV_OMISSION",
++        }
++        for mid in ("D2-M1", "D2-M2", "D2-M3", "D2-M4",
++                    "D2-M5", "D2-M6", "D2-M7", "D2-M8"):
++            pkg_root = build_pkg_root(mid)
++            delta, before, after, mutated_rels = apply_d2(mid, pkg_root)
++            temp_census = _pkg_input_census(pkg_root, input_rels)
++            artifact_hashes = {}
++            for rel in mutated_rels:
++                artifact_hashes[rel] = {
++                    "clean_production_sha256": production_census.get(rel),
++                    "mutated_temp_sha256": temp_census.get(rel),
++                    "changed": production_census.get(rel) != temp_census.get(rel)}
++            census_check = {rel: {"production_sha256": production_census.get(rel),
++                                  "temp_sha256": temp_census.get(rel),
++                                  "byte_identical_to_production":
++                                      production_census.get(rel) == temp_census.get(rel)}
++                            for rel in input_rels}
++            mut_pkg = load_pkg(pkg_root)
++            st, det = gate_q2(mut_pkg, ctx)
++            unmut_status = gate_results.get("Q2")
++            failing = []
++            for key in ("mismatches", "json_csv_inconsistencies"):
++                for m in (det.get(key) or []):
++                    failing.append(m if isinstance(m, dict) else {"why": m})
++            results.append({
++                "MUTATION_ID": mid,
++                "MUTATION_CLASS": D2_META[mid],
++                "MUTATED_ARTIFACTS": mutated_rels,
++                "SEMANTIC_DELTA": delta,
++                "BEFORE_VALUE": before,
++                "AFTER_VALUE": after,
++                "ARTIFACT_HASHES": artifact_hashes,
++                "INPUT_HASH_CENSUS": census_check,
++                "INPUT_CENSUS_SUMMARY": {
++                    "inputs_total": len(input_rels),
++                    "inputs_byte_identical": sum(
++                        1 for c in census_check.values()
++                        if c["byte_identical_to_production"]),
++                    "inputs_changed": [rel for rel, c in census_check.items()
++                                       if not c["byte_identical_to_production"]]},
++                "FAILING_PREDICATES": failing,
++                "PRODUCTION_GATE_ID": "Q2",
++                "UNMUTATED_RESULT": unmut_status,
++                "MUTATED_RESULT": st,
++                "EXPECTED_CAUSALITY": "UNMUTATED=PASS -> MUTATED=FAIL",
++                "ACTUAL_CAUSALITY": ("CAUSAL_PASS" if (unmut_status == "PASS"
++                                                      and st == "FAIL")
++                                     else "NOT_CAUSAL"),
++                "SUBSTITUTE_FAILURE_CHECK": ("the failure is the production "
++                                            "gate_q2's own predicate list "
++                                            "above (pin-universe/role/EA "
++                                            "checks against the pinned EXE "
++                                            "and roster); no manifest, no "
++                                            "Git baseline, no other gate "
++                                            "participates in this check"),
++                "IDENTITY_PRESERVED_BETWEEN_EXECUTIONS": (
++                    "EXE identity: pinned %s / %d bytes re-hashed by the "
++                    "loader at both executions; expected roster: re-derived "
++                    "in-run from the SAME BASE Git blob; unrelated inputs: "
++                    "byte-identical to the production package per the "
++                    "INPUT_HASH_CENSUS; gate implementation: the SAME "
++                    "gate_q2 function object executed for both results"
++                    % (pebnd.PINNED_EXE_SHA256[:12], pebnd.PINNED_EXE_SIZE)),
++                "TEMP_TREE": pkg_root,
++            })
++    finally:
++        # delete ONLY this run's scratch (verified under the task-specific
++        # D2_MUT_TMP_BASE; never anything inside the repo)
++        if os.path.abspath(tmp).startswith(os.path.abspath(D2_MUT_TMP_BASE)):
++            shutil.rmtree(tmp, ignore_errors=True)
++    return results
++
++
+ # ============================ MAIN ============================
+@@ -1840,2 +2581,4 @@
+     ap.add_argument("--out-mut", default=os.path.join(RUN, "01_RAW", "CQC_MUTATION_RESULTS.json"))
++    ap.add_argument("--out-d2mut", default=os.path.join(RUN, "01_RAW", "D2_MUTATION_RESULTS.json"))
++    ap.add_argument("--out-d1-falsifier", default=os.path.join(RUN, "01_RAW", "D1_BOUNDARY_FALSIFIER.json"))
+     ap.add_argument("--out-final", default=os.path.join(RUN, "01_RAW", "CQC_FINAL.json"))
+@@ -1866,24 +2609,67 @@
+     mut_results = run_mutations(ctx, pkg, gate_results)
++    d2_mut_results = run_d2_mutations(ctx, pkg, gate_results)
+     with open(args.out_mut, "w", newline="\n") as f:
+-        json.dump({"run": "PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005",
+-                    "mutation_discipline": ("M1-M4 + AF3/Q8 (compound, all changed "
+-                                           "fields listed) + M5/M6 (P2-3): the SAME "
+-                                           "production gate must show UNMUTATED=PASS "
+-                                           "and MUTATED=FAIL; the mutation target is a "
+-                                           "TEMPORARY COPY of the ACTUAL final artifact "
+-                                           "(never a fixture, never the canonical "
+-                                           "committed artifact; temp tree OUTSIDE the "
+-                                           "repo, deleted after the run); corrupted "
+-                                           "copies are never persisted; exact "
+-                                           "before/after values and failing predicates "
+-                                           "recorded per mutation"),
++        json.dump({"run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
++                    "mutation_discipline": ("the RETAINED seven M1-M4 + AF3/Q8 "
++                                           "(compound, all changed fields listed) "
++                                           "+ M5/M6 controls: the SAME production "
++                                           "gate must show UNMUTATED=PASS and "
++                                           "MUTATED=FAIL; the mutation target is a "
++                                           "TEMPORARY COPY of the ACTUAL final "
++                                           "artifact (never a fixture, never the "
++                                           "canonical committed artifact; temp "
++                                           "tree OUTSIDE the repo, deleted after "
++                                           "the run); corrupted copies are never "
++                                           "persisted; exact before/after values "
++                                           "and failing predicates recorded per "
++                                           "mutation. The eight NEW D2 completeness "
++                                           "controls are persisted separately in "
++                                           "01_RAW/D2_MUTATION_RESULTS.json"),
+                     "results": mut_results}, f, indent=1)
++    with open(args.out_d2mut, "w", newline="\n") as f:
++        json.dump({"run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
++                    "d2_mutation_discipline": ("D2 completeness controls (NOT new "
++                                              "science): each case mutates an "
++                                              "ISOLATED TEMP COPY of the ACTUAL "
++                                              "newly generated C1 JSON/CSV "
++                                              "(same pinned EXE, same production "
++                                              "loader, same production gate_q2) "
++                                              "and must flip clean Q2 PASS -> "
++                                              "mutated Q2 FAIL through the "
++                                              "gate's OWN pin-universe/role/EA "
++                                              "predicates (no manifest, no Git "
++                                              "baseline, no other gate); exact "
++                                              "semantic deltas, before/after "
++                                              "artifact hashes and per-case "
++                                              "input-hash censuses proving the "
++                                              "unrelated inputs byte-identical"),
++                    "results": d2_mut_results}, f, indent=1)
++    with open(args.out_d1_falsifier, "w", newline="\n") as f:
++        json.dump({"run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
++                    "falsifier_discipline": ("MANDATORY downstream falsifier "
++                                            "(D1): synthetic bytes, synthetic "
++                                            "strong entry at the first byte; "
++                                            "the invalid initial instruction "
++                                            "must STOP justified sequential "
++                                            "decoding; the E8 at offset +4 "
++                                            "must NOT receive "
++                                            "CALL_VALIDATION=PASS or a "
++                                            "promoted target; the VA/fixture "
++                                            "is never special-cased; the "
++                                            "BEFORE outcome is MEASURED "
++                                            "in-run through the committed "
++                                            "BASE (THREE-P2) modules"),
++                    "record": gates["Q5"][1]["d1_falsifier_record"],
++                    "production_gate": "Q5 (boundary test matrix case "
++                                       "D1_0F73_4_DOWNSTREAM_FALSIFIER)"}, f, indent=1)
+     with open(args.out_af1_matrix, "w", newline="", encoding="utf-8") as f:
+         w = csv.writer(f)
+-        w.writerow(["MUTATION_ID", "MUTATED_ARTIFACT", "FIELD", "BEFORE", "BEFORE_VALUE",
+-                    "AFTER", "AFTER_VALUE", "PRODUCTION_GATE_ID", "UNMUTATED_RESULT",
+-                    "MUTATED_RESULT", "EXPECTED_CAUSALITY", "ACTUAL_CAUSALITY",
++        w.writerow(["MUTATION_ID", "MUTATION_CLASS", "MUTATED_ARTIFACT", "FIELD",
++                    "BEFORE", "BEFORE_VALUE", "AFTER", "AFTER_VALUE",
++                    "PRODUCTION_GATE_ID", "UNMUTATED_RESULT", "MUTATED_RESULT",
++                    "EXPECTED_CAUSALITY", "ACTUAL_CAUSALITY",
+                     "FAILING_PREDICATE_COUNT"])
+         for r in mut_results:
+-            w.writerow([r["MUTATION_ID"], r["MUTATED_ARTIFACT"], r["FIELD"],
++            w.writerow([r["MUTATION_ID"], "RETAINED_CONTROL",
++                        r["MUTATED_ARTIFACT"], r["FIELD"],
+                         r["BEFORE"], r.get("BEFORE_VALUE"),
+@@ -1893,2 +2679,13 @@
+                         len(r.get("FAILING_PREDICATES") or [])])
++        for r in d2_mut_results:
++            w.writerow([r["MUTATION_ID"], r["MUTATION_CLASS"],
++                        "; ".join(r["MUTATED_ARTIFACTS"]), r["SEMANTIC_DELTA"],
++                        "clean committed artifact (production package)",
++                        r.get("BEFORE_VALUE"),
++                        "temporary mutated copy at %s (deleted after the test; "
++                        "never persisted as a canonical artifact)" % r["TEMP_TREE"],
++                        r.get("AFTER_VALUE"), r["PRODUCTION_GATE_ID"],
++                        r["UNMUTATED_RESULT"], r["MUTATED_RESULT"],
++                        r["EXPECTED_CAUSALITY"], r["ACTUAL_CAUSALITY"],
++                        len(r.get("FAILING_PREDICATES") or [])])
+ 
+@@ -1896,3 +2693,3 @@
+     with open(args.out_decoder, "w", newline="\n") as f:
+-        json.dump({"run": "PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005",
++        json.dump({"run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
+                    "unit_battery": gates["Q4"][1]["unit_battery"],
+@@ -1902,3 +2699,3 @@
+     with open(args.out_counter, "w", newline="\n") as f:
+-        json.dump({"run": "PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005",
++        json.dump({"run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
+                    "counterexamples": gates["Q5"][1]["counterexamples"],
+@@ -1941,6 +2738,8 @@
+     mutation_ok = all(r["ACTUAL_CAUSALITY"] == "CAUSAL_PASS" for r in mut_results)
+-    qc_pass = (all(s == "PASS" for s in gate_status.values()) and mutation_ok)
++    d2_mutation_ok = all(r["ACTUAL_CAUSALITY"] == "CAUSAL_PASS" for r in d2_mut_results)
++    qc_pass = (all(s == "PASS" for s in gate_status.values())
++               and mutation_ok and d2_mutation_ok)
+ 
+     final = {
+-        "run": "PE_935_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION_R1_20261005",
++        "run": "PE_935_FACTORY_PLUS_84_C2_C1_D1_D2_CORRECTION_R1_20261005",
+         "qc_scope": "SELF_CHECK_FACTORY_PLUS_84_C2_C1_THREE_P2_CORRECTION",
+@@ -1954,7 +2753,15 @@
+         "mutation_results_summary": {
+-            "MUTATION_TEST_COUNT": len(mut_results),
+-            "MUTATION_CAUSAL_PASS_COUNT": sum(1 for r in mut_results
+-                                              if r["ACTUAL_CAUSALITY"] == "CAUSAL_PASS"),
+-            "MUTATION_CAUSAL_FAIL_COUNT": sum(1 for r in mut_results
+-                                              if r["ACTUAL_CAUSALITY"] != "CAUSAL_PASS"),
++            "MUTATION_TEST_COUNT": len(mut_results) + len(d2_mut_results),
++            "OLD_MUTATION_TOTAL": len(mut_results),
++            "OLD_MUTATION_CAUSAL_PASS_COUNT": sum(
++                1 for r in mut_results if r["ACTUAL_CAUSALITY"] == "CAUSAL_PASS"),
++            "D2_NEW_MUTATION_TOTAL": len(d2_mut_results),
++            "D2_NEW_MUTATION_CAUSAL_PASS_COUNT": sum(
++                1 for r in d2_mut_results if r["ACTUAL_CAUSALITY"] == "CAUSAL_PASS"),
++            "MUTATION_CAUSAL_PASS_COUNT": sum(
++                1 for r in mut_results + d2_mut_results
++                if r["ACTUAL_CAUSALITY"] == "CAUSAL_PASS"),
++            "MUTATION_CAUSAL_FAIL_COUNT": sum(
++                1 for r in mut_results + d2_mut_results
++                if r["ACTUAL_CAUSALITY"] != "CAUSAL_PASS"),
+             "MUTATION_NOT_ESTABLISHED_COUNT": sum(
+@@ -1975,3 +2782,3 @@
+         final["mutation_results_summary"]["MUTATION_CAUSAL_PASS_COUNT"],
+-        len(mut_results), final["QC_VERDICT"]))
++        len(mut_results) + len(d2_mut_results), final["QC_VERDICT"]))
+ 
