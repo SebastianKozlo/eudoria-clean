@@ -1,0 +1,84 @@
+{
+ "validator_identity": {
+  "path": "03_SCRIPTS/ledger_schema_qc.py",
+  "size": 19843,
+  "sha256": "916AD3E19D941BAF6D55A6197537ACCFC606276D3168D2AF9B233B0468887CEE"
+ },
+ "pin_match": true,
+ "clean_check": {
+  "returncode": 0,
+  "stdout": "FUNCTION_LEDGER_SCHEMA = PASS\nEDGE_LEDGER_SCHEMA = PASS\nOVERALL = PASS"
+ },
+ "mutations": [
+  {
+   "mutation_id": "QC_MUT_A_FUNCTION_ORD5",
+   "method": "raw-text append cell to ORD 5",
+   "mutant_widths": [
+    10,
+    11
+   ],
+   "returncode": 2,
+   "rejected": true,
+   "failed_predicates": null,
+   "stdout": "FUNCTION_LEDGER_SCHEMA = FAIL\nEDGE_LEDGER_SCHEMA = PASS\nOVERALL = FAIL\nFAIL FUNCTION ROW_WIDTH_EXACT row=None row widths [10, 11] != 10\nFAIL FUNCTION DICTREADER_NO_EXTRA_CELLS row=6 row 6 has overflow cells ['__QC_EXTRA_CELL__']"
+  },
+  {
+   "mutation_id": "QC_MUT_A_EDGE_E-GB2",
+   "method": "raw-text append cell to E-GB2",
+   "returncode": 2,
+   "rejected": true,
+   "stdout": "FUNCTION_LEDGER_SCHEMA = PASS\nEDGE_LEDGER_SCHEMA = FAIL\nOVERALL = FAIL\nFAIL EDGE ROW_WIDTH_EXACT row=None row widths [11, 12] != 11\nFAIL EDGE DICTREADER_NO_EXTRA_CELLS row=22 row 22 has overflow cells ['__QC_EXTRA_CELL__']"
+  },
+  {
+   "mutation_id": "QC_MUT_B_FUNCTION_ORD8",
+   "method": "remove last cell of ORD 8 (csv writer)",
+   "returncode": 2,
+   "rejected": true,
+   "stdout": "FUNCTION_LEDGER_SCHEMA = FAIL\nEDGE_LEDGER_SCHEMA = PASS\nOVERALL = FAIL\nFAIL FUNCTION ROW_WIDTH_EXACT row=None row widths [9, 10] != 10\nFAIL FUNCTION DICTREADER_NO_MISSING_CELLS row=9 row 9 missing cell for CITED_PHYSICAL_SOURCE"
+  },
+  {
+   "mutation_id": "QC_MUT_B_EDGE_E-N4",
+   "method": "remove last cell of E-N4 (csv writer)",
+   "returncode": 2,
+   "rejected": true,
+   "stdout": "FUNCTION_LEDGER_SCHEMA = PASS\nEDGE_LEDGER_SCHEMA = FAIL\nOVERALL = FAIL\nFAIL EDGE ROW_WIDTH_EXACT row=None row widths [10, 11] != 11\nFAIL EDGE DICTREADER_NO_MISSING_CELLS row=20 row 20 missing cell for CITED_PHYSICAL_SOURCE"
+  },
+  {
+   "mutation_id": "QC_MUT_C_EDGE_E-N4",
+   "method": "swap STATUS/CITED on E-N4 (width preserved)",
+   "returncode": 2,
+   "rejected": true,
+   "stdout": "FUNCTION_LEDGER_SCHEMA = PASS\nEDGE_LEDGER_SCHEMA = FAIL\nOVERALL = FAIL\nFAIL EDGE CITED_EXISTING_ARTIFACT row=20 row 20: CITED_PHYSICAL_SOURCE cites no known artifact\nFAIL EDGE STATUS_VOCABULARY row=20 row 20: STATUS '01_RAW/E8_CENSUS.json; GHIDRA_DISASM_WINDOWS.txt W_0045A08B_' outside the declared vocabulary\nFAIL EDGE STATUS_NOT_EVIDENCE_PATH row=20 row 20: an evidence path cannot pass as STATUS: '01_RAW/E8_CENSUS.json; GHIDRA_DISASM_WINDOWS.txt W_0045A08B_'\nFAIL EDGE CITED_NOT_STATUS_TOKEN row=20 row 20: a STATUS token cannot pass as CITED_PHYSICAL_SOURCE: 'UNRESOLVED (shortlisted site 3 - the strongest NEW resource '"
+  },
+  {
+   "mutation_id": "QC_EXTRA_BLANKLINE_EDGE",
+   "method": "insert one fully blank line before E-M1",
+   "expected_if_strict": "REJECT",
+   "returncode": 0,
+   "rejected": false,
+   "note": "validator skips empty rows by design (rows[1:] if r) - leniency probe",
+   "stdout": "FUNCTION_LEDGER_SCHEMA = PASS\nEDGE_LEDGER_SCHEMA = PASS\nOVERALL = PASS"
+  },
+  {
+   "mutation_id": "QC_EXTRA_EMPTY_STATUS_E-GB1",
+   "method": "set STATUS to empty string",
+   "returncode": 2,
+   "rejected": true,
+   "stdout": "FUNCTION_LEDGER_SCHEMA = PASS\nEDGE_LEDGER_SCHEMA = FAIL\nOVERALL = FAIL\nFAIL EDGE NO_EMPTY_REQUIRED_CELLS row=21 row 21 column STATUS is empty\nFAIL EDGE STATUS_VOCABULARY row=21 row 21: STATUS '' outside the declared vocabulary"
+  },
+  {
+   "mutation_id": "QC_EXTRA_CITED_IS_STATUS_TOKEN_E-GB1",
+   "method": "CITED_PHYSICAL_SOURCE := 'CONFIRMED' (STATUS intact)",
+   "returncode": 2,
+   "rejected": true,
+   "stdout": "FUNCTION_LEDGER_SCHEMA = PASS\nEDGE_LEDGER_SCHEMA = FAIL\nOVERALL = FAIL\nFAIL EDGE CITED_EXISTING_ARTIFACT row=21 row 21: CITED_PHYSICAL_SOURCE cites no known artifact\nFAIL EDGE CITED_NOT_STATUS_TOKEN row=21 row 21: a STATUS token cannot pass as CITED_PHYSICAL_SOURCE: 'CONFIRMED'"
+  }
+ ],
+ "validator_unchanged_after_clean": true,
+ "validator_unchanged_after_all": true,
+ "clean_ledgers_unchanged_after_all": true,
+ "clean_ledger_hash_match_manifest": {
+  "FUNCTION_LEDGER_CORRECTED.csv": true,
+  "EDGE_LEDGER_CORRECTED.csv": true
+ }
+}

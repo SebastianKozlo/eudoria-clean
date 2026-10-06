@@ -1,0 +1,87 @@
+{
+ "run": "LEDGER_SCHEMA_QC",
+ "mode": "mutate",
+ "temp_copies": "created under a system temp dir and DELETED after each measurement; the clean corrected ledgers were never modified (mutants are copies only)",
+ "clean_function_verdict": "PASS",
+ "clean_edge_verdict": "PASS",
+ "mutations": [
+  {
+   "mutation_id": "MUT_A_FUNCTION",
+   "table": "FUNCTION_LEDGER",
+   "gate": "SCHEMA_GATE",
+   "mutation": "introduce one extra CSV cell",
+   "mutated_row_primary_id": "1",
+   "clean_baseline_result": "PASS",
+   "mutated_result": "FAIL",
+   "mutant_rejected_by_production_validator": true,
+   "exact_failed_predicates": [
+    "DICTREADER_NO_EXTRA_CELLS",
+    "ROW_WIDTH_EXACT"
+   ],
+   "verdict": "CAUSAL_FAIL"
+  },
+  {
+   "mutation_id": "MUT_A_EDGE",
+   "table": "EDGE_LEDGER",
+   "gate": "SCHEMA_GATE",
+   "mutation": "introduce one extra CSV cell",
+   "mutated_row_primary_id": "E-GETTER",
+   "clean_baseline_result": "PASS",
+   "mutated_result": "FAIL",
+   "mutant_rejected_by_production_validator": true,
+   "exact_failed_predicates": [
+    "DICTREADER_NO_EXTRA_CELLS",
+    "ROW_WIDTH_EXACT"
+   ],
+   "verdict": "CAUSAL_FAIL"
+  },
+  {
+   "mutation_id": "MUT_B_FUNCTION",
+   "table": "FUNCTION_LEDGER",
+   "gate": "SCHEMA_GATE",
+   "mutation": "remove one required cell",
+   "mutated_row_primary_id": "1",
+   "clean_baseline_result": "PASS",
+   "mutated_result": "FAIL",
+   "mutant_rejected_by_production_validator": true,
+   "exact_failed_predicates": [
+    "DICTREADER_NO_MISSING_CELLS",
+    "ROW_WIDTH_EXACT"
+   ],
+   "verdict": "CAUSAL_FAIL"
+  },
+  {
+   "mutation_id": "MUT_B_EDGE",
+   "table": "EDGE_LEDGER",
+   "gate": "SCHEMA_GATE",
+   "mutation": "remove one required cell",
+   "mutated_row_primary_id": "E-GETTER",
+   "clean_baseline_result": "PASS",
+   "mutated_result": "FAIL",
+   "mutant_rejected_by_production_validator": true,
+   "exact_failed_predicates": [
+    "DICTREADER_NO_MISSING_CELLS",
+    "ROW_WIDTH_EXACT"
+   ],
+   "verdict": "CAUSAL_FAIL"
+  },
+  {
+   "mutation_id": "MUT_C_EDGE",
+   "table": "EDGE_LEDGER",
+   "gate": "SEMANTIC_SCHEMA_GATE",
+   "mutation": "swap STATUS and CITED_PHYSICAL_SOURCE (width preserved)",
+   "mutated_row_primary_id": "E-GETTER",
+   "clean_baseline_result": "PASS",
+   "mutated_result": "FAIL",
+   "mutant_rejected_by_production_validator": true,
+   "exact_failed_predicates": [
+    "CITED_EXISTING_ARTIFACT",
+    "CITED_NOT_STATUS_TOKEN",
+    "STATUS_NOT_EVIDENCE_PATH",
+    "STATUS_VOCABULARY"
+   ],
+   "verdict": "CAUSAL_FAIL"
+  }
+ ],
+ "all_mutants_causally_rejected": true
+}
