@@ -1,0 +1,51 @@
+# FULL_READ_LOG — PE_935_INSTANCE_KEY_RESOURCE_EDGE_MICRO_QC_INTERNAL_R1_20261006
+
+Reading mode legend: FULL_READ = entire file read to EOF (the Read tool line-by-line,
+no section skipping). All reads performed 2026-10-06 by the pe-master-auditor QC
+worker (fresh context, STATIC-ONLY). Base directory:
+D:\Eudoria_Reconstruction\12_WebGame\eudoria-clean\docs\audits\PE_935_INSTANCE_KEY_RESOURCE_EDGE_MICRO_R1_20261006\
+
+Coverage algebra: package physical files 28 = FULL_READ 28 + NOT_READ 0.
+
+| # | File | Mode | Size (B) | Notes |
+|---|------|------|---------|-------|
+| 1 | GOVERNANCE_DECISION.md | FULL_READ | 6,324 | verbatim block + DA1 adjudication + preflight + persistence resolution |
+| 2 | INPUT_IDENTITIES.md | FULL_READ | 5,206 | pinned inputs, tools, BASE-evidence inputs table |
+| 3 | FINAL_REPORT.md | FULL_READ | 14,642 | question/answer, census method, shortlist, branch trace, status algebra, PASS records |
+| 4 | QC_REPORT.md | FULL_READ | 7,950 | SELF_CHECK Q1-Q9 |
+| 5 | HANDOFF.md | FULL_READ | 8,859 | run status, science result, package census, proposed entrypoint row, persistence instruction |
+| 6 | EVIDENCE_INDEX.md | FULL_READ | 4,258 | artifact table + scripts table + NOT_CHECKED (BYTE_WINDOWS description defective — finding F2) |
+| 7 | FUNCTION_LEDGER.csv | FULL_READ | 8,431 | 8 data rows (6 COUNTED + DISCLOSED_OVER_BUDGET_PROBE + BOUNDED_CLASSIFICATION_PROBE) |
+| 8 | EDGE_LEDGER.csv | FULL_READ | 10,086 | 22 data rows (E-GETTER, E-C1*, E-E1*, E-E2*, E-M1*, E-N1..N4, E-GB1/2, E-XD) |
+| 9 | CALLSITE_SHORTLIST.csv | FULL_READ | 3,158 | 6 data rows (3 SHORTLISTED + 3 census-classified) |
+| 10 | COMMITTED_PACKAGE_MANIFEST_SHA256.csv | FULL_READ | 2,769 | comment line + header + 27 rows |
+| 11 | 01_RAW/GovernanceWriteTime.txt | FULL_READ | 223 | KROK-0 identity pin (stale vs current file — finding F1) |
+| 12 | 01_RAW/GETTER_PIN.txt | FULL_READ | 562 | getter pin text |
+| 13 | 01_RAW/GETTER_PIN.json | FULL_READ | 1,656 | pin + section map + PE spot checks |
+| 14 | 01_RAW/E8_CENSUS.json | FULL_READ | 2,392 | 6 hits + zero-counts + method + published xref recompute |
+| 15 | 01_RAW/BYTE_WINDOWS.txt | FULL_READ | 5,474 | 7 windows present; SF_ctor_tail / F0064B1E0_head / F004157B0_head ABSENT (finding F2) |
+| 16 | 01_RAW/RTTI_PROBES.json | FULL_READ | 1,458 | 3 calibration + 3 probes (incl. honest NOT-A-CLASS-VTABLE) |
+| 17 | 01_RAW/QC_CONTROLS.json | FULL_READ | 4,266 | CTRL_A/B/C + exe identity + recount + boundary reread |
+| 18 | 01_RAW/GHIDRA_VERIFY.json | FULL_READ | 26,596 | getter identity, 6 candidates, 6 references, disasm windows, decompiles |
+| 19 | 01_RAW/GHIDRA_DISASM_WINDOWS.txt | FULL_READ | 13,546 | 7 Ghidra listings |
+| 20 | 01_RAW/GHIDRA_DECOMPILES.txt | FULL_READ | 7,196 | decompiles of the 5 budgeted functions |
+| 21 | 03_SCRIPTS/pe935k_core.py | FULL_READ | 3,445 | PE walk core (fail-closed asserts) |
+| 22 | 03_SCRIPTS/pin_getter.py | FULL_READ | 3,452 | getter pin + manual decode |
+| 23 | 03_SCRIPTS/e8_census.py | FULL_READ | 6,440 | census (E8/E9/dword + whole-file + published recompute) |
+| 24 | 03_SCRIPTS/byte_windows.py | FULL_READ | 1,352 | WINDOWS list = exactly the 7 persisted windows |
+| 25 | 03_SCRIPTS/rtti_probes.py | FULL_READ | 3,737 | calibration-first RTTI walker |
+| 26 | 03_SCRIPTS/qc_controls.py | FULL_READ | 12,763 | CTRL_A/B/C + recount + boundary (CTRL_C comment defect — finding F3) |
+| 27 | 03_SCRIPTS/ghidra_post.py | FULL_READ | 6,177 | Ghidra postscript; SHA 38FBCFBE... re-verified == manifest == INPUT_IDENTITIES pin |
+| 28 | 03_SCRIPTS/make_manifest.py | FULL_READ | 3,504 | manifest generator + in-process bijection verification |
+
+External inputs read:
+- Contract C:\Users\User\Documents\ChatGPT\PE\PE_935_INSTANCE_RESOURCE_MICRORUN_PROMPT_REVIEW_20261005\OPENCODE_INSTANCE_KEY_RESOURCE_EDGE_MICRO_R1_20261006.md — FULL_READ (212 lines); SHA re-verified 57A73168...BABB6; size 11,823 B.
+- Pinned EXE D:\Eudoria_Reconstruction\pcg_install\Entropia.exe — byte reads only (own measurements, QC_MEASUREMENTS.txt M0-M12); never modified.
+- Ghidra sandbox C:\Users\User\AppData\Local\Temp\opencode\PE935K_GHIDRA\ — existence + SHA comparison of 3 out\ artifacts + sandbox EXE SHA (corroboration only, M9).
+
+NOT read (not part of this QC's bounded scope; see NOT_CHECKED in QC_REPORT_INTERNAL.md):
+- BASE historical package contents beyond the inputs cited by the executor
+  (their re-derivation was out of QC scope; the two published xrefs and the RTTI
+  calibration names were re-derived from raw EXE bytes instead).
+- The Ghidra sandbox project internals (proj\PE935K.rep db files).
+- Foreign untracked paths (5x PE_935_* dirs + experiments/) — untouched.

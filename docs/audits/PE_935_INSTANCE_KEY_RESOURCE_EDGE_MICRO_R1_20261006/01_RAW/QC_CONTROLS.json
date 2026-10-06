@@ -1,0 +1,75 @@
+{
+ "controls": [
+  {
+   "control": "CTRL_A_GETTER_OFFSET_MUTATION",
+   "clean_pass": true,
+   "mutated_fail": true,
+   "verdict": "PASS",
+   "details": {
+    "clean": "byte-pin PASS (8B 41 74 C3) + semantic PASS (mov eax,[ecx+0x74]; ret)",
+    "mutated": "expected offset changed to +0x78 WITHOUT touching the EXE: byte-pin FAIL + semantic FAIL (disp8 mismatch: claimed 0x78, physical 0x74)",
+    "measured_quantity": "EXE bytes at VA 0x00414130",
+    "independent_source_of_truth": "physical EXE file re-read by this gate",
+    "why_non_circular": "the gate compares an INDEPENDENT expectation against the physical bytes; the mutation changes only the expectation",
+    "failure_case_detected": "if the physical byte at 0x00414132 were 0x78 (or the getter pin were wrong), the clean gate would already FAIL; the +0x78 mutated expectation FAILS against the true bytes",
+    "coverage_limit": "covers the 4-byte getter pin only; not every consumer instruction"
+   }
+  },
+  {
+   "control": "CTRL_B_RECEIVER_IDENTITY_EDGE_REMOVAL",
+   "clean_pass": true,
+   "mutated_fail": true,
+   "verdict": "PASS",
+   "details": {
+    "clean": "all four identity edges byte-pinned: {'E1_mov_esi_ecx': True, 'E2_cmo_vtable_store': True, 'E3_mov_ecx_esi': True, 'E4_call_getter': True}",
+    "mutated": "edge E3 removed (mutated in-memory copy 8B CE -> 8B CD, EXE untouched): gate checks {'E1_mov_esi_ecx': True, 'E2_cmo_vtable_store': True, 'E3_mov_ecx_esi': False, 'E4_call_getter': True} -> gate FAIL (receiver no longer proven == ctor this)",
+    "claim_that_depends": "the selected receiver-proven branch: ECX at 0x00528FD9 == the ClientMovableObject ctor this",
+    "measured_quantity": "four byte-pinned identity edges of the receiver chain",
+    "independent_source_of_truth": "physical EXE bytes at the four VAs",
+    "why_non_circular": "the gate fails when any edge is absent or altered; the mutation alters only the copied evidence",
+    "failure_case_detected": "with E3 removed, the receiver claim FAILS (the essential edge is load-bearing)",
+    "coverage_limit": "covers the ctor callsite receiver chain; not the GameClient/other receivers"
+   }
+  },
+  {
+   "control": "CTRL_C_RESOURCE_JOIN_NEGATIVE_KEY_TO_MAP",
+   "clean_pass": true,
+   "mutated_fail": true,
+   "verdict": "PASS",
+   "details": {
+    "clean": "map pins True; resource-family E8 calls found in the decoded insert body: [] (expected ZERO)",
+    "mutated": "falsifier: fake E8->FUN_0072F580 injected at 0x0085620B in an in-memory copy: detector found [('0x85620b', '0x72f580')] (expected the injected 1) -> the detector demonstrably FAILs on a real resource join",
+    "real_examined_operation": "FUN_00856190 hash_map insert (mgr1+0x10 identity map, key=[value+0x74], value=the instance object)",
+    "why_this_is_a_negative": "the examined key-to-map operation maps instance-key -> the SAME instance object (identity map; duplicate path calls the value's deleting dtor) - byte-distinct from the templates.vfs RB-tree registry (root 0x00BA1824, FUN_0043A550/FUN_0072F580) - so the key-to-map join is NOT a resource join",
+    "measured_quantity": "byte pins + E8 target census inside the insert body",
+    "independent_source_of_truth": "physical EXE body bytes + the resource-family address list from BASE canon (read as input)",
+    "why_non_circular": "the detector enumerates E8 targets directly; the falsifier proves it detects an injected resource call",
+    "failure_case_detected": "any real E8 into the resource family inside the insert body would flip clean PASS to FAIL",
+    "coverage_limit": "covers the decoded insert body only; not other map operations"
+   }
+  }
+ ],
+ "exe_identity": {
+  "size": 8015872,
+  "size_match": true,
+  "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+  "sha_match": true
+ },
+ "census_recount": {
+  "e8_hits_targeting_getter": 6,
+  "expected_from_census": 6,
+  "match": true
+ },
+ "getter_boundary_reread": {
+  "bytes": "8B 41 74 C3",
+  "after_ret": "CC CC CC CC CC CC CC CC",
+  "ret_is_c3": true,
+  "padding_is_cc": true
+ },
+ "overall": {
+  "all_controls_pass": true,
+  "exe_identity_ok": true,
+  "census_recount_ok": true,
+  "getter_boundary_ok": true
+ }
+}

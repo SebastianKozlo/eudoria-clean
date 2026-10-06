@@ -1,0 +1,196 @@
+# QC_MEASUREMENTS — PE_935_INSTANCE_KEY_RESOURCE_EDGE_MICRO_QC_INTERNAL_R1_20261006
+
+Independent own measurements by the pe-master-auditor QC worker. Engine: Windows
+PowerShell 5.1 / .NET ([Array]::IndexOf scan + BitConverter arithmetic + own PE
+section walk). NO executor script was used for any measurement below. The pinned
+EXE was read-only. All timestamps local 2026-10-06.
+
+## M0. Input identities (own re-measurement)
+
+- EXE `D:\Eudoria_Reconstruction\pcg_install\Entropia.exe`: 8,015,872 B;
+  SHA256 `E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31` — MATCH pin.
+- Contract `OPENCODE_INSTANCE_KEY_RESOURCE_EDGE_MICRO_R1_20261006.md`: 11,823 B;
+  SHA256 `57A731683EE32E6FC43CCEC42664B03D4DC7FBA2138009B8BF7A0A8E634BABB6` — MATCH pin
+  (and MATCH the SIZE_BYTES in the GOVERNANCE verbatim block).
+- Repo HEAD: `3921dbe2a43a9181f8a50fa5242d8586c85896b6` == BASE. Package tree untracked
+  (pre-persistence); AUDIT_ENTRYPOINT.md unmodified vs BASE; 6 foreign untracked paths
+  untouched.
+- Own PE walk (parsed from headers, not from the executor's JSON): image_base 0x00400000,
+  machine 0x014C, PE32 magic 0x010B, dllchar 0x0000 (ASLR OFF), 5 sections:
+  .text va=0x00401000 vsize=0x6735E5 raw=0x674000 ptr=0x1000; .rdata va=0x00A75000
+  vsize=0xF6569 raw=0xF7000 ptr=0x675000; .data va=0x00B6C000 raw=0x34000 ptr=0x76C000;
+  .tls va=0x00BAA000 raw=0x1000 ptr=0x7A0000; .rsrc va=0x00BAB000 raw=0x4000 ptr=0x7A1000.
+  — MATCHES GETTER_PIN.json's section map.
+
+## M1. Getter re-pin (own read)
+
+- bytes @0x00414130 (file offset 0x14130): `8B 41 74 C3 CC CC CC CC CC CC CC CC CC CC CC CC`
+- window @0x00414120: `0B 8B 06 50 E8 17 9A 54 00 83 C4 04 5E C3 CC CC`
+- decode: `mov eax,[ecx+0x74]; ret` (8B /r mod=01 reg=000(EAX) rm=001(ECX) disp8=0x74; C3 RET);
+  after-RET padding = 11..12x CC.
+- MATCHES the executor's GETTER_PIN.txt/GETTER_PIN.json/QC_CONTROLS.json byte-for-byte.
+
+## M2. Own E8/E9/dword census (full .text raw image 0x1000..0x675000 + whole file)
+
+MY E8 CENSUS (.text, target 0x00414130): COUNT=6
+- 0x569D3 VA 0x004569D3 rel32=0xFFFBD758 (-272552) bytes[E8 58 D7 FB FF]
+- 0x56BEB VA 0x00456BEB rel32=0xFFFBD540 (-273088) bytes[E8 40 D5 FB FF]
+- 0x5723E VA 0x0045723E rel32=0xFFFBCEED (-274707) bytes[E8 ED CE FB FF]
+- 0x5A08B VA 0x0045A08B rel32=0xFFFBA0A0 (-286560) bytes[E8 A0 A0 FB FF]
+- 0x128FD9 VA 0x00528FD9 rel32=0xFFEEB152 (-1134254) bytes[E8 52 B1 EE FF]
+- 0x4561AC VA 0x008561AC rel32=0xFFBBDF7F (-4464769) bytes[E8 7F DF BB FF]
+MY E9 THUNK CENSUS (.text, target getter): COUNT=0
+MY ABSOLUTE DWORD CENSUS (whole file, LE 0x00414130): COUNT=0
+MY E8-PATTERN OUTSIDE .TEXT (fixed-base criterion mirroring e8_census.py): COUNT=0
+- MATCHES E8_CENSUS.json exactly (all six VAs/offsets/rel32/bytes; all zero-counts).
+- Set equality with Ghidra: my census set == GHIDRA_VERIFY.json references_to_getter set
+  (6==6, identical VAs: 0x0045723E, 0x00528FD9, 0x008561AC, 0x0045A08B, 0x004569D3,
+  0x00456BEB; all UNCONDITIONAL_CALL). A mid-instruction E8 would appear in the raw
+  census but not in Ghidra's reference graph; equality excludes that case for all 6.
+
+## M3. rel32 target recompute (every E8 target claimed by the package; own arithmetic)
+
+All MATCH:
+- 0x004569CC E8 8F A9 FA FF -> 0x00401360 (GameClient singleton getter)
+- 0x004569DA E8 71 2E 05 00 -> 0x004A9850
+- 0x00456BE4 E8 77 A7 FA FF -> 0x00401360; 0x00456BF2 E8 59 2C 05 00 -> 0x004A9850
+- 0x00457237 E8 24 A1 FA FF -> 0x00401360; 0x00457245 E8 06 26 05 00 -> 0x004A9850
+- 0x0045A084 E8 47 83 FB FF -> 0x004123D0 (deref helper; body verified: 8B 01 C3)
+- 0x0045A09F E8 4C B4 FB FF -> 0x004154F0 (mgr1 getter); 0x0045A0A6 E8 55 9C 3F 00 -> 0x00853D00
+- 0x00528FE1 E8 DA B7 FF FF -> 0x005247C0 (edge 1)
+- 0x0052480F E8 1C 4B FE FF -> 0x00509330 (edge 2); 0x0052482B -> 0x005094E0; 0x0052483D -> 0x006A8980
+- 0x005093A0 E8 1F 40 45 00 -> 0x0095D3C4 (new thunk); 0x0050948B E8 50 1D 14 00 -> 0x0064B1E0
+- 0x005094A2 E8 D9 D5 2A 00 -> 0x007B6A80; 0x0064B1E3 E8 98 D5 17 00 -> 0x007C8780
+- 0x008561A5 -> 0x00413440; 0x008561AC -> 0x00414130; 0x008561C5 -> 0x00856090;
+  0x008561D6 -> 0x00854D90; 0x008561F0 -> 0x00413450; 0x00856202 -> 0x00413450
+- 0x0040138F E8 30 C0 55 00 -> 0x0095D3C4 (new thunk); 0x004013A9 E8 02 44 01 00 -> 0x004157B0
+- 0x0085B20A E8 C1 71 BB FF -> 0x004123D0 (base-ctor key store call)
+
+## M4. Own RTTI walks (MSVC: [vt-4]=COL, [COL+0xC]=TD, name=TD+8; from raw EXE bytes)
+
+- VT 0x00A7D458: col=0x00AA12B8 td=0x00B78834 name=.?AVSceneFeederObject@@  (calibration MATCH)
+- VT 0x00A7DCB0: col=0x00AA17CC td=0x00B79958 name=.?AVClientMovableObject@@ (calibration MATCH — own-read confirmation of the dispatch-required claim)
+- VT 0x00A91E4C: col=0x00AB33D0 td=0x00B7997C name=.?AVMovableObject@@        (calibration MATCH)
+- VT 0x00A79F18: col=0x00A9E348 td=0x00B6D004 name=.?AVGameClient@@            (probe MATCH)
+- VT 0x00A83274: col=0x00AA4874 td=0x00B86340 name=.?AVSceneFeederObjectExtraData@@ (probe MATCH)
+- VT 0x00A7D444: TD-not-file-backed col=0x007E19D0 td=0xCCCCCCCC -> NOT-A-CLASS-VTABLE (honest negative MATCH);
+  string @0x00A7D444 = "ArkSceneFeeder" (own read; matches the Ghidra decompile string)
+- All MATCH RTTI_PROBES.json exactly.
+
+## M5. Own byte-pin reads (all MATCH the ledgers/QC_CONTROLS)
+
+- CTRL_B edges: 8B F1 @0x00528E76; C7 06 B0 DC A7 00 @0x00528EA2; 8B CE @0x00528FD2;
+  E8 52 B1 EE FF @0x00528FD9; 50 @0x00528FDE; E8 DA B7 FF FF @0x00528FE1; 89 86 C0 00 00 00 @0x00528FEA
+- SF ctor: 8B E9 @0x00509357; C7 45 00 58 D4 A7 00 @0x00509366; 8B 44 24 50 @0x00509372;
+  89 45 14 @0x0050937E; 8B 4C 24 4C @0x005093D1; 89 8D 8C 00 00 00 @0x00509411;
+  6A 14 @0x005093E7; 83 40 04 01 @0x005093C8
+- Wrapper FUN_005247C0: 8B 4C 24 28 / 8B 54 24 24 / 51 52 57 / 8B C8 @0x00524802..0D; C2 08 00 @0x00524855
+- Insert FUN_00856190: 83 7F 74 00 @0x00856199; 8B CF @0x008561AA; 89 44 24 0C @0x008561B1;
+  8D 73 10 @0x008561B8; 89 7C 24 14 @0x008561C1; dup-path 8B 07 8B 10 6A 01 8B CF FF D2 @0x008561E3
+- Singleton FUN_00401360: A1 5C FE B9 00 @0x00401381; 68 88 00 00 00 @0x0040138A;
+  A3 5C FE B9 00 @0x004013AE
+- Deref helper FUN_004123D0: 8B 01 C3
+- Base ctor key store: E8 C1 71 BB FF @0x0085B20A -> FUN_004123D0; 8B CF @0x0085B20F; 89 46 74 @0x0085B211
+
+## M6. The three MISSING-WINDOW regions (own dumps; executor's cited BYTE_WINDOWS windows
+##     SF_ctor_tail / F0064B1E0_head / F004157B0_head are NOT in the artifact — finding F2)
+
+SF tail 0x00509470..0x005094BF (my dump):
+- 0x00509470: E8 4F 3F 45 00 83 C4 04 89 44 24 50 3B C3 C6 44
+- 0x00509480: 24 44 03 74 0D 8B 55 14 52 8B C8 E8 50 1D 14 00
+- 0x00509490: EB 02 33 C0 8B 4D 30 50 68 44 D4 A7 00 C6 44 24
+- 0x005094A0: 4C 02 E8 D9 D5 2A 00 8B C5 8B 4C 24 3C 64 89 0D
+- 0x005094B0: 00 00 00 00 59 5F 5E 5D 5B 83 C4 34 C2 0C 00 CC
+- Confirms: JZ 0x00509492 @0x00509483; 8B 55 14 (EDX=[SF+0x14]=KEY) @0x00509485;
+  52 @0x00509488; 8B C8 @0x00509489; E8 50 1D 14 00 @0x0050948B -> 0x0064B1E0;
+  EB 02 33 C0 @0x00509490; 8B 4D 30 @0x00509494; 50 @0x00509497;
+  68 44 D4 A7 00 @0x00509498; E8 D9 D5 2A 00 @0x005094A2 -> 0x007B6A80;
+  C2 0C 00 @0x005094BC (RET 0xC; the extent end 0x005094BE is its last byte).
+  ALL the executor's claims TRUE; the window is simply absent from BYTE_WINDOWS.txt.
+
+FUN_0064B1E0 0x0064B1E0..0x0064B21F (my dump):
+- 0x0064B1E0: 56 8B F1 E8 98 D5 17 00 8B 44 24 08 89 46 10 C7
+- 0x0064B1F0: 06 74 32 A8 00 8B C6 5E C2 04 00 CC CC CC CC CC
+- 0x0064B200: B8 A0 3E BA 00 C3 CC CC CC CC CC CC CC CC CC CC  (next tiny thunk)
+- 0x0064B210: B8 44 D4 A7 00 C3 CC CC CC CC CC CC CC CC CC CC  (returns 0x00A7D444!)
+- Confirms: 56 (PUSH ESI); 8B F1; E8 98 D5 17 00 @0x0064B1E3 -> 0x007C8780;
+  8B 44 24 08 @0x0064B1E8 (EAX=stack arg=the KEY); 89 46 10 @0x0064B1EC
+  (ExtraData+0x10 = KEY); C7 06 74 32 A8 00 @0x0064B1EF (vtable 0x00A83274);
+  8B C6; 5E; C2 04 00 @0x0064B1F7 (RET 4); CC padding from 0x0064B1FA.
+  Body = 26 B (0x0064B1E0..0x0064B1F9 inclusive); the 0x30 probe covers it fully.
+  ALL the executor's claims TRUE.
+
+FUN_004157B0 head 0x004157B0..0x004157DF (my dump):
+- 0x004157B0: 53 56 8B F1 8D 46 08 50 C7 06 18 9F A7 00 FF 15
+- 0x004157C0: 04 51 A7 00 8D 4E 10 E8 B4 61 FF FF 33 DB 8D 4E
+- 0x004157D0: 38 89 5E 18 89 5E 1C 89 5E 20 89 5E 24 89 5E 28
+- Confirms: C7 06 18 9F A7 00 @0x004157B7 (vtable 0x00A79F18 store) — the
+  GameClient-classification claim TRUE (window absent from BYTE_WINDOWS.txt).
+
+## M7. Own resource-family census inside the insert body (0x00856190..0x00856210)
+
+- Resource-family E8 count: 0 (family input list as used by CTRL_C:
+  0x0072F580/0x006C9700/0x006CB6F0/0x006CB020/0x0043A550 — read as BASE-canon input;
+  the list itself was NOT re-derived from the BASE packages by this QC).
+- All E8s in the body (6): 0x008561A5->0x00413440 | 0x008561AC->0x00414130 |
+  0x008561C5->0x00856090 | 0x008561D6->0x00854D90 | 0x008561F0->0x00413450 |
+  0x00856202->0x00413450. — MATCHES the executor's CTRL_C clean result.
+
+## M8. Own manifest re-hash (COMMITTED_PACKAGE_MANIFEST_SHA256.csv, 27 rows)
+
+- 27 rows parsed; every row re-hashed: 0 SHA mismatches, 0 size mismatches.
+- Disk files excluding the manifest: 27; + the manifest = 28 physical files.
+- 0 extra files on disk not in the manifest; 0 rows without files.
+- Manifest row for GOVERNANCE_DECISION.md = 6324 B / 96B80022C581... (the CURRENT
+  bytes) — see finding F1 for the contradiction with GovernanceWriteTime.txt.
+
+## M9. Ghidra sandbox corroboration (outside the repo, read-only)
+
+- C:\Users\User\AppData\Local\Temp\opencode\PE935K_GHIDRA\ exists: Entropia.exe
+  (8,015,872 B, SHA256 == pin E7785430...0F31 — the sandbox copy identity MATCHES),
+  out\GHIDRA_VERIFY.json / GHIDRA_DISASM_WINDOWS.txt / GHIDRA_DECOMPILES.txt are
+  BYTE-IDENTICAL (SHA-equal) to the package's 01_RAW copies; Ghidra project
+  proj\PE935K.rep present. Corroborates the claimed sandbox import + "outputs copied
+  to 01_RAW" flow. The original EXE was never modified (re-hash at M0 == pin).
+
+## M10. Own negative controls (script: qc_negative_controls.ps1; final transcript)
+
+- EXE_IDENTITY: size=True sha_match=True
+- NC1 (CTRL_C falsifier re-run, my own detector on the real body):
+  NC1_CLEAN: resource-family E8 in insert body = 0 (expect 0)
+  NC1_MUTATED: detector found 1 (expect 1) -> 0x0085620B->0x0072F580
+  NC1_VERDICT: PASS
+- NC2 (my census detector positive control; synthetic E8->getter injected at
+  neutral file offset 0x569C0 in an in-memory COPY):
+  NC2_MUTATED: my census on copy = 7 hits (expect 7)
+  NC2_HITS: 0x004569C0, 0x004569D3, 0x00456BEB, 0x0045723E, 0x0045A08B, 0x00528FD9, 0x008561AC
+  NC2_VERDICT: PASS
+  (QC self-note: the first version of NC2 injected at 0x569D0 and clobbered the real
+  hit's E8 opcode @0x569D3 — my tooling error, disclosed; the detector itself behaved
+  correctly: 5 real + 1 synthetic = 6. Fixed to the neutral offset and re-run PASS.)
+- NC3 (mutated-expectation negative; wrong target 0x00414134 on the unmutated EXE):
+  NC3_WRONG_TARGET: 0 hits (expect 0) — no false positives; target discrimination works.
+  NC3_VERDICT: PASS
+- OVERALL_NEGATIVE_CONTROLS: ALL_PASS
+
+## M11. GOVERNANCE_DECISION.md identity measurements (finding F1 evidence)
+
+- Current physical file: 6,324 B; SHA256
+  96B80022C5819AE0781B978053CB076C12B918C9E377D4CDB8569BBADD808E3A; LastWriteTime
+  2026-10-05 23:54:12 (local).
+- 01_RAW/GovernanceWriteTime.txt records: 6,299 B; SHA256
+  A953107598F7553C8DE5926EE7FA690920117E34923977B728F065AC073741A6; LastWriteTime
+  of the file 2026-10-05 23:54:05.874; measured_at 2026-10-05 23:54:08.342.
+- Delta: +25 B, modified 4 s after the recorded re-measurement, ~2 min before the
+  first science artifact (pe935k_core.py 23:56:13). Undisclosed in the package;
+  manifest (00:19:47) pins the CURRENT (post-edit) bytes — two inconsistent pins.
+
+## M12. Scope greps (whole package)
+
+- '0xA4': only prohibition lines (GOVERNANCE_DECISION verbatim + scope). No 0xA4 work.
+- 'templates.vfs': only the BASE-canon registry contrast text (no opening).
+- 'BNT'/'NIF'/'VFS/ARK': only scope/prohibition/NOT_CHECKED lines. No .ark / ArkVFS work.
+- try/except in 03_SCRIPTS: ZERO occurrences (fail-closed style; rtti walker returns
+  ok:false with reasons; make_manifest exits 2 on bijection errors; pe935k_core raises
+  ValueError on identity mismatch; ghidra_post records DECOMPILE_FAILED).
+- No commit performed by the executor phase (HEAD == BASE; package untracked).
