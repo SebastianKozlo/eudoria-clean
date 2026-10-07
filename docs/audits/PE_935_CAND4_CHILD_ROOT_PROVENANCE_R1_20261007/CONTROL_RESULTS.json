@@ -1,0 +1,106 @@
+{
+  "CTRL_1": {
+    "checker": "ctrl1_visual_role (the §6 evidence-leg classifier; one code path for clean/mutated/real)",
+    "clean_case": {
+      "input": {
+        "resource_derived_contained_model": true,
+        "typed_containment": true,
+        "exact_wrapper_used_as_child": true,
+        "positive_consumer_proof": true,
+        "synthetic": "SYNTHETIC_MACHINERY_TEST_ONLY"
+      },
+      "result": "PASS",
+      "detail": "all four §6 legs present"
+    },
+    "mutated_case": {
+      "input": {
+        "model_adjacency_only": true,
+        "object_class": "NiControllerSequence",
+        "prior_pin": "source-run CH3 canon: the named 0x110 object of instance creator FUN_006CB6F0 (NiControllerSequence per the R2 adjudication)",
+        "synthetic": "SYNTHETIC_MACHINERY_TEST_ONLY"
+      },
+      "result": "FAIL",
+      "expected": "FAIL",
+      "detail": "REJECT_MODEL_ADJACENCY_ONLY: NiControllerSequence/sequence-control adjacency does not qualify as main visual (contract §9.1)",
+      "cause": "the adjacency-only mutation removed every §6 proof leg; the predicate did not survive"
+    },
+    "real_input_case": {
+      "input": {
+        "resource_derived_contained_model": true,
+        "typed_containment": false,
+        "exact_wrapper_used_as_child": false,
+        "positive_consumer_proof": false,
+        "note": "the REAL CAND-4 child evidence of THIS run (CL-07/CL-10/CL-11)"
+      },
+      "result": "FAIL",
+      "detail": "missing §6 proof legs: typed_containment,exact_wrapper_used_as_child,positive_consumer_proof",
+      "classification": "POLICY_ONLY — the REAL child is not confirmed main-visual by ABSENCE of the §6 proof legs (evidence-absence), not by detection of a specific defect; recorded per contract §9 (no detection claim)"
+    },
+    "verdict": "PASS",
+    "range": "same checker; same §6 leg set; clean fixture vs adjacency-only mutation vs the real child evidence"
+  },
+  "CTRL_2": {
+    "checker": "ctrl2_containment (store-offset == declared child-field offset AND source-read == declared instance-field offset; one code path)",
+    "clean_case": {
+      "store_va": "0x006C67E2",
+      "read_va": "0x006C67BE",
+      "result": "PASS",
+      "detail": "store 'mov [esi + 0x68], edi' ok=True; read 'mov edi, [eax + 4]' ok=True"
+    },
+    "mutated_case": {
+      "store_va": "0x006C7008",
+      "mutation": "the containment relation broken: the producer's [+0x6C] instance-cache store (real EXE bytes of a DIFFERENT manager field) substituted as the child-field store",
+      "result": "FAIL",
+      "expected": "FAIL",
+      "detail": "store 'mov [esi + 0x6c], eax' ok=False; read 'mov edi, [eax + 4]' ok=True",
+      "cause": "the store offset no longer matches the declared +0x68 containment field"
+    },
+    "verdict": "PASS",
+    "range": "same checker; same 3-byte instruction range class (89/8B stores/loads); clean = the measured writer pair; mutated = the foreign-field store"
+  },
+  "CTRL_3": {
+    "checker": "ctrl3_provenance (getter field offset == producer-written offset 0x68; one code path)",
+    "clean_case": {
+      "accessor_va": "0x006C66D0",
+      "result": "PASS",
+      "detail": "accessor reads eax, [ecx + 0x68] == the producer-written field"
+    },
+    "mutated_case": {
+      "accessor_va": "0x006C0EE0",
+      "mutation": "the accessor substituted with the REAL EXE bytes of a foreign manager field ([+0x120] getter of the same class family)",
+      "result": "FAIL",
+      "expected": "FAIL",
+      "detail": "accessor 'mov eax, [ecx + 0x120]' does not read [ecx+0x68]",
+      "cause": "correct bytes of a foreign field do not qualify as provenance of THIS getter (+0x68)"
+    },
+    "verdict": "PASS",
+    "range": "same checker; same accessor instruction shape; clean = the real getter; mutated = the real foreign-field accessor"
+  },
+  "CTRL_4": {
+    "checker": "ctrl4_preservation (§7 chain intactness: head move + no EDI-writing instruction + push edi; one code path)",
+    "clean_case": {
+      "window": "0x0050A3B7..0x0050A3F8 (the measured §7 window; free re-pin)",
+      "result": "PASS",
+      "detail": "chain intact: mov edi,eax; no EDI write before push edi; push edi present"
+    },
+    "mutated_case": {
+      "window": "same window with a SYNTHETIC EDI clobber injected at 0x0050A3DD (8B 3D D0 D8 B9 00)",
+      "result": "FAIL",
+      "expected": "FAIL",
+      "detail": "EDI clobbered at 0x0050a3dd mov edi, dword ptr [0xb9d8d0]",
+      "cause": "an EDI-writing instruction between the head move and push edi breaks the return->final-child relation; CHILD_TO_JOIN_IDENTITY cannot remain CONFIRMED"
+    },
+    "verdict": "PASS",
+    "range": "same checker; same window range; clean = the real measured bytes; mutated = the same bytes with the injected clobber",
+    "note": "the REAL chain is reported at STRONGLY_SUPPORTED (CL-12): the checker's clean PASS covers the CALLER side only; the four intervening callee bodies remain NOT_CHECKED (ABI support, not proof)"
+  },
+  "SUMMARY": {
+    "CTRL_1_RESULT": "PASS",
+    "CTRL_2_RESULT": "PASS",
+    "CTRL_3_RESULT": "PASS",
+    "CTRL_4_RESULT": "PASS",
+    "all_four_machinery_controls": "PASS",
+    "scope_note": "machinery falsifiability only — SYNTHETIC PASS is not PCG science; no new EXE fields/objects were searched for the controls; the real-input classifications (incl. the POLICY_ONLY note) are recorded per case",
+    "decoder": "capstone 5.0.7 (cs_version (5,0,1280)); pinned EXE fail-closed reads"
+  }
+}

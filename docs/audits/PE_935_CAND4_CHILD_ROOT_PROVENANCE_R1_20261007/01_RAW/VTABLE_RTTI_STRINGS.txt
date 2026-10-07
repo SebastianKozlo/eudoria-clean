@@ -1,0 +1,45 @@
+01_RAW/VTABLE_RTTI_STRINGS.txt — data reads (no body opening; no budget charge).
+All values are DATA reads from the pinned EXE (vtable entries, MSVC RTTI Complete
+Object Locator chains, string constants). Era label: PCG 9.3.5 client image.
+
+=== VTABLE ENTRIES (measured u32 reads) ===
+  ArkModelManagerMain vtable 0x00A855D0:
+    slot 2 (+0x08) = 0x006C0FD0   (dispatched at 0x006C7055 in the producer; body NOT opened)
+    slot 3 (+0x0C) = 0x006C19B0   (dispatched at 0x006C8B9E in the lazy-init; body NOT opened)
+  ArkModelManager base vtable 0x00A85A08:
+    slot 2 (+0x08) = 0x008E0110 (purecall-family placeholder — matches the derived-class
+                                  override pattern; recorded as measured data)
+    slot 3 (+0x0C) = 0x008E0110 (same)
+
+=== MSVC RTTI (vtable[-1] -> CompleteObjectLocator -> TypeDescriptor name) ===
+  0x00A855D0: COL ptr 0x00AA6C58 -> type name .?AVArkModelManagerMain@@   (derived manager — CONFIRMED by RTTI)
+  0x00A85A08: COL ptr 0x00AA6CD8 -> type name .?AVArkModelManager@@        (base class — CONFIRMED by RTTI)
+  0x00A864B8: COL ptr 0x00AA7770 -> type name .?AVArkModelResourceInstanceRef@@
+              (the prior bridge canon's 0xC-byte wrapper class: new(0xC) ->
+               FUN_006FA8B0 ctor with vft 0x00A864B8 inside instance creator
+               FUN_006CB6F0's chain — prior canon CH3; the RTTI name is measured
+               by THIS run as data. The prior-canon field map for this class
+               (refcount@+4, item@+8) is NOT re-verified here and CONTRADICTS the
+               [instance+4]-as-pointer use observed in FUN_006C6780 if the pump
+               returns this wrapper — see FUN_006C6780_INSTALLER_PARTIAL.txt
+               IDENTITY GAP.)
+
+=== STRING CONSTANTS (measured) ===
+  0x00A859F8: 41 72 6B 54 65 78 74 75 72 65 00 00            = "ArkTexture"
+              (pushed @0x006C67ED; the named-lookup constant on the [+0x68] child)
+  0x00A8547C: 41 72 6B 41 6E 69 6D 61 74 69 6F 6E 00 00 00 00 = "ArkAnimation"
+              (pushed @0x006C6836; the second named-lookup constant on the child)
+  0x00A7957B: 00 ...                                         = "" (EMPTY STRING; the byte at
+              0x00A7957B is 00; the literal "Entropia" begins at 0x00A7957C)
+              (pushed @0x006C6FB5 and @0x006C6FD3 as the lookup key of the two
+              import-mediated lookups in the producer FUN_006C6F60)
+  0x00A7D444: "ArkSceneFeeder"  (prior canon PA2; NOT re-measured this run beyond
+              this confirmation read — the SF ExtraData key of the SF ctor chain)
+
+=== NOTES ===
+- The vtable slot identities (0x006C0FD0 / 0x006C19B0) are DATA facts; the bodies
+  were NOT opened (no interpretation of their content is recorded anywhere in this
+  package; EDGE_ACCOUNTING_LEDGER rows E-19/E-12 record only the dispatch facts).
+- 0x008E0110 appears as the base-class slot-2/slot-3 placeholder; the observed
+  value pattern (cmp [esi+0x28]-derived flags with 0x8E0110 in FUN_006C8BB0's
+  raw-visible bytes) is NOT interpreted by this run (NEIGH rows only).

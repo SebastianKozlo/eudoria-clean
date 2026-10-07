@@ -1,0 +1,67 @@
+01_RAW/FUN_006C0D50_CTOR_DECODE.txt — ArkModelManagerMain derived constructor.
+NEW BODY #2 of 6. Decoder: capstone 5.0.7; own rel32 recompute; pinned EXE (fail-closed).
+
+Context: called from FUN_006A3930 @0x006A3A77 (rel32 E8 D4 D2 01 00, recomputed =
+0x006C0D50) with args (push eax=[FUN_006A3930 param @0x006A3A6E]; push 4; push eax=
+FUN_00733340 result) and receiver ECX = the new(0x130) block (@0x006A3A4D allocator
+call → 0x0095D3C4; prior canon X31/X06 family; re-pinned free, no new semantics).
+
+WINDOW 0x006C0D50 LEN 700 (bounded). ANALYZED BODY = 0x006C0D50..0x006C0DAE only.
+RAW BYTES (first 0x5F bytes of the body):
+8B 44 24 0C 8B 54 24 04 56 8B F1 8B 4C 24 0C 50 51 52 8B CE E8 17 82 00 00 33 C0 89 86 10 01 00 00 89 86 14 01 00 00 89 86 18 01 00 00 89 86 1C 01 00 00 89 86 20 01 00 00 89 86 24 01 00 00 88 86 28 01 00 00 88 86 2A 01 00 00 C7 06 D0 55 A8 00 C6 86 29 01 00 00 01 8B C6 5E C2 0C 00 CC CC
+
+DISASSEMBLY (analyzed extent 0x006C0D50..0x006C0DAE):
+  0x006c0d50  8B 44 24 0C           mov eax, [esp+0xc]        ; arg3 (FUN_00733340 result)
+  0x006c0d54  8B 54 24 04           mov edx, [esp+0x4]        ; arg1 (=4)
+  0x006c0d58  56                    push esi
+  0x006c0d59  8B F1                 mov esi, ecx              ; this
+  0x006c0d5b  8B 4C 24 0C           mov ecx, [esp+0xc]        ; arg2 (param)
+  0x006c0d5f  50                    push eax                  ; arg3
+  0x006c0d60  51                    push ecx                  ; arg2
+  0x006c0d61  52                    push edx                  ; arg1
+  0x006c0d62  8B CE                 mov ecx, esi              ; receiver = this
+  0x006c0d64  E8 17 82 00 00        call 0x6c8f80             ; rel32 recompute: 0x006C0D64+5+0x8217 = 0x006C8F80 (BASE CTOR — analyzed body #3)
+  0x006c0d69  33 C0                 xor eax, eax
+  0x006c0d6b  89 86 10 01 00 00     mov [esi+0x110], eax      ; zero derived fields
+  0x006c0d71  89 86 14 01 00 00     mov [esi+0x114], eax
+  0x006c0d77  89 86 18 01 00 00     mov [esi+0x118], eax
+  0x006c0d7d  89 86 1C 01 00 00     mov [esi+0x11c], eax
+  0x006c0d83  89 86 20 01 00 00     mov [esi+0x120], eax
+  0x006c0d89  89 86 24 01 00 00     mov [esi+0x124], eax
+  0x006c0d8f  88 86 28 01 00 00     mov byte [esi+0x128], al
+  0x006c0d95  88 86 2A 01 00 00     mov byte [esi+0x12a], al
+  0x006c0d9b  C7 06 D0 55 A8 00     mov [esi], 0xa855d0       ; DERIVED vtable (RTTI .?AVArkModelManagerMain@@, measured)
+  0x006c0da1  C6 86 29 01 00 00 01  mov byte [esi+0x129], 1
+  0x006c0da8  8B C6                 mov eax, esi              ; return this
+  0x006c0daa  5E                    pop esi
+  0x006c0dab  C2 0C 00              ret 0xc                   ; terminal RET; extent ends 0x006C0DAE
+  0x006c0dae  CC CC                 int3 padding (2 bytes; next body @0x006C0DB0 = a SECOND
+                                          constructor variant — raw-visible continuation, NOT analyzed)
+
+EXTENT: 0x006C0D50..0x006C0DAE — RESOLVED (terminal ret 0xc + CC padding + aligned next
+entry @0x006C0DB0 with a standard SEH prologue).
+
+SEMANTICS (measured, this run):
+- Thin derived-class constructor: delegates to the BASE constructor FUN_006C8F80
+  (this, arg1=4, arg2, arg3), then zeroes the DERIVED-region fields +0x110..+0x12A
+  (incl. byte fields), sets the derived vtable 0x00A855D0 and byte flag [+0x129]=1,
+  returns this. Thiscall with callee cleanup of 3 args (ret 0xc).
+- The manager's +0x68 field lies in the BASE-class region (0x00..0x10C) — NOT in
+  the zeroed derived region; its writer is in the base ctor (FUN_006C8F80, body #3).
+
+RAW-VISIBLE WINDOW CONTINUATION (bodies past the extent — NOT analyzed, no
+interpretation recorded; EDGE_ACCOUNTING_LEDGER rows NEIGH-3..NEIGH-11,
+OUT_OF_ANALYZED_EXTENT): 0x006C0DB0 (second ctor variant: call 0x006C80C0
+@0x006C0DE4; new(0x68) @0x006C0E15 → 0x0095D3C4; call 0x006CF3F0 @0x006C0E2D;
+stores [esi+0x124] etc.), 0x006C0E70 (setter +0x118 with slot-0 release dispatch
+@0x006C0E83), 0x006C0EB0 (getter +0x118), 0x006C0EC0 (getter byte +0x12A),
+0x006C0ED0 (reset byte +0x12A), 0x006C0EE0 (getter +0x120), 0x006C0EF0 (lazy
+initializer of +0x120 — contains a callsite of FUN_006C66D0 @0x006C0F49 with
+receiver esi and further calls 0x0040B0A0 @0x006C0F41 / 0x006C9F30 @0x006C0F51;
+NONE interpreted by this run), 0x006C0F80 (getter +0x124), 0x006C0F90 (7-byte
+getter byte +0x128 — an intervening callee of the §7 chain; NOT interpreted here,
+NOT opened as a body this run; NOT_CHECKED), 0x006C0FA0 (setter byte +0x129),
+0x006C0FB0 (getter byte +0x129), 0x006C0FC0 (getter +0x11C), 0x006C0FD0 (lazy
+creator family — new(0x68) @0x006C0FF8 → 0x0095D3C4; the identity 0x006C0FD0 =
+manager vtable slot 2 (data read from 0xA855D0+8) is recorded as DATA, no body
+analysis). Window ends 0x006C100C (LEN 700).

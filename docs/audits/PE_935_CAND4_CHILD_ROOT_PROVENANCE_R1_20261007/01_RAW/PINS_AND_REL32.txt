@@ -1,0 +1,96 @@
+01_RAW/PINS_AND_REL32.txt — load-bearing byte pins + independent rel32 recomputes.
+All reads are fresh from the pinned EXE (fail-closed reader; INPUT_IDENTITIES.md §1).
+Decoder identity: capstone 5.0.7 for instruction display; rel32 arithmetic recomputed
+by this run's own code (call_va + 5 + int32(rel32)); the two implementations agree
+on every pin below.
+
+=== BYTE PINS (measured) ===
+  getter_body                         @0x006C66D0: 8B 41 68 C3            (mov eax,[ecx+0x68]; ret)
+  base_ctor_null_write_+0x68          @0x006C8FD3: 89 5E 68               (mov [esi+0x68], ebx)
+  base_ctor_store_+0x6C_null          @0x006C8FE3: 89 5E 6C               (mov [esi+0x6C], ebx)
+  base_ctor_flag_+0xEC_null           @0x006C9014: 88 9E EC 00 00 00      (mov byte [esi+0xEC], bl)
+  lazy_cmp_+0x68                      @0x006C8B34: 83 7E 68 00            (cmp [esi+0x68], 0)
+  lazy_call_producer                  @0x006C8B3A: E8 21 E4 FF FF
+  lazy_set_flag_+0xEC                 @0x006C8B50: C6 86 EC 00 00 00 01   (mov byte [esi+0xEC],1)
+  producer_cmp_+0x6C                  @0x006C6F88: 83 7E 6C 00            (cmp [esi+0x6C], 0)
+  producer_store_+0x6C                @0x006C7008: 89 46 6C               (mov [esi+0x6C], eax)
+  producer_call_installer             @0x006C7049: E8 32 F7 FF FF
+  installer_cmp_+0x68                 @0x006C67A9: 83 7E 68 00            (cmp [esi+0x68], 0)
+  installer_read_inst+4               @0x006C67BE: 8B 78 04               (mov edi, [eax+4])
+  installer_write_+0x68               @0x006C67E2: 89 7E 68               (mov [esi+0x68], edi)  <<<<< THE WRITER
+  installer_incref_new               @0x006C67E7: 01 5F 04               (add [edi+4], ebx)
+  installer_decref_old                @0x006C67D4: 01 69 04               (add [ecx+4], ebp)
+  texture_lookup_push_name            @0x006C67ED: 68 F8 59 A8 00         (push 0x00A859F8)
+  texture_lookup_call                 @0x006C67F2: E8 39 04 0F 00
+  animation_lookup_push_name          @0x006C6836: 68 7C 54 A8 00         (push 0x00A8547C)
+  animation_lookup_call               @0x006C683B: E8 F0 03 0F 00
+  derived_ctor_call_base              @0x006C0D64: E8 17 82 00 00
+  base_ctor_subinit_+0x70             @0x006C8FE6: E8 B5 E0 E9 FF
+  base_ctor_subinit_+0xA0             @0x006C9005: E8 26 13 D7 FF
+  base_vtable_store                   @0x006C8FAB: C7 06 08 5A A8 00      (mov [esi], 0x00A85A08)
+  derived_vtable_store                @0x006C0D9B: C7 06 D0 55 A8 00      (mov [esi], 0x00A855D0)
+  ctor_validity_call                  @0x006C6F97: E8 44 8D 06 00
+  ctor_getterA_call                   @0x006C6FF6: E8 E5 71 10 00
+  ctor_pump_call                      @0x006C6FFC: E8 FF 26 00 00
+  ctor_key_constant_push (#1)         @0x006C6FB5: 68 7B 95 A7 00          (push 0x00A7957B)
+  ctor_key_constant_push (#2)         @0x006C6FD3: 68 7B 95 A7 00
+  ctor_pump_argpush_A                 @0x006C6FFB: 50
+  ctor_pump_cdecl_cleanup             @0x006C7001: 83 C4 10               (add esp, 0x10 — cdecl, 4 args)
+  chain_call_ctor                     @0x006A3A77: E8 D4 D2 01 00
+  chain_call_8b20                     @0x006A3A8D: E8 8E 50 02 00
+  chain_call_8bb0                     @0x006A3A94: E8 17 51 02 00
+  chain_call_50a310                   @0x006A3A9D: E8 6E 68 E6 FF
+  chain_push_0x130                    @0x006A3A48: 68 30 01 00 00         (prior canon X31; free re-pin)
+  join_window_mov_edi_eax             @0x0050A3B7: 8B F8                  (mov edi, eax)
+  join_window_call_f90                @0x0050A3B9: E8 D2 6B 1B 00
+  join_window_test_al                 @0x0050A3BE: 84 C0
+  join_window_or_+0x2C_2              @0x0050A3C2: 83 4E 2C 02            (or [esi+0x2C], 2)
+  join_window_and_+0x2C               @0x0050A3C8: 83 66 2C FD           (and [esi+0x2C], 0xFFFFFFFD)
+  join_window_call_10b0               @0x0050A3CF: E8 DC 6C 1B 00
+  join_window_push_eax                @0x0050A3D6: 50
+  join_window_push_edi_arg            @0x0050A3D7: 57                     (push edi — child arg to FUN_0050A1E0)
+  join_window_call_50a1e0             @0x0050A3D8: E8 03 FE FF FF
+  join_window_call_5246e0             @0x0050A3E4: E8 F7 A2 01 00
+  join_window_load_sf30               @0x0050A3E9: 8B 4E 30               (mov ecx, [esi+0x30])
+  join_window_vtload                 @0x0050A3EC: 8B 01                  (mov eax, [ecx])
+  join_window_slot41                  @0x0050A3EE: 8B 90 A4 00 00 00      (mov edx, [eax+0xA4])
+  join_window_push0                   @0x0050A3F4: 6A 00
+  join_window_push_edi_child          @0x0050A3F6: 57                     (push edi — THE join child argument)
+  join_window_call_dx                 @0x0050A3F7: FF D2                  (call edx — THE JOIN)
+  getter_callsite_main                @0x0050A3AF: E8 1C C3 1B 00
+  getter_callsite_nullcheck           @0x0050A39D: E8 2E C3 1B 00
+  getter_callsite_oldmgr              @0x0050A34B: E8 80 C3 1B 00
+  sf20_store (prior canon; re-pin)    @0x0050A3AC: 89 7E 20               (mov [esi+0x20], edi)
+
+=== REL32 RECOMPUTES (own arithmetic; capstone agreement verified) ===
+  CALL 0x0050A34B -> 0x006C66D0   (getter; old-manager detach path)
+  CALL 0x0050A39D -> 0x006C66D0   (getter; null-check of the new manager)
+  CALL 0x0050A3AF -> 0x006C66D0   (getter; THE CAND-4 child getter)
+  CALL 0x0050A3B9 -> 0x006C0F90   (intervening callee #1; body NOT opened)
+  CALL 0x0050A3CF -> 0x006C10B0   (intervening callee #2; body NOT opened)
+  CALL 0x0050A3D8 -> 0x0050A1E0   (intervening callee #3; body NOT opened)
+  CALL 0x0050A3E4 -> 0x005246E0   (intervening callee #4; body NOT opened)
+  CALL 0x006A3A77 -> 0x006C0D50   (manager ctor)
+  CALL 0x006A3A8D -> 0x006C8B20   (manager lazy-init)
+  CALL 0x006A3A94 -> 0x006C8BB0   (manager method; body NOT opened — coverage gap)
+  CALL 0x006A3A9D -> 0x0050A310   (the SF install method; prior canon E5, free re-pin)
+  CALL 0x006C0D64 -> 0x006C8F80   (base ctor)
+  CALL 0x006C8FE6 -> 0x005670A0   (+0x70 sub-object init; body NOT opened)
+  CALL 0x006C9005 -> 0x0043A330   (+0xA0 sub-object init; body NOT opened)
+  CALL 0x006C8B3A -> 0x006C6F60   (lazy producer)
+  CALL 0x006C6F97 -> 0x0072FCE0   (validity check; prior canon family, free identity re-pin)
+  CALL 0x006C6FF6 -> 0x007CE1E0   (getter A; prior canon CH1/X23 family, free identity re-pin)
+  CALL 0x006C6FFC -> 0x006C9700   (instance-creator pump; prior canon CH3 family, free identity re-pin)
+  CALL 0x006C7049 -> 0x006C6780   (installer/writer)
+  CALL 0x006C67F2 -> 0x007B6C30   ('ArkTexture' named lookup; body NOT opened)
+  CALL 0x006C683B -> 0x007B6C30   ('ArkAnimation' named lookup; body NOT opened)
+  CALL 0x006C6804 -> 0x0095D3C4   (operator new(0x10))
+  CALL 0x006C6823 -> 0x006D3570   (0x10-object init; body NOT opened)
+
+CROSS-CHECK vs PRIOR RECORDS (free re-pins, zero mismatches):
+- The 0x0050A3E9..0x0050A3F7 join window bytes == the source run's
+  01_RAW/FUN_0050A310_DECODE.txt window (byte-identical re-read; the source run's
+  QC S4/S8 pins remain valid; NiNode vtable slot 41 = FUN_007B5810 per prior canon).
+- The getter callsite rel32 (0x0050A3AF -> 0x006C66D0) == the source run's QC S3 pin.
+- The chain pins 0x006A3A77/0x006A3A8D/0x006A3A94/0x006A3A9D == the source run's
+  01_RAW/FUN_006A3930_CHAIN_REPIN.txt (X06/X07/X08/X05 family; free re-pins).

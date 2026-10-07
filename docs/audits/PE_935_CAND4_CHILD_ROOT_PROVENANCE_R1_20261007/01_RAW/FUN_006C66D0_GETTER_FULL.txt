@@ -1,0 +1,56 @@
+01_RAW/FUN_006C66D0_GETTER_FULL.txt — the child getter of the CAND-4 path.
+NEW BODY #1 of 6. Decoder: capstone 5.0.7 (INPUT_IDENTITIES.md §4); own rel32 recompute.
+Byte source: D:\Eudoria_Reconstruction\pcg_install\Entropia.exe (8,015,872 B / SHA256
+E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, fail-closed reader).
+
+WINDOW 0x006C66D0 LEN 96 (bounded window; body extent = first 4 bytes, see EXTENT below)
+RAW BYTES:
+8B 41 68 C3 CC CC CC CC CC CC CC CC CC CC CC CC 56 8B 74 24 08 83 7E 58 00 75 14 8B 41 68 85 C0 74 0D 56 50 E8 77 33 02 00 83 C4 08 89 46 58 5E C2 04 00 CC CC CC CC CC CC CC CC CC CC CC CC CC 83 79 68 00 56 8B 74 24 08 74 47 80 B9 EC 00 00 00 00 74 3E 8B 46 34 8B 40 68 85 C0 8B 4E 58 74
+
+DISASSEMBLY (capstone 5.0.7, CS_ARCH_X86/CS_MODE_32):
+  0x006c66d0  8B 41 68              mov eax, dword ptr [ecx + 0x68]
+  0x006c66d3  C3                    ret
+  0x006c66d4..0x006c66df             int3 padding (12 bytes CC)
+  --- next body begins @0x006C66E0 (push esi; mov esi,[esp+8]; cmp [esi+0x58],0; ...)
+  0x006c66e0  56                    push esi            } NEXT FUNCTION (NOT analyzed this run —
+  0x006c66e1  8B 74 24 08           mov esi, [esp+8]     } raw-visible window continuation only;
+  0x006c66e5  83 7E 58 00           cmp [esi+0x58], 0    } no interpretation recorded (budget)
+  0x006c66e9  75 14                 jne 0x6c66ff
+  0x006c66eb  8B 41 68              mov eax, [ecx+0x68]
+  0x006c66ee  85 C0                 test eax, eax
+  0x006c66f0  74 0D                 je 0x6c66ff
+  0x006c66f2  56                    push esi
+  0x006c66f3  50                    push eax
+  0x006c66f4  E8 77 33 02 00       call 0x6e9a70        ; rel32 recompute: 0x006C66F4+5+0x23377 = 0x006E9A70
+  0x006c66f9  83 C4 08              add esp, 8
+  0x006c66fc  89 46 58              mov [esi+0x58], eax
+  0x006c66ff  5E                    pop esi
+  0x006c6700  C2 04 00              ret 4
+  0x006c6703..0x006c670f            int3 padding (13 bytes CC)
+  --- next body @0x006C6710 (cmp [ecx+0x68],0; ... — raw-visible continuation only, NOT analyzed)
+
+EXTENT PROVENANCE (contract §4 — CC/RET heuristic alone is NOT extent proof):
+- Entry 0x006C66D0 is byte-exact: all three callers of this function in the
+  examined chain reach it by rel32 arithmetic (0x0050A3AF+5+0x1BC31C,
+  0x0050A39D+5+0x1BC32E, 0x0050A34B+5+0x1BC380 — all = 0x006C66D0; recomputed).
+- Terminal instruction: RET (C3) @0x006C66D3.
+- Trailing alignment padding: 12 consecutive 0xCC int3 bytes 0x006C66D4..0x006C66DF,
+  immediately followed by the aligned entry of the next distinct body at
+  0x006C66E0 (push esi — a standard prologue).
+- Function extent: 0x006C66D0..0x006C66D4 (4 bytes). BOUNDED — RESOLVED.
+
+GETTER SEMANTICS (measured):
+  input : ECX = this (the ArkModelManagerMain instance — RTTI .?AVArkModelManagerMain@@,
+         vtable 0x00A855D0; base class .?AVArkModelManager@@, vtable 0x00A85A08;
+         both RTTI names measured from the vtable COL chains this run)
+  output: EAX = [this + 0x68] (dword)
+  branches: NONE. NULL handling: NONE (raw field value returned).
+  call convention: thiscall, no stack cleanup (ret), no callee-saved register touched.
+
+GETTER_OPERATION = DIRECT_FIELD_GETTER
+ARKMODELMANAGER_CHILD_FIELD_OFFSET = 0x68 (measured: 8B 41 68 = mov eax,[ecx+0x68])
+
+Neighbor note (NO interpretation recorded — budget discipline): the raw-visible
+neighbor bodies at 0x006C66E0 and 0x006C6710 also access [ecx+0x68]/[esi+0x34]+0x68
+of their receivers; they are NOT analyzed by this run (no body opened, no semantic
+role recorded; EDGE_ACCOUNTING_LEDGER rows NEIGH-1/NEIGH-2, RAW_VISIBLE_ONLY).

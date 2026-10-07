@@ -1,0 +1,78 @@
+01_RAW/FUN_006C8F80_BASECTOR_DECODE.txt — ArkModelManager base constructor.
+NEW BODY #3 of 6. Decoder: capstone 5.0.7; own rel32 recompute; pinned EXE (fail-closed).
+
+Context: called by the derived ctor FUN_006C0D50 @0x006C0D64 (rel32 recomputed =
+0x006C8F80) with (this, 4, param, FUN_00733340-result).
+
+WINDOW 0x006C8F80 LEN 400 (bounded). ANALYZED BODY = 0x006C8F80..0x006C9036 only.
+RAW BYTES (body, 0xB6 bytes):
+6A FF 68 A7 55 A0 00 64 A1 00 00 00 00 50 51 53 56 A1 D0 D8 B9 00 33 C4 50 8D 44 24 10 64 A3 00 00 00 00 8B F1 89 74 24 0C 33 DB C7 06 08 5A A8 00 89 5E 08 89 5C 24 18 89 5E 28 89 5E 48 89 5E 4C 89 5E 50 89 5E 54 89 5E 58 89 5E 5C 89 5E 60 89 5E 64 89 5E 68 8B 44 24 20 50 8D 4E 70 C6 44 24 1C 03 89 5E 6C E8 B5 E0 E9 FF 8B 4C 24 28 68 00 A3 43 00 6A 03 6A 18 51 8D 96 A0 00 00 00 52 C6 44 24 2C 04 E8 26 13 D7 FF 8B 44 24 24 89 86 E8 00 00 00 88 9E EC 00 00 00 89 9E F0 00 00 00 8B C6 8B 4C 24 10 64 89 0D 00 00 00 00 59 5E 5B 83 C4 10 C2 0C 00
+
+DISASSEMBLY (analyzed extent 0x006C8F80..0x006C9036):
+  0x006c8f80..0x006c8fa2  SEH prologue (push -1; push 0xa055a7; fs:[0] chain; esp cookie)
+  0x006c8fa3  8B F1                 mov esi, ecx              ; this
+  0x006c8fa9  33 DB                 xor ebx, ebx              ; ebx = 0
+  0x006c8fab  C7 06 08 5A A8 00     mov [esi], 0xa85a08       ; BASE vtable (RTTI .?AVArkModelManager@@, measured)
+  0x006c8fb1  89 5E 08              mov [esi+8], ebx
+  0x006c8fb8  89 5E 28              mov [esi+0x28], ebx
+  0x006c8fbb  89 5E 48              mov [esi+0x48], ebx
+  0x006c8fbe  89 5E 4C              mov [esi+0x4c], ebx
+  0x006c8fc1  89 5E 50              mov [esi+0x50], ebx
+  0x006c8fc4  89 5E 54              mov [esi+0x54], ebx
+  0x006c8fc7  89 5E 58              mov [esi+0x58], ebx
+  0x006c8fca  89 5E 5C              mov [esi+0x5c], ebx
+  0x006c8fcd  89 5E 60              mov [esi+0x60], ebx
+  0x006c8fd0  89 5E 64              mov [esi+0x64], ebx
+  0x006c8fd3  89 5E 68              mov [esi+0x68], ebx       ; <<<<< WRITER #1: [this+0x68] = 0 (NULL reset)
+  0x006c8fd6  8B 44 24 20           mov eax, [esp+0x20]       ; ctor arg (FUN_00733340 result)
+  0x006c8fda  50                    push eax
+  0x006c8fdb  8D 4E 70              lea ecx, [esi+0x70]
+  0x006c8fde  C6 44 24 1C 03        mov byte [esp+0x1c], 3
+  0x006c8fe3  89 5E 6C              mov [esi+0x6c], ebx       ; [+0x6C] = 0 (instance cache NULL reset)
+  0x006c8fe6  E8 B5 E0 E9 FF        call 0x5670a0             ; rel32 recompute: 0x006C8FE6+5+(-0x11F4B) = 0x005670A0
+                                                              ; sub-object init at [this+0x70] (template holder)
+  0x006c8feb  8B 4C 24 28           mov ecx, [esp+0x28]       ; ctor arg2 (the param)
+  0x006c8fef  68 00 A3 43 00        push 0x43a300             ; const arg
+  0x006c8ff4  6A 03                 push 3
+  0x006c8ff6  6A 18                 push 0x18
+  0x006c8ff8  51                    push ecx
+  0x006c8ff9  8D 96 A0 00 00 00     lea edx, [esi+0xa0]
+  0x006c8fff  52                    push edx
+  0x006c9000  C6 44 24 2C 04        mov byte [esp+0x2c], 4
+  0x006c9005  E8 26 13 D7 FF        call 0x43a330             ; rel32 recompute: 0x006C9005+5+(-0x28CDA) = 0x0043A330
+                                                              ; second sub-object init at [this+0xA0]
+  0x006c900a  8B 44 24 24           mov eax, [esp+0x24]
+  0x006c900e  89 86 E8 00 00 00     mov [esi+0xe8], eax       ; [+0xE8] = arg2 (param)
+  0x006c9014  88 9E EC 00 00 00     mov byte [esi+0xec], bl    ; [+0xEC] = 0 (the lazy-init flag used by FUN_006C8B20)
+  0x006c901a  89 9E F0 00 00 00     mov [esi+0xf0], ebx       ; [+0xF0] = 0
+  0x006c9020  8B C6                 mov eax, esi              ; return this
+  0x006c9033  C2 0C 00              ret 0xc                   ; terminal RET; extent ends 0x006C9036
+  0x006c9036..0x006c903f            int3 padding (10 bytes CC)
+
+EXTENT: 0x006C8F80..0x006C9036 — RESOLVED (terminal ret 0xc + CC padding + aligned
+next entry @0x006C9040 with standard SEH prologue).
+
+SEMANTICS (measured, this run):
+- Base-class constructor of the manager: sets base vtable 0x00A85A08, NULLs the
+  base-region fields (+8, +0x28, +0x48..+0x68 INCLUSIVE — the examined child field
+  +0x68 is NULL after construction), inits the +0x70 sub-object (FUN_005670A0 —
+  the template holder later consumed by the producer FUN_006C6F60 via
+  FUN_0072FCE0/FUN_007CE1E0), inits the +0xA0 sub-object (FUN_0043A330), stores
+  arg2 at +0xE8, resets byte flag +0xEC=0 (the flag FUN_006C8B20 later sets to 1)
+  and +0xF0=0.
+- FIELD_PRODUCER_LEDGER WRITER #1: [manager+0x68] = 0 @0x006C8FD3 (89 5E 68) —
+  the NULL/initial writer. (Also resets [+0x6C] = 0 @0x006C8FE3 — the instance
+  cache field.)
+- The child field is therefore NULL immediately after construction; a non-NULL
+  child on the examined path REQUIRES a later producer (found: FUN_006C8B20 →
+  FUN_006C6F60 → FUN_006C6780, bodies #4/#5/#6).
+
+RAW-VISIBLE WINDOW CONTINUATION (bodies past the extent — NOT analyzed, no
+interpretation recorded; EDGE_ACCOUNTING_LEDGER rows NEIGH-12..NEIGH-20,
+OUT_OF_ANALYZED_EXTENT): 0x006C9040..0x006C910D (a body whose raw bytes include
+indirect calls via [0xA75A48] @0x006C907E/@0x006C908B, a call 0x006C6420
+@0x006C909A, calls of FUN_006C8B20 @0x006C90B4 and FUN_006C8BB0 @0x006C90BD, a
+call 0x006C6CE0 @0x006C90C9, an indirect vtable dispatch @0x006C90D5, calls
+0x006C8DE0 @0x006C90DF and 0x0043A290 @0x006C90F0 — NONE interpreted by this
+run; the body belongs to the manager-class family but was never opened as an
+analysis unit). Window ends 0x006C9110 (LEN 400).

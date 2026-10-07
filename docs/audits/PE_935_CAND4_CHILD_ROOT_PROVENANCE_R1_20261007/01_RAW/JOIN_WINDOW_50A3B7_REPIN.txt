@@ -1,0 +1,53 @@
+01_RAW/JOIN_WINDOW_50A3B7_REPIN.txt — §7 re-pin: getter result -> exact join child argument.
+FREE RE-PIN of the source run's already-recorded interpretation (prior file/record:
+PE_935_MODEL_CHILD_SCENEFEEDER_NINODE_JOIN_R1_20261006 01_RAW/FUN_0050A310_DECODE.txt
+window + its QC S4; the source run's census row family R01/V02/V03 + QC S2/S3) —
+the window bytes below are byte-identical to the persisted source record (verified
+this run, PINS_AND_REL32.txt); NO new semantics are claimed for the window itself.
+The §7 chain assessment (bottom) is THIS run's work.
+
+WINDOW 0x0050A3B7..0x0050A3F8 (fresh read; byte-identical to prior record):
+  0x0050a3b7  8B F8                 mov edi, eax            ; EDI = FUN_006C66D0 result ([manager+0x68])
+  0x0050a3b9  E8 D2 6B 1B 00        call 0x6c0f90           ; intervening call #1 (body NOT opened this run)
+  0x0050a3be  84 C0                 test al, al
+  0x0050a3c0  74 06                 je 0x50a3c8             ; branch on call#1 result
+  0x0050a3c2  83 4E 2C 02           or dword ptr [esi + 0x2c], 2      ; [SF+0x2C] bit1 = 1
+  0x0050a3c6  EB 04                 jmp 0x50a3cc
+  0x0050a3c8  83 66 2C FD           and dword ptr [esi + 0x2c], 0xfffffffd ; [SF+0x2C] bit1 = 0
+  0x0050a3cc  8B 4E 20              mov ecx, dword ptr [esi + 0x20]    ; the manager
+  0x0050a3cf  E8 DC 6C 1B 00        call 0x6c10b0           ; intervening call #2 (body NOT opened this run)
+  0x0050a3d4  8B CE                 mov ecx, esi            ; ECX = SF
+  0x0050a3d6  50                    push eax                ; value = call#2 result
+  0x0050a3d7  57                    push edi                ; <<<<< EDI (the getter result) pushed as an ARGUMENT
+  0x0050a3d8  E8 03 FE FF FF        call 0x50a1e0           ; intervening call #3 (body NOT opened this run)
+  0x0050a3dd  8B 8E 8C 00 00 00     mov ecx, dword ptr [esi + 0x8c]
+  0x0050a3e3  56                    push esi
+  0x0050a3e4  E8 F7 A2 01 00        call 0x5246e0           ; intervening call #4 (body NOT opened this run)
+  0x0050a3e9  8B 4E 30              mov ecx, dword ptr [esi + 0x30]    ; [SF+0x30] NiNode (prior canon; the EXACT parent)
+  0x0050a3ec  8B 01                 mov eax, dword ptr [ecx]
+  0x0050a3ee  8B 90 A4 00 00 00     mov edx, dword ptr [eax + 0xa4]   ; NiNode vtable slot 41 = FUN_007B5810 (prior canon)
+  0x0050a3f4  6A 00                 push 0
+  0x0050a3f6  57                    push edi                ; <<<<< THE JOIN CHILD ARGUMENT
+  0x0050a3f7  FF D2                 call edx                ; THE JOIN (STRONGLY_SUPPORTED AttachChild counterpart; prior canon ceiling)
+
+§7 CHAIN ASSESSMENT (this run):
+- Caller-side physical fact (measured over the whole window): between
+  mov edi,eax @0x0050A3B7 and push edi @0x0050A3F6 the ONLY instructions that
+  touch EDI are the two pushes (0x0050A3D7, 0x0050A3F6); no caller-side
+  instruction writes EDI. (Same measurement as the source run's QC S4 — free re-pin.)
+- The value crosses FOUR intervening calls: FUN_006C0F90 @0x0050A3B9,
+  FUN_006C10B0 @0x0050A3CF, FUN_0050A1E0 @0x0050A3D8, FUN_005246E0 @0x0050A3E4.
+  NONE of these four callee bodies was opened by this run (function budget
+  6/6 exhausted by the getter/producer chain — see EDGE_ACCOUNTING_LEDGER and
+  FINAL_REPORT budget section). Preservation across them rests on the MSVC x86
+  callee-saved-register ABI (EDI/ESI/EBX/EBP preserved) — SUPPORT, NOT PROOF
+  (contract §7).
+- ABI support + the measured caller window + the consistent dual use of the same
+  EDI register as the child argument of both the FUN_0050A1E0 call (0x0050A3D7)
+  and the join (0x0050A3F6) support the identity, but CONFIRMED is NOT available
+  without the four callee bodies.
+- CHILD_TO_JOIN_IDENTITY = STRONGLY_SUPPORTED (NOT CONFIRMED) — the honest §7
+  fallback per contract §7 ("Jeśli budżet nie pozwala, ustaw
+  STRONGLY_SUPPORTED/UNRESOLVED").
+- NOT_CHECKED (explicit): FUN_006C0F90, FUN_006C10B0, FUN_0050A1E0, FUN_005246E0
+  bodies (EDI preservation unverified physically); any EDI behavior inside them.

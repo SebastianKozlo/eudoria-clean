@@ -1,0 +1,101 @@
+01_RAW/FUN_006C6780_INSTALLER_PARTIAL.txt — the WRITER of [manager+0x68].
+NEW BODY #6 of 6 — PARTIAL OPENING (bounded 200-byte window; EXTENT = UNRESOLVED).
+Decoder: capstone 5.0.7; own rel32 recompute; pinned EXE (fail-closed).
+
+Context: called by FUN_006C6F60 @0x006C7049 (rel32 recomputed = 0x006C6780) with
+receiver ECX = manager, only after a successful instance creation ([+0x6C] != 0).
+
+WINDOW 0x006C6780 LEN 200 (0x006C6780..0x006C6848). THE BODY CONTINUES PAST THE
+WINDOW (the last complete instruction ends at 0x006C6844; bytes 0x006C6844..0x006C6847
+are the leading bytes of a further conditional branch). Per contract §4 the extent
+is recorded UNRESOLVED and NO continuation is decoded as part of this function.
+ALL LOAD-BEARING FACTS BELOW LIE INSIDE THE SEEN WINDOW.
+
+RAW BYTES (seen window, first 0xC8 bytes):
+6A FF 68 D1 4E A0 00 64 A1 00 00 00 00 50 83 EC 08 53 55 56 57 A1 D0 D8 B9 00 33 C4 50 8D 44 24 1C 64 A3 00 00 00 00 8B F1 83 7E 68 00 0F 85 55 01 00 00 8B 46 6C 85 C0 0F 84 4A 01 00 00 8B 78 04 8B 4E 68 83 CD FF 3B CF BB 01 00 00 00 74 1A 85 C9 74 0C 01 69 04 75 07 8B 01 8B 50 04 FF D2 85 FF 89 7E 68 74 03 01 5F 04 8B 4E 68 68 F8 59 A8 00 E8 39 04 0F 00 8B F8 85 FF 74 36 38 5F 1C 75 31 6A 10 E8 BB 6B 29 00 83 C4 04 89 44 24 14 85 C0 C7 44 24 24 00 00 00 00 74 0E 8B 7F 38 53 57 8B C8 E8 48 CD 00 00 EB 02 33 C0 89 6C 24 24 89 46 5C 8B 4E 68 68 7C 54 A8 00 E8 F0 03 0F 00 8B F8 85 FF 0F 84 BE 00
+
+DISASSEMBLY (seen instructions 0x006C6780..0x006C6844):
+  0x006c6780..0x006c67a6  SEH prologue
+  0x006c67a7  8B F1                 mov esi, ecx              ; this = manager
+  0x006c67a9  83 7E 68 00           cmp dword [esi+0x68], 0   ; child already installed?
+  0x006c67ad  0F 85 55 01 00 00     jne 0x6c6908              ; yes -> skip (target inside the UNSEEN continuation)
+  0x006c67b3  8B 46 6C              mov eax, [esi+0x6c]       ; the created instance
+  0x006c67b6  85 C0                 test eax, eax
+  0x006c67b8  0F 84 4A 01 00 00     je 0x6c6908              ; none -> skip (UNSEEN continuation)
+  0x006c67be  8B 78 04              mov edi, [eax+4]         ; <<<<< the child pointer = [instance+4]
+  0x006c67c1  8B 4E 68              mov ecx, [esi+0x68]      ; old value (NULL at first install)
+  0x006c67c4  83 CD FF              or ebp, 0xffffffff
+  0x006c67c7  3B CF                 cmp ecx, edi
+  0x006c67c9  BB 01 00 00 00        mov ebx, 1
+  0x006c67ce  74 1A                 je 0x6c67ea              ; same value -> skip swap
+  0x006c67d0  85 C9                 test ecx, ecx
+  0x006c67d2  74 0C                 je 0x6c67e0
+  0x006c67d4  01 69 04              add [ecx+4], ebp         ; refcount DEC on the old value
+  0x006c67d7  75 07                 jne 0x6c67e0
+  0x006c67d9  8B 01                 mov eax, [ecx]           ; vtable of the old value
+  0x006c67db  8B 50 04              mov edx, [eax+4]        ; vtable slot 1
+  0x006c67de  FF D2                 call edx                 ; zero-destroy dispatch of the old value (NiObject-family protocol)
+  0x006c67e0  85 FF                 test edi, edi
+  0x006c67e2  89 7E 68              mov [esi+0x68], edi      ; <<<<<<<<<< WRITER #2: [manager+0x68] = [instance+4]
+  0x006c67e5  74 03                 je 0x6c67ea
+  0x006c67e7  01 5F 04              add [edi+4], ebx        ; refcount INC on the new value (=> [+0x68] holds a REFCOUNTED object, refcount@+4)
+  0x006c67ea  8B 4E 68              mov ecx, [esi+0x68]      ; the new child
+  0x006c67ed  68 F8 59 A8 00        push 0xa859f8            ; name constant -> measured string 'ArkTexture' (41 72 6B 54 65 78 74 75 72 65 00)
+  0x006c67f2  E8 39 04 0F 00        call 0x7b6c30            ; rel32 recompute: 0x006C67F2+5+0xF0439 = 0x007B6C30
+                                                              ; NAMED LOOKUP on the child (callee body NOT opened; NiMain-cluster VA range)
+  0x006c67f7  8B F8                 mov edi, eax            ; lookup result
+  0x006c67f9  85 FF                 test edi, edi
+  0x006c67fb  74 36                 je 0x6c6833             ; NULL -> skip the texture binding (conditional — existence NOT guaranteed)
+  0x006c67fd  38 5F 1C              cmp byte [edi+0x1c], bl  ; result flag check ([+0x1C]==1?)
+  0x006c6800  75 31                 jne 0x6c6833            ; not set -> skip
+  0x006c6802  6A 10                 push 0x10
+  0x006c6804  E8 BB 6B 29 00        call 0x95d3c4            ; operator new(0x10)
+  0x006c6809  83 C4 04              add esp, 4
+  0x006c680c  89 44 24 14           mov [esp+0x14], eax
+  0x006c6810  85 C0                 test eax, eax
+  0x006c6812  C7 44 24 24 00 00 00 00  (SEH state store)
+  0x006c681a  74 0E                 je 0x6c682a
+  0x006c681c  8B 7F 38              mov edi, [edi+0x38]      ; field +0x38 of the lookup result
+  0x006c681f  53                    push ebx                ; 1
+  0x006c6820  57                    push edi
+  0x006c6821  8B C8                 mov ecx, eax            ; receiver = the new 0x10 object
+  0x006c6823  E8 48 CD 00 00        call 0x6d3570            ; rel32 recompute: 0x006C6823+5+0xCD48 = 0x006D3570 (init; body NOT opened)
+  0x006c6828  EB 02                 jmp 0x6c682c
+  0x006c682a  33 C0                 xor eax, eax
+  0x006c682c  89 6C 24 24           (SEH state store)
+  0x006c6830  89 46 5C              mov [esi+0x5c], eax      ; [manager+0x5C] = the bound texture-side object (conditional)
+  0x006c6833  8B 4E 68              mov ecx, [esi+0x68]      ; the child again
+  0x006c6836  68 7C 54 A8 00        push 0xa8547c            ; name constant -> measured string 'ArkAnimation' (41 72 6B 41 6E 69 6D 61 74 69 6F 6E 00)
+  0x006c683b  E8 F0 03 0F 00        call 0x7b6c30            ; SECOND NAMED LOOKUP on the child (body NOT opened)
+  0x006c6840  8B F8                 mov edi, eax
+  0x006c6842  85 FF                 test edi, edi
+  0x006c6844  0F 84 BE 00 ...        (window ends mid-instruction; body continues — NOT decoded)
+
+EXTENT: UNRESOLVED (partial opening; the body continues past 0x006C6844; the two
+long conditional jumps target 0x006C6908 — inside the unseen continuation). Per
+contract §4 the unseen continuation is NOT decoded and NOT claimed.
+
+SEMANTICS (measured, this run) — the writer of the child field:
+- Guarded by [+0x68]==0 and instance [+0x6C]!=0 (first install only).
+- WRITER #2 (FIELD_PRODUCER_LEDGER): [manager+0x68] = [instance+4] @0x006C67E2
+  (89 7E 68) — a refcounted smart-pointer SET: old value dec @0x006C67D4 with
+  zero-destroy via old-value vtable slot 1 @0x006C67DE; new value inc @0x006C67E7
+  (01 5F 04). The stored value is therefore a REFCOUNTED OBJECT (refcount@+4,
+  destroy via vtable slot 1 — the NiObject-family protocol).
+- After the write, two conditional NAMED LOOKUPS run ON the stored child via
+  FUN_007B6C30(child, name): 'ArkTexture' (0x00A859F8) and 'ArkAnimation'
+  (0x00A8547C) — i.e. the child is used as a named-lookup ROOT. Both lookups are
+  CONDITIONAL (NULL results skip their bindings); the existence of the named
+  children on any specific resource is NOT guaranteed by these bytes.
+- The 'ArkTexture' branch (on flag [+0x1C]==1 of the lookup result) creates a
+  0x10-byte object (operator new) initialized by FUN_006D3570(new, [result+0x38],
+  1) and stores it at [manager+0x5C]. The 'ArkAnimation' branch continues past
+  the window (NOT decoded).
+- IDENTITY GAP (recorded honestly): the exact class/role of [instance+4] is
+  UNRESOLVED — FUN_006C9700's body was NOT opened; the prior bridge canon's
+  0xC-byte wrapper class (RTTI .?AVArkModelResourceInstanceRef@@, vtable
+  0x00A864B8 — RTTI measured by this run from that vtable) carries a prior-canon
+  field map (refcount@+4, item@+8) that CONTRADICTS the [instance+4]-as-pointer
+  use observed here IF the pump returns that wrapper; the discrepancy is NOT
+  resolvable within this run's budget (no body opened for FUN_006C9700; no
+  global census). CHILD_RESOURCE_PROVENANCE is capped accordingly.

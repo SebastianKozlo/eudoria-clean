@@ -1,0 +1,314 @@
+{
+  "identity": null,
+  "pe_map": {
+    "e_lfanew": 288,
+    "machine": "0x14c",
+    "nsec": 5,
+    "image_base": "0x400000",
+    "sections": [
+      [
+        ".text",
+        4096,
+        6764005,
+        6766592,
+        4096
+      ],
+      [
+        ".rdata",
+        6770688,
+        1009001,
+        1011712,
+        6770688
+      ],
+      [
+        ".data",
+        7782400,
+        251620,
+        212992,
+        7782400
+      ],
+      [
+        ".tls",
+        8036352,
+        10,
+        4096,
+        7995392
+      ],
+      [
+        ".rsrc",
+        8040448,
+        15444,
+        16384,
+        7999488
+      ]
+    ]
+  },
+  "checks": [
+    {
+      "id": "QC-A0-exe-identity",
+      "ok": true,
+      "detail": "8015872 B / SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+    },
+    {
+      "id": "QC-A1-getter-body",
+      "ok": true,
+      "detail": "@0x006C66D0 = 8B 41 68 C3 (expect 8B 41 68 C3 = mov eax,[ecx+0x68]; ret)"
+    },
+    {
+      "id": "QC-A2-getter-modrm-decode",
+      "ok": true,
+      "detail": "own decode: mov EAX, [ECX+0x68]; ret — DIRECT_FIELD_GETTER [this+0x68], NOT [esi+0x68] (would be ModRM 0x46)"
+    },
+    {
+      "id": "QC-A3-getter-cc-padding",
+      "ok": true,
+      "detail": "padding 0x006C66D4..0x006C66DF = CC CC CC CC CC CC CC CC CC CC CC CC (12x CC)"
+    },
+    {
+      "id": "QC-A4-getter-next-entry",
+      "ok": true,
+      "detail": "next body @0x006C66E0 first byte = 56 (56 = push esi — prologue)"
+    },
+    {
+      "id": "QC-A5-caller-oldmgr",
+      "ok": true,
+      "detail": "E8 @0x0050A34B: rel32 80 C3 1B 00 -> 0x006C66D0 (expect 0x006C66D0)"
+    },
+    {
+      "id": "QC-A5-caller-nullcheck",
+      "ok": true,
+      "detail": "E8 @0x0050A39D: rel32 2E C3 1B 00 -> 0x006C66D0 (expect 0x006C66D0)"
+    },
+    {
+      "id": "QC-A5-caller-main",
+      "ok": true,
+      "detail": "E8 @0x0050A3AF: rel32 1C C3 1B 00 -> 0x006C66D0 (expect 0x006C66D0)"
+    },
+    {
+      "id": "QC-B1-rtti-derived",
+      "ok": true,
+      "detail": "vt 0x00A855D0 -> COL 0x00AA6C58 -> TD 0x00B8C1B0 -> '.?AVArkModelManagerMain@@'"
+    },
+    {
+      "id": "QC-B2-rtti-base",
+      "ok": true,
+      "detail": "vt 0x00A85A08 -> COL 0x00AA6CD8 -> TD 0x00B8C1D4 -> '.?AVArkModelManager@@'"
+    },
+    {
+      "id": "QC-B3-rtti-wrapper",
+      "ok": true,
+      "detail": "vt 0x00A864B8 -> COL 0x00AA7770 -> TD 0x00B8CAC4 -> '.?AVArkModelResourceInstanceRef@@'"
+    },
+    {
+      "id": "QC-B4-derived-vtable-slots",
+      "ok": true,
+      "detail": "derived vtable slot2=0x006C0FD0 slot3=0x006C19B0 (expect 0x006C0FD0 / 0x006C19B0)"
+    },
+    {
+      "id": "QC-B5-base-vtable-slots",
+      "ok": true,
+      "detail": "base vtable slot2=0x008E0110 slot3=0x008E0110 (both 0x008E0110)"
+    },
+    {
+      "id": "QC-B6-vtable-stores",
+      "ok": true,
+      "detail": "derived ctor stores 0x00A855D0 @0x006C0D9B; base ctor stores 0x00A85A08 @0x006C8FAB"
+    },
+    {
+      "id": "QC-C-pin-base_ctor_null_write_+0x68",
+      "ok": true,
+      "detail": "@0x006C8FD3 = 89 5E 68 (expect 89 5E 68) — mov [esi+0x68], ebx"
+    },
+    {
+      "id": "QC-C-pin-base_ctor_store_+0x6C_null",
+      "ok": true,
+      "detail": "@0x006C8FE3 = 89 5E 6C (expect 89 5E 6C) — mov [esi+0x6C], ebx"
+    },
+    {
+      "id": "QC-C-pin-base_ctor_flag_+0xEC_null",
+      "ok": true,
+      "detail": "@0x006C9014 = 88 9E EC 00 00 00 (expect 88 9E EC 00 00 00) — mov byte [esi+0xEC], bl"
+    },
+    {
+      "id": "QC-C-pin-lazy_cmp_+0x68",
+      "ok": true,
+      "detail": "@0x006C8B34 = 83 7E 68 00 (expect 83 7E 68 00) — cmp [esi+0x68], 0"
+    },
+    {
+      "id": "QC-C-pin-lazy_set_flag_+0xEC",
+      "ok": true,
+      "detail": "@0x006C8B50 = C6 86 EC 00 00 00 01 (expect C6 86 EC 00 00 00 01) — mov byte [esi+0xEC], 1"
+    },
+    {
+      "id": "QC-C-pin-producer_cmp_+0x6C",
+      "ok": true,
+      "detail": "@0x006C6F88 = 83 7E 6C 00 (expect 83 7E 6C 00) — cmp [esi+0x6C], 0"
+    },
+    {
+      "id": "QC-C-pin-producer_store_+0x6C",
+      "ok": true,
+      "detail": "@0x006C7008 = 89 46 6C (expect 89 46 6C) — mov [esi+0x6C], eax"
+    },
+    {
+      "id": "QC-C-pin-installer_cmp_+0x68",
+      "ok": true,
+      "detail": "@0x006C67A9 = 83 7E 68 00 (expect 83 7E 68 00) — cmp [esi+0x68], 0"
+    },
+    {
+      "id": "QC-C-pin-installer_read_inst+4",
+      "ok": true,
+      "detail": "@0x006C67BE = 8B 78 04 (expect 8B 78 04) — mov edi, [eax+4]"
+    },
+    {
+      "id": "QC-C-pin-installer_write_+0x68",
+      "ok": true,
+      "detail": "@0x006C67E2 = 89 7E 68 (expect 89 7E 68) — mov [esi+0x68], edi — THE WRITER"
+    },
+    {
+      "id": "QC-C-pin-installer_incref_new",
+      "ok": true,
+      "detail": "@0x006C67E7 = 01 5F 04 (expect 01 5F 04) — add [edi+4], ebx"
+    },
+    {
+      "id": "QC-C-pin-installer_decref_old",
+      "ok": true,
+      "detail": "@0x006C67D4 = 01 69 04 (expect 01 69 04) — add [ecx+4], ebp"
+    },
+    {
+      "id": "QC-C-pin-texture_lookup_push_name",
+      "ok": true,
+      "detail": "@0x006C67ED = 68 F8 59 A8 00 (expect 68 F8 59 A8 00) — push 0x00A859F8"
+    },
+    {
+      "id": "QC-C-pin-animation_lookup_push_name",
+      "ok": true,
+      "detail": "@0x006C6836 = 68 7C 54 A8 00 (expect 68 7C 54 A8 00) — push 0x00A8547C"
+    },
+    {
+      "id": "QC-C-pin-ctor_pump_cdecl_cleanup",
+      "ok": true,
+      "detail": "@0x006C7001 = 83 C4 10 (expect 83 C4 10) — add esp, 0x10"
+    },
+    {
+      "id": "QC-C-pin-key_constant_push_1",
+      "ok": true,
+      "detail": "@0x006C6FB5 = 68 7B 95 A7 00 (expect 68 7B 95 A7 00) — push 0x00A7957B"
+    },
+    {
+      "id": "QC-C-pin-key_constant_push_2",
+      "ok": true,
+      "detail": "@0x006C6FD3 = 68 7B 95 A7 00 (expect 68 7B 95 A7 00) — push 0x00A7957B"
+    },
+    {
+      "id": "QC-C-pin-old_value_vtable_load",
+      "ok": true,
+      "detail": "@0x006C67D9 = 8B 01 (expect 8B 01) — mov eax, [ecx]"
+    },
+    {
+      "id": "QC-C-pin-old_value_slot1_load",
+      "ok": true,
+      "detail": "@0x006C67DB = 8B 50 04 (expect 8B 50 04) — mov edx, [eax+4]"
+    },
+    {
+      "id": "QC-C-pin-slot1_call",
+      "ok": true,
+      "detail": "@0x006C67DE = FF D2 (expect FF D2) — call edx — zero-destroy dispatch"
+    },
+    {
+      "id": "QC-C-rel32-lazy_call_producer",
+      "ok": true,
+      "detail": "E8 @0x006C8B3A -> 0x006C6F60 (expect 0x006C6F60)"
+    },
+    {
+      "id": "QC-C-rel32-base_ctor_subinit_+0x70",
+      "ok": true,
+      "detail": "E8 @0x006C8FE6 -> 0x005670A0 (expect 0x005670A0)"
+    },
+    {
+      "id": "QC-C-rel32-base_ctor_subinit_+0xA0",
+      "ok": true,
+      "detail": "E8 @0x006C9005 -> 0x0043A330 (expect 0x0043A330)"
+    },
+    {
+      "id": "QC-C-rel32-derived_ctor_call_base",
+      "ok": true,
+      "detail": "E8 @0x006C0D64 -> 0x006C8F80 (expect 0x006C8F80)"
+    },
+    {
+      "id": "QC-C-rel32-producer_validity",
+      "ok": true,
+      "detail": "E8 @0x006C6F97 -> 0x0072FCE0 (expect 0x0072FCE0)"
+    },
+    {
+      "id": "QC-C-rel32-producer_getterA",
+      "ok": true,
+      "detail": "E8 @0x006C6FF6 -> 0x007CE1E0 (expect 0x007CE1E0)"
+    },
+    {
+      "id": "QC-C-rel32-producer_pump",
+      "ok": true,
+      "detail": "E8 @0x006C6FFC -> 0x006C9700 (expect 0x006C9700)"
+    },
+    {
+      "id": "QC-C-rel32-producer_call_installer",
+      "ok": true,
+      "detail": "E8 @0x006C7049 -> 0x006C6780 (expect 0x006C6780)"
+    },
+    {
+      "id": "QC-C-rel32-texture_lookup_call",
+      "ok": true,
+      "detail": "E8 @0x006C67F2 -> 0x007B6C30 (expect 0x007B6C30)"
+    },
+    {
+      "id": "QC-C-rel32-animation_lookup_call",
+      "ok": true,
+      "detail": "E8 @0x006C683B -> 0x007B6C30 (expect 0x007B6C30)"
+    },
+    {
+      "id": "QC-C-rel32-texture_branch_new",
+      "ok": true,
+      "detail": "E8 @0x006C6804 -> 0x0095D3C4 (expect 0x0095D3C4)"
+    },
+    {
+      "id": "QC-C-rel32-texture_branch_init",
+      "ok": true,
+      "detail": "E8 @0x006C6823 -> 0x006D3570 (expect 0x006D3570)"
+    },
+    {
+      "id": "QC-C-string-ArkTexture",
+      "ok": true,
+      "detail": "@0x00A859F8 = 41 72 6B 54 65 78 74 75 72 65 00 00 = 'ArkTexture\\0'"
+    },
+    {
+      "id": "QC-C-string-ArkAnimation",
+      "ok": false,
+      "detail": "@0x00A8547C = 41 72 6B 41 6E 69 6D 61 74 69 6F 6E 00 00 00 00 = 'ArkAnimation\\0'"
+    },
+    {
+      "id": "QC-C-string-empty-key",
+      "ok": true,
+      "detail": "@0x00A7957B = 00 (empty string) ; @0x00A7957C = Entropia"
+    },
+    {
+      "id": "QC-D-named-lookup-root-1",
+      "ok": true,
+      "detail": "receiver = [esi+0x68] (the child) @0x006C67EA; push 'ArkTexture' @0x006C67ED; call 0x007B6C30 @0x006C67F2"
+    },
+    {
+      "id": "QC-D-named-lookup-root-2",
+      "ok": true,
+      "detail": "receiver = [esi+0x68] (the child) @0x006C6833; push 'ArkAnimation' @0x006C6836; call 0x007B6C30 @0x006C683B"
+    },
+    {
+      "id": "QC-F1-all-56-pins",
+      "ok": true,
+      "detail": "56/56 pin rows re-read from EXE; mismatches: NONE"
+    },
+    {
+      "id": "QC-F2-all-23-rel32",
+      "ok": true,
+      "detail": "23/23 rel32 targets recomputed by OWN arithmetic; mismatches: NONE"
+    }
+  ],
+  "fail_count": 1
+}

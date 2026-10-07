@@ -1,0 +1,102 @@
+01_RAW/FUN_006C6F60_PRODUCER_DECODE.txt — the lazy producer of the resource instance ([manager+0x6C]).
+NEW BODY #5 of 6. Decoder: capstone 5.0.7; own rel32 recompute; pinned EXE (fail-closed).
+
+Context: called by FUN_006C8B20 @0x006C8B3A (rel32 recomputed = 0x006C6F60) with
+receiver ECX = manager, only when [manager+0x68]==0 (and flag [+0xEC]==0).
+
+WINDOW 0x006C6F60 LEN 400 (bounded). ANALYZED BODY = 0x006C6F60..0x006C7072 only.
+RAW BYTES (body, 0x112 bytes):
+6A FF 68 F4 4F A0 00 64 A1 00 00 00 00 50 83 EC 34 55 56 57 A1 D0 D8 B9 00 33 C4 50 8D 44 24 44 64 A3 00 00 00 00 8B F1 83 7E 6C 00 0F 85 C5 00 00 00 8D 6E 70 8B CD E8 44 8D 06 00 84 C0 0F 84 B3 00 00 00 8D 4C 24 13 FF 15 38 5A A7 00 8B 3D 44 5A A7 00 50 68 7B 95 A7 00 8D 4C 24 34 C7 44 24 54 00 00 00 00 FF D7 8D 4C 24 12 FF 15 38 5A A7 00 50 68 7B 95 A7 00 8D 4C 24 1C C6 44 24 54 02 FF D7 6A 00 8D 44 24 30 50 8D 4C 24 1C 51 8B CD C6 44 24 58 03 E8 E5 71 10 00 50 E8 FF 26 00 00 83 C4 10 8D 4C 24 14 89 46 6C C6 44 24 4C 02 FF 15 5C 5A A7 00 8D 4C 24 12 FF 15 40 5A A7 00 8D 4C 24 2C C6 44 24 4C 00 FF 15 5C 5A A7 00 8D 4C 24 13 C7 44 24 4C FF FF FF FF FF 15 40 5A A7 00 83 7E 6C 00 74 10 8B CE E8 32 F7 FF FF 8B 16 8B 42 08 8B CE FF D0 33 C0 39 46 6C 0F 95 C0 8B 4C 24 44 64 89 0D 00 00 00 00 59 5F 5E 5D 83 C4 40 C3
+
+DISASSEMBLY (analyzed extent 0x006C6F60..0x006C7072):
+  0x006c6f80..0x006c6f85  SEH prologue
+  0x006c6f86  8B F1                 mov esi, ecx              ; this = manager
+  0x006c6f88  83 7E 6C 00           cmp dword [esi+0x6c], 0   ; instance cache already produced?
+  0x006c6f8c  0F 85 C5 00 00 00     jne 0x6c7057              ; yes -> skip production
+  0x006c6f92  8D 6E 70              lea ebp, [esi+0x70]       ; the template-holder sub-object (inited by base ctor FUN_005670A0)
+  0x006c6f95  8B CD                 mov ecx, ebp
+  0x006c6f97  E8 44 8D 06 00        call 0x72fce0             ; rel32 recompute: 0x006C6F97+5+0x68D44 = 0x0072FCE0
+                                                              ; validity check (prior bridge canon family: registry/template validity)
+  0x006c6f9c  84 C0                 test al, al
+  0x006c6f9e  0F 84 B3 00 00 00     je 0x6c7057              ; invalid -> no production (return 0)
+  0x006c6fa4  8D 4C 24 13           lea ecx, [esp+0x13]
+  0x006c6fa8  FF 15 38 5A A7 00     call dword ptr [0xa75a38]  ; import-mediated temp init (callee identity NOT resolved; RAW_VISIBLE_ONLY)
+  0x006c6fae  8B 3D 44 5A A7 00     mov edi, dword ptr [0xa75a44]  ; import function ptr (callee identity NOT resolved)
+  0x006c6fb4  50                    push eax
+  0x006c6fb5  68 7B 95 A7 00        push 0xa7957b             ; key constant = EMPTY STRING (measured: 00 at 0xA7957B; 'Entropia' string starts @0xA7957C)
+  0x006c6fba  8D 4C 24 34           lea ecx, [esp+0x34]       ; out-local #1
+  0x006c6fbe  C7 44 24 54 00 00 00 00  (SEH state store)
+  0x006c6fc6  FF D7                 call edi ([0xa75a44])     ; lookup #1 (import; identity unresolved) -> local [esp+0x34]
+  0x006c6fc8  8D 4C 24 12           lea ecx, [esp+0x12]
+  0x006c6fcc  FF 15 38 5A A7 00     call dword ptr [0xa75a38]  ; second temp init (RAW_VISIBLE_ONLY)
+  0x006c6fd2  50                    push eax
+  0x006c6fd3  68 7B 95 A7 00        push 0xa7957b             ; same empty-string key
+  0x006c6fd8  8D 4C 24 1C           lea ecx, [esp+0x1c]       ; out-local #2
+  0x006c6fdc  C6 44 24 54 02        (SEH state store)
+  0x006c6fe1  FF D7                 call edi ([0xa75a44])     ; lookup #2 (import; identity unresolved) -> local [esp+0x1C]
+  0x006c6fe3  6A 00                 push 0                    ; arg4 = 0
+  0x006c6fe5  8D 44 24 30           lea eax, [esp+0x30]
+  0x006c6fe9  50                    push eax                  ; arg3 = &local
+  0x006c6fea  8D 4C 24 1C           lea ecx, [esp+0x1c]
+  0x006c6fee  51                    push ecx                  ; arg2 = &local (lookup #2 result)
+  0x006c6fef  8B CD                 mov ecx, ebp              ; receiver = [this+0x70] template holder
+  0x006c6ff1  C6 44 24 58 03        (SEH state store)
+  0x006c6ff6  E8 E5 71 10 00        call 0x7ce1e0             ; rel32 recompute: 0x006C6FF6+5+0x1071E5 = 0x007CE1E0
+                                                              ; getter A = [template+0x08] (PRIOR BRIDGE CANON CH1/X23 family; free re-pin of
+                                                              ; the identity) -> EAX = A (the resource id)
+  0x006c6ffb  50                    push eax                  ; arg1 = A
+  0x006c6ffc  E8 FF 26 00 00        call 0x6c9700             ; rel32 recompute: 0x006C6FFC+5+0x26FF = 0x006C9700
+                                                              ; INSTANCE-CREATOR PUMP (prior bridge canon CH3: the pump of instance creator
+                                                              ; FUN_006CB6F0 @0x006CB7CF); cdecl (caller cleanup add esp,0x10)
+  0x006c7001  83 C4 10              add esp, 0x10             ; 4 args cleaned by caller
+  0x006c7004  8D 4C 24 14           lea ecx, [esp+0x14]
+  0x006c7008  89 46 6C              mov [esi+0x6c], eax       ; <<<<< [manager+0x6C] = the created instance
+  0x006c700b..0x006c7040            temp cleanup calls via imports [0xA75A5C]/[0xA75A40] (RAW_VISIBLE_ONLY — no interpretation)
+  0x006c7041  83 7E 6C 00           cmp dword [esi+0x6c], 0   ; creation succeeded?
+  0x006c7045  74 10                 je 0x6c7057              ; failed -> skip install (return 0)
+  0x006c7047  8B CE                 mov ecx, esi
+  0x006c7049  E8 32 F7 FF FF        call 0x6c6780             ; rel32 recompute: 0x006C7049+5+(-0x8CE) = 0x006C6780
+                                                              ; <<<<< THE INSTALLER (analyzed body #6) — writes [+0x68]
+  0x006c704e  8B 16                 mov edx, [esi]           ; vtable
+  0x006c7050  8B 42 08              mov eax, [edx+8]        ; vtable slot 2
+  0x006c7053  8B CE                 mov ecx, esi
+  0x006c7055  FF D0                 call eax                 ; dispatch manager vtable slot 2 (target identity from DATA read:
+                                                              ; 0xA855D0+8 = 0x006C0FD0; callee body NOT opened; role = post-creation
+                                                              ; virtual action, semantics unknown)
+  0x006c7057  33 C0                 xor eax, eax
+  0x006c7059  39 46 6C              cmp [esi+0x6c], eax
+  0x006c705c  0F 95 C0              setne al                 ; return TRUE iff instance created
+  0x006c705f..0x006c7071  SEH epilogue; ret
+
+EXTENT: 0x006C6F60..0x006C7072 — RESOLVED (terminal ret C3 @0x006C7071 + 14 CC
+padding bytes 0x006C7072..0x006C707F + aligned next entry @0x006C7080).
+
+SEMANTICS (measured, this run) — the producer of the resource instance:
+1. Guard: if [manager+0x6C] != 0 → already produced, return accordingly.
+2. Validity check of the [+0x70] template holder via FUN_0072FCE0 (prior canon
+   family; the CH1/CH3 bridge canon used the same validity function).
+3. Two import-mediated lookups with the EMPTY-STRING key 0xA7957B (measured:
+   byte 00 at 0x00A7957B; the 'Entropia' literal begins at 0x00A7957C) producing
+   two locals.
+4. A = FUN_007CE1E0([this+0x70]) — the prior-canon getter A ([template+0x08],
+   the resource id getter of the {0x66=MODEL, A} request family; CH1 canon,
+   free re-pin of the identity).
+5. instance = FUN_006C9700(A, &local2, &local3, 0) — the prior-canon
+   instance-creator PUMP (CH3: the pump called @0x006CB7CF inside instance
+   creator FUN_006CB6F0; cdecl, 4 args).
+6. [manager+0x6C] = instance.
+7. On success: FUN_006C6780(this) (the installer — body #6) + manager vtable
+   slot 2 dispatch (0x006C0FD0, not opened).
+8. Returns TRUE iff instance != NULL.
+
+The {type} pairing visible in the EMITTER canon (0x66=MODEL request pairs) is
+NOT re-typed by this run (no payload/pair emission examined here; FUN_006C9700
+body NOT opened): whether A on THIS path is a model-typed resource stands on
+the prior canon's {0x66,A} family linkage ONLY (cited as prior canon; era label:
+the bridge run's PCG corpus).
+
+RAW-VISIBLE WINDOW CONTINUATION (bodies past the extent — NOT analyzed; EDGE
+ledger rows NEIGH-25..NEIGH-27, OUT_OF_ANALYZED_EXTENT): 0x006C7080..0x006C70EB
+(a body start: indirect dispatch @0x006C70CE, calls 0x006C69A0 @0x006C70DE and
+@0x006C70EA — NONE interpreted). Window ends at 0x006C70F0 (LEN 400; the
+instruction listing cut at the window end).
