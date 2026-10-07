@@ -1,0 +1,107 @@
+PART 2: FUN_0050A310 FULL DECODE — NEW detailed function #7
+Context: called from FUN_006A3930 (ArkClientLocalDynamic ctor) right after the
+ArkModelManagerMain creation (new(0x130) -> FUN_006C0D50) — see FUN_006A3930_CHAIN_REPIN.txt.
+Focus: receiver/args; any store to [SF+0x20]; any access to [SF+0x30] (NiNode); any attach.
+
+WINDOW 0x0050a310 LEN 288
+BYTES: 51 55 56 8B F1 80 7E 24 01 75 10 E8 50 F3 FF FF C6 46 24 00 C6 86 91 00 00 00 01 8B 6E 30 85 ED 75 08 5E 32 C0 5D 59 C2 04 00 8B 4E 20 85 C9 57 74 4D 8B 7D 00 81 C7 A8 00 00 00 E8 80 C3 1B 00 8B 17 50 8D 44 24 10 50 8B CD FF D2 8B 44 24 0C 85 C0 74 15 83 40 04 FF 8B C8 83 C0 04 83 38 00 75 07 8B 01 8B 50 04 FF D2 8B 4E 20 85 C9 74 08 8B 01 8B 10 6A 01 FF D2 C7 46 20 00 00 00 00 8B 7C 24 14 85 FF 0F 84 B8 00 00 00 8B CF E8 2E C3 1B 00 85 C0 0F 84 A9 00 00 00 8B CF 89 7E 20 E8 1C C3 1B 00 8B 4E 20 8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2 8B CF E8 00 55 2B 00 8B CF E8 29 52 2B 00 D9 EE 6A 01 51 8B 4E 30 D9 1C 24 E8 E9 50 2B 00 0F B6 46 25 6A 01 6A 01 50 8B CE E8 C9 FC FF FF 80 7E 24 00 C6 86 91 00 00
+
+  0x0050a310  51                          push ecx
+  0x0050a311  55                          push ebp
+  0x0050a312  56                          push esi
+  0x0050a313  8b f1                       mov esi, ecx
+  0x0050a315  80 7e 24 01                 cmp byte ptr [esi + 0x24], 1
+  0x0050a319  75 10                       jne 0x50a32b
+  0x0050a31b  e8 50 f3 ff ff              call 0x509670
+  0x0050a320  c6 46 24 00                 mov byte ptr [esi + 0x24], 0
+  0x0050a324  c6 86 91 00 00 00 01        mov byte ptr [esi + 0x91], 1
+  0x0050a32b  8b 6e 30                    mov ebp, dword ptr [esi + 0x30]
+  0x0050a32e  85 ed                       test ebp, ebp
+  0x0050a330  75 08                       jne 0x50a33a
+  0x0050a332  5e                          pop esi
+  0x0050a333  32 c0                       xor al, al
+  0x0050a335  5d                          pop ebp
+  0x0050a336  59                          pop ecx
+  0x0050a337  c2 04 00                    ret 4
+  0x0050a33a  8b 4e 20                    mov ecx, dword ptr [esi + 0x20]
+  0x0050a33d  85 c9                       test ecx, ecx
+  0x0050a33f  57                          push edi
+  0x0050a340  74 4d                       je 0x50a38f
+  0x0050a342  8b 7d 00                    mov edi, dword ptr [ebp]
+  0x0050a345  81 c7 a8 00 00 00           add edi, 0xa8
+  0x0050a34b  e8 80 c3 1b 00              call 0x6c66d0
+  0x0050a350  8b 17                       mov edx, dword ptr [edi]
+  0x0050a352  50                          push eax
+  0x0050a353  8d 44 24 10                 lea eax, [esp + 0x10]
+  0x0050a357  50                          push eax
+  0x0050a358  8b cd                       mov ecx, ebp
+  0x0050a35a  ff d2                       call edx
+  0x0050a35c  8b 44 24 0c                 mov eax, dword ptr [esp + 0xc]
+  0x0050a360  85 c0                       test eax, eax
+  0x0050a362  74 15                       je 0x50a379
+  0x0050a364  83 40 04 ff                 add dword ptr [eax + 4], -1
+  0x0050a368  8b c8                       mov ecx, eax
+  0x0050a36a  83 c0 04                    add eax, 4
+  0x0050a36d  83 38 00                    cmp dword ptr [eax], 0
+  0x0050a370  75 07                       jne 0x50a379
+  0x0050a372  8b 01                       mov eax, dword ptr [ecx]
+  0x0050a374  8b 50 04                    mov edx, dword ptr [eax + 4]
+  0x0050a377  ff d2                       call edx
+  0x0050a379  8b 4e 20                    mov ecx, dword ptr [esi + 0x20]
+  0x0050a37c  85 c9                       test ecx, ecx
+  0x0050a37e  74 08                       je 0x50a388
+  0x0050a380  8b 01                       mov eax, dword ptr [ecx]
+  0x0050a382  8b 10                       mov edx, dword ptr [eax]
+  0x0050a384  6a 01                       push 1
+  0x0050a386  ff d2                       call edx
+  0x0050a388  c7 46 20 00 00 00 00        mov dword ptr [esi + 0x20], 0
+  0x0050a38f  8b 7c 24 14                 mov edi, dword ptr [esp + 0x14]
+  0x0050a393  85 ff                       test edi, edi
+  0x0050a395  0f 84 b8 00 00 00           je 0x50a453
+  0x0050a39b  8b cf                       mov ecx, edi
+  0x0050a39d  e8 2e c3 1b 00              call 0x6c66d0
+  0x0050a3a2  85 c0                       test eax, eax
+  0x0050a3a4  0f 84 a9 00 00 00           je 0x50a453
+  0x0050a3aa  8b cf                       mov ecx, edi
+  0x0050a3ac  89 7e 20                    mov dword ptr [esi + 0x20], edi
+  0x0050a3af  e8 1c c3 1b 00              call 0x6c66d0
+  0x0050a3b4  8b 4e 20                    mov ecx, dword ptr [esi + 0x20]
+  0x0050a3b7  8b f8                       mov edi, eax
+  0x0050a3b9  e8 d2 6b 1b 00              call 0x6c0f90
+  0x0050a3be  84 c0                       test al, al
+  0x0050a3c0  74 06                       je 0x50a3c8
+  0x0050a3c2  83 4e 2c 02                 or dword ptr [esi + 0x2c], 2
+  0x0050a3c6  eb 04                       jmp 0x50a3cc
+  0x0050a3c8  83 66 2c fd                 and dword ptr [esi + 0x2c], 0xfffffffd
+  0x0050a3cc  8b 4e 20                    mov ecx, dword ptr [esi + 0x20]
+  0x0050a3cf  e8 dc 6c 1b 00              call 0x6c10b0
+  0x0050a3d4  8b ce                       mov ecx, esi
+  0x0050a3d6  50                          push eax
+  0x0050a3d7  57                          push edi
+  0x0050a3d8  e8 03 fe ff ff              call 0x50a1e0
+  0x0050a3dd  8b 8e 8c 00 00 00           mov ecx, dword ptr [esi + 0x8c]
+  0x0050a3e3  56                          push esi
+  0x0050a3e4  e8 f7 a2 01 00              call 0x5246e0
+  0x0050a3e9  8b 4e 30                    mov ecx, dword ptr [esi + 0x30]
+  0x0050a3ec  8b 01                       mov eax, dword ptr [ecx]
+  0x0050a3ee  8b 90 a4 00 00 00           mov edx, dword ptr [eax + 0xa4]
+  0x0050a3f4  6a 00                       push 0
+  0x0050a3f6  57                          push edi
+  0x0050a3f7  ff d2                       call edx
+  0x0050a3f9  8b cf                       mov ecx, edi
+  0x0050a3fb  e8 00 55 2b 00              call 0x7bf900
+  0x0050a400  8b cf                       mov ecx, edi
+  0x0050a402  e8 29 52 2b 00              call 0x7bf630
+  0x0050a407  d9 ee                       fldz 
+  0x0050a409  6a 01                       push 1
+  0x0050a40b  51                          push ecx
+  0x0050a40c  8b 4e 30                    mov ecx, dword ptr [esi + 0x30]
+  0x0050a40f  d9 1c 24                    fstp dword ptr [esp]
+  0x0050a412  e8 e9 50 2b 00              call 0x7bf500
+  0x0050a417  0f b6 46 25                 movzx eax, byte ptr [esi + 0x25]
+  0x0050a41b  6a 01                       push 1
+  0x0050a41d  6a 01                       push 1
+  0x0050a41f  50                          push eax
+  0x0050a420  8b ce                       mov ecx, esi
+  0x0050a422  e8 c9 fc ff ff              call 0x50a0f0
+  0x0050a427  80 7e 24 00                 cmp byte ptr [esi + 0x24], 0

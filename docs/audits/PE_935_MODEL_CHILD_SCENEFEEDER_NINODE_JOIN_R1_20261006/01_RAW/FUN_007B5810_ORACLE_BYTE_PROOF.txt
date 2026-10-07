@@ -1,0 +1,105 @@
+ORACLE MECHANISM #1 (of max 1): NiNode::AttachChild (Gb12 source fingerprint)
+ORACLE_SOURCE: D:\gamebyroengine\extracted\Gb12_Source\CoreLibs\NiMain\NiNode.cpp
+  measured size 33897 / SHA256 38C7A1DE1E166345068D296F70F34B1ADAE27C694E19EAD8FA0FBD8B62E0E016
+  == earlier-research expectation (SOURCE_IDENTITIES.json of PE_SCENEFEEDER_ENGINE_COMPARISON_RESEARCH_20261006) MATCH
+ORACLE_SOURCE: D:\gamebyroengine\extracted\Gb12_Source\CoreLibs\NiMain\NiAVObject.cpp
+  measured size 33215 / SHA256 72E0837149B03CCDA171BDF5E68E1E1F8C2712B2F10E7957AC3EC26344CA5EA7 MATCH
+ROLE: NON_EXACT_PCG_SOURCE_ORACLE (fingerprint only; no ABI/offset transfer beyond PCG-measured canon;
+  source text NOT copied into the repo).
+
+PREDICTED FINGERPRINT (from NiNode.cpp:52-72 AttachChild + NiAVObject.cpp:62-69 AttachParent,
+described in own words, no source reproduction):
+  F1. NULL-guard on the CHILD argument (release-mode early return).
+  F2. Refcount INCREMENT on the child's refcount field ([child+4] per PCG canon: LINK30/PA1).
+  F3. VIRTUAL call on the CHILD passing the PARENT (this) — the AttachParent role: reads the child's
+      old parent; if present, calls old_parent->DetachChild(child); stores the new parent into the
+      child's parent field.
+  F4. Children-array insertion into the NiNode's children container — PCG canon layout: base ptr at
+      NiNode+0xCC, used count at NiNode+0xD4 (measured by the GetObjectByName slot-17 walk,
+      PE_935_NINODE_SLOT17_GAMEBRYO_ORACLE_MINICHECK_R1_20260914) — either AddFirstEmpty (bFirstAvail=1)
+      or Add (append with growth).
+  F5. Refcount DECREMENT on the child ([child+4]-1, with the zero-destroy protocol or virtual dec).
+PCG CANDIDATE: FUN_007B5810 (NiNode vtable slot 41 = [0x00A8CCF4+0xA4], data dump in
+  01_RAW/SF20_WRITER_CENSUS.txt; the receiver at the join site = [SF+0x30]).
+
+BYTE PROOF WINDOW 0x007b5810 LEN 256
+BYTES: 6A FF 68 10 DE A1 00 64 A1 00 00 00 00 50 53 56 57 A1 D0 D8 B9 00 33 C4 50 8D 44 24 10 64 A3 00 00 00 00 8B F9 8B 74 24 20 85 F6 0F 84 9C 00 00 00 BB 01 00 00 00 01 5E 04 57 8B CE E8 1F 9C 00 00 01 5E 04 80 7C 24 24 00 89 74 24 24 74 2F 8D 44 24 24 50 8D 8F C8 00 00 00 C7 44 24 1C 00 00 00 00 E8 69 FD FF FF 83 CF FF 01 7E 04 89 7C 24 18 75 4C 8B 16 8B 42 04 8B CE FF D0 EB 41 81 C7 C8 00 00 00 89 5C 24 18 8B 5F 0C 3B 5F 08 72 0D 8B 4F 14 03 CB 51 8B CF E8 C3 2C FD FF 8D 54 24 24 52 53 8B CF E8 16 38 FC FF 83 CF FF 01 7E 04 89 7C 24 18 75 09 8B 06 8B 50 04 8B CE FF D2 01 7E 04 75 09 8B 06 8B 50 04 8B CE FF D2 8B 4C 24 10 64 89 0D 00 00 00 00 59 5F 5E 5B 83 C4 0C C2 08 00 CC CC CC CC CC CC CC CC CC CC CC CC CC CC 6A FF 68 38 DE A1 00 64 A1 00 00 00 00 50 51 53
+
+  0x007b5810  6a ff                       push -1
+  0x007b5812  68 10 de a1 00              push 0xa1de10
+  0x007b5817  64 a1 00 00 00 00           mov eax, dword ptr fs:[0]
+  0x007b581d  50                          push eax
+  0x007b581e  53                          push ebx
+  0x007b581f  56                          push esi
+  0x007b5820  57                          push edi
+  0x007b5821  a1 d0 d8 b9 00              mov eax, dword ptr [0xb9d8d0]
+  0x007b5826  33 c4                       xor eax, esp
+  0x007b5828  50                          push eax
+  0x007b5829  8d 44 24 10                 lea eax, [esp + 0x10]
+  0x007b582d  64 a3 00 00 00 00           mov dword ptr fs:[0], eax
+  0x007b5833  8b f9                       mov edi, ecx
+  0x007b5835  8b 74 24 20                 mov esi, dword ptr [esp + 0x20]
+  0x007b5839  85 f6                       test esi, esi
+  0x007b583b  0f 84 9c 00 00 00           je 0x7b58dd
+  0x007b5841  bb 01 00 00 00              mov ebx, 1
+  0x007b5846  01 5e 04                    add dword ptr [esi + 4], ebx
+  0x007b5849  57                          push edi
+  0x007b584a  8b ce                       mov ecx, esi
+  0x007b584c  e8 1f 9c 00 00              call 0x7bf470
+  0x007b5851  01 5e 04                    add dword ptr [esi + 4], ebx
+  0x007b5854  80 7c 24 24 00              cmp byte ptr [esp + 0x24], 0
+  0x007b5859  89 74 24 24                 mov dword ptr [esp + 0x24], esi
+  0x007b585d  74 2f                       je 0x7b588e
+  0x007b585f  8d 44 24 24                 lea eax, [esp + 0x24]
+  0x007b5863  50                          push eax
+  0x007b5864  8d 8f c8 00 00 00           lea ecx, [edi + 0xc8]
+  0x007b586a  c7 44 24 1c 00 00 00 00     mov dword ptr [esp + 0x1c], 0
+  0x007b5872  e8 69 fd ff ff              call 0x7b55e0
+  0x007b5877  83 cf ff                    or edi, 0xffffffff
+  0x007b587a  01 7e 04                    add dword ptr [esi + 4], edi
+  0x007b587d  89 7c 24 18                 mov dword ptr [esp + 0x18], edi
+  0x007b5881  75 4c                       jne 0x7b58cf
+  0x007b5883  8b 16                       mov edx, dword ptr [esi]
+  0x007b5885  8b 42 04                    mov eax, dword ptr [edx + 4]
+  0x007b5888  8b ce                       mov ecx, esi
+  0x007b588a  ff d0                       call eax
+  0x007b588c  eb 41                       jmp 0x7b58cf
+  0x007b588e  81 c7 c8 00 00 00           add edi, 0xc8
+  0x007b5894  89 5c 24 18                 mov dword ptr [esp + 0x18], ebx
+  0x007b5898  8b 5f 0c                    mov ebx, dword ptr [edi + 0xc]
+  0x007b589b  3b 5f 08                    cmp ebx, dword ptr [edi + 8]
+  0x007b589e  72 0d                       jb 0x7b58ad
+  0x007b58a0  8b 4f 14                    mov ecx, dword ptr [edi + 0x14]
+  0x007b58a3  03 cb                       add ecx, ebx
+  0x007b58a5  51                          push ecx
+  0x007b58a6  8b cf                       mov ecx, edi
+  0x007b58a8  e8 c3 2c fd ff              call 0x788570
+  0x007b58ad  8d 54 24 24                 lea edx, [esp + 0x24]
+  0x007b58b1  52                          push edx
+  0x007b58b2  53                          push ebx
+  0x007b58b3  8b cf                       mov ecx, edi
+  0x007b58b5  e8 16 38 fc ff              call 0x7790d0
+  0x007b58ba  83 cf ff                    or edi, 0xffffffff
+  0x007b58bd  01 7e 04                    add dword ptr [esi + 4], edi
+  0x007b58c0  89 7c 24 18                 mov dword ptr [esp + 0x18], edi
+  0x007b58c4  75 09                       jne 0x7b58cf
+  0x007b58c6  8b 06                       mov eax, dword ptr [esi]
+  0x007b58c8  8b 50 04                    mov edx, dword ptr [eax + 4]
+  0x007b58cb  8b ce                       mov ecx, esi
+  0x007b58cd  ff d2                       call edx
+  0x007b58cf  01 7e 04                    add dword ptr [esi + 4], edi
+  0x007b58d2  75 09                       jne 0x7b58dd
+  0x007b58d4  8b 06                       mov eax, dword ptr [esi]
+  0x007b58d6  8b 50 04                    mov edx, dword ptr [eax + 4]
+  0x007b58d9  8b ce                       mov ecx, esi
+  0x007b58db  ff d2                       call edx
+  0x007b58dd  8b 4c 24 10                 mov ecx, dword ptr [esp + 0x10]
+  0x007b58e1  64 89 0d 00 00 00 00        mov dword ptr fs:[0], ecx
+  0x007b58e8  59                          pop ecx
+  0x007b58e9  5f                          pop edi
+  0x007b58ea  5e                          pop esi
+  0x007b58eb  5b                          pop ebx
+  0x007b58ec  83 c4 0c                    add esp, 0xc
+  0x007b58ef  c2 08 00                    ret 8
+
+TERMINAL RET + PADDING at 0x007b58ef: extent 0x007b5810..0x007b58f2 (226 B)

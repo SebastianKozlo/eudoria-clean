@@ -1,0 +1,65 @@
+FUN_007BF500 DECODE — NEW detailed function #6; edge #4: FUN_00509850 -> FUN_007BF500 @0x00509972
+Receiver provenance at the callsite: ECX = [ebp+0x30] = [SF+0x30] = the examined NiNode
+(same field created in FUN_00509330 @0x005093C3 — PA1 re-pin).
+Stack args at the callsite: [esp]=float (Z*100.0 or the caller's 0.0f), [esp+4]=1.
+
+WINDOW 0x007bf500 LEN 256
+BYTES: 83 EC 10 56 8B F1 8B 4E 2C D9 46 34 8B 46 28 D9 5C 24 04 8B 56 30 D9 44 24 18 57 8D 7E 28 89 4C 24 10 8B 4C 24 20 51 89 44 24 10 8B 06 51 89 54 24 1C D9 1C 24 8B 50 4C 8B CE FF D2 83 7E 24 00 74 2B D9 44 24 08 D9 46 34 DA E9 DF E0 F6 C4 44 7A 0E 57 8D 4C 24 10 E8 34 C8 D4 FF 84 C0 74 0D 8B 4E 24 8B 01 8B 90 B4 00 00 00 FF D2 5F 5E 83 C4 10 C2 08 00 CC CC CC CC CC CC CC CC CC CC CC 80 7C 24 08 00 56 8B F1 74 0F D9 44 24 08 6A 01 51 D9 1C 24 E8 57 50 FF FF 8B 06 8B 50 6C 8B CE FF D2 8B 06 8B 50 68 8B CE FF D2 8B 06 8B 90 84 00 00 00 8B CE FF D2 5E C2 08 00 CC CC CC CC CC D9 44 24 04 56 8B F1 0F B6 46 20 C0 E8 03 25 01 FF FF FF 50 51 D9 1C 24 E8 13 50 FF FF 8A 4E 20 C0 E9 02 F6 C1 01 74 1E 8B 16 8B 42 6C 8B CE FF D0 8B 16 8B 42 68 8B CE FF D0 8B 16 8B 82 84 00
+
+  0x007bf500  83 ec 10                    sub esp, 0x10
+  0x007bf503  56                          push esi
+  0x007bf504  8b f1                       mov esi, ecx
+  0x007bf506  8b 4e 2c                    mov ecx, dword ptr [esi + 0x2c]
+  0x007bf509  d9 46 34                    fld dword ptr [esi + 0x34]
+  0x007bf50c  8b 46 28                    mov eax, dword ptr [esi + 0x28]
+  0x007bf50f  d9 5c 24 04                 fstp dword ptr [esp + 4]
+  0x007bf513  8b 56 30                    mov edx, dword ptr [esi + 0x30]
+  0x007bf516  d9 44 24 18                 fld dword ptr [esp + 0x18]
+  0x007bf51a  57                          push edi
+  0x007bf51b  8d 7e 28                    lea edi, [esi + 0x28]
+  0x007bf51e  89 4c 24 10                 mov dword ptr [esp + 0x10], ecx
+  0x007bf522  8b 4c 24 20                 mov ecx, dword ptr [esp + 0x20]
+  0x007bf526  51                          push ecx
+  0x007bf527  89 44 24 10                 mov dword ptr [esp + 0x10], eax
+  0x007bf52b  8b 06                       mov eax, dword ptr [esi]
+  0x007bf52d  51                          push ecx
+  0x007bf52e  89 54 24 1c                 mov dword ptr [esp + 0x1c], edx
+  0x007bf532  d9 1c 24                    fstp dword ptr [esp]
+  0x007bf535  8b 50 4c                    mov edx, dword ptr [eax + 0x4c]
+  0x007bf538  8b ce                       mov ecx, esi
+  0x007bf53a  ff d2                       call edx
+  0x007bf53c  83 7e 24 00                 cmp dword ptr [esi + 0x24], 0
+  0x007bf540  74 2b                       je 0x7bf56d
+  0x007bf542  d9 44 24 08                 fld dword ptr [esp + 8]
+  0x007bf546  d9 46 34                    fld dword ptr [esi + 0x34]
+  0x007bf549  da e9                       fucompp 
+  0x007bf54b  df e0                       fnstsw ax
+  0x007bf54d  f6 c4 44                    test ah, 0x44
+  0x007bf550  7a 0e                       jp 0x7bf560
+  0x007bf552  57                          push edi
+  0x007bf553  8d 4c 24 10                 lea ecx, [esp + 0x10]
+  0x007bf557  e8 34 c8 d4 ff              call 0x50bd90
+  0x007bf55c  84 c0                       test al, al
+  0x007bf55e  74 0d                       je 0x7bf56d
+  0x007bf560  8b 4e 24                    mov ecx, dword ptr [esi + 0x24]
+  0x007bf563  8b 01                       mov eax, dword ptr [ecx]
+  0x007bf565  8b 90 b4 00 00 00           mov edx, dword ptr [eax + 0xb4]
+  0x007bf56b  ff d2                       call edx
+  0x007bf56d  5f                          pop edi
+  0x007bf56e  5e                          pop esi
+  0x007bf56f  83 c4 10                    add esp, 0x10
+  0x007bf572  c2 08 00                    ret 8
+
+TERMINAL RET + PADDING at 0x007bf572: extent 0x007bf500..0x007bf575 (117 B)
+
+Callsite re-verification (0x00509961..0x00509977):
+BYTES: 84 DB 75 12 D9 44 24 24 6A 01 51 8B 4D 30 D9 1C 24 E8 89 5B 2B 00 C6 45
+  0x00509961  84 db                     test bl, bl
+  0x00509963  75 12                     jne 0x509977
+  0x00509965  d9 44 24 24               fld dword ptr [esp + 0x24]
+  0x00509969  6a 01                     push 1
+  0x0050996b  51                        push ecx
+  0x0050996c  8b 4d 30                  mov ecx, dword ptr [ebp + 0x30]
+  0x0050996f  d9 1c 24                  fstp dword ptr [esp]
+  0x00509972  e8 89 5b 2b 00            call 0x7bf500
+rel32 recomputation: 0x00509972 + 5 + (2841481) = 0x007bf500 (expect 0x007BF500)

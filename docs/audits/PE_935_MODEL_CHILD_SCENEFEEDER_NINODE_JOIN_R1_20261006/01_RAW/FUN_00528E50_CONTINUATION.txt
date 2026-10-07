@@ -1,0 +1,84 @@
+FUN_00528E50 (ClientMovableObject ctor) CONTINUATION — NEW detailed function #2 (new semantics beyond prior pin scope)
+Prior pin scope (MICRO_R1 §3/§4 + LINK30 C9): prologue/vtable/[CMO+0x74] chain/SF factory/SF store/[CMO+0xC0]
+New scope declared BEFORE this decode: the body from 0x00529020 (just after the FUN_005094C0 callsite)
+to the ctor's terminal ret (find ret + int3 padding). Focus: any read of [SF+0x30] (SF obtained via
+[CMO+0xC0] or a saved SF register), any NiNode-family operation, any model/request call.
+
+WINDOW 0x00529020 LEN 256
+BYTES: E8 9B 04 FE FF 8B 8E C0 00 00 00 8D 56 5C 52 E8 DC 04 FE FF 8B 8E C0 00 00 00 8D 46 50 50 E8 2D 00 FE FF D9 EE 53 51 8B 8E C0 00 00 00 D9 1C 24 E8 FB 07 FE FF D9 46 64 D9 9E B4 00 00 00 8B C6 8B 4C 24 2C 64 89 0D 00 00 00 00 59 5F 5E 5B 83 C4 28 C2 10 00 CC CC CC CC CC CC CC CC CC CC CC 6A FF 68 68 F5 9B 00 64 A1 00 00 00 00 50 51 56 A1 D0 D8 B9 00 33 C4 50 8D 44 24 0C 64 A3 00 00 00 00 8B F1 89 74 24 08 C7 06 B0 DC A7 00 8B 8E C4 00 00 00 85 C9 C7 44 24 14 00 00 00 00 74 1A 8B 86 CC 00 00 00 2B C1 C1 F8 02 03 C0 03 C0 50 51 FF 15 FC 59 A7 00 83 C4 08 8B CE C7 44 24 14 FF FF FF FF E8 B7 22 33 00 8B 4C 24 0C 64 89 0D 00 00 00 00 59 5E 83 C4 10 C3 CC CC CC CC CC CC 53 8B 5C 24 08 55 56 8B F1 3B DE 57 0F 84 CF 00 00 00 8B 6B 04 8B 03 8B 16 8B 4E 08 8B FD 2B F8
+
+  0x00529020  e8 9b 04 fe ff            call 0x5094c0
+  0x00529025  8b 8e c0 00 00 00         mov ecx, dword ptr [esi + 0xc0]
+  0x0052902b  8d 56 5c                  lea edx, [esi + 0x5c]
+  0x0052902e  52                        push edx
+  0x0052902f  e8 dc 04 fe ff            call 0x509510
+  0x00529034  8b 8e c0 00 00 00         mov ecx, dword ptr [esi + 0xc0]
+  0x0052903a  8d 46 50                  lea eax, [esi + 0x50]
+  0x0052903d  50                        push eax
+  0x0052903e  e8 2d 00 fe ff            call 0x509070
+  0x00529043  d9 ee                     fldz 
+  0x00529045  53                        push ebx
+  0x00529046  51                        push ecx
+  0x00529047  8b 8e c0 00 00 00         mov ecx, dword ptr [esi + 0xc0]
+  0x0052904d  d9 1c 24                  fstp dword ptr [esp]
+  0x00529050  e8 fb 07 fe ff            call 0x509850
+  0x00529055  d9 46 64                  fld dword ptr [esi + 0x64]
+  0x00529058  d9 9e b4 00 00 00         fstp dword ptr [esi + 0xb4]
+  0x0052905e  8b c6                     mov eax, esi
+  0x00529060  8b 4c 24 2c               mov ecx, dword ptr [esp + 0x2c]
+  0x00529064  64 89 0d 00 00 00 00      mov dword ptr fs:[0], ecx
+  0x0052906b  59                        pop ecx
+  0x0052906c  5f                        pop edi
+  0x0052906d  5e                        pop esi
+  0x0052906e  5b                        pop ebx
+  0x0052906f  83 c4 28                  add esp, 0x28
+  0x00529072  c2 10 00                  ret 0x10
+  0x00529075  cc                        int3 
+  0x00529076  cc                        int3 
+  0x00529077  cc                        int3 
+  0x00529078  cc                        int3 
+  0x00529079  cc                        int3 
+  0x0052907a  cc                        int3 
+  0x0052907b  cc                        int3 
+  0x0052907c  cc                        int3 
+  0x0052907d  cc                        int3 
+  0x0052907e  cc                        int3 
+  0x0052907f  cc                        int3 
+  0x00529080  6a ff                     push -1
+  0x00529082  68 68 f5 9b 00            push 0x9bf568
+  0x00529087  64 a1 00 00 00 00         mov eax, dword ptr fs:[0]
+  0x0052908d  50                        push eax
+  0x0052908e  51                        push ecx
+  0x0052908f  56                        push esi
+  0x00529090  a1 d0 d8 b9 00            mov eax, dword ptr [0xb9d8d0]
+  0x00529095  33 c4                     xor eax, esp
+  0x00529097  50                        push eax
+  0x00529098  8d 44 24 0c               lea eax, [esp + 0xc]
+  0x0052909c  64 a3 00 00 00 00         mov dword ptr fs:[0], eax
+  0x005290a2  8b f1                     mov esi, ecx
+  0x005290a4  89 74 24 08               mov dword ptr [esp + 8], esi
+  0x005290a8  c7 06 b0 dc a7 00         mov dword ptr [esi], 0xa7dcb0
+  0x005290ae  8b 8e c4 00 00 00         mov ecx, dword ptr [esi + 0xc4]
+  0x005290b4  85 c9                     test ecx, ecx
+  0x005290b6  c7 44 24 14 00 00 00 00   mov dword ptr [esp + 0x14], 0
+  0x005290be  74 1a                     je 0x5290da
+  0x005290c0  8b 86 cc 00 00 00         mov eax, dword ptr [esi + 0xcc]
+  0x005290c6  2b c1                     sub eax, ecx
+  0x005290c8  c1 f8 02                  sar eax, 2
+  0x005290cb  03 c0                     add eax, eax
+  0x005290cd  03 c0                     add eax, eax
+  0x005290cf  50                        push eax
+  0x005290d0  51                        push ecx
+  0x005290d1  ff 15 fc 59 a7 00         call dword ptr [0xa759fc]
+  0x005290d7  83 c4 08                  add esp, 8
+  0x005290da  8b ce                     mov ecx, esi
+  0x005290dc  c7 44 24 14 ff ff ff ff   mov dword ptr [esp + 0x14], 0xffffffff
+  0x005290e4  e8 b7 22 33 00            call 0x85b3a0
+  0x005290e9  8b 4c 24 0c               mov ecx, dword ptr [esp + 0xc]
+  0x005290ed  64 89 0d 00 00 00 00      mov dword ptr fs:[0], ecx
+  0x005290f4  59                        pop ecx
+  0x005290f5  5e                        pop esi
+  0x005290f6  83 c4 10                  add esp, 0x10
+  0x005290f9  c3                        ret 
+
+CTOR TERMINAL RET + PADDING at 0x005290f9: ctor extent ends 0x005290fa (within window)

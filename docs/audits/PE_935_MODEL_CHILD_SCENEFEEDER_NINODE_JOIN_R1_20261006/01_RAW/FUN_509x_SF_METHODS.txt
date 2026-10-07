@@ -1,0 +1,95 @@
+THE THREE SF METHODS CALLED BY THE CMO CTOR CONTINUATION — NEW detailed functions #3/#4/#5
+Edges charged: CMO ctor->FUN_00509510, CMO ctor->FUN_00509070, CMO ctor->FUN_00509850 (3 of 6).
+EXE pinned by pe_reader. capstone 5.0.7. Raw bytes shown.
+
+====================================================================================================
+NEW #4: FUN_00509070 — SF method called with &[CMO+0x50] @0x0052903E
+WINDOW 0x00509070 LEN 96
+BYTES: 8B 44 24 04 8B 10 89 91 80 00 00 00 8B 50 04 89 91 84 00 00 00 8B 40 08 89 81 88 00 00 00 C2 04 00 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC 8D 41 34 C3 CC CC CC CC CC CC CC CC CC CC CC CC 8D 41 74 C3 CC CC CC CC CC CC CC CC CC CC CC CC 8D 81 80 00 00 00 C3 CC CC CC CC CC CC CC CC CC
+
+  0x00509070  8b 44 24 04               mov eax, dword ptr [esp + 4]
+  0x00509074  8b 10                     mov edx, dword ptr [eax]
+  0x00509076  89 91 80 00 00 00         mov dword ptr [ecx + 0x80], edx
+  0x0050907c  8b 50 04                  mov edx, dword ptr [eax + 4]
+  0x0050907f  89 91 84 00 00 00         mov dword ptr [ecx + 0x84], edx
+  0x00509085  8b 40 08                  mov eax, dword ptr [eax + 8]
+  0x00509088  89 81 88 00 00 00         mov dword ptr [ecx + 0x88], eax
+  0x0050908e  c2 04 00                  ret 4
+-> terminal ret at 0x0050908e; extent 0x00509070..0x00509091 (33 B)
+
+====================================================================================================
+NEW #3: FUN_00509510 — SF method called with &[CMO+0x5C] @0x0052902F
+WINDOW 0x00509510 LEN 96
+BYTES: 8B 44 24 04 83 EC 48 53 8B D9 8B 08 89 4B 74 8B 50 04 56 89 53 78 8B 48 08 57 89 4B 7C 50 8D 4C 24 10 E8 99 38 46 00 8D 54 24 0C 52 8D 44 24 34 50 E8 2A EA F2 FF 8B C8 E8 73 25 F8 FF 8D 7B 4C B9 09 00 00 00 8B F0 F3 A5 5F 5E C6 43 28 01 5B 83 C4 48 C2 04 00 CC CC CC CC CC CC CC CC CC CC
+
+  0x00509510  8b 44 24 04               mov eax, dword ptr [esp + 4]
+  0x00509514  83 ec 48                  sub esp, 0x48
+  0x00509517  53                        push ebx
+  0x00509518  8b d9                     mov ebx, ecx
+  0x0050951a  8b 08                     mov ecx, dword ptr [eax]
+  0x0050951c  89 4b 74                  mov dword ptr [ebx + 0x74], ecx
+  0x0050951f  8b 50 04                  mov edx, dword ptr [eax + 4]
+  0x00509522  56                        push esi
+  0x00509523  89 53 78                  mov dword ptr [ebx + 0x78], edx
+  0x00509526  8b 48 08                  mov ecx, dword ptr [eax + 8]
+  0x00509529  57                        push edi
+  0x0050952a  89 4b 7c                  mov dword ptr [ebx + 0x7c], ecx
+  0x0050952d  50                        push eax
+  0x0050952e  8d 4c 24 10               lea ecx, [esp + 0x10]
+  0x00509532  e8 99 38 46 00            call 0x96cdd0
+  0x00509537  8d 54 24 0c               lea edx, [esp + 0xc]
+  0x0050953b  52                        push edx
+  0x0050953c  8d 44 24 34               lea eax, [esp + 0x34]
+  0x00509540  50                        push eax
+  0x00509541  e8 2a ea f2 ff            call 0x437f70
+  0x00509546  8b c8                     mov ecx, eax
+  0x00509548  e8 73 25 f8 ff            call 0x48bac0
+  0x0050954d  8d 7b 4c                  lea edi, [ebx + 0x4c]
+  0x00509550  b9 09 00 00 00            mov ecx, 9
+  0x00509555  8b f0                     mov esi, eax
+  0x00509557  f3 a5                     rep movsd dword ptr es:[edi], dword ptr [esi]
+  0x00509559  5f                        pop edi
+  0x0050955a  5e                        pop esi
+  0x0050955b  c6 43 28 01               mov byte ptr [ebx + 0x28], 1
+  0x0050955f  5b                        pop ebx
+  0x00509560  83 c4 48                  add esp, 0x48
+  0x00509563  c2 04 00                  ret 4
+-> terminal ret at 0x00509563; extent 0x00509510..0x00509566 (86 B)
+
+====================================================================================================
+NEW #5: FUN_00509850 — SF method called with (ebx, ecx, 0.0f) @0x00529050
+WINDOW 0x00509850 LEN 96
+BYTES: 83 EC 18 53 55 8B E9 8A 45 24 84 C0 74 0C 80 7D 25 00 75 06 80 7D 26 00 74 12 80 7D 27 00 0F 84 3F 01 00 00 84 C0 75 04 32 DB EB 04 8A 5C 24 28 8B 4D 20 85 C9 74 18 E8 34 76 1B 00 84 C0 74 0F 8B 4D 20 E8 38 76 1B 00 C6 85 91 00 00 00 01 80 7D 28 01 0F 85 DA 00 00 00 8B 45 34 8B 4D 38 8B
+
+  0x00509850  83 ec 18                  sub esp, 0x18
+  0x00509853  53                        push ebx
+  0x00509854  55                        push ebp
+  0x00509855  8b e9                     mov ebp, ecx
+  0x00509857  8a 45 24                  mov al, byte ptr [ebp + 0x24]
+  0x0050985a  84 c0                     test al, al
+  0x0050985c  74 0c                     je 0x50986a
+  0x0050985e  80 7d 25 00               cmp byte ptr [ebp + 0x25], 0
+  0x00509862  75 06                     jne 0x50986a
+  0x00509864  80 7d 26 00               cmp byte ptr [ebp + 0x26], 0
+  0x00509868  74 12                     je 0x50987c
+  0x0050986a  80 7d 27 00               cmp byte ptr [ebp + 0x27], 0
+  0x0050986e  0f 84 3f 01 00 00         je 0x5099b3
+  0x00509874  84 c0                     test al, al
+  0x00509876  75 04                     jne 0x50987c
+  0x00509878  32 db                     xor bl, bl
+  0x0050987a  eb 04                     jmp 0x509880
+  0x0050987c  8a 5c 24 28               mov bl, byte ptr [esp + 0x28]
+  0x00509880  8b 4d 20                  mov ecx, dword ptr [ebp + 0x20]
+  0x00509883  85 c9                     test ecx, ecx
+  0x00509885  74 18                     je 0x50989f
+  0x00509887  e8 34 76 1b 00            call 0x6c0ec0
+  0x0050988c  84 c0                     test al, al
+  0x0050988e  74 0f                     je 0x50989f
+  0x00509890  8b 4d 20                  mov ecx, dword ptr [ebp + 0x20]
+  0x00509893  e8 38 76 1b 00            call 0x6c0ed0
+  0x00509898  c6 85 91 00 00 00 01      mov byte ptr [ebp + 0x91], 1
+  0x0050989f  80 7d 28 01               cmp byte ptr [ebp + 0x28], 1
+  0x005098a3  0f 85 da 00 00 00         jne 0x509983
+  0x005098a9  8b 45 34                  mov eax, dword ptr [ebp + 0x34]
+  0x005098ac  8b 4d 38                  mov ecx, dword ptr [ebp + 0x38]
+

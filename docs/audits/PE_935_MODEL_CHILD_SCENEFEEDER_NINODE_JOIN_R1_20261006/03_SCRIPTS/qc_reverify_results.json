@@ -1,0 +1,63 @@
+{
+  "checks": {
+    "S1_exe_identity": {
+      "ok": true,
+      "detail": "size 8015872, sha E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+    },
+    "S2_load_bearing_pins": {
+      "ok": true,
+      "detail": "25 pins re-read; mismatches: NONE"
+    },
+    "S3_rel32_arithmetic": {
+      "ok": true,
+      "detail": "17 call targets recomputed; mismatches: NONE"
+    },
+    "S4_join_receiver_preservation": {
+      "ok": true,
+      "detail": "window 0x0050A3E9..0x0050A3F8 = '8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2'; ECX loaded at 0x0050A3E9, only MOV EAX,[ECX] (read) between, no ECX write before CALL EDX at 0x0050A3F7"
+    },
+    "S5_fun_50a310_head_esi_sf": {
+      "ok": true,
+      "detail": "push ecx; push ebp; push esi; mov esi,ecx (this=SF at entry per the E5 callsite chain); then flags check"
+    },
+    "S6_sf_creation_chain": {
+      "ok": true,
+      "detail": "mov ecx,eax (SF result) -> call FUN_005247C0 @0x006A39ED -> mov [esi+0x18],eax @0x006A39F6 (SF stored at [ACLD+0x18])"
+    },
+    "S7_manager_chain": {
+      "ok": true,
+      "detail": "push 0x130; call operator new; ebp=block; FUN_006C0D50(this=block) @0x006A3A77; then FUN_006C8B20/BB0 and mov ecx,[esi+0x18] (SF) -> FUN_0050A310"
+    },
+    "S8_ninode_vtable_slots": {
+      "ok": true,
+      "detail": "slot 41 (+0xA4) = 0x007b5810 (expect 0x007B5810); slot 42 (+0xA8) = 0x007b5a00 (detach-shaped call at 0x0050A35A)"
+    },
+    "S9_budgets": {
+      "ok": true,
+      "detail": "NEW_DETAILED_FUNCTIONS 8/8 (max 8); NEW_INTERPROCEDURAL_EDGES 6/6 (max 6); JOIN_CANDIDATES_DETAILED 4/4 (max 4); ORACLE_MECHANISMS 1/1 (AttachChild); budget NOT exceeded"
+    },
+    "S10_ledger_schema": {
+      "ok": true,
+      "detail": "header/order/width/dup/null validated by build_ledgers.py validator"
+    },
+    "S11_no_overclaims_in_ledgers": {
+      "ok": true,
+      "detail": "overclaim token sweep: CLEAN"
+    },
+    "S12_repo_state": {
+      "ok": true,
+      "detail": "HEAD 24f45e0108b922c26ff584fee9ef7749de0390b6; tracked modifications: NONE; untracked roots: ['docs', 'experiments']"
+    },
+    "S13_qualification_gate": {
+      "ok": true,
+      "detail": "baseline PASS; CTRL-A/B/C each rejected by the proper predicate; real candidate FAIL; not checker-always-FAIL; real-chain bytes verified against the EXE"
+    },
+    "S14_status_algebra": {
+      "ok": true,
+      "detail": "CAND-4: A=UNRESOLVED, B=CONFIRMED (scoped), C=STRONGLY_SUPPORTED, D=UNRESOLVED -> INSTANCE_MODEL_NODE_JOIN=NOT_ESTABLISHED (no averaging up)"
+    }
+  },
+  "findings": [],
+  "OVERALL": "QC_PASS",
+  "note": "SELF-CLASSIFICATION: this is the executor's own fresh-context internal QC (SELF_CHECK), NOT independent external Desktop post-audit and NOT PE-MASTER qualification."
+}

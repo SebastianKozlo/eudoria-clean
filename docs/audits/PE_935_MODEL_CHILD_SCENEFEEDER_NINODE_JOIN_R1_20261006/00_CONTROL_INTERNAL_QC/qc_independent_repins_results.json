@@ -1,0 +1,388 @@
+{
+  "checks": {
+    "Q0_exe_identity": {
+      "ok": true,
+      "detail": "size=8015872 sha=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+    },
+    "A1_join_site_bytes": {
+      "ok": true,
+      "detail": "0x0050A3E9..0x0050A3F8 = '8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2'"
+    },
+    "A2_join_site_boundary_decode": {
+      "ok": true,
+      "detail": "0x50a3e9: 8B 4E 30 mov ECX,rm(mod=1,rm=6); 0x50a3ec: 8B 01 mov EAX,rm(mod=0,rm=1); 0x50a3ee: 8B 90 A4 00 00 00 mov EDX,rm(mod=2,rm=0); 0x50a3f4: 6A 00 push 0x0; 0x50a3f6: 57 push EDI; 0x50a3f7: FF D2 grp5/2 (mod=3,rm=2)"
+    },
+    "A3_receiver_arithmetic": {
+      "ok": true,
+      "detail": "receiver ECX = [ESI+0x30] (8B 4E 30: mod=01 rm=110 -> [ESI+disp8 0x30]); vtable = [ECX] (8B 01); slot = [EAX+0xA4] (8B 90 A4 00 00 00; 0xA4/4 = slot 41); push 0 (bFirstAvail arg2); push EDI (child arg1); call EDX @0x0050A3F7 \u2014 ECX loaded once at 0x0050A3E9, only a vtable READ ([ECX]) between, no ECX write before the call"
+    },
+    "A4_slot41_data": {
+      "ok": true,
+      "detail": "[0x00A8CCF4+0xA4] = 0x007B5810 (expect 0x007B5810); 0xA4 = slot 41*4"
+    },
+    "A5_slot42_data": {
+      "ok": true,
+      "detail": "[0x00A8CCF4+0xA8] = 0x007B5A00 (expect 0x007B5A00)"
+    },
+    "A6_fun_50a310_head": {
+      "ok": true,
+      "detail": "head = '51 55 56 8B F1 80 7E 24' => push ecx; push ebp; push esi; mov ESI,ECX (this=SF); cmp byte [ESI+0x24],1"
+    },
+    "A7_edi_chain_bytes": {
+      "ok": true,
+      "detail": "mov EDI,[ESP+0x14] (manager arg); call 0x006C66D0; mov EDI,EAX (child); no EDI write between 0x0050A3B7 and push EDI @0x0050A3F6"
+    },
+    "B1_sf20_store": {
+      "ok": true,
+      "detail": "0x0050A3AC = '89 7E 20' = mov [ESI+0x20],EDI (ESI=SF per A6; EDI=manager arg per A7)"
+    },
+    "B2_sf20_store_is_boundary": {
+      "ok": true,
+      "detail": "0x0050A3AC is a true instruction boundary (linear decode from 0x0050A310); between mov ECX,EDI @0x0050A3AA and call @0x0050A3AF"
+    },
+    "C1_getter_call_target": {
+      "ok": true,
+      "detail": "rel32 recompute: 0x0050A3AF + 5 + 0x1bc31c = 0x006C66D0 (expect 0x006C66D0)"
+    },
+    "C2_getter_receiver": {
+      "ok": true,
+      "detail": "ECX = EDI (the manager) immediately before the getter call @0x0050A3AF (bytes 8B CF at 0x0050A3AA)"
+    },
+    "D1_call_target_50a310": {
+      "ok": true,
+      "detail": "0x006A3A9D + 5 + -0x199792 = 0x0050A310 (expect 0x0050A310)"
+    },
+    "D2_call_args": {
+      "ok": true,
+      "detail": "mov ECX,[ESI+0x18] (SF from [ACLD+0x18]; ESI=ACLD per ctor head mov esi,ecx) ; push EBP (the manager) ; call"
+    },
+    "D3_sf_store_acld18": {
+      "ok": true,
+      "detail": "mov [ESI+0x18],EAX @0x006A39F6 = '89 46 18' (SF stored at [ACLD+0x18])"
+    },
+    "D4_sf_factory_call": {
+      "ok": true,
+      "detail": "0x006A39ED call target = 0x005247C0 (expect 0x005247C0)"
+    },
+    "D5_manager_new_0x130": {
+      "ok": true,
+      "detail": "push 0x130; call 0x0095D3C4 (allocator; rel32 recompute below); mov EBP,EAX"
+    },
+    "D5b_allocator_target": {
+      "ok": true,
+      "detail": "new(0x130) call target = 0x0095D3C4 (expect 0x0095D3C4)"
+    },
+    "D6_manager_ctor_call": {
+      "ok": true,
+      "detail": "FUN_006C0D50 (ArkModelManagerMain ctor per bridge W02 prior canon) target = 0x006C0D50"
+    },
+    "D7_all_sites_boundaries": {
+      "ok": true,
+      "detail": "all D-chain sites are true instruction boundaries in my own linear decode of FUN_006A3930 from entry 0x006A3930"
+    },
+    "E1_oracle_proof_bytes_match": {
+      "ok": true,
+      "detail": "my EXE read of 0x007B5810 LEN 256 is byte-identical to the BYTES line in 01_RAW/FUN_007B5810_ORACLE_BYTE_PROOF.txt"
+    },
+    "E2_F1_null_guard": {
+      "ok": true,
+      "detail": "ESI = [ESP+0x20] (arg1 = child); test ESI,ESI; je 0x007B58DD (early return)"
+    },
+    "E3_F2_refcount_inc_x2": {
+      "ok": true,
+      "detail": "add [ESI+4],EBX (EBX=1) @0x007B5846 '01 5E 04' and @0x007B5851 '01 5E 04' \u2014 refcount inc x2"
+    },
+    "E4_F3_attachparent_call": {
+      "ok": true,
+      "detail": "push EDI (parent=this) @0x007B5849 (57); mov ECX,ESI (child receiver) @0x007B584A (8B CE); call @0x007B584C (E8 1F 9C 00 00)"
+    },
+    "E4b_F3_target": {
+      "ok": true,
+      "detail": "call FUN_007BF470 target = 0x007BF470 (expect 0x007BF470; body NOT decoded)"
+    },
+    "E5_F4_bfirstavail_gate": {
+      "ok": true,
+      "detail": "cmp byte [ESP+0x24],0 \u2014 arg2 (bFirstAvail) gate"
+    },
+    "E6_F4_children_obj_lea": {
+      "ok": true,
+      "detail": "lea ECX,[EDI+0xC8] @0x007B5864 = '8D 8F C8 00 00 00' \u2014 m_kChildren @NiNode+0xC8"
+    },
+    "E7_addfirstempty_call": {
+      "ok": true,
+      "detail": "call FUN_007B55E0 target = 0x007B55E0"
+    },
+    "E8_append_path": {
+      "ok": true,
+      "detail": "add EDI,0xC8 (bFirstAvail==0 branch); EBX=[EDI+0xC] (used = NiNode+0xD4); cmp EBX,[EDI+8] (alloc = NiNode+0xD0)"
+    },
+    "E9_grow_call": {
+      "ok": true,
+      "detail": "grow call target = 0x00788570 (expect 0x00788570)"
+    },
+    "E10_setat_call": {
+      "ok": true,
+      "detail": "set-at-index call target = 0x007790D0 (expect 0x007790D0)"
+    },
+    "E11_F5_dec_and_destroy": {
+      "ok": true,
+      "detail": "add [ESI+4],EDI (EDI=-1) dec after each branch (@0x7B587A bFirstAvail-path, @0x7B58BD append-path, @0x7B58CF common tail); zero-destroy: EAX=[ESI] (vtable), EDX=[EAX+4] (slot 1), ECX=ESI, call EDX (9 bytes 8B 06 8B 50 04 8B CE FF D2)"
+    },
+    "E12_extent": {
+      "ok": true,
+      "detail": "my linear decode: extent 0x007B5810..0x7b58f2 (226 B, reason TERMINAL_RET_PADDING) \u2014 matches the ledger's 0x007B5810..0x007B58F2"
+    },
+    "F1_flags_window": {
+      "ok": true,
+      "detail": "flags AL=[EBP+0x24]; [EBP+0x25]/[EBP+0x26]/[EBP+0x27] window gates (EBP=SF per mov ebp,ecx @0x00509855)"
+    },
+    "F2_gate_sf28": {
+      "ok": true,
+      "detail": "cmp byte [EBP+0x28],1; jne 0x00509983 \u2014 the transform-write gate"
+    },
+    "F3_gate_sf2c_bit0": {
+      "ok": true,
+      "detail": "EAX=[EBP+0x2C]; shr EAX,4; test AL,1 \u2014 gates the +0x40..0x48 offset add"
+    },
+    "F4_translate_load": {
+      "ok": true,
+      "detail": "EAX=[EBP+0x30] (SF+0x30 NiNode); add EAX,0x5C \u2014 translate target base"
+    },
+    "F5_translate_stores": {
+      "ok": true,
+      "detail": "mov [EAX],ECX; mov [EAX+4],EDX; mov [EAX+8],ECX \u2014 NiNode+0x5C/+0x60/+0x64"
+    },
+    "F6_x100_const": {
+      "ok": true,
+      "detail": "[0x00A7A618] qword = 100.0 (expect 100.0 \u2014 the x100 multiplier; fld qword [0x00A7A618] @0x005098F4)"
+    },
+    "F7_rotation_copy": {
+      "ok": true,
+      "detail": "EDI=[EBP+0x30]+0x38; ECX=9; rep movsd <- ESI=[EBP+0x4C] \u2014 rotation 9 dwords SF+0x4C -> NiNode+0x38"
+    },
+    "F8_scale": {
+      "ok": true,
+      "detail": "fld [EBP+0x70]; fabs; EDX=[EBP+0x30]; fstp [EDX+0x68] \u2014 scale |SF+0x70| -> NiNode+0x68"
+    },
+    "F9_callsite_29050": {
+      "ok": true,
+      "detail": "0x00529050 call target = 0x00509850 (expect 0x00509850); ecx=[ESI+0xC0] (SF) @0x00529047"
+    },
+    "F10_extent": {
+      "ok": true,
+      "detail": "my linear decode extent 0x00509850..0x5099bb \u2014 matches the ledger's 0x00509850..0x005099BB"
+    },
+    "G1_8bd720_body": {
+      "ok": true,
+      "detail": "0x008BD720 = '8D 41 18 C3' = lea EAX,[ECX+0x18]; ret \u2014 4-byte accessor (NOT a completion handler)"
+    },
+    "G2_8bd720_padding": {
+      "ok": true,
+      "detail": "int3 padding after the ret"
+    },
+    "G3_imm_at_6c3fb0": {
+      "ok": true,
+      "detail": "0x006C3FB0 = 'BB 20 D7 8B 00' = mov EBX,0x008BD720 (the callback immediate; instruction VA 0x006C3FB0, imm at +1)"
+    },
+    "G4_scheduler_entry_call": {
+      "ok": true,
+      "detail": "scheduler call target = 0x006C3640 (expect 0x006C3640)"
+    },
+    "H1_sf_vtable_store": {
+      "ok": true,
+      "detail": "SectorFun_00509330: linear-decode vtable store hit = not as C7 06 in linear decode; raw imm32 0x00A7D458 found at 0x00509369 in 0x00509330..0x00509510"
+    },
+    "H2_ninode_vtable_store": {
+      "ok": true,
+      "detail": "NiNode ctor FUN_007B6000 stores vtable 0x00A8CCF4 at 0x007B6041"
+    },
+    "H3_sf30_store": {
+      "ok": true,
+      "detail": "mov [EBP+0x30],EAX @0x005093C3"
+    },
+    "H4_ninode_ctor_call": {
+      "ok": true,
+      "detail": "0x005093B8 call target = 0x007B6000"
+    },
+    "H5_refcount_inc_after_store": {
+      "ok": true,
+      "detail": "add [EAX+4],1 @0x005093C8 (refcount inc on the stored node)"
+    },
+    "H6_vtable_canon_slots": {
+      "ok": true,
+      "detail": "slot17=0x7b5390 slot19=0x7b47d0 slot41=0x7b5810 slot42=0x7b5a00 slot45=0x7b4550; slot46=0x7b4580; slot47=0x65666665 (past-end ASCII 'effe')"
+    },
+    "H7_fun_50a310_extent": {
+      "ok": true,
+      "detail": "my own linear decode from entry 0x0050A310: TRUE extent = 0x0050A310..0x0050A45C (terminal C2 04 00 ret 0x4 at 0x0050A459, reason TERMINAL_RET_PADDING) \u2014 the executor's raw window (LEN 288) covers only 0x0050A310..0x0050A42F and the budget honestly writes '0x0050A310..0x0050A453+'; the FINAL_REPORT 'fully decoded' wording overstates the window (see QC finding)"
+    },
+    "I1_raw_windows_byte_identity": {
+      "ok": true,
+      "detail": "23 raw windows re-read from the EXE and compared byte-for-byte with the 01_RAW records; mismatches: NONE"
+    },
+    "J1_oracle_sources": {
+      "ok": true,
+      "detail": "{\"NiNode.cpp\": {\"sha256\": \"38C7A1DE1E166345068D296F70F34B1ADAE27C694E19EAD8FA0FBD8B62E0E016\", \"size\": 33897, \"expected_sha\": \"38C7A1DE1E166345068D296F70F34B1ADAE27C694E19EAD8FA0FBD8B62E0E016\", \"expected_size\": 33897, \"match\": true}, \"NiAVObject.cpp\": {\"sha256\": \"72E0837149B03CCDA171BDF5E68E1E1F8C2712B2F10E7957AC3EC26344CA5EA7\", \"size\": 33215, \"expected_sha\": \"72E0837149B03CCDA171BDF5E68E1E1F8C2712B2F10E7957AC3EC26344CA5EA7\", \"expected_size\": 33215, \"match\": true}}"
+    },
+    "J2_private_research_reports": {
+      "ok": true,
+      "detail": "{\"PE_SCENEFEEDER_ENGINE_COMPARISON_RESEARCH_20261006\": {\"sha256\": \"26CBF3AB57CEB99DB90760AB503E58AF5D42DCE5E2AB6DA428578DBD4DCD64C1\", \"size\": 17914, \"expected\": \"26CBF3AB57CEB99DB90760AB503E58AF5D42DCE5E2AB6DA428578DBD4DCD64C1\", \"match\": true}, \"PE_935_NIRTTI_CLASS_IDENTITY_DESKTOP_RESEARCH_R1_20261004\": {\"sha256\": \"D6B81792BC1AA99124C772EF05C6690A94BFF97DD11B09CCECC3B226C852547A\", \"size\": 13385, \"expected\": \"D6B81792BC1AA99124C772EF05C6690A94BFF97DD11B09CCECC3B226C852547A\", \"match\": true}, \"PE_935_PLACEMENT_BRIDGE_DESKTOP_POST_AUDIT_20261003\": {\"sha256\": \"598DA71AC3DC1F6577EA2AF9E25ED8CF9C53A2603899D08B8AA3307A8CC35396\", \"size\": 15300, \"expected\": \"598DA71AC3DC1F6577EA2AF9E25ED8CF9C53A2603899D08B8AA3307A8CC35396\", \"match\": true}}"
+    },
+    "J3_contract_identity": {
+      "ok": true,
+      "detail": "15348 B / F929D2C03B1D078BD69BDD206B0CF51DE5F393A0CE6D39618ED87819D043F3C8"
+    },
+    "J4_anchor_constraints_identity": {
+      "ok": true,
+      "detail": "1641 B / D531B56AB0C1FD180A31DABC5DACAAE289372CA7B8FD8EC8BAAC565FAB0E4355"
+    },
+    "K1_manifest_bijection": {
+      "ok": true,
+      "detail": "disk files (excl. manifest, excl. this QC dir) = 32; manifest rows = 31; missing/mismatch=NONE; extra=NONE; dups=NONE"
+    },
+    "K2_row_count": {
+      "ok": true,
+      "detail": "31 manifest rows vs 32 physical files (31 + the self-excluded manifest itself) \u2014 matches the dispatch's 32-file census; the AUDIT_ENTRYPOINT.md exclusion is explicitly recorded (make_manifest.py docstring + FINAL_REPORT \u00a76 + HANDOFF)"
+    },
+    "L1_candidate_ledger": {
+      "ok": true,
+      "detail": "header exact match to contract \u00a75 fields; 4 candidate rows; width/null/dup errors: NONE"
+    },
+    "L2_cand4_status_algebra": {
+      "ok": true,
+      "detail": "CAND-4: A=UNRESOLVED, B=CONFIRMED(scoped, DIFFERENT-INSTANCE disclosure present), C=STRONGLY_SUPPORTED with explicit NOT CONFIRMED, D=UNRESOLVED"
+    }
+  },
+  "detail": {
+    "pe_sections": [
+      {
+        "name": ".text",
+        "va": "0x00001000",
+        "vsize": "0x00674000",
+        "raw_off": "0x00001000"
+      },
+      {
+        "name": ".rdata",
+        "va": "0x00675000",
+        "vsize": "0x000F7000",
+        "raw_off": "0x00675000"
+      },
+      {
+        "name": ".data",
+        "va": "0x0076C000",
+        "vsize": "0x0003D6E4",
+        "raw_off": "0x0076C000"
+      },
+      {
+        "name": ".tls",
+        "va": "0x007AA000",
+        "vsize": "0x00001000",
+        "raw_off": "0x007A0000"
+      },
+      {
+        "name": ".rsrc",
+        "va": "0x007AB000",
+        "vsize": "0x00004000",
+        "raw_off": "0x007A1000"
+      }
+    ],
+    "vtable_slots_0_47": {
+      "slot_0": "0x0082E420",
+      "slot_1": "0x00406D50",
+      "slot_2": "0x007B60C0",
+      "slot_3": "0x007B6240",
+      "slot_4": "0x007B45A0",
+      "slot_5": "0x007B5E00",
+      "slot_6": "0x007B5470",
+      "slot_7": "0x007B5F50",
+      "slot_8": "0x007B54F0",
+      "slot_9": "0x007B63A0",
+      "slot_10": "0x007E19D0",
+      "slot_11": "0x007B62C0",
+      "slot_12": "0x007B71B0",
+      "slot_13": "0x00775CA0",
+      "slot_14": "0x007B4A60",
+      "slot_15": "0x007B5100",
+      "slot_16": "0x007B4650",
+      "slot_17": "0x007B5390",
+      "slot_18": "0x007B5160",
+      "slot_19": "0x007B47D0",
+      "slot_20": "0x007B48A0",
+      "slot_21": "0x007B49B0",
+      "slot_22": "0x007B4FA0",
+      "slot_23": "0x007B5050",
+      "slot_24": "0x007B5270",
+      "slot_25": "0x007B52C0",
+      "slot_26": "0x007B4AB0",
+      "slot_27": "0x007E4820",
+      "slot_28": "0x007DE3F0",
+      "slot_29": "0x007DE420",
+      "slot_30": "0x007DE450",
+      "slot_31": "0x007DE180",
+      "slot_32": "0x007DE0D0",
+      "slot_33": "0x007DE1B0",
+      "slot_34": "0x007DE260",
+      "slot_35": "0x007DE2B0",
+      "slot_36": "0x007DE2F0",
+      "slot_37": "0x007DE350",
+      "slot_38": "0x007D93A0",
+      "slot_39": "0x007DE370",
+      "slot_40": "0x007DE390",
+      "slot_41": "0x007B5810",
+      "slot_42": "0x007B5A00",
+      "slot_43": "0x007B5900",
+      "slot_44": "0x007B5B00",
+      "slot_45": "0x007B4550",
+      "slot_46": "0x007B4580",
+      "slot_47": "0x65666665"
+    },
+    "fun_50a310_decode_end": "0x0050A45C",
+    "fun_50a310_decode_reason": "TERMINAL_RET_PADDING",
+    "fun_50a310_last_insns": [
+      "0x50a453: 5F pop EDI",
+      "0x50a454: 5E pop ESI",
+      "0x50a455: 32 C0 xor r/m (mod=3,reg=0)",
+      "0x50a457: 5D pop EBP",
+      "0x50a458: 59 pop ECX",
+      "0x50a459: C2 04 00 ret 0x4"
+    ],
+    "fun_50a310_undecoded_tail_bytes": "00 00 01 C6 46 28 01 75 12 8B CE E8 81 F1 FF FF C6 46 24 01 C6 86 91 00 00 00 01 5F 5E B0 01 5D 59 C2 04 00 5F 5E 32 C0 5D 59 C2 04 00",
+    "raw_windows_checked": 23,
+    "oracle_sources": {
+      "NiNode.cpp": {
+        "sha256": "38C7A1DE1E166345068D296F70F34B1ADAE27C694E19EAD8FA0FBD8B62E0E016",
+        "size": 33897,
+        "expected_sha": "38C7A1DE1E166345068D296F70F34B1ADAE27C694E19EAD8FA0FBD8B62E0E016",
+        "expected_size": 33897,
+        "match": true
+      },
+      "NiAVObject.cpp": {
+        "sha256": "72E0837149B03CCDA171BDF5E68E1E1F8C2712B2F10E7957AC3EC26344CA5EA7",
+        "size": 33215,
+        "expected_sha": "72E0837149B03CCDA171BDF5E68E1E1F8C2712B2F10E7957AC3EC26344CA5EA7",
+        "expected_size": 33215,
+        "match": true
+      }
+    },
+    "private_reports": {
+      "PE_SCENEFEEDER_ENGINE_COMPARISON_RESEARCH_20261006": {
+        "sha256": "26CBF3AB57CEB99DB90760AB503E58AF5D42DCE5E2AB6DA428578DBD4DCD64C1",
+        "size": 17914,
+        "expected": "26CBF3AB57CEB99DB90760AB503E58AF5D42DCE5E2AB6DA428578DBD4DCD64C1",
+        "match": true
+      },
+      "PE_935_NIRTTI_CLASS_IDENTITY_DESKTOP_RESEARCH_R1_20261004": {
+        "sha256": "D6B81792BC1AA99124C772EF05C6690A94BFF97DD11B09CCECC3B226C852547A",
+        "size": 13385,
+        "expected": "D6B81792BC1AA99124C772EF05C6690A94BFF97DD11B09CCECC3B226C852547A",
+        "match": true
+      },
+      "PE_935_PLACEMENT_BRIDGE_DESKTOP_POST_AUDIT_20261003": {
+        "sha256": "598DA71AC3DC1F6577EA2AF9E25ED8CF9C53A2603899D08B8AA3307A8CC35396",
+        "size": 15300,
+        "expected": "598DA71AC3DC1F6577EA2AF9E25ED8CF9C53A2603899D08B8AA3307A8CC35396",
+        "match": true
+      }
+    }
+  }
+}

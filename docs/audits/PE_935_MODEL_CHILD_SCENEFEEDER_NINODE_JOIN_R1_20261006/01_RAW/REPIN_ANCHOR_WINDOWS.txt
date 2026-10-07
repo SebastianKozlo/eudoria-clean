@@ -1,0 +1,312 @@
+REPIN_ANCHOR_WINDOWS — PE_935_MODEL_CHILD_SCENEFEEDER_NINODE_JOIN_R1_20261006
+EXE pinned in pe_reader.py (size+SHA fail-closed at import).
+Method: own PE mapper + capstone 5.0.7 linear decode of bounded windows; raw bytes shown.
+
+### PA1a: SF ctor FUN_00509330 — new(0x118)/FUN_007B6000/[SF+0x30] store window (prior pin: MICRO_R1 §4; LINK30 C4/C5)
+VA 0x005093a0 LEN 64
+BYTES: E8 1F 40 45 00 83 C4 04 89 44 24 50 3B C3 C6 44 24 44 01 74 0A 53 8B C8 E8 43 CC 2A 00 EB 02 33 C0 3B C3 89 45 30 74 04 83 40 04 01 D9 EE D9 55 34 8B 4C 24 4C D9 55 38 BE 80 3C B9 00 D9 55 3C
+  0x005093a0  e8 1f 40 45 00            call 0x95d3c4
+  0x005093a5  83 c4 04                  add esp, 4
+  0x005093a8  89 44 24 50               mov dword ptr [esp + 0x50], eax
+  0x005093ac  3b c3                     cmp eax, ebx
+  0x005093ae  c6 44 24 44 01            mov byte ptr [esp + 0x44], 1
+  0x005093b3  74 0a                     je 0x5093bf
+  0x005093b5  53                        push ebx
+  0x005093b6  8b c8                     mov ecx, eax
+  0x005093b8  e8 43 cc 2a 00            call 0x7b6000
+  0x005093bd  eb 02                     jmp 0x5093c1
+  0x005093bf  33 c0                     xor eax, eax
+  0x005093c1  3b c3                     cmp eax, ebx
+  0x005093c3  89 45 30                  mov dword ptr [ebp + 0x30], eax
+  0x005093c6  74 04                     je 0x5093cc
+  0x005093c8  83 40 04 01               add dword ptr [eax + 4], 1
+  0x005093cc  d9 ee                     fldz 
+  0x005093ce  d9 55 34                  fst dword ptr [ebp + 0x34]
+  0x005093d1  8b 4c 24 4c               mov ecx, dword ptr [esp + 0x4c]
+  0x005093d5  d9 55 38                  fst dword ptr [ebp + 0x38]
+  0x005093d8  be 80 3c b9 00            mov esi, 0xb93c80
+  0x005093dd  d9 55 3c                  fst dword ptr [ebp + 0x3c]
+
+### PA1b: FUN_007B6000 vtable store 0x00A8CCF4 window (prior pin: LINK30 C6)
+VA 0x007b6038 LEN 32
+BYTES: 8E C8 00 00 00 89 7C 24 20 C7 06 F4 CC A8 00 E8 34 24 FD FF 89 BE EC 00 00 00 89 BE E4 00 00 00
+  0x007b6038  8e c8                     mov cs, eax
+  0x007b603a  00 00                     add byte ptr [eax], al
+  0x007b603c  00 89 7c 24 20 c7         add byte ptr [ecx - 0x38dfdb84], cl
+  0x007b6042  06                        push es
+  0x007b6043  f4                        hlt 
+  0x007b6044  cc                        int3 
+  0x007b6045  a8 00                     test al, 0
+  0x007b6047  e8 34 24 fd ff            call 0x788480
+  0x007b604c  89 be ec 00 00 00         mov dword ptr [esi + 0xec], edi
+  0x007b6052  89 be e4 00 00 00         mov dword ptr [esi + 0xe4], edi
+
+### PA2a: SF ctor tail — new(0x14)/FUN_0064B1E0 (ExtraData ctor) window (prior pin: MICRO_R1 §4/§5; NIRTTI §4)
+VA 0x0050947e LEN 48
+BYTES: C6 44 24 44 03 74 0D 8B 55 14 52 8B C8 E8 50 1D 14 00 EB 02 33 C0 8B 4D 30 50 68 44 D4 A7 00 C6 44 24 4C 02 E8 D9 D5 2A 00 8B C5 8B 4C 24 3C 64
+  0x0050947e  c6 44 24 44 03            mov byte ptr [esp + 0x44], 3
+  0x00509483  74 0d                     je 0x509492
+  0x00509485  8b 55 14                  mov edx, dword ptr [ebp + 0x14]
+  0x00509488  52                        push edx
+  0x00509489  8b c8                     mov ecx, eax
+  0x0050948b  e8 50 1d 14 00            call 0x64b1e0
+  0x00509490  eb 02                     jmp 0x509494
+  0x00509492  33 c0                     xor eax, eax
+  0x00509494  8b 4d 30                  mov ecx, dword ptr [ebp + 0x30]
+  0x00509497  50                        push eax
+  0x00509498  68 44 d4 a7 00            push 0xa7d444
+  0x0050949d  c6 44 24 4c 02            mov byte ptr [esp + 0x4c], 2
+  0x005094a2  e8 d9 d5 2a 00            call 0x7b6a80
+  0x005094a7  8b c5                     mov eax, ebp
+  0x005094a9  8b 4c 24 3c               mov ecx, dword ptr [esp + 0x3c]
+
+### PA2b: FUN_0064B1E0 body (ExtraData ctor: vtable store 0x00A83274, key -> [obj+0x10]) (prior pin: NIRTTI §4)
+VA 0x0064b1e0 LEN 24
+BYTES: 56 8B F1 E8 98 D5 17 00 8B 44 24 08 89 46 10 C7 06 74 32 A8 00 8B C6 5E
+  0x0064b1e0  56                        push esi
+  0x0064b1e1  8b f1                     mov esi, ecx
+  0x0064b1e3  e8 98 d5 17 00            call 0x7c8780
+  0x0064b1e8  8b 44 24 08               mov eax, dword ptr [esp + 8]
+  0x0064b1ec  89 46 10                  mov dword ptr [esi + 0x10], eax
+  0x0064b1ef  c7 06 74 32 a8 00         mov dword ptr [esi], 0xa83274
+  0x0064b1f5  8b c6                     mov eax, esi
+  0x0064b1f7  5e                        pop esi
+
+### PA2c: registration window [SF+0x30] + 'ArkSceneFeeder' + ExtraData -> FUN_007B6A80 (prior pin: NIRTTI §4)
+VA 0x00509494 LEN 24
+BYTES: 8B 4D 30 50 68 44 D4 A7 00 C6 44 24 4C 02 E8 D9 D5 2A 00 8B C5 8B 4C 24
+  0x00509494  8b 4d 30                  mov ecx, dword ptr [ebp + 0x30]
+  0x00509497  50                        push eax
+  0x00509498  68 44 d4 a7 00            push 0xa7d444
+  0x0050949d  c6 44 24 4c 02            mov byte ptr [esp + 0x4c], 2
+  0x005094a2  e8 d9 d5 2a 00            call 0x7b6a80
+  0x005094a7  8b c5                     mov eax, ebp
+
+### PA3a: FUN_0050A050 primary path — [SF+0x30] load + NiNode vtable+0x44 dispatch (prior pin: LINK30 C7)
+VA 0x0050a05b LEN 12
+BYTES: 8B 4E 30 8B 11 50 8B 42 44 FF D0 85
+  0x0050a05b  8b 4e 30                  mov ecx, dword ptr [esi + 0x30]
+  0x0050a05e  8b 11                     mov edx, dword ptr [ecx]
+  0x0050a060  50                        push eax
+  0x0050a061  8b 42 44                  mov eax, dword ptr [edx + 0x44]
+  0x0050a064  ff d0                     call eax
+
+### PA3b: FUN_0050A050 full body (SF vtable slot 3; prior pin: SLOT_CENSUS §3)
+VA 0x0050a050 LEN 92
+BYTES: 8B 44 24 08 85 C0 56 8B F1 74 2C 8B 4E 30 8B 11 50 8B 42 44 FF D0 85 C0 74 1D 8B 74 24 08 05 90 00 00 00 50 56 E8 F6 DE F2 FF 8B C8 E8 1F 15 32 00 8B C6 5E C2 08 00 8B 16 8B 42 04 8B CE FF D0 8B 10 8B 4C 24 08 89 11 8B 50 04 89 51 04 8B 40 08 89 41 08 8B C1 5E C2 08 00 CC CC
+  0x0050a050  8b 44 24 08               mov eax, dword ptr [esp + 8]
+  0x0050a054  85 c0                     test eax, eax
+  0x0050a056  56                        push esi
+  0x0050a057  8b f1                     mov esi, ecx
+  0x0050a059  74 2c                     je 0x50a087
+  0x0050a05b  8b 4e 30                  mov ecx, dword ptr [esi + 0x30]
+  0x0050a05e  8b 11                     mov edx, dword ptr [ecx]
+  0x0050a060  50                        push eax
+  0x0050a061  8b 42 44                  mov eax, dword ptr [edx + 0x44]
+  0x0050a064  ff d0                     call eax
+  0x0050a066  85 c0                     test eax, eax
+  0x0050a068  74 1d                     je 0x50a087
+  0x0050a06a  8b 74 24 08               mov esi, dword ptr [esp + 8]
+  0x0050a06e  05 90 00 00 00            add eax, 0x90
+  0x0050a073  50                        push eax
+  0x0050a074  56                        push esi
+  0x0050a075  e8 f6 de f2 ff            call 0x437f70
+  0x0050a07a  8b c8                     mov ecx, eax
+  0x0050a07c  e8 1f 15 32 00            call 0x82b5a0
+  0x0050a081  8b c6                     mov eax, esi
+  0x0050a083  5e                        pop esi
+  0x0050a084  c2 08 00                  ret 8
+  0x0050a087  8b 16                     mov edx, dword ptr [esi]
+  0x0050a089  8b 42 04                  mov eax, dword ptr [edx + 4]
+  0x0050a08c  8b ce                     mov ecx, esi
+  0x0050a08e  ff d0                     call eax
+  0x0050a090  8b 10                     mov edx, dword ptr [eax]
+  0x0050a092  8b 4c 24 08               mov ecx, dword ptr [esp + 8]
+  0x0050a096  89 11                     mov dword ptr [ecx], edx
+  0x0050a098  8b 50 04                  mov edx, dword ptr [eax + 4]
+  0x0050a09b  89 51 04                  mov dword ptr [ecx + 4], edx
+  0x0050a09e  8b 40 08                  mov eax, dword ptr [eax + 8]
+  0x0050a0a1  89 41 08                  mov dword ptr [ecx + 8], eax
+  0x0050a0a4  8b c1                     mov eax, ecx
+  0x0050a0a6  5e                        pop esi
+  0x0050a0a7  c2 08 00                  ret 8
+  0x0050a0aa  cc                        int3 
+  0x0050a0ab  cc                        int3 
+
+### PA4a: CMO ctor FUN_00528E50 — [CMO+0x74] getter call + PUSH + FUN_005247C0 call window (prior pin: MICRO_R1 §4)
+VA 0x00528fc9 LEN 48
+BYTES: 50 8B CE E8 4F 21 33 00 50 8B CE C6 44 24 38 02 E8 52 B1 EE FF 50 8B CF E8 DA B7 FF FF 8D 4C 24 14 89 86 C0 00 00 00 C6 44 24 34 01 FF 15 5C 5A
+  0x00528fc9  50                        push eax
+  0x00528fca  8b ce                     mov ecx, esi
+  0x00528fcc  e8 4f 21 33 00            call 0x85b120
+  0x00528fd1  50                        push eax
+  0x00528fd2  8b ce                     mov ecx, esi
+  0x00528fd4  c6 44 24 38 02            mov byte ptr [esp + 0x38], 2
+  0x00528fd9  e8 52 b1 ee ff            call 0x414130
+  0x00528fde  50                        push eax
+  0x00528fdf  8b cf                     mov ecx, edi
+  0x00528fe1  e8 da b7 ff ff            call 0x5247c0
+  0x00528fe6  8d 4c 24 14               lea ecx, [esp + 0x14]
+  0x00528fea  89 86 c0 00 00 00         mov dword ptr [esi + 0xc0], eax
+  0x00528ff0  c6 44 24 34 01            mov byte ptr [esp + 0x34], 1
+
+### PA4b: result -> [this+0xC0] store window (prior pin: MICRO_R1 §4; LINK30 C9)
+VA 0x00528fe0 LEN 24
+BYTES: CF E8 DA B7 FF FF 8D 4C 24 14 89 86 C0 00 00 00 C6 44 24 34 01 FF 15 5C
+  0x00528fe0  cf                        iretd 
+  0x00528fe1  e8 da b7 ff ff            call 0x5247c0
+  0x00528fe6  8d 4c 24 14               lea ecx, [esp + 0x14]
+  0x00528fea  89 86 c0 00 00 00         mov dword ptr [esi + 0xc0], eax
+  0x00528ff0  c6 44 24 34 01            mov byte ptr [esp + 0x34], 1
+
+### PA4c: SF re-received [esi+0xC0] -> CALL FUN_005094C0 (prior pin: LINK30 C9)
+VA 0x0052901a LEN 12
+BYTES: 8B 8E C0 00 00 00 E8 9B 04 FE FF 8B
+  0x0052901a  8b 8e c0 00 00 00         mov ecx, dword ptr [esi + 0xc0]
+  0x00529020  e8 9b 04 fe ff            call 0x5094c0
+
+### PA4d: FUN_005094C0 SetPosition-like body (positive control of SLOT_CENSUS §5)
+VA 0x005094c0 LEN 28
+BYTES: 8B 44 24 04 8B 10 89 51 34 8B 50 04 89 51 38 8B 40 08 89 41 3C C6 41 28 01 C2 04 00
+  0x005094c0  8b 44 24 04               mov eax, dword ptr [esp + 4]
+  0x005094c4  8b 10                     mov edx, dword ptr [eax]
+  0x005094c6  89 51 34                  mov dword ptr [ecx + 0x34], edx
+  0x005094c9  8b 50 04                  mov edx, dword ptr [eax + 4]
+  0x005094cc  89 51 38                  mov dword ptr [ecx + 0x38], edx
+  0x005094cf  8b 40 08                  mov eax, dword ptr [eax + 8]
+  0x005094d2  89 41 3c                  mov dword ptr [ecx + 0x3c], eax
+  0x005094d5  c6 41 28 01               mov byte ptr [ecx + 0x28], 1
+  0x005094d9  c2 04 00                  ret 4
+
+### CH1a: FUN_006C3F50 emitter head — registry lookup + A getter (prior pin: bridge E3)
+VA 0x006c3f50 LEN 96
+BYTES: 83 EC 08 8B 44 24 0C 53 56 57 50 E8 F0 65 D7 FF 8B C8 E8 19 B6 06 00 8B F8 BB 66 00 00 00 8B CF 89 5C 24 0C E8 67 A2 10 00 8B 74 24 1C 8B 4E 04 3B 4E 08 89 44 24 10 74 0F 85 C9 74 05 89 19 89 41 04 83 46 04 08 EB 16 6A 01 6A 01 8D 54 24 24 52 8D 44 24 18 50 51 8B CE E8 52 EE FF FF 8B CF
+  0x006c3f50  83 ec 08                  sub esp, 8
+  0x006c3f53  8b 44 24 0c               mov eax, dword ptr [esp + 0xc]
+  0x006c3f57  53                        push ebx
+  0x006c3f58  56                        push esi
+  0x006c3f59  57                        push edi
+  0x006c3f5a  50                        push eax
+  0x006c3f5b  e8 f0 65 d7 ff            call 0x43a550
+  0x006c3f60  8b c8                     mov ecx, eax
+  0x006c3f62  e8 19 b6 06 00            call 0x72f580
+  0x006c3f67  8b f8                     mov edi, eax
+  0x006c3f69  bb 66 00 00 00            mov ebx, 0x66
+  0x006c3f6e  8b cf                     mov ecx, edi
+  0x006c3f70  89 5c 24 0c               mov dword ptr [esp + 0xc], ebx
+  0x006c3f74  e8 67 a2 10 00            call 0x7ce1e0
+  0x006c3f79  8b 74 24 1c               mov esi, dword ptr [esp + 0x1c]
+  0x006c3f7d  8b 4e 04                  mov ecx, dword ptr [esi + 4]
+  0x006c3f80  3b 4e 08                  cmp ecx, dword ptr [esi + 8]
+  0x006c3f83  89 44 24 10               mov dword ptr [esp + 0x10], eax
+  0x006c3f87  74 0f                     je 0x6c3f98
+  0x006c3f89  85 c9                     test ecx, ecx
+  0x006c3f8b  74 05                     je 0x6c3f92
+  0x006c3f8d  89 19                     mov dword ptr [ecx], ebx
+  0x006c3f8f  89 41 04                  mov dword ptr [ecx + 4], eax
+  0x006c3f92  83 46 04 08               add dword ptr [esi + 4], 8
+  0x006c3f96  eb 16                     jmp 0x6c3fae
+  0x006c3f98  6a 01                     push 1
+  0x006c3f9a  6a 01                     push 1
+  0x006c3f9c  8d 54 24 24               lea edx, [esp + 0x24]
+  0x006c3fa0  52                        push edx
+  0x006c3fa1  8d 44 24 18               lea eax, [esp + 0x18]
+  0x006c3fa5  50                        push eax
+  0x006c3fa6  51                        push ecx
+  0x006c3fa7  8b ce                     mov ecx, esi
+  0x006c3fa9  e8 52 ee ff ff            call 0x6c2e00
+  0x006c3fae  8b cf                     mov ecx, edi
+
+### CH1b: emitter tail — {0x66,A} pair stores + scheduler entry window (prior pin: bridge E3; find FUN_006C3640 call + FUN_008BD720 immediate)
+VA 0x006c3f8b LEN 128
+BYTES: 74 05 89 19 89 41 04 83 46 04 08 EB 16 6A 01 6A 01 8D 54 24 24 52 8D 44 24 18 50 51 8B CE E8 52 EE FF FF 8B CF BB 20 D7 8B 00 E8 B6 70 D4 FF 8B 4C 24 10 8B 50 04 8B 00 51 53 56 52 50 8D 4C 24 30 51 E8 6E F6 FF FF 83 C4 18 5F 5E 5B 83 C4 08 C3 CC CC CC CC 53 8B 5C 24 0C 55 56 8B 74 24 10 57 BD 02 00 00 00 8D 7E 10 3B F7 74 13 8B 06 53 50 E8 4F FF FF FF 83 C6 04 83 C4 08 3B F7 75 ED
+  0x006c3f8b  74 05                     je 0x6c3f92
+  0x006c3f8d  89 19                     mov dword ptr [ecx], ebx
+  0x006c3f8f  89 41 04                  mov dword ptr [ecx + 4], eax
+  0x006c3f92  83 46 04 08               add dword ptr [esi + 4], 8
+  0x006c3f96  eb 16                     jmp 0x6c3fae
+  0x006c3f98  6a 01                     push 1
+  0x006c3f9a  6a 01                     push 1
+  0x006c3f9c  8d 54 24 24               lea edx, [esp + 0x24]
+  0x006c3fa0  52                        push edx
+  0x006c3fa1  8d 44 24 18               lea eax, [esp + 0x18]
+  0x006c3fa5  50                        push eax
+  0x006c3fa6  51                        push ecx
+  0x006c3fa7  8b ce                     mov ecx, esi
+  0x006c3fa9  e8 52 ee ff ff            call 0x6c2e00
+  0x006c3fae  8b cf                     mov ecx, edi
+  0x006c3fb0  bb 20 d7 8b 00            mov ebx, 0x8bd720
+  0x006c3fb5  e8 b6 70 d4 ff            call 0x40b070
+  0x006c3fba  8b 4c 24 10               mov ecx, dword ptr [esp + 0x10]
+  0x006c3fbe  8b 50 04                  mov edx, dword ptr [eax + 4]
+  0x006c3fc1  8b 00                     mov eax, dword ptr [eax]
+  0x006c3fc3  51                        push ecx
+  0x006c3fc4  53                        push ebx
+  0x006c3fc5  56                        push esi
+  0x006c3fc6  52                        push edx
+  0x006c3fc7  50                        push eax
+  0x006c3fc8  8d 4c 24 30               lea ecx, [esp + 0x30]
+  0x006c3fcc  51                        push ecx
+  0x006c3fcd  e8 6e f6 ff ff            call 0x6c3640
+  0x006c3fd2  83 c4 18                  add esp, 0x18
+  0x006c3fd5  5f                        pop edi
+  0x006c3fd6  5e                        pop esi
+  0x006c3fd7  5b                        pop ebx
+  0x006c3fd8  83 c4 08                  add esp, 8
+  0x006c3fdb  c3                        ret 
+  0x006c3fdc  cc                        int3 
+  0x006c3fdd  cc                        int3 
+  0x006c3fde  cc                        int3 
+  0x006c3fdf  cc                        int3 
+  0x006c3fe0  53                        push ebx
+  0x006c3fe1  8b 5c 24 0c               mov ebx, dword ptr [esp + 0xc]
+  0x006c3fe5  55                        push ebp
+  0x006c3fe6  56                        push esi
+  0x006c3fe7  8b 74 24 10               mov esi, dword ptr [esp + 0x10]
+  0x006c3feb  57                        push edi
+  0x006c3fec  bd 02 00 00 00            mov ebp, 2
+  0x006c3ff1  8d 7e 10                  lea edi, [esi + 0x10]
+  0x006c3ff4  3b f7                     cmp esi, edi
+  0x006c3ff6  74 13                     je 0x6c400b
+  0x006c3ff8  8b 06                     mov eax, dword ptr [esi]
+  0x006c3ffa  53                        push ebx
+  0x006c3ffb  50                        push eax
+  0x006c3ffc  e8 4f ff ff ff            call 0x6c3f50
+  0x006c4001  83 c6 04                  add esi, 4
+  0x006c4004  83 c4 08                  add esp, 8
+  0x006c4007  3b f7                     cmp esi, edi
+  0x006c4009  75 ed                     jne 0x6c3ff8
+
+### CH2a: FUN_0064B1E0 body tail @0x0064B1EC (duplicate of the PA2b window) [CAPTION CORRECTED 2026-10-06 records-repair, internal QC F-QC-1]
+[RECORD-REPAIR NOTE: the original caption mislabeled this window as "FUN_008BD720 first bytes
+(PIN existence check; body decode charged separately)" — the bytes below are NOT at 0x008BD720.
+This window (VA 0x0064b1ec LEN 16) is the FUN_0064B1E0 (ExtraData ctor) body tail and
+duplicates the tail of the PA2b window above. The REAL FUN_008BD720 accessor (8D 41 18 C3 =
+lea EAX,[ECX+0x18]; ret @0x008BD720) is correctly recorded in 01_RAW/FUN_008BD720_DECODE.txt
+(NEW #1) and is untouched by this repair. VA/BYTES of this window are UNCHANGED (true EXE
+bytes, byte-verified by the internal QC); no claim cites CH2a (CL-05 rests on CH1a/CH1b;
+CL-06 on FUN_008BD720_DECODE.txt).]
+VA 0x0064b1ec LEN 16
+BYTES: 89 46 10 C7 06 74 32 A8 00 8B C6 5E C2 04 00 CC
+  0x0064b1ec  89 46 10                  mov dword ptr [esi + 0x10], eax
+  0x0064b1ef  c7 06 74 32 a8 00         mov dword ptr [esi], 0xa83274
+  0x0064b1f5  8b c6                     mov eax, esi
+  0x0064b1f7  5e                        pop esi
+  0x0064b1f8  c2 04 00                  ret 4
+  0x0064b1fb  cc                        int3 
+
+### CH3a: FUN_006CB6F0 pump call site window @0x006CB7CF (prior pin: bridge E5)
+VA 0x006cb7c0 LEN 32
+BYTES: 54 24 38 52 8D 44 24 24 50 56 C6 44 24 64 03 E8 2C DF FF FF 83 C4 10 8D 4C 24 1C 8B F0 88 5C 24
+  0x006cb7c0  54                        push esp
+  0x006cb7c1  24 38                     and al, 0x38
+  0x006cb7c3  52                        push edx
+  0x006cb7c4  8d 44 24 24               lea eax, [esp + 0x24]
+  0x006cb7c8  50                        push eax
+  0x006cb7c9  56                        push esi
+  0x006cb7ca  c6 44 24 64 03            mov byte ptr [esp + 0x64], 3
+  0x006cb7cf  e8 2c df ff ff            call 0x6c9700
+  0x006cb7d4  83 c4 10                  add esp, 0x10
+  0x006cb7d7  8d 4c 24 1c               lea ecx, [esp + 0x1c]
+  0x006cb7db  8b f0                     mov esi, eax
+

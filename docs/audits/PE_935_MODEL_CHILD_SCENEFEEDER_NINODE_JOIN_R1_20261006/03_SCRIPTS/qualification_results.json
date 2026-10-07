@@ -1,0 +1,62 @@
+{
+  "baseline_synthetic": {
+    "chain": "SYNTHETIC_GATE_TEST_ONLY",
+    "verdict": "PASS",
+    "failures": [],
+    "required": "PASS (clean baseline before the mutants)"
+  },
+  "ctrl_a_parent_other_node": {
+    "verdict": "FAIL",
+    "failures": [
+      "P_PARENT_FAIL: receiver OTHER_NODE != the SF+0x30 node (SF30_NODE)",
+      "P_OPERATION_FAIL: operation parent != join receiver node"
+    ],
+    "required": "FAIL by the PARENT predicate",
+    "proper_predicate": true
+  },
+  "ctrl_b_child_provenance_removed": {
+    "verdict": "FAIL",
+    "failures": [
+      "P_CHILD_FAIL: no child_provenance edge (model/resource provenance not established)"
+    ],
+    "required": "FAIL by the CHILD predicate",
+    "proper_predicate": true
+  },
+  "ctrl_c_identity_edge_broken": {
+    "verdict": "FAIL",
+    "failures": [
+      "P_PARENT_FAIL: missing sf_creation/sf_store/parent_identity_access(+0x30)"
+    ],
+    "required": "FAIL by the PARENT-IDENTITY predicate",
+    "proper_predicate": true
+  },
+  "real_cand_4": {
+    "chain": "REAL_CAND-4-ACLD-PATH-SLOT41-ATTACH",
+    "verdict": "FAIL",
+    "failures": [
+      "P_CHILD_FAIL: no child_provenance edge (model/resource provenance not established)",
+      "P_VISUAL_FAIL: no visual_role edge"
+    ],
+    "byte_verification": {
+      "r1": "va 0x006a39ed got 'E8 CE 0D E8 FF' expect 'E8 CE 0D E8 FF' match=True",
+      "r2": "va 0x006a39f6 got '89 46 18' expect '89 46 18' match=True",
+      "r3": "va 0x0050a3e9 got '8B 4E 30' expect '8B 4E 30' match=True",
+      "r4": "va 0x0050a3f7 got 'FF D2' expect 'FF D2' match=True",
+      "r6": "va 0x007b5846 got '01 5E 04' expect '01 5E 04' match=True"
+    },
+    "required": "FAIL (A/D unresolved \u2014 the gate must not rubber-stamp the real candidate)",
+    "interpretation": "the real candidate fails the production gate: child model/resource provenance and visual role are not established; consistent with INSTANCE_MODEL_NODE_JOIN = NOT_ESTABLISHED"
+  },
+  "gate_self_checks": {
+    "baseline_passes": true,
+    "ctrl_a_fails_by_parent_predicate": true,
+    "ctrl_a_cascade_note": "the parent->other-node mutation also fails the operation-parent consistency rule (the operation must bind THE receiver node); the PRIMARY rejection is the PARENT predicate",
+    "ctrl_b_fails_by_child_predicate": true,
+    "ctrl_c_fails_by_parent_identity_predicate": true,
+    "real_candidate_fails": true,
+    "not_checker_always_fail": true,
+    "real_candidate_bytes_verified_against_exe": true,
+    "exe_sha_verified": true
+  },
+  "OVERALL": "PASS"
+}
