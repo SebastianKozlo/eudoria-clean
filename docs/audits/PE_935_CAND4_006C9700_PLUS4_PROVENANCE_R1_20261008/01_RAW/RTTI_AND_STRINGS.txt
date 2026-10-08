@@ -1,0 +1,62 @@
+01_RAW/RTTI_AND_STRINGS.txt — free data reads (no body opening; no edge charge).
+PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008. All values are DATA reads from
+the pinned EXE (u32 reads; raw byte dumps; RTTI COL chains). Era label: PCG 9.3.5
+client image. Every RTTI pointer in this build is an ABSOLUTE VA (measured: the
+pTypeDescriptor field 0x00B8CAC4 maps to .data RVA 0x78CAC4 — an RVA interpretation
+would be unmapped; the absolute-VA interpretation reads the recorded names).
+
+=== RTTI CHAINS (vtable[-1] -> CompleteObjectLocator -> TypeDescriptor -> name) ===
+  vtable 0x00A864B8 (the KNOWN W class — prior canon re-pin; NOT R):
+    vtable[-1] @0x00A864B4 = 0x00AA7770 (COL pointer)
+    COL @0x00AA7770: sig=0x0, offset=0x0, cdOffset=0x0,
+                     pTypeDescriptor=0x00B8CAC4, pClassDescriptor=0x00AA7784
+    TypeDescriptor @0x00B8CAC4: vfptr=0x00A98110, spare=0x00000000,
+                     name = ".?AVArkModelResourceInstanceRef@@"
+    MATCH with the prior record (CHILD_ROOT_PROVENANCE 01_RAW/VTABLE_RTTI_STRINGS.txt).
+  vtable 0x00A855D0 (ArkModelManagerMain — prior canon re-pin):
+    vtable[-1] = 0x00AA6C58 -> TypeDescriptor 0x00B8C1B0 -> ".?AVArkModelManagerMain@@"
+  vtable 0x00A85A08 (ArkModelManager — prior canon re-pin):
+    vtable[-1] = 0x00AA6CD8 -> TypeDescriptor 0x00B8C1D4 -> ".?AVArkModelManager@@"
+  W vtable first entries (raw u32 data reads):
+    slot 0 (+0x00) = 0x006FA970; slot 1 (+0x04) = 0x00AA77BC;
+    slot 2 (+0x08) = 0x006FAC50; slot 3 (+0x0C) = 0x006FAA20.
+
+=== RELATION OF RTTI TO R AND T (the load-bearing adjudication) ===
+  - R (the pump's path-B return) has NO vptr store in its construction dataflow
+    (FUN_006E8F70 writes the S POINTER at [R+0] — 89 06 @0x006E8F9D; no vtable
+    immediate is stored at any offset of R). Therefore NO vptr/COL/TypeDescriptor
+    chain exists FOR R in the opened chain: R's class NAME is NOT RTTI-derivable
+    within this bound. Nearby RTTI (the W class above; the manager classes) does NOT
+    qualify R (CTRL_A).
+  - T (= [R+4] = P) is a HEAP object whose vtable value is runtime data; P's own
+    RTTI chain is NOT statically readable in this run (P's construction site lies
+    inside FUN_007B79B0 — NOT adjudicated within bound). The name-taking virtual
+    (P -> vtable slot 17 with "Geowater:0") is a MEASURED CALL SITE (E10), not an
+    RTTI identification.
+  - The W-class field map (count@+4 / item@+8, prior canon, inherited) applies to
+    W's base ONLY. This run measures R's base: [R+4] = P (an object POINTER with
+    refcount@P+4). Same offset, DIFFERENT base objects — no contradiction; the
+    prior-canon "contradicts pointer use IF the pump returns that wrapper" is now
+    physically resolved: the pump does NOT return the 0xC wrapper; it returns the
+    0x10 handle R (see FINAL_REPORT §ARKMODELRESOURCEINSTANCEREF_RELATION).
+
+=== STRING CONSTANTS (raw byte reads) ===
+  0x00A85DA4: 47 65 6F 77 61 74 65 72 3A 30 00 = "Geowater:0"
+              (pushed @0x006E8FE6 as the name argument of the P vtable-slot-17 call
+              in the ctor's conditional [R+8] branch; measured data read)
+  0x00A859F8: 41 72 6B 54 65 78 74 75 72 65 00 = "ArkTexture"
+              (prior-canon pin re-read; the installer's first named-lookup constant)
+  0x00A8547C: 41 72 6B 41 6E 69 6D 61 74 69 6F 6E 00 = "ArkAnimation"
+              (prior-canon pin re-read; the installer's second named-lookup constant)
+  0x00BA73BC: NOT MAPPED in the file's raw data (an address inside .data BEYOND the
+              section's raw size — RVA 0x7A73BC > raw end 0x7A0000; the slot belongs
+              to the zero-initialized tail: a runtime-initialized global variable,
+              statically absent from the file). Pushed @0x006E8FF2 as an argument of
+              the RAW_VISIBLE_ONLY call in the ctor's conditional branch. NO claim
+              is made about its runtime content.
+  0x00A7957B: byte 00 (EMPTY STRING; prior-canon pin re-read; the producer's lookup key)
+
+=== CONSTANT ===
+  0xB7DC = 47068 (decimal) — the imm32 of cmp [eax+4],0xB7DC @0x006E8FD5, the gate of
+  the ctor's conditional [R+8] branch (the FUN_00728150(S) result's +4 field).
+  Role beyond its gate value: NOT adjudicated (no interpretation claimed).

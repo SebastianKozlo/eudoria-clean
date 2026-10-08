@@ -1,0 +1,26 @@
+# FUNCTION_BODY_ACCOUNTING — PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008
+# Shared body ledger (executor + controls + QC). Budget: MAX_NEW_FUNCTION_BODIES_OPENED = 6.
+# Rule honored: partial opening counts; re-opening a previously unrecorded range of a known
+# function costs one unit; each function-start VA charged ONCE; further windows of an
+# already-charged body are recorded WITHOUT a second charge. USED = 4/6 (NOT exceeded).
+BODY_ID,FUNCTION_START_VA,WINDOW_VA_RANGE,EXTENT,EXTENT_PROOF,CHARGE,ROLE_FOR_THIS_RUN,STATUS
+B-1,0x006C9700,0x006C9700..0x006C981B (window read 0x006C9700..0x006C9AFF LEN 0x400),RESOLVED 0x006C9700..0x006C981B,terminal ret C3 @0x006C981B + 4x CC padding 0x006C981C..0x006C981F + aligned next entry 0x006C9820,1 (the mandated body #1),the pump: return-path derivation of R; the request pair {0x66,A}; the construction call; the P release protocol,DECODING_COMPLETE (01_RAW/FUN_006C9700_PUMP_FULL.txt)
+B-2,0x006E8F70,0x006E8F70..0x006E9027 (window read 0x006E8F70..0x006E90EF LEN 0x180),RESOLVED 0x006E8F70..0x006E9027,terminal ret 8 (C2 08 00) @0x006E9027 + 6x CC padding + aligned next entry 0x006E9030,2 (adaptive plan item (a)+(b)+(c): the callee producing the returned value = the ctor of the object = the +4 writer),the ctor of R: [R+0]=S store; [R+4]=P store + addref; [R+8]/[R+0xC]=0; return this; the conditional [R+8] branch,DECODING_COMPLETE (01_RAW/FUN_006E8F70_CTOR_R.txt)
+B-3,0x006C9570,0x006C9570..0x006C966C (window read 0x006C9570..0x006C966F LEN 0x100),RESOLVED 0x006C9570..0x006C966E (two ret-8 exits),ret 8 @0x006C962E and @0x006C966C + CC padding @0x006C966F + aligned next entry 0x006C9670,3 (adaptive plan item (c): the +4-writer value's SOURCE chain),the slot setter: pre-clear; P = FUN_007B79B0([S+0x10]); slot=P + addref [P+4],DECODING_COMPLETE (01_RAW/FUN_006C9570_SLOT_SETTER.txt)
+B-4,0x007B79B0,0x007B79B0..0x007B7A0F (window LEN 0x60 — CUT INSIDE THE BODY),PARTIAL — extent UNRESOLVED past 0x007B7A0F,window ends immediately after the call edx @0x007B7A0D; the continuation NOT decoded (STOP_BEFORE_EXCEED: interpreting the internal callsites' result flows would exceed the edge budget),4 (adaptive plan item (c): the deepest source boundary of the +4 value),the P getter: head visible (alloc via 0x0095D3C4(4); init via 0x007B7930; a receiver vtable slot-3 dispatch); return path NOT seen; internal callsites RAW_VISIBLE_ONLY,DECODING_PARTIAL (01_RAW/FUN_007B79B0_P_GETTER_PARTIAL.txt)
+# RAW_WINDOW_OVERFLOW disclosure (displayed, NOT analyzed, NO body charge — the historical
+# CANDIDATE-question precedent; this run records it explicitly instead of leaving it silent):
+#   B-1's window displayed 0x006C9820..0x006C9AFF raw (neighbor entries incl. a
+#   deleting-destructor-shaped function @0x006C9820 — role NOT adjudicated);
+#   B-2's window displayed 0x006E9030..0x006E90EF raw (small getters; NOT analyzed).
+# No interpretation of any displayed neighbor is recorded anywhere in this package.
+# Bodies NOT opened (with reasons): FUN_00415670 (the request issue — O's identity not
+# required for R's origin/type or the +4 writer/source; body budget conserved);
+# FUN_00823C10 (S's identity — same reason); FUN_008268A0 (the slot==0 path — returns 0,
+# off the R-producing path); FUN_007B7660 (the flag==1 variant — off the CAND-4 path,
+# callsite-level interpretation only, E12); FUN_00728150 / FUN_00769510 / FUN_006E8A90 /
+# FUN_006B2310 (the conditional [R+8] branch — not load-bearing for the two required
+# results; RAW_VISIBLE_ONLY); FUN_007B7930 (inside FUN_007B79B0's RAW chain);
+# FUN_006C9670 + the 0x006C9820 neighbor (RAW display only); FUN_006C8BB0, FUN_007B6C30,
+# FUN_007BF900, FUN_007BF630, FUN_007BF470, the join implementation (contract §1
+# prohibitions — NEVER touched).

@@ -1,0 +1,19 @@
+# RETURN_VALUE_TRACE — PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008
+# The return value R of FUN_006C9700 on paths consistent with the recorded CAND-4 caller
+# (caller FUN_006C6F60 @0x006C6FFC; args (A, &local2, &local1, 0); result stored to
+# [manager+0x6C] @0x006C7008). Every row cites its physical evidence. STATIC analysis:
+# a static path is NOT an observed execution (no runtime in this run class).
+PATH_ID,FINAL_EAX_SOURCE,EXPRESSION,PATH_PREDICATE,EVIDENCE_VA,EVIDENCE_BYTES,STATUS
+PATH_A,constant 0,xor eax,eax @0x006C97A5,S == NULL (the FUN_00823C10 result; je @0x006C9756 taken),0x006C97A5,33 C0,RESOLVED (EAX = 0/NULL)
+PATH_B,ctor result (this = the new(0x10) object),mov eax,esi @0x006C9808 (ESI = FUN_006E8F70 result = its this per mov eax,esi @0x006E9014),S != 0 AND the arg1 slot != 0 after FUN_006C9570 (jne @0x006C9776) AND operator new(0x10) != 0 (je @0x006C97CE not taken),0x006C9808;0x006E9014,8B C6;8B C6,RESOLVED (EAX = R = the 16-byte handle object)
+PATH_B_ALLOCFAIL,constant 0 (ESI = 0),mov eax,esi @0x006C9808 with ESI = 0 (xor esi,esi @0x006C97E1),S != 0 AND slot != 0 AND operator new(0x10) == 0,0x006C97E1;0x006C9808,33 F6;8B C6,RESOLVED (EAX = 0/NULL)
+PATH_C,constant 0,xor eax,eax @0x006C97A5 (fallthrough after the release block),S != 0 AND slot == 0 after FUN_006C9570 AND slot still 0 after FUN_008268A0 (je @0x006C978E taken),0x006C97A5,33 C0,RESOLVED (EAX = 0/NULL)
+PATH_C_RELEASE,constant 0,xor eax,eax @0x006C97A5 (after dec/destroy of the re-read slot value),S != 0 AND slot == 0 after FUN_006C9570 AND slot != 0 after FUN_008268A0 (je @0x006C978E not taken),0x006C9790;0x006C97A5,83 40 04 FF;33 C0,RESOLVED (EAX = 0/NULL; the released value's provenance on this path is NOT adjudicated — the FUN_008268A0 body is NOT opened)
+# RETURN_VALUE_ORIGIN SUMMARY (adjudicated by the author from the above):
+# R = the operator-new(0x10) allocation constructed by FUN_006E8F70(this=allocation; S; P)
+# inside FUN_006C9700; the ctor returns this; the pump returns that result on PATH_B.
+# ORIGIN CATEGORY = ALLOCATION + CONSTRUCTION (not a callee passthrough / field / getter /
+# adjusted return): the exact source expression is "the this of FUN_006E8F70 called at
+# 0x006C97D8 with receiver = the EAX of the operator-new(0x10) call at 0x006C97BB".
+# Path predicate = PATH_B above. RETURNED_POINTER_BASE_AND_ADJUSTMENT = the allocation
+# base, NO adjustment (ESI == ECX == the allocation; mov eax,esi returns it unchanged).

@@ -1,0 +1,91 @@
+01_RAW/MANUAL_ENCODING_CROSSCHECK.txt — manual x86 encoding verification of the key
+instructions (contract §5: key instructions cross-checked by hand from the encoding).
+PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008. Opcode/modrm arithmetic below is
+performed by hand from Intel encoding rules, independent of capstone and of the
+pe_reader (only the raw byte values are shared).
+
+1) 89 46 6C @0x006C7008 — MOV [esi+0x6C], eax
+   opcode 89 /r = MOV r/m32, r32; modrm 0x46 = 01 000 110: mod=01 (disp8), reg=000
+   (EAX), rm=110 (ESI); disp8=0x6C. => mov [esi+0x6C], eax. MATCH (prior-canon pin).
+
+2) 8B 78 04 @0x006C67BE — MOV edi, [eax+4]
+   opcode 8B /r = MOV r32, r/m32; modrm 0x78 = 01 111 000: mod=01, reg=111 (EDI),
+   rm=000 (EAX); disp8=0x04. => mov edi, [eax+4]. MATCH (the [R+4] load — the
+   installer's T read).
+
+3) 89 7E 68 @0x006C67E2 — MOV [esi+0x68], edi
+   modrm 0x7E = 01 111 110: mod=01, reg=111 (EDI), rm=110 (ESI); disp8=0x68.
+   => mov [esi+0x68], edi. MATCH (prior-canon writer pin).
+
+4) BB 01 00 00 00 @0x006C67C9 — MOV ebx, 1
+   opcode B8+rd (BB = ebx), imm32=1. => mov ebx, 1. MATCH — establishes EBX=1 for the
+   01 5F 04 that follows later; NOT an INC opcode (INC would be 40/rd or FE/FF /0).
+
+5) 01 5F 04 @0x006C67E7 and @0x006C9657 — ADD [edi+4], ebx
+   opcode 01 /r = ADD r/m32, r32; modrm 0x5F = 01 011 111: mod=01, reg=011 (EBX),
+   rm=111 (EDI); disp8=0x04. => add [edi+4], ebx. MATCH (ADD, not INC).
+
+6) 01 48 04 @0x006E8FAF — ADD [eax+4], ecx
+   modrm 0x48 = 01 001 000: mod=01, reg=001 (ECX), rm=000 (EAX); disp8=0x04.
+   => add [eax+4], ecx (ECX=1 from mov ecx,1 @0x006E8FA8). MATCH.
+
+7) 89 46 04 @0x006E8FA5 — MOV [esi+4], eax   <<<<< THE +4 WRITER
+   modrm 0x46 = 01 000 110: mod=01, reg=000 (EAX), rm=110 (ESI); disp8=0x04.
+   => mov [esi+4], eax (eax = ctor arg2 = P). MATCH.
+
+8) 89 06 @0x006E8F9D — MOV [esi], eax
+   modrm 0x06 = 00 000 110: mod=00, reg=000 (EAX), rm=110 (ESI); no disp.
+   => mov [esi], eax ([R+0] = S). MATCH.
+
+9) 8B C6 @0x006E9014 — MOV eax, esi   (RETURN this)
+   modrm 0xC6 = 11 000 110: mod=11, reg=000 (EAX), rm=110 (ESI). => mov eax, esi.
+   MATCH (the ctor's return-this).
+
+10) 89 3E @0x006C9651 — MOV [esi], edi   (SLOT = P)
+    modrm 0x3E = 00 011 110: mod=00, reg=011 (EDI), rm=110 (ESI). => mov [esi], edi.
+    MATCH.
+
+11) C7 06 00 00 00 00 @0x006C95A0 — MOV dword [esi], 0
+    opcode C7 /0 (modrm 0x06 = 00 000 110: mod=00, reg=000 (/0), rm=110 ESI),
+    imm32=0. => mov dword [esi], 0. MATCH (the slot pre-clear).
+
+12) 81 78 04 DC B7 00 00 @0x006E8FD5 — CMP [eax+4], 0xB7DC
+    opcode 81 /7 (modrm 0x78 = 01 111 000: mod=01, reg=111 (/7 CMP), rm=000 EAX),
+    disp8=0x04, imm32=0x0000B7DC. => cmp dword [eax+4], 0xB7DC. MATCH.
+
+13) E8 rel32 forms (all five load-bearing call pins):
+    E8 25 BF D4 FF @0x006C9746: rel32 = 0xFFD4BF25 (signed -0x2B40DB);
+      0x006C974B + (-0x2B40DB) = 0x00415670. MATCH.
+    E8 BE A4 15 00 @0x006C974D: rel32 = +0x15A4BE; 0x006C9752 + 0x15A4BE = 0x00823C10. MATCH.
+    E8 07 FE FF FF @0x006C9764: rel32 = -0x1F9; 0x006C9769 - 0x1F9 = 0x006C9570. MATCH.
+    E8 20 D1 15 00 @0x006C977B: rel32 = +0x15D120; 0x006C9780 + 0x15D120 = 0x008268A0. MATCH.
+    E8 04 3C 29 00 @0x006C97BB: rel32 = +0x293C04; 0x006C97C0 + 0x293C04 = 0x0095D3C4. MATCH.
+    E8 93 F7 01 00 @0x006C97D8: rel32 = +0x1F793; 0x006C97DD + 0x1F793 = 0x006E8F70. MATCH.
+    E8 7B F1 03 00 @0x006E8FD0: rel32 = +0x3F17B; 0x006E8FD5 + 0x3F17B = 0x00728150. MATCH.
+    E8 96 E0 0E 00 @0x006C95C5: rel32 = +0xEE096; 0x006C95CA + 0xEE096 = 0x007B7660. MATCH.
+    E8 7A E3 0E 00 @0x006C9631: rel32 = +0xEE37A; 0x006C9636 + 0xEE37A = 0x007B79B0. MATCH.
+    E8 2C DF FF FF @0x006CB7CF: rel32 = -0x20D4; 0x006CB7D4 - 0x20D4 = 0x006C9700. MATCH
+      (prior-canon historical caller pin, re-derived from raw bytes).
+    E8 75 F0 02 00 @0x006CB836: rel32 = +0x2F075; 0x006CB83B + 0x2F075 = 0x006FA8B0. MATCH.
+      PROCESS DISCLOSURE: the first transcription of this pin in this run's draft read
+      "E8 35 F0 02 00" (a sign/misreading of the prior record's Ghidra signed-byte
+      rendering "-18 75 -10 02 00", where 75 is POSITIVE 0x75); the physical-EXE
+      production gate (03_SCRIPTS/checker_plus4.py, clean pass attempt 1) CAUGHT the
+      mismatch (FAIL PIN:HIST_CALLER_CTOR_CALL), the pin was corrected to the MEASURED
+      bytes E8 75 F0 02 00, and the clean pass re-ran 80/80. The rel32 TARGET
+      (0x006FA8B0) was correct in both readings; only the byte transcription was
+      wrong. No prior-canon record was altered (the prior L20 record's bytes agree
+      with the physical EXE).
+
+14) C2 08 00 — RETN 8 (thiscall, 2 callee-cleaned stack args) at @0x006E9027 and
+    @0x006C962E/@0x006C966C. opcode C2 imm16=8. MATCH — consistent with the two
+    pushed args at each call site (0x006C97D4/0x006C97D5 for the ctor; 0x006C975C/
+    0x006C9761 for the setter).
+
+15) 6A 10 / 6A 04 / 6A 0C — PUSH imm8 (0x10 / 4 / 0xC): opcode 6A ib. The 0x10 at
+    0x006C97B9 is the allocation size for R; the 0xC at the historical caller
+    0x006CB819 is the W wrapper size (prior canon) — DIFFERENT allocations, no
+    conflation (R = 0x10 bytes; W = 0xC bytes).
+
+All manual encodings agree with the capstone 5.0.7 decode and with the own-arithmetic
+rel32 recomputes. No disagreement found on any load-bearing pin.

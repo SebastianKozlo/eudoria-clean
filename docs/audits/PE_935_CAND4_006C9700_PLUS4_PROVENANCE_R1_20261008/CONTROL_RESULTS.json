@@ -1,0 +1,114 @@
+{
+  "run_id": "PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008",
+  "note": "REAL_SCIENCE_AUTO_QUALIFICATION=DISABLED; SCHEMA_CHECK != PIN_CHECK != STRUCTURAL_CHECK != SEMANTIC_ADJUDICATION; hash/pin PASS does not approve dataflow or semantic role (class/return/source adjudication = author/QC). Mechanical corruptions are IN-MEMORY copies; the physical EXE is never modified. CTRL_A..G are SYNTHETIC_LOGICAL_CONTROL — not new physical PCG measurements.",
+  "mechanical_controls": {
+    "clean_pass": {
+      "checks_total": 80,
+      "checks_pass": 80,
+      "gate": "PASS",
+      "fails": []
+    },
+    "corruption_base_identity": {
+      "size": 8015872,
+      "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "note": "in-memory copies only; the physical file is never modified"
+    },
+    "MC1_plus4_writer_anchor": {
+      "corruption": "@0x006E8FA5 89 46 04 -> 8B 46 04 (mov [esi+4],eax -> mov esi,[eax+4]-shaped bytes)",
+      "gate": "FAIL",
+      "anchor_detected": true,
+      "anchor_fail_detail": "@0x006e8fa5 expected 89 46 04, got 8B 46 04",
+      "verdict": "PASS"
+    },
+    "MC2_ctor_return_this_anchor": {
+      "corruption": "@0x006E9014 8B C6 -> 8B C7 (mov eax,esi -> mov eax,edi)",
+      "gate": "FAIL",
+      "anchor_detected": true,
+      "verdict": "PASS"
+    },
+    "MC3_pump_return_R_anchor": {
+      "corruption": "@0x006C9808 8B C6 -> 90 90 (mov eax,esi -> nop nop)",
+      "gate": "FAIL",
+      "anchor_detected": true,
+      "verdict": "PASS"
+    },
+    "MC4_ctor_call_rel32_anchor": {
+      "corruption": "@0x006C97D8 rel32 operand byte bit-flip (target must cease to be 0x006E8F70)",
+      "gate": "FAIL",
+      "anchor_detected": true,
+      "anchor_fail_detail": "@0x006c97d8 rel32 +0x1f792 -> 0x006e8f6f != expected 0x006e8f70",
+      "verdict": "PASS"
+    },
+    "MC5_w_rtti_chain_anchor": {
+      "corruption": "@TypeDescriptor 0x00b8cac4+8 first name byte '.' -> 'X'",
+      "gate": "FAIL",
+      "anchor_detected": true,
+      "verdict": "PASS"
+    },
+    "MC6_unrelated_corruption_specificity": {
+      "corruption": "@0x00ba1100 (unpinned .rsrc byte) -> AA",
+      "anchor_gates_still_pass": true,
+      "note": "the anchor gates must remain PASS — the MC1..MC5 failures were caused by the load-bearing anchor corruptions, not by generic damage detection; the whole-file SHA gate is NOT used as the corruption detector (documented)",
+      "verdict": "PASS"
+    }
+  },
+  "ctrl_a": {
+    "control": "CTRL_A: nearby/intermediate RTTI without final-return dataflow does not qualify R",
+    "class": "SYNTHETIC_LOGICAL_CONTROL",
+    "fixture": "R construction measured: no vptr store (89 06 stores the S pointer); nearby RTTI = the W class only",
+    "rejection_observed": true,
+    "legal_form_sanity": true,
+    "verdict": "PASS"
+  },
+  "ctrl_b": {
+    "control": "CTRL_B: unproven base mixing rejected; proven alias legal",
+    "class": "SYNTHETIC_LOGICAL_CONTROL",
+    "fixture_unproven": "[T+4] vs [R+4] without the T==P dataflow -> NOT_QUALIFIED",
+    "fixture_proven": "T = [R+4] = P (the ctor store + the installer load, same base R) -> QUALIFIED (legal)",
+    "rejection_observed": true,
+    "legal_alias_accepted": true,
+    "verdict": "PASS"
+  },
+  "ctrl_c": {
+    "control": "CTRL_C: ctor(W,R) + W's name do not qualify class(R)",
+    "class": "SYNTHETIC_LOGICAL_CONTROL",
+    "fixture": "historical ctor FUN_006FA8B0(W,R) exists; W RTTI name measured; R has NO own vptr edge",
+    "rejection_observed": true,
+    "legal_form_sanity": true,
+    "verdict": "PASS"
+  },
+  "ctrl_d": {
+    "control": "CTRL_D: pointer-vs-count conflict conditional until base proven",
+    "class": "SYNTHETIC_LOGICAL_CONTROL",
+    "fixture_unproven": "prior state (no base proof): CONDITIONAL_UNRESOLVED",
+    "fixture_proven": "this run: R's base proven (16-byte handle; [R+4] stores an object pointer P with refcount at [P+4]) -> RESOLVED_AS_POINTER (measured, not assumed)",
+    "unproven_stays_conditional": true,
+    "prior_map_not_new_measurement": true,
+    "verdict": "PASS"
+  },
+  "ctrl_e": {
+    "control": "CTRL_E: named strings alone do not qualify lookup/child/root",
+    "class": "SYNTHETIC_LOGICAL_CONTROL",
+    "fixture": "the name constants are measured; the lookup callee bodies are NOT opened -> no child/scene-root claim",
+    "rejection_observed": true,
+    "legal_form_sanity": true,
+    "verdict": "PASS"
+  },
+  "ctrl_f": {
+    "control": "CTRL_F: refcount protocol does not qualify class or absolute ownership; manager retention has a different receiver ([T+4] += 1 by the INSTALLER, not by R)",
+    "class": "SYNTHETIC_LOGICAL_CONTROL",
+    "fixture": "the [P+4]/[T+4] addref/dec/destroy protocol is measured; P's class has no vptr/RTTI edge in bound; an absolute-ownership claim is REJECTED (R holds ONE addref'd reference; the manager's own retention [manager+0x68]=T + [T+4]+=1 is a SEPARATE reference by a separate receiver)",
+    "rejection_observed": true,
+    "legal_form_sanity": true,
+    "verdict": "PASS"
+  },
+  "ctrl_g": {
+    "control": "CTRL_G: missing closure stays UNKNOWN; no visual/transform/world/channel/XYZ promotion",
+    "class": "SYNTHETIC_LOGICAL_CONTROL",
+    "fixture": "the FUN_007B79B0-internal origin of P stays NOT_ESTABLISHED_WITHIN_BOUND (STOP_BEFORE_EXCEED honored); the standing science statuses are preserved verbatim",
+    "unknown_kept": true,
+    "no_promotions": true,
+    "verdict": "PASS"
+  },
+  "CONTROLS_OVERALL": "PASS"
+}

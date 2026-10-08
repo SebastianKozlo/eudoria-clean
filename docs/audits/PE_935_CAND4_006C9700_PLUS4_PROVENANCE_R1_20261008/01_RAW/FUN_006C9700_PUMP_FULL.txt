@@ -1,0 +1,149 @@
+01_RAW/FUN_006C9700_PUMP_FULL.txt — BODY #1 of this run: FUN_006C9700 (the pump).
+PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008 — measured from the pinned EXE
+(D:\Eudoria_Reconstruction\pcg_install\Entropia.exe = 8,015,872 B / SHA256
+E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31; fail-closed reader).
+Decoder: capstone 5.0.7 (cs_version (5,0,1280); identity INPUT_IDENTITIES.md §5);
+rel32 recomputed by this run's own arithmetic (capstone agrees on every pin).
+Manual encoding cross-checks: 01_RAW/MANUAL_ENCODING_CROSSCHECK.txt.
+
+CONTEXT (prior canon, cited: PE_935_CAND4_CHILD_ROOT_PROVENANCE_R1_20261007/
+01_RAW/FUN_006C6F60_PRODUCER_DECODE.txt — the CAND-4 caller record; scope: the recorded
+caller conditions; identity: BASE-blob-identical, 263/263):
+  - CAND-4 caller FUN_006C6F60 @callsite 0x006C6FFC (E8 FF 26 00 00), cdecl 4 args:
+    arg1 = A (resource id, from getter FUN_007CE1E0([manager+0x70]) = [template+0x08]),
+    arg2 = &local (out-local #2), arg3 = &local (out-local #1), arg4 = 0.
+    Return R → [manager+0x6C] @0x006C7008 (89 46 6C).
+  - Historical other caller FUN_006CB6F0 @0x006CB7CF (E8 2C DF FF FF), same arg shape
+    (arg4 = PUSH 0x0 @0x006CB7BD): saved R in ESI, then new(0xC) → W →
+    ctor FUN_006FA8B0(W, R) @0x006CB836 (cited: PE_935_PLACEMENT_RECORD_BRIDGE_GAMEBRYO_
+    R1_20261003T071348Z/02_ANALYSIS/TRACE_EDGE_BLOCKS.md E5 + 01_RAW/C9_LISTING_WINDOWS.json
+    L20_instcreator_006cb6f0 window).
+
+RAW BYTES (body, 0x006C9700..0x006C981B = 0x11C bytes):
+6A FF 68 13 57 A0 00 64 A1 00 00 00 00 50 83 EC 0C 56 57 A1 D0 D8 B9 00 33 C4 50 8D 44 24 18 64 A3 00 00 00 00 8B 7C 24 30 8B 4C 24 2C 8B 44 24 28 6A 01 57 51 8D 54 24 1C 52 C7 44 24 20 66 00 00 00 89 44 24 24 E8 25 BF D4 FF 8B C8 E8 BE A4 15 00 8B F0 85 F6 74 4D 8B 44 24 34 50 8D 4C 24 2C 51 8B CE E8 07 FE FF FF 83 7C 24 28 00 C7 44 24 20 00 00 00 00 75 41 57 8B CE E8 20 D1 15 00 8B 44 24 28 85 C0 C7 44 24 20 FF FF FF FF 74 15 83 40 04 FF 8B C8 83 C0 04 83 38 00 75 07 8B 11 8B 42 04 FF D0 33 C0 8B 4C 24 18 64 89 0D 00 00 00 00 59 5F 5E 83 C4 18 C3 6A 10 E8 04 3C 29 00 83 C4 04 89 44 24 0C 85 C0 C6 44 24 20 01 74 11 8B 4C 24 28 51 56 8B C8 E8 93 F7 01 00 8B F0 EB 02 33 F6 8B 44 24 28 85 C0 C7 44 24 20 FF FF FF FF 74 15 83 40 04 FF 8B C8 83 C0 04 83 38 00 75 07 8B 11 8B 42 04 FF D0 8B C6 8B 4C 24 18 64 89 0D 00 00 00 00 59 5F 5E 83 C4 18 C3
+
+DISASSEMBLY (analyzed extent 0x006C9700..0x006C981B; frame: MSVC SEH prologue,
+7 pushes = 0x1C below entry; stack args of the pump: [ESP0+4]=arg1=A, +8=arg2,
++0xC=arg3, +0x10=arg4):
+  0x006C9700..0x006C9724  SEH prologue (push -1; handler 0xA05713; fs:0; sub esp,0xC;
+                          push esi/edi; cookie; fs:0 frame install)
+  0x006C9725  8B 7C 24 30         mov edi, [esp+0x30]        ; EDI = arg3 (&local out)
+  0x006C9729  8B 4C 24 2C         mov ecx, [esp+0x2C]        ; ECX = arg2 (&local out)
+  0x006C972D  8B 44 24 28         mov eax, [esp+0x28]        ; EAX = arg1 (A, resource id)
+  0x006C9731  6A 01                push 1                     ; inner arg4
+  0x006C9733  57                   push edi                   ; inner arg3 = pump arg3
+  0x006C9734  51                   push ecx                   ; inner arg2 = pump arg2
+  0x006C9735  8D 54 24 1C          lea edx, [esp+0x1C]        ; &local 8-byte request pair
+  0x006C9739  52                   push edx                   ; inner arg1 = &pair
+  0x006C973A  C7 44 24 20 66 00 00 00  mov dword [esp+0x20], 0x66  ; pair.type = 0x66 (MODEL)
+  0x006C9742  89 44 24 24          mov [esp+0x24], eax        ; pair.id = A
+  0x006C9746  E8 25 BF D4 FF        call 0x00415670           ; rel32 own: 0x006C974B-0x2B40DB=0x00415670
+                          ; E1: request issue. Receiver: none pushed (ECX not set here) —
+                          ; args (&pair{0x66,A}, pump-arg2, pump-arg3, 1). Returns O in EAX.
+                          ; Callee cleans 16 bytes (ret 0x10 — dataflow-verified: no add esp
+                          ; follows and all later [esp+X] references only align at ESP_b).
+  0x006C974B  8B C8                mov ecx, eax               ; receiver = O
+  0x006C974D  E8 BE A4 15 00        call 0x00823C10            ; rel32 own: 0x006C9752+0x15A4BE=0x00823C10
+                          ; E2: thiscall(O), 0 stack args (callee ret 0 — dataflow: ESP
+                          ; unchanged). Result S in EAX.
+  0x006C9752  8B F0                mov esi, eax               ; ESI = S
+  0x006C9754  85 F6                test esi, esi
+  0x006C9756  74 4D                je 0x006C97A5              ; S==NULL → RETURN PATH A (0/NULL)
+  0x006C9758  8B 44 24 34          mov eax, [esp+0x34]        ; arg4 (the 0 of the CAND-4 caller)
+  0x006C975C  50                   push eax                   ; 0x6C9570's arg2 (flag)
+  0x006C975D  8D 4C 24 2C          lea ecx, [esp+0x2C]        ; = &pump-arg1 slot (byref!)
+  0x006C9761  51                   push ecx                   ; 0x6C9570's arg1 = &slot
+  0x006C9762  8B CE                mov ecx, esi               ; receiver = S
+  0x006C9764  E8 07 FE FF FF        call 0x006C9570            ; rel32 own: 0x006C9769-0x1F9=0x006C9570
+                          ; E3: the SLOT SETTER (body #3) — thiscall(S, &slot, flag), ret 8.
+                          ; Writes the object pointer P into the pump's arg1 slot
+                          ; (slot first cleared, then slot = FUN_007B79B0([S+0x10]) return,
+                          ; addref [P+4]).
+  0x006C9769  83 7C 24 28 00       cmp dword [esp+0x28], 0    ; slot (was A; now P or 0)
+  0x006C976E  C7 44 24 20 00 00 00 00  (SEH state store)
+  0x006C9776  75 41                jne 0x006C97B9            ; P != 0 → RETURN PATH B (construction)
+  ; ---- slot == 0 (P NULL) → RETURN PATH C ----
+  0x006C9778  57                   push edi                   ; pump arg3 (&local out)
+  0x006C9779  8B CE                mov ecx, esi               ; receiver = S
+  0x006C977B  E8 20 D1 15 00        call 0x008268A0            ; rel32 own: 0x006C9780+0x15D120=0x008268A0
+                          ; E4: S-method with the pump's arg3 (receiver S, 1 stack arg,
+                          ; ret 4 — dataflow-verified). Body NOT opened (off the R-producing path).
+  0x006C9780  8B 44 24 28          mov eax, [esp+0x28]        ; slot re-read (0 or a value written meanwhile)
+  0x006C9784  85 C0                test eax, eax
+  0x006C9786  C7 44 24 20 FF FF FF FF  (SEH state store)
+  0x006C978E  74 15                je 0x006C97A5              ; still 0 → return 0/NULL
+  ; release block (slot value non-zero on this path): dec refcount, destroy at zero
+  0x006C9790  83 40 04 FF          add dword [eax+4], -1      ; [P+4] -= 1 (refcount DEC, base = slot value)
+  0x006C9794  8B C8                mov ecx, eax
+  0x006C9796  83 C0 04             add eax, 4
+  0x006C9799  83 38 00             cmp dword [eax], 0
+  0x006C979C  75 07                jne 0x006C97A5
+  0x006C979E  8B 11                mov edx, [ecx]            ; vtable
+  0x006C97A0  8B 42 04             mov eax, [edx+4]           ; vtable slot 1
+  0x006C97A3  FF D0                call eax                  ; E7: zero-destroy dispatch (vtable slot 1)
+  ; ---- common epilogue return 0 ----
+  0x006C97A5  33 C0                xor eax, eax              ; RETURN: 0/NULL
+  0x006C97A7..0x006C97B8  SEH epilogue; ret (C3)
+  ; ---- RETURN PATH B: slot != 0 (P non-NULL) — the R-producing path ----
+  0x006C97B9  6A 10                push 0x10                  ; allocation size 16 bytes
+  0x006C97BB  E8 04 3C 29 00        call 0x0095D3C4            ; rel32 own: 0x006C97C0+0x293C04=0x0095D3C4
+                          ; E5: allocation. Callee identity = operator new per PRIOR CANON
+                          ; (CHILD_ROOT_PROVENANCE 01_RAW/PINS_AND_REL32.txt pinned
+                          ; 0x0095D3C4 = operator new at ITS recorded callsites 0x006C6804 and
+                          ; the historical 0x006CB81B — cited, NOT re-adjudicated). NEW fact
+                          ; of THIS callsite: the allocation SIZE 0x10 for R. cdecl
+                          ; (caller add esp,4 @0x006C97C0).
+  0x006C97C0  83 C4 04             add esp, 4
+  0x006C97C3  89 44 24 0C          mov [esp+0xC], eax         ; local = the allocation
+  0x006C97C7  85 C0                test eax, eax
+  0x006C97C9  C6 44 24 20 01       (SEH state store)
+  0x006C97CE  74 11                je 0x006C97E1             ; alloc failed → ESI = 0
+  0x006C97D0  8B 4C 24 28          mov ecx, [esp+0x28]        ; ecx = P (the slot value)
+  0x006C97D4  51                   push ecx                  ; ctor arg2 = P
+  0x006C97D5  56                   push esi                  ; ctor arg1 = S
+  0x006C97D6  8B C8                mov ecx, eax              ; this = the new 0x10 allocation
+  0x006C97D8  E8 93 F7 01 00        call 0x006E8F70            ; rel32 own: 0x006C97DD+0x1F793=0x006E8F70
+                          ; E6: THE CTOR OF R (body #2) — thiscall(new16, S, P), ret 8.
+                          ; Stores S at [R+0], P at [R+4] (with addref [P+4]), zeroes +8/+0xC,
+                          ; RETURNS this (mov eax,esi).
+  0x006C97DD  8B F0                mov esi, eax              ; ESI = the ctor result (= R)
+  0x006C97DF  EB 02                jmp 0x006C97E3
+  0x006C97E1  33 F6                xor esi, esi              ; alloc failed → R-candidate = 0
+  ; release of the caller-side P reference (the ctor kept its own reference):
+  0x006C97E3  8B 44 24 28          mov eax, [esp+0x28]        ; P
+  0x006C97E7  85 C0                test eax, eax
+  0x006C97E9  C7 44 24 20 FF FF FF FF  (SEH state store)
+  0x006C97F1  74 15                je 0x006C9808
+  0x006C97F3  83 40 04 FF          add dword [eax+4], -1      ; [P+4] -= 1 (refcount DEC)
+  0x006C97F7  8B C8                mov ecx, eax
+  0x006C97F9  83 C0 04             add eax, 4
+  0x006C97FC  83 38 00             cmp dword [eax], 0
+  0x006C97FF  75 07                jne 0x006C9808
+  0x006C9801  8B 11                mov edx, [ecx]
+  0x006C9803  8B 42 04             mov eax, [edx+4]           ; vtable slot 1
+  0x006C9806  FF D0                call eax                  ; E8: zero-destroy dispatch (vtable slot 1)
+  0x006C9808  8B C6                mov eax, esi              ; RETURN: EAX = ESI = the ctor result (R)
+  0x006C980A..0x006C981A  SEH epilogue
+  0x006C981B  C3                   ret                        ; cdecl return (caller cleaned 0x10 args)
+
+EXTENT: 0x006C9700..0x006C981B — RESOLVED (terminal ret C3 @0x006C981B; 4x CC padding
+@0x006C981C..0x006C981F; aligned next entry @0x006C9820).
+
+RETURN-PATH TABLE (final EAX to RET):
+| path | predicate chain | final EAX | status |
+|---|---|---|---|
+| A | S == FUN_00823C10(FUN_00415670(...)) == NULL (je @0x006C9756) | 0 (xor eax,eax @0x006C97A5) | RESOLVED |
+| B | S != 0 AND slot != 0 after FUN_006C9570 (jne @0x006C9776) AND new(0x10) != 0 (je @0x006C97CE not taken) | ctor result = this = the new(0x10) object (mov eax,esi @0x006C9808) | RESOLVED |
+| B-null | S != 0 AND slot != 0 AND new(0x10) == 0 | 0 (ESI=0) | RESOLVED |
+| C | S != 0 AND slot == 0 (fallthrough @0x006C9776) → FUN_008268A0(S, arg3) → slot still 0 (je @0x006C978E) | 0 | RESOLVED |
+| C-rel | same, but slot non-zero after FUN_008268A0 (je @0x006C978E not taken) | 0 (after the release block falls through to xor eax,eax) | RESOLVED |
+
+On the CAND-4 caller conditions (arg4=0, A = the model request id, both out-locals
+provided), PATH B is the only R-producing path; its predicate is fully stated above.
+A static path is not an observed execution (no runtime in this run class).
+
+NOT-COUNTED neighbors displayed raw by the bounded window (FUNCTION_BODY_ACCOUNTING
+row: RAW_WINDOW_OVERFLOW, NOT analyzed, NO body charge — displayed bytes only,
+0x006C9820..0x006C9A8F past the body extent; e.g. a deleting-destructor-shaped entry
+@0x006C9820 (mov esi,ecx; call 0x006C9670; test byte [esp+8],1; push esi;
+call 0x0095D42A; mov eax,esi; ret 4) — role NOT adjudicated in this run).

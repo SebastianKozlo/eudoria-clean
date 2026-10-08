@@ -1,0 +1,85 @@
+01_RAW/FUN_006E8F70_CTOR_R.txt — BODY #2 of this run: FUN_006E8F70 (the constructor of R).
+PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008 — measured from the pinned EXE
+(fail-closed; identity INPUT_IDENTITIES.md §3). Decoder: capstone 5.0.7 + own rel32
+arithmetic (agreement verified per pin). Manual encoding cross-checks in
+01_RAW/MANUAL_ENCODING_CROSSCHECK.txt.
+
+CONTEXT: called by FUN_006C9700 @0x006C97D8 (E8 93 F7 01 00; own recompute
+0x006C97DD+0x1F793 = 0x006E8F70) as thiscall(this = new(0x10) allocation,
+arg1 = S, arg2 = P), ret 8 (SEEN: C2 08 00 @0x006E9027). Frame: 7 pushes = 0x1C;
+its stack args: [esp+0x20] = arg1 (S), [esp+0x24] = arg2 (P).
+
+RAW BYTES (body, 0x006E8F70..0x006E9027 = 0xB8 bytes):
+6A FF 68 C6 87 A0 00 64 A1 00 00 00 00 50 51 56 57 A1 D0 D8 B9 00 33 C4 50 8D 44 24 10 64 A3 00 00 00 00 8B F1 89 74 24 0C 8B 44 24 20 89 06 8B 44 24 24 85 C0 89 46 04 B9 01 00 00 00 74 03 01 48 04 8D 7E 08 C7 44 24 18 00 00 00 00 C7 07 00 00 00 00 88 4C 24 18 8B 0E C7 46 0C 00 00 00 00 E8 7B F1 03 00 81 78 04 DC B7 00 00 75 36 8B 4E 04 8B 11 8B 42 44 68 A4 5D A8 00 FF D0 85 C0 74 23 50 68 BC 73 BA 00 E8 14 05 08 00 83 C4 08 85 C0 74 11 50 E8 87 FA FF FF 83 C4 04 50 8B CF E8 FC 92 FC FF 8B C6 8B 4C 24 10 64 89 0D 00 00 00 00 59 5F 5E 83 C4 10 C2 08 00
+
+DISASSEMBLY (analyzed extent 0x006E8F70..0x006E9027):
+  0x006E8F70..0x006E8F92  SEH prologue (push -1; handler 0xA087C6; fs:0; push ecx;
+                          push esi; push edi; cookie; frame install)
+  0x006E8F93  8B F1                mov esi, ecx              ; this = the new16 object (R base)
+  0x006E8F95  89 74 24 0C         mov [esp+0xC], esi         ; (SEH this-save)
+  0x006E8F99  8B 44 24 20         mov eax, [esp+0x20]        ; arg1 = S
+  0x006E8F9D  89 06                mov [esi], eax             ; <<<<< [R+0] = S   (NO vtable store:
+                          ; the FIRST DWORD of R receives the object POINTER S — the
+                          ; construction writes no vptr at +0)
+  0x006E8F9F  8B 44 24 24         mov eax, [esp+0x24]        ; arg2 = P
+  0x006E8FA3  85 C0                test eax, eax
+  0x006E8FA5  89 46 04             mov [esi+4], eax           ; <<<<< [R+4] = P — THE +4 WRITER (first init)
+  0x006E8FA8  B9 01 00 00 00       mov ecx, 1
+  0x006E8FAD  74 03                je 0x006E8FB2              ; P == NULL → skip the addref
+  0x006E8FAF  01 48 04             add [eax+4], ecx           ; <<<<< [P+4] += 1 — ADDREF of the
+                          ; stored P (refcount at +4 of P; ecx=1)
+  0x006E8FB2  8D 7E 08             lea edi, [esi+8]           ; &R+8
+  0x006E8FB5  C7 44 24 18 00 00 00 00  (SEH state)
+  0x006E8FBD  C7 07 00 00 00 00    mov dword [edi], 0         ; [R+8] = 0
+  0x006E8FC3  88 4C 24 18          (SEH state)
+  0x006E8FC7  8B 0E                mov ecx, [esi]            ; ECX = S (read back from [R+0])
+  0x006E8FC9  C7 46 0C 00 00 00 00  mov dword [esi+0xC], 0    ; [R+0xC] = 0
+  0x006E8FD0  E8 7B F1 03 00        call 0x00728150            ; rel32 own: 0x006E8FD5+0x3F17B=0x00728150
+                          ; E9: thiscall(S) (0 stack args). Result's [+4] field is compared
+                          ; below — the gate of the conditional [R+8] population.
+  0x006E8FD5  81 78 04 DC B7 00 00  cmp dword [eax+4], 0xB7DC  ; gate (0xB7DC = 47068)
+  0x006E8FDC  75 36                jne 0x006E9014             ; not the gated value → return this
+  0x006E8FDE  8B 4E 04             mov ecx, [esi+4]          ; P
+  0x006E8FE1  8B 11                mov edx, [ecx]            ; P's vtable
+  0x006E8FE3  8B 42 44             mov eax, [edx+0x44]       ; vtable slot 17 (0x44/4)
+  0x006E8FE6  68 A4 5D A8 00       push 0x00A85DA4           ; name constant -> "Geowater:0"
+                          ; (measured data read: 47 65 6F 77 61 74 65 72 3A 30 00)
+  0x006E8FEB  FF D0                call eax                  ; E10: P -> vtable slot 17 (name-taking
+                          ; virtual on P — P is usable as a named-lookup receiver)
+  0x006E8FED  85 C0                test eax, eax
+  0x006E8FEF  74 23                je 0x006E9014
+  0x006E8FF1  50                   push eax                  ; \
+  0x006E8FF2  68 BC 73 BA 00       push 0x00BA73BC           ;  > RAW_VISIBLE_ONLY (NOT interpreted;
+  0x006E8FF7  E8 14 05 08 00       call 0x00769510            ; /  destination base R+8, conditional)
+  0x006E8FFC  83 C4 08             add esp, 8
+  0x006E8FFF  85 C0                test eax, eax
+  0x006E9001  74 11                je 0x006E9014
+  0x006E9003  50                   push eax                  ; \
+  0x006E9004  E8 87 FA FF FF       call 0x006E8A90            ;  > RAW_VISIBLE_ONLY (NOT interpreted)
+  0x006E9009  83 C4 04             add esp, 4                ; /
+  0x006E900C  50                   push eax
+  0x006E900D  8B CF                mov ecx, edi              ; receiver = R+8
+  0x006E900F  E8 FC 92 FC FF       call 0x006B2310            ; RAW_VISIBLE_ONLY (thiscall, receiver
+                          ; = &R+8 — the conditional [R+8] population; NOT interpreted)
+  0x006E9014  8B C6                mov eax, esi              ; <<<<< RETURN this (R)
+  0x006E9016..0x006E9026  SEH epilogue
+  0x006E9027  C2 08 00             ret 8                     ; thiscall, 2 stack args
+
+EXTENT: 0x006E8F70..0x006E9027 — RESOLVED (terminal ret 8; 6x CC padding
+@0x006E902A..0x006E902F; aligned next entry @0x006E9030).
+
+MEASURED R LAYOUT (the construction dataflow of THIS body; all four field stores
+are the only writes to base R in the opened chain):
+  +0x00: S (object pointer — the FUN_00823C10 result of the caller) — 89 06
+  +0x04: P (object pointer — ctor arg2 = the slot value; ADDREF [P+4] at store) — 89 46 04 + 01 48 04
+  +0x08: 0 (conditionally populated by the RAW-visible branch above) — C7 07 00 00 00 00
+  +0x0C: 0 — C7 46 0C 00 00 00 00
+  Total size 0x10 (the caller's allocation @0x006C97B9). NO vptr store at any offset.
+
+RETURN VALUE: this (mov eax,esi @0x006E9014) — RESOLVED. The ctor's return is the
+allocated object itself; therefore the pump's path-B return R = the new(0x10) object
+(return identity tied to the SAME allocation; no adjustment — ESI == the `this` ECX
+received at entry, unmodified).
+
+NOT-COUNTED neighbors displayed raw by the bounded window (RAW_WINDOW_OVERFLOW:
+0x006E9030..0x006E90EF — small getters/destructor-shaped entries; NOT analyzed).

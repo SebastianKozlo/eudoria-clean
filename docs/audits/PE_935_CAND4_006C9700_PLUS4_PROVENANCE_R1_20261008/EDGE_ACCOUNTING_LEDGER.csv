@@ -1,0 +1,38 @@
+# EDGE_ACCOUNTING_LEDGER — PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008
+# SHARED ledger (executor + controls + QC). Budget: MAX_NEW_INTERPROCEDURAL_EDGES_ANALYZED = 12.
+# Edge unit = a unique semantically analyzed (caller_start_VA, callsite_VA). Interpretation
+# of a rejected candidate / control / ranking / RAW content also counts if it contributes
+# new callsite interpretation. Data/RTTI reads without callsite interpretation are NOT
+# edges. QC repetition of the same unit is free; NEW QC units draw from the common budget.
+# USED = 12/12 (AT the preregistered limit; NOT exceeded; STOP_BEFORE_EXCEED honored at the
+# FUN_007B79B0 boundary — see the RAW rows and FUNCTION_BODY_ACCOUNTING B-4).
+EDGE_ID,CALLER_START_VA,CALLSITE_VA,TARGET,PHASE,SCOPE,INTERPRETATION,PRIOR_RECORD,CHARGE
+E1,0x006C9700,0x006C9746,0x00415670,SCIENCE,request chain,the request issue: receives the 8-byte request pair {type=0x66=MODEL, id=A} (built @0x006C973A/0x006C9742) + the pump's arg2/arg3 + flag 1; callee cleans 16 bytes (ret 0x10 — dataflow-verified); result O feeds the S getter,none (new),1
+E2,0x006C9700,0x006C974D,0x00823C10,SCIENCE,request chain,S = thiscall(O) result (0 stack args; ret 0); the NULL check @0x006C9756 gates all R-producing paths on S != 0,none (new),1
+E3,0x006C9700,0x006C9764,0x006C9570,SCIENCE,+4 source chain,the slot setter: thiscall(S, &pump-arg1-slot, flag=pump-arg4), ret 8; writes P into the slot (body #3 opened),none (new),1
+E4,0x006C9700,0x006C977B,0x008268A0,SCIENCE,slot==0 path,an S-method receiving the pump's arg3 (&local out); taken only when the slot stayed 0; its body NOT opened (the path returns 0 — not R-producing),none (new),1
+E5,0x006C9700,0x006C97BB,0x0095D3C4,SCIENCE,R origin,the allocation of R: push 0x10 @0x006C97B9 (SIZE 0x10 = this run's new fact); callee identity = operator new per PRIOR CANON (CHILD_ROOT_PROVENANCE PINS_AND_REL32: 0x006C6804->0x0095D3C4 "operator new(0x10)"; PLACEMENT_RECORD_BRIDGE L20: 0x006CB81B->0x0095D3C4 "operator new(0xC)"),CHILD_ROOT_PROVENANCE 01_RAW/PINS_AND_REL32.txt (callee identity, cited),1
+E6,0x006C9700,0x006C97D8,0x006E8F70,SCIENCE,R origin + +4 writer,THE CTOR OF R: thiscall(new16, S, P), ret 8; stores [R+0]=S, [R+4]=P (the +4 writer), zeroes +8/+0xC, returns this (body #2 opened),none (new),1
+E7,0x006C9700,0x006C97A3,(indirect: [P-vtable+4]),SCIENCE,P protocol,the zero-destroy dispatch of the released P on the slot==0-then-value path (vtable slot 1; the add [eax+4],-1 refcount DEC precedes at 0x006C9790),none (new),1
+E8,0x006C9700,0x006C9806,(indirect: [P-vtable+4]),SCIENCE,P protocol,the zero-destroy dispatch of the caller-side P reference after the ctor (same slot-1 protocol; DEC @0x006C97F3),none (new),1
+E9,0x006E8F70,0x006E8FD0,0x00728150,SCIENCE,conditional [R+8] branch gate,thiscall(S) (receiver read back from [R+0]); its result's [+4] field is compared with 0xB7DC — the gate of the conditional [R+8] population (NOT load-bearing for R's origin or the +4 value; interpretation recorded honestly),none (new),1
+E10,0x006E8F70,0x006E8FEB,(indirect: [P-vtable+0x44]),SCIENCE,T/P role cross-evidence,P -> vtable slot 17 name-taking virtual call (name constant 0x00A85DA4 = "Geowater:0") — P is usable as a NAMED-LOOKUP RECEIVER (cross-evidence with the prior-canon installer lookups on T: 'ArkTexture'/'ArkAnimation'),CHILD_ROOT_PROVENANCE 01_RAW/FUN_006C6780_INSTALLER_PARTIAL.txt (the installer lookups, cited as prior record),1
+E11,0x006C9570,0x006C9631,0x007B79B0,SCIENCE,+4 source chain,THE P GETTER: thiscall, receiver [S+0x10], 0 stack args; its return value = P = the value swapped into the slot (body #4 opened PARTIAL),none (new),1
+E12,0x006C9570,0x006C95C5,0x007B7660,SCIENCE,off-path alternative (recorded honestly),the flag==1 variant lookup: thiscall(receiver [S+0x10], &flag-slot byref out) — NOT the CAND-4 path (arg4=0 -> jne @0x006C95BE); interpretation performed during the session and recorded (no hiding),none (new),1
+# ---------------- RAW_VISIBLE_ONLY rows (NOT counted; explicit NOT_COUNTED_REASON each) ----------------
+R-1,0x006E8F70,0x006E8FF7,0x00769510,SCIENCE,conditional [R+8] branch,RAW arith only (+0x80514),NOT_COUNTED_REASON: not load-bearing for RETURN_VALUE_ORIGIN or PLUS4_WRITER_AND_SOURCE; interpretation NOT performed (edge budget discipline)
+R-2,0x006E8F70,0x006E9004,0x006E8A90,SCIENCE,conditional [R+8] branch,RAW arith only (-0x579),NOT_COUNTED_REASON: same as R-1
+R-3,0x006E8F70,0x006E900F,0x006B2310,SCIENCE,conditional [R+8] branch,RAW arith only (receiver = &R+8),NOT_COUNTED_REASON: same as R-1 (the receiver fact is body dataflow; NO callee identity/role claim)
+R-4,0x006C9570,0x006C95E9,(indirect),SCIENCE,flag==1 variant release block,RAW only,NOT_COUNTED_REASON: edge budget at the preregistered limit (12/12); the destroy-dispatch pattern was established at THIS RUN's E7/E8 sites; NO claim is made about THIS site (off the CAND-4 path)
+R-5,0x006C9570,0x006C9618,(indirect),SCIENCE,flag==1 variant temp release,RAW only,NOT_COUNTED_REASON: same as R-4
+R-6,0x006C9570,0x006C964D,(indirect),SCIENCE,old-slot release block (non-equal path),RAW only,NOT_COUNTED_REASON: same as R-4 (additionally NOT executed on the CAND-4 first-install path: the slot was pre-cleared to 0)
+R-7,0x007B79B0,0x007B79D8,0x0095D3C4,SCIENCE,P getter head alloc,RAW arith only (+0x1A59E7; size 4 pushed),NOT_COUNTED_REASON: edge budget at limit (12/12); callee identity NOT adjudicated at THIS site (prior canon covers its OWN recorded sites only — cited, not transferred)
+R-8,0x007B79B0,0x007B79F2,0x007B7930,SCIENCE,P getter head init,RAW arith only (-0xC7),NOT_COUNTED_REASON: same as R-7 (role/identity/result-flow NOT claimed)
+R-9,0x007B79B0,0x007B7A0D,(indirect: receiver vtable slot 3),SCIENCE,P getter dispatch,RAW only,NOT_COUNTED_REASON: same as R-7 (indirect target = runtime data; result flow NOT adjudicated)
+# PRIOR-SCOPE re-pins (free; prior record cited per row; no new semantics claimed):
+#   0x006C6FFC->0x006C9700 (the CAND-4 pump callsite; CHILD_ROOT_PROVENANCE), 0x006C7049->
+#   0x006C6780 (producer->installer), 0x006CB7CF->0x006C9700 (historical caller pump callsite;
+#   PLACEMENT_RECORD_BRIDGE L20), 0x006CB81B->0x0095D3C4, 0x006CB836->0x006FA8B0 (the
+#   historical W ctor; PLACEMENT_RECORD_BRIDGE L20) — byte re-reads only.
+# TOTALS: ANALYZED_NEW = 12 (E1..E12) of MAX 12 — AT THE LIMIT; RAW_VISIBLE_ONLY = 9;
+# exceedance = NONE; RETROACTIVE_PRIOR_AUTHORIZATION = NO (not needed — no exceedance).

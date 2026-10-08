@@ -1,0 +1,70 @@
+01_RAW/FUN_007B79B0_P_GETTER_PARTIAL.txt — BODY #4 of this run (PARTIAL): FUN_007B79B0
+(the getter whose return value becomes P — the value later stored at [R+4]).
+PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008 — measured from the pinned EXE
+(fail-closed; identity INPUT_IDENTITIES.md §3). Decoder: capstone 5.0.7 + own rel32
+arithmetic. EDGE BUDGET AT THE PREREGRISTERED LIMIT (12/12) for the whole run:
+EVERY call instruction in this body is recorded RAW_VISIBLE_ONLY — NO callsite
+interpretation is performed or claimed by this run for this body.
+
+CONTEXT: called by FUN_006C9570 @0x006C9631 (E8 7A E3 0E 00; own recompute
+0x006C9636+0xEE37A = 0x007B79B0), thiscall, receiver ECX = [S+0x10], 0 stack args.
+Its return value = the P that the slot setter swaps into the pump's arg1 slot
+(mov [esi],edi @0x006C9651; addref [P+4] @0x006C9657) and that the ctor later stores
+at [R+4] (mov [esi+4],eax @0x006E8FA5).
+
+RAW BYTES (window 0x007B79B0..0x007B7A0F, LEN 0x60 — THE BODY CONTINUES PAST THE
+WINDOW; the last complete instruction ends at 0x007B7A0D-1; the final `call edx`
+@0x007B7A0D is complete (2 bytes) but the window cuts before the following bytes):
+6A FF 68 AB E1 A1 00 64 A1 00 00 00 00 50 51 53 56 57 A1 D0 D8 B9 00 33 C4 50 8D 44 24 14 64 A3 00 00 00 00 8B F9 6A 04 E8 E7 59 1A 00 83 C4 04 89 44 24 10 85 C0 C7 44 24 1C 00 00 00 00 74 0B 8B C8 E8 39 FF FF FF 8B F0 EB 02 33 F6 8B 07 8B 50 0C 56 8B CF C7 44 24 20 FF FF FF FF FF D2
+
+DISASSEMBLY (visible window; register/dataflow notes only — NO callsite interpretations):
+  0x007B79B0..0x007B79D3  SEH prologue (push -1; handler 0xA1E1AB; fs:0; push ecx;
+                          push ebx/esi/edi; cookie; frame install)
+  0x007B79D4  8B F9                mov edi, ecx              ; receiver ([S+0x10]) saved
+  0x007B79D6  6A 04                push 4
+  0x007B79D8  E8 E7 59 1A 00       call 0x0095D3C4            ; RAW_VISIBLE_ONLY — target
+                          ; arithmetic only (0x007B79DD+0x1A59E7 = 0x0095D3C4; capstone
+                          ; agrees). Callee identity NOT adjudicated by this run at THIS
+                          ; site. (Prior canon measured 0x0095D3C4 = operator new at ITS
+                          OWN recorded callsites: CHILD_ROOT_PROVENANCE PINS_AND_REL32
+                          0x006C6804->0x0095D3C4 "operator new(0x10)"; the historical
+                          caller 0x006CB81B->0x0095D3C4 "operator new(0xC)" — cited as
+                          prior record; this run makes NO claim about this site's role.)
+  0x007B79DD  83 C4 04             add esp, 4
+  0x007B79E0  89 44 24 10          mov [esp+0x10], eax        ; local = call result
+  0x007B79E4  85 C0                test eax, eax
+  0x007B79E6  C7 44 24 1C 00 00 00 00  (SEH state)
+  0x007B79EE  74 0B                je 0x007B79FB
+  0x007B79F0  8B C8                mov ecx, eax
+  0x007B79F2  E8 39 FF FF FF       call 0x007B7930            ; RAW_VISIBLE_ONLY — target
+                          ; arithmetic only (0x007B79F7-0xC7 = 0x007B7930; capstone agrees).
+                          ; Callee identity/role NOT adjudicated by this run.
+  0x007B79F7  8B F0                mov esi, eax
+  0x007B79F9  EB 02                jmp 0x007B79FD
+  0x007B79FB  33 F6                xor esi, esi
+  0x007B79FD  8B 07                mov eax, [edi]            ; vtable of the receiver
+  0x007B79FF  8B 50 0C             mov edx, [eax+0xC]       ; vtable slot 3 of the receiver
+  0x007B7A02  56                   push esi
+  0x007B7A03  8B CF                mov ecx, edi              ; receiver
+  0x007B7A05  C7 44 24 20 FF FF FF FF  (SEH state)
+  0x007B7A0D  FF D2                call edx                  ; RAW_VISIBLE_ONLY — indirect
+                          ; dispatch (receiver vtable slot 3), argument = ESI; target is
+                          ; runtime data. NOT interpreted (edge budget at limit).
+  ; ---- WINDOW ENDS (0x007B7A0F); the body continues — NOT decoded, NOT claimed ----
+
+EXTENT: PARTIAL — UNRESOLVED past 0x007B7A0F (the window cut inside the body; the
+return path of this function is NOT seen; per the preregistered STOP_BEFORE_EXCEED
+rule the continuation is NOT decoded as part of this run's claims).
+
+LOAD-BEARING USE OF THIS BODY (bounded):
+- The value P (later stored at [R+4] by the ctor) = the RETURN VALUE of this
+  function (measured at the caller: the swap-in @0x006C9651 uses EAX of this call).
+- WHAT THIS RUN ESTABLISHES about that return value: NOTHING BEYOND THE CALLER-SIDE
+  FACTS. The internal origin of the return value (which register/field feeds its
+  final EAX; whether the 0x0095D3C4/0x007B7930/slot-3 results participate) is
+  NOT_ESTABLISHED_WITHIN_BOUND (the callsite result-flow interpretations would be
+  NEW edge units 13+ — the preregistered budget MAX 12 is exhausted; STOP honored).
+- Visible structural facts recorded WITHOUT interpretation: the head allocates via
+  the 0x0095D3C4 call with size 4; the allocation is passed to the 0x007B7930 call;
+  a virtual dispatch (receiver vtable slot 3) runs with the ESI value; the window
+  cuts. No role, identity or result-flow claim is made for any of these sites.

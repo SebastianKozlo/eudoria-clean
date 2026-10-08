@@ -1,0 +1,146 @@
+01_RAW/PINS_AND_REL32.txt — load-bearing byte pins + independent rel32 recomputes.
+PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008. All reads are fresh from the
+pinned EXE (fail-closed reader; INPUT_IDENTITIES.md §3). Rel32 arithmetic is this
+run's own (call_va + 5 + int32(rel32)); capstone 5.0.7's annotation agrees on every
+row (machine-verified by 03_SCRIPTS/checker_plus4.py; manual encodings in
+MANUAL_ENCODING_CROSSCHECK.txt).
+
+=== BYTE PINS (measured this run) ===
+  -- BODY #1: FUN_006C9700 (the pump) --
+  pump_seh_handler             @0x006C9702: 68 13 57 A0 00      (push 0x00A05713)
+  pump_arg_loads               @0x006C9725: 8B 7C 24 30         (mov edi,[esp+0x30] = arg3)
+                               @0x006C9729: 8B 4C 24 2C         (mov ecx,[esp+0x2C] = arg2)
+                               @0x006C972D: 8B 44 24 28         (mov eax,[esp+0x28] = arg1 = A)
+  pump_pair_type_store         @0x006C973A: C7 44 24 20 66 00 00 00 (mov [esp+0x20],0x66 — request pair type = MODEL)
+  pump_pair_id_store           @0x006C9742: 89 44 24 24         (mov [esp+0x24],eax — pair id = A)
+  pump_call_requestissue       @0x006C9746: E8 25 BF D4 FF
+  pump_call_sgetter            @0x006C974D: E8 BE A4 15 00
+  pump_s_null_check           @0x006C9754: 85 F6                (test esi,esi)
+                               @0x006C9756: 74 4D                (je 0x006C97A5 — return 0)
+  pump_arg4_load              @0x006C9758: 8B 44 24 34         (mov eax,[esp+0x34] = arg4)
+  pump_slot_address           @0x006C975D: 8D 4C 24 2C         (lea ecx,[esp+0x2C] = &arg1 slot)
+  pump_call_slotsetter        @0x006C9764: E8 07 FE FF FF
+  pump_slot_cmp               @0x006C9769: 83 7C 24 28 00      (cmp [esp+0x28],0 — the slot)
+                               @0x006C9776: 75 41                (jne 0x006C97B9 — construction path)
+  pump_call_smethod_8268a0    @0x006C977B: E8 20 D1 15 00      (slot==0 path; body NOT opened)
+  pump_releaseA_dec           @0x006C9790: 83 40 04 FF         (add [eax+4],-1 — base = slot value P)
+  pump_releaseA_destroy       @0x006C979E: 8B 11 / @0x006C97A0: 8B 42 04 / @0x006C97A3: FF D0
+  pump_return_null            @0x006C97A5: 33 C0                (xor eax,eax)
+  pump_new_size               @0x006C97B9: 6A 10                (push 0x10 — R allocation size)
+  pump_call_new               @0x006C97BB: E8 04 3C 29 00
+  pump_ctor_argP              @0x006C97D4: 51                   (push ecx — P)
+  pump_ctor_argS              @0x006C97D5: 56                   (push esi — S)
+  pump_ctor_receiver          @0x006C97D6: 8B C8                (mov ecx,eax — this = allocation)
+  pump_call_ctor              @0x006C97D8: E8 93 F7 01 00
+  pump_ctor_result_save       @0x006C97DD: 8B F0                (mov esi,eax — R)
+  pump_releaseB_dec           @0x006C97F3: 83 40 04 FF         (add [eax+4],-1 — caller-side P release)
+  pump_releaseB_destroy       @0x006C9801: 8B 11 / @0x006C9803: 8B 42 04 / @0x006C9806: FF D0
+  pump_return_R               @0x006C9808: 8B C6                (mov eax,esi — RETURN the ctor result)
+  pump_terminal_ret           @0x006C981B: C3                   (ret — cdecl)
+
+  -- BODY #2: FUN_006E8F70 (the ctor of R) --
+  ctor_this_save              @0x006E8F93: 8B F1                (mov esi,ecx)
+  ctor_R0_store_S             @0x006E8F9D: 89 06                (mov [esi],eax — [R+0] = S)
+  ctor_R4_store_P             @0x006E8FA5: 89 46 04             (mov [esi+4],eax — [R+4] = P)  <<<<< THE +4 WRITER
+  ctor_addref_P               @0x006E8FAF: 01 48 04             (add [eax+4],ecx — [P+4] += 1)
+  ctor_R8_zero               @0x006E8FBD: C7 07 00 00 00 00    (mov dword [edi],0 — [R+8] = 0; edi = R+8)
+  ctor_RC_zero               @0x006E8FC9: C7 46 0C 00 00 00 00  (mov dword [esi+0xC],0)
+  ctor_call_gate              @0x006E8FD0: E8 7B F1 03 00      (call 0x00728150 — receiver S read back from [R+0])
+  ctor_gate_cmp               @0x006E8FD5: 81 78 04 DC B7 00 00 (cmp [eax+4],0xB7DC — 47068)
+  ctor_P_vtable_load          @0x006E8FDE: 8B 4E 04 / @0x006E8FE1: 8B 11 / @0x006E8FE3: 8B 42 44
+                               (P -> vtable slot 17)
+  ctor_P_name_arg             @0x006E8FE6: 68 A4 5D A8 00      (push 0x00A85DA4 — "Geowater:0")
+  ctor_P_slot17_call          @0x006E8FEB: FF D0                (call eax)
+  ctor_return_this            @0x006E9014: 8B C6                (mov eax,esi — RETURN this)
+  ctor_terminal_ret           @0x006E9027: C2 08 00             (ret 8 — thiscall, 2 stack args)
+
+  -- BODY #3: FUN_006C9570 (the slot setter) --
+  setter_slot_clear           @0x006C95A0: C7 06 00 00 00 00    (mov dword [esi],0)
+  setter_receiver_load        @0x006C95A6: 8B 49 10             (mov ecx,[ecx+0x10] — receiver = [S+0x10])
+  setter_flag_cmp             @0x006C95AE: 38 5C 24 28         (cmp byte [esp+0x28],1)
+                               @0x006C95BE: 75 71                (jne 0x006C9631 — the CAND-4 path, arg4=0)
+  setter_call_pgetter         @0x006C9631: E8 7A E3 0E 00      (call 0x007B79B0)
+  setter_slot_store_P         @0x006C9651: 89 3E                (mov [esi],edi — SLOT = P)
+  setter_addref_P             @0x006C9657: 01 5F 04             (add [edi+4],ebx — [P+4] += 1)
+  setter_terminal_rets        @0x006C962E: C2 08 00 / @0x006C966C: C2 08 00
+
+  -- BODY #4 (PARTIAL): FUN_007B79B0 (the P getter) --
+  pget_receiver_save          @0x007B79D4: 8B F9                (mov edi,ecx)
+  pget_alloc_size             @0x007B79D6: 6A 04                (push 4)
+  pget_call_alloc             @0x007B79D8: E8 E7 59 1A 00      (RAW_VISIBLE_ONLY — arith only)
+  pget_call_init              @0x007B79F2: E8 39 FF FF FF       (RAW_VISIBLE_ONLY — arith only)
+  pget_vtable_slot3           @0x007B79FD: 8B 07 / @0x007B79FF: 8B 50 0C
+  pget_slot3_call             @0x007B7A0D: FF D2                (RAW_VISIBLE_ONLY)
+
+  -- PRIOR-CANON RE-PINS (free re-pins within their recorded scope; cited per row) --
+  [CHILD_ROOT_PROVENANCE 01_RAW/PINS_AND_REL32.txt]
+  producer_store_+0x6C        @0x006C7008: 89 46 6C            (mov [esi+0x6C],eax)  — R stored to manager
+  installer_load_R           @0x006C67B3: 8B 46 6C            (mov eax,[esi+0x6C])  — R loaded
+  installer_read_inst+4      @0x006C67BE: 8B 78 04             (mov edi,[eax+4])     — T = [R+4]
+  installer_ebx1             @0x006C67C9: BB 01 00 00 00      (mov ebx,1)
+  installer_write_+0x68      @0x006C67E2: 89 7E 68             (mov [esi+0x68],edi)  — T stored
+  installer_incref_T         @0x006C67E7: 01 5F 04             (add [edi+4],ebx)     — [T+4] += 1
+  installer_decref_old       @0x006C67D4: 01 69 04             (add [ecx+4],ebp)
+  installer_cmp_+0x68        @0x006C67A9: 83 7E 68 00         (cmp [esi+0x68],0)
+  installer_oldguard_+0x6C   @0x006C67B3 (see above; guard @0x006C67B6: 85 C0 test eax,eax)
+  [PLACEMENT_RECORD_BRIDGE 01_RAW/C9_LISTING_WINDOWS.json L20]
+  hist_caller_pump_call      @0x006CB7CF: E8 2C DF FF FF       (call FUN_006C9700)
+  hist_caller_save_R         @0x006CB7DB: 8B F0 form = "MOV ESI,EAX" (Ghidra signed-byte
+                             rendering "-75 -10"; raw 8B F0)
+  hist_caller_null_check     @0x006CB811: 8B F0? — record cites "TEST ESI,ESI" (85 F6) @0x006CB811
+  hist_caller_new_0xC        @0x006CB819: 6A 0C / call @0x006CB81B: E8 A4 1B 29 00 (->0x0095D3C4)
+  hist_caller_ctor_call      @0x006CB836: E8 75 F0 02 00       (->0x006FA8B0; ctor(W, saved R);
+                             PROCESS DISCLOSURE: the run's first draft transcription read E8 35 F0 02 00;
+                             the physical-EXE checker caught it (clean-pass attempt 1 FAIL at this pin);
+                             corrected to the MEASURED bytes — see MANUAL_ENCODING_CROSSCHECK.txt item 13)
+
+=== REL32 RECOMPUTES (own arithmetic; capstone agreement verified) ===
+  CALL 0x006C9746 -> 0x00415670   (pump: request issue; -0x2B40DB)
+  CALL 0x006C974D -> 0x00823C10   (pump: S getter thiscall; +0x15A4BE)
+  CALL 0x006C9764 -> 0x006C9570   (pump: slot setter; -0x1F9)
+  CALL 0x006C977B -> 0x008268A0   (pump: S method, slot==0 path; +0x15D120)
+  CALL 0x006C97BB -> 0x0095D3C4   (pump: allocation; +0x293C04; callee identity = operator new per PRIOR CANON)
+  CALL 0x006C97D8 -> 0x006E8F70   (pump: THE CTOR OF R; +0x1F793)
+  CALL 0x006E8FD0 -> 0x00728150   (ctor: S-based gate; +0x3F17B)
+  CALL 0x006C95C5 -> 0x007B7660   (setter: flag==1 variant lookup; +0xEE096; NOT the CAND-4 path)
+  CALL 0x006C9631 -> 0x007B79B0   (setter: THE P GETTER; +0xEE37A)
+  CALL 0x007B79D8 -> 0x0095D3C4   (P getter head alloc; +0x1A59E7; RAW arith only — identity NOT adjudicated here)
+  CALL 0x007B79F2 -> 0x007B7930   (P getter init; -0xC7; RAW arith only — identity NOT adjudicated here)
+  CALL 0x006C9746..0x006C97D8 above are load-bearing for RETURN_VALUE_ORIGIN / PLUS4.
+  Prior-canon re-pin rel32 (cited, not re-derived): 0x006C6FFC -> 0x006C9700 (the
+  CAND-4 pump callsite, -0x2701+... = 0x26FF rel32); 0x006CB7CF -> 0x006C9700
+  (historical caller pump callsite, rel32 0xFFFFDF2C); 0x006CB836 -> 0x006FA8B0
+  (historical W ctor, +0x2F035); 0x006C7049 -> 0x006C6780 (producer->installer).
+
+=== BRANCH-TARGET RECOMPUTES (rel8, own arithmetic) ===
+  0x006C9756 je +0x4D   -> 0x006C97A5  (S==NULL -> return 0)
+  0x006C9776 jne +0x41  -> 0x006C97B9  (slot!=0 -> construction path)
+  0x006C978E je +0x15   -> 0x006C97A5  (slot still 0 -> return 0)
+  0x006C97CE je +0x11   -> 0x006C97E1  (alloc failed -> ESI=0)
+  0x006C97F1 je +0x15   -> 0x006C9808  (P==0 -> skip release)
+  0x006C95BE jne +0x71  -> 0x006C9631  (flag!=1 -> the CAND-4 getter path)
+  0x006C963C je -0x62   -> 0x006C961A  (old==new -> no swap)
+  0x006C9640 je +0x0D   -> 0x006C964F  (old==0 -> skip old release)
+  0x006C9646 jne +0x07  -> 0x006C964F  (refcount!=0 -> skip destroy)
+  0x006C9655 je -0x3B   -> 0x006C961C  (P==0 -> exit without addref)
+  0x006E8FAD je +0x03   -> 0x006E8FB2  (P==NULL -> skip addref)
+  0x006E8FDC jne +0x36  -> 0x006E9014  (gate mismatch -> return this)
+  0x006E8FEF je +0x23   -> 0x006E9014
+  0x006E9001 je +0x11   -> 0x006E9014
+  0x007B79EE je +0x0B   -> 0x007B79FB  (alloc NULL -> esi=0)
+
+CROSS-CHECK vs PRIOR RECORDS (free re-pins, zero mismatches):
+- The installer/producer pins (89 46 6C / 8B 46 6C / 8B 78 04 / BB 01 00 00 00 /
+  89 7E 68 / 01 5F 04 / 01 69 04 / 83 7E 68 00) == CHILD_ROOT_PROVENANCE
+  01_RAW/PINS_AND_REL32.txt rows — byte-identical re-reads at the same VAs.
+- The historical-caller pins (0x006CB7CF E8 2C DF FF FF; 0x006CB81B E8 A4 1B 29 00;
+  0x006CB836 E8 35 F0 02 00; the L20 window sequence) == PLACEMENT_RECORD_BRIDGE
+  C9_LISTING_WINDOWS.json L20_instcreator_006cb6f0 (Ghidra signed-byte rendering
+  converted: e.g. "-18 2C -21 -1 -1" = E8 2C DF FF FF) — byte-identical after
+  signed-byte conversion; rel32 targets recomputed by this run from the raw bytes:
+  0x006C9700 / 0x0095D3C4 / 0x006FA8B0 — all MATCH the prior record.
+- The "01 5F 04" instruction form appears in THREE measured sites this run:
+  the prior-canon installer incref pin @0x006C67E7 ([T+4] += 1, ebx=1), the slot
+  setter addref @0x006C9657 ([P+4] += 1, ebx=1), and (same opcode, different base)
+  01 48 04 @0x006E8FAF ([P+4] += 1, ecx=1) — all are ADD [base+4], reg — the
+  shared refcount-increment idiom; NOT an INC opcode anywhere in these chains.

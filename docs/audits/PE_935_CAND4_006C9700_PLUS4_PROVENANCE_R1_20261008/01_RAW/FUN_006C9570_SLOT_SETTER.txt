@@ -1,0 +1,89 @@
+01_RAW/FUN_006C9570_SLOT_SETTER.txt — BODY #3 of this run: FUN_006C9570 (the slot setter
+= the upstream producer of the value later stored at [R+4]).
+PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008 — measured from the pinned EXE
+(fail-closed; identity INPUT_IDENTITIES.md §3). Decoder: capstone 5.0.7 + own rel32
+arithmetic. Manual encoding cross-checks in 01_RAW/MANUAL_ENCODING_CROSSCHECK.txt.
+
+CONTEXT: called by FUN_006C9700 @0x006C9764 (E8 07 FE FF FF; own recompute
+0x006C9769-0x1F9 = 0x006C9570) as thiscall(S, arg1 = &pump_arg1_slot, arg2 =
+pump arg4 (flag byte)), ret 8 (SEEN: C2 08 00 @0x006C962E and @0x006C966C).
+Frame: 8 pushes = 0x20; its stack args: [esp+0x24] = &slot, [esp+0x28] = flag.
+
+On the CAND-4 caller conditions (arg4 = 0): cmp byte [esp+0x28], 1 → NOT equal →
+jne @0x006C95BE TAKEN → the 0x006C9631 path is the CAND-4 path. The 0x006C95C0
+block (flag == 1 variant) is a recorded alternative (E12 — interpreted at callsite
+level; NOT the CAND-4 path).
+
+RAW BYTES (body, 0x006C9570..0x006C966E = 0xFF bytes):
+6A FF 68 B1 56 A0 00 64 A1 00 00 00 00 50 51 53 56 57 A1 D0 D8 B9 00 33 C4 50 8D 44 24 14 64 A3 00 00 00 00 C7 44 24 10 00 00 00 00 8B 74 24 24 C7 06 00 00 00 00 8B 49 10 BB 01 00 00 00 38 5C 24 28 C7 44 24 1C 00 00 00 00 89 5C 24 10 75 71 8D 44 24 28 50 E8 96 E0 0E 00 8B 44 24 28 8B 0E 3B C8 89 5C 24 1C 8B F8 74 22 85 C9 74 11 83 41 04 FF 75 07 8B 11 8B 42 04 FF D0 8B 44 24 28 85 FF 89 3E 74 07 01 5F 04 8B 44 24 28 85 C0 C6 44 24 1C 00 74 15 83 40 04 FF 8B C8 83 C0 04 83 38 00 75 07 8B 11 8B 42 04 FF D0 8B C6 8B 4C 24 14 64 89 0D 00 00 00 00 59 5F 5E 5B 83 C4 10 C2 08 00 E8 7A E3 0E 00 8B 0E 8B F8 3B CF 74 DC 85 C9 74 0D 83 41 04 FF 75 07 8B 11 8B 42 04 FF D0 85 FF 89 3E 8B C6 74 C5 01 5F 04 8B 4C 24 14 64 89 0D 00 00 00 00 59 5F 5E 5B 83 C4 10 C2 08 00
+
+DISASSEMBLY (analyzed extent 0x006C9570..0x006C966C; two ret 8 exits):
+  0x006C9570..0x006C9593  SEH prologue (push -1; handler 0xA056B1; fs:0; push ecx;
+                          push ebx/esi/edi; cookie; frame install)
+  0x006C9594  C7 44 24 10 00 00 00 00  (local init)
+  0x006C959C  8B 74 24 24         mov esi, [esp+0x24]        ; ESI = &slot (its arg1)
+  0x006C95A0  C7 06 00 00 00 00    mov dword [esi], 0         ; <<<<< SLOT = 0 FIRST (cleared
+                          ; before the lookup — the old A value in the slot is discarded here)
+  0x006C95A6  8B 49 10             mov ecx, [ecx+0x10]       ; receiver = [S+0x10] (field of S)
+  0x006C95A9  BB 01 00 00 00       mov ebx, 1
+  0x006C95AE  38 5C 24 28          cmp byte [esp+0x28], bl    ; flag byte vs 1
+  0x006C95B2  C7 44 24 1C 00 00 00 00  (SEH state)
+  0x006C95BA  89 5C 24 10          (SEH state)
+  0x006C95BE  75 71                jne 0x006C9631            ; flag != 1 → the CAND-4 path
+  ; ---- flag == 1 variant (NOT the CAND-4 path; E12) ----
+  0x006C95C0  8D 44 24 28          lea eax, [esp+0x28]       ; &flag slot (byref out)
+  0x006C95C4  50                   push eax
+  0x006C95C5  E8 96 E0 0E 00       call 0x007B7660            ; rel32 own: 0x006C95CA+0xEE096=0x007B7660
+                          ; E12: variant lookup, receiver [S+0x10], out via &flag-slot
+  0x006C95CA..0x006C961A  the variant swap/release blocks (RAW_VISIBLE_ONLY — the two
+                          `call eax` destroy dispatches @0x006C95E9/@0x006C9618 recorded
+                          WITHOUT interpretation, NOT_COUNTED_REASON: edge budget at the
+                          preregistered limit 12/12; the pattern was established at body #1
+                          sites E7/E8 — those sites' own interpretation stands, this run
+                          makes NO claim about these sites)
+  0x006C961A..0x006C962E  first exit epilogue (mov eax,esi; ret 8)
+  ; ---- CAND-4 path (flag != 1) ----
+  0x006C9631  E8 7A E3 0E 00       call 0x007B79B0            ; rel32 own: 0x006C9636+0xEE37A=0x007B79B0
+                          ; E11: THE P GETTER — thiscall, receiver [S+0x10] (ECX still
+                          ; [S+0x10] from 0x006C95A6), 0 stack args. Body #4 opened
+                          ; (PARTIAL): allocates a 4-byte object, initializes it via
+                          ; 0x007B7930, and makes a virtual call (receiver vtable slot 3)
+                          ; with it; window cut at 0x007B7A0F; its internal callsites are
+                          ; RAW_VISIBLE_ONLY; its return-path dataflow NOT adjudicated
+                          ; within bound.
+  0x006C9636  8B 0E                mov ecx, [esi]            ; current slot content (0)
+  0x006C9638  8B F8                mov edi, eax              ; EDI = the getter result (P)
+  0x006C963A  3B CF                cmp ecx, edi
+  0x006C963C  74 DC                je 0x006C961A             ; equal → no swap → return
+  0x006C963E  85 C9                test ecx, ecx
+  0x006C9640  74 0D                je 0x006C964F             ; old slot 0 → skip old release
+  0x006C9642  83 41 04 FF          add dword [ecx+4], -1      ; (old release — base = old slot value)
+  0x006C9646  75 07                jne 0x006C964F
+  0x006C9648  8B 11                mov edx, [ecx]
+  0x006C964A  8B 42 04             mov eax, [edx+4]
+  0x006C964D  FF D0                call eax                  ; RAW_VISIBLE_ONLY (NOT_COUNTED_REASON:
+                          ; edge budget at 12/12; the release-of-old block on the non-equal
+                          ; path — pattern NOT adjudicated for THIS site by this run;
+                          ; NOT executed on the CAND-4 first-install path because the slot
+                          ; was cleared to 0 at 0x006C95A0)
+  0x006C964F  85 FF                test edi, edi
+  0x006C9651  89 3E                mov [esi], edi             ; <<<<< SLOT = P — the swap-in of
+                          ; the getter result (the value that reaches [R+4] via the ctor)
+  0x006C9653  8B C6                mov eax, esi              ; return value = &slot (ESI)
+  0x006C9655  74 C5                je 0x006C961C             ; P == 0 → exit without addref
+  0x006C9657  01 5F 04             add dword [edi+4], ebx    ; <<<<< [P+4] += 1 — ADDREF of the
+                          ; swapped-in P (ebx = 1; the same 01 5F 04 instruction form as the
+                          ; prior-canon installer incref pin @0x006C67E7)
+  0x006C965A..0x006C966C  second exit epilogue (ret 8)
+
+EXTENT: 0x006C9570..0x006C966E — RESOLVED (two ret 8 exits @0x006C962E/@0x006C966C;
+CC padding @0x006C966F; aligned next entry @0x006C9670).
+
+SEMANTICS (measured, this run): a smart-pointer SETTER for the pump's arg1 slot:
+  1. slot = 0 (pre-clear);
+  2. (CAND-4 path, flag != 1) P = FUN_007B79B0([S+0x10]);
+  3. if old != new: release-of-old block (RAW-visible on this path; skipped when old==0);
+  4. slot = P; addref [P+4] (when P != 0);
+  5. return &slot.
+RETURN VALUE: &slot (ESI) — RESOLVED (the pump ignores it: no mov after the call;
+the pump instead re-reads the slot at 0x006C9769).

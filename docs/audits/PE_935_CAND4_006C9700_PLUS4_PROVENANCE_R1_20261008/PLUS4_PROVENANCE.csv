@@ -1,0 +1,20 @@
+# PLUS4_PROVENANCE — PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008
+# The provenance of the value later read as [R+4] (the installer's T read @0x006C67BE:
+# 8B 78 04, with the incref [T+4] @0x006C67E7). Writer unit = unique static assignment
+# site + destination-base interpretation. Budget: MAX_NEW_PLUS4_WRITERS_TRACED = 4; used = 2.
+# First initialization and later overwrite reported SEPARATELY. NO global writer census:
+# closure outside the opened creation/return chain = NOT_CHECKED (unknown).
+ROW_ID,KIND,ASSIGNMENT_SITE,DESTINATION_BASE_INTERPRETATION,VALUE_EXPRESSION,FIRST_INIT_OR_OVERWRITE,PATH_CONDITION,EVIDENCE,STATUS
+PW-1,direct writer of [R+4],FUN_006E8F70 @0x006E8FA5 (89 46 04 mov [esi+4],eax),[esi+4] = R+4 (esi = the ctor this = the new(0x10) object = R),value = ctor arg2 = P (the pump's arg1 slot content at the call; slot previously set by FUN_006C9570),FIRST INITIALIZATION (the object's construction; with the companion addref [P+4]+=1 @0x006E8FAF when P != 0),PATH_B of FUN_006C9700 (S != 0; slot != 0; alloc OK),01_RAW/FUN_006E8F70_CTOR_R.txt; 01_RAW/PINS_AND_REL32.txt,CONFIRMED (byte-measured store + addref; the only write to base R+4 encountered in the opened chain)
+PW-2,upstream producer of the VALUE stored at [R+4] (writer of the pump's arg1 slot),FUN_006C9570 @0x006C9651 (89 3E mov [esi],edi) with the pre-clear @0x006C95A0 (C7 06 00 00 00 00),[esi] = the pump's arg1 slot (byref out-local of FUN_006C9570; the very slot whose content the pump passes as ctor arg2),value = P = the return value of FUN_007B79B0 (receiver = [S+0x10]); with the addref [P+4]+=1 @0x006C9657,VALUE-ORIGIN (this assignment produces the value that PW-1 stores; the slot pre-clear @0x006C95A0 discards the original A id),the CAND-4 flag path (arg4 = 0; cmp byte [esp+0x28],1 -> jne @0x006C95BE taken; old slot == 0 so the release-of-old block is skipped),01_RAW/FUN_006C9570_SLOT_SETTER.txt,CONFIRMED (byte-measured swap-in + addref)
+PW-3,deeper origin of P (NOT a writer of [R+4]),FUN_007B79B0 return path,NOT an assignment site — the return value origin inside FUN_007B79B0 (its EAX at its terminal ret),UNKNOWN_WITHIN_BOUND (the body's visible head allocates a 4-byte object via the 0x0095D3C4 call and dispatches a receiver vtable slot 3 call; the return-path dataflow past the 0x007B7A0F window cut is NOT decoded),NOT APPLICABLE (beyond the boundary),N/A — STOP_BEFORE_EXCEED honored (edge budget exhausted at the preregistered 12/12; interpreting the internal callsites' result flows would be NEW edge units 13+),01_RAW/FUN_007B79B0_P_GETTER_PARTIAL.txt,NOT_ESTABLISHED_WITHIN_BOUND (deeper origin of P UNKNOWN; body #4 extent PARTIAL)
+# LATER OVERWRITE of [R+4]: NOT_ENCOUNTERED_WITHIN_BOUND — within the four opened bodies
+# (FUN_006C9700 / FUN_006E8F70 / FUN_006C9570 / FUN_007B79B0-head) there is NO other
+# assignment with destination base R (all other [x+4] writes in the chain are refcount
+# operations with destination base P: 01 48 04 @0x006E8FAF, 01 5F 04 @0x006C9657,
+# 83 40 04 FF @0x006C9790/@0x006C97F3, and the slot-setter's old-release block). This is
+# NOT a global closure claim: writers outside the creation/return chain = NOT_CHECKED.
+# FIRST-INIT VALUE (the value prevailing at return/use): P = a heap object address with
+# the intrusive refcount protocol (refcount at [P+4]; destroy via P's vtable slot 1 at
+# zero count — the pump's release blocks @0x006C9790..A3 and @0x006C97F3..06; the
+# addrefs at 0x006E8FAF and 0x006C9657). P's class identity: NOT established in bound.
