@@ -1,0 +1,127 @@
+{
+  "RUN_ID": "PE_935_CAND4_CHILD_ROOT_NC1_SIB_DECODER_POST_AUDIT_CORRECTION_R1_20261007",
+  "RUN_CLASS": "RECORDS_AND_QC_MACHINERY_CORRECTION",
+  "purpose": "pre-correction state with explicit provenance separation (contract §14 / dispatch STEP 3): SOURCE_DESKTOP_MEASUREMENT (Desktop post-audit of 57ecf350 — transcribed, NOT an executor measurement) vs EXECUTOR_REPRODUCTION (this run's independent in-memory measurement of the OLD production checker)",
+  "SOURCE_DESKTOP_MEASUREMENT": {
+    "label": "SOURCE_DESKTOP_MEASUREMENT — transcribed from the Desktop post-audit (of 57ecf3506481e73ca27548ea02e4864904d9883a); this is Desktop's measurement, NOT this executor's",
+    "cited_file": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_935_CAND4_CORRECTION_DESKTOP_POST_AUDIT_57ECF350_20261007\\CONTROL_COUNTERCHECKS.json",
+    "cited_file_size_bytes": 46675,
+    "cited_file_sha256": "2288CB39E357343C4A404F83D6327E5A628547C467D28869A2C34237C0090C00",
+    "case": "sib_hidden_edi_write",
+    "EXPECTED": "FAIL",
+    "PRODUCTION_CHECKER": "PASS",
+    "INTERNAL_QC_CHECKER": "PASS",
+    "REFERENCE_EDI_WRITE": "0x0050A3E4",
+    "FALSE_PASS_REPRODUCED": "YES",
+    "transcribed_raw_fields": {
+      "expected": false,
+      "production.ok": true,
+      "independent_internal.ok": true,
+      "capstone_edi_writes_in_required_range": [
+        "0x50a3e4"
+      ]
+    },
+    "reference_decoder": {
+      "library": "capstone",
+      "version": "5.0.7"
+    }
+  },
+  "EXECUTOR_REPRODUCTION": {
+    "status": "PERFORMED",
+    "method": "OLD production checker imported READ-ONLY via importlib from the SOURCE_PACKAGE (docs/audits/PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_R1_20261007/03_SCRIPTS/ctrl4_exact_endpoint.py; module-level inert; run_and_write NEVER invoked; sys.dont_write_bytecode set before import and executed with python -B — no .pyc written into the READ-ONLY SOURCE_PACKAGE); its ACTUAL ctrl4_exact_endpoint executed on the same five in-memory buffers (byte-identical buffers — same SHA256s as the POST matrix)",
+    "old_checker_source_path": "docs/audits/PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_R1_20261007/03_SCRIPTS/ctrl4_exact_endpoint.py",
+    "old_checker_sha256": "FDB5F16E6F9A6352030DD2F4D9523E1CAA0AB924F2112DDEC787CC7B3A84A330",
+    "matrix": {
+      "REAL_RECORDED_CLEAN": {
+        "case": "the 0x42 published clean window (identical fixture to the SOURCE_PACKAGE checker)",
+        "mutants_synthetic_memory_only": true,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "9AC6A7529F1EB2F2424C424E6B3E3BD0BAB133C39CEC18FCC13ADCB02B349398",
+        "true_expected": "PASS",
+        "old_checker_result": "PASS",
+        "old_checker_detail": "PASS: P1 exact head mov edi,eax @0x0050A3B7 (8B F8); P2 no caller-side EDI write in (0x0050A3B7, 0x0050A3F6); P3 exact final child argument push edi @0x0050A3F6 (57); P4 exact join call endpoint call edx @0x0050A3F7 (FF D2) — all on verified decode boundaries",
+        "false_pass": false
+      },
+      "HISTORICAL_EDI_CLOBBER": {
+        "case": "SYNTHETIC in-memory mutant: 6 bytes @0x0050A3DD replaced with 8B 3D D0 D8 B9 00 (same 6-byte length — boundaries preserved)",
+        "mutants_synthetic_memory_only": true,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 3D D0 D8 B9 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "1EC7B30C763013AFCF24AF3063D278BFADE8BD088DB41EC8BB35CBCAC6E6847F",
+        "true_expected": "FAIL",
+        "old_checker_result": "FAIL",
+        "old_checker_detail": "P2 FAIL: caller-side EDI write @0x0050A3DD in the required range: 'mov edi, dword ptr [0x00b9d8d0]'",
+        "false_pass": false
+      },
+      "FINAL_PUSH_ESI": {
+        "case": "SYNTHETIC in-memory mutant @0x0050A3F6: 57 -> 56 (push edi -> push esi); the earlier push edi @0x0050A3D7 survives",
+        "mutants_synthetic_memory_only": true,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 56 FF D2",
+        "buffer_sha256": "230C6E389E8794552A4CEB7E1D5B74A73D1BB1B2205517F1346B5474E36909A1",
+        "true_expected": "FAIL",
+        "old_checker_result": "FAIL",
+        "old_checker_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: push esi [56])",
+        "false_pass": false
+      },
+      "FINAL_PUSH_NOP": {
+        "case": "SYNTHETIC in-memory mutant @0x0050A3F6: 57 -> 90 (push edi -> nop); the earlier push edi @0x0050A3D7 survives",
+        "mutants_synthetic_memory_only": true,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 90 FF D2",
+        "buffer_sha256": "6E0AAAEDD5C85617D9CD243A2420E92A177C134209755053BB3B6AA8F889BA03",
+        "true_expected": "FAIL",
+        "old_checker_result": "FAIL",
+        "old_checker_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+        "false_pass": false
+      },
+      "NC1_SIB_HIDDEN_EDI_WRITE": {
+        "case": "SYNTHETIC in-memory mutant: 12-byte span @0x0050A3DD..0x0050A3E8 replaced with 8B 8C 24 8C 00 00 E8 BF AA BB CC 90 (total window stays 0x42) — the Desktop NC1 counterexample",
+        "mutants_synthetic_memory_only": true,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8C 24 8C 00 00 E8 BF AA BB CC 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "257450DD78CAB115EBFAA951AE6EF55FE14874238BF4E3D9EA317A8AFB3F7DAC",
+        "true_expected": "FAIL",
+        "old_checker_result": "PASS",
+        "old_checker_detail": "PASS: P1 exact head mov edi,eax @0x0050A3B7 (8B F8); P2 no caller-side EDI write in (0x0050A3B7, 0x0050A3F6); P3 exact final child argument push edi @0x0050A3F6 (57); P4 exact join call endpoint call edx @0x0050A3F7 (FF D2) — all on verified decode boundaries",
+        "false_pass": true,
+        "old_decode_boundaries_at_replacement_span": [
+          {
+            "va": "0x0050A3DD",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esp + 0x8c24]",
+            "hex": "8B 8C 24 8C 00 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E3",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x-32f3b159",
+            "hex": "E8 BF AA BB CC",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E8",
+            "size": 1,
+            "mnemonic": "nop",
+            "operands": "",
+            "hex": "90",
+            "writes_edi": false
+          }
+        ],
+        "old_boundary_shift_note": "the OLD decoder omits the SIB byte: 8B 8C 24 8C 00 00 is mis-decoded as a 6-byte MOV (boundary 0x0050A3E3), E8 BF AA BB CC as a 5-byte CALL (boundary 0x0050A3E8), 90 as NOP — so the reference `mov edi, 0x90CCBBAA` @0x0050A3E4 (BF AA BB CC 90, an EDI write INSIDE the prohibited P2 range) is never decoded and the old checker FALSE-PASSES the buffer"
+      }
+    },
+    "expected_pre_correction_measurements": {
+      "REAL_RECORDED_CLEAN": "PASS",
+      "HISTORICAL_EDI_CLOBBER": "FAIL",
+      "FINAL_PUSH_ESI": "FAIL",
+      "FINAL_PUSH_NOP": "FAIL",
+      "NC1_SIB_HIDDEN_EDI_WRITE": "PASS (the false PASS)"
+    },
+    "nc1_false_pass_reproduced_by_old_checker": "YES",
+    "verdict": "OLD-CHECKER NC1 FALSE PASS REPRODUCED BY EXECUTOR (independent of the Desktop measurement): the OLD production checker PASSes the NC1_SIB_HIDDEN_EDI_WRITE buffer whose true expected verdict is FAIL"
+  },
+  "fixture_identity_old_vs_corrected": true,
+  "nc1_buffer_byte_identical_to_desktop_counterexample": true,
+  "exe_accessed": false,
+  "buffers_synthetic_in_memory_only": true
+}

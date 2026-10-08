@@ -1,0 +1,1199 @@
+{
+  "RUN_ID": "PE_935_CAND4_CHILD_ROOT_NC1_SIB_DECODER_POST_AUDIT_CORRECTION_R1_20261007",
+  "RUN_CLASS": "RECORDS_AND_QC_MACHINERY_CORRECTION",
+  "purpose": "corrected-production (POST) five-case matrix results produced by the ACTUAL corrected production checker (contract §7 / dispatch STEP 2)",
+  "production_checker": {
+    "script": "03_SCRIPTS/ctrl4_exact_endpoint_sibfixed.py",
+    "script_sha256": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+    "function": "ctrl4_exact_endpoint — EXECUTED via importlib import of ctrl4_exact_endpoint_sibfixed.py (the ACTUAL corrected production function; NOT a rewritten imitation)",
+    "successor_of": "docs/audits/PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_R1_20261007/03_SCRIPTS/ctrl4_exact_endpoint.py (READ-ONLY, SHA256 FDB5F16E6F9A6352030DD2F4D9523E1CAA0AB924F2112DDEC787CC7B3A84A330)",
+    "nc1_correction": "fail-closed SIB guard in EVERY memory-ModRM branch (0x8B/0x89/0x8D; 0x84; 0x83; 0xFF): if mod != 0b11 and rm == 0b100 -> ValueError('unsupported SIB form (mod=%02b rm=100) — FAIL CLOSED') BEFORE any displacement/length computation; the old length logic never runs for such forms; full SIB decoding NOT implemented (not required)",
+    "p1_p4_predicate_unchanged": true,
+    "fail_closed_decode_design_unchanged": true,
+    "fixture_identity_with_old_checker": true,
+    "exe_accessed": false,
+    "buffers_synthetic_in_memory_only": true
+  },
+  "nc1_matrix_post": {
+    "REAL_RECORDED_CLEAN": {
+      "case": "the 0x42 published clean window (identical fixture to the SOURCE_PACKAGE checker)",
+      "mutants_synthetic_memory_only": true,
+      "buffer_len_bytes": 66,
+      "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+      "buffer_sha256": "9AC6A7529F1EB2F2424C424E6B3E3BD0BAB133C39CEC18FCC13ADCB02B349398",
+      "expected": "PASS",
+      "expected_note": "the published 0x42 clean window bytes (SOURCE_PACKAGE 01_RAW/JOIN_WINDOW_50A3B7_REPIN.txt)",
+      "actual": "PASS",
+      "match": true,
+      "checker_detail": "PASS: P1 exact head mov edi,eax @0x0050A3B7 (8B F8); P2 no caller-side EDI write in (0x0050A3B7, 0x0050A3F6); P3 exact final child argument push edi @0x0050A3F6 (57); P4 exact join call endpoint call edx @0x0050A3F7 (FF D2) — all on verified decode boundaries",
+      "checker_script": "03_SCRIPTS/ctrl4_exact_endpoint_sibfixed.py",
+      "checker_script_sha256": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+      "decode_boundaries": {
+        "decode_status": "DECODED",
+        "instruction_count": 22,
+        "listing": [
+          {
+            "va": "0x0050A3B7",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "edi, eax",
+            "hex": "8B F8",
+            "writes_edi": true
+          },
+          {
+            "va": "0x0050A3B9",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x006c0f90",
+            "hex": "E8 D2 6B 1B 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3BE",
+            "size": 2,
+            "mnemonic": "test",
+            "operands": "al, al",
+            "hex": "84 C0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C0",
+            "size": 2,
+            "mnemonic": "je",
+            "operands": "0x0050a3c8",
+            "hex": "74 06",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C2",
+            "size": 4,
+            "mnemonic": "or",
+            "operands": "dword ptr [esi + 0x2c], 0x2",
+            "hex": "83 4E 2C 02",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C6",
+            "size": 2,
+            "mnemonic": "jmp",
+            "operands": "0x0050a3cc",
+            "hex": "EB 04",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C8",
+            "size": 4,
+            "mnemonic": "and",
+            "operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+            "hex": "83 66 2C FD",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CC",
+            "size": 3,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x20]",
+            "hex": "8B 4E 20",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CF",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x006c10b0",
+            "hex": "E8 DC 6C 1B 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D4",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "ecx, esi",
+            "hex": "8B CE",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D6",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "eax",
+            "hex": "50",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D7",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "edi",
+            "hex": "57",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D8",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x0050a1e0",
+            "hex": "E8 03 FE FF FF",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DD",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x8c]",
+            "hex": "8B 8E 8C 00 00 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E3",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "esi",
+            "hex": "56",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E4",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x005246e0",
+            "hex": "E8 F7 A2 01 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E9",
+            "size": 3,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x30]",
+            "hex": "8B 4E 30",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EC",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "eax, [ecx]",
+            "hex": "8B 01",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EE",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "edx, dword ptr [eax + 0xa4]",
+            "hex": "8B 90 A4 00 00 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F4",
+            "size": 2,
+            "mnemonic": "push",
+            "operands": "0",
+            "hex": "6A 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F6",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "edi",
+            "hex": "57",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F7",
+            "size": 2,
+            "mnemonic": "call",
+            "operands": "edx",
+            "hex": "FF D2",
+            "writes_edi": false
+          }
+        ],
+        "va_size_map": {
+          "0x0050A3B7": 2,
+          "0x0050A3B9": 5,
+          "0x0050A3BE": 2,
+          "0x0050A3C0": 2,
+          "0x0050A3C2": 4,
+          "0x0050A3C6": 2,
+          "0x0050A3C8": 4,
+          "0x0050A3CC": 3,
+          "0x0050A3CF": 5,
+          "0x0050A3D4": 2,
+          "0x0050A3D6": 1,
+          "0x0050A3D7": 1,
+          "0x0050A3D8": 5,
+          "0x0050A3DD": 6,
+          "0x0050A3E3": 1,
+          "0x0050A3E4": 5,
+          "0x0050A3E9": 3,
+          "0x0050A3EC": 2,
+          "0x0050A3EE": 6,
+          "0x0050A3F4": 2,
+          "0x0050A3F6": 1,
+          "0x0050A3F7": 2
+        }
+      }
+    },
+    "HISTORICAL_EDI_CLOBBER": {
+      "case": "SYNTHETIC in-memory mutant: 6 bytes @0x0050A3DD replaced with 8B 3D D0 D8 B9 00 (same 6-byte length — boundaries preserved)",
+      "mutants_synthetic_memory_only": true,
+      "buffer_len_bytes": 66,
+      "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 3D D0 D8 B9 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+      "buffer_sha256": "1EC7B30C763013AFCF24AF3063D278BFADE8BD088DB41EC8BB35CBCAC6E6847F",
+      "expected": "FAIL",
+      "expected_note": "clean window with 6 bytes @0x0050A3DD replaced by 8B 3D D0 D8 B9 00 (mov edi,[0xB9D8D0]) — the historical clobber case; P2",
+      "actual": "FAIL",
+      "match": true,
+      "checker_detail": "P2 FAIL: caller-side EDI write @0x0050A3DD in the required range: 'mov edi, dword ptr [0x00b9d8d0]'",
+      "checker_script": "03_SCRIPTS/ctrl4_exact_endpoint_sibfixed.py",
+      "checker_script_sha256": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+      "decode_boundaries": {
+        "decode_status": "DECODED",
+        "instruction_count": 22,
+        "listing": [
+          {
+            "va": "0x0050A3B7",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "edi, eax",
+            "hex": "8B F8",
+            "writes_edi": true
+          },
+          {
+            "va": "0x0050A3B9",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x006c0f90",
+            "hex": "E8 D2 6B 1B 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3BE",
+            "size": 2,
+            "mnemonic": "test",
+            "operands": "al, al",
+            "hex": "84 C0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C0",
+            "size": 2,
+            "mnemonic": "je",
+            "operands": "0x0050a3c8",
+            "hex": "74 06",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C2",
+            "size": 4,
+            "mnemonic": "or",
+            "operands": "dword ptr [esi + 0x2c], 0x2",
+            "hex": "83 4E 2C 02",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C6",
+            "size": 2,
+            "mnemonic": "jmp",
+            "operands": "0x0050a3cc",
+            "hex": "EB 04",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C8",
+            "size": 4,
+            "mnemonic": "and",
+            "operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+            "hex": "83 66 2C FD",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CC",
+            "size": 3,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x20]",
+            "hex": "8B 4E 20",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CF",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x006c10b0",
+            "hex": "E8 DC 6C 1B 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D4",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "ecx, esi",
+            "hex": "8B CE",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D6",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "eax",
+            "hex": "50",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D7",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "edi",
+            "hex": "57",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D8",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x0050a1e0",
+            "hex": "E8 03 FE FF FF",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DD",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "edi, dword ptr [0x00b9d8d0]",
+            "hex": "8B 3D D0 D8 B9 00",
+            "writes_edi": true
+          },
+          {
+            "va": "0x0050A3E3",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "esi",
+            "hex": "56",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E4",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x005246e0",
+            "hex": "E8 F7 A2 01 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E9",
+            "size": 3,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x30]",
+            "hex": "8B 4E 30",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EC",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "eax, [ecx]",
+            "hex": "8B 01",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EE",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "edx, dword ptr [eax + 0xa4]",
+            "hex": "8B 90 A4 00 00 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F4",
+            "size": 2,
+            "mnemonic": "push",
+            "operands": "0",
+            "hex": "6A 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F6",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "edi",
+            "hex": "57",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F7",
+            "size": 2,
+            "mnemonic": "call",
+            "operands": "edx",
+            "hex": "FF D2",
+            "writes_edi": false
+          }
+        ],
+        "va_size_map": {
+          "0x0050A3B7": 2,
+          "0x0050A3B9": 5,
+          "0x0050A3BE": 2,
+          "0x0050A3C0": 2,
+          "0x0050A3C2": 4,
+          "0x0050A3C6": 2,
+          "0x0050A3C8": 4,
+          "0x0050A3CC": 3,
+          "0x0050A3CF": 5,
+          "0x0050A3D4": 2,
+          "0x0050A3D6": 1,
+          "0x0050A3D7": 1,
+          "0x0050A3D8": 5,
+          "0x0050A3DD": 6,
+          "0x0050A3E3": 1,
+          "0x0050A3E4": 5,
+          "0x0050A3E9": 3,
+          "0x0050A3EC": 2,
+          "0x0050A3EE": 6,
+          "0x0050A3F4": 2,
+          "0x0050A3F6": 1,
+          "0x0050A3F7": 2
+        }
+      }
+    },
+    "FINAL_PUSH_ESI": {
+      "case": "SYNTHETIC in-memory mutant @0x0050A3F6: 57 -> 56 (push edi -> push esi); the earlier push edi @0x0050A3D7 survives",
+      "mutants_synthetic_memory_only": true,
+      "buffer_len_bytes": 66,
+      "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 56 FF D2",
+      "buffer_sha256": "230C6E389E8794552A4CEB7E1D5B74A73D1BB1B2205517F1346B5474E36909A1",
+      "expected": "FAIL",
+      "expected_note": "@0x0050A3F6: 57->56 (push edi -> push esi); P3",
+      "actual": "FAIL",
+      "match": true,
+      "checker_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: push esi [56])",
+      "checker_script": "03_SCRIPTS/ctrl4_exact_endpoint_sibfixed.py",
+      "checker_script_sha256": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+      "decode_boundaries": {
+        "decode_status": "DECODED",
+        "instruction_count": 22,
+        "listing": [
+          {
+            "va": "0x0050A3B7",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "edi, eax",
+            "hex": "8B F8",
+            "writes_edi": true
+          },
+          {
+            "va": "0x0050A3B9",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x006c0f90",
+            "hex": "E8 D2 6B 1B 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3BE",
+            "size": 2,
+            "mnemonic": "test",
+            "operands": "al, al",
+            "hex": "84 C0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C0",
+            "size": 2,
+            "mnemonic": "je",
+            "operands": "0x0050a3c8",
+            "hex": "74 06",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C2",
+            "size": 4,
+            "mnemonic": "or",
+            "operands": "dword ptr [esi + 0x2c], 0x2",
+            "hex": "83 4E 2C 02",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C6",
+            "size": 2,
+            "mnemonic": "jmp",
+            "operands": "0x0050a3cc",
+            "hex": "EB 04",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C8",
+            "size": 4,
+            "mnemonic": "and",
+            "operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+            "hex": "83 66 2C FD",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CC",
+            "size": 3,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x20]",
+            "hex": "8B 4E 20",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CF",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x006c10b0",
+            "hex": "E8 DC 6C 1B 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D4",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "ecx, esi",
+            "hex": "8B CE",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D6",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "eax",
+            "hex": "50",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D7",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "edi",
+            "hex": "57",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D8",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x0050a1e0",
+            "hex": "E8 03 FE FF FF",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DD",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x8c]",
+            "hex": "8B 8E 8C 00 00 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E3",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "esi",
+            "hex": "56",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E4",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x005246e0",
+            "hex": "E8 F7 A2 01 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E9",
+            "size": 3,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x30]",
+            "hex": "8B 4E 30",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EC",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "eax, [ecx]",
+            "hex": "8B 01",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EE",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "edx, dword ptr [eax + 0xa4]",
+            "hex": "8B 90 A4 00 00 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F4",
+            "size": 2,
+            "mnemonic": "push",
+            "operands": "0",
+            "hex": "6A 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F6",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "esi",
+            "hex": "56",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F7",
+            "size": 2,
+            "mnemonic": "call",
+            "operands": "edx",
+            "hex": "FF D2",
+            "writes_edi": false
+          }
+        ],
+        "va_size_map": {
+          "0x0050A3B7": 2,
+          "0x0050A3B9": 5,
+          "0x0050A3BE": 2,
+          "0x0050A3C0": 2,
+          "0x0050A3C2": 4,
+          "0x0050A3C6": 2,
+          "0x0050A3C8": 4,
+          "0x0050A3CC": 3,
+          "0x0050A3CF": 5,
+          "0x0050A3D4": 2,
+          "0x0050A3D6": 1,
+          "0x0050A3D7": 1,
+          "0x0050A3D8": 5,
+          "0x0050A3DD": 6,
+          "0x0050A3E3": 1,
+          "0x0050A3E4": 5,
+          "0x0050A3E9": 3,
+          "0x0050A3EC": 2,
+          "0x0050A3EE": 6,
+          "0x0050A3F4": 2,
+          "0x0050A3F6": 1,
+          "0x0050A3F7": 2
+        }
+      }
+    },
+    "FINAL_PUSH_NOP": {
+      "case": "SYNTHETIC in-memory mutant @0x0050A3F6: 57 -> 90 (push edi -> nop); the earlier push edi @0x0050A3D7 survives",
+      "mutants_synthetic_memory_only": true,
+      "buffer_len_bytes": 66,
+      "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 90 FF D2",
+      "buffer_sha256": "6E0AAAEDD5C85617D9CD243A2420E92A177C134209755053BB3B6AA8F889BA03",
+      "expected": "FAIL",
+      "expected_note": "@0x0050A3F6: 57->90 (push edi -> nop); P3",
+      "actual": "FAIL",
+      "match": true,
+      "checker_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+      "checker_script": "03_SCRIPTS/ctrl4_exact_endpoint_sibfixed.py",
+      "checker_script_sha256": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+      "decode_boundaries": {
+        "decode_status": "DECODED",
+        "instruction_count": 22,
+        "listing": [
+          {
+            "va": "0x0050A3B7",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "edi, eax",
+            "hex": "8B F8",
+            "writes_edi": true
+          },
+          {
+            "va": "0x0050A3B9",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x006c0f90",
+            "hex": "E8 D2 6B 1B 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3BE",
+            "size": 2,
+            "mnemonic": "test",
+            "operands": "al, al",
+            "hex": "84 C0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C0",
+            "size": 2,
+            "mnemonic": "je",
+            "operands": "0x0050a3c8",
+            "hex": "74 06",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C2",
+            "size": 4,
+            "mnemonic": "or",
+            "operands": "dword ptr [esi + 0x2c], 0x2",
+            "hex": "83 4E 2C 02",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C6",
+            "size": 2,
+            "mnemonic": "jmp",
+            "operands": "0x0050a3cc",
+            "hex": "EB 04",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C8",
+            "size": 4,
+            "mnemonic": "and",
+            "operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+            "hex": "83 66 2C FD",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CC",
+            "size": 3,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x20]",
+            "hex": "8B 4E 20",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CF",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x006c10b0",
+            "hex": "E8 DC 6C 1B 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D4",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "ecx, esi",
+            "hex": "8B CE",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D6",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "eax",
+            "hex": "50",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D7",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "edi",
+            "hex": "57",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D8",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x0050a1e0",
+            "hex": "E8 03 FE FF FF",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DD",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x8c]",
+            "hex": "8B 8E 8C 00 00 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E3",
+            "size": 1,
+            "mnemonic": "push",
+            "operands": "esi",
+            "hex": "56",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E4",
+            "size": 5,
+            "mnemonic": "call",
+            "operands": "0x005246e0",
+            "hex": "E8 F7 A2 01 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E9",
+            "size": 3,
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x30]",
+            "hex": "8B 4E 30",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EC",
+            "size": 2,
+            "mnemonic": "mov",
+            "operands": "eax, [ecx]",
+            "hex": "8B 01",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EE",
+            "size": 6,
+            "mnemonic": "mov",
+            "operands": "edx, dword ptr [eax + 0xa4]",
+            "hex": "8B 90 A4 00 00 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F4",
+            "size": 2,
+            "mnemonic": "push",
+            "operands": "0",
+            "hex": "6A 00",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F6",
+            "size": 1,
+            "mnemonic": "nop",
+            "operands": "",
+            "hex": "90",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F7",
+            "size": 2,
+            "mnemonic": "call",
+            "operands": "edx",
+            "hex": "FF D2",
+            "writes_edi": false
+          }
+        ],
+        "va_size_map": {
+          "0x0050A3B7": 2,
+          "0x0050A3B9": 5,
+          "0x0050A3BE": 2,
+          "0x0050A3C0": 2,
+          "0x0050A3C2": 4,
+          "0x0050A3C6": 2,
+          "0x0050A3C8": 4,
+          "0x0050A3CC": 3,
+          "0x0050A3CF": 5,
+          "0x0050A3D4": 2,
+          "0x0050A3D6": 1,
+          "0x0050A3D7": 1,
+          "0x0050A3D8": 5,
+          "0x0050A3DD": 6,
+          "0x0050A3E3": 1,
+          "0x0050A3E4": 5,
+          "0x0050A3E9": 3,
+          "0x0050A3EC": 2,
+          "0x0050A3EE": 6,
+          "0x0050A3F4": 2,
+          "0x0050A3F6": 1,
+          "0x0050A3F7": 2
+        }
+      }
+    },
+    "NC1_SIB_HIDDEN_EDI_WRITE": {
+      "case": "SYNTHETIC in-memory mutant: 12-byte span @0x0050A3DD..0x0050A3E8 replaced with 8B 8C 24 8C 00 00 E8 BF AA BB CC 90 (total window stays 0x42) — the Desktop NC1 counterexample",
+      "mutants_synthetic_memory_only": true,
+      "buffer_len_bytes": 66,
+      "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8C 24 8C 00 00 E8 BF AA BB CC 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+      "buffer_sha256": "257450DD78CAB115EBFAA951AE6EF55FE14874238BF4E3D9EA317A8AFB3F7DAC",
+      "expected": "FAIL",
+      "expected_note": "12 bytes @0x0050A3DD..0x0050A3E8 replaced by 8B 8C 24 8C 00 00 E8 BF AA BB CC 90; the SIB guard must reject the first instruction before length computation",
+      "actual": "FAIL",
+      "match": true,
+      "checker_detail": "window not boundary-decodable (unsupported SIB form (mod=10 rm=100) — FAIL CLOSED) — FAIL closed",
+      "checker_script": "03_SCRIPTS/ctrl4_exact_endpoint_sibfixed.py",
+      "checker_script_sha256": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+      "decode_boundaries": {
+        "decode_status": "REJECTED_FAIL_CLOSED",
+        "rejection": "ValueError: unsupported SIB form (mod=10 rm=100) — FAIL CLOSED",
+        "rejected_at_va": "0x0050A3DD",
+        "note": "decode aborted at the rejected instruction before any displacement/length was computed for it; no instruction at/after this VA was produced"
+      }
+    }
+  },
+  "nc1_guard_evidence": {
+    "prefix_before_span": {
+      "prefix_len_bytes": 38,
+      "prefix_decode_ok": true,
+      "prefix_decodes_identically_to_clean_prefix": true,
+      "prefix_last_instruction_end_va": "0x0050A3DD"
+    },
+    "full_buffer_decode": "ValueError (unsupported SIB form) — rejected at the FIRST instruction of the replacement span, before any displacement/length computation",
+    "rejected_at_va": "0x0050A3DD",
+    "six_byte_mov_impossible": "the corrected decode never treats 8B 8C 24 8C 00 00 as a 6-byte MOV — the guard raises before the old length logic could run; the reference 7-byte boundary set (0x0050A3DD: 8B 8C 24 8C 00 00 E8 / 0x0050A3E4: BF AA BB CC 90 mov edi,0x90CCBBAA) can no longer be boundary-shifted out of P2"
+  },
+  "clean_window_full_decode_listing": {
+    "provenance": "the published 0x42 clean window (SOURCE_PACKAGE 01_RAW/JOIN_WINDOW_50A3B7_REPIN.txt); decode by the ACTUAL corrected module",
+    "instruction_count": 22,
+    "listing": [
+      {
+        "va": "0x0050A3B7",
+        "size": 2,
+        "mnemonic": "mov",
+        "operands": "edi, eax",
+        "hex": "8B F8",
+        "writes_edi": true
+      },
+      {
+        "va": "0x0050A3B9",
+        "size": 5,
+        "mnemonic": "call",
+        "operands": "0x006c0f90",
+        "hex": "E8 D2 6B 1B 00",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3BE",
+        "size": 2,
+        "mnemonic": "test",
+        "operands": "al, al",
+        "hex": "84 C0",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3C0",
+        "size": 2,
+        "mnemonic": "je",
+        "operands": "0x0050a3c8",
+        "hex": "74 06",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3C2",
+        "size": 4,
+        "mnemonic": "or",
+        "operands": "dword ptr [esi + 0x2c], 0x2",
+        "hex": "83 4E 2C 02",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3C6",
+        "size": 2,
+        "mnemonic": "jmp",
+        "operands": "0x0050a3cc",
+        "hex": "EB 04",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3C8",
+        "size": 4,
+        "mnemonic": "and",
+        "operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+        "hex": "83 66 2C FD",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3CC",
+        "size": 3,
+        "mnemonic": "mov",
+        "operands": "ecx, dword ptr [esi + 0x20]",
+        "hex": "8B 4E 20",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3CF",
+        "size": 5,
+        "mnemonic": "call",
+        "operands": "0x006c10b0",
+        "hex": "E8 DC 6C 1B 00",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3D4",
+        "size": 2,
+        "mnemonic": "mov",
+        "operands": "ecx, esi",
+        "hex": "8B CE",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3D6",
+        "size": 1,
+        "mnemonic": "push",
+        "operands": "eax",
+        "hex": "50",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3D7",
+        "size": 1,
+        "mnemonic": "push",
+        "operands": "edi",
+        "hex": "57",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3D8",
+        "size": 5,
+        "mnemonic": "call",
+        "operands": "0x0050a1e0",
+        "hex": "E8 03 FE FF FF",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3DD",
+        "size": 6,
+        "mnemonic": "mov",
+        "operands": "ecx, dword ptr [esi + 0x8c]",
+        "hex": "8B 8E 8C 00 00 00",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3E3",
+        "size": 1,
+        "mnemonic": "push",
+        "operands": "esi",
+        "hex": "56",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3E4",
+        "size": 5,
+        "mnemonic": "call",
+        "operands": "0x005246e0",
+        "hex": "E8 F7 A2 01 00",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3E9",
+        "size": 3,
+        "mnemonic": "mov",
+        "operands": "ecx, dword ptr [esi + 0x30]",
+        "hex": "8B 4E 30",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3EC",
+        "size": 2,
+        "mnemonic": "mov",
+        "operands": "eax, [ecx]",
+        "hex": "8B 01",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3EE",
+        "size": 6,
+        "mnemonic": "mov",
+        "operands": "edx, dword ptr [eax + 0xa4]",
+        "hex": "8B 90 A4 00 00 00",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3F4",
+        "size": 2,
+        "mnemonic": "push",
+        "operands": "0",
+        "hex": "6A 00",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3F6",
+        "size": 1,
+        "mnemonic": "push",
+        "operands": "edi",
+        "hex": "57",
+        "writes_edi": false
+      },
+      {
+        "va": "0x0050A3F7",
+        "size": 2,
+        "mnemonic": "call",
+        "operands": "edx",
+        "hex": "FF D2",
+        "writes_edi": false
+      }
+    ],
+    "boundary_regression": {
+      "reference": "SOURCE_PACKAGE 03_SCRIPTS/FIXTURES.md F3 published clean-window map (22 instructions)",
+      "published_va_size_map": {
+        "0x0050A3B7": 2,
+        "0x0050A3B9": 5,
+        "0x0050A3BE": 2,
+        "0x0050A3C0": 2,
+        "0x0050A3C2": 4,
+        "0x0050A3C6": 2,
+        "0x0050A3C8": 4,
+        "0x0050A3CC": 3,
+        "0x0050A3CF": 5,
+        "0x0050A3D4": 2,
+        "0x0050A3D6": 1,
+        "0x0050A3D7": 1,
+        "0x0050A3D8": 5,
+        "0x0050A3DD": 6,
+        "0x0050A3E3": 1,
+        "0x0050A3E4": 5,
+        "0x0050A3E9": 3,
+        "0x0050A3EC": 2,
+        "0x0050A3EE": 6,
+        "0x0050A3F4": 2,
+        "0x0050A3F6": 1,
+        "0x0050A3F7": 2
+      },
+      "measured_va_size_map": {
+        "0x0050A3B7": 2,
+        "0x0050A3B9": 5,
+        "0x0050A3BE": 2,
+        "0x0050A3C0": 2,
+        "0x0050A3C2": 4,
+        "0x0050A3C6": 2,
+        "0x0050A3C8": 4,
+        "0x0050A3CC": 3,
+        "0x0050A3CF": 5,
+        "0x0050A3D4": 2,
+        "0x0050A3D6": 1,
+        "0x0050A3D7": 1,
+        "0x0050A3D8": 5,
+        "0x0050A3DD": 6,
+        "0x0050A3E3": 1,
+        "0x0050A3E4": 5,
+        "0x0050A3E9": 3,
+        "0x0050A3EC": 2,
+        "0x0050A3EE": 6,
+        "0x0050A3F4": 2,
+        "0x0050A3F6": 1,
+        "0x0050A3F7": 2
+      },
+      "va_sets_identical": true,
+      "sizes_identical": true,
+      "instruction_count": 22,
+      "total_bytes": 66,
+      "result": "PASS"
+    },
+    "note": "full decode listing of the clean window proving the NC1 SIB guard (and the P3 tooling cleanup) did NOT change any clean-window decode boundary: VA set and sizes are identical to the published map"
+  },
+  "P3_TOOLING_CLEANUP": {
+    "status": "PERFORMED",
+    "description": "grp1-imm8 (0x83 mod=01) operand text: the immediate is now read from opcode+3 (after the disp8 at opcode+2); the old code printed the disp byte as the immediate. Decoder-only edit; NO science status affected",
+    "length_regression": {
+      "83 4E 2C 02 size 4": true,
+      "83 66 2C FD size 4": true
+    },
+    "per_instruction": {
+      "0x0050A3C2": {
+        "bytes": "83 4E 2C 02",
+        "old_operands": "dword ptr [esi + 0x2c], 0x2c",
+        "old_size": 4,
+        "new_operands": "dword ptr [esi + 0x2c], 0x2",
+        "new_size": 4,
+        "length_unchanged": true
+      },
+      "0x0050A3C8": {
+        "bytes": "83 66 2C FD",
+        "old_operands": "dword ptr [esi + 0x2c], 0x2c",
+        "old_size": 4,
+        "new_operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+        "new_size": 4,
+        "length_unchanged": true
+      }
+    },
+    "clean_window_va_set_unchanged": true,
+    "result": "PASS"
+  },
+  "matrix_verdict": "PASS",
+  "verdict_semantics": "all five measured results equal the mandatory expectations (clean PASS; clobber/esi/nop/NC1 FAIL) of the corrected production checker. Strongest permitted claim (contract §8): CTRL4_BOUNDARY_VALIDATION = SUPPORTED_WITHIN_RECORDED_CLEAN_WINDOW_AND_REGISTERED_FALSIFIERS — NOT GENERAL_X86_DECODER_PROVEN. This is QC-machinery correction only; it creates no science and retracts no historical result"
+}
