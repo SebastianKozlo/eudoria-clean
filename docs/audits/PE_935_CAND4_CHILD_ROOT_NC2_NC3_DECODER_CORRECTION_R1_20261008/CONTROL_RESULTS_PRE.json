@@ -1,0 +1,1483 @@
+{
+  "RUN_ID": "PE_935_CAND4_CHILD_ROOT_NC2_NC3_DECODER_CORRECTION_R1_20261008",
+  "RUN_CLASS": "RECORDS_AND_QC_MACHINERY_CORRECTION",
+  "purpose": "PRE reproduction on the REAL HISTORICAL functions (dispatch STEP 3), separated from the Desktop measurements: the NC1-era production checker (sibfixed) and the NC1-era internal-QC checker (qc_ind_ctrl_sib_own) are AST-EXTRACTED (top level NEVER executed) and run on the SAME eight synthetic in-memory buffers; per-case results are measured, NEVER forced, and PRE_REPRODUCED flags are derived from the actuals",
+  "input_identities_remeasured_at_run_time": {
+    "contract": {
+      "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_935_NC2_NC3_CORRECTION_PROMPT_20261008\\OPENCODE_NC2_NC3_CORRECTION.md",
+      "size_bytes": 14069,
+      "size_pin": 14069,
+      "sha256": "3E0BDB58A0CDC1488DE9477A855CEC04D712D492E147CC92CDB3C021B5143B8F",
+      "sha256_pin": "3E0BDB58A0CDC1488DE9477A855CEC04D712D492E147CC92CDB3C021B5143B8F",
+      "match": true
+    },
+    "desktop_report": {
+      "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_935_NC1_DESKTOP_POST_AUDIT_91598A98_20261007\\REPORT.md",
+      "size_bytes": 11570,
+      "size_pin": 11570,
+      "sha256": "125C47CA195C5D2F782EA1DBCEA0BA1CA65B973CBABEBABDD4F78963C43E83B4",
+      "sha256_pin": "125C47CA195C5D2F782EA1DBCEA0BA1CA65B973CBABEBABDD4F78963C43E83B4",
+      "match": true
+    },
+    "desktop_control_counterchecks": {
+      "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_935_NC1_DESKTOP_POST_AUDIT_91598A98_20261007\\CONTROL_COUNTERCHECKS.json",
+      "size_bytes": 132471,
+      "size_pin": 132471,
+      "sha256": "AD8DC2052F714439497A277512944EF729F53BDC94B436CB20EE09FEE6BCC28D",
+      "sha256_pin": "AD8DC2052F714439497A277512944EF729F53BDC94B436CB20EE09FEE6BCC28D",
+      "match": true
+    },
+    "desktop_audit_checks": {
+      "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_935_NC1_DESKTOP_POST_AUDIT_91598A98_20261007\\AUDIT_CHECKS.json",
+      "size_bytes": 46417,
+      "size_pin": 46417,
+      "sha256": "593B03C3AB87FD274BE8C02E7196D60A961975C95631278C97A8271E528862B7",
+      "sha256_pin": "593B03C3AB87FD274BE8C02E7196D60A961975C95631278C97A8271E528862B7",
+      "match": true
+    },
+    "historical_production_sibfixed": {
+      "path": "docs/audits/PE_935_CAND4_CHILD_ROOT_NC1_SIB_DECODER_POST_AUDIT_CORRECTION_R1_20261007/03_SCRIPTS/ctrl4_exact_endpoint_sibfixed.py",
+      "size_bytes": 17740,
+      "size_pin": 17740,
+      "sha256": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+      "sha256_pin": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+      "match": true
+    },
+    "historical_internal_qc": {
+      "path": "docs/audits/PE_935_CAND4_CHILD_ROOT_NC1_SIB_DECODER_POST_AUDIT_CORRECTION_R1_20261007/00_CONTROL_INTERNAL_QC/qc_ind_ctrl_sib_own.py",
+      "size_bytes": 51943,
+      "size_pin": 51943,
+      "sha256": "529B61DB312AEC338221425B12F2D94DE2BE351B5C62F68DDBA6BF915B007B25",
+      "sha256_pin": "529B61DB312AEC338221425B12F2D94DE2BE351B5C62F68DDBA6BF915B007B25",
+      "match": true
+    },
+    "published_window_record": {
+      "path": "docs/audits/PE_935_CAND4_CHILD_ROOT_PROVENANCE_R1_20261007/01_RAW/JOIN_WINDOW_50A3B7_REPIN.txt",
+      "size_bytes": 4043,
+      "size_pin": 4043,
+      "sha256": "A0DEFAA16D6934FC307BD88210BCCA59B823C58FB57319A2C090F9ED59AD01E3",
+      "sha256_pin": "A0DEFAA16D6934FC307BD88210BCCA59B823C58FB57319A2C090F9ED59AD01E3",
+      "match": true
+    }
+  },
+  "METHOD_SAFE_AST_EXTRACTION": {
+    "description": "SAFE AST EXTRACTION: Python ast parses each historical script; ONLY the top-level nodes binding whitelisted names (FunctionDef / ClassDef / plain-Name Assign) are picked; every Call inside the picked nodes is statically censused against allowlists (allowed attribute methods: fromhex/from_bytes/join/get/hex; allowed builtins: sorted/len/range/int/bytes/bytearray/str/isinstance/enumerate; allowed name calls: whitelisted symbols themselves) — any open()/write()/exec()/import or other disallowed call aborts the extraction; the picked nodes are then compiled and executed in an isolated namespace. The historical top level is NEVER executed: the historical QC script's top level writes QC_RESULTS.json (executing it would corrupt the READ-ONLY package) and no historical writer of any kind is invoked.",
+    "historical_production_source": {
+      "path": "docs/audits/PE_935_CAND4_CHILD_ROOT_NC1_SIB_DECODER_POST_AUDIT_CORRECTION_R1_20261007/03_SCRIPTS/ctrl4_exact_endpoint_sibfixed.py",
+      "size_bytes": 17740,
+      "sha256": "44155437F20FA6DA9D6847A236F708C7F2A40F26BABE71424B21C325B4FB4405",
+      "extracted_symbols_in_source_order": [
+        "CLEAN_WINDOW_HEX",
+        "WIN_VA",
+        "HEAD_VA",
+        "FINAL_PUSH_VA",
+        "JOIN_CALL_VA",
+        "CLEAN_WINDOW",
+        "CLOBBER_VA",
+        "CLOBBER_BYTES",
+        "NC1_SIB_VA",
+        "NC1_SIB_SPAN_LEN",
+        "NC1_SIB_ORIGINAL",
+        "NC1_SIB_BYTES",
+        "make_clobber_mutant",
+        "make_final_arg_mutant",
+        "make_nc1_sib_mutant",
+        "REG",
+        "GRP1",
+        "Insn",
+        "_modrm",
+        "_reject_sib",
+        "decode",
+        "ctrl4_exact_endpoint"
+      ],
+      "extracted_node_count": 22,
+      "static_call_census": {
+        "attr:fromhex": 5,
+        "name:bytearray": 3,
+        "name:bytes": 3,
+        "name:len": 2,
+        "attr:join": 1,
+        "name:ValueError": 4,
+        "name:Insn": 1,
+        "name:_modrm": 4,
+        "name:_reject_sib": 4,
+        "attr:from_bytes": 4,
+        "attr:get": 3,
+        "name:sorted": 1,
+        "name:decode": 1,
+        "attr:hex": 3
+      },
+      "top_level_executed": false,
+      "historical_top_level_assert_skipped_note": "the module-level 'assert len(CLEAN_WINDOW) == 0x42' is NOT extracted; the harness asserts the 0x42 length itself on the extracted constant"
+    },
+    "historical_internal_qc_source": {
+      "path": "docs/audits/PE_935_CAND4_CHILD_ROOT_NC1_SIB_DECODER_POST_AUDIT_CORRECTION_R1_20261007/00_CONTROL_INTERNAL_QC/qc_ind_ctrl_sib_own.py",
+      "size_bytes": 51943,
+      "sha256": "529B61DB312AEC338221425B12F2D94DE2BE351B5C62F68DDBA6BF915B007B25",
+      "extracted_symbols_in_source_order": [
+        "hexsp",
+        "WIN_VA",
+        "HEAD_VA",
+        "FINAL_PUSH_VA",
+        "JOIN_CALL_VA",
+        "CLOBBER_VA",
+        "NC1_SPAN_VA",
+        "NC1_SPAN_LEN",
+        "REG",
+        "GRP1",
+        "Insn",
+        "mrm_split",
+        "mem_dlen",
+        "my_decode",
+        "my_ctrl4",
+        "SIB_BATTERY"
+      ],
+      "extracted_node_count": 16,
+      "static_call_census": {
+        "attr:join": 1,
+        "name:ValueError": 6,
+        "name:len": 1,
+        "name:Insn": 1,
+        "name:mrm_split": 4,
+        "name:mem_dlen": 2,
+        "name:bytes": 1,
+        "attr:from_bytes": 3,
+        "attr:get": 3,
+        "name:sorted": 1,
+        "name:my_decode": 1,
+        "name:hexsp": 3
+      },
+      "top_level_executed": false
+    },
+    "isolated_namespaces": {
+      "historical_production": "fresh dict namespace; only the extracted defs/constants execute",
+      "historical_internal_qc": "fresh dict namespace; only the extracted defs/constants execute",
+      "historical_qc_writer_qc_results_json_invoked": false
+    }
+  },
+  "EXECUTOR_REPRODUCTION": {
+    "label": "EXECUTOR_REPRODUCTION — THIS run's own in-memory measurements of the REAL HISTORICAL functions (AST-extracted), on buffers built by the sibfixed builders themselves (cases 1-5) and by this harness's own 12-byte span builders (cases 6-8, byte-identical to the cited Desktop residual case buffers). Never a relabel of the Desktop measurement.",
+    "matrix_8_cases": {
+      "REAL_RECORDED_CLEAN": {
+        "buffer_len_bytes": 66,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "9AC6A7529F1EB2F2424C424E6B3E3BD0BAB133C39CEC18FCC13ADCB02B349398",
+        "expected": {
+          "production": "PASS",
+          "internal_qc": "PASS"
+        },
+        "actual": {
+          "production": "PASS",
+          "internal_qc": "PASS"
+        },
+        "production_detail": "PASS: P1 exact head mov edi,eax @0x0050A3B7 (8B F8); P2 no caller-side EDI write in (0x0050A3B7, 0x0050A3F6); P3 exact final child argument push edi @0x0050A3F6 (57); P4 exact join call endpoint call edx @0x0050A3F7 (FF D2) — all on verified decode boundaries",
+        "production_exception": null,
+        "internal_qc_detail": "PASS: P1 head mov edi,eax @0x0050A3B7 (8B F8) exact; P2 no caller-side EDI write inside (0x0050A3B7, 0x0050A3F6); P3 final push edi @0x0050A3F6 (57) exact; P4 join call edx @0x0050A3F7 (FF D2) exact — on MY OWN verified decode boundaries",
+        "internal_qc_exception": null,
+        "production_reproduced": true,
+        "internal_qc_reproduced": true
+      },
+      "HISTORICAL_EDI_CLOBBER": {
+        "buffer_len_bytes": 66,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 3D D0 D8 B9 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "1EC7B30C763013AFCF24AF3063D278BFADE8BD088DB41EC8BB35CBCAC6E6847F",
+        "expected": {
+          "production": "FAIL",
+          "internal_qc": "FAIL"
+        },
+        "actual": {
+          "production": "FAIL",
+          "internal_qc": "FAIL"
+        },
+        "production_detail": "P2 FAIL: caller-side EDI write @0x0050A3DD in the required range: 'mov edi, dword ptr [0x00b9d8d0]'",
+        "production_exception": null,
+        "internal_qc_detail": "P2 FAIL: caller-side EDI write @0x0050A3DD in the required range (mov edi, dword ptr [0x00b9d8d0])",
+        "internal_qc_exception": null,
+        "production_reproduced": true,
+        "internal_qc_reproduced": true
+      },
+      "FINAL_PUSH_ESI": {
+        "buffer_len_bytes": 66,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 56 FF D2",
+        "buffer_sha256": "230C6E389E8794552A4CEB7E1D5B74A73D1BB1B2205517F1346B5474E36909A1",
+        "expected": {
+          "production": "FAIL",
+          "internal_qc": "FAIL"
+        },
+        "actual": {
+          "production": "FAIL",
+          "internal_qc": "FAIL"
+        },
+        "production_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: push esi [56])",
+        "production_exception": null,
+        "internal_qc_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: push esi [56])",
+        "internal_qc_exception": null,
+        "production_reproduced": true,
+        "internal_qc_reproduced": true
+      },
+      "FINAL_PUSH_NOP": {
+        "buffer_len_bytes": 66,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8E 8C 00 00 00 56 E8 F7 A2 01 00 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 90 FF D2",
+        "buffer_sha256": "6E0AAAEDD5C85617D9CD243A2420E92A177C134209755053BB3B6AA8F889BA03",
+        "expected": {
+          "production": "FAIL",
+          "internal_qc": "FAIL"
+        },
+        "actual": {
+          "production": "FAIL",
+          "internal_qc": "FAIL"
+        },
+        "production_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+        "production_exception": null,
+        "internal_qc_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+        "internal_qc_exception": null,
+        "production_reproduced": true,
+        "internal_qc_reproduced": true
+      },
+      "NC1_SIB_HIDDEN_EDI_WRITE": {
+        "buffer_len_bytes": 66,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8B 8C 24 8C 00 00 E8 BF AA BB CC 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "257450DD78CAB115EBFAA951AE6EF55FE14874238BF4E3D9EA317A8AFB3F7DAC",
+        "expected": {
+          "production": "FAIL",
+          "internal_qc": "FAIL"
+        },
+        "actual": {
+          "production": "FAIL",
+          "internal_qc": "FAIL"
+        },
+        "production_detail": "window not boundary-decodable (unsupported SIB form (mod=10 rm=100) — FAIL CLOSED) — FAIL closed",
+        "production_exception": null,
+        "internal_qc_detail": "window not boundary-decodable (SIB memory form rejected fail-closed (mod=10, rm=100) before any displacement/length computation — NC1 guard) — FAIL closed",
+        "internal_qc_exception": null,
+        "production_reproduced": true,
+        "internal_qc_reproduced": true
+      },
+      "NC2_NON_SIB_TEST_HIDDEN_EDI": {
+        "buffer_len_bytes": 66,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 84 06 BF AA BB CC E8 90 90 90 90 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "F4C14EA9037B54B5FF64A9D0733F134D17A273B701990D65ED7D93DBA2EA9CA9",
+        "expected": {
+          "production": "PASS",
+          "internal_qc": "FAIL"
+        },
+        "actual": {
+          "production": "PASS",
+          "internal_qc": "FAIL"
+        },
+        "production_detail": "PASS: P1 exact head mov edi,eax @0x0050A3B7 (8B F8); P2 no caller-side EDI write in (0x0050A3B7, 0x0050A3F6); P3 exact final child argument push edi @0x0050A3F6 (57); P4 exact join call endpoint call edx @0x0050A3F7 (FF D2) — all on verified decode boundaries",
+        "production_exception": null,
+        "internal_qc_detail": "window not boundary-decodable (uncovered test memory form (mod=00) — fail-closed) — FAIL closed",
+        "internal_qc_exception": null,
+        "production_reproduced": true,
+        "internal_qc_reproduced": true
+      },
+      "NC3_INVALID_FF_FAR_CALL_REGISTER": {
+        "buffer_len_bytes": 66,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF FF D8 90 90 90 90 90 90 90 90 90 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "270F2EE5924501DB7DE0D45F146FE14FAE062A1D0D2B334B2B972CAB8ADF33A3",
+        "expected": {
+          "production": "FAIL",
+          "internal_qc": "PASS"
+        },
+        "actual": {
+          "production": "FAIL",
+          "internal_qc": "PASS"
+        },
+        "production_detail": "window not boundary-decodable (uncovered FF /3 mod=11) — FAIL closed",
+        "production_exception": null,
+        "internal_qc_detail": "PASS: P1 head mov edi,eax @0x0050A3B7 (8B F8) exact; P2 no caller-side EDI write inside (0x0050A3B7, 0x0050A3F6); P3 final push edi @0x0050A3F6 (57) exact; P4 join call edx @0x0050A3F7 (FF D2) exact — on MY OWN verified decode boundaries",
+        "internal_qc_exception": null,
+        "production_reproduced": true,
+        "internal_qc_reproduced": true
+      },
+      "NC3_INVALID_LEA_REGISTER": {
+        "buffer_len_bytes": 66,
+        "buffer_hex": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8D C0 90 90 90 90 90 90 90 90 90 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "buffer_sha256": "978E5977312AE00B11C288E25CBF2085E20E4781507767F6F1452C7E5C2D5CAB",
+        "expected": {
+          "production": "ERROR:TypeError",
+          "internal_qc": "PASS"
+        },
+        "actual": {
+          "production": "ERROR:TypeError",
+          "internal_qc": "PASS"
+        },
+        "production_detail": "TypeError: unsupported format string passed to NoneType.__format__",
+        "production_exception": "TypeError",
+        "internal_qc_detail": "PASS: P1 head mov edi,eax @0x0050A3B7 (8B F8) exact; P2 no caller-side EDI write inside (0x0050A3B7, 0x0050A3F6); P3 final push edi @0x0050A3F6 (57) exact; P4 join call edx @0x0050A3F7 (FF D2) exact — on MY OWN verified decode boundaries",
+        "internal_qc_exception": null,
+        "production_reproduced": true,
+        "internal_qc_reproduced": true
+      }
+    },
+    "PRE_REPRODUCED": {
+      "per_case": {
+        "REAL_RECORDED_CLEAN": {
+          "production": true,
+          "internal_qc": true
+        },
+        "HISTORICAL_EDI_CLOBBER": {
+          "production": true,
+          "internal_qc": true
+        },
+        "FINAL_PUSH_ESI": {
+          "production": true,
+          "internal_qc": true
+        },
+        "FINAL_PUSH_NOP": {
+          "production": true,
+          "internal_qc": true
+        },
+        "NC1_SIB_HIDDEN_EDI_WRITE": {
+          "production": true,
+          "internal_qc": true
+        },
+        "NC2_NON_SIB_TEST_HIDDEN_EDI": {
+          "production": true,
+          "internal_qc": true
+        },
+        "NC3_INVALID_FF_FAR_CALL_REGISTER": {
+          "production": true,
+          "internal_qc": true
+        },
+        "NC3_INVALID_LEA_REGISTER": {
+          "production": true,
+          "internal_qc": true
+        }
+      },
+      "all_cases_production_and_internal_qc": true,
+      "note": "PRE_REPRODUCED=YES requires every per-case actual to equal the contract-expected historical behavior (incl. the historical NC2 production false-PASS, the historical NC3 LEA production TypeError captured as ERROR:TypeError — never as FAIL — and the historical QC /3-acceptance PASSes). Actuals differing from expectation are shown per case; the flags are derived, never forced."
+    },
+    "historical_defect_confirmation": {
+      "NC2_memory_TEST_false_pass": "historical production PASSes NC2_NON_SIB_TEST_HIDDEN_EDI (the false pass: 84 06 mis-lengthened to 6 bytes hides the true mov edi,0xE8CCBBAA @0x0050A3DF EDI write inside P2) while the historical QC correctly FAILs it (its 0x84 branch rejects every memory TEST form)",
+      "NC3_FF_D8_divergence": "historical production FAILs FF D8 (FF branch accepts only /2 mod=11) while the historical QC PASSes it (its erroneous /3-acceptance branch decodes FF D8 as a harmless push — the NC3-A defect, corrected in the QC phase, not in this executor's scope)",
+      "NC3_LEA_TypeError": "historical production ERRORS with TypeError (NoneType operand formatting crash escapes the (ValueError, IndexError) catch) while the historical QC PASSes it (its mod=11 LEA formats 'eax, eax' as a harmless instruction)"
+    }
+  },
+  "SOURCE_DESKTOP_MEASUREMENT": {
+    "label": "SOURCE_DESKTOP_MEASUREMENT — transcribed VERBATIM from the Desktop post-audit of 91598a98 (CONTROL_COUNTERCHECKS.json residual_tests); this is the DESKTOP's measurement, cited as reference, NEVER relabeled as this executor's own",
+    "cited_file": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_935_NC1_DESKTOP_POST_AUDIT_91598A98_20261007\\CONTROL_COUNTERCHECKS.json",
+    "cited_file_size_bytes": 132471,
+    "cited_file_sha256": "AD8DC2052F714439497A277512944EF729F53BDC94B436CB20EE09FEE6BCC28D",
+    "residual_tests": {
+      "NON_SIB_TEST_HIDDEN_EDI": {
+        "buffer": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 84 06 BF AA BB CC E8 90 90 90 90 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "production": {
+          "ok": true,
+          "detail": "PASS: P1 exact head mov edi,eax @0x0050A3B7 (8B F8); P2 no caller-side EDI write in (0x0050A3B7, 0x0050A3F6); P3 exact final child argument push edi @0x0050A3F6 (57); P4 exact join call endpoint call edx @0x0050A3F7 (FF D2) — all on verified decode boundaries"
+        },
+        "independent_internal": {
+          "ok": false,
+          "detail": "window not boundary-decodable (uncovered test memory form (mod=00) — fail-closed) — FAIL closed"
+        },
+        "reference": {
+          "library": "capstone",
+          "version": "5.0.7",
+          "decoded_bytes": 66,
+          "edi_writes_in_required_interval": [
+            "0x0050A3DF"
+          ],
+          "listing": [
+            {
+              "va": "0x0050A3B7",
+              "size": 2,
+              "bytes": "8B F8",
+              "mnemonic": "mov",
+              "operands": "edi, eax"
+            },
+            {
+              "va": "0x0050A3B9",
+              "size": 5,
+              "bytes": "E8 D2 6B 1B 00",
+              "mnemonic": "call",
+              "operands": "0x6c0f90"
+            },
+            {
+              "va": "0x0050A3BE",
+              "size": 2,
+              "bytes": "84 C0",
+              "mnemonic": "test",
+              "operands": "al, al"
+            },
+            {
+              "va": "0x0050A3C0",
+              "size": 2,
+              "bytes": "74 06",
+              "mnemonic": "je",
+              "operands": "0x50a3c8"
+            },
+            {
+              "va": "0x0050A3C2",
+              "size": 4,
+              "bytes": "83 4E 2C 02",
+              "mnemonic": "or",
+              "operands": "dword ptr [esi + 0x2c], 2"
+            },
+            {
+              "va": "0x0050A3C6",
+              "size": 2,
+              "bytes": "EB 04",
+              "mnemonic": "jmp",
+              "operands": "0x50a3cc"
+            },
+            {
+              "va": "0x0050A3C8",
+              "size": 4,
+              "bytes": "83 66 2C FD",
+              "mnemonic": "and",
+              "operands": "dword ptr [esi + 0x2c], 0xfffffffd"
+            },
+            {
+              "va": "0x0050A3CC",
+              "size": 3,
+              "bytes": "8B 4E 20",
+              "mnemonic": "mov",
+              "operands": "ecx, dword ptr [esi + 0x20]"
+            },
+            {
+              "va": "0x0050A3CF",
+              "size": 5,
+              "bytes": "E8 DC 6C 1B 00",
+              "mnemonic": "call",
+              "operands": "0x6c10b0"
+            },
+            {
+              "va": "0x0050A3D4",
+              "size": 2,
+              "bytes": "8B CE",
+              "mnemonic": "mov",
+              "operands": "ecx, esi"
+            },
+            {
+              "va": "0x0050A3D6",
+              "size": 1,
+              "bytes": "50",
+              "mnemonic": "push",
+              "operands": "eax"
+            },
+            {
+              "va": "0x0050A3D7",
+              "size": 1,
+              "bytes": "57",
+              "mnemonic": "push",
+              "operands": "edi"
+            },
+            {
+              "va": "0x0050A3D8",
+              "size": 5,
+              "bytes": "E8 03 FE FF FF",
+              "mnemonic": "call",
+              "operands": "0x50a1e0"
+            },
+            {
+              "va": "0x0050A3DD",
+              "size": 2,
+              "bytes": "84 06",
+              "mnemonic": "test",
+              "operands": "byte ptr [esi], al"
+            },
+            {
+              "va": "0x0050A3DF",
+              "size": 5,
+              "bytes": "BF AA BB CC E8",
+              "mnemonic": "mov",
+              "operands": "edi, 0xe8ccbbaa"
+            },
+            {
+              "va": "0x0050A3E4",
+              "size": 1,
+              "bytes": "90",
+              "mnemonic": "nop",
+              "operands": ""
+            },
+            {
+              "va": "0x0050A3E5",
+              "size": 1,
+              "bytes": "90",
+              "mnemonic": "nop",
+              "operands": ""
+            },
+            {
+              "va": "0x0050A3E6",
+              "size": 1,
+              "bytes": "90",
+              "mnemonic": "nop",
+              "operands": ""
+            },
+            {
+              "va": "0x0050A3E7",
+              "size": 1,
+              "bytes": "90",
+              "mnemonic": "nop",
+              "operands": ""
+            },
+            {
+              "va": "0x0050A3E8",
+              "size": 1,
+              "bytes": "90",
+              "mnemonic": "nop",
+              "operands": ""
+            },
+            {
+              "va": "0x0050A3E9",
+              "size": 3,
+              "bytes": "8B 4E 30",
+              "mnemonic": "mov",
+              "operands": "ecx, dword ptr [esi + 0x30]"
+            },
+            {
+              "va": "0x0050A3EC",
+              "size": 2,
+              "bytes": "8B 01",
+              "mnemonic": "mov",
+              "operands": "eax, dword ptr [ecx]"
+            },
+            {
+              "va": "0x0050A3EE",
+              "size": 6,
+              "bytes": "8B 90 A4 00 00 00",
+              "mnemonic": "mov",
+              "operands": "edx, dword ptr [eax + 0xa4]"
+            },
+            {
+              "va": "0x0050A3F4",
+              "size": 2,
+              "bytes": "6A 00",
+              "mnemonic": "push",
+              "operands": "0"
+            },
+            {
+              "va": "0x0050A3F6",
+              "size": 1,
+              "bytes": "57",
+              "mnemonic": "push",
+              "operands": "edi"
+            },
+            {
+              "va": "0x0050A3F7",
+              "size": 2,
+              "bytes": "FF D2",
+              "mnemonic": "call",
+              "operands": "edx"
+            }
+          ]
+        },
+        "production_decode": [
+          {
+            "va": "0x0050A3B7",
+            "size": 2,
+            "bytes": "8B F8",
+            "mnemonic": "mov",
+            "operands": "edi, eax",
+            "writes_edi": true
+          },
+          {
+            "va": "0x0050A3B9",
+            "size": 5,
+            "bytes": "E8 D2 6B 1B 00",
+            "mnemonic": "call",
+            "operands": "0x006c0f90",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3BE",
+            "size": 2,
+            "bytes": "84 C0",
+            "mnemonic": "test",
+            "operands": "al, al",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C0",
+            "size": 2,
+            "bytes": "74 06",
+            "mnemonic": "je",
+            "operands": "0x0050a3c8",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C2",
+            "size": 4,
+            "bytes": "83 4E 2C 02",
+            "mnemonic": "or",
+            "operands": "dword ptr [esi + 0x2c], 0x2",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C6",
+            "size": 2,
+            "bytes": "EB 04",
+            "mnemonic": "jmp",
+            "operands": "0x0050a3cc",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C8",
+            "size": 4,
+            "bytes": "83 66 2C FD",
+            "mnemonic": "and",
+            "operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CC",
+            "size": 3,
+            "bytes": "8B 4E 20",
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x20]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CF",
+            "size": 5,
+            "bytes": "E8 DC 6C 1B 00",
+            "mnemonic": "call",
+            "operands": "0x006c10b0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D4",
+            "size": 2,
+            "bytes": "8B CE",
+            "mnemonic": "mov",
+            "operands": "ecx, esi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D6",
+            "size": 1,
+            "bytes": "50",
+            "mnemonic": "push",
+            "operands": "eax",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D7",
+            "size": 1,
+            "bytes": "57",
+            "mnemonic": "push",
+            "operands": "edi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D8",
+            "size": 5,
+            "bytes": "E8 03 FE FF FF",
+            "mnemonic": "call",
+            "operands": "0x0050a1e0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DD",
+            "size": 6,
+            "bytes": "84 06 BF AA BB CC",
+            "mnemonic": "test",
+            "operands": "byte ptr [...], al",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E3",
+            "size": 5,
+            "bytes": "E8 90 90 90 90",
+            "mnemonic": "call",
+            "operands": "0x-6f1ecb88",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E8",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E9",
+            "size": 3,
+            "bytes": "8B 4E 30",
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x30]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EC",
+            "size": 2,
+            "bytes": "8B 01",
+            "mnemonic": "mov",
+            "operands": "eax, [ecx]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EE",
+            "size": 6,
+            "bytes": "8B 90 A4 00 00 00",
+            "mnemonic": "mov",
+            "operands": "edx, dword ptr [eax + 0xa4]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F4",
+            "size": 2,
+            "bytes": "6A 00",
+            "mnemonic": "push",
+            "operands": "0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F6",
+            "size": 1,
+            "bytes": "57",
+            "mnemonic": "push",
+            "operands": "edi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F7",
+            "size": 2,
+            "bytes": "FF D2",
+            "mnemonic": "call",
+            "operands": "edx",
+            "writes_edi": false
+          }
+        ],
+        "internal_decode": {
+          "exception": "ValueError: uncovered test memory form (mod=00) — fail-closed"
+        }
+      },
+      "INVALID_FF_FAR_CALL_REGISTER": {
+        "buffer": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF FF D8 90 90 90 90 90 90 90 90 90 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "production": {
+          "ok": false,
+          "detail": "window not boundary-decodable (uncovered FF /3 mod=11) — FAIL closed"
+        },
+        "independent_internal": {
+          "ok": true,
+          "detail": "PASS: P1 head mov edi,eax @0x0050A3B7 (8B F8) exact; P2 no caller-side EDI write inside (0x0050A3B7, 0x0050A3F6); P3 final push edi @0x0050A3F6 (57) exact; P4 join call edx @0x0050A3F7 (FF D2) exact — on MY OWN verified decode boundaries"
+        },
+        "reference": {
+          "library": "capstone",
+          "version": "5.0.7",
+          "decoded_bytes": 38,
+          "edi_writes_in_required_interval": [],
+          "listing": [
+            {
+              "va": "0x0050A3B7",
+              "size": 2,
+              "bytes": "8B F8",
+              "mnemonic": "mov",
+              "operands": "edi, eax"
+            },
+            {
+              "va": "0x0050A3B9",
+              "size": 5,
+              "bytes": "E8 D2 6B 1B 00",
+              "mnemonic": "call",
+              "operands": "0x6c0f90"
+            },
+            {
+              "va": "0x0050A3BE",
+              "size": 2,
+              "bytes": "84 C0",
+              "mnemonic": "test",
+              "operands": "al, al"
+            },
+            {
+              "va": "0x0050A3C0",
+              "size": 2,
+              "bytes": "74 06",
+              "mnemonic": "je",
+              "operands": "0x50a3c8"
+            },
+            {
+              "va": "0x0050A3C2",
+              "size": 4,
+              "bytes": "83 4E 2C 02",
+              "mnemonic": "or",
+              "operands": "dword ptr [esi + 0x2c], 2"
+            },
+            {
+              "va": "0x0050A3C6",
+              "size": 2,
+              "bytes": "EB 04",
+              "mnemonic": "jmp",
+              "operands": "0x50a3cc"
+            },
+            {
+              "va": "0x0050A3C8",
+              "size": 4,
+              "bytes": "83 66 2C FD",
+              "mnemonic": "and",
+              "operands": "dword ptr [esi + 0x2c], 0xfffffffd"
+            },
+            {
+              "va": "0x0050A3CC",
+              "size": 3,
+              "bytes": "8B 4E 20",
+              "mnemonic": "mov",
+              "operands": "ecx, dword ptr [esi + 0x20]"
+            },
+            {
+              "va": "0x0050A3CF",
+              "size": 5,
+              "bytes": "E8 DC 6C 1B 00",
+              "mnemonic": "call",
+              "operands": "0x6c10b0"
+            },
+            {
+              "va": "0x0050A3D4",
+              "size": 2,
+              "bytes": "8B CE",
+              "mnemonic": "mov",
+              "operands": "ecx, esi"
+            },
+            {
+              "va": "0x0050A3D6",
+              "size": 1,
+              "bytes": "50",
+              "mnemonic": "push",
+              "operands": "eax"
+            },
+            {
+              "va": "0x0050A3D7",
+              "size": 1,
+              "bytes": "57",
+              "mnemonic": "push",
+              "operands": "edi"
+            },
+            {
+              "va": "0x0050A3D8",
+              "size": 5,
+              "bytes": "E8 03 FE FF FF",
+              "mnemonic": "call",
+              "operands": "0x50a1e0"
+            }
+          ]
+        },
+        "production_decode": {
+          "exception": "ValueError: uncovered FF /3 mod=11"
+        },
+        "internal_decode": [
+          {
+            "va": "0x0050A3B7",
+            "size": 2,
+            "bytes": "8B F8",
+            "mnemonic": "mov",
+            "operands": "edi, eax",
+            "writes_edi": true
+          },
+          {
+            "va": "0x0050A3B9",
+            "size": 5,
+            "bytes": "E8 D2 6B 1B 00",
+            "mnemonic": "call",
+            "operands": "0x006c0f90",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3BE",
+            "size": 2,
+            "bytes": "84 C0",
+            "mnemonic": "test",
+            "operands": "al, al",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C0",
+            "size": 2,
+            "bytes": "74 06",
+            "mnemonic": "je",
+            "operands": "0x0050a3c8",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C2",
+            "size": 4,
+            "bytes": "83 4E 2C 02",
+            "mnemonic": "or",
+            "operands": "dword ptr [esi + 0x2c], 0x2",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C6",
+            "size": 2,
+            "bytes": "EB 04",
+            "mnemonic": "jmp",
+            "operands": "0x0050a3cc",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C8",
+            "size": 4,
+            "bytes": "83 66 2C FD",
+            "mnemonic": "and",
+            "operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CC",
+            "size": 3,
+            "bytes": "8B 4E 20",
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x20]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CF",
+            "size": 5,
+            "bytes": "E8 DC 6C 1B 00",
+            "mnemonic": "call",
+            "operands": "0x006c10b0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D4",
+            "size": 2,
+            "bytes": "8B CE",
+            "mnemonic": "mov",
+            "operands": "ecx, esi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D6",
+            "size": 1,
+            "bytes": "50",
+            "mnemonic": "push",
+            "operands": "eax",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D7",
+            "size": 1,
+            "bytes": "57",
+            "mnemonic": "push",
+            "operands": "edi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D8",
+            "size": 5,
+            "bytes": "E8 03 FE FF FF",
+            "mnemonic": "call",
+            "operands": "0x0050a1e0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DD",
+            "size": 2,
+            "bytes": "FF D8",
+            "mnemonic": "push",
+            "operands": "eax",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DF",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E0",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E1",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E2",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E3",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E4",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E5",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E6",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E7",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E8",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E9",
+            "size": 3,
+            "bytes": "8B 4E 30",
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x30]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EC",
+            "size": 2,
+            "bytes": "8B 01",
+            "mnemonic": "mov",
+            "operands": "eax, dword ptr [ecx]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EE",
+            "size": 6,
+            "bytes": "8B 90 A4 00 00 00",
+            "mnemonic": "mov",
+            "operands": "edx, dword ptr [eax + 0xa4]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F4",
+            "size": 2,
+            "bytes": "6A 00",
+            "mnemonic": "push",
+            "operands": "0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F6",
+            "size": 1,
+            "bytes": "57",
+            "mnemonic": "push",
+            "operands": "edi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F7",
+            "size": 2,
+            "bytes": "FF D2",
+            "mnemonic": "call",
+            "operands": "edx",
+            "writes_edi": false
+          }
+        ]
+      },
+      "INVALID_LEA_REGISTER": {
+        "buffer": "8B F8 E8 D2 6B 1B 00 84 C0 74 06 83 4E 2C 02 EB 04 83 66 2C FD 8B 4E 20 E8 DC 6C 1B 00 8B CE 50 57 E8 03 FE FF FF 8D C0 90 90 90 90 90 90 90 90 90 90 8B 4E 30 8B 01 8B 90 A4 00 00 00 6A 00 57 FF D2",
+        "production": {
+          "ok": null,
+          "exception": "TypeError: unsupported format string passed to NoneType.__format__"
+        },
+        "independent_internal": {
+          "ok": true,
+          "detail": "PASS: P1 head mov edi,eax @0x0050A3B7 (8B F8) exact; P2 no caller-side EDI write inside (0x0050A3B7, 0x0050A3F6); P3 final push edi @0x0050A3F6 (57) exact; P4 join call edx @0x0050A3F7 (FF D2) exact — on MY OWN verified decode boundaries"
+        },
+        "reference": {
+          "library": "capstone",
+          "version": "5.0.7",
+          "decoded_bytes": 38,
+          "edi_writes_in_required_interval": [],
+          "listing": [
+            {
+              "va": "0x0050A3B7",
+              "size": 2,
+              "bytes": "8B F8",
+              "mnemonic": "mov",
+              "operands": "edi, eax"
+            },
+            {
+              "va": "0x0050A3B9",
+              "size": 5,
+              "bytes": "E8 D2 6B 1B 00",
+              "mnemonic": "call",
+              "operands": "0x6c0f90"
+            },
+            {
+              "va": "0x0050A3BE",
+              "size": 2,
+              "bytes": "84 C0",
+              "mnemonic": "test",
+              "operands": "al, al"
+            },
+            {
+              "va": "0x0050A3C0",
+              "size": 2,
+              "bytes": "74 06",
+              "mnemonic": "je",
+              "operands": "0x50a3c8"
+            },
+            {
+              "va": "0x0050A3C2",
+              "size": 4,
+              "bytes": "83 4E 2C 02",
+              "mnemonic": "or",
+              "operands": "dword ptr [esi + 0x2c], 2"
+            },
+            {
+              "va": "0x0050A3C6",
+              "size": 2,
+              "bytes": "EB 04",
+              "mnemonic": "jmp",
+              "operands": "0x50a3cc"
+            },
+            {
+              "va": "0x0050A3C8",
+              "size": 4,
+              "bytes": "83 66 2C FD",
+              "mnemonic": "and",
+              "operands": "dword ptr [esi + 0x2c], 0xfffffffd"
+            },
+            {
+              "va": "0x0050A3CC",
+              "size": 3,
+              "bytes": "8B 4E 20",
+              "mnemonic": "mov",
+              "operands": "ecx, dword ptr [esi + 0x20]"
+            },
+            {
+              "va": "0x0050A3CF",
+              "size": 5,
+              "bytes": "E8 DC 6C 1B 00",
+              "mnemonic": "call",
+              "operands": "0x6c10b0"
+            },
+            {
+              "va": "0x0050A3D4",
+              "size": 2,
+              "bytes": "8B CE",
+              "mnemonic": "mov",
+              "operands": "ecx, esi"
+            },
+            {
+              "va": "0x0050A3D6",
+              "size": 1,
+              "bytes": "50",
+              "mnemonic": "push",
+              "operands": "eax"
+            },
+            {
+              "va": "0x0050A3D7",
+              "size": 1,
+              "bytes": "57",
+              "mnemonic": "push",
+              "operands": "edi"
+            },
+            {
+              "va": "0x0050A3D8",
+              "size": 5,
+              "bytes": "E8 03 FE FF FF",
+              "mnemonic": "call",
+              "operands": "0x50a1e0"
+            }
+          ]
+        },
+        "production_decode": {
+          "exception": "TypeError: unsupported format string passed to NoneType.__format__"
+        },
+        "internal_decode": [
+          {
+            "va": "0x0050A3B7",
+            "size": 2,
+            "bytes": "8B F8",
+            "mnemonic": "mov",
+            "operands": "edi, eax",
+            "writes_edi": true
+          },
+          {
+            "va": "0x0050A3B9",
+            "size": 5,
+            "bytes": "E8 D2 6B 1B 00",
+            "mnemonic": "call",
+            "operands": "0x006c0f90",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3BE",
+            "size": 2,
+            "bytes": "84 C0",
+            "mnemonic": "test",
+            "operands": "al, al",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C0",
+            "size": 2,
+            "bytes": "74 06",
+            "mnemonic": "je",
+            "operands": "0x0050a3c8",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C2",
+            "size": 4,
+            "bytes": "83 4E 2C 02",
+            "mnemonic": "or",
+            "operands": "dword ptr [esi + 0x2c], 0x2",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C6",
+            "size": 2,
+            "bytes": "EB 04",
+            "mnemonic": "jmp",
+            "operands": "0x0050a3cc",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3C8",
+            "size": 4,
+            "bytes": "83 66 2C FD",
+            "mnemonic": "and",
+            "operands": "dword ptr [esi + 0x2c], 0xfffffffd",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CC",
+            "size": 3,
+            "bytes": "8B 4E 20",
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x20]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3CF",
+            "size": 5,
+            "bytes": "E8 DC 6C 1B 00",
+            "mnemonic": "call",
+            "operands": "0x006c10b0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D4",
+            "size": 2,
+            "bytes": "8B CE",
+            "mnemonic": "mov",
+            "operands": "ecx, esi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D6",
+            "size": 1,
+            "bytes": "50",
+            "mnemonic": "push",
+            "operands": "eax",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D7",
+            "size": 1,
+            "bytes": "57",
+            "mnemonic": "push",
+            "operands": "edi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3D8",
+            "size": 5,
+            "bytes": "E8 03 FE FF FF",
+            "mnemonic": "call",
+            "operands": "0x0050a1e0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DD",
+            "size": 2,
+            "bytes": "8D C0",
+            "mnemonic": "lea",
+            "operands": "eax, eax",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3DF",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E0",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E1",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E2",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E3",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E4",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E5",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E6",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E7",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E8",
+            "size": 1,
+            "bytes": "90",
+            "mnemonic": "nop",
+            "operands": "",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3E9",
+            "size": 3,
+            "bytes": "8B 4E 30",
+            "mnemonic": "mov",
+            "operands": "ecx, dword ptr [esi + 0x30]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EC",
+            "size": 2,
+            "bytes": "8B 01",
+            "mnemonic": "mov",
+            "operands": "eax, dword ptr [ecx]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3EE",
+            "size": 6,
+            "bytes": "8B 90 A4 00 00 00",
+            "mnemonic": "mov",
+            "operands": "edx, dword ptr [eax + 0xa4]",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F4",
+            "size": 2,
+            "bytes": "6A 00",
+            "mnemonic": "push",
+            "operands": "0",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F6",
+            "size": 1,
+            "bytes": "57",
+            "mnemonic": "push",
+            "operands": "edi",
+            "writes_edi": false
+          },
+          {
+            "va": "0x0050A3F7",
+            "size": 2,
+            "bytes": "FF D2",
+            "mnemonic": "call",
+            "operands": "edx",
+            "writes_edi": false
+          }
+        ]
+      }
+    },
+    "executor_buffer_identity_vs_cited_desktop_cases": {
+      "NC2_NON_SIB_TEST_HIDDEN_EDI": {
+        "desktop_case": "NON_SIB_TEST_HIDDEN_EDI",
+        "byte_identical_to_executor_buffer": true
+      },
+      "NC3_INVALID_FF_FAR_CALL_REGISTER": {
+        "desktop_case": "INVALID_FF_FAR_CALL_REGISTER",
+        "byte_identical_to_executor_buffer": true
+      },
+      "NC3_INVALID_LEA_REGISTER": {
+        "desktop_case": "INVALID_LEA_REGISTER",
+        "byte_identical_to_executor_buffer": true
+      }
+    },
+    "reference_decoder_cited": {
+      "library": "capstone",
+      "version": "5.0.7",
+      "note": "Desktop's independent reference decode; CITED, not re-measured by this run (nothing installed; no new Capstone measurement)"
+    }
+  },
+  "PROVENANCE_SEPARATION_NOTE": "SOURCE_DESKTOP_MEASUREMENT (Desktop's measurements, transcribed with citation) and EXECUTOR_REPRODUCTION (this run's AST-extraction measurements) are recorded as SEPARATE labeled sections; no Desktop row is copied as a new executor measurement and vice versa.",
+  "exe_accessed": false,
+  "buffers_synthetic_in_memory_only": true,
+  "determinism": "no timestamps; all rows machine-measured in this run"
+}
