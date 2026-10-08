@@ -1,0 +1,328 @@
+{
+  "policy": {
+    "classification_values": [
+      "RAW_BACKED",
+      "VIRTUAL_BSS",
+      "UNMAPPED",
+      "REJECTED_INVALID_INPUT"
+    ],
+    "raw_padding_policy": "PHYSICAL_FILE_MAPPER_POLICY: a range inside SizeOfRawData but past VirtualSize is classified RAW_BACKED per this explicit physical-file policy; this is a statement about the physical FILE, never a runtime observation.",
+    "header_va_reads": "VAs below the first section are UNMAPPED; the suite requires no header-VA read",
+    "membership_rule": "membership may use max(VirtualSize, SizeOfRawData) but that NEVER grants a physical read",
+    "no_fabricated_zeros": true,
+    "short_slice_is_not_success": true
+  },
+  "controls": [
+    {
+      "control_id": "MAP1_raw_backed_code_pin",
+      "input": "read(0x006E8FA5, 3) on the physical EXE",
+      "expected": "RAW_BACKED + 89 46 04",
+      "observed_classification": "RAW_BACKED",
+      "observed_bytes": "89 46 04",
+      "failure_gate": "classification != RAW_BACKED or bytes != 89 46 04",
+      "denominator": 1,
+      "pass": true
+    },
+    {
+      "control_id": "MAP2_bss_vas_classified_not_fetched",
+      "input": "classify+read(0x00BA1100,1) and (0x00BA73BC,1) from headers (contract par. 2 item e); NO physical bytes fetched for them",
+      "expected": "VIRTUAL_BSS + controlled read error for both",
+      "observed_cases": [
+        {
+          "va": "0x00BA1100",
+          "classification": "VIRTUAL_BSS",
+          "classify_detail": "RVA 0x7a1100 is inside the virtual extent of section .data but past its raw range (delta 0x35100 >= rsize 0x34000); zero-init tail \u2014 physically absent from the file",
+          "physical_read": "CONTROLLED_FAIL",
+          "read_error": "VIRTUAL_BSS: RVA 0x7a1100 is inside the virtual extent of section .data but past its raw range (delta 0x35100 >= rsize 0x34000); zero-init tail \u2014 physically absent from the file",
+          "physical_bytes_fetched": false
+        },
+        {
+          "va": "0x00BA73BC",
+          "classification": "VIRTUAL_BSS",
+          "classify_detail": "RVA 0x7a73bc is inside the virtual extent of section .data but past its raw range (delta 0x3b3bc >= rsize 0x34000); zero-init tail \u2014 physically absent from the file",
+          "physical_read": "CONTROLLED_FAIL",
+          "read_error": "VIRTUAL_BSS: RVA 0x7a73bc is inside the virtual extent of section .data but past its raw range (delta 0x3b3bc >= rsize 0x34000); zero-init tail \u2014 physically absent from the file",
+          "physical_bytes_fetched": false
+        }
+      ],
+      "failure_gate": "classification != VIRTUAL_BSS or read succeeded",
+      "denominator": 2,
+      "pass": true
+    },
+    {
+      "control_id": "MAP3_synthetic_raw_to_bss_crossing",
+      "input": "synthetic PE (.text vsize 0x100, rsize 0x80) with plausible-looking bytes in the file past the raw end",
+      "expected": "first/last raw byte reads PASS; the crossing read has a controlled FAIL",
+      "observed_cases": [
+        {
+          "read": "read(0x00401000, 1) first raw byte",
+          "classification": "RAW_BACKED",
+          "returned_n": 1,
+          "pass": true
+        },
+        {
+          "read": "read(0x0040107f, 1) last raw byte",
+          "classification": "RAW_BACKED",
+          "returned_n": 1,
+          "pass": true
+        },
+        {
+          "read": "read(0x0040107f, 2) from the LAST raw byte, crossing raw->BSS",
+          "classification": "VIRTUAL_BSS",
+          "physical_read": "CONTROLLED_FAIL",
+          "read_error": "VIRTUAL_BSS: read starts in the raw range of section .text but CROSSES into the virtual tail (delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize); controlled FAIL at the raw->BSS boundary",
+          "plausible_further_file_bytes_present": true,
+          "note": "the byte at the next file offset looks like plausible code of another mapping; the mapper still FAILs at the raw->BSS boundary of THIS section",
+          "pass": true
+        }
+      ],
+      "failure_gate": "any of the three cases deviates",
+      "denominator": 3,
+      "pass": true
+    },
+    {
+      "control_id": "MAP4_synthetic_declared_raw_past_eof",
+      "input": "synthetic PE declaring rsize 0x200 at roff 0x400 while the physical file ends at 0x500; read(0x00401100, 0x10)",
+      "expected": "controlled FAIL (declared raw past EOF); no silent short read",
+      "observed_classification": "REJECTED_INVALID_INPUT",
+      "physical_read": "CONTROLLED_FAIL",
+      "read_error": "REJECTED_INVALID_INPUT: declared raw range of section .text runs past the physical end of the file (PointerToRawData 0x400 + delta 0x100 + n 16 = 0x510 > file size 0x500); controlled FAIL, no silent short read",
+      "bytes_returned": 0,
+      "failure_gate": "read succeeded or returned partial data",
+      "denominator": 1,
+      "pass": true
+    },
+    {
+      "control_id": "MAP5_synthetic_rejections",
+      "input": "synthetic PE cases: unmapped, n=0, n=-3, VA underflow, range overflow beyond the image, ambiguous overlapping sections",
+      "expected": "every case is a controlled rejection (no read success)",
+      "observed_cases": [
+        {
+          "case": "UNMAPPED VA beyond every section",
+          "classification": "UNMAPPED",
+          "read": "CONTROLLED_FAIL",
+          "pass": true
+        },
+        {
+          "case": "invalid length n=0",
+          "classification": "REJECTED_INVALID_INPUT",
+          "read": "CONTROLLED_FAIL",
+          "pass": true
+        },
+        {
+          "case": "invalid length negative n",
+          "classification": "REJECTED_INVALID_INPUT",
+          "read": "CONTROLLED_FAIL",
+          "pass": true
+        },
+        {
+          "case": "VA underflow (va < ImageBase)",
+          "classification": "REJECTED_INVALID_INPUT",
+          "read": "CONTROLLED_FAIL",
+          "pass": true
+        },
+        {
+          "case": "VA range overflow beyond the image (controlled rejection)",
+          "classification": "UNMAPPED",
+          "read": "CONTROLLED_FAIL",
+          "pass": true
+        },
+        {
+          "case": "ambiguous overlapping section mapping (no arbitrary first-section choice)",
+          "classification": "REJECTED_INVALID_INPUT",
+          "read": "CONTROLLED_FAIL",
+          "pass": true
+        }
+      ],
+      "failure_gate": "any case reads successfully or is unclassified",
+      "denominator": 6,
+      "pass": true
+    },
+    {
+      "control_id": "MAP6_structured_col_name_range_crossing",
+      "input": "synthetic PE with a synthetic vtable[-1] -> COL structure whose 20-byte COL read and TypeDescriptor name read CROSS the raw->BSS boundary",
+      "expected": "the structured reads go through the SAME range-safe API and are controlled FAILs (no garbage, no short slice)",
+      "observed_cases": [
+        {
+          "step": "u32(vtable-4) raw-backed",
+          "observed": "0x00401078",
+          "pass": true
+        },
+        {
+          "step": "read(COL, 20) crossing raw->BSS",
+          "physical_read": "CONTROLLED_FAIL",
+          "read_error": "VIRTUAL_BSS: read starts in the raw range of section .rdata but CROSSES into the virtual tail (delta 0x78 < rsize 0x80 but delta+n 0x8c > rsize); controlled FAIL at the raw->BSS boundary",
+          "pass": true
+        },
+        {
+          "step": "read(TD+8 name) crossing raw->BSS",
+          "physical_read": "CONTROLLED_FAIL",
+          "read_error": "VIRTUAL_BSS: read starts in the raw range of section .rdata but CROSSES into the virtual tail (delta 0x7c < rsize 0x80 but delta+n 0x81 > rsize); controlled FAIL at the raw->BSS boundary",
+          "pass": true
+        }
+      ],
+      "failure_gate": "any structured crossing read succeeds",
+      "denominator": 3,
+      "pass": true
+    },
+    {
+      "control_id": "MAP7_MC6_physical_offset_specificity",
+      "input": "in-memory TEST-OVERRIDE copy of the physical EXE with the byte at the DIRECT PHYSICAL FILE OFFSET 0x7A1100 changed 0X04 -> 0xAA",
+      "description": "a PHYSICAL-OFFSET mutation of a .rsrc raw byte (file offsets and VAs are separate units); this is NOT a read of VA 0x00BA1100, and the mutated buffer is NOT the SHA-identical physical EXE",
+      "expected": "every existing-anchor gate (the historical 80 + the RECW record gates) stays PASS",
+      "observed_gate": "PASS",
+      "failed_ids": [],
+      "failure_gate": "any anchor gate FAILs",
+      "denominator": 86,
+      "pass_count": 86,
+      "pass": true
+    }
+  ],
+  "controls_all_pass": true,
+  "controls_denominator": 102,
+  "controls_pass_count": 102,
+  "implementation_identity": {
+    "successor_script": {
+      "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_POST_AUDIT_CORRECTION_R1_20261008/03_SCRIPTS/checker_plus4_successor.py",
+      "sha256": "F50DDC40F4780FB4431C8B08808F3A5E74DBECD91398A1AC0977556744FBAF45"
+    },
+    "controls_script": {
+      "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_POST_AUDIT_CORRECTION_R1_20261008/03_SCRIPTS/run_correction_controls.py",
+      "sha256": "18F5B0459F03B07CD46E63BB3D61D7380F7F40735885BB9377E2A6AB81ACF5C3"
+    },
+    "exe_identity_before_all_controls": {
+      "size": 8015872,
+      "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "pinned_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "match": true
+    },
+    "exe_identity_after_all_controls": {
+      "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "unchanged": true
+    },
+    "physical_exe_never_modified": true,
+    "mutants_are_in_memory_test_overrides": true
+  },
+  "mc1_to_mc5": [
+    {
+      "mc_id": "MC1_plus4_writer_anchor",
+      "corruption": "@VA 0x006e8fa5 (physical offset 0x2e8fa5) 89 46 04 -> 8B 46 04 (in-memory TEST-OVERRIDE copy)",
+      "expected_fail_id": "PIN:CTOR_R4_STORE_P",
+      "observed_gate": "FAIL",
+      "observed_fail_ids": [
+        "PIN:CTOR_R4_STORE_P"
+      ],
+      "fails_exactly_on_proper_anchor": true,
+      "anchor_detected": true,
+      "note": "the whole-file SHA gate is NOT the corruption detector; the specific anchor check must FAIL"
+    },
+    {
+      "mc_id": "MC2_ctor_return_this_anchor",
+      "corruption": "@VA 0x006e9014 (physical offset 0x2e9014) 8B C6 -> 8B C7 (in-memory TEST-OVERRIDE copy)",
+      "expected_fail_id": "PIN:CTOR_RETURN_THIS",
+      "observed_gate": "FAIL",
+      "observed_fail_ids": [
+        "PIN:CTOR_RETURN_THIS"
+      ],
+      "fails_exactly_on_proper_anchor": true,
+      "anchor_detected": true,
+      "note": "the whole-file SHA gate is NOT the corruption detector; the specific anchor check must FAIL"
+    },
+    {
+      "mc_id": "MC3_pump_return_R_anchor",
+      "corruption": "@VA 0x006c9808 (physical offset 0x2c9808) 8B C6 -> 90 90 (in-memory TEST-OVERRIDE copy)",
+      "expected_fail_id": "PIN:PUMP_RETURN_R",
+      "observed_gate": "FAIL",
+      "observed_fail_ids": [
+        "PIN:PUMP_RETURN_R"
+      ],
+      "fails_exactly_on_proper_anchor": true,
+      "anchor_detected": true,
+      "note": "the whole-file SHA gate is NOT the corruption detector; the specific anchor check must FAIL"
+    },
+    {
+      "mc_id": "MC4_ctor_call_rel32_anchor",
+      "corruption": "@VA 0x006c97d8 (physical offset 0x2c97d8) rel32 operand byte bit-flip (93 -> 92; target ceases to be 0x006E8F70) \u2014 in-memory TEST-OVERRIDE copy",
+      "expected_fail_id": "REL32:REL_PUMP_CTOR_R",
+      "observed_gate": "FAIL",
+      "observed_fail_ids": [
+        "REL32:REL_PUMP_CTOR_R"
+      ],
+      "fails_exactly_on_proper_anchor": true,
+      "anchor_detected": true,
+      "note": "own rel32 arithmetic detects the wrong target"
+    },
+    {
+      "mc_id": "MC5_w_rtti_chain_anchor",
+      "corruption": "@TypeDescriptor 0x00B8CAC4+8 (VA 0x00b8cacc, physical offset 0x78cacc) first name byte '.' -> 'X' (in-memory TEST-OVERRIDE copy)",
+      "expected_fail_id": "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF",
+      "observed_gate": "FAIL",
+      "observed_fail_ids": [
+        "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF"
+      ],
+      "fails_exactly_on_proper_anchor": true,
+      "anchor_detected": true,
+      "note": "the COL 20 B + name reads go through the same range-safe API"
+    }
+  ],
+  "mc1_to_mc5_all_pass": true,
+  "mc1_to_mc5_fail_exactly_on_proper_anchor_all": true,
+  "w_record_mutation_gates": {
+    "pins_json_sha256_before": "64C64DA9D59CEEC25C72D1890C89E38935BB21530D8E3ED8B90537B98705001F",
+    "pins_json_sha256_after": "64C64DA9D59CEEC25C72D1890C89E38935BB21530D8E3ED8B90537B98705001F",
+    "pins_json_file_unchanged": true,
+    "mutation_scope": "in-memory copies of the parsed JSON document only; the JSON FILE and the physical EXE are never modified",
+    "hardcode_note": "a correct constant hardcoded in the checker while ignoring the JSON would NOT flip these gates; the mutations prove the JSON actually drives them (physical EXE and the historical 80 stay PASS)",
+    "gates": [
+      {
+        "gate_id": "W_MUT_BYTES_ONLY",
+        "mutation": "BYTES: 'E8 75 F0 02 00' -> 'E8 35 F0 02 00' (byte-hex only)",
+        "note": "JSON BYTES-only mutation to the erroneous E8 35 F0 02 00; the physical EXE is untouched; the JSON file is untouched",
+        "corresponding_gate": "RECW:W_RECORD_BYTES",
+        "bytes_gate": "FAIL",
+        "rel32_gate": "PASS",
+        "target_gate": "PASS",
+        "internal_consistency_gate": "FAIL",
+        "historical_80_all_pass": true,
+        "observed_fail_ids": [
+          "RECW:W_RECORD_BYTES",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY"
+        ],
+        "pass": true
+      },
+      {
+        "gate_id": "W_MUT_REL32_ONLY",
+        "mutation": "SIGNED_REL32: '+0x2F075' -> '+0x2F035' (displacement only)",
+        "note": "JSON SIGNED_REL32-only mutation to the erroneous +0x2F035; the physical EXE is untouched; the JSON file is untouched",
+        "corresponding_gate": "RECW:W_RECORD_REL32",
+        "bytes_gate": "PASS",
+        "rel32_gate": "FAIL",
+        "target_gate": "PASS",
+        "internal_consistency_gate": "FAIL",
+        "historical_80_all_pass": true,
+        "observed_fail_ids": [
+          "RECW:W_RECORD_REL32",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY"
+        ],
+        "pass": true
+      },
+      {
+        "gate_id": "W_MUT_TARGET_ONLY",
+        "mutation": "TARGET_VA: '0x006FA8B0' -> '0x006FA870' (target only)",
+        "note": "JSON TARGET_VA-only mutation to the wrong 0x006FA870 (the target the erroneous E8 35/+0x2F035 reading would produce); the physical EXE is untouched; the JSON file is untouched",
+        "corresponding_gate": "RECW:W_RECORD_TARGET",
+        "bytes_gate": "PASS",
+        "rel32_gate": "PASS",
+        "target_gate": "FAIL",
+        "internal_consistency_gate": "FAIL",
+        "historical_80_all_pass": true,
+        "observed_fail_ids": [
+          "RECW:W_RECORD_TARGET",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY"
+        ],
+        "pass": true
+      }
+    ],
+    "all_gates_pass": true
+  }
+}

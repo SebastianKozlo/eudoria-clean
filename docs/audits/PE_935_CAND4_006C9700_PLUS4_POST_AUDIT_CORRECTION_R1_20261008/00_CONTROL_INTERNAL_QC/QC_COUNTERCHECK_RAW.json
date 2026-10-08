@@ -1,0 +1,455 @@
+{
+  "qc_run_id": "PE_935_CAND4_006C9700_PLUS4_POST_AUDIT_CORRECTION_R1_20261008_INTERNAL_QC_R1",
+  "author_process": "pe-master-auditor fresh-context internal QC (internal to PE-MASTER; NOT a Desktop audit; NOT executor self-review)",
+  "independence_architecture": {
+    "own_mapper": "QCPE (this file) \u2014 independent implementation; NOT a re-export of RangeSafePE",
+    "own_synthetic_builder": "make_minipe (this file)",
+    "production_replay": "checker_plus4_successor.py via importlib \u2014 clearly labeled REPLAY_*, never presented as independence"
+  },
+  "exe_identity": {
+    "size": 8015872,
+    "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+    "pinned_size": 8015872,
+    "pinned_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+    "match": true
+  },
+  "pe_header_measured": {
+    "image_base": "0x00400000",
+    "e_lfanew": "0x120",
+    "sections": [
+      {
+        "name": ".text",
+        "va": "0x00001000",
+        "vsize": "0x6735E5",
+        "rsize": "0x674000",
+        "roff": "0x1000"
+      },
+      {
+        "name": ".rdata",
+        "va": "0x00675000",
+        "vsize": "0xF6569",
+        "rsize": "0xF7000",
+        "roff": "0x675000"
+      },
+      {
+        "name": ".data",
+        "va": "0x0076C000",
+        "vsize": "0x3D6E4",
+        "rsize": "0x34000",
+        "roff": "0x76C000"
+      },
+      {
+        "name": ".tls",
+        "va": "0x007AA000",
+        "vsize": "0xA",
+        "rsize": "0x1000",
+        "roff": "0x7A0000"
+      },
+      {
+        "name": ".rsrc",
+        "va": "0x007AB000",
+        "vsize": "0x3C54",
+        "rsize": "0x4000",
+        "roff": "0x7A1000"
+      }
+    ]
+  },
+  "duty2_w_record_recheck": {
+    "implementation": "QCPE own read + own struct rel32 arithmetic",
+    "physical_offset_measured": "0x2CB836",
+    "physical_offset_json": "0x2CB836",
+    "bytes_measured": "E8 75 F0 02 00",
+    "bytes_json": "E8 75 F0 02 00",
+    "signed_rel32_measured": "+0x2f075",
+    "signed_rel32_json": "+0x2F075",
+    "next_va_measured": "0x006CB83B",
+    "next_va_json": "0x006CB83B",
+    "target_va_measured": "0x006FA8B0",
+    "target_va_json": "0x006FA8B0",
+    "target_formula_json": "CALLSITE_VA + 5 + signed_little_endian_int32(BYTES[1:5])",
+    "callsite_va_json": "0x006CB836",
+    "signed_rel32_numeric_match": true,
+    "fields_all_match": true,
+    "expected_values_per_contract": {
+      "BYTES": "E8 75 F0 02 00",
+      "SIGNED_REL32": "+0x2F075",
+      "NEXT_VA": "0x006CB83B",
+      "TARGET_VA": "0x006FA8B0"
+    },
+    "contract_values_match": true
+  },
+  "duty3_own_mapper_controls": {
+    "implementation": "QCPE own (independent); NOT production code",
+    "map1_raw_backed_pin": {
+      "expected": "QC_RAW_BACKED + 89 46 04",
+      "measured_class": "QC_RAW_BACKED",
+      "measured_bytes": "89 46 04",
+      "pass": true
+    },
+    "map2_bss_vas": {
+      "cases": [
+        {
+          "va": "0x00BA1100",
+          "measured_class": "QC_VIRTUAL_BSS",
+          "detail": "RVA 0x7a1100 in .data virtual tail: delta 0x35100 >= rsize 0x34000",
+          "controlled_read_fail": true,
+          "read_error": "QC_VIRTUAL_BSS: RVA 0x7a1100 in .data virtual tail: delta 0x35100 >= rsize 0x34000",
+          "pass": true
+        },
+        {
+          "va": "0x00BA73BC",
+          "measured_class": "QC_VIRTUAL_BSS",
+          "detail": "RVA 0x7a73bc in .data virtual tail: delta 0x3b3bc >= rsize 0x34000",
+          "controlled_read_fail": true,
+          "read_error": "QC_VIRTUAL_BSS: RVA 0x7a73bc in .data virtual tail: delta 0x3b3bc >= rsize 0x34000",
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    "map3_raw_to_bss_crossing": {
+      "first_raw_byte_class": "QC_RAW_BACKED",
+      "first_raw_byte_ok": true,
+      "last_raw_byte_class": "QC_RAW_BACKED",
+      "last_raw_byte_ok": true,
+      "crossing_class": "QC_VIRTUAL_BSS",
+      "crossing_controlled_fail": true,
+      "crossing_error": "QC_VIRTUAL_BSS: cross raw->BSS in .text: delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize",
+      "plausible_further_bytes_present": true,
+      "pass": true
+    },
+    "map4_declared_raw_past_eof": {
+      "measured_class": "QC_REJECTED_INVALID_INPUT",
+      "controlled_read_fail": true,
+      "read_error": "QC_REJECTED_INVALID_INPUT: declared raw of .text past EOF: roff 0x400+delta 0x100+16 > file 0x500",
+      "pass": true
+    },
+    "map5_rejections": {
+      "cases": [
+        {
+          "case": "unmapped",
+          "class": "QC_UNMAPPED",
+          "fail": true,
+          "pass": true
+        },
+        {
+          "case": "n=0",
+          "class": "QC_REJECTED_INVALID_INPUT",
+          "fail": true,
+          "pass": true
+        },
+        {
+          "case": "negative n",
+          "class": "QC_REJECTED_INVALID_INPUT",
+          "fail": true,
+          "pass": true
+        },
+        {
+          "case": "va underflow",
+          "class": "QC_REJECTED_INVALID_INPUT",
+          "fail": true,
+          "pass": true
+        },
+        {
+          "case": "range overflow beyond image",
+          "class": "QC_UNMAPPED",
+          "fail": true,
+          "pass": true
+        },
+        {
+          "case": "ambiguous overlapping sections",
+          "class": "QC_REJECTED_INVALID_INPUT",
+          "fail": true,
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    "map6_structured_col_name_crossing": {
+      "u32_vtable_minus_4": "0x00401078",
+      "u32_matches_synth_col": true,
+      "col20_controlled_fail": true,
+      "col_error": "CONTROLLED_FAIL",
+      "td_name_controlled_fail": true,
+      "td_error": "CONTROLLED_FAIL",
+      "pass": true
+    },
+    "map7_mc6_physical_offset_specificity": {
+      "mutation": "direct FILE offset 0x7A1100 byte 0X04 -> 0xAA (in-memory copy)",
+      "file_offset_owner_section": ".rsrc",
+      "is_rsrc_raw_byte": true,
+      "pin_reads_identical_after_mutation": true,
+      "rel32_reads_identical_after_mutation": true,
+      "pass": true
+    }
+  },
+  "duty4_production_gate_replay": {
+    "implementation": "checker_plus4_successor.py via importlib (REPLAY)",
+    "import_inertness": "verified by FULL READ of the file before this run (no module-top-level side effects; main() under __main__ guard only)",
+    "clean": {
+      "checks_total": 86,
+      "pass_count": 86,
+      "gate": "PASS",
+      "fail_ids": []
+    },
+    "mc1_to_mc5": [
+      {
+        "mc_id": "MC1",
+        "mutation": "@0x006e8fa5 89 46 04 -> 8B 46 04",
+        "gate": "FAIL",
+        "expected_fail_id": "PIN:CTOR_R4_STORE_P",
+        "observed_fail_ids": [
+          "PIN:CTOR_R4_STORE_P"
+        ],
+        "fails_exactly_on_proper_anchor": true,
+        "pass": true
+      },
+      {
+        "mc_id": "MC2",
+        "mutation": "@0x006e9014 8B C6 -> 8B C7",
+        "gate": "FAIL",
+        "expected_fail_id": "PIN:CTOR_RETURN_THIS",
+        "observed_fail_ids": [
+          "PIN:CTOR_RETURN_THIS"
+        ],
+        "fails_exactly_on_proper_anchor": true,
+        "pass": true
+      },
+      {
+        "mc_id": "MC3",
+        "mutation": "@0x006c9808 8B C6 -> 90 90",
+        "gate": "FAIL",
+        "expected_fail_id": "PIN:PUMP_RETURN_R",
+        "observed_fail_ids": [
+          "PIN:PUMP_RETURN_R"
+        ],
+        "fails_exactly_on_proper_anchor": true,
+        "pass": true
+      },
+      {
+        "mc_id": "MC4",
+        "mutation": "@0x006c97d8 rel32 operand byte bit-flip (93->92)",
+        "gate": "FAIL",
+        "expected_fail_id": "REL32:REL_PUMP_CTOR_R",
+        "observed_fail_ids": [
+          "REL32:REL_PUMP_CTOR_R"
+        ],
+        "fails_exactly_on_proper_anchor": true,
+        "pass": true
+      },
+      {
+        "mc_id": "MC5",
+        "mutation": "@TD 0x00B8CAC4+8 first name byte '.' -> 'X'",
+        "gate": "FAIL",
+        "expected_fail_id": "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF",
+        "observed_fail_ids": [
+          "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF"
+        ],
+        "fails_exactly_on_proper_anchor": true,
+        "pass": true
+      }
+    ],
+    "mc1_to_mc5_all_pass": true,
+    "w_record_mutation_gates": [
+      {
+        "gate_id": "W_MUT_BYTES_ONLY",
+        "mutated_field": "BYTES",
+        "mutated_value": "E8 35 F0 02 00",
+        "expected_gate_fail": "RECW:W_RECORD_BYTES",
+        "expected_gate_measured": "FAIL",
+        "other_two_gates": {
+          "RECW:W_RECORD_REL32": "PASS",
+          "RECW:W_RECORD_TARGET": "PASS"
+        },
+        "internal_consistency_gate": "FAIL",
+        "historical_80_all_pass": true,
+        "observed_fail_ids": [
+          "RECW:W_RECORD_BYTES",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY"
+        ],
+        "pass": true
+      },
+      {
+        "gate_id": "W_MUT_REL32_ONLY",
+        "mutated_field": "SIGNED_REL32",
+        "mutated_value": "+0x2F035",
+        "expected_gate_fail": "RECW:W_RECORD_REL32",
+        "expected_gate_measured": "FAIL",
+        "other_two_gates": {
+          "RECW:W_RECORD_BYTES": "PASS",
+          "RECW:W_RECORD_TARGET": "PASS"
+        },
+        "internal_consistency_gate": "FAIL",
+        "historical_80_all_pass": true,
+        "observed_fail_ids": [
+          "RECW:W_RECORD_REL32",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY"
+        ],
+        "pass": true
+      },
+      {
+        "gate_id": "W_MUT_TARGET_ONLY",
+        "mutated_field": "TARGET_VA",
+        "mutated_value": "0x006FA870",
+        "expected_gate_fail": "RECW:W_RECORD_TARGET",
+        "expected_gate_measured": "FAIL",
+        "other_two_gates": {
+          "RECW:W_RECORD_BYTES": "PASS",
+          "RECW:W_RECORD_REL32": "PASS"
+        },
+        "internal_consistency_gate": "FAIL",
+        "historical_80_all_pass": true,
+        "observed_fail_ids": [
+          "RECW:W_RECORD_TARGET",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY"
+        ],
+        "pass": true
+      }
+    ],
+    "w_record_mutation_gates_all_pass": true,
+    "pins_json_sha256_after": "64C64DA9D59CEEC25C72D1890C89E38935BB21530D8E3ED8B90537B98705001F",
+    "exe_sha256_after_replay": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+  },
+  "duty7_logical_models": {
+    "scope": "SYNTHETIC_ONLY",
+    "countermodel": {
+      "model": "QC_COUNTERMODEL_FIRST_INIT_P_OPAQUE_HELPER_T_Q",
+      "premises": {
+        "first_init_store": true,
+        "ctor_returns_same_base_no_adjustment": true,
+        "installer_reads_same_field": true
+      },
+      "t_measured": "0x3000",
+      "t_equals_first_initial_p": false,
+      "demonstrates": "first-init + no-adjustment return + same-field read are INSUFFICIENT for T==P at use"
+    },
+    "field_preserving_model": {
+      "model": "QC_FIELD_PRESERVING_MODEL",
+      "premises": {
+        "first_init_store": true,
+        "ctor_returns_same_base_no_adjustment": true,
+        "installer_reads_same_field": true
+      },
+      "t_measured": "0x2000",
+      "t_equals_first_initial_p": true,
+      "demonstrates": "the same premises are equally consistent with T==P; symmetric \u2014 evidence does not decide"
+    },
+    "both_execute_premises_true": true,
+    "countermodel_t_equals_p": false,
+    "field_preserving_t_equals_p": true,
+    "resolves_real_FUN_006B2310": false,
+    "package_reports_say_neither_resolves": true,
+    "pass": true
+  },
+  "duty9_80id_regression": {
+    "hist_checker_sha256_measured": "F58D2DB36106006BA2CBF931DC9CFED872E9C5E22C5484E86462568B985AB7E8",
+    "hist_checker_sha256_expected": "F58D2DB36106006BA2CBF931DC9CFED872E9C5E22C5484E86462568B985AB7E8",
+    "hist_checker_sha_match": true,
+    "required_id_count": 80,
+    "required_ids": [
+      "EXE_IDENTITY",
+      "PIN:CTOR_GATE_CMP_0xB7DC",
+      "PIN:CTOR_P_ADDREF",
+      "PIN:CTOR_P_NAME_ARG",
+      "PIN:CTOR_P_VT_SLOT17",
+      "PIN:CTOR_R0_STORE_S",
+      "PIN:CTOR_R4_STORE_P",
+      "PIN:CTOR_R8_ZERO",
+      "PIN:CTOR_RC_ZERO",
+      "PIN:CTOR_RETURN_THIS",
+      "PIN:CTOR_TERMINAL_RET8",
+      "PIN:CTOR_THIS_SAVE",
+      "PIN:HIST_CALLER_CTOR_CALL",
+      "PIN:HIST_CALLER_NEW_0xC",
+      "PIN:HIST_CALLER_PUMP_CALL",
+      "PIN:INSTALLER_DECREF_OLD",
+      "PIN:INSTALLER_EBX_1",
+      "PIN:INSTALLER_INCREF_T",
+      "PIN:INSTALLER_LOAD_R",
+      "PIN:INSTALLER_READ_R4",
+      "PIN:INSTALLER_WRITE_68",
+      "PIN:PGET_ALLOC_SIZE_4",
+      "PIN:PGET_RECEIVER_SAVE",
+      "PIN:PRODUCER_STORE_6C",
+      "PIN:PUMP_ALLOC_FAIL_JE",
+      "PIN:PUMP_ALLOC_LOCAL_SAVE",
+      "PIN:PUMP_ARG1_LOAD",
+      "PIN:PUMP_ARG2_LOAD",
+      "PIN:PUMP_ARG3_LOAD",
+      "PIN:PUMP_ARG4_LOAD",
+      "PIN:PUMP_CTOR_PUSH_P",
+      "PIN:PUMP_CTOR_PUSH_S",
+      "PIN:PUMP_CTOR_RECEIVER",
+      "PIN:PUMP_CTOR_RESULT_SAVE",
+      "PIN:PUMP_NEW_SIZE_0x10",
+      "PIN:PUMP_PAIR_ID_A",
+      "PIN:PUMP_PAIR_TYPE_0x66",
+      "PIN:PUMP_RELEASEA_DEC",
+      "PIN:PUMP_RELEASEA_DESTROY",
+      "PIN:PUMP_RELEASEB_DEC",
+      "PIN:PUMP_RELEASEB_DESTROY",
+      "PIN:PUMP_RETURN_NULL",
+      "PIN:PUMP_RETURN_R",
+      "PIN:PUMP_SEH_HANDLER",
+      "PIN:PUMP_SLOT_CMP",
+      "PIN:PUMP_SLOT_JNE",
+      "PIN:PUMP_SLOT_LEA",
+      "PIN:PUMP_S_NULL_JE",
+      "PIN:PUMP_S_NULL_TEST",
+      "PIN:PUMP_TERMINAL_RET",
+      "PIN:SETTER_FLAG_CMP",
+      "PIN:SETTER_FLAG_JNE",
+      "PIN:SETTER_P_ADDREF",
+      "PIN:SETTER_RECEIVER_S10",
+      "PIN:SETTER_SLOT_CLEAR",
+      "PIN:SETTER_SLOT_STORE_P",
+      "PIN:SETTER_TERMINAL_RET8_A",
+      "PIN:SETTER_TERMINAL_RET8_B",
+      "REL32:REL_CAND4_CALLER_PUMP",
+      "REL32:REL_CTOR_GATE",
+      "REL32:REL_HIST_NEW",
+      "REL32:REL_HIST_PUMP",
+      "REL32:REL_HIST_WCTOR",
+      "REL32:REL_PGET_ALLOC",
+      "REL32:REL_PGET_INIT",
+      "REL32:REL_PRODUCER_INSTALLER",
+      "REL32:REL_PUMP_ALLOC_NEW",
+      "REL32:REL_PUMP_CTOR_R",
+      "REL32:REL_PUMP_REQISSUE",
+      "REL32:REL_PUMP_SGETTER",
+      "REL32:REL_PUMP_SLOTSETTER",
+      "REL32:REL_PUMP_SMETHOD_8268A0",
+      "REL32:REL_SETTER_PGETTER",
+      "REL32:REL_SETTER_VARIANT",
+      "RTTI:RTTI_MANAGER_BASE",
+      "RTTI:RTTI_MANAGER_MAIN",
+      "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF",
+      "STR:STR_ARKANIMATION",
+      "STR:STR_ARKTEXTURE",
+      "STR:STR_GEOWATER0"
+    ],
+    "duplicate_required_ids": false,
+    "own_execution": {
+      "implementation": "QCPE own reads + own arithmetic (NOT the production checker)",
+      "checks": 80,
+      "pass_count": 80,
+      "all_pass": true,
+      "fail_list": []
+    },
+    "successor_table_identity_vs_historical": {
+      "BYTE_PINS": true,
+      "REL32_PINS": true,
+      "RTTI_PINS": true,
+      "STRING_PINS": true
+    },
+    "replay_clean_historical_ids": 80,
+    "replay_clean_historical_all_pass": true,
+    "new_record_controls_denominator": 6,
+    "regression_pass": true
+  },
+  "exe_identity_after_all": {
+    "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+    "unchanged": true
+  },
+  "overall_pass": true
+}

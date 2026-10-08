@@ -1,0 +1,47 @@
+{
+  "run_id": "PE_935_CAND4_006C9700_PLUS4_POST_AUDIT_CORRECTION_R1_20261008",
+  "logical_controls_scope": "SYNTHETIC_ONLY",
+  "scope_note": "both models are LOGICAL controls (proof-sufficiency demonstrations on synthetic state); neither is a new physical PCG writer, neither confirms actual corruption, and NEITHER resolves how the real FUN_006B2310 works \u2014 its body was NOT opened and no claim is made that it overwrites or preserves [R+4]",
+  "real_fun_006b2310_body_opened": false,
+  "countermodel_helper_writes_r_plus_4": {
+    "model": "SYNTHETIC_COUNTERMODEL_FIRST_INIT_P__OPAQUE_HELPER__T_EQUALS_Q",
+    "r_base": "0x1000",
+    "initial_p": "0x2000",
+    "q": "0x3000",
+    "helper_receiver_this": "0x1008",
+    "helper_store_expression": "[this-4] := Q (i.e. [R+4] := Q)",
+    "premises_kept_true": {
+      "first_init_store_R_plus_4_is_P": true,
+      "ctor_returns_same_base_R_no_adjustment": true,
+      "installer_reads_the_same_field_R_plus_4": true
+    },
+    "installer_read_t": "0x3000",
+    "t_equals_first_initial_p": false,
+    "demonstrates": "first-init + no-adjustment return + same-field read are INSUFFICIENT to prove T==P at use; the missing condition is write-effects/frame preservation through the unopened helper",
+    "actual_helper_mutation_observed": false,
+    "actual_helper_body_opened": false,
+    "is_physical_pcg_writer": false
+  },
+  "field_preserving_model": {
+    "model": "SYNTHETIC_FIELD_PRESERVING_MODEL",
+    "r_base": "0x1000",
+    "initial_p": "0x2000",
+    "q": "0x3000",
+    "helper_receiver_this": "0x1008",
+    "helper_store_expression": "[this+0x100] := Q (NOT [this-4])",
+    "premises_kept_true": {
+      "first_init_store_R_plus_4_is_P": true,
+      "ctor_returns_same_base_R_no_adjustment": true,
+      "installer_reads_the_same_field_R_plus_4": true
+    },
+    "installer_read_t": "0x2000",
+    "t_equals_first_initial_p": true,
+    "demonstrates": "the same premises are equally consistent with T==P; the models are symmetric \u2014 the evidence does not decide between them",
+    "actual_helper_mutation_observed": false,
+    "actual_helper_body_opened": false,
+    "is_physical_pcg_writer": false
+  },
+  "both_models_execute_premises_true": true,
+  "verdict": "T_EQUALS_FIRST_INITIAL_P = NOT_ESTABLISHED_WITHIN_BOUND; ACTUAL_LATER_OVERWRITE_OBSERVED = NO; the write-effects/frame gap through the conditional &R+8 branch stands",
+  "models_agree_on_all_measured_premises": true
+}

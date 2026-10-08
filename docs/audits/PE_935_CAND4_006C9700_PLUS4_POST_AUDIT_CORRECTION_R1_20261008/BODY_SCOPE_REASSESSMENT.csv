@@ -1,0 +1,18 @@
+# BODY_SCOPE_REASSESSMENT — PE_935_CAND4_006C9700_PLUS4_POST_AUDIT_CORRECTION_R1_20261008 (FD-C1 body scope).
+# The four reported bodies + the already-described neighbor 0x006C9820 from the RAW pump lines.
+# The neighbor was NOT read from the EXE and its semantics were NOT developed in this run.
+# SUMMARY RECORDS:
+# MINIMUM_NEW_FUNCTION_BODIES_OPENED = 5
+# EXACT_NEW_FUNCTION_BODIES_OPENED = UNRESOLVED
+# ORIGINAL_MAX_NEW_FUNCTION_BODIES = 6
+# BODY_BUDGET_EXCEEDANCE_ESTABLISHED = NO (the minimum 5 does not establish exceedance of 6)
+# ORIGINAL_SCOPE_COMPLIANCE = FAIL
+# RETROACTIVE_PRIOR_AUTHORIZATION = NO
+# NEIGHBOR_006C9820_READ_FROM_EXE_THIS_RUN = NO; NEIGHBOR_SEMANTICS_DEVELOPED_THIS_RUN = NO
+# The old limit (6) is NOT changed; exceedance is NOT established on the current floor.
+body_id,function_start_va,source_path,line_or_reference,exact_quote,adjudication_reason,floor_charge,status
+B-1,0x006C9700,docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/FUNCTION_BODY_ACCOUNTING.csv,line 7,"B-1,0x006C9700,0x006C9700..0x006C981B ...,1 (the mandated body #1),the pump: return-path derivation of R; the request pair {0x66,A}; the construction call; the P release protocol,DECODING_COMPLETE",historically charged body (kept),1,COUNTED_PRESERVED_FLOOR
+B-2,0x006E8F70,docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/FUNCTION_BODY_ACCOUNTING.csv,line 8,"B-2,0x006E8F70,0x006E8F70..0x006E9027 ...,2 ...,the ctor of R: [R+0]=S store; [R+4]=P store + addref; [R+8]/[R+0xC]=0; return this; the conditional [R+8] branch,DECODING_COMPLETE",historically charged body (kept),1,COUNTED_PRESERVED_FLOOR
+B-3,0x006C9570,docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/FUNCTION_BODY_ACCOUNTING.csv,line 9,"B-3,0x006C9570,0x006C9570..0x006C966C ...,3 ...,the slot setter: pre-clear; P = FUN_007B79B0([S+0x10]); slot=P + addref [P+4],DECODING_COMPLETE",historically charged body (kept),1,COUNTED_PRESERVED_FLOOR
+B-4,0x007B79B0,docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/FUNCTION_BODY_ACCOUNTING.csv,line 10,"B-4,0x007B79B0,0x007B79B0..0x007B7A0F (window LEN 0x60 — CUT INSIDE THE BODY),PARTIAL — extent UNRESOLVED past 0x007B7A0F ...,4 ...,the P getter: head visible (alloc via 0x0095D3C4(4); init via 0x007B7930; a receiver vtable slot-3 dispatch); return path NOT seen; internal callsites RAW_VISIBLE_ONLY,DECODING_PARTIAL",historically charged body (kept; partial opening counts),1,COUNTED_PRESERVED_FLOOR
+NB-5,0x006C9820,docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/01_RAW/FUN_006C9700_PUMP_FULL.txt,lines 147-149 (the RAW pump overflow disclosure; corroborated by FUNCTION_BODY_ACCOUNTING lines 13-16),"0x006C9820..0x006C9A8F past the body extent; e.g. a deleting-destructor-shaped entry @0x006C9820 (mov esi,ecx; call 0x006C9670; test byte [esp+8],1; push esi; call 0x0095D42A; mov eax,esi; ret 4) — role NOT adjudicated in this run",the neighbor body is DESCRIBED by a specific interpreted instruction sequence and a shape classification (deleting-destructor-shaped) — not a dump of uninterpreted bytes; the description itself is an opened/interpreted body unit. In THIS correction run the neighbor was NOT read from the EXE and its semantics were NOT developed (records-only scope).,1,ADDITIONAL_COUNT_REQUIRED_FLOOR
