@@ -1,0 +1,93 @@
+{
+  "OVERALL": "QC_PASS",
+  "origin": "SELF-REVIEW — fresh internal QC by the same pe-reconstruction executor session that produced this correction package (NOT an independent external Desktop post-audit; NOT a PE-MASTER qualification; the authoritative independent input for this correction's basis was the Desktop post-audit OF THE SOURCE RUN; an independent Desktop post-audit of THIS correction's SHA remains NOT_PERFORMED)",
+  "qc_run_id": "PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_INTERNAL_QC_R1_20261007",
+  "checks": {
+    "C1_source_ledger_shape": {
+      "ok": true,
+      "detail": "69 rows (expected 69)"
+    },
+    "C2_content_derived_counted_set": {
+      "ok": true,
+      "detail": "content-derived counted units = 32 (expected exactly 32: 24 ANALYZED_NEW with non-empty recorded interpretation + RV-01..RV-07 + NEIGH-09 with interpretations in NOT_COUNTED_REASON)"
+    },
+    "C3_minimum_32": {
+      "ok": true,
+      "detail": "MINIMUM_NEW_ANALYZED_EDGE_COUNT >= 32 CONFIRMED (measured proven floor = 32)"
+    },
+    "C4_corrected_ledger_matches_derivation": {
+      "ok": true,
+      "detail": "69 rows; CORRECTED_COUNTED matches the independent content derivation for all rows (mismatches: NONE); class census: {'COUNTED_ANALYZED_UNIT': 32, 'PRIOR_REPIN_EXEMPTION_UNREVERIFIED': 11, 'NOT_COUNTED_CLEAN': 17, 'CANDIDATE_UNADJUDICATED': 9}"
+    },
+    "C5_mandatory_rows_re_adjudicated": {
+      "ok": true,
+      "detail": "RV-01..RV-07 + NEIGH-09 all COUNTED=YES in the corrected ledger (mandatory set per contract §1)"
+    },
+    "C6_verbatim_roundtrip": {
+      "ok": true,
+      "detail": "ORIGINAL_* fields byte-identical to the source ledger for all 69 rows x 9 fields (mismatches: NONE)"
+    },
+    "C7_body_minimum_7": {
+      "ok": true,
+      "detail": "MINIMUM_NEW_FUNCTION_BODIES_OPENED >= 7 CONFIRMED (counted bodies = 7; the proven undeclared probe = 0x006C0EE0 = FUN_006C0EE0, the historical CTRL_3 8-byte probe); candidates (window-spill neighbor bodies) present as CANDIDATE_UNADJUDICATED: 1 row(s); EXACT stays UNRESOLVED"
+    },
+    "C8_script_probe_scan": {
+      "ok": true,
+      "detail": "records-only scan of the audited run's scripts (31 distinct read VAs in read/disasm/u32 lines): every read VA is within the 6 declared bodies' windows, the accounted FUN_006C0EE0 8-byte probe, the prior-scoped caller windows (0x0050A310 / 0x006A3930), or the recorded data-section pins (IAT/RTTI/vtable/string/cookie); UNACCOUNTED probes: NONE (this proves the RECORDED scripts contain no other undeclared probe; the unrecorded execution history is not provable from records — EXACT_NEW_FUNCTION_BODIES_OPENED stays UNRESOLVED)"
+    },
+    "C9_ctrl3_reexecuted": {
+      "ok": true,
+      "detail": "CTRL_3 rebuilt re-executed from import: clean PASS (accessor reads [ecx + 0x68] == the producer-written field [ecx+0x68]); mutated FAIL (accessor 'mov eax, [ecx + 0x120]' does not read [ecx+0x68]); exe_accessed=False; fixtures = persisted prior pin + recorded historical constant"
+    },
+    "C10_ctrl4_matrix": {
+      "ok": true,
+      "detail": "CTRL_4 exact-endpoint re-executed from import: REAL CLEAN = PASS; historical EDI-clobber = FAIL (expected FAIL; P2 FAIL: caller-side EDI write @0x0050A3DD in the required range: 'mov edi, dword ptr [0x00b9d8d0]'); final push esi = FAIL (expected FAIL; P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: push esi [56])); final push nop = FAIL (expected FAIL; P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90]))"
+    },
+    "C11_old_logic_false_pass_reproduced": {
+      "ok": true,
+      "detail": "old-logic reproduction: clean PASS; clobber FAIL; FALSE PASS on ['final_push_esi', 'final_push_nop'] (matches Desktop CONTROL_COUNTERCHECKS.json wrong_final_push_ESI/missing_final_push_NOP = true/true on the old checker)"
+    },
+    "C12_matches_desktop_counterchecks": {
+      "ok": true,
+      "detail": "the rebuilt checker's 4-case matrix equals the Desktop own_exact_endpoint_predicate (clean=true, recorded_mutant=false, ESI=false, NOP=false) and the persisted CONTROL_RESULTS.json matrix"
+    },
+    "C13_clean_buffer_provenance": {
+      "ok": true,
+      "detail": "the CTRL_4 clean buffer re-derived from the published record's byte column: first VA 0x0050A3B7, contiguous decode boundaries, total 0x42 bytes, byte-identical to the fixture (22 instructions)"
+    },
+    "C14_window_branch_arithmetic": {
+      "ok": true,
+      "detail": "decode-boundary arithmetic re-verified on the clean buffer: call targets 0x6C0F90/0x6C10B0/0x50A1E0/0x5246E0 and je/jmp rel8 targets 0x50A3C8/0x50A3CC all recompute exactly"
+    },
+    "C15_no_new_science_branches": {
+      "ok": true,
+      "detail": "the 8 additionally counted rows adjudicate ONLY interpretations already recorded in the source ledger (verbatim quote checks: ALL OK); forbidden-ACTIVE-token sweep over the correction records: NONE"
+    },
+    "C16_wrapper_terminology": {
+      "ok": true,
+      "detail": "CORRECTED_LINEAGE_STATUS.md: WRAPPER_DEPTH = UNRESOLVED (semantics != budget consumption); POINTER_LINEAGE_TRANSITIONS_OBSERVED = 2 (examined H-1/H-2 description, not a global census); H-2 RELATION_TYPE = UNRESOLVED; historical NEW_WRAPPER_HOPS = 2 / MAX 3 PRESERVED (unresolved relation still consumed; no 2-layers claim)"
+    },
+    "C17_historical_fail_preserved": {
+      "ok": true,
+      "detail": "historical budget FAILs preserved verbatim in the corrected records: ORIGINAL_EDGE_BUDGET_COMPLIANCE = FAIL; RETROACTIVE_PRIOR_AUTHORIZATION = NO; ORIGINAL_FUNCTION_BODY_BUDGET_COMPLIANCE = FAIL; ORIGINAL_SCOPE_COMPLIANCE = FAIL (never becomes PASS); EXACT counts = UNRESOLVED; CORRECTION_RECORDS_QC is reported separately from ORIGINAL_SCOPE_COMPLIANCE (see QC_REPORT.md §verdict)"
+    },
+    "C18_source_package_immutable": {
+      "ok": true,
+      "detail": "SOURCE_PACKAGE at QC time: 38 BASE blobs, 0 mismatches, 0 missing — READ-ONLY preserved (zero writes by this correction)"
+    },
+    "C19_desktop_inputs_identity": {
+      "ok": true,
+      "detail": "the three Desktop post-audit inputs re-hashed at QC time: all MATCH the dispatch pins (mismatches: NONE)"
+    },
+    "C20_encoding": {
+      "ok": true,
+      "detail": "correction package files at QC time: UTF-8 no-BOM, LF-only, strict-decodable (violations: NONE)"
+    },
+    "C21_repo_state": {
+      "ok": true,
+      "detail": "HEAD == BASE 790e83735b43; tracked dirty = 0; foreign untracked roots = 6 (5 audit dirs + experiments/ — untouched); this correction's writes are confined to OUTPUT_ROOT (AUDIT_ENTRYPOINT.md NOT edited; no commit/push this phase)"
+    }
+  },
+  "correction_records_qc": "PASS",
+  "original_scope_compliance": "FAIL (historical state of the audited run; never becomes PASS; separated from CORRECTION_RECORDS_QC)"
+}

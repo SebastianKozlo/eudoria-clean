@@ -1,0 +1,319 @@
+{
+  "QC_RUN_ID": "PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_INTERNAL_QC_R1_20261007",
+  "QC_ORIGIN": "INDEPENDENT internal QC by pe-master-auditor (a FRESH session, NOT the executor; the executor's own QC is the honestly-labeled SELF-REVIEW in QC_REPORT.md). Under PE-MASTER direct dispatch; RECORDS/QC-MACHINERY ONLY — zero EXE access, zero new RE; replicas on published byte buffers and synthetic in-memory copies only.",
+  "AUDITED_PACKAGE": "docs/audits/PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_R1_20261007/ (19 executor files)",
+  "BASE_SHA": "790e83735b439e2d76a250868a47a599c2c10184 (HEAD unchanged; package untracked; no commit/push by this QC)",
+  "part1_records_identity_results": {
+    "I1_manifest_rehash": {
+      "ok": true,
+      "detail": "physical package files (executor close, pre-QC) = 19; manifest rows = 18; size+SHA256 mismatches = 0; extra = 0 — every manifest row re-measured by THIS QC (zero mismatch); manifest self-excluded; the QC's own 00_CONTROL_INTERNAL_QC/ additions are excluded from this census by design (the persistence phase regenerates the manifest over the final physical package — the established pattern)"
+    },
+    "I2_encoding": {
+      "ok": true,
+      "detail": "all 19 executor package files: UTF-8 no-BOM, LF-only, strict-decodable (violations: NONE)"
+    },
+    "I3_source_package_immutable": {
+      "ok": true,
+      "detail": "SOURCE_PACKAGE at QC time: 38 BASE blobs, 0 working-tree mismatches — READ-ONLY preserved (my own git hash-object method; the QC's writes never touch it)"
+    },
+    "I4_source_ledger_shape": {
+      "ok": true,
+      "detail": "source ledger: 69 rows; class census {'ANALYZED_NEW': 24, 'RAW_VISIBLE_ONLY': 7, 'REPIN_PRIOR_SCOPE': 11, 'OUT_OF_ANALYZED_EXTENT': 27}"
+    },
+    "I5_verbatim_roundtrip": {
+      "ok": true,
+      "detail": "ORIGINAL_* fields byte-identical to the BASE source ledger for all 69 rows x 9 fields (mismatches: NONE)"
+    },
+    "I6_own_readjudication_vs_ledger": {
+      "ok": true,
+      "detail": "MY OWN row-by-row re-adjudication of all 69 rows == the corrected ledger classification for every row (differences: NONE); note: under MY STRICTER reading NEIGH-04/NEIGH-15 (and possibly other candidates) could be COUNTED, which would only RAISE the floor above 32 — no disposition changes"
+    },
+    "I7_corrected_census": {
+      "ok": true,
+      "detail": "census 32/11/17/9 = {'COUNTED_ANALYZED_UNIT': 32, 'PRIOR_REPIN_EXEMPTION_UNREVERIFIED': 11, 'NOT_COUNTED_CLEAN': 17, 'CANDIDATE_UNADJUDICATED': 9}; counted set == E-01..E-24 + RV-01..RV-07 + NEIGH-09 (exactly the 24+8 defensive minimum)"
+    },
+    "I8_minimums_and_fails": {
+      "ok": true,
+      "detail": "MINIMUM_NEW_ANALYZED_EDGE_COUNT = 32 (>= 32) defensive (24 historical + 8 content-proven); EXACT = UNRESOLVED; ORIGINAL_EDGE_BUDGET_COMPLIANCE = FAIL; bodies >= 7, EXACT bodies UNRESOLVED, ORIGINAL_FUNCTION_BODY_BUDGET_COMPLIANCE = FAIL; RETROACTIVE_PRIOR_AUTHORIZATION = NO; ORIGINAL_SCOPE_COMPLIANCE = FAIL — all present verbatim in the corrected records and HANDOFF terminal block"
+    },
+    "I9_body_accounting_probe": {
+      "ok": true,
+      "detail": "FUNCTION_BODY_ACCOUNTING: 7 COUNTED rows (6 declared + FUN_006C0EE0); the historical probe VERIFIED AT SOURCE: qc_controls.py line 'ctrl3_provenance(0x006C0EE0)' via 'disasm(getter_va, 8)' (a REAL 8-byte EXE read) + source CONTROL_RESULTS.json CTRL_3 mutated_case records the [+0x120] accessor; bytes 8B 81 20 01 00 00 C3 CC in the accounting record"
+    },
+    "I10_probe_absent_from_prior": {
+      "ok": true,
+      "detail": "FUN_006C0EE0 (6c0ee0, case-insensitive) appears in ZERO of the four prior audit packages at BASE (git grep exit=1) — the probe was NOT a prior pin; the Desktop 'absent from both declared prior packages' claim independently CONFIRMED (and extended to all four grep'd packages)"
+    },
+    "I11_rp_citations_verified": {
+      "ok": true,
+      "detail": "all 11 RP prior-record citations spot-verified REAL at BASE: RP-01/X01=True; RP-02/X03=True; RP-03/X05=True; RP-04/X31=True; RP-05/X08=True; RP-06/E5=True; RP-07/E6+QC-S4=True; RP-08..11/window=True — the PRIOR_REPIN_EXEMPTION class rests on genuine prior records (the correction's UNREVERIFIED label is conservative; my verification converts it to spot-verified-genuine for the sampled citations)"
+    },
+    "I12_supersession_quotes": {
+      "ok": true,
+      "detail": "every S-1..S-9 supersession quote verified in the cited SOURCE package file at BASE (whitespace/backtick-normalized for the source's ~78-col hard wraps; incl. the historical CTRL_4 clean PASS / EDI-clobber FAIL measurements preserved as authentic, the old push_edi-anywhere defect locus in qc_controls.py, the QC-I5/QC-I9/QC-I10 census defects, the WRAPPER_DEPTH=2 locus, the 6/6 locus, the PARTIAL scope locus, the MASTER_ACCEPTED/zero-P1-P2 locus); the NOT-superseded byte measurements (getter 8B 41 68 C3; store pair 89 7E 68 / 8B 78 04; join window 8B F8/57/FF D2; EXACT_PARENT) all present: NOT-superserved-getter=True; NOT-superserved-store=True; NOT-superserved-join-window=True; NOT-superserved-EXACT_PARENT=True"
+    },
+    "FINDING_P3_S4_quote_file_attribution": {
+      "ok": true,
+      "detail": "FINDING P3: SUPERSESSION.md S-4 'Where' cites \"FINAL_REPORT.md §4 ('no analysis is hidden behind RAW labels')\" — the quoted phrase does NOT exist in FINAL_REPORT.md; it exists in CLAIM_MATRIX.csv CL-14 (evidence cell: 'full census per the J2 lesson; every uncounted row carries an explicit reason; no analysis is hidden behind RAW labels'). The superseded CLAIM is real (EDGE_ACCOUNTING_LEDGER.csv header line 8; PE_MASTER_REVIEW.md line 23; CLAIM_MATRIX.csv CL-14), so supersession S-4 stands; only the middle citation's file attribution is wrong. Correction: re-attribute that citation to CLAIM_MATRIX.csv CL-14 (or cite FINAL_REPORT §4 with its actual wording 'every uncounted row carries an explicit reason — the J2 discipline'). Secondary trivial imprecision in the same file: S-3's QC-I10 quote 'exceeded by exactly 16' vs the source's 'EXCEEDED by exactly 16' (capitalization); several S-quotes span the source's hard line wraps / drop backticks (S-1 ledger header, S-6 FINAL_REPORT §3, S-7 FINAL_REPORT §1) — substance identical in every case."
+    },
+    "I13_desktop_committed_input": {
+      "ok": true,
+      "detail": "Desktop COMMITTED_INPUT/EDGE_ACCOUNTING_LEDGER.csv SHA256 == BASE source ledger SHA256 == 50d6969591c8f9fa... — the Desktop post-audit hashed the exact audited bytes (same evidence basis)"
+    },
+    "I14_governance": {
+      "ok": true,
+      "detail": "GOVERNANCE_DECISION.md §1: verbatim human instruction present with the exact contract path/size/SHA (364D5C82…F348), RUN_ID, EXPECTED_BASE_SHA 790e837, the budget-FAIL-preservation sentence, the FUN_006C9700/new-RE prohibition, NEXT_EXPERIMENT_AUTHORIZED = NO, HARD_STOP = YES; §2 records the phase split as ORCHESTRATOR_PHASE_SPLIT from the dispatch text (matches THIS QC's dispatch: no entrypoint edit, no commit/push by the executor phase)"
+    },
+    "I15_separation": {
+      "ok": true,
+      "detail": "no file anywhere claims ORIGINAL_SCOPE_COMPLIANCE = PASS (scan: 13 record files); CORRECTION_RECORDS_QC = PASS is always reported SEPARATELY from the historical ORIGINAL_SCOPE_COMPLIANCE = FAIL (FINAL_REPORT §3 block keeps them as distinct algebra objects)"
+    },
+    "I16_zero_exe_access": {
+      "ok": true,
+      "detail": "scan over all correction-package scripts: every .exe/pe_reader/PE_OBJ/capstone/Entropia occurrence is inside an explicit NEGATION sentence (e.g. ctrl3_rebuilt.py docstring 'No capstone, no pe_reader, no EXE'); zero affirmative EXE-access occurrences (violations: NONE); CTRL_3/CTRL_4 rebuilt operate on in-memory byte constants only — NEW_PCG_FUNCTION_BODIES_ALLOWED = 0 honored by the package"
+    }
+  },
+  "part2_controls_results": {
+    "C1_window_rederivation": {
+      "ok": true,
+      "detail": "clean window re-derived MY OWN way from the published record: first VA 0x0050A3B7, 22 instructions, contiguous boundaries, total 0x42; byte-identical to the executor's declared fixture (extracted from its script as text)"
+    },
+    "C3_my_checker_mandatory_matrix": {
+      "ok": true,
+      "detail": "MY OWN exact-endpoint checker: REAL CLEAN = PASS; historical EDI-clobber = FAIL (P2); 57->56 = FAIL; 57->90 = FAIL (P3) — the mandatory contract §3 matrix"
+    },
+    "C4_executor_checker_and_matrix": {
+      "ok": true,
+      "detail": "the EXECUTOR's rebuilt checker executed BY THIS QC on the same four buffers: identical results to MY checker (clean PASS; clobber FAIL; esi FAIL; nop FAIL); equals the persisted CONTROL_RESULTS.json matrix; equals the Desktop own_exact_endpoint_predicate (clean=true, recorded_mutant=false, ESI=false, NOP=false)"
+    },
+    "C5_old_logic_false_pass_reproduced": {
+      "ok": true,
+      "detail": "the old checker's logic reproduction: clean PASS; clobber FAIL; FALSE PASS on ESI and NOP — exactly the two Desktop false PASS (the superseded any-push-edi defect), reproduced over in-memory buffers"
+    },
+    "C6_adversarial_mutants": {
+      "ok": true,
+      "detail": "all 9 adversarial mutants FAIL BOTH checkers (mine == executor's on every buffer; zero false PASS on the rebuilt predicate): head displacement (P1), alternative head byte-form 89 C7 (P1), real push edi at F4/F5 but not at the exact site (P3), join call shifted to F8 (P3+P4), truncated call (fail-closed), pop-edi EDI writes at E3 and D6 (P2), 2-byte FF F7 push form (P3 exact byte form), final removed with the earlier push surviving (P3; the OLD logic FALSE-PASSES it — the closed hole)"
+    },
+    "C7_ctrl3": {
+      "ok": true,
+      "detail": "CTRL_3 rebuilt verified on MY OWN checker AND the executor's (same fixtures): clean getter pin 8B 41 68 C3 = PASS; the recorded historical probe constant 8B 81 20 01 00 00 = FAIL ([ecx+0x120]); MY adversarial fixtures: [ecx+0x69] FAIL, [esi+0x68] FAIL (offset and base-register specificity), disp32 form of [ecx+0x68] PASS (semantically identical encoding must NOT false-fail); both checkers agree on every fixture; ZERO EXE access (synthetic/persisted-prior-pin only)"
+    },
+    "C8_window_arithmetic": {
+      "ok": true,
+      "detail": "MY decoder recomputes the window arithmetic: call rel32 targets 0x006C0F90 / 0x006C10B0 / 0x0050A1E0 / 0x005246E0 and the je/jmp rel8 targets 0x0050A3C8 / 0x0050A3CC — all exact; the join endpoint decodes as call edx @0x0050A3F7 (FF D2)"
+    }
+  },
+  "mandatory_matrix_mine_vs_executor_vs_old": {
+    "real_clean": {
+      "my_checker": "PASS",
+      "executor_checker": "PASS",
+      "old_logic": "PASS",
+      "expected": "PASS"
+    },
+    "historical_edi_clobber": {
+      "my_checker": "FAIL",
+      "executor_checker": "FAIL",
+      "old_logic": "FAIL",
+      "expected": "FAIL"
+    },
+    "final_push_esi": {
+      "my_checker": "FAIL",
+      "executor_checker": "FAIL",
+      "old_logic": "PASS",
+      "expected": "FAIL"
+    },
+    "final_push_nop": {
+      "my_checker": "FAIL",
+      "executor_checker": "FAIL",
+      "old_logic": "PASS",
+      "expected": "FAIL"
+    }
+  },
+  "adversarial_mutant_matrix": [
+    {
+      "mutant": "A1a_head_displaced_nop@B7",
+      "expected_fail_leg": "P1",
+      "my_checker": "FAIL",
+      "my_detail": "P1 FAIL: exact head mov edi,eax @0x0050A3B7 (8B F8) not found (got nop  [90])",
+      "executor_checker": "FAIL",
+      "executor_detail": "window not boundary-decodable (uncovered opcode F8 @0x0050A3B8) — FAIL closed",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A1b_head_alt_form_89C7",
+      "expected_fail_leg": "P1",
+      "my_checker": "FAIL",
+      "my_detail": "P1 FAIL: exact head mov edi,eax @0x0050A3B7 (8B F8) not found (got mov edi, eax [89 C7])",
+      "executor_checker": "FAIL",
+      "executor_detail": "P1 FAIL: exact head mov edi,eax @0x0050A3B7 (8B F8) not found (got: mov edi, eax [89 C7])",
+      "old_logic_result": "PASS"
+    },
+    {
+      "mutant": "A2_push_edi_at_F4F5_not_F6",
+      "expected_fail_leg": "P3",
+      "my_checker": "FAIL",
+      "my_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got nop  [90])",
+      "executor_checker": "FAIL",
+      "executor_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+      "old_logic_result": "PASS"
+    },
+    {
+      "mutant": "A3a_call_shifted_to_F8",
+      "expected_fail_leg": "P3+P4",
+      "my_checker": "FAIL",
+      "my_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got nop  [90])",
+      "executor_checker": "FAIL",
+      "executor_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+      "old_logic_result": "PASS"
+    },
+    {
+      "mutant": "A3b_call_truncated_at_F8",
+      "expected_fail_leg": "fail-closed",
+      "my_checker": "FAIL",
+      "my_detail": "window not boundary-decodable (index out of range) — FAIL closed",
+      "executor_checker": "FAIL",
+      "executor_detail": "window not boundary-decodable (index out of range) — FAIL closed",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A4a_pop_edi@E3",
+      "expected_fail_leg": "P2",
+      "my_checker": "FAIL",
+      "my_detail": "P2 FAIL: caller-side EDI write @0x0050A3E3 (pop edi)",
+      "executor_checker": "FAIL",
+      "executor_detail": "P2 FAIL: caller-side EDI write @0x0050A3E3 in the required range: 'pop edi'",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A4b_pop_edi@D6",
+      "expected_fail_leg": "P2",
+      "my_checker": "FAIL",
+      "my_detail": "P2 FAIL: caller-side EDI write @0x0050A3D6 (pop edi)",
+      "executor_checker": "FAIL",
+      "executor_detail": "P2 FAIL: caller-side EDI write @0x0050A3D6 in the required range: 'pop edi'",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A5_push_edi_FFF7_form@F6",
+      "expected_fail_leg": "P3+P4",
+      "my_checker": "FAIL",
+      "my_detail": "window not boundary-decodable (uncovered FF /6 mod=11) — FAIL closed",
+      "executor_checker": "FAIL",
+      "executor_detail": "window not boundary-decodable (uncovered FF /6 mod=11) — FAIL closed",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A6_final_removed_earlier_survives",
+      "expected_fail_leg": "P3",
+      "my_checker": "FAIL",
+      "my_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got nop  [90])",
+      "executor_checker": "FAIL",
+      "executor_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+      "old_logic_result": "PASS"
+    }
+  ],
+  "ctrl3_matrix": [
+    {
+      "fixture": "clean_getter_pin",
+      "expected": "PASS",
+      "mine": "PASS",
+      "executor": "PASS"
+    },
+    {
+      "fixture": "foreign_accessor_0x120",
+      "expected": "FAIL",
+      "mine": "FAIL",
+      "executor": "FAIL"
+    },
+    {
+      "fixture": "adv_wrong_offset_0x69",
+      "expected": "FAIL",
+      "mine": "FAIL",
+      "executor": "FAIL"
+    },
+    {
+      "fixture": "adv_wrong_base_esi_0x68",
+      "expected": "FAIL",
+      "mine": "FAIL",
+      "executor": "FAIL"
+    },
+    {
+      "fixture": "adv_same_field_disp32_form",
+      "expected": "PASS",
+      "mine": "PASS",
+      "executor": "PASS"
+    }
+  ],
+  "manual_adjudication_results": {
+    "science_preservation_token_sweep": {
+      "method": "my own enumeration of forbidden/promotable tokens over all package record files (excluding this QC dir), with per-occurrence CONTEXT ADJUDICATION by this QC",
+      "occurrences": 16,
+      "adjudication": "ALL 16 occurrences are in legitimate negation / superseded / policy / quotation contexts (CORRECTED_LINEAGE_STATUS S-7 quote; FINAL_REPORT 'No SCIENCE_PASS is issued anywhere'; GOVERNANCE 'no tool of this run issues a SCIENCE_PASS'; HANDOFF supersession row; QC_REPORT's own forbidden-token enumeration; SUPERSESSION S-7 declaration + citations). ZERO active promotions."
+    },
+    "lineage_record_mechanical_checks": {
+      "WRAPPER_DEPTH = UNRESOLVED": true,
+      "MODEL_ROOT_RELATION = UNKNOWN": true,
+      "POINTER_LINEAGE_TRANSITIONS_OBSERVED = 2 (description, not census)": true,
+      "H-2 RELATION_TYPE = UNRESOLVED": true,
+      "NEW_WRAPPER_HOPS = 2 preserved (charged units)": true,
+      "MAX_NEW_WRAPPER_HOPS = 3 unchanged": true,
+      "no 2-wrapper-layers claim": true,
+      "unresolved H-2 still consumes the budget": true,
+      "H-3/H-4 SAME_OBJECT not lineage transitions": true
+    },
+    "standing_status_presence": {
+      "MODEL_ROOT_RELATION = UNKNOWN": "6 package files",
+      "CHILD_VISUAL_ROLE = UNRESOLVED": "4 package files",
+      "CHILD_TO_JOIN_IDENTITY = STRONGLY_SUPPORTED (NOT CONFIRMED)": "5 package files",
+      "CAND4_CHILD_ROOT_CLOSURE = NOT_ESTABLISHED_WITHIN_BOUND": "5 package files",
+      "CHILD_RESOURCE_PROVENANCE = STRONGLY_SUPPORTED_MODEL_DERIVED (ceiling)": "2 package files",
+      "EXACT_PARENT = CONFIRMED_EXACT_SCENEFEEDER_PLUS_30 (carried, scoped)": "4 package files",
+      "promotions_found": 0
+    },
+    "stricter_reading_observation": "MY OWN stricter reading of the literal rule would potentially COUNT NEIGH-04 ('new(0x68)' argument-flow) and NEIGH-15 ('receiver [esp+0x40]') — and possibly further candidate rows — which would RAISE the floor above 32. This cannot change any disposition (the budget FAIL vs MAX 8 stands either way; EXACT = UNRESOLVED already carries it); the correction's conservative 32-floor follows the authoritative Desktop post-audit exactly.",
+    "bonus_observation_old_checker_head": "MY adversarial mutant A1b (alternative head encoding 89 C7 = mov edi,eax) revealed an ADDITIONAL weakness of the OLD checker: the old head check (mnemonic 'mov' + 'edi, eax' in op_str) accepted the non-canonical encoding; the rebuilt checker's exact-byte requirement (8B F8) closes this class too. Old logic PASSED A1b; the rebuilt checker FAILs it (P1)."
+  },
+  "findings": {
+    "F-IND-1_P3_supersession_S4_quote_file_attribution": "SUPERSESSION.md S-4 'Where' cites \"FINAL_REPORT.md §4 ('no analysis is hidden behind RAW labels')\" — the quoted phrase does NOT exist in FINAL_REPORT.md; it exists in CLAIM_MATRIX.csv CL-14 (evidence cell). The superseded CLAIM is real in three loci (EDGE_ACCOUNTING_LEDGER.csv header line 8; PE_MASTER_REVIEW.md line 23; CLAIM_MATRIX.csv CL-14), so supersession S-4 stands; only the middle citation's file attribution is wrong. Correction: re-attribute to CLAIM_MATRIX.csv CL-14 (or quote FINAL_REPORT §4's actual wording 'every uncounted row carries an explicit reason — the J2 discipline'). Secondary trivial imprecision in the same file: S-3's QC-I10 quote 'exceeded by exactly 16' vs the source's 'EXCEEDED by exactly 16'; several S-quotes span the source's ~78-col hard line wraps / drop backticks (S-1 ledger header; S-6 FINAL_REPORT §3; S-7 FINAL_REPORT §1) — substance identical in every case. Revalidation: grep the corrected citation strings in the named source files.",
+    "F-IND-2_P3_executor_qc_independence_wording": "QC_REPORT.md §1 (and FINAL_REPORT §3 / HANDOFF equivalently) claims the fresh QC's re-derivation did not trust LEDGER_CLASS — but qc_correction.py check C2 uses LEDGER_CLASS as the branch selector for the 24 E-rows and hard-derives 'not counted' for every other row (the RP rows' interpretation text is never content-derivation-checked), so the 'content-based re-derivation' is partially class-gated and its C4 agreement with the corrected ledger is structurally guaranteed for the non-E/non-marker rows. MATERIALITY LOW: the 24 E-rows' content IS verified non-empty, the 8 mandatory rows' content IS verified, and THIS QC's genuinely independent per-row content adjudication (I6) confirms the full 32/11/17/9 classification. Correction: reword the QC_REPORT §1 self-description to state the C2 derivation's actual structure. Revalidation: the sentence cites the C2 code path accurately."
+  },
+  "verdict_inputs": {
+    "part1_checks_passed": 17,
+    "part1_checks_total": 17,
+    "part2_checks_passed": 7,
+    "part2_checks_total": 7,
+    "findings_P1_P2": 0,
+    "findings_P3": 2,
+    "executor_files_modified_by_qc": [],
+    "qc_files_encoding_ok": true
+  },
+  "QC_VERDICT": "QC_PASS_WITH_FINDINGS",
+  "verdict_statement": "The correction package PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_R1_20261007 is verified by THIS independent QC: the 69-row re-adjudication (32 counted = 24 historical + RV-01..07 + NEIGH-09, exactly the Desktop-proven defensive floor) is confirmed by my own row-by-row content adjudication with ZERO differences; the verbatim round-trip is byte-exact; the body accounting (>= 7 with the verified-at-source FUN_006C0EE0 probe) is correct; the rebuilt CTRL_4 exact-endpoint predicate passes the mandatory 4-case matrix AND all 9 of MY adversarial mutants (zero false PASS; fail-closed on undecodable forms; exact-address and exact-byte-form enforced); CTRL_3 rebuilt is synthetic/prior-pin only with zero EXE access; the supersessions S-1..S-9 are grounded in real source loci (with the S-4 citation imprecision = F-IND-1); science standings are preserved without a single active promotion; SOURCE_PACKAGE is immutably preserved (38/38 BASE blobs); the historical budget FAILs stand; CORRECTION_RECORDS_QC and ORIGINAL_SCOPE_COMPLIANCE = FAIL stay separated. Two P3 findings (S-4 quote file attribution; executor-QC independence wording) — both records-precision class, neither overturns a disposition. C4-C1/C4-C2 corrections: VERIFIED as records; closure of the correction itself belongs to PE-MASTER + the persistence phase + the future independent Desktop post-audit of the new SHA.",
+  "qc_files": {
+    "QC_IND_PART1_RESULTS.json": {
+      "size": 7205,
+      "sha256": "4c054c3712fb1b09d20b1658cc7f331546204187d94c271c841c616a99cb8af2",
+      "utf8_nobom_lf": true
+    },
+    "QC_IND_PART2_RESULTS.json": {
+      "size": 7489,
+      "sha256": "91b2ee2a5b43e1cd0fd91519bed377e3463f8d0ef75a70ed144ed53a931712ea",
+      "utf8_nobom_lf": true
+    },
+    "qc_ind_ctrl_own.py": {
+      "size": 21707,
+      "sha256": "e8dad9c707caa29a59a7c3dc106092360f96b42f9bb29e6b9cf1e6cba4ac6ca4",
+      "utf8_nobom_lf": true
+    },
+    "qc_ind_finalize.py": {
+      "size": 10867,
+      "sha256": "e905e71364ec3cd63c092341d4b5560f1942fd235649700713e0e801baa268c0",
+      "utf8_nobom_lf": true
+    },
+    "qc_ind_reverify.py": {
+      "size": 30006,
+      "sha256": "688e68eefdd1a5bbd592a3749134d3cf00275b1c5e56af5e6fee9a26f828eaef",
+      "utf8_nobom_lf": true
+    }
+  }
+}

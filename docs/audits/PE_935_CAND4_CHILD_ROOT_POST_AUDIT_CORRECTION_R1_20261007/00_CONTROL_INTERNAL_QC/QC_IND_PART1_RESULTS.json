@@ -1,0 +1,72 @@
+{
+  "I_results": {
+    "I1_manifest_rehash": {
+      "ok": true,
+      "detail": "physical package files (executor close, pre-QC) = 19; manifest rows = 18; size+SHA256 mismatches = 0; extra = 0 — every manifest row re-measured by THIS QC (zero mismatch); manifest self-excluded; the QC's own 00_CONTROL_INTERNAL_QC/ additions are excluded from this census by design (the persistence phase regenerates the manifest over the final physical package — the established pattern)"
+    },
+    "I2_encoding": {
+      "ok": true,
+      "detail": "all 19 executor package files: UTF-8 no-BOM, LF-only, strict-decodable (violations: NONE)"
+    },
+    "I3_source_package_immutable": {
+      "ok": true,
+      "detail": "SOURCE_PACKAGE at QC time: 38 BASE blobs, 0 working-tree mismatches — READ-ONLY preserved (my own git hash-object method; the QC's writes never touch it)"
+    },
+    "I4_source_ledger_shape": {
+      "ok": true,
+      "detail": "source ledger: 69 rows; class census {'ANALYZED_NEW': 24, 'RAW_VISIBLE_ONLY': 7, 'REPIN_PRIOR_SCOPE': 11, 'OUT_OF_ANALYZED_EXTENT': 27}"
+    },
+    "I5_verbatim_roundtrip": {
+      "ok": true,
+      "detail": "ORIGINAL_* fields byte-identical to the BASE source ledger for all 69 rows x 9 fields (mismatches: NONE)"
+    },
+    "I6_own_readjudication_vs_ledger": {
+      "ok": true,
+      "detail": "MY OWN row-by-row re-adjudication of all 69 rows == the corrected ledger classification for every row (differences: NONE); note: under MY STRICTER reading NEIGH-04/NEIGH-15 (and possibly other candidates) could be COUNTED, which would only RAISE the floor above 32 — no disposition changes"
+    },
+    "I7_corrected_census": {
+      "ok": true,
+      "detail": "census 32/11/17/9 = {'COUNTED_ANALYZED_UNIT': 32, 'PRIOR_REPIN_EXEMPTION_UNREVERIFIED': 11, 'NOT_COUNTED_CLEAN': 17, 'CANDIDATE_UNADJUDICATED': 9}; counted set == E-01..E-24 + RV-01..RV-07 + NEIGH-09 (exactly the 24+8 defensive minimum)"
+    },
+    "I8_minimums_and_fails": {
+      "ok": true,
+      "detail": "MINIMUM_NEW_ANALYZED_EDGE_COUNT = 32 (>= 32) defensive (24 historical + 8 content-proven); EXACT = UNRESOLVED; ORIGINAL_EDGE_BUDGET_COMPLIANCE = FAIL; bodies >= 7, EXACT bodies UNRESOLVED, ORIGINAL_FUNCTION_BODY_BUDGET_COMPLIANCE = FAIL; RETROACTIVE_PRIOR_AUTHORIZATION = NO; ORIGINAL_SCOPE_COMPLIANCE = FAIL — all present verbatim in the corrected records and HANDOFF terminal block"
+    },
+    "I9_body_accounting_probe": {
+      "ok": true,
+      "detail": "FUNCTION_BODY_ACCOUNTING: 7 COUNTED rows (6 declared + FUN_006C0EE0); the historical probe VERIFIED AT SOURCE: qc_controls.py line 'ctrl3_provenance(0x006C0EE0)' via 'disasm(getter_va, 8)' (a REAL 8-byte EXE read) + source CONTROL_RESULTS.json CTRL_3 mutated_case records the [+0x120] accessor; bytes 8B 81 20 01 00 00 C3 CC in the accounting record"
+    },
+    "I10_probe_absent_from_prior": {
+      "ok": true,
+      "detail": "FUN_006C0EE0 (6c0ee0, case-insensitive) appears in ZERO of the four prior audit packages at BASE (git grep exit=1) — the probe was NOT a prior pin; the Desktop 'absent from both declared prior packages' claim independently CONFIRMED (and extended to all four grep'd packages)"
+    },
+    "I11_rp_citations_verified": {
+      "ok": true,
+      "detail": "all 11 RP prior-record citations spot-verified REAL at BASE: RP-01/X01=True; RP-02/X03=True; RP-03/X05=True; RP-04/X31=True; RP-05/X08=True; RP-06/E5=True; RP-07/E6+QC-S4=True; RP-08..11/window=True — the PRIOR_REPIN_EXEMPTION class rests on genuine prior records (the correction's UNREVERIFIED label is conservative; my verification converts it to spot-verified-genuine for the sampled citations)"
+    },
+    "I12_supersession_quotes": {
+      "ok": true,
+      "detail": "every S-1..S-9 supersession quote verified in the cited SOURCE package file at BASE (whitespace/backtick-normalized for the source's ~78-col hard wraps; incl. the historical CTRL_4 clean PASS / EDI-clobber FAIL measurements preserved as authentic, the old push_edi-anywhere defect locus in qc_controls.py, the QC-I5/QC-I9/QC-I10 census defects, the WRAPPER_DEPTH=2 locus, the 6/6 locus, the PARTIAL scope locus, the MASTER_ACCEPTED/zero-P1-P2 locus); the NOT-superseded byte measurements (getter 8B 41 68 C3; store pair 89 7E 68 / 8B 78 04; join window 8B F8/57/FF D2; EXACT_PARENT) all present: NOT-superserved-getter=True; NOT-superserved-store=True; NOT-superserved-join-window=True; NOT-superserved-EXACT_PARENT=True"
+    },
+    "FINDING_P3_S4_quote_file_attribution": {
+      "ok": true,
+      "detail": "FINDING P3: SUPERSESSION.md S-4 'Where' cites \"FINAL_REPORT.md §4 ('no analysis is hidden behind RAW labels')\" — the quoted phrase does NOT exist in FINAL_REPORT.md; it exists in CLAIM_MATRIX.csv CL-14 (evidence cell: 'full census per the J2 lesson; every uncounted row carries an explicit reason; no analysis is hidden behind RAW labels'). The superseded CLAIM is real (EDGE_ACCOUNTING_LEDGER.csv header line 8; PE_MASTER_REVIEW.md line 23; CLAIM_MATRIX.csv CL-14), so supersession S-4 stands; only the middle citation's file attribution is wrong. Correction: re-attribute that citation to CLAIM_MATRIX.csv CL-14 (or cite FINAL_REPORT §4 with its actual wording 'every uncounted row carries an explicit reason — the J2 discipline'). Secondary trivial imprecision in the same file: S-3's QC-I10 quote 'exceeded by exactly 16' vs the source's 'EXCEEDED by exactly 16' (capitalization); several S-quotes span the source's hard line wraps / drop backticks (S-1 ledger header, S-6 FINAL_REPORT §3, S-7 FINAL_REPORT §1) — substance identical in every case."
+    },
+    "I13_desktop_committed_input": {
+      "ok": true,
+      "detail": "Desktop COMMITTED_INPUT/EDGE_ACCOUNTING_LEDGER.csv SHA256 == BASE source ledger SHA256 == 50d6969591c8f9fa... — the Desktop post-audit hashed the exact audited bytes (same evidence basis)"
+    },
+    "I14_governance": {
+      "ok": true,
+      "detail": "GOVERNANCE_DECISION.md §1: verbatim human instruction present with the exact contract path/size/SHA (364D5C82…F348), RUN_ID, EXPECTED_BASE_SHA 790e837, the budget-FAIL-preservation sentence, the FUN_006C9700/new-RE prohibition, NEXT_EXPERIMENT_AUTHORIZED = NO, HARD_STOP = YES; §2 records the phase split as ORCHESTRATOR_PHASE_SPLIT from the dispatch text (matches THIS QC's dispatch: no entrypoint edit, no commit/push by the executor phase)"
+    },
+    "I15_separation": {
+      "ok": true,
+      "detail": "no file anywhere claims ORIGINAL_SCOPE_COMPLIANCE = PASS (scan: 13 record files); CORRECTION_RECORDS_QC = PASS is always reported SEPARATELY from the historical ORIGINAL_SCOPE_COMPLIANCE = FAIL (FINAL_REPORT §3 block keeps them as distinct algebra objects)"
+    },
+    "I16_zero_exe_access": {
+      "ok": true,
+      "detail": "scan over all correction-package scripts: every .exe/pe_reader/PE_OBJ/capstone/Entropia occurrence is inside an explicit NEGATION sentence (e.g. ctrl3_rebuilt.py docstring 'No capstone, no pe_reader, no EXE'); zero affirmative EXE-access occurrences (violations: NONE); CTRL_3/CTRL_4 rebuilt operate on in-memory byte constants only — NEW_PCG_FUNCTION_BODIES_ALLOWED = 0 honored by the package"
+    }
+  }
+}

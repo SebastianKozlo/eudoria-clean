@@ -1,0 +1,40 @@
+# FUNCTION_BODY_ACCOUNTING — PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_R1_20261007
+# C4-C1 body accounting correction (contract §2). The source run declared
+# "NEW_FUNCTION_BODIES_OPENED = 6/6 — NOT exceeded" (FINAL_REPORT §2/§4; HANDOFF;
+# PREREGISTRATION §2 MAX_NEW_FUNCTION_BODIES_OPENED = 6). That declaration is SUPERSEDED:
+# the historical CTRL_3 (SOURCE_PACKAGE 03_SCRIPTS/qc_controls.py lines 117-143) performed
+# a REAL 8-byte EXE probe of FUN_006C0EE0 and interpreted the result as the manager+0x120
+# getter of the same class family — an UNDECLARED real-body probe outside both declared
+# prior packages (Desktop C4-C1 second counterexample; EDGE_AND_SCOPE_COUNTERCHECKS.json
+# "new_body_counterexample"). Per the source-run contract §2 rule ("Partial body opening /
+# probing of a new function consumes the function budget") it MUST be counted.
+#
+# CORRECTED ACCOUNTING (conservative PROVEN floor):
+#   MINIMUM_NEW_FUNCTION_BODIES_OPENED = 7   (>= 7; MAX was 6 — the limit is EXCEEDED)
+#   EXACT_NEW_FUNCTION_BODIES_OPENED = UNRESOLVED
+#     (the bounded analysis windows of the 6 opened bodies also DISPLAY raw bytes of neighbor
+#     bodies past their extents — 01_RAW window-continuation sections; whether such bounded-
+#     window raw display constitutes "partial opening/probing" under contract §2 was NOT
+#     adjudicated by the authoritative post-audit nor by this correction; the source run
+#     classified those neighbor bodies as never-opened raw-visible continuations — see the
+#     candidate rows below; the exact total is not provable from existing records)
+#   ORIGINAL_FUNCTION_BODY_BUDGET_COMPLIANCE = FAIL (historical; supersedes the source run's
+#     "6/6 within, NOT exceeded"; stands permanently)
+#   RETROACTIVE_PRIOR_AUTHORIZATION = NO
+#
+# THIS CORRECTION OPENS NO NEW BODY: NEW_PCG_FUNCTION_BODIES_ALLOWED = 0 (zero EXE access of
+# any kind; the rebuilt CTRL_3 runs on synthetic fixtures / persisted prior pins only — see
+# CONTROL_RESULTS.json CTRL_3_REBUILT.ctrl3_synthetic_or_prior_pin_status).
+#
+# The six declared bodies' own measured facts (extents, writers, roles) are BYTE MEASUREMENTS
+# of the source run and are NOT superseded — only the 6/6 budget declaration is.
+BODY_INDEX,FUNCTION_VA,FUNCTION_LABEL,OPEN_KIND,DECLARATION_STATUS_IN_SOURCE_RUN,SOURCE_RECORD,CORRECTED_STATUS,NOTES
+1,0x006C66D0,"the CAND-4 child getter: 4-byte DIRECT_FIELD_GETTER mov eax,[ecx+0x68]; ret (extent 0x006C66D0..0x006C66D4 RESOLVED)",FULL (4 B),declared body #1 of 6,01_RAW/FUN_006C66D0_GETTER_FULL.txt,COUNTED_AS_NEW_BODY_OPENING,within the historical 6/6 declaration; the measured getter facts are NOT superseded
+2,0x006C0D50,"ArkModelManagerMain derived ctor (base delegation + derived-field zeroing + vtable 0xA855D0; extent 0x006C0D50..0x006C0DAE RESOLVED)",FULL (0x5E B),declared body #2 of 6,01_RAW/FUN_006C0D50_CTOR_DECODE.txt,COUNTED_AS_NEW_BODY_OPENING,within the historical 6/6 declaration
+3,0x006C8F80,"ArkModelManager base ctor — WRITER W1 ([+0x68]=0 @0x006C8FD3; +0x70 template-holder init; extent 0x006C8F80..0x006C9036 RESOLVED)",FULL (0xB6 B),declared body #3 of 6,01_RAW/FUN_006C8F80_BASECTOR_DECODE.txt,COUNTED_AS_NEW_BODY_OPENING,within the historical 6/6 declaration; the NULL-init measurement is NOT superseded
+4,0x006C8B20,"the on-path lazy initializer (the [+0x68]==0 trigger of the producer; extent 0x006C8B20..0x006C8BAA RESOLVED)",FULL (0x8A B),declared body #4 of 6,01_RAW/FUN_006C8B20_LAZYINIT_DECODE.txt,COUNTED_AS_NEW_BODY_OPENING,within the historical 6/6 declaration
+5,0x006C6F60,"the producer (validity check; empty-string-key lookups; getter A; the instance-creator pump; [+0x6C] store; installer call; extent 0x006C6F60..0x006C7072 RESOLVED)",FULL (0x112 B),declared body #5 of 6,01_RAW/FUN_006C6F60_PRODUCER_DECODE.txt,COUNTED_AS_NEW_BODY_OPENING,within the historical 6/6 declaration; the lazy producer-chain byte/dataflow facts are NOT superseded
+6,0x006C6780,"the installer/writer — WRITER W2 ([manager+0x68]=[instance+4] @0x006C67E2 with the refcounted smart-pointer protocol; 'ArkTexture'/'ArkAnimation' named lookups)",PARTIAL (0x006C6780..0x006C6848 SEEN; extent UNRESOLVED past 0x006C6848 — continuation NOT decoded/claimed),declared body #6 of 6,01_RAW/FUN_006C6780_INSTALLER_PARTIAL.txt,COUNTED_AS_NEW_BODY_OPENING,within the historical 6/6 declaration; the measured store facts are NOT superseded
+7,0x006C0EE0,"foreign manager-field accessor (mov eax,[ecx+0x120]; ret; int3 — bytes 8B 81 20 01 00 00 C3 CC) probed and interpreted by the historical CTRL_3 mutated case",REAL 8-BYTE PROBE + interpretation as the manager+0x120 getter of the same class family,UNDECLARED in the 6/6 body accounting (the probe postdates the declaration; absent from both declared prior packages — Desktop verified),03_SCRIPTS/qc_controls.py lines 117-143 (historical execution); recorded bytes in SOURCE_PACKAGE CONTROL_RESULTS.json CTRL_3 mutated_case + Desktop CONTROL_COUNTERCHECKS.json foreign_accessor_bytes,COUNTED_AS_NEW_BODY_OPENING (THE PROVEN 7TH),"per the source-run contract §2 rule (partial opening/probing of a new function consumes the budget): counted retroactively as a HISTORICAL consumption — the exceedance is a historical process fact; NOT re-probed by this correction (its bytes are used only as a persisted recorded constant in the rebuilt CTRL_3 synthetic fixture)"
+C1,(neighbor bodies caught by bounded windows),"raw-visible window continuations of the 6 opened bodies: 0x006C66E0 / 0x006C6710 (getter window); 0x006C0DB0 / 0x006C0E70 / 0x006C0EB0..0x006C0FC0 family (ctor window); 0x006C9040 (base-ctor window); 0x006C8BB0 (lazy-init window; GAP-2); 0x006C7080 (producer window) — the NEIGH row callers of the edge ledger",BOUNDED-WINDOW RAW DISPLAY ONLY (no analysis unit opened; per the source run: 'the neighbor body was NEVER opened as an analysis unit'; no interpretation of any neighbor body is relied upon),NOT declared as opened by the source run (classified OUT_OF_ANALYZED_EXTENT in the edge ledger),01_RAW window-continuation sections of the six decode records; EDGE_ACCOUNTING_LEDGER NEIGH rows,CANDIDATE_UNADJUDICATED,"whether bounded-window raw display of neighbor bodies constitutes 'partial opening/probing' under the source-run contract §2 was NOT adjudicated by the authoritative Desktop post-audit ('co najmniej siódme' — at least the seventh) nor by this correction; IF adjudicated as openings the exact count would rise above 7; contributes to EXACT_NEW_FUNCTION_BODIES_OPENED = UNRESOLVED; the MINIMUM (>= 7) does not depend on this adjudication"
+C2,0x0050A310,"the join-window caller (prior-scene-feeder install body; the §7 window 0x0050A3B7..0x0050A3F8 was re-read byte-identical by the source run as a FREE RE-PIN)",PRIOR-DECODED BODY (opened by the PRIOR source run PE_935_MODEL_CHILD_SCENEFEEDER_NINODE_JOIN_R1_20261006; the audited run's window re-pin was classified a free re-pin — no new analysis unit),NOT a new body of the audited run (prior scope),01_RAW/JOIN_WINDOW_50A3B7_REPIN.txt; prior-run records (free re-pin citations),NOT_COUNTED_AS_NEW_BODY_OF_THE_AUDITED_RUN,"the audited run's §3 budget covers NEW bodies of THAT run; the window re-read consumed no new-body budget and is a re-verification of a prior-recorded interpretation (the corrected CTRL_4 of THIS correction likewise reads NO EXE — it runs on the published window bytes)"

@@ -1,0 +1,173 @@
+{
+  "C_results": {
+    "C1_window_rederivation": {
+      "ok": true,
+      "detail": "clean window re-derived MY OWN way from the published record: first VA 0x0050A3B7, 22 instructions, contiguous boundaries, total 0x42; byte-identical to the executor's declared fixture (extracted from its script as text)"
+    },
+    "C3_my_checker_mandatory_matrix": {
+      "ok": true,
+      "detail": "MY OWN exact-endpoint checker: REAL CLEAN = PASS; historical EDI-clobber = FAIL (P2); 57->56 = FAIL; 57->90 = FAIL (P3) — the mandatory contract §3 matrix"
+    },
+    "C4_executor_checker_and_matrix": {
+      "ok": true,
+      "detail": "the EXECUTOR's rebuilt checker executed BY THIS QC on the same four buffers: identical results to MY checker (clean PASS; clobber FAIL; esi FAIL; nop FAIL); equals the persisted CONTROL_RESULTS.json matrix; equals the Desktop own_exact_endpoint_predicate (clean=true, recorded_mutant=false, ESI=false, NOP=false)"
+    },
+    "C5_old_logic_false_pass_reproduced": {
+      "ok": true,
+      "detail": "the old checker's logic reproduction: clean PASS; clobber FAIL; FALSE PASS on ESI and NOP — exactly the two Desktop false PASS (the superseded any-push-edi defect), reproduced over in-memory buffers"
+    },
+    "C6_adversarial_mutants": {
+      "ok": true,
+      "detail": "all 9 adversarial mutants FAIL BOTH checkers (mine == executor's on every buffer; zero false PASS on the rebuilt predicate): head displacement (P1), alternative head byte-form 89 C7 (P1), real push edi at F4/F5 but not at the exact site (P3), join call shifted to F8 (P3+P4), truncated call (fail-closed), pop-edi EDI writes at E3 and D6 (P2), 2-byte FF F7 push form (P3 exact byte form), final removed with the earlier push surviving (P3; the OLD logic FALSE-PASSES it — the closed hole)"
+    },
+    "C7_ctrl3": {
+      "ok": true,
+      "detail": "CTRL_3 rebuilt verified on MY OWN checker AND the executor's (same fixtures): clean getter pin 8B 41 68 C3 = PASS; the recorded historical probe constant 8B 81 20 01 00 00 = FAIL ([ecx+0x120]); MY adversarial fixtures: [ecx+0x69] FAIL, [esi+0x68] FAIL (offset and base-register specificity), disp32 form of [ecx+0x68] PASS (semantically identical encoding must NOT false-fail); both checkers agree on every fixture; ZERO EXE access (synthetic/persisted-prior-pin only)"
+    },
+    "C8_window_arithmetic": {
+      "ok": true,
+      "detail": "MY decoder recomputes the window arithmetic: call rel32 targets 0x006C0F90 / 0x006C10B0 / 0x0050A1E0 / 0x005246E0 and the je/jmp rel8 targets 0x0050A3C8 / 0x0050A3CC — all exact; the join endpoint decodes as call edx @0x0050A3F7 (FF D2)"
+    }
+  },
+  "adversarial_mutant_matrix": [
+    {
+      "mutant": "A1a_head_displaced_nop@B7",
+      "expected_fail_leg": "P1",
+      "my_checker": "FAIL",
+      "my_detail": "P1 FAIL: exact head mov edi,eax @0x0050A3B7 (8B F8) not found (got nop  [90])",
+      "executor_checker": "FAIL",
+      "executor_detail": "window not boundary-decodable (uncovered opcode F8 @0x0050A3B8) — FAIL closed",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A1b_head_alt_form_89C7",
+      "expected_fail_leg": "P1",
+      "my_checker": "FAIL",
+      "my_detail": "P1 FAIL: exact head mov edi,eax @0x0050A3B7 (8B F8) not found (got mov edi, eax [89 C7])",
+      "executor_checker": "FAIL",
+      "executor_detail": "P1 FAIL: exact head mov edi,eax @0x0050A3B7 (8B F8) not found (got: mov edi, eax [89 C7])",
+      "old_logic_result": "PASS"
+    },
+    {
+      "mutant": "A2_push_edi_at_F4F5_not_F6",
+      "expected_fail_leg": "P3",
+      "my_checker": "FAIL",
+      "my_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got nop  [90])",
+      "executor_checker": "FAIL",
+      "executor_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+      "old_logic_result": "PASS"
+    },
+    {
+      "mutant": "A3a_call_shifted_to_F8",
+      "expected_fail_leg": "P3+P4",
+      "my_checker": "FAIL",
+      "my_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got nop  [90])",
+      "executor_checker": "FAIL",
+      "executor_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+      "old_logic_result": "PASS"
+    },
+    {
+      "mutant": "A3b_call_truncated_at_F8",
+      "expected_fail_leg": "fail-closed",
+      "my_checker": "FAIL",
+      "my_detail": "window not boundary-decodable (index out of range) — FAIL closed",
+      "executor_checker": "FAIL",
+      "executor_detail": "window not boundary-decodable (index out of range) — FAIL closed",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A4a_pop_edi@E3",
+      "expected_fail_leg": "P2",
+      "my_checker": "FAIL",
+      "my_detail": "P2 FAIL: caller-side EDI write @0x0050A3E3 (pop edi)",
+      "executor_checker": "FAIL",
+      "executor_detail": "P2 FAIL: caller-side EDI write @0x0050A3E3 in the required range: 'pop edi'",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A4b_pop_edi@D6",
+      "expected_fail_leg": "P2",
+      "my_checker": "FAIL",
+      "my_detail": "P2 FAIL: caller-side EDI write @0x0050A3D6 (pop edi)",
+      "executor_checker": "FAIL",
+      "executor_detail": "P2 FAIL: caller-side EDI write @0x0050A3D6 in the required range: 'pop edi'",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A5_push_edi_FFF7_form@F6",
+      "expected_fail_leg": "P3+P4",
+      "my_checker": "FAIL",
+      "my_detail": "window not boundary-decodable (uncovered FF /6 mod=11) — FAIL closed",
+      "executor_checker": "FAIL",
+      "executor_detail": "window not boundary-decodable (uncovered FF /6 mod=11) — FAIL closed",
+      "old_logic_result": "FAIL"
+    },
+    {
+      "mutant": "A6_final_removed_earlier_survives",
+      "expected_fail_leg": "P3",
+      "my_checker": "FAIL",
+      "my_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got nop  [90])",
+      "executor_checker": "FAIL",
+      "executor_detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])",
+      "old_logic_result": "PASS"
+    }
+  ],
+  "ctrl3_matrix": [
+    {
+      "fixture": "clean_getter_pin",
+      "expected": "PASS",
+      "mine": "PASS",
+      "executor": "PASS"
+    },
+    {
+      "fixture": "foreign_accessor_0x120",
+      "expected": "FAIL",
+      "mine": "FAIL",
+      "executor": "FAIL"
+    },
+    {
+      "fixture": "adv_wrong_offset_0x69",
+      "expected": "FAIL",
+      "mine": "FAIL",
+      "executor": "FAIL"
+    },
+    {
+      "fixture": "adv_wrong_base_esi_0x68",
+      "expected": "FAIL",
+      "mine": "FAIL",
+      "executor": "FAIL"
+    },
+    {
+      "fixture": "adv_same_field_disp32_form",
+      "expected": "PASS",
+      "mine": "PASS",
+      "executor": "PASS"
+    }
+  ],
+  "mandatory_matrix": {
+    "real_clean": {
+      "my_checker": "PASS",
+      "executor_checker": "PASS",
+      "old_logic": "PASS",
+      "expected": "PASS"
+    },
+    "historical_edi_clobber": {
+      "my_checker": "FAIL",
+      "executor_checker": "FAIL",
+      "old_logic": "FAIL",
+      "expected": "FAIL"
+    },
+    "final_push_esi": {
+      "my_checker": "FAIL",
+      "executor_checker": "FAIL",
+      "old_logic": "PASS",
+      "expected": "FAIL"
+    },
+    "final_push_nop": {
+      "my_checker": "FAIL",
+      "executor_checker": "FAIL",
+      "old_logic": "PASS",
+      "expected": "FAIL"
+    }
+  }
+}

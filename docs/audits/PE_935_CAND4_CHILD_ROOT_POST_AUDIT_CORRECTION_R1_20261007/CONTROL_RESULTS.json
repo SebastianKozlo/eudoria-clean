@@ -1,0 +1,104 @@
+{
+  "CTRL_3_REBUILT": {
+    "checker": "ctrl3_provenance (rebuilt; getter field offset == producer-written offset 0x68; ONE code path for clean/mutated)",
+    "rebuilt_because": "the source-run implementation (qc_controls.py:117-143) used the REAL foreign EXE accessor FUN_006C0EE0 as the mutated case — an undeclared 8-byte real-body probe (the accounted 7th body opening); the rebuild uses synthetic fixtures / persisted prior pins only, with no new real EXE accessor discovery",
+    "exe_accessed": false,
+    "fixtures": {
+      "clean": {
+        "bytes": "8B 41 68 C3 CC CC CC CC",
+        "provenance": "persisted prior pin: SOURCE_PACKAGE 01_RAW/FUN_006C66D0_GETTER_FULL.txt RAW BYTES (body #1 of the source run, already budgeted); synthetic use: in-memory constant",
+        "input_kind": "PERSISTED_PRIOR_PIN__SYNTHETIC_IN_MEMORY"
+      },
+      "mutated": {
+        "bytes": "8B 81 20 01 00 00 C3 CC",
+        "provenance": "persisted recorded constant of the HISTORICAL probe (SOURCE_PACKAGE CONTROL_RESULTS.json CTRL_3 mutated_case; Desktop CONTROL_COUNTERCHECKS.json foreign_accessor_bytes); used as a recorded constant — NO new EXE read; the historical probe itself is accounted in FUNCTION_BODY_ACCOUNTING.csv row 7",
+        "input_kind": "PERSISTED_RECORDED_CONSTANT__SYNTHETIC_IN_MEMORY"
+      }
+    },
+    "clean_case": {
+      "input_bytes": "8B 41 68 C3 CC CC CC CC",
+      "result": "PASS",
+      "expected": "PASS",
+      "detail": "accessor reads [ecx + 0x68] == the producer-written field [ecx+0x68]"
+    },
+    "mutated_case": {
+      "input_bytes": "8B 81 20 01 00 00 C3 CC",
+      "mutation": "the accessor substituted with the recorded bytes of a foreign manager-field accessor ([+0x120] getter of the same class family) — SYNTHETIC/in-memory fixture, not an EXE read",
+      "result": "FAIL",
+      "expected": "FAIL",
+      "detail": "accessor 'mov eax, [ecx + 0x120]' does not read [ecx+0x68]",
+      "cause": "correct bytes of a foreign field do not qualify as provenance of THIS getter (+0x68)"
+    },
+    "verdict": "PASS",
+    "range": "same checker; same accessor instruction shape (8B /r mov r32,[ecx+disp]); clean = the persisted getter pin; mutated = the recorded foreign-accessor constant",
+    "ctrl3_synthetic_or_prior_pin_status": "SYNTHETIC_FIXTURES_AND_PERSISTED_PRIOR_PINS_ONLY (no EXE access; no new real accessor discovery; NEW_PCG_FUNCTION_BODIES_ALLOWED = 0 honored)"
+  },
+  "CTRL_4_EXACT_ENDPOINT_REBUILT": {
+    "checker": "ctrl4_exact_endpoint (rebuilt; caller-side §7 chain: P1 exact head @0x0050A3B7 (8B F8) AND P2 no EDI write in (0x0050A3B7, 0x0050A3F6) AND P3 exact final child argument push edi @0x0050A3F6 (57) AND P4 exact join call endpoint call edx @0x0050A3F7 (FF D2, no shift); exact-address instruction lookup on verified decode boundaries; ONE code path for all cases",
+    "rebuilt_because": "the source-run implementation (qc_controls.py:150-199) accepted ANY push edi in the window (the earlier push edi @0x0050A3D7 keeps its boolean) and did not bind the predicate to the exact final-argument site / join call endpoint — two Desktop false-PASS mutants",
+    "exe_accessed": false,
+    "clean_buffer_provenance": "the 0x42 published window bytes of SOURCE_PACKAGE 01_RAW/JOIN_WINDOW_50A3B7_REPIN.txt (per-instruction byte column; lengths/rel8/rel32/total-length re-verified)",
+    "matrix": {
+      "real_clean": {
+        "case": "the published §7 window bytes (0x0050A3B7..0x0050A3F8, 0x42 B; SOURCE_PACKAGE 01_RAW/JOIN_WINDOW_50A3B7_REPIN.txt)",
+        "mutants_synthetic_memory_only": true,
+        "expected_new_checker": "PASS",
+        "new_exact_endpoint_checker": {
+          "result": "PASS",
+          "detail": "PASS: P1 exact head mov edi,eax @0x0050A3B7 (8B F8); P2 no caller-side EDI write in (0x0050A3B7, 0x0050A3F6); P3 exact final child argument push edi @0x0050A3F6 (57); P4 exact join call endpoint call edx @0x0050A3F7 (FF D2) — all on verified decode boundaries"
+        },
+        "old_checker_logic_reproduction": {
+          "result": "PASS",
+          "detail": "chain intact: mov edi,eax; no EDI write before push edi; push edi present",
+          "note": "consistent with the historical result of the old checker"
+        }
+      },
+      "historical_edi_clobber": {
+        "case": "SYNTHETIC in-memory mutant: 6 bytes @0x0050A3DD replaced with 8B 3D D0 D8 B9 00 (mov edi,[0xB9D8D0]) — the historical clobber case",
+        "mutants_synthetic_memory_only": true,
+        "expected_new_checker": "FAIL",
+        "new_exact_endpoint_checker": {
+          "result": "FAIL",
+          "detail": "P2 FAIL: caller-side EDI write @0x0050A3DD in the required range: 'mov edi, dword ptr [0x00b9d8d0]'"
+        },
+        "old_checker_logic_reproduction": {
+          "result": "FAIL",
+          "detail": "EDI clobbered at 0x0050a3dd mov edi, dword ptr [0x00b9d8d0]",
+          "note": "consistent with the historical result of the old checker"
+        }
+      },
+      "final_push_esi": {
+        "case": "SYNTHETIC in-memory mutant @0x0050A3F6: 57 -> 56 (push edi -> push esi); the earlier push edi @0x0050A3D7 survives",
+        "mutants_synthetic_memory_only": true,
+        "expected_new_checker": "FAIL",
+        "new_exact_endpoint_checker": {
+          "result": "FAIL",
+          "detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: push esi [56])"
+        },
+        "old_checker_logic_reproduction": {
+          "result": "PASS",
+          "detail": "chain intact: mov edi,eax; no EDI write before push edi; push edi present",
+          "note": "FALSE PASS of the superseded predicate (any push edi in the window keeps the boolean) — reproduced from the old checker's logic over the same in-memory buffer"
+        }
+      },
+      "final_push_nop": {
+        "case": "SYNTHETIC in-memory mutant @0x0050A3F6: 57 -> 90 (push edi -> nop); the earlier push edi @0x0050A3D7 survives",
+        "mutants_synthetic_memory_only": true,
+        "expected_new_checker": "FAIL",
+        "new_exact_endpoint_checker": {
+          "result": "FAIL",
+          "detail": "P3 FAIL: exact final child argument push edi @0x0050A3F6 (57) not found (got: nop  [90])"
+        },
+        "old_checker_logic_reproduction": {
+          "result": "PASS",
+          "detail": "chain intact: mov edi,eax; no EDI write before push edi; push edi present",
+          "note": "FALSE PASS of the superseded predicate (any push edi in the window keeps the boolean) — reproduced from the old checker's logic over the same in-memory buffer"
+        }
+      }
+    },
+    "verdict": "PASS",
+    "range": "same checker; same window range (0x0050A3B7..0x0050A3F8); clean = the published bytes; mutants = synthetic in-memory byte edits at the exact endpoint sites",
+    "semantic_scope": "CALLER-SIDE exact final-argument predicate ONLY — no claim about callee-preservation completeness; the four intervening callee bodies (FUN_006C0F90/FUN_006C10B0/FUN_0050A1E0/FUN_005246E0) remain UNOPENED; CHILD_TO_JOIN_IDENTITY stays STRONGLY_SUPPORTED (NOT CONFIRMED); this control does not promote it",
+    "historical_results_preserved": "the four historically executed test cases remain authentic measurements of the OLD checker (clean PASS and EDI-clobber FAIL did occur; see SUPERSESSION.md); what is superseded is the stronger claim that the old predicate checked the exact final child argument — the two false-PASS mutants and this rebuild disprove that"
+  }
+}
