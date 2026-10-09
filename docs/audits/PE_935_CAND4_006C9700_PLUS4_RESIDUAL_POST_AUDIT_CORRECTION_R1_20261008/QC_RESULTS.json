@@ -1,0 +1,408 @@
+{
+  "qc_run_id": "PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008_INTERNAL_QC_R1",
+  "audited_run_id": "PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008",
+  "run_class_audited": "RECORDS_AND_QC_MACHINERY_CORRECTION",
+  "qc_origin": "pe-master-auditor fresh-context internal QC, internal to PE-MASTER — NOT an independent Desktop post-audit, NOT executor self-review",
+  "contract_identity_verified_by_this_qc": {
+    "path": "C:\\Users\\User\\Downloads\\OPENCODE_PLUS4_RESIDUAL_CORRECTION_R1_20261008.md",
+    "size_bytes": 23137,
+    "sha256": "2634BA31C4002B636E6AF659D2EB51313C18CB2ED3B7FEB000AA2303042C6969",
+    "match": true,
+    "read": "IN FULL (172 lines) by this QC session before any work"
+  },
+  "repo_state": {
+    "expected_base_sha": "0b94c487ba11869b811aada188bfabaf8972728a",
+    "head_at_qc_start": "0b94c487ba11869b811aada188bfabaf8972728a",
+    "head_matches_base": true,
+    "publication_actions_by_this_qc": "NONE (no stage/commit/push; the package is the parent's later phase)",
+    "package_status": "untracked working tree (executor phase complete; 66 pre-QC files)"
+  },
+
+  "qc_implementation_identity": {
+    "path": "03_SCRIPTS/qc_countercheck_v2.py",
+    "size_bytes": 89938,
+    "sha256": "F57988BC7DB255E70C0EEE7E6B3A7BD4C3F2045078233C90FD81F499B5AF4402",
+    "lines": 1778,
+    "code_lineage": "THIS QC's own implementation. NOT a re-export of the production RangeSafePE/RangeSafePEv2 classifier (own class QCPEv2, own synthetic builder build_minipe2, own oracle arithmetic qc_oracle_expectation/qc_oracle_constructor_stage, own observation helpers); style continued from this QC family's historical qc_countercheck.py QCPE with the residual P2-A/P2-B defects FIXED",
+    "executed_command": "python -B 03_SCRIPTS/qc_countercheck_v2.py",
+    "raw_output": "00_CONTROL_INTERNAL_QC/QC_COUNTERCHECK_V2_RAW.json",
+    "p2a_fixes_implemented": [
+      "half-open [VA, VA+n) intervals; all validation BEFORE section matching",
+      "va/n integers-not-bool; 0 <= VA < 2**32; n > 0; VA+n <= 2**32",
+      "VA < ImageBase underflow rejected separately",
+      "per-section declared membership [VirtualAddress, VirtualAddress+max(VirtualSize, SizeOfRawData))",
+      "ANY-INTERSECTION matching: >1 intersecting section => QC_REJECT even if one fully contains the read",
+      "a single intersecting section must cover the WHOLE request",
+      "RAW_BACKED = whole range inside one section's SizeOfRawData AND physically inside the file",
+      "pure virtual tail => QC_VIRTUAL_BSS; raw->BSS crossing => controlled read FAIL (boundary-crossing reason, no fabricated bytes)",
+      "VA=0xFFFFFFFF,n=1 / VA=0xFFFFFFFE,n=2 VALID when genuinely raw-backed (measured bytes returned)",
+      "VA=0xFFFFFFFE,n=4 / VA=0x100000000,n=4 INVALID (rejected at validation, before section matching)"
+    ],
+    "p2b_fixes_implemented": [
+      "staged constructor: physical buffer availability + declared header limits verified BEFORE EVERY struct.unpack_from/slice interpretation (e_lfanew, COFF machine/nsec, SizeOfOptionalHeader, PE32 Magic @0x98, ImageBase @0xB4, section table)",
+      "each stage raises its own controlled QCReadError(QC_REJECTED_INVALID_INPUT) with a stage-specific reason",
+      "struct.error/IndexError never escape; no catch-all"
+    ]
+  },
+
+  "input_identities_verified_by_this_qc": {
+    "desktop_adversarial_counterchecks": {
+      "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_PLUS4_CORRECTION_DESKTOP_POST_AUDIT_0B94C48_20261008\\ADVERSARIAL_COUNTERCHECKS.json",
+      "size_bytes": 16079,
+      "sha256": "62646637C323E0BAEAD371A0AE979D1F92DD2752B60C9D402E70A5A8FA38837B",
+      "match": true,
+      "read": "IN FULL (649 lines; 9 cases) by this QC session"
+    },
+    "physical_exe": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe",
+      "size_bytes": 8015872,
+      "sha256_before_all_qc_reads": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "sha256_after_all_controls": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+      "unchanged": true,
+      "access_policy": "PE headers + the pinned byte/rel32/COL/TypeDescriptor/name/string ranges + the 5 W-ctor bytes; in-memory TEST-OVERRIDE copies only for the mutants; never modified"
+    },
+    "source_run_pins_reverified": {
+      "ACTIVE_CORRECTED_PINS.json": {"size": 4835, "sha256": "64C64DA9D59CEEC25C72D1890C89E38935BB21530D8E3ED8B90537B98705001F", "match": true},
+      "03_SCRIPTS/checker_plus4_successor.py": {"size": 30167, "sha256": "F50DDC40F4780FB4431C8B08808F3A5E74DBECD91398A1AC0977556744FBAF45", "match": true},
+      "03_SCRIPTS/qc_countercheck.py": {"size": 40309, "sha256": "11957F40F7D067E4E422D86E630599142AFBB073F843CEBDB92216E382CB0870", "match": true},
+      "access": "READ_ONLY; the historical QCPE used via AST-EXTRACTION ONLY (top level NEVER executed; executed definitions: QC_RAW/QC_BSS/QC_UNMAPPED/QC_REJECT, QCReadError, QCPE, make_minipe, sha256_bytes, sha256_file, parse_hex, _try_read)"
+    },
+    "production_v2_checker_measured_before_import_and_reverified_after": {
+      "path": "03_SCRIPTS/checker_plus4_successor_v2.py",
+      "size_bytes": 38568,
+      "sha256": "80EBEE27883AA61173737590FB822B3503B4658CDA511B4B690F8E75B6B64E62",
+      "import_inertness": "verified by FULL READ (776 lines) before import — module top level is definitions/constants only; main() under __main__ guard; no file I/O at import",
+      "sha_identical_before_and_after_this_qc": true
+    },
+    "historical_provenance_checker": {
+      "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/03_SCRIPTS/checker_plus4.py",
+      "size_bytes": 12749,
+      "sha256": "F58D2DB36106006BA2CBF931DC9CFED872E9C5E22C5484E86462568B985AB7E8",
+      "match": true,
+      "access": "READ_ONLY AST parse only (80-ID tables; never executed)"
+    },
+    "audit_entrypoint": {
+      "size_bytes": 263460,
+      "sha256": "87FF331453E5643407C7428B6C43EE6898A22E33379AF2EC3812A01ADD287C01",
+      "unchanged_by_executor_and_this_qc": true
+    }
+  },
+
+  "duty_1_desktop_p2a_cases": {
+    "implementation_measured": "QCPEv2 (this QC's own) POST; historical QCPE (AST-extracted) PRE; production v1 (importlib, labeled replay) PRE; production v2 (importlib, labeled replay) POST",
+    "case_count": 18,
+    "pass_count": 18,
+    "oracle": "this file's own interval arithmetic (qc_oracle_expectation); oracle == contract expectation for every case",
+    "pre_parity_with_desktop_and_executor": {
+      "verdict": "CONFIRMED for all four Desktop mapper false-passes",
+      "outcome_vocabulary_map": "this QC's observe_read records read success as RETURNED with bytes_hex spaced; the Desktop corpus records READ_SUCCESS with packed bytes; the mapping RETURNED<->READ_SUCCESS and '41 41 41 41'<->'41414141' is a vocabulary difference, not a measurement difference",
+      "PARTIAL_OVERLAP_SECOND_SECTION_STARTS_INSIDE_READ": {
+        "desktop_qc": "READ_SUCCESS / QC_RAW_BACKED / 41414141",
+        "my_pre_on_historical_qcpe": "RETURNED / QC_RAW_BACKED / 41 41 41 41",
+        "executor_pre_qc_v1": "RETURNED / QC_RAW_BACKED / 41 41 41 41",
+        "expected": "REJECT",
+        "my_post_qcpev2": "QC_REJECTED_INVALID_INPUT, read EXCEPTION (ambiguous: 2 sections A/B intersect)",
+        "my_post_production_v2": "REJECTED_INVALID_INPUT, EXCEPTION",
+        "parity": true
+      },
+      "PARTIAL_OVERLAP_SECOND_SECTION_ENDS_INSIDE_READ": {
+        "desktop_qc": "READ_SUCCESS / QC_RAW_BACKED / 41414141",
+        "my_pre_on_historical_qcpe": "RETURNED / QC_RAW_BACKED / 41 41 41 41",
+        "executor_pre_qc_v1": "RETURNED / QC_RAW_BACKED / 41 41 41 41",
+        "expected": "REJECT (the B-intersection is exactly ONE byte 0x106F)",
+        "my_post_qcpev2": "QC_REJECTED_INVALID_INPUT, EXCEPTION",
+        "my_post_production_v2": "REJECTED_INVALID_INPUT, EXCEPTION",
+        "parity": true
+      },
+      "PE32_ABSOLUTE_VA_END_CROSSES_4GB": {
+        "desktop_qc": "READ_SUCCESS / QC_RAW_BACKED / 41414141",
+        "my_pre_on_historical_qcpe": "RETURNED / QC_RAW_BACKED / 41 41 41 41",
+        "executor_pre_qc_v1": "RETURNED / QC_RAW_BACKED / 41 41 41 41",
+        "expected": "REJECT (VA+n = 0x100000002 > 2**32)",
+        "my_post_qcpev2": "QC_REJECTED_INVALID_INPUT, EXCEPTION (rejected BEFORE section matching)",
+        "my_post_production_v2": "REJECTED_INVALID_INPUT, EXCEPTION",
+        "parity": true
+      },
+      "PE32_ABSOLUTE_VA_START_ABOVE_4GB": {
+        "desktop_qc": "READ_SUCCESS / QC_RAW_BACKED / 41414141",
+        "my_pre_on_historical_qcpe": "RETURNED / QC_RAW_BACKED / 41 41 41 41",
+        "executor_pre_qc_v1": "RETURNED / QC_RAW_BACKED / 41 41 41 41",
+        "expected": "REJECT (VA >= 2**32)",
+        "my_post_qcpev2": "QC_REJECTED_INVALID_INPUT, EXCEPTION",
+        "my_post_production_v2": "REJECTED_INVALID_INPUT, EXCEPTION",
+        "parity": true
+      }
+    },
+    "positive_boundary_cases_measured": {
+      "VA_0xFFFFFFFF_n_1": "QC_RAW_BACKED, read RETURNED byte 41 (the exclusive endpoint equals 2**32 — NOT rejected)",
+      "VA_0xFFFFFFFE_n_2": "QC_RAW_BACKED, read RETURNED 41 41"
+    },
+    "qc_extra_falsifiers_measured": {
+      "QC-DISTINCT-1/2": "same geometry, section B raw bytes 0x42 — the historical containment-only matcher would return A's 0x41 for a range covering B's region; both REJECTED on QCPEv2/v2",
+      "QC-ONE-BYTE-INTERSECTION": "range [0x10FF,0x1101) intersects .s1 and .s2 in exactly one byte each — REJECTED (the historical matcher would classify UNMAPPED); regression detection for ANY-intersection",
+      "QC-ONE-BYTE-PARTIAL": "range intersects only A but extends past its membership end — REJECTED (partially covered)",
+      "QC-PARTIAL-START": "range starts below A — REJECTED (partially unmapped)",
+      "QC-TOUCH-CROSSING": "range crossing .s1->.s2 — REJECTED (both intersect)",
+      "QC-HIST-AMBIGUOUS": "both sections fully contain the read — still REJECTED (historical full-overlap control preserved)"
+    },
+    "raw_crossing_policy_measured": {
+      "last_raw_byte": "QC_RAW_BACKED 7F",
+      "crossing_last_byte_plus_one": "QC_VIRTUAL_BSS boundary-crossing classification, read EXCEPTION — controlled FAIL, never fabricated bytes, even though plausible bytes exist further in the file"
+    },
+    "relabeled_overflow_control": "VA=ImageBase+0x7FFFFFFF measured QC_UNMAPPED (a valid 32-bit range intersecting no section) — retained RELABELED, NOT a PE32 overflow test; the real boundary tests are QC-DESKTOP-3/4 + QC-BOUNDARY-VALID-1/2"
+  },
+
+  "duty_2_p2b_header_truncations": {
+    "case_count": 9,
+    "pass_count": 9,
+    "fixture_layout_measured": "e_lfanew=0x80; PE sig @0x80; COFF @0x84 (machine 0x14C, nsec 1); SizeOfOptionalHeader @0x94 = 0xE0; Magic @0x98 = 0x10B; ImageBase @0xB4 = 0x00400000; section table @0x178; positive intact control CONSTRUCTED with all fixture header fields verified (all_match=true)",
+    "truncations_pre_parity": {
+      "0x98": {"expected": "CONTROLLED_REJECT", "pre_historical_qcpe": "struct.error 'unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 152)' — BYTE-IDENTICAL to the Desktop message and the executor PRE", "post_qcpev2": "QCReadError/QC_REJECTED_INVALID_INPUT at the optional-header Magic stage", "post_production_v2": "ControlledReadError", "verdict": "PASS"},
+      "0x99": {"expected": "CONTROLLED_REJECT", "pre_historical_qcpe": "struct.error '...154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 153)' — BYTE-IDENTICAL to Desktop/executor", "post_qcpev2": "QCReadError at the Magic stage", "verdict": "PASS"},
+      "0xB4": {"expected": "CONTROLLED_REJECT", "pre_historical_qcpe": "struct.error '...184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 180)' — BYTE-IDENTICAL to Desktop/executor", "post_qcpev2": "QCReadError at the ImageBase stage", "verdict": "PASS"},
+      "0xB7": {"expected": "CONTROLLED_REJECT", "pre_historical_qcpe": "struct.error '...184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 183)' — BYTE-IDENTICAL to Desktop/executor", "post_qcpev2": "QCReadError at the ImageBase stage", "verdict": "PASS"}
+    },
+    "boundary_probes_measured": {
+      "0x9A": "PRE historical QCPE: RAW struct.error at the ImageBase field (154 < 184); POST QCPEv2: controlled QCReadError at the ImageBase stage — the probe confirms v1's escape point is closed",
+      "0xB8": "PRE historical QCPE: ALREADY controlled (QCReadError 'incomplete section table'); POST QCPEv2: controlled at the section-table stage",
+      "0x190": "mid-section-table probe: both historical QCPE and QCPEv2 controlled at the section-table stage",
+      "0x1C0": "CONSTRUCTED on all four implementations — headers complete; only raw reads remain"
+    },
+    "positive_intact_control": "CONSTRUCTED on historical QCPE, production v1, QCPEv2 and production v2; every measured fixture header field equals the intended value (e_lfanew 0x80, PE sig, machine 0x14C, nsec 1, size_opt 0xE0, Magic 0x10B, ImageBase 0x00400000, section table @0x178); first section byte read RETURNED"
+  },
+
+  "duty_3_p3_wrong_callsite_identity_gate": {
+    "scratch_fixtures_own": {
+      "note": "this QC built its OWN isolated scratch fixtures (00_CONTROL_INTERNAL_QC/scratch/) — the SOURCE ACTIVE_CORRECTED_PINS.json and the physical EXE were never mutated; replay through the checker's NORMAL loader path (load_active_corrected_pins(<scratch path>) -> physical-file parse -> schema validation -> run_checks + gate) — NOT a prevalidated-dict bypass",
+      "CLEAN_copy": "byte-identical content to the SOURCE record",
+      "W1": "RECORD_ID kept W_CTOR_CALL_AT_006CB836; callsite teleported to the independently pinned REL_PUMP_CTOR_R 0x006C97D8 (E8 93 F7 01 00, +0x1F793, NEXT 0x006C97DD, TARGET 0x006E8F70) — the Desktop mutant",
+      "W2": "RECORD_ID-only wrong identity (RECORD_ID -> W_CTOR_CALL_AT_006C97D8; CALLSITE_VA kept canonical 0x006CB836 with the original correct values)",
+      "W3": "generality teleport to the pinned REL_HIST_PUMP callsite 0x006CB7CF (E8 2C DF FF FF, -0x20D4, NEXT 0x006CB7D4, TARGET 0x006C9700)"
+    },
+    "pre_false_pass_reproduction_on_production_v1": {
+      "W1": "86/86 gate PASS (FALSE PASS — the Desktop's expected PRE result, reproduced exactly by this QC's own replay)",
+      "W2": "86/86 gate PASS (FALSE PASS)",
+      "W3": "86/86 gate PASS (FALSE PASS)",
+      "CLEAN": "86/86 gate PASS",
+      "fixed_address_qc_comparison": {"W1": "MISMATCH_DETECTED", "W2": "MATCH_NO_MISMATCH (honest negative — the fixed-address comparison cannot catch a RECORD_ID-only mutant; only the identity gate does)", "W3": "MISMATCH_DETECTED"}
+    },
+    "post_production_v2_reexecution": {
+      "CLEAN_scratch_copy_through_normal_loader_path": {"checks_total": 87, "pass_count": 87, "gate": "PASS"},
+      "CLEAN_default_pinned_source_loader_path": {"checks_total": 87, "pass_count": 87, "gate": "PASS"},
+      "W1": {"checks_total": 87, "pass_count": 86, "gate": "FAIL", "fail_ids": ["RECW:W_RECORD_IDENTITY"], "historical_80_all_pass": true, "other_recw_all_pass": true, "no_sha_mismatch_rescue": true, "verdict": "PASS"},
+      "W2": {"checks_total": 87, "pass_count": 86, "gate": "FAIL", "fail_ids": ["RECW:W_RECORD_IDENTITY"], "historical_80_all_pass": true, "other_recw_all_pass": true, "no_sha_mismatch_rescue": true, "verdict": "PASS"},
+      "W3": {"checks_total": 87, "pass_count": 86, "gate": "FAIL", "fail_ids": ["RECW:W_RECORD_IDENTITY"], "historical_80_all_pass": true, "other_recw_all_pass": true, "no_sha_mismatch_rescue": true, "verdict": "PASS"},
+      "expected_denominators": {"historical_80": 80, "recw_old_6": 6, "new_identity": 1, "total": 87},
+      "clean_w_callsite_gate_fields": "byte pin E8 75 F0 02 00, rel32 +0x2F075, target 0x006FA8B0, all six original RECW checks AND the identity gate PASS on the clean record"
+    },
+    "identity_oracle_non_mutatability_verification": {
+      "structural": "full read of checker_plus4_successor_v2.py: exactly ONE module-level definition CANONICAL_RECORD_IDENTITY = {'W_CTOR_CALL_AT_006CB836': 0x006CB836}; ZERO later assignments; ZERO JSON-driven writes to the registry; record_checks() reads it via .get(rid) BEFORE any physical read and fails closed for unknown ids",
+      "behavioral": "W1 (canonical id + wrong callsite in the JSON) => identity FAIL: the JSON cannot rebind W_CTOR_CALL_AT_006CB836; W2 (unknown id) => identity FAIL: fail-closed; W3 (canonical id + another pinned callsite) => identity FAIL: the binding is callsite-exact",
+      "verdict": "CONFIRMED non-mutatable module-internal oracle, independent of the fixture JSON"
+    }
+  },
+
+  "duty_4_w_byte_pin_own_read": {
+    "implementation": "QCPEv2 own physical read + own signed-rel32 arithmetic + an independent direct file-slice crosscheck at the same computed offset",
+    "callsite": "0x006CB836",
+    "physical_offset_measured": "0x2CB836",
+    "direct_file_slice_crosscheck": "E8 75 F0 02 00",
+    "bytes_measured": "E8 75 F0 02 00",
+    "bytes_expected_contract": "E8 75 F0 02 00",
+    "bytes_match": true,
+    "signed_rel32_measured": "+0x2f075",
+    "signed_rel32_expected_contract": "+0x2F075",
+    "rel32_match": true,
+    "next_va_measured": "0x006CB83B",
+    "target_va_measured": "0x006FA8B0",
+    "target_match": true,
+    "json_record_matches_own_measurement": true
+  },
+
+  "duty_5_80id_regression_own_reexecution": {
+    "implementation": "this QC's own reads through QCPEv2 + own arithmetic (NOT the production checker)",
+    "required_id_count": 80,
+    "duplicate_required_ids": false,
+    "own_checks": 80,
+    "own_pass": 80,
+    "all_pass": true,
+    "table_identity": {
+      "v2_vs_historical": {"BYTE_PINS": true, "REL32_PINS": true, "RTTI_PINS": true, "STRING_PINS": true},
+      "v2_vs_source_run_successor": {"BYTE_PINS": true, "REL32_PINS": true, "RTTI_PINS": true, "STRING_PINS": true}
+    },
+    "executor_required_ids_identical_to_own": true,
+    "executor_regression_verdict": "PASS",
+    "regression_pass": true
+  },
+
+  "duty_6_records_content_readjudication": {
+    "corrected_claim_matrix": {
+      "physical_rows_including_header": 22,
+      "data_rows": 21,
+      "row_ids": ["ROLE_DEFINITIONS", "R_ALLOCATION_AND_RETURN_CORE", "R_PLUS4_FIRST_INITIALIZATION", "P_VALUE_SOURCE_AT_FIRST_INIT", "R_PLUS4_VALUE_PRESERVED_TO_LATER_USE", "T_EQUALS_FIRST_INITIAL_P", "ACTUAL_LATER_OVERWRITE_OBSERVED", "T_NOT_EQUAL_W_AT_LATER_USE", "R_NOT_EQUAL_T_AT_LATER_USE", "R_W_SEPARATENESS", "P_ALLOCATION_OR_STORAGE_ORIGIN", "P_HEAP_ORIGIN", "OWNERSHIP_INTERPRETATION", "R_TO_T_RELATION_TYPE", "FIELD_EQUIVOCATION_BAN", "P_NAME_TAKING_VIRTUAL_CALL", "RESEARCH_GUARDRAILS", "W_CTOR_ACTIVE_PIN_RECORD", "CTRL_B_REINTERPRETATION", "SUPERSEDED_OVERCLAIMS_STANDING", "SCOPE_BUDGET_RECORDS"],
+      "retraction_a_R_W_SEPARATENESS": "SCOPED STRUCTURAL FACT (CORRECTED): R/W distinct construction events and sizes preserved IN FULL (6A 10 vs 6A 0C; separate construction sites and callers; the CAND-4 path creates no W); the unsupported later-T part 'T != W' REMOVED from the active claim; NOT a universal object/class inequality, NOT a lifetime identity theorem",
+      "retraction_b_R_NOT_T": "R_NOT_EQUAL_T_AT_LATER_USE = NOT_ESTABLISHED_WITHIN_BOUND (the historical ACTIVE 'R != T stays' of the SOURCE ledger FD-C2/SL-9 superseded; NEITHER equality NOR inequality established; R, P, T, W, field addresses, owners and classes never conflated)",
+      "explicit_unknown_rows": {"T_NOT_EQUAL_W_AT_LATER_USE": "NOT_ESTABLISHED_WITHIN_BOUND", "R_NOT_EQUAL_T_AT_LATER_USE": "NOT_ESTABLISHED_WITHIN_BOUND"},
+      "preserved_core": {"T_EQUALS_FIRST_INITIAL_P": "NOT_ESTABLISHED_WITHIN_BOUND", "R_PLUS4_VALUE_PRESERVED_TO_LATER_USE": "NOT_ESTABLISHED", "P_HEAP_ORIGIN": "NOT_ESTABLISHED", "P_ALLOCATION_OR_STORAGE_ORIGIN": "NOT_ESTABLISHED_WITHIN_BOUND", "R_PLUS4_FIRST_INITIALIZATION": "PRESERVED_CONFIRMED_STATIC_CONDITIONAL"},
+      "scope_budget_records": {"floor_17": true, "bodies_5": true, "edge_budget_12_fail": true, "exact_counts_unresolved": true, "retroactive_authorization": "NO"}
+    },
+    "supersession_ledger": {
+      "physical_rows_including_header": 9,
+      "data_rows": 8,
+      "ids": ["RS-1", "RS-2", "RS-3", "RS-4", "RS-5", "RS-6", "RS-7", "RS-8"],
+      "RS1_retraction_a": true,
+      "RS2_supersession_of_R_NOT_T_active": true,
+      "RS3_explicit_census_10_locations": true,
+      "RS8_HISTORICAL_FIRST_QC_PRE_LOST_OR_NOT_AVAILABLE_disclosed": true
+    },
+    "active_overclaim_sweep_of_this_package": {
+      "patterns_searched": ["T==P PROVEN", "T==P alias-at-use", "P heap-origin CONFIRMED", "scope WITHIN", "SCIENCE_PASS"],
+      "hits": 4,
+      "all_hits_are_HISTORICAL_SUPERSEDED_or_RETRACTION_records": true,
+      "note": "two 'scope WITHIN' hits fell outside this script's short tagging-context window but the FULL row reads (SUPERSEDED_OVERCLAIMS_STANDING and RS-4) are explicitly SUPERSEDED-statement rows — verified by this QC's manual row read; ZERO ACTIVE standing",
+      "untagged_active_overclaims": 0
+    },
+    "general_pe_mapper_correctness": {"occurrences_in_package": 4, "all_say_NOT_ESTABLISHED": true},
+    "science_pass_occurrences": 0,
+    "schema_pass_is_not_science_pass": "CONFIRMED — no SCIENCE_PASS token exists anywhere in the audited package"
+  },
+
+  "duty_7_dependent_location_census_and_entrypoint": {
+    "rs3_census_10_locations_verified_by_this_qc": {
+      "1_SOURCE_RUN_CORRECTED_CLAIM_MATRIX_line18_ACTIVE_retracted_by_RS1": true,
+      "2_SOURCE_RUN_SUPERSESSION_LEDGER_FD-C2_SL9_ACTIVE_superseded_by_RS2": true,
+      "3_SOURCE_RUN_FINAL_REPORT_L228_and_L248_dependent_HISTORICAL_SUPERSEDED": true,
+      "4_SOURCE_RUN_QC_RESULTS_duty6_dependent_HISTORICAL_SUPERSEDED": true,
+      "5_SOURCE_RUN_PE_MASTER_REVIEW_L28_generic_citation_limited_to_scoped_structural_fact": true,
+      "6_SOURCE_RUN_HANDOFF_no_occurrence": true,
+      "7_SOURCE_RUN_EVIDENCE_INDEX_no_inequality_restatement": true,
+      "8_SOURCE_RUN_SOURCE_STATE_no_direct_occurrence": true,
+      "9_AUDIT_ENTRYPOINT_line31_SOURCE_RUN_row_no_T_or_R_inequality_standing_text": true,
+      "10_AUDIT_ENTRYPOINT_line32_R_not_equal_T_in_original_historical_text": true
+    },
+    "entrypoint_measured": {
+      "line_31_inequality_hits": 0,
+      "line_32_inequality_hits": ["R!=W", "R!=T"],
+      "line_32_hits_position": "both BEFORE the bracketed HISTORICAL_REFERENCE annotation (annotation span offsets 4707..5175 within the 5352-char line) — they are part of the ORIGINAL historical provenance-row text",
+      "line_32_annotation_withdraws_T_equals_P_and_WITHIN": true,
+      "line_32_annotation_withdraws_R_not_equal_T": false,
+      "precision_note": "RS-2/RS-3 phrase this as 'R!=T ... inside the bracketed HISTORICAL_REFERENCE annotation'; physically the R!=T tokens sit in the original row text BEFORE the annotation (the annotation was appended by the earlier correction). The MEANING intended and needed is unchanged: the current annotation withdraws T==P/WITHIN but NOT R!=T — the R!=T standing use REMAINS pending the parent-phase annotation extension"
+    },
+    "remaining_pending_for_the_parent_phase": [
+      "AUDIT_ENTRYPOINT.md line 32 (the older PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1 row): extend the existing HISTORICAL_REFERENCE withdrawal annotation to ALSO cover the 'R!=T' standing use (per RS-2); the 'R!=W 0x10 vs 0xC' token in the same line remains the SCOPED STRUCTURAL FACT (permitted)"
+    ],
+    "additional_historical_occurrences_outside_the_rs3_census_scope": [
+      "the older PROVENANCE_R1 package (READ_ONLY history at 97823c6) contains further historical 'R!=T/R!=W' tokens (e.g. its QC_REPORT.md L113, FINAL_REPORT.md L154, CLAIM_MATRIX.csv CL-13/CL-14, HANDOFF.md L56/L78, PE_MASTER_REVIEW.md L21, 00_CONTROL_INTERNAL_QC/QC_RESULTS.json L840); those files are historical authentic records whose standing alias claims were already superseded at the claim level by the SOURCE_RUN FD-C2 supersessions (SL-9..SL-16) and whose T==P overclaims are withdrawn; they were NOT part of the contract par. 4 sweep list (the 8 SOURCE_RUN files + entrypoint) and need no new annotation; listed here for completeness"
+    ]
+  },
+
+  "duty_8_mapper_boundary_results_spot_verification": {
+    "method": "pairwise comparison of THIS QC's own production-v2 re-observations against every mapped case of MAPPER_BOUNDARY_RESULTS.json (16 synthetic pairs + 3 EXE cases + 8 input-type cases)",
+    "classification_vocabulary_map": "QCPEv2 names carry the QC_ prefix (QC_RAW_BACKED/QC_VIRTUAL_BSS/QC_UNMAPPED/QC_REJECTED_INVALID_INPUT) mapped 1:1 to the production vocabulary (RAW_BACKED/VIRTUAL_BSS/UNMAPPED/REJECTED_INVALID_INPUT) — a namespace difference, not a measurement difference",
+    "synthetic_cases_agree": 16,
+    "synthetic_cases_disagree": 0,
+    "exe_cases_agree": 3,
+    "exe_cases_disagree": 0,
+    "input_type_cases_agree": 8,
+    "input_type_cases_disagree": 0,
+    "historical_qcpe_pre_observations_agree_with_executor_pre": 16,
+    "verdict": "CONFIRMED — every spot row matches this QC's independent measurements"
+  },
+
+  "duty_9_regression_results_spot_verification": {
+    "executor_historical_80": {"count": 80, "pass_count": 80, "all_pass": true},
+    "executor_recw_old_6_pass": 6,
+    "executor_new_identity": {"id": "RECW:W_RECORD_IDENTITY", "verdict": "PASS"},
+    "executor_separate_denominators": {"historical_80": 80, "recw_old": 6, "new_identity": 1, "total": 87},
+    "my_clean_reexecution": {"checks_total": 87, "pass_count": 87, "gate": "PASS"},
+    "my_own_80id_reexecution": {"checks": 80, "pass": 80},
+    "my_mutant_reexecutions_each_86_of_87_fail_exactly_identity": true,
+    "executor_regression_verdict": "PASS",
+    "agree": true
+  },
+
+  "duty_10_pre_immutability_and_superseded_stamps": {
+    "pre_sha256_index_files": 10,
+    "mismatches": 0,
+    "extra_files_not_in_index": ["PRE_20261009T035439Z_SHA256_INDEX.json"],
+    "extra_is_only_the_self_index": true,
+    "verdict": "PASS (all PRE files match their SHA256 index; the index does not hash itself by design)",
+    "superseded_post_stamps_preserved": ["20261009T035645Z", "20261009T035712Z", "20261009T035717Z", "20261009T035740Z"],
+    "final_post_stamp": "20261009T035844Z",
+    "none_of_the_00_PRE_files_overwritten": true,
+    "four_superseded_stamps_kept_as_authentic_negative_evidence": true
+  },
+
+  "qc_self_tooling_fixes_disclosed": {
+    "repair_round_used": 1,
+    "fix_1": "the first write of this file had a 63-character transcription of the historical checker SHA pin (one '2' dropped); the fail-closed verify_pin caught it BEFORE any execution — no raw output was written; corrected in place with a source comment at the constant",
+    "fix_2": "an oracle-census line used 'v2.count' instead of 'v2_src.count' (NameError after the duties, BEFORE the raw dump); no raw output was written by that attempt; only the deterministic scratch fixtures existed; fixed in place",
+    "attempts_log": "00_CONTROL_INTERNAL_QC/QC_ATTEMPTS_LOG.md (authentic negative evidence per contract par. 6)",
+    "completed_run": "attempt 3 — the run whose raw output is QC_COUNTERCHECK_V2_RAW.json",
+    "executor_artifacts_modified_by_these_fixes": "NONE"
+  },
+
+  "final_identities_after_all_qc_controls": {
+    "exe": {"size": 8015872, "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31", "unchanged": true},
+    "source_run_pins": {"checker": true, "qc_countercheck": true, "active_corrected_pins_json": true},
+    "audit_entrypoint": {"size": 263460, "sha256": "87FF331453E5643407C7428B6C43EE6898A22E33379AF2EC3812A01ADD287C01", "unchanged": true},
+    "production_v2_checker": {"sha256_before_and_after_identical": "80EBEE27883AA61173737590FB822B3503B4658CDA511B4B690F8E75B6B64E62"},
+    "pycache_or_pyc_residue": "NONE (python -B everywhere; verified)"
+  },
+
+  "coverage": {
+    "full_read": [
+      "the frozen contract (172 lines) — this QC session",
+      "Desktop ADVERSARIAL_COUNTERCHECKS.json (649 lines) — this QC session",
+      "PACKAGE checker_plus4_successor_v2.py (776 lines) — this QC session (import inertness)",
+      "PACKAGE run_residual_controls.py (1794 lines) — this QC session (generator lineage)",
+      "SOURCE_RUN qc_countercheck.py (892 lines) — this QC session (defect verification + AST extraction source)",
+      "SOURCE_RUN checker_plus4_successor.py (620 lines) — this QC session (PRE defect verification + import inertness)",
+      "PACKAGE INPUT_IDENTITIES.md, AUTHORIZATION_RECORD.md, SOURCE_STATE_AND_FINDINGS.md — this QC session",
+      "PACKAGE CORRECTED_CLAIM_MATRIX.csv (21 data rows) + SUPERSESSION_LEDGER.csv (8 data rows) — csv.reader + full row reads",
+      "SOURCE_RUN PE_MASTER_REVIEW.md (46 lines) — this QC session",
+      "PACKAGE REGRESSION_RESULTS.json (917 lines) — this QC session",
+      "PACKAGE MAPPER_BOUNDARY_RESULTS.json — full programmatic parse of all 39 cases + policy + oracle_discipline sections; every case object individually compared with this QC's own measurements"
+    ],
+    "recomputed_or_reexecuted": [
+      "ALL Desktop P2-A cases (18 mapper cases incl. the 4 Desktop false-passes + positives + QC extra falsifiers) on 4 implementations (historical QCPE AST-extracted PRE, production v1 PRE, QCPEv2 POST, production v2 POST)",
+      "ALL P2-B truncations/probes + positive intact (9 cases) on the same 4 implementations",
+      "8 input-type rejections",
+      "3 EXE read cases + the W byte pin (own read + own arithmetic + direct file-slice crosscheck)",
+      "the 80-ID historical regression by this QC's own reads/arithmetic",
+      "the production v2 gate: CLEAN via the default pinned loader AND via the normal scratch loader path (87/87), W1/W2/W3 mutant replays (86/87, fail exactly RECW:W_RECORD_IDENTITY)",
+      "PRE immutability (10-file SHA index re-hash), SOURCE_RUN pin re-hash, entrypoint/EXE/v2-checker identity re-hash",
+      "RS-3 census: all 10 locations independently re-verified (regex + full-line reads + SOURCE_RUN file reads)"
+    ],
+    "not_checked_by_this_qc": [
+      "no new RE / disassembly of any kind (contract par. 0) — zero new bodies, zero new xrefs",
+      "FUN_007B79B0 / FUN_007B7930 / FUN_006B2310 bodies were NOT opened (the &R+8 write-effects GAP stays a GAP)",
+      "the EXE was never executed (STATIC_ONLY)",
+      "executor PRE/POST raw files (00_PRE/, 00_POST/) were hashed and spot-verified against MAPPER_BOUNDARY/REGRESSION, not every JSON field individually re-executed by this QC (the load-bearing mapper/header/P3/regression rows WERE re-executed)",
+      "the Desktop post-audit of the resulting SHA remains NOT_PERFORMED (external, later)",
+      "canonical/qualification effects: NONE (CANONICAL_GATE_EFFECT = NONE)"
+    ]
+  },
+
+  "qc_verdict": "PASS",
+  "qc_verdict_scope": "internal QC of THIS residual correction run's machinery and records (the executor's P2-A/P2-B/P2-C/P3 corrections + regression evidence). NOT MASTER_ACCEPTED, NOT a milestone closure, NOT a canonical promotion, NOT an external Desktop post-audit.",
+  "open_findings": [
+    "F-QC-1 (pending parent action, not a defect of this package): AUDIT_ENTRYPOINT.md line 32 still carries the 'R!=T' standing use in its original historical text; the existing HISTORICAL_REFERENCE annotation withdraws T==P/WITHIN but NOT R!=T — the parent phase must extend the annotation per RS-2 (the executor correctly recorded this as pending and did NOT edit the entrypoint)"
+  ],
+  "standing_statuses_confirmed_unchanged": {
+    "ORIGINAL_SCOPE_COMPLIANCE": "FAIL",
+    "ORIGINAL_EDGE_BUDGET_COMPLIANCE": "FAIL",
+    "RETROACTIVE_PRIOR_AUTHORIZATION": "NO",
+    "T_EQUALS_FIRST_INITIAL_P": "NOT_ESTABLISHED_WITHIN_BOUND",
+    "T_NOT_EQUAL_W_AT_LATER_USE": "NOT_ESTABLISHED_WITHIN_BOUND",
+    "R_NOT_EQUAL_T_AT_LATER_USE": "NOT_ESTABLISHED_WITHIN_BOUND",
+    "P_HEAP_ORIGIN": "NOT_ESTABLISHED",
+    "GENERAL_PE_MAPPER_CORRECTNESS": "NOT_ESTABLISHED",
+    "MODEL_ROOT_RELATION": "UNKNOWN",
+    "WORLD_XYZ_RECOVERED": "NO",
+    "HISTORICAL_FIRST_QC_PRE": "LOST_OR_NOT_AVAILABLE",
+    "NEW_DESKTOP_POST_AUDIT": "NOT_PERFORMED",
+    "NEXT_EXPERIMENT_AUTHORIZED": "NO",
+    "HARD_STOP": "YES"
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "phase": "PRE",
+  "stamp": "20261009T035439Z",
+  "fixture_layout": "e_lfanew=0x80; COFF at 0x84; Magic read at 0x98; ImageBase read at 0xB4; SizeOfOptionalHeader 0xE0; section table at 0x1A0; one section .text (RVA 0x1000, vsize 0x100, rsize 0x100, roff 0x400); full file 0x500 bytes; truncations are total FILE sizes in bytes",
+  "header_field_expectations": {
+    "e_lfanew": "0x80",
+    "pe_signature": "PE\\x00\\x00",
+    "machine": "0x14C",
+    "number_of_sections": 1,
+    "size_of_optional_header": "0xE0",
+    "optional_header_magic": "0x10B (PE32)",
+    "image_base": "0x00400000",
+    "coff_file_offset": "0x84",
+    "magic_file_offset": "0x98",
+    "image_base_file_offset": "0xB4",
+    "section_table_file_offset": "0x1A0",
+    "sections": [
+      {
+        "name": ".text",
+        "rva": "0x00001000",
+        "vsize": "0x100",
+        "raw_offset": "0x400",
+        "raw_size": "0x100",
+        "member_end": "0x1100"
+      }
+    ]
+  },
+  "positive_intact": {
+    "pre_production_v1": {
+      "outcome": "CONSTRUCTED",
+      "image_base": "0x00400000",
+      "sections": [
+        {
+          "name": ".text",
+          "rva": "0x00001000",
+          "vsize": "0x100",
+          "raw_offset": "0x400",
+          "raw_size": "0x100",
+          "member_end": "0x1100"
+        }
+      ]
+    },
+    "pre_qc_v1": {
+      "outcome": "CONSTRUCTED",
+      "image_base": "0x00400000",
+      "sections": [
+        {
+          "name": ".text",
+          "rva": "0x00001000",
+          "vsize": "0x100",
+          "raw_offset": "0x400",
+          "raw_size": "0x100",
+          "member_end": "0x1100"
+        }
+      ]
+    },
+    "read_first_section_byte": {
+      "request": {
+        "va": "0x00401000",
+        "n": 1
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x0, raw end 0x401 <= file size 0x500; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      }
+    }
+  },
+  "truncations": {
+    "0x98": {
+      "file_size": "0x98",
+      "expected": "CONTROLLED_REJECT (REJECTED_INVALID_INPUT / QC_REJECT)",
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 152)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 152)",
+        "controlled": false
+      }
+    },
+    "0x99": {
+      "file_size": "0x99",
+      "expected": "CONTROLLED_REJECT (REJECTED_INVALID_INPUT / QC_REJECT)",
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 153)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 153)",
+        "controlled": false
+      }
+    },
+    "0xB4": {
+      "file_size": "0xB4",
+      "expected": "CONTROLLED_REJECT (REJECTED_INVALID_INPUT / QC_REJECT)",
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 180)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 180)",
+        "controlled": false
+      }
+    },
+    "0xB7": {
+      "file_size": "0xB7",
+      "expected": "CONTROLLED_REJECT (REJECTED_INVALID_INPUT / QC_REJECT)",
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 183)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 183)",
+        "controlled": false
+      }
+    }
+  },
+  "probes": {
+    "0x9A": {
+      "file_size": "0x9A",
+      "expected": "boundary-specific probe \u2014 confirm the exact failure stage; do NOT assume a complete valid PE image",
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 154)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 154)",
+        "controlled": false
+      }
+    },
+    "0xB8": {
+      "file_size": "0xB8",
+      "expected": "boundary-specific probe \u2014 confirm the exact failure stage; do NOT assume a complete valid PE image",
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] incomplete section table",
+        "controlled": true
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "QCReadError",
+        "exception_message": "[QC_REJECTED_INVALID_INPUT] incomplete section table",
+        "controlled": true
+      }
+    },
+    "0x1C0": {
+      "file_size": "0x1C0",
+      "expected": "boundary-specific probe \u2014 confirm the exact failure stage; do NOT assume a complete valid PE image",
+      "pre_production_v1": {
+        "outcome": "CONSTRUCTED",
+        "image_base": "0x00400000",
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ]
+      },
+      "pre_qc_v1": {
+        "outcome": "CONSTRUCTED",
+        "image_base": "0x00400000",
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ]
+      }
+    }
+  }
+}

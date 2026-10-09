@@ -1,0 +1,1909 @@
+{
+  "phase": "PRE",
+  "stamp": "20261009T035439Z",
+  "canonical_w_callsite": "0x006CB836",
+  "source_record": {
+    "RECORD_ID": "W_CTOR_CALL_AT_006CB836",
+    "CALLSITE_VA": "0x006CB836",
+    "BYTES": "E8 75 F0 02 00",
+    "SIGNED_REL32": "+0x2F075",
+    "NEXT_VA": "0x006CB83B",
+    "TARGET_VA": "0x006FA8B0",
+    "TARGET_FORMULA": "CALLSITE_VA + 5 + signed_little_endian_int32(BYTES[1:5])",
+    "PHYSICAL_OFFSET": "0x2CB836"
+  },
+  "note": "the ORIGINAL production checker has NO RECORD_ID<->CALLSITE_VA identity gate (expected PRE false PASS per the Desktop demonstration); the separate fixed-address QC comparison catches the teleport (W1) but NOT the RECORD_ID-only mutant (W2) \u2014 recorded honestly",
+  "mutants": {
+    "W1": {
+      "fixture": {
+        "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/scratch/W1_wrong_callsite_20261009T035439Z.json",
+        "size": 5066,
+        "sha256": "66EBAAE24C1663644AF013F4F116AF3EA263EF71F028CA86E3C85084F60AA02B"
+      },
+      "record": {
+        "RECORD_ID": "W_CTOR_CALL_AT_006CB836",
+        "CALLSITE_VA": "0x006C97D8",
+        "BYTES": "E8 93 F7 01 00",
+        "SIGNED_REL32": "+0x1F793",
+        "NEXT_VA": "0x006C97DD",
+        "TARGET_VA": "0x006E8F70",
+        "PHYSICAL_OFFSET": "0x2C97D8"
+      },
+      "pre_v1_production": {
+        "replay_label": "PRE W1 on v1",
+        "loader_path": "load_active_corrected_pins(<scratch fixture path>) \u2014 physical-file parse + schema validation executed; then run_checks() + gate() (the SAME overall production gate)",
+        "fixture_path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/scratch/W1_wrong_callsite_20261009T035439Z.json",
+        "checks_total": 86,
+        "pass_count": 86,
+        "gate": "PASS",
+        "fail_ids": [],
+        "recw_verdicts": {
+          "RECW:RECORD_SCHEMA": "PASS",
+          "RECW:W_RECORD_BYTES": "PASS",
+          "RECW:W_RECORD_REL32": "PASS",
+          "RECW:W_RECORD_NEXT_VA": "PASS",
+          "RECW:W_RECORD_TARGET": "PASS",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY": "PASS"
+        },
+        "historical_80_all_pass": true,
+        "results_raw": [
+          [
+            "EXE_IDENTITY",
+            "PASS",
+            "physical EXE size+SHA256 == pinned"
+          ],
+          [
+            "PIN:PUMP_SEH_HANDLER",
+            "PASS",
+            "@0x006c9702 == 68 13 57 A0 00"
+          ],
+          [
+            "PIN:PUMP_ARG3_LOAD",
+            "PASS",
+            "@0x006c9725 == 8B 7C 24 30"
+          ],
+          [
+            "PIN:PUMP_ARG2_LOAD",
+            "PASS",
+            "@0x006c9729 == 8B 4C 24 2C"
+          ],
+          [
+            "PIN:PUMP_ARG1_LOAD",
+            "PASS",
+            "@0x006c972d == 8B 44 24 28"
+          ],
+          [
+            "PIN:PUMP_PAIR_TYPE_0x66",
+            "PASS",
+            "@0x006c973a == C7 44 24 20 66 00 00 00"
+          ],
+          [
+            "PIN:PUMP_PAIR_ID_A",
+            "PASS",
+            "@0x006c9742 == 89 44 24 24"
+          ],
+          [
+            "PIN:PUMP_S_NULL_TEST",
+            "PASS",
+            "@0x006c9754 == 85 F6"
+          ],
+          [
+            "PIN:PUMP_S_NULL_JE",
+            "PASS",
+            "@0x006c9756 == 74 4D"
+          ],
+          [
+            "PIN:PUMP_ARG4_LOAD",
+            "PASS",
+            "@0x006c9758 == 8B 44 24 34"
+          ],
+          [
+            "PIN:PUMP_SLOT_LEA",
+            "PASS",
+            "@0x006c975d == 8D 4C 24 2C"
+          ],
+          [
+            "PIN:PUMP_SLOT_CMP",
+            "PASS",
+            "@0x006c9769 == 83 7C 24 28 00"
+          ],
+          [
+            "PIN:PUMP_SLOT_JNE",
+            "PASS",
+            "@0x006c9776 == 75 41"
+          ],
+          [
+            "PIN:PUMP_RELEASEA_DEC",
+            "PASS",
+            "@0x006c9790 == 83 40 04 FF"
+          ],
+          [
+            "PIN:PUMP_RELEASEA_DESTROY",
+            "PASS",
+            "@0x006c979e == 8B 11 8B 42 04 FF D0"
+          ],
+          [
+            "PIN:PUMP_RETURN_NULL",
+            "PASS",
+            "@0x006c97a5 == 33 C0"
+          ],
+          [
+            "PIN:PUMP_NEW_SIZE_0x10",
+            "PASS",
+            "@0x006c97b9 == 6A 10"
+          ],
+          [
+            "PIN:PUMP_ALLOC_LOCAL_SAVE",
+            "PASS",
+            "@0x006c97c3 == 89 44 24 0C"
+          ],
+          [
+            "PIN:PUMP_ALLOC_FAIL_JE",
+            "PASS",
+            "@0x006c97ce == 74 11"
+          ],
+          [
+            "PIN:PUMP_CTOR_PUSH_P",
+            "PASS",
+            "@0x006c97d4 == 51"
+          ],
+          [
+            "PIN:PUMP_CTOR_PUSH_S",
+            "PASS",
+            "@0x006c97d5 == 56"
+          ],
+          [
+            "PIN:PUMP_CTOR_RECEIVER",
+            "PASS",
+            "@0x006c97d6 == 8B C8"
+          ],
+          [
+            "PIN:PUMP_CTOR_RESULT_SAVE",
+            "PASS",
+            "@0x006c97dd == 8B F0"
+          ],
+          [
+            "PIN:PUMP_RELEASEB_DEC",
+            "PASS",
+            "@0x006c97f3 == 83 40 04 FF"
+          ],
+          [
+            "PIN:PUMP_RELEASEB_DESTROY",
+            "PASS",
+            "@0x006c9801 == 8B 11 8B 42 04 FF D0"
+          ],
+          [
+            "PIN:PUMP_RETURN_R",
+            "PASS",
+            "@0x006c9808 == 8B C6"
+          ],
+          [
+            "PIN:PUMP_TERMINAL_RET",
+            "PASS",
+            "@0x006c981b == C3"
+          ],
+          [
+            "PIN:CTOR_THIS_SAVE",
+            "PASS",
+            "@0x006e8f93 == 8B F1"
+          ],
+          [
+            "PIN:CTOR_R0_STORE_S",
+            "PASS",
+            "@0x006e8f9d == 89 06"
+          ],
+          [
+            "PIN:CTOR_R4_STORE_P",
+            "PASS",
+            "@0x006e8fa5 == 89 46 04"
+          ],
+          [
+            "PIN:CTOR_P_ADDREF",
+            "PASS",
+            "@0x006e8faf == 01 48 04"
+          ],
+          [
+            "PIN:CTOR_R8_ZERO",
+            "PASS",
+            "@0x006e8fbd == C7 07 00 00 00 00"
+          ],
+          [
+            "PIN:CTOR_RC_ZERO",
+            "PASS",
+            "@0x006e8fc9 == C7 46 0C 00 00 00 00"
+          ],
+          [
+            "PIN:CTOR_GATE_CMP_0xB7DC",
+            "PASS",
+            "@0x006e8fd5 == 81 78 04 DC B7 00 00"
+          ],
+          [
+            "PIN:CTOR_P_VT_SLOT17",
+            "PASS",
+            "@0x006e8fe3 == 8B 42 44"
+          ],
+          [
+            "PIN:CTOR_P_NAME_ARG",
+            "PASS",
+            "@0x006e8fe6 == 68 A4 5D A8 00"
+          ],
+          [
+            "PIN:CTOR_RETURN_THIS",
+            "PASS",
+            "@0x006e9014 == 8B C6"
+          ],
+          [
+            "PIN:CTOR_TERMINAL_RET8",
+            "PASS",
+            "@0x006e9027 == C2 08 00"
+          ],
+          [
+            "PIN:SETTER_SLOT_CLEAR",
+            "PASS",
+            "@0x006c95a0 == C7 06 00 00 00 00"
+          ],
+          [
+            "PIN:SETTER_RECEIVER_S10",
+            "PASS",
+            "@0x006c95a6 == 8B 49 10"
+          ],
+          [
+            "PIN:SETTER_FLAG_CMP",
+            "PASS",
+            "@0x006c95ae == 38 5C 24 28"
+          ],
+          [
+            "PIN:SETTER_FLAG_JNE",
+            "PASS",
+            "@0x006c95be == 75 71"
+          ],
+          [
+            "PIN:SETTER_SLOT_STORE_P",
+            "PASS",
+            "@0x006c9651 == 89 3E"
+          ],
+          [
+            "PIN:SETTER_P_ADDREF",
+            "PASS",
+            "@0x006c9657 == 01 5F 04"
+          ],
+          [
+            "PIN:SETTER_TERMINAL_RET8_A",
+            "PASS",
+            "@0x006c962e == C2 08 00"
+          ],
+          [
+            "PIN:SETTER_TERMINAL_RET8_B",
+            "PASS",
+            "@0x006c966c == C2 08 00"
+          ],
+          [
+            "PIN:PGET_RECEIVER_SAVE",
+            "PASS",
+            "@0x007b79d4 == 8B F9"
+          ],
+          [
+            "PIN:PGET_ALLOC_SIZE_4",
+            "PASS",
+            "@0x007b79d6 == 6A 04"
+          ],
+          [
+            "PIN:PRODUCER_STORE_6C",
+            "PASS",
+            "@0x006c7008 == 89 46 6C"
+          ],
+          [
+            "PIN:INSTALLER_LOAD_R",
+            "PASS",
+            "@0x006c67b3 == 8B 46 6C"
+          ],
+          [
+            "PIN:INSTALLER_READ_R4",
+            "PASS",
+            "@0x006c67be == 8B 78 04"
+          ],
+          [
+            "PIN:INSTALLER_EBX_1",
+            "PASS",
+            "@0x006c67c9 == BB 01 00 00 00"
+          ],
+          [
+            "PIN:INSTALLER_WRITE_68",
+            "PASS",
+            "@0x006c67e2 == 89 7E 68"
+          ],
+          [
+            "PIN:INSTALLER_INCREF_T",
+            "PASS",
+            "@0x006c67e7 == 01 5F 04"
+          ],
+          [
+            "PIN:INSTALLER_DECREF_OLD",
+            "PASS",
+            "@0x006c67d4 == 01 69 04"
+          ],
+          [
+            "PIN:HIST_CALLER_PUMP_CALL",
+            "PASS",
+            "@0x006cb7cf == E8 2C DF FF FF"
+          ],
+          [
+            "PIN:HIST_CALLER_NEW_0xC",
+            "PASS",
+            "@0x006cb819 == 6A 0C"
+          ],
+          [
+            "PIN:HIST_CALLER_CTOR_CALL",
+            "PASS",
+            "@0x006cb836 == E8 75 F0 02 00"
+          ],
+          [
+            "REL32:REL_PUMP_REQISSUE",
+            "PASS",
+            "@0x006c9746 E8 rel32 -0x2b40db -> 0x00415670 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SGETTER",
+            "PASS",
+            "@0x006c974d E8 rel32 +0x15a4be -> 0x00823c10 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SLOTSETTER",
+            "PASS",
+            "@0x006c9764 E8 rel32 -0x1f9 -> 0x006c9570 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SMETHOD_8268A0",
+            "PASS",
+            "@0x006c977b E8 rel32 +0x15d120 -> 0x008268a0 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_ALLOC_NEW",
+            "PASS",
+            "@0x006c97bb E8 rel32 +0x293c04 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_CTOR_R",
+            "PASS",
+            "@0x006c97d8 E8 rel32 +0x1f793 -> 0x006e8f70 == expected"
+          ],
+          [
+            "REL32:REL_CTOR_GATE",
+            "PASS",
+            "@0x006e8fd0 E8 rel32 +0x3f17b -> 0x00728150 == expected"
+          ],
+          [
+            "REL32:REL_SETTER_VARIANT",
+            "PASS",
+            "@0x006c95c5 E8 rel32 +0xee096 -> 0x007b7660 == expected"
+          ],
+          [
+            "REL32:REL_SETTER_PGETTER",
+            "PASS",
+            "@0x006c9631 E8 rel32 +0xee37a -> 0x007b79b0 == expected"
+          ],
+          [
+            "REL32:REL_PGET_ALLOC",
+            "PASS",
+            "@0x007b79d8 E8 rel32 +0x1a59e7 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_PGET_INIT",
+            "PASS",
+            "@0x007b79f2 E8 rel32 -0xc7 -> 0x007b7930 == expected"
+          ],
+          [
+            "REL32:REL_CAND4_CALLER_PUMP",
+            "PASS",
+            "@0x006c6ffc E8 rel32 +0x26ff -> 0x006c9700 == expected"
+          ],
+          [
+            "REL32:REL_PRODUCER_INSTALLER",
+            "PASS",
+            "@0x006c7049 E8 rel32 -0x8ce -> 0x006c6780 == expected"
+          ],
+          [
+            "REL32:REL_HIST_PUMP",
+            "PASS",
+            "@0x006cb7cf E8 rel32 -0x20d4 -> 0x006c9700 == expected"
+          ],
+          [
+            "REL32:REL_HIST_NEW",
+            "PASS",
+            "@0x006cb81b E8 rel32 +0x291ba4 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_HIST_WCTOR",
+            "PASS",
+            "@0x006cb836 E8 rel32 +0x2f075 -> 0x006fa8b0 == expected"
+          ],
+          [
+            "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF",
+            "PASS",
+            "vtable 0x00a864b8 -> COL 0x00aa7770 (20 B, range-safe) -> TD 0x00b8cac4 -> .?AVArkModelResourceInstanceRef@@"
+          ],
+          [
+            "RTTI:RTTI_MANAGER_MAIN",
+            "PASS",
+            "vtable 0x00a855d0 -> COL 0x00aa6c58 (20 B, range-safe) -> TD 0x00b8c1b0 -> .?AVArkModelManagerMain@@"
+          ],
+          [
+            "RTTI:RTTI_MANAGER_BASE",
+            "PASS",
+            "vtable 0x00a85a08 -> COL 0x00aa6cd8 (20 B, range-safe) -> TD 0x00b8c1d4 -> .?AVArkModelManager@@"
+          ],
+          [
+            "STR:STR_GEOWATER0",
+            "PASS",
+            "@0x00a85da4 == Geowater:0"
+          ],
+          [
+            "STR:STR_ARKTEXTURE",
+            "PASS",
+            "@0x00a859f8 == ArkTexture"
+          ],
+          [
+            "STR:STR_ARKANIMATION",
+            "PASS",
+            "@0x00a8547c == ArkAnimation"
+          ],
+          [
+            "RECW:RECORD_SCHEMA",
+            "PASS",
+            "ACTIVE_CORRECTED_PINS.json loaded; exactly 1 active record with all required fields (structural check only)"
+          ],
+          [
+            "RECW:W_RECORD_BYTES",
+            "PASS",
+            "@0x006c97d8 physical == JSON BYTES E8 93 F7 01 00"
+          ],
+          [
+            "RECW:W_RECORD_REL32",
+            "PASS",
+            "own recompute int32(physical[1:5]) = +0x1f793 == JSON SIGNED_REL32 +0x1F793"
+          ],
+          [
+            "RECW:W_RECORD_NEXT_VA",
+            "PASS",
+            "JSON NEXT_VA 0x006C97DD == CALLSITE_VA+5 0x006c97dd"
+          ],
+          [
+            "RECW:W_RECORD_TARGET",
+            "PASS",
+            "own recompute CALLSITE_VA+5+int32(physical[1:5]) = 0x006e8f70 == JSON TARGET_VA 0x006E8F70 (formula: CALLSITE_VA + 5 + signed_little_endian_int32(BYTES[1:5]))"
+          ],
+          [
+            "RECW:W_RECORD_INTERNAL_CONSISTENCY",
+            "PASS",
+            "JSON self-consistent: BYTES-derived rel32 +0x1f793 == SIGNED_REL32; CALLSITE+5+REL32 == TARGET_VA"
+          ]
+        ]
+      },
+      "pre_fixed_address_qc": {
+        "implementation": "historical QC duty-2 style fixed-address comparison (QCPE own read at the CANONICAL 0x006CB836)",
+        "canonical_bytes_measured": "E8 75 F0 02 00",
+        "canonical_rel32_recomputed": "+0x2f075",
+        "canonical_next_va": "0x006CB83B",
+        "canonical_target_recomputed": "0x006FA8B0",
+        "declared_callsite_va": "0x006C97D8",
+        "callsite_mismatch_detected": true,
+        "declared_bytes": "E8 93 F7 01 00",
+        "bytes_mismatch_detected": true,
+        "verdict": "MISMATCH_DETECTED"
+      }
+    },
+    "W2": {
+      "fixture": {
+        "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/scratch/W2_wrong_record_id_20261009T035439Z.json",
+        "size": 4968,
+        "sha256": "E9F2A6DB4370417D85396C66EDB9A301E7FB7A018CE073C40EC87B6C80C8AF3F"
+      },
+      "record": {
+        "RECORD_ID": "W_CTOR_CALL_AT_006C97D8",
+        "CALLSITE_VA": "0x006CB836",
+        "BYTES": "E8 75 F0 02 00",
+        "SIGNED_REL32": "+0x2F075",
+        "NEXT_VA": "0x006CB83B",
+        "TARGET_VA": "0x006FA8B0",
+        "PHYSICAL_OFFSET": "0x2CB836"
+      },
+      "pre_v1_production": {
+        "replay_label": "PRE W2 on v1",
+        "loader_path": "load_active_corrected_pins(<scratch fixture path>) \u2014 physical-file parse + schema validation executed; then run_checks() + gate() (the SAME overall production gate)",
+        "fixture_path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/scratch/W2_wrong_record_id_20261009T035439Z.json",
+        "checks_total": 86,
+        "pass_count": 86,
+        "gate": "PASS",
+        "fail_ids": [],
+        "recw_verdicts": {
+          "RECW:RECORD_SCHEMA": "PASS",
+          "RECW:W_RECORD_BYTES": "PASS",
+          "RECW:W_RECORD_REL32": "PASS",
+          "RECW:W_RECORD_NEXT_VA": "PASS",
+          "RECW:W_RECORD_TARGET": "PASS",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY": "PASS"
+        },
+        "historical_80_all_pass": true,
+        "results_raw": [
+          [
+            "EXE_IDENTITY",
+            "PASS",
+            "physical EXE size+SHA256 == pinned"
+          ],
+          [
+            "PIN:PUMP_SEH_HANDLER",
+            "PASS",
+            "@0x006c9702 == 68 13 57 A0 00"
+          ],
+          [
+            "PIN:PUMP_ARG3_LOAD",
+            "PASS",
+            "@0x006c9725 == 8B 7C 24 30"
+          ],
+          [
+            "PIN:PUMP_ARG2_LOAD",
+            "PASS",
+            "@0x006c9729 == 8B 4C 24 2C"
+          ],
+          [
+            "PIN:PUMP_ARG1_LOAD",
+            "PASS",
+            "@0x006c972d == 8B 44 24 28"
+          ],
+          [
+            "PIN:PUMP_PAIR_TYPE_0x66",
+            "PASS",
+            "@0x006c973a == C7 44 24 20 66 00 00 00"
+          ],
+          [
+            "PIN:PUMP_PAIR_ID_A",
+            "PASS",
+            "@0x006c9742 == 89 44 24 24"
+          ],
+          [
+            "PIN:PUMP_S_NULL_TEST",
+            "PASS",
+            "@0x006c9754 == 85 F6"
+          ],
+          [
+            "PIN:PUMP_S_NULL_JE",
+            "PASS",
+            "@0x006c9756 == 74 4D"
+          ],
+          [
+            "PIN:PUMP_ARG4_LOAD",
+            "PASS",
+            "@0x006c9758 == 8B 44 24 34"
+          ],
+          [
+            "PIN:PUMP_SLOT_LEA",
+            "PASS",
+            "@0x006c975d == 8D 4C 24 2C"
+          ],
+          [
+            "PIN:PUMP_SLOT_CMP",
+            "PASS",
+            "@0x006c9769 == 83 7C 24 28 00"
+          ],
+          [
+            "PIN:PUMP_SLOT_JNE",
+            "PASS",
+            "@0x006c9776 == 75 41"
+          ],
+          [
+            "PIN:PUMP_RELEASEA_DEC",
+            "PASS",
+            "@0x006c9790 == 83 40 04 FF"
+          ],
+          [
+            "PIN:PUMP_RELEASEA_DESTROY",
+            "PASS",
+            "@0x006c979e == 8B 11 8B 42 04 FF D0"
+          ],
+          [
+            "PIN:PUMP_RETURN_NULL",
+            "PASS",
+            "@0x006c97a5 == 33 C0"
+          ],
+          [
+            "PIN:PUMP_NEW_SIZE_0x10",
+            "PASS",
+            "@0x006c97b9 == 6A 10"
+          ],
+          [
+            "PIN:PUMP_ALLOC_LOCAL_SAVE",
+            "PASS",
+            "@0x006c97c3 == 89 44 24 0C"
+          ],
+          [
+            "PIN:PUMP_ALLOC_FAIL_JE",
+            "PASS",
+            "@0x006c97ce == 74 11"
+          ],
+          [
+            "PIN:PUMP_CTOR_PUSH_P",
+            "PASS",
+            "@0x006c97d4 == 51"
+          ],
+          [
+            "PIN:PUMP_CTOR_PUSH_S",
+            "PASS",
+            "@0x006c97d5 == 56"
+          ],
+          [
+            "PIN:PUMP_CTOR_RECEIVER",
+            "PASS",
+            "@0x006c97d6 == 8B C8"
+          ],
+          [
+            "PIN:PUMP_CTOR_RESULT_SAVE",
+            "PASS",
+            "@0x006c97dd == 8B F0"
+          ],
+          [
+            "PIN:PUMP_RELEASEB_DEC",
+            "PASS",
+            "@0x006c97f3 == 83 40 04 FF"
+          ],
+          [
+            "PIN:PUMP_RELEASEB_DESTROY",
+            "PASS",
+            "@0x006c9801 == 8B 11 8B 42 04 FF D0"
+          ],
+          [
+            "PIN:PUMP_RETURN_R",
+            "PASS",
+            "@0x006c9808 == 8B C6"
+          ],
+          [
+            "PIN:PUMP_TERMINAL_RET",
+            "PASS",
+            "@0x006c981b == C3"
+          ],
+          [
+            "PIN:CTOR_THIS_SAVE",
+            "PASS",
+            "@0x006e8f93 == 8B F1"
+          ],
+          [
+            "PIN:CTOR_R0_STORE_S",
+            "PASS",
+            "@0x006e8f9d == 89 06"
+          ],
+          [
+            "PIN:CTOR_R4_STORE_P",
+            "PASS",
+            "@0x006e8fa5 == 89 46 04"
+          ],
+          [
+            "PIN:CTOR_P_ADDREF",
+            "PASS",
+            "@0x006e8faf == 01 48 04"
+          ],
+          [
+            "PIN:CTOR_R8_ZERO",
+            "PASS",
+            "@0x006e8fbd == C7 07 00 00 00 00"
+          ],
+          [
+            "PIN:CTOR_RC_ZERO",
+            "PASS",
+            "@0x006e8fc9 == C7 46 0C 00 00 00 00"
+          ],
+          [
+            "PIN:CTOR_GATE_CMP_0xB7DC",
+            "PASS",
+            "@0x006e8fd5 == 81 78 04 DC B7 00 00"
+          ],
+          [
+            "PIN:CTOR_P_VT_SLOT17",
+            "PASS",
+            "@0x006e8fe3 == 8B 42 44"
+          ],
+          [
+            "PIN:CTOR_P_NAME_ARG",
+            "PASS",
+            "@0x006e8fe6 == 68 A4 5D A8 00"
+          ],
+          [
+            "PIN:CTOR_RETURN_THIS",
+            "PASS",
+            "@0x006e9014 == 8B C6"
+          ],
+          [
+            "PIN:CTOR_TERMINAL_RET8",
+            "PASS",
+            "@0x006e9027 == C2 08 00"
+          ],
+          [
+            "PIN:SETTER_SLOT_CLEAR",
+            "PASS",
+            "@0x006c95a0 == C7 06 00 00 00 00"
+          ],
+          [
+            "PIN:SETTER_RECEIVER_S10",
+            "PASS",
+            "@0x006c95a6 == 8B 49 10"
+          ],
+          [
+            "PIN:SETTER_FLAG_CMP",
+            "PASS",
+            "@0x006c95ae == 38 5C 24 28"
+          ],
+          [
+            "PIN:SETTER_FLAG_JNE",
+            "PASS",
+            "@0x006c95be == 75 71"
+          ],
+          [
+            "PIN:SETTER_SLOT_STORE_P",
+            "PASS",
+            "@0x006c9651 == 89 3E"
+          ],
+          [
+            "PIN:SETTER_P_ADDREF",
+            "PASS",
+            "@0x006c9657 == 01 5F 04"
+          ],
+          [
+            "PIN:SETTER_TERMINAL_RET8_A",
+            "PASS",
+            "@0x006c962e == C2 08 00"
+          ],
+          [
+            "PIN:SETTER_TERMINAL_RET8_B",
+            "PASS",
+            "@0x006c966c == C2 08 00"
+          ],
+          [
+            "PIN:PGET_RECEIVER_SAVE",
+            "PASS",
+            "@0x007b79d4 == 8B F9"
+          ],
+          [
+            "PIN:PGET_ALLOC_SIZE_4",
+            "PASS",
+            "@0x007b79d6 == 6A 04"
+          ],
+          [
+            "PIN:PRODUCER_STORE_6C",
+            "PASS",
+            "@0x006c7008 == 89 46 6C"
+          ],
+          [
+            "PIN:INSTALLER_LOAD_R",
+            "PASS",
+            "@0x006c67b3 == 8B 46 6C"
+          ],
+          [
+            "PIN:INSTALLER_READ_R4",
+            "PASS",
+            "@0x006c67be == 8B 78 04"
+          ],
+          [
+            "PIN:INSTALLER_EBX_1",
+            "PASS",
+            "@0x006c67c9 == BB 01 00 00 00"
+          ],
+          [
+            "PIN:INSTALLER_WRITE_68",
+            "PASS",
+            "@0x006c67e2 == 89 7E 68"
+          ],
+          [
+            "PIN:INSTALLER_INCREF_T",
+            "PASS",
+            "@0x006c67e7 == 01 5F 04"
+          ],
+          [
+            "PIN:INSTALLER_DECREF_OLD",
+            "PASS",
+            "@0x006c67d4 == 01 69 04"
+          ],
+          [
+            "PIN:HIST_CALLER_PUMP_CALL",
+            "PASS",
+            "@0x006cb7cf == E8 2C DF FF FF"
+          ],
+          [
+            "PIN:HIST_CALLER_NEW_0xC",
+            "PASS",
+            "@0x006cb819 == 6A 0C"
+          ],
+          [
+            "PIN:HIST_CALLER_CTOR_CALL",
+            "PASS",
+            "@0x006cb836 == E8 75 F0 02 00"
+          ],
+          [
+            "REL32:REL_PUMP_REQISSUE",
+            "PASS",
+            "@0x006c9746 E8 rel32 -0x2b40db -> 0x00415670 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SGETTER",
+            "PASS",
+            "@0x006c974d E8 rel32 +0x15a4be -> 0x00823c10 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SLOTSETTER",
+            "PASS",
+            "@0x006c9764 E8 rel32 -0x1f9 -> 0x006c9570 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SMETHOD_8268A0",
+            "PASS",
+            "@0x006c977b E8 rel32 +0x15d120 -> 0x008268a0 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_ALLOC_NEW",
+            "PASS",
+            "@0x006c97bb E8 rel32 +0x293c04 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_CTOR_R",
+            "PASS",
+            "@0x006c97d8 E8 rel32 +0x1f793 -> 0x006e8f70 == expected"
+          ],
+          [
+            "REL32:REL_CTOR_GATE",
+            "PASS",
+            "@0x006e8fd0 E8 rel32 +0x3f17b -> 0x00728150 == expected"
+          ],
+          [
+            "REL32:REL_SETTER_VARIANT",
+            "PASS",
+            "@0x006c95c5 E8 rel32 +0xee096 -> 0x007b7660 == expected"
+          ],
+          [
+            "REL32:REL_SETTER_PGETTER",
+            "PASS",
+            "@0x006c9631 E8 rel32 +0xee37a -> 0x007b79b0 == expected"
+          ],
+          [
+            "REL32:REL_PGET_ALLOC",
+            "PASS",
+            "@0x007b79d8 E8 rel32 +0x1a59e7 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_PGET_INIT",
+            "PASS",
+            "@0x007b79f2 E8 rel32 -0xc7 -> 0x007b7930 == expected"
+          ],
+          [
+            "REL32:REL_CAND4_CALLER_PUMP",
+            "PASS",
+            "@0x006c6ffc E8 rel32 +0x26ff -> 0x006c9700 == expected"
+          ],
+          [
+            "REL32:REL_PRODUCER_INSTALLER",
+            "PASS",
+            "@0x006c7049 E8 rel32 -0x8ce -> 0x006c6780 == expected"
+          ],
+          [
+            "REL32:REL_HIST_PUMP",
+            "PASS",
+            "@0x006cb7cf E8 rel32 -0x20d4 -> 0x006c9700 == expected"
+          ],
+          [
+            "REL32:REL_HIST_NEW",
+            "PASS",
+            "@0x006cb81b E8 rel32 +0x291ba4 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_HIST_WCTOR",
+            "PASS",
+            "@0x006cb836 E8 rel32 +0x2f075 -> 0x006fa8b0 == expected"
+          ],
+          [
+            "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF",
+            "PASS",
+            "vtable 0x00a864b8 -> COL 0x00aa7770 (20 B, range-safe) -> TD 0x00b8cac4 -> .?AVArkModelResourceInstanceRef@@"
+          ],
+          [
+            "RTTI:RTTI_MANAGER_MAIN",
+            "PASS",
+            "vtable 0x00a855d0 -> COL 0x00aa6c58 (20 B, range-safe) -> TD 0x00b8c1b0 -> .?AVArkModelManagerMain@@"
+          ],
+          [
+            "RTTI:RTTI_MANAGER_BASE",
+            "PASS",
+            "vtable 0x00a85a08 -> COL 0x00aa6cd8 (20 B, range-safe) -> TD 0x00b8c1d4 -> .?AVArkModelManager@@"
+          ],
+          [
+            "STR:STR_GEOWATER0",
+            "PASS",
+            "@0x00a85da4 == Geowater:0"
+          ],
+          [
+            "STR:STR_ARKTEXTURE",
+            "PASS",
+            "@0x00a859f8 == ArkTexture"
+          ],
+          [
+            "STR:STR_ARKANIMATION",
+            "PASS",
+            "@0x00a8547c == ArkAnimation"
+          ],
+          [
+            "RECW:RECORD_SCHEMA",
+            "PASS",
+            "ACTIVE_CORRECTED_PINS.json loaded; exactly 1 active record with all required fields (structural check only)"
+          ],
+          [
+            "RECW:W_RECORD_BYTES",
+            "PASS",
+            "@0x006cb836 physical == JSON BYTES E8 75 F0 02 00"
+          ],
+          [
+            "RECW:W_RECORD_REL32",
+            "PASS",
+            "own recompute int32(physical[1:5]) = +0x2f075 == JSON SIGNED_REL32 +0x2F075"
+          ],
+          [
+            "RECW:W_RECORD_NEXT_VA",
+            "PASS",
+            "JSON NEXT_VA 0x006CB83B == CALLSITE_VA+5 0x006cb83b"
+          ],
+          [
+            "RECW:W_RECORD_TARGET",
+            "PASS",
+            "own recompute CALLSITE_VA+5+int32(physical[1:5]) = 0x006fa8b0 == JSON TARGET_VA 0x006FA8B0 (formula: CALLSITE_VA + 5 + signed_little_endian_int32(BYTES[1:5]))"
+          ],
+          [
+            "RECW:W_RECORD_INTERNAL_CONSISTENCY",
+            "PASS",
+            "JSON self-consistent: BYTES-derived rel32 +0x2f075 == SIGNED_REL32; CALLSITE+5+REL32 == TARGET_VA"
+          ]
+        ]
+      },
+      "pre_fixed_address_qc": {
+        "implementation": "historical QC duty-2 style fixed-address comparison (QCPE own read at the CANONICAL 0x006CB836)",
+        "canonical_bytes_measured": "E8 75 F0 02 00",
+        "canonical_rel32_recomputed": "+0x2f075",
+        "canonical_next_va": "0x006CB83B",
+        "canonical_target_recomputed": "0x006FA8B0",
+        "declared_callsite_va": "0x006CB836",
+        "callsite_mismatch_detected": false,
+        "declared_bytes": "E8 75 F0 02 00",
+        "bytes_mismatch_detected": false,
+        "verdict": "MATCH_NO_MISMATCH"
+      }
+    },
+    "W3": {
+      "fixture": {
+        "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/scratch/W3_generality_callsite_20261009T035439Z.json",
+        "size": 4971,
+        "sha256": "6DB93F3FA2B541236743630C42E1435446615293E04D69461A64E848764EAEF9"
+      },
+      "record": {
+        "RECORD_ID": "W_CTOR_CALL_AT_006CB836",
+        "CALLSITE_VA": "0x006CB7CF",
+        "BYTES": "E8 2C DF FF FF",
+        "SIGNED_REL32": "-0x20D4",
+        "NEXT_VA": "0x006CB7D4",
+        "TARGET_VA": "0x006C9700",
+        "PHYSICAL_OFFSET": "0x2CB7CF"
+      },
+      "pre_v1_production": {
+        "replay_label": "PRE W3 on v1",
+        "loader_path": "load_active_corrected_pins(<scratch fixture path>) \u2014 physical-file parse + schema validation executed; then run_checks() + gate() (the SAME overall production gate)",
+        "fixture_path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/scratch/W3_generality_callsite_20261009T035439Z.json",
+        "checks_total": 86,
+        "pass_count": 86,
+        "gate": "PASS",
+        "fail_ids": [],
+        "recw_verdicts": {
+          "RECW:RECORD_SCHEMA": "PASS",
+          "RECW:W_RECORD_BYTES": "PASS",
+          "RECW:W_RECORD_REL32": "PASS",
+          "RECW:W_RECORD_NEXT_VA": "PASS",
+          "RECW:W_RECORD_TARGET": "PASS",
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY": "PASS"
+        },
+        "historical_80_all_pass": true,
+        "results_raw": [
+          [
+            "EXE_IDENTITY",
+            "PASS",
+            "physical EXE size+SHA256 == pinned"
+          ],
+          [
+            "PIN:PUMP_SEH_HANDLER",
+            "PASS",
+            "@0x006c9702 == 68 13 57 A0 00"
+          ],
+          [
+            "PIN:PUMP_ARG3_LOAD",
+            "PASS",
+            "@0x006c9725 == 8B 7C 24 30"
+          ],
+          [
+            "PIN:PUMP_ARG2_LOAD",
+            "PASS",
+            "@0x006c9729 == 8B 4C 24 2C"
+          ],
+          [
+            "PIN:PUMP_ARG1_LOAD",
+            "PASS",
+            "@0x006c972d == 8B 44 24 28"
+          ],
+          [
+            "PIN:PUMP_PAIR_TYPE_0x66",
+            "PASS",
+            "@0x006c973a == C7 44 24 20 66 00 00 00"
+          ],
+          [
+            "PIN:PUMP_PAIR_ID_A",
+            "PASS",
+            "@0x006c9742 == 89 44 24 24"
+          ],
+          [
+            "PIN:PUMP_S_NULL_TEST",
+            "PASS",
+            "@0x006c9754 == 85 F6"
+          ],
+          [
+            "PIN:PUMP_S_NULL_JE",
+            "PASS",
+            "@0x006c9756 == 74 4D"
+          ],
+          [
+            "PIN:PUMP_ARG4_LOAD",
+            "PASS",
+            "@0x006c9758 == 8B 44 24 34"
+          ],
+          [
+            "PIN:PUMP_SLOT_LEA",
+            "PASS",
+            "@0x006c975d == 8D 4C 24 2C"
+          ],
+          [
+            "PIN:PUMP_SLOT_CMP",
+            "PASS",
+            "@0x006c9769 == 83 7C 24 28 00"
+          ],
+          [
+            "PIN:PUMP_SLOT_JNE",
+            "PASS",
+            "@0x006c9776 == 75 41"
+          ],
+          [
+            "PIN:PUMP_RELEASEA_DEC",
+            "PASS",
+            "@0x006c9790 == 83 40 04 FF"
+          ],
+          [
+            "PIN:PUMP_RELEASEA_DESTROY",
+            "PASS",
+            "@0x006c979e == 8B 11 8B 42 04 FF D0"
+          ],
+          [
+            "PIN:PUMP_RETURN_NULL",
+            "PASS",
+            "@0x006c97a5 == 33 C0"
+          ],
+          [
+            "PIN:PUMP_NEW_SIZE_0x10",
+            "PASS",
+            "@0x006c97b9 == 6A 10"
+          ],
+          [
+            "PIN:PUMP_ALLOC_LOCAL_SAVE",
+            "PASS",
+            "@0x006c97c3 == 89 44 24 0C"
+          ],
+          [
+            "PIN:PUMP_ALLOC_FAIL_JE",
+            "PASS",
+            "@0x006c97ce == 74 11"
+          ],
+          [
+            "PIN:PUMP_CTOR_PUSH_P",
+            "PASS",
+            "@0x006c97d4 == 51"
+          ],
+          [
+            "PIN:PUMP_CTOR_PUSH_S",
+            "PASS",
+            "@0x006c97d5 == 56"
+          ],
+          [
+            "PIN:PUMP_CTOR_RECEIVER",
+            "PASS",
+            "@0x006c97d6 == 8B C8"
+          ],
+          [
+            "PIN:PUMP_CTOR_RESULT_SAVE",
+            "PASS",
+            "@0x006c97dd == 8B F0"
+          ],
+          [
+            "PIN:PUMP_RELEASEB_DEC",
+            "PASS",
+            "@0x006c97f3 == 83 40 04 FF"
+          ],
+          [
+            "PIN:PUMP_RELEASEB_DESTROY",
+            "PASS",
+            "@0x006c9801 == 8B 11 8B 42 04 FF D0"
+          ],
+          [
+            "PIN:PUMP_RETURN_R",
+            "PASS",
+            "@0x006c9808 == 8B C6"
+          ],
+          [
+            "PIN:PUMP_TERMINAL_RET",
+            "PASS",
+            "@0x006c981b == C3"
+          ],
+          [
+            "PIN:CTOR_THIS_SAVE",
+            "PASS",
+            "@0x006e8f93 == 8B F1"
+          ],
+          [
+            "PIN:CTOR_R0_STORE_S",
+            "PASS",
+            "@0x006e8f9d == 89 06"
+          ],
+          [
+            "PIN:CTOR_R4_STORE_P",
+            "PASS",
+            "@0x006e8fa5 == 89 46 04"
+          ],
+          [
+            "PIN:CTOR_P_ADDREF",
+            "PASS",
+            "@0x006e8faf == 01 48 04"
+          ],
+          [
+            "PIN:CTOR_R8_ZERO",
+            "PASS",
+            "@0x006e8fbd == C7 07 00 00 00 00"
+          ],
+          [
+            "PIN:CTOR_RC_ZERO",
+            "PASS",
+            "@0x006e8fc9 == C7 46 0C 00 00 00 00"
+          ],
+          [
+            "PIN:CTOR_GATE_CMP_0xB7DC",
+            "PASS",
+            "@0x006e8fd5 == 81 78 04 DC B7 00 00"
+          ],
+          [
+            "PIN:CTOR_P_VT_SLOT17",
+            "PASS",
+            "@0x006e8fe3 == 8B 42 44"
+          ],
+          [
+            "PIN:CTOR_P_NAME_ARG",
+            "PASS",
+            "@0x006e8fe6 == 68 A4 5D A8 00"
+          ],
+          [
+            "PIN:CTOR_RETURN_THIS",
+            "PASS",
+            "@0x006e9014 == 8B C6"
+          ],
+          [
+            "PIN:CTOR_TERMINAL_RET8",
+            "PASS",
+            "@0x006e9027 == C2 08 00"
+          ],
+          [
+            "PIN:SETTER_SLOT_CLEAR",
+            "PASS",
+            "@0x006c95a0 == C7 06 00 00 00 00"
+          ],
+          [
+            "PIN:SETTER_RECEIVER_S10",
+            "PASS",
+            "@0x006c95a6 == 8B 49 10"
+          ],
+          [
+            "PIN:SETTER_FLAG_CMP",
+            "PASS",
+            "@0x006c95ae == 38 5C 24 28"
+          ],
+          [
+            "PIN:SETTER_FLAG_JNE",
+            "PASS",
+            "@0x006c95be == 75 71"
+          ],
+          [
+            "PIN:SETTER_SLOT_STORE_P",
+            "PASS",
+            "@0x006c9651 == 89 3E"
+          ],
+          [
+            "PIN:SETTER_P_ADDREF",
+            "PASS",
+            "@0x006c9657 == 01 5F 04"
+          ],
+          [
+            "PIN:SETTER_TERMINAL_RET8_A",
+            "PASS",
+            "@0x006c962e == C2 08 00"
+          ],
+          [
+            "PIN:SETTER_TERMINAL_RET8_B",
+            "PASS",
+            "@0x006c966c == C2 08 00"
+          ],
+          [
+            "PIN:PGET_RECEIVER_SAVE",
+            "PASS",
+            "@0x007b79d4 == 8B F9"
+          ],
+          [
+            "PIN:PGET_ALLOC_SIZE_4",
+            "PASS",
+            "@0x007b79d6 == 6A 04"
+          ],
+          [
+            "PIN:PRODUCER_STORE_6C",
+            "PASS",
+            "@0x006c7008 == 89 46 6C"
+          ],
+          [
+            "PIN:INSTALLER_LOAD_R",
+            "PASS",
+            "@0x006c67b3 == 8B 46 6C"
+          ],
+          [
+            "PIN:INSTALLER_READ_R4",
+            "PASS",
+            "@0x006c67be == 8B 78 04"
+          ],
+          [
+            "PIN:INSTALLER_EBX_1",
+            "PASS",
+            "@0x006c67c9 == BB 01 00 00 00"
+          ],
+          [
+            "PIN:INSTALLER_WRITE_68",
+            "PASS",
+            "@0x006c67e2 == 89 7E 68"
+          ],
+          [
+            "PIN:INSTALLER_INCREF_T",
+            "PASS",
+            "@0x006c67e7 == 01 5F 04"
+          ],
+          [
+            "PIN:INSTALLER_DECREF_OLD",
+            "PASS",
+            "@0x006c67d4 == 01 69 04"
+          ],
+          [
+            "PIN:HIST_CALLER_PUMP_CALL",
+            "PASS",
+            "@0x006cb7cf == E8 2C DF FF FF"
+          ],
+          [
+            "PIN:HIST_CALLER_NEW_0xC",
+            "PASS",
+            "@0x006cb819 == 6A 0C"
+          ],
+          [
+            "PIN:HIST_CALLER_CTOR_CALL",
+            "PASS",
+            "@0x006cb836 == E8 75 F0 02 00"
+          ],
+          [
+            "REL32:REL_PUMP_REQISSUE",
+            "PASS",
+            "@0x006c9746 E8 rel32 -0x2b40db -> 0x00415670 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SGETTER",
+            "PASS",
+            "@0x006c974d E8 rel32 +0x15a4be -> 0x00823c10 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SLOTSETTER",
+            "PASS",
+            "@0x006c9764 E8 rel32 -0x1f9 -> 0x006c9570 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_SMETHOD_8268A0",
+            "PASS",
+            "@0x006c977b E8 rel32 +0x15d120 -> 0x008268a0 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_ALLOC_NEW",
+            "PASS",
+            "@0x006c97bb E8 rel32 +0x293c04 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_PUMP_CTOR_R",
+            "PASS",
+            "@0x006c97d8 E8 rel32 +0x1f793 -> 0x006e8f70 == expected"
+          ],
+          [
+            "REL32:REL_CTOR_GATE",
+            "PASS",
+            "@0x006e8fd0 E8 rel32 +0x3f17b -> 0x00728150 == expected"
+          ],
+          [
+            "REL32:REL_SETTER_VARIANT",
+            "PASS",
+            "@0x006c95c5 E8 rel32 +0xee096 -> 0x007b7660 == expected"
+          ],
+          [
+            "REL32:REL_SETTER_PGETTER",
+            "PASS",
+            "@0x006c9631 E8 rel32 +0xee37a -> 0x007b79b0 == expected"
+          ],
+          [
+            "REL32:REL_PGET_ALLOC",
+            "PASS",
+            "@0x007b79d8 E8 rel32 +0x1a59e7 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_PGET_INIT",
+            "PASS",
+            "@0x007b79f2 E8 rel32 -0xc7 -> 0x007b7930 == expected"
+          ],
+          [
+            "REL32:REL_CAND4_CALLER_PUMP",
+            "PASS",
+            "@0x006c6ffc E8 rel32 +0x26ff -> 0x006c9700 == expected"
+          ],
+          [
+            "REL32:REL_PRODUCER_INSTALLER",
+            "PASS",
+            "@0x006c7049 E8 rel32 -0x8ce -> 0x006c6780 == expected"
+          ],
+          [
+            "REL32:REL_HIST_PUMP",
+            "PASS",
+            "@0x006cb7cf E8 rel32 -0x20d4 -> 0x006c9700 == expected"
+          ],
+          [
+            "REL32:REL_HIST_NEW",
+            "PASS",
+            "@0x006cb81b E8 rel32 +0x291ba4 -> 0x0095d3c4 == expected"
+          ],
+          [
+            "REL32:REL_HIST_WCTOR",
+            "PASS",
+            "@0x006cb836 E8 rel32 +0x2f075 -> 0x006fa8b0 == expected"
+          ],
+          [
+            "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF",
+            "PASS",
+            "vtable 0x00a864b8 -> COL 0x00aa7770 (20 B, range-safe) -> TD 0x00b8cac4 -> .?AVArkModelResourceInstanceRef@@"
+          ],
+          [
+            "RTTI:RTTI_MANAGER_MAIN",
+            "PASS",
+            "vtable 0x00a855d0 -> COL 0x00aa6c58 (20 B, range-safe) -> TD 0x00b8c1b0 -> .?AVArkModelManagerMain@@"
+          ],
+          [
+            "RTTI:RTTI_MANAGER_BASE",
+            "PASS",
+            "vtable 0x00a85a08 -> COL 0x00aa6cd8 (20 B, range-safe) -> TD 0x00b8c1d4 -> .?AVArkModelManager@@"
+          ],
+          [
+            "STR:STR_GEOWATER0",
+            "PASS",
+            "@0x00a85da4 == Geowater:0"
+          ],
+          [
+            "STR:STR_ARKTEXTURE",
+            "PASS",
+            "@0x00a859f8 == ArkTexture"
+          ],
+          [
+            "STR:STR_ARKANIMATION",
+            "PASS",
+            "@0x00a8547c == ArkAnimation"
+          ],
+          [
+            "RECW:RECORD_SCHEMA",
+            "PASS",
+            "ACTIVE_CORRECTED_PINS.json loaded; exactly 1 active record with all required fields (structural check only)"
+          ],
+          [
+            "RECW:W_RECORD_BYTES",
+            "PASS",
+            "@0x006cb7cf physical == JSON BYTES E8 2C DF FF FF"
+          ],
+          [
+            "RECW:W_RECORD_REL32",
+            "PASS",
+            "own recompute int32(physical[1:5]) = -0x20d4 == JSON SIGNED_REL32 -0x20D4"
+          ],
+          [
+            "RECW:W_RECORD_NEXT_VA",
+            "PASS",
+            "JSON NEXT_VA 0x006CB7D4 == CALLSITE_VA+5 0x006cb7d4"
+          ],
+          [
+            "RECW:W_RECORD_TARGET",
+            "PASS",
+            "own recompute CALLSITE_VA+5+int32(physical[1:5]) = 0x006c9700 == JSON TARGET_VA 0x006C9700 (formula: CALLSITE_VA + 5 + signed_little_endian_int32(BYTES[1:5]))"
+          ],
+          [
+            "RECW:W_RECORD_INTERNAL_CONSISTENCY",
+            "PASS",
+            "JSON self-consistent: BYTES-derived rel32 -0x20d4 == SIGNED_REL32; CALLSITE+5+REL32 == TARGET_VA"
+          ]
+        ]
+      },
+      "pre_fixed_address_qc": {
+        "implementation": "historical QC duty-2 style fixed-address comparison (QCPE own read at the CANONICAL 0x006CB836)",
+        "canonical_bytes_measured": "E8 75 F0 02 00",
+        "canonical_rel32_recomputed": "+0x2f075",
+        "canonical_next_va": "0x006CB83B",
+        "canonical_target_recomputed": "0x006FA8B0",
+        "declared_callsite_va": "0x006CB7CF",
+        "callsite_mismatch_detected": true,
+        "declared_bytes": "E8 2C DF FF FF",
+        "bytes_mismatch_detected": true,
+        "verdict": "MISMATCH_DETECTED"
+      }
+    }
+  },
+  "clean_scratch_copy": {
+    "fixture": {
+      "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/scratch/CLEAN_copy_20261009T035439Z.json",
+      "size": 4835,
+      "sha256": "64C64DA9D59CEEC25C72D1890C89E38935BB21530D8E3ED8B90537B98705001F"
+    },
+    "pre_v1_production": {
+      "replay_label": "PRE CLEAN on v1",
+      "loader_path": "load_active_corrected_pins(<scratch fixture path>) \u2014 physical-file parse + schema validation executed; then run_checks() + gate() (the SAME overall production gate)",
+      "fixture_path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/scratch/CLEAN_copy_20261009T035439Z.json",
+      "checks_total": 86,
+      "pass_count": 86,
+      "gate": "PASS",
+      "fail_ids": [],
+      "recw_verdicts": {
+        "RECW:RECORD_SCHEMA": "PASS",
+        "RECW:W_RECORD_BYTES": "PASS",
+        "RECW:W_RECORD_REL32": "PASS",
+        "RECW:W_RECORD_NEXT_VA": "PASS",
+        "RECW:W_RECORD_TARGET": "PASS",
+        "RECW:W_RECORD_INTERNAL_CONSISTENCY": "PASS"
+      },
+      "historical_80_all_pass": true,
+      "results_raw": [
+        [
+          "EXE_IDENTITY",
+          "PASS",
+          "physical EXE size+SHA256 == pinned"
+        ],
+        [
+          "PIN:PUMP_SEH_HANDLER",
+          "PASS",
+          "@0x006c9702 == 68 13 57 A0 00"
+        ],
+        [
+          "PIN:PUMP_ARG3_LOAD",
+          "PASS",
+          "@0x006c9725 == 8B 7C 24 30"
+        ],
+        [
+          "PIN:PUMP_ARG2_LOAD",
+          "PASS",
+          "@0x006c9729 == 8B 4C 24 2C"
+        ],
+        [
+          "PIN:PUMP_ARG1_LOAD",
+          "PASS",
+          "@0x006c972d == 8B 44 24 28"
+        ],
+        [
+          "PIN:PUMP_PAIR_TYPE_0x66",
+          "PASS",
+          "@0x006c973a == C7 44 24 20 66 00 00 00"
+        ],
+        [
+          "PIN:PUMP_PAIR_ID_A",
+          "PASS",
+          "@0x006c9742 == 89 44 24 24"
+        ],
+        [
+          "PIN:PUMP_S_NULL_TEST",
+          "PASS",
+          "@0x006c9754 == 85 F6"
+        ],
+        [
+          "PIN:PUMP_S_NULL_JE",
+          "PASS",
+          "@0x006c9756 == 74 4D"
+        ],
+        [
+          "PIN:PUMP_ARG4_LOAD",
+          "PASS",
+          "@0x006c9758 == 8B 44 24 34"
+        ],
+        [
+          "PIN:PUMP_SLOT_LEA",
+          "PASS",
+          "@0x006c975d == 8D 4C 24 2C"
+        ],
+        [
+          "PIN:PUMP_SLOT_CMP",
+          "PASS",
+          "@0x006c9769 == 83 7C 24 28 00"
+        ],
+        [
+          "PIN:PUMP_SLOT_JNE",
+          "PASS",
+          "@0x006c9776 == 75 41"
+        ],
+        [
+          "PIN:PUMP_RELEASEA_DEC",
+          "PASS",
+          "@0x006c9790 == 83 40 04 FF"
+        ],
+        [
+          "PIN:PUMP_RELEASEA_DESTROY",
+          "PASS",
+          "@0x006c979e == 8B 11 8B 42 04 FF D0"
+        ],
+        [
+          "PIN:PUMP_RETURN_NULL",
+          "PASS",
+          "@0x006c97a5 == 33 C0"
+        ],
+        [
+          "PIN:PUMP_NEW_SIZE_0x10",
+          "PASS",
+          "@0x006c97b9 == 6A 10"
+        ],
+        [
+          "PIN:PUMP_ALLOC_LOCAL_SAVE",
+          "PASS",
+          "@0x006c97c3 == 89 44 24 0C"
+        ],
+        [
+          "PIN:PUMP_ALLOC_FAIL_JE",
+          "PASS",
+          "@0x006c97ce == 74 11"
+        ],
+        [
+          "PIN:PUMP_CTOR_PUSH_P",
+          "PASS",
+          "@0x006c97d4 == 51"
+        ],
+        [
+          "PIN:PUMP_CTOR_PUSH_S",
+          "PASS",
+          "@0x006c97d5 == 56"
+        ],
+        [
+          "PIN:PUMP_CTOR_RECEIVER",
+          "PASS",
+          "@0x006c97d6 == 8B C8"
+        ],
+        [
+          "PIN:PUMP_CTOR_RESULT_SAVE",
+          "PASS",
+          "@0x006c97dd == 8B F0"
+        ],
+        [
+          "PIN:PUMP_RELEASEB_DEC",
+          "PASS",
+          "@0x006c97f3 == 83 40 04 FF"
+        ],
+        [
+          "PIN:PUMP_RELEASEB_DESTROY",
+          "PASS",
+          "@0x006c9801 == 8B 11 8B 42 04 FF D0"
+        ],
+        [
+          "PIN:PUMP_RETURN_R",
+          "PASS",
+          "@0x006c9808 == 8B C6"
+        ],
+        [
+          "PIN:PUMP_TERMINAL_RET",
+          "PASS",
+          "@0x006c981b == C3"
+        ],
+        [
+          "PIN:CTOR_THIS_SAVE",
+          "PASS",
+          "@0x006e8f93 == 8B F1"
+        ],
+        [
+          "PIN:CTOR_R0_STORE_S",
+          "PASS",
+          "@0x006e8f9d == 89 06"
+        ],
+        [
+          "PIN:CTOR_R4_STORE_P",
+          "PASS",
+          "@0x006e8fa5 == 89 46 04"
+        ],
+        [
+          "PIN:CTOR_P_ADDREF",
+          "PASS",
+          "@0x006e8faf == 01 48 04"
+        ],
+        [
+          "PIN:CTOR_R8_ZERO",
+          "PASS",
+          "@0x006e8fbd == C7 07 00 00 00 00"
+        ],
+        [
+          "PIN:CTOR_RC_ZERO",
+          "PASS",
+          "@0x006e8fc9 == C7 46 0C 00 00 00 00"
+        ],
+        [
+          "PIN:CTOR_GATE_CMP_0xB7DC",
+          "PASS",
+          "@0x006e8fd5 == 81 78 04 DC B7 00 00"
+        ],
+        [
+          "PIN:CTOR_P_VT_SLOT17",
+          "PASS",
+          "@0x006e8fe3 == 8B 42 44"
+        ],
+        [
+          "PIN:CTOR_P_NAME_ARG",
+          "PASS",
+          "@0x006e8fe6 == 68 A4 5D A8 00"
+        ],
+        [
+          "PIN:CTOR_RETURN_THIS",
+          "PASS",
+          "@0x006e9014 == 8B C6"
+        ],
+        [
+          "PIN:CTOR_TERMINAL_RET8",
+          "PASS",
+          "@0x006e9027 == C2 08 00"
+        ],
+        [
+          "PIN:SETTER_SLOT_CLEAR",
+          "PASS",
+          "@0x006c95a0 == C7 06 00 00 00 00"
+        ],
+        [
+          "PIN:SETTER_RECEIVER_S10",
+          "PASS",
+          "@0x006c95a6 == 8B 49 10"
+        ],
+        [
+          "PIN:SETTER_FLAG_CMP",
+          "PASS",
+          "@0x006c95ae == 38 5C 24 28"
+        ],
+        [
+          "PIN:SETTER_FLAG_JNE",
+          "PASS",
+          "@0x006c95be == 75 71"
+        ],
+        [
+          "PIN:SETTER_SLOT_STORE_P",
+          "PASS",
+          "@0x006c9651 == 89 3E"
+        ],
+        [
+          "PIN:SETTER_P_ADDREF",
+          "PASS",
+          "@0x006c9657 == 01 5F 04"
+        ],
+        [
+          "PIN:SETTER_TERMINAL_RET8_A",
+          "PASS",
+          "@0x006c962e == C2 08 00"
+        ],
+        [
+          "PIN:SETTER_TERMINAL_RET8_B",
+          "PASS",
+          "@0x006c966c == C2 08 00"
+        ],
+        [
+          "PIN:PGET_RECEIVER_SAVE",
+          "PASS",
+          "@0x007b79d4 == 8B F9"
+        ],
+        [
+          "PIN:PGET_ALLOC_SIZE_4",
+          "PASS",
+          "@0x007b79d6 == 6A 04"
+        ],
+        [
+          "PIN:PRODUCER_STORE_6C",
+          "PASS",
+          "@0x006c7008 == 89 46 6C"
+        ],
+        [
+          "PIN:INSTALLER_LOAD_R",
+          "PASS",
+          "@0x006c67b3 == 8B 46 6C"
+        ],
+        [
+          "PIN:INSTALLER_READ_R4",
+          "PASS",
+          "@0x006c67be == 8B 78 04"
+        ],
+        [
+          "PIN:INSTALLER_EBX_1",
+          "PASS",
+          "@0x006c67c9 == BB 01 00 00 00"
+        ],
+        [
+          "PIN:INSTALLER_WRITE_68",
+          "PASS",
+          "@0x006c67e2 == 89 7E 68"
+        ],
+        [
+          "PIN:INSTALLER_INCREF_T",
+          "PASS",
+          "@0x006c67e7 == 01 5F 04"
+        ],
+        [
+          "PIN:INSTALLER_DECREF_OLD",
+          "PASS",
+          "@0x006c67d4 == 01 69 04"
+        ],
+        [
+          "PIN:HIST_CALLER_PUMP_CALL",
+          "PASS",
+          "@0x006cb7cf == E8 2C DF FF FF"
+        ],
+        [
+          "PIN:HIST_CALLER_NEW_0xC",
+          "PASS",
+          "@0x006cb819 == 6A 0C"
+        ],
+        [
+          "PIN:HIST_CALLER_CTOR_CALL",
+          "PASS",
+          "@0x006cb836 == E8 75 F0 02 00"
+        ],
+        [
+          "REL32:REL_PUMP_REQISSUE",
+          "PASS",
+          "@0x006c9746 E8 rel32 -0x2b40db -> 0x00415670 == expected"
+        ],
+        [
+          "REL32:REL_PUMP_SGETTER",
+          "PASS",
+          "@0x006c974d E8 rel32 +0x15a4be -> 0x00823c10 == expected"
+        ],
+        [
+          "REL32:REL_PUMP_SLOTSETTER",
+          "PASS",
+          "@0x006c9764 E8 rel32 -0x1f9 -> 0x006c9570 == expected"
+        ],
+        [
+          "REL32:REL_PUMP_SMETHOD_8268A0",
+          "PASS",
+          "@0x006c977b E8 rel32 +0x15d120 -> 0x008268a0 == expected"
+        ],
+        [
+          "REL32:REL_PUMP_ALLOC_NEW",
+          "PASS",
+          "@0x006c97bb E8 rel32 +0x293c04 -> 0x0095d3c4 == expected"
+        ],
+        [
+          "REL32:REL_PUMP_CTOR_R",
+          "PASS",
+          "@0x006c97d8 E8 rel32 +0x1f793 -> 0x006e8f70 == expected"
+        ],
+        [
+          "REL32:REL_CTOR_GATE",
+          "PASS",
+          "@0x006e8fd0 E8 rel32 +0x3f17b -> 0x00728150 == expected"
+        ],
+        [
+          "REL32:REL_SETTER_VARIANT",
+          "PASS",
+          "@0x006c95c5 E8 rel32 +0xee096 -> 0x007b7660 == expected"
+        ],
+        [
+          "REL32:REL_SETTER_PGETTER",
+          "PASS",
+          "@0x006c9631 E8 rel32 +0xee37a -> 0x007b79b0 == expected"
+        ],
+        [
+          "REL32:REL_PGET_ALLOC",
+          "PASS",
+          "@0x007b79d8 E8 rel32 +0x1a59e7 -> 0x0095d3c4 == expected"
+        ],
+        [
+          "REL32:REL_PGET_INIT",
+          "PASS",
+          "@0x007b79f2 E8 rel32 -0xc7 -> 0x007b7930 == expected"
+        ],
+        [
+          "REL32:REL_CAND4_CALLER_PUMP",
+          "PASS",
+          "@0x006c6ffc E8 rel32 +0x26ff -> 0x006c9700 == expected"
+        ],
+        [
+          "REL32:REL_PRODUCER_INSTALLER",
+          "PASS",
+          "@0x006c7049 E8 rel32 -0x8ce -> 0x006c6780 == expected"
+        ],
+        [
+          "REL32:REL_HIST_PUMP",
+          "PASS",
+          "@0x006cb7cf E8 rel32 -0x20d4 -> 0x006c9700 == expected"
+        ],
+        [
+          "REL32:REL_HIST_NEW",
+          "PASS",
+          "@0x006cb81b E8 rel32 +0x291ba4 -> 0x0095d3c4 == expected"
+        ],
+        [
+          "REL32:REL_HIST_WCTOR",
+          "PASS",
+          "@0x006cb836 E8 rel32 +0x2f075 -> 0x006fa8b0 == expected"
+        ],
+        [
+          "RTTI:RTTI_W_ARKMODELRESOURCEINSTANCEREF",
+          "PASS",
+          "vtable 0x00a864b8 -> COL 0x00aa7770 (20 B, range-safe) -> TD 0x00b8cac4 -> .?AVArkModelResourceInstanceRef@@"
+        ],
+        [
+          "RTTI:RTTI_MANAGER_MAIN",
+          "PASS",
+          "vtable 0x00a855d0 -> COL 0x00aa6c58 (20 B, range-safe) -> TD 0x00b8c1b0 -> .?AVArkModelManagerMain@@"
+        ],
+        [
+          "RTTI:RTTI_MANAGER_BASE",
+          "PASS",
+          "vtable 0x00a85a08 -> COL 0x00aa6cd8 (20 B, range-safe) -> TD 0x00b8c1d4 -> .?AVArkModelManager@@"
+        ],
+        [
+          "STR:STR_GEOWATER0",
+          "PASS",
+          "@0x00a85da4 == Geowater:0"
+        ],
+        [
+          "STR:STR_ARKTEXTURE",
+          "PASS",
+          "@0x00a859f8 == ArkTexture"
+        ],
+        [
+          "STR:STR_ARKANIMATION",
+          "PASS",
+          "@0x00a8547c == ArkAnimation"
+        ],
+        [
+          "RECW:RECORD_SCHEMA",
+          "PASS",
+          "ACTIVE_CORRECTED_PINS.json loaded; exactly 1 active record with all required fields (structural check only)"
+        ],
+        [
+          "RECW:W_RECORD_BYTES",
+          "PASS",
+          "@0x006cb836 physical == JSON BYTES E8 75 F0 02 00"
+        ],
+        [
+          "RECW:W_RECORD_REL32",
+          "PASS",
+          "own recompute int32(physical[1:5]) = +0x2f075 == JSON SIGNED_REL32 +0x2F075"
+        ],
+        [
+          "RECW:W_RECORD_NEXT_VA",
+          "PASS",
+          "JSON NEXT_VA 0x006CB83B == CALLSITE_VA+5 0x006cb83b"
+        ],
+        [
+          "RECW:W_RECORD_TARGET",
+          "PASS",
+          "own recompute CALLSITE_VA+5+int32(physical[1:5]) = 0x006fa8b0 == JSON TARGET_VA 0x006FA8B0 (formula: CALLSITE_VA + 5 + signed_little_endian_int32(BYTES[1:5]))"
+        ],
+        [
+          "RECW:W_RECORD_INTERNAL_CONSISTENCY",
+          "PASS",
+          "JSON self-consistent: BYTES-derived rel32 +0x2f075 == SIGNED_REL32; CALLSITE+5+REL32 == TARGET_VA"
+        ]
+      ]
+    }
+  }
+}

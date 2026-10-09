@@ -1,0 +1,289 @@
+{
+  "phase": "POST",
+  "stamp": "20261009T035844Z",
+  "fixture_layout": "same Desktop layout as PRE",
+  "positive_intact": {
+    "post_production_v2": {
+      "outcome": "CONSTRUCTED",
+      "image_base": "0x00400000",
+      "sections": [
+        {
+          "name": ".text",
+          "rva": "0x00001000",
+          "vsize": "0x100",
+          "raw_offset": "0x400",
+          "raw_size": "0x100",
+          "member_end": "0x1100"
+        }
+      ]
+    },
+    "post_qc_v1_historical": {
+      "outcome": "CONSTRUCTED",
+      "image_base": "0x00400000",
+      "sections": [
+        {
+          "name": ".text",
+          "rva": "0x00001000",
+          "vsize": "0x100",
+          "raw_offset": "0x400",
+          "raw_size": "0x100",
+          "member_end": "0x1100"
+        }
+      ]
+    },
+    "measured_vs_fixture_verification": {
+      "e_lfanew": {
+        "measured": "0x80",
+        "expected": "0x80",
+        "match": true
+      },
+      "pe_signature": {
+        "measured": "b'PE\\x00\\x00'",
+        "expected": "b'PE\\x00\\x00'",
+        "match": true
+      },
+      "machine": {
+        "measured": "0x014C",
+        "expected": "0x14C",
+        "match": true
+      },
+      "number_of_sections": {
+        "measured": 1,
+        "expected": 1,
+        "match": true
+      },
+      "size_of_optional_header": {
+        "measured": "0xE0",
+        "expected": "0xE0",
+        "match": true
+      },
+      "optional_header_magic": {
+        "measured": "0x010B",
+        "expected": "0x10B (PE32)",
+        "match": true
+      },
+      "image_base": {
+        "measured": "0x00400000",
+        "expected": "0x00400000",
+        "match": true
+      },
+      "image_base_measured_via_mapper": {
+        "measured": "0x00400000",
+        "expected": "0x00400000",
+        "match": true
+      },
+      "section": {
+        "measured": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ],
+        "expected": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ],
+        "match": true
+      },
+      "all_match": true
+    },
+    "read_first_section_byte": {
+      "request": {
+        "va": "0x00401000",
+        "n": 1
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x0, raw end 0x401 <= file size 0x500; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      }
+    }
+  },
+  "truncations": {
+    "0x98": {
+      "file_size": "0x98",
+      "expected": "CONTROLLED_REJECT (ControlledReadError with a stage-specific REJECTED_INVALID_INPUT reason)",
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header PE32 Magic field at 0x98 (need 0x9a, file 0x98)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 152)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    "0x99": {
+      "file_size": "0x99",
+      "expected": "CONTROLLED_REJECT (ControlledReadError with a stage-specific REJECTED_INVALID_INPUT reason)",
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header PE32 Magic field at 0x98 (need 0x9a, file 0x99)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 153)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    "0xB4": {
+      "file_size": "0xB4",
+      "expected": "CONTROLLED_REJECT (ControlledReadError with a stage-specific REJECTED_INVALID_INPUT reason)",
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header ImageBase field at 0xb4 (need 0xb8, file 0xb4)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 180)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    "0xB7": {
+      "file_size": "0xB7",
+      "expected": "CONTROLLED_REJECT (ControlledReadError with a stage-specific REJECTED_INVALID_INPUT reason)",
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header ImageBase field at 0xb4 (need 0xb8, file 0xb7)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 183)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    }
+  },
+  "probes": {
+    "0x9A": {
+      "file_size": "0x9A",
+      "expected": "controlled rejection at the exact failure stage (0x190 is a POST-only probe: mid-section-table truncation, table region 0x178..0x1A0)",
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header ImageBase field at 0xb4 (need 0xb8, file 0x9a)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 154)",
+        "controlled": false
+      }
+    },
+    "0xB8": {
+      "file_size": "0xB8",
+      "expected": "controlled rejection at the exact failure stage (0x190 is a POST-only probe: mid-section-table truncation, table region 0x178..0x1A0)",
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] incomplete section table (1 sections need 0x1a0 bytes; file is 0xb8)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "QCReadError",
+        "exception_message": "[QC_REJECTED_INVALID_INPUT] incomplete section table",
+        "controlled": true
+      }
+    },
+    "0x190": {
+      "file_size": "0x190",
+      "expected": "controlled rejection at the exact failure stage (0x190 is a POST-only probe: mid-section-table truncation, table region 0x178..0x1A0)",
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] incomplete section table (1 sections need 0x1a0 bytes; file is 0x190)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "QCReadError",
+        "exception_message": "[QC_REJECTED_INVALID_INPUT] incomplete section table",
+        "controlled": true
+      }
+    },
+    "0x1C0": {
+      "file_size": "0x1C0",
+      "expected": "controlled rejection at the exact failure stage (0x190 is a POST-only probe: mid-section-table truncation, table region 0x178..0x1A0)",
+      "post_production_v2": {
+        "outcome": "CONSTRUCTED",
+        "image_base": "0x00400000",
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ]
+      },
+      "post_qc_v1_historical": {
+        "outcome": "CONSTRUCTED",
+        "image_base": "0x00400000",
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ]
+      }
+    }
+  }
+}

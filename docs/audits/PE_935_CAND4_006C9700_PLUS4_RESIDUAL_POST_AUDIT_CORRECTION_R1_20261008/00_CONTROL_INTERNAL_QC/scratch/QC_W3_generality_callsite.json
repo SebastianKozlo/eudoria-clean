@@ -1,0 +1,52 @@
+{
+  "run_id": "PE_935_CAND4_006C9700_PLUS4_POST_AUDIT_CORRECTION_R1_20261008",
+  "record_class": "REC_W_ACTIVE_CORRECTED_PIN",
+  "superseded_records_note": "The three contradictory active records in the source package (SOURCE_STATE.md L112 'E8 35 F0 02 00'; 01_RAW/PINS_AND_REL32.txt L113 '+0x2F035'; 01_RAW/PINS_AND_REL32.txt L137 'E8 35 F0 02 00' claimed byte-identical with the prior record) are superseded by THIS single active record. The source package is READ_ONLY and was NOT edited; the disclosures in 01_RAW/PINS_AND_REL32.txt L92-95 and 01_RAW/MANUAL_ENCODING_CROSSCHECK.txt item 13 (true descriptions of the earlier transcription mistake) remain historically authentic.",
+  "active_records": [
+    {
+      "RECORD_ID": "W_CTOR_CALL_AT_006CB836",
+      "CALLSITE_VA": "0x006CB7CF",
+      "BYTES": "E8 2C DF FF FF",
+      "SIGNED_REL32": "-0x20D4",
+      "NEXT_VA": "0x006CB7D4",
+      "TARGET_VA": "0x006C9700",
+      "TARGET_FORMULA": "CALLSITE_VA + 5 + signed_little_endian_int32(BYTES[1:5])",
+      "PHYSICAL_OFFSET": "0x2CB7CF",
+      "MEASUREMENT_BASIS": "SCRATCH MUTANT FIXTURE of the residual QC (PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008_INTERNAL_QC_R1) \u2014 W3 generality teleport to the independently pinned REL_HIST_PUMP callsite 0x006CB7CF (E8 2C DF FF FF, -0x20D4 -> 0x006C9700); NOT a physical measurement record; the SOURCE ACTIVE_CORRECTED_PINS.json is untouched",
+      "PRIOR_RECORD_AGREEMENT": {
+        "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/01_RAW/MANUAL_ENCODING_CROSSCHECK.txt",
+        "location": "item 13, lines 69-78",
+        "git_blob_sha1": "eea2876a460d871a37ea03daee38edd9702323f1",
+        "sha256": "540CA5839C00DE0299EA3DCC1392CDF666ECC00AF4EB827C8E887C1D43F750AF",
+        "quote": "E8 75 F0 02 00 @0x006CB836: rel32 = +0x2F075; 0x006CB83B + 0x2F075 = 0x006FA8B0. MATCH. PROCESS DISCLOSURE: the first transcription of this pin in this run's draft read \"E8 35 F0 02 00\" (a sign/misreading of the prior record's Ghidra signed-byte rendering \"-18 75 -10 02 00\", where 75 is POSITIVE 0x75); the physical-EXE production gate (03_SCRIPTS/checker_plus4.py, clean pass attempt 1) CAUGHT the mismatch (FAIL PIN:HIST_CALLER_CTOR_CALL), the pin was corrected to the MEASURED bytes E8 75 F0 02 00, and the clean pass re-ran 80/80.",
+        "corroboration": [
+          "01_RAW/PINS_AND_REL32.txt L92-95 (git blob 7696829d5860fc69ed570f91a4a790a5ee857db2): 'hist_caller_ctor_call @0x006CB836: E8 75 F0 02 00 (->0x006FA8B0; ctor(W, saved R); PROCESS DISCLOSURE: the run's first draft transcription read E8 35 F0 02 00; the physical-EXE checker caught it (clean-pass attempt 1 FAIL at this pin); corrected to the MEASURED bytes'",
+          "QC_REPORT.md line 89 (26/26 anchors incl. this rel32): 'hist. FUN_006FA8B0(W,R) prior record | 0x006CB836 | E8 75 F0 02 00 | E8 75 F0 02 00 | MATCH - the CORRECTED transcription is the physically true one (rel32 +0x2F075 -> 0x006FA8B0)'",
+          "HANDOFF.md L142-145: 'one executor transcription error (E8 35... -> E8 75 F0 02 00 @0x006CB836) CAUGHT by the production gate itself on clean-pass attempt 1 and corrected before any evidence was accepted.'",
+          "00_CONTROL_INTERNAL_QC/QC_RESULTS.json: REL32 REL_HIST_WCTOR @0x6cb836 measured_target 0x6fa8b0 (26/26 QC anchor set incl. this row)"
+        ]
+      },
+      "SUPERSEDED_ACTIVE_RECORDS": [
+        {
+          "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/SOURCE_STATE.md",
+          "location": "line 112",
+          "old_active_claim": "ctor FUN_006FA8B0(W, saved R) @0x006CB836 (E8 35 F0 02 00);",
+          "why_wrong": "the physical EXE bytes at 0x006CB836 are E8 75 F0 02 00 (this run's own physical read); E8 35 F0 02 00 is the earlier transcription error this same package documents as corrected"
+        },
+        {
+          "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/01_RAW/PINS_AND_REL32.txt",
+          "location": "line 113",
+          "old_active_claim": "0x006CB836 -> 0x006FA8B0 (historical W ctor, +0x2F035);",
+          "why_wrong": "internally inconsistent and physically wrong: 0x006CB83B + 0x2F035 = 0x006FA870, not 0x006FA8B0; the measured rel32 is +0x2F075"
+        },
+        {
+          "path": "docs/audits/PE_935_CAND4_006C9700_PLUS4_PROVENANCE_R1_20261008/01_RAW/PINS_AND_REL32.txt",
+          "location": "line 137",
+          "old_active_claim": "0x006CB836 E8 35 F0 02 00; the L20 window sequence) == PLACEMENT_RECORD_BRIDGE ... byte-identical after signed-byte conversion",
+          "why_wrong": "the prior L20 record's bytes agree with the physical EXE (E8 75 F0 02 00; '-18 75 -10 02 00' signed rendering); the E8 35 transcription does NOT match the prior record"
+        }
+      ]
+    }
+  ],
+  "qc_mutation_note": "W3 generality teleport to the independently pinned REL_HIST_PUMP callsite 0x006CB7CF (E8 2C DF FF FF, -0x20D4 -> 0x006C9700)"
+}

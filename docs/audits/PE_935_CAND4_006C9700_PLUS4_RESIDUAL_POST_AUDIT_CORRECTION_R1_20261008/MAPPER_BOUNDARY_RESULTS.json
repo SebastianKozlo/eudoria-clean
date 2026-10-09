@@ -1,0 +1,3359 @@
+{
+  "run_id": "PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008",
+  "phase": "POST-ASSEMBLED",
+  "stamp": "20261009T035844Z",
+  "evidence_files": {
+    "pre_mapper_raw": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/PRE_20261009T035439Z_MAPPER_P2A_RAW.json",
+    "pre_header_raw": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/PRE_20261009T035439Z_HEADER_P2B_RAW.json",
+    "pre_p3_raw": "docs/audits/PE_935_CAND4_006C9700_PLUS4_RESIDUAL_POST_AUDIT_CORRECTION_R1_20261008/00_PRE/PRE_20261009T035439Z_WRONG_CALLSITE_P3_RAW.json",
+    "post_mapper_raw": "00_POST/POST_20261009T035844Z_MAPPER_P2A_RAW.json",
+    "post_header_raw": "00_POST/POST_20261009T035844Z_HEADER_P2B_RAW.json",
+    "post_p3_raw": "00_POST/POST_20261009T035844Z_WRONG_CALLSITE_P3_RAW.json",
+    "note": "00_PRE/ files are the immutable PRE record; this assembled file merges PRE (v1) and POST (v2) observations; PRE raws were never overwritten"
+  },
+  "policy": {
+    "interval_semantics": "half-open VA intervals [VA, VA+n); all validation BEFORE PE section matching",
+    "validation": "va/n integers not bool; 0 <= VA < 2**32; n > 0; VA+n <= 2**32; VA underflow (< ImageBase) rejected separately",
+    "section_matching": "ANY-INTERSECTION: more than one intersecting section => REJECTED even if one fully contains the read; a single intersecting section must cover the WHOLE request; cross-section / partially unmapped intervals never yield bytes",
+    "classification_values": [
+      "RAW_BACKED",
+      "VIRTUAL_BSS",
+      "UNMAPPED",
+      "REJECTED_INVALID_INPUT"
+    ],
+    "raw_padding_policy": "PHYSICAL_FILE_MAPPER_POLICY: a range inside SizeOfRawData but past VirtualSize is classified RAW_BACKED per this explicit physical-file policy; this is a statement about the physical FILE, never a runtime observation.",
+    "no_fabricated_zeros": true,
+    "short_slice_is_not_success": true,
+    "general_pe_mapper_correctness": "NOT_ESTABLISHED",
+    "relabeled_overflow_control": "ImageBase+0x7FFFFFFF is UNMAPPED (far beyond the image, a VALID 32-bit range); it is NOT a PE32 address-space overflow test; the real boundary tests are the 4GiB cases below"
+  },
+  "cases": [
+    {
+      "case_id": "P2A-DESKTOP-1",
+      "desktop_case": "PARTIAL_OVERLAP_SECOND_SECTION_STARTS_INSIDE_READ",
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": "B",
+            "rva": "0x00001050",
+            "vsize": "0x20",
+            "rsize": "0x20",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x000040104F",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "two sections intersect the half-open range; VA=0xFFFFFFFF-family not involved",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (A/B)"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0x4f, raw end 0x453 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x4f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x104f..0x1052: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x104f..0x1052: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x4f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": null,
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": "41 41 41 41",
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": true,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-DESKTOP-2",
+      "desktop_case": "PARTIAL_OVERLAP_SECOND_SECTION_ENDS_INSIDE_READ",
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": "B",
+            "rva": "0x00001050",
+            "vsize": "0x20",
+            "rsize": "0x20",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x000040106F",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "two sections intersect (B-intersection is exactly ONE byte 0x106F)",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (A/B)"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0x6f, raw end 0x473 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x6f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x106f..0x1072: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x106f..0x1072: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x6f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": null,
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": "41 41 41 41",
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": true,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-DISTINCT-1",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": "B",
+            "rva": "0x00001050",
+            "vsize": "0x20",
+            "rsize": "0x20",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x000040104F",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "same geometry; section B raw bytes are 0x42 \u2014 a false-pass read would provably return the WRONG section's bytes (A=0x41) for a range that covers B's region",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (A/B)"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0x4f, raw end 0x453 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x4f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x104f..0x1052: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x104f..0x1052: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x4f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": null,
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": "41 41 41 41",
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": true,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-DISTINCT-2",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": "B",
+            "rva": "0x00001050",
+            "vsize": "0x20",
+            "rsize": "0x20",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x000040106F",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "same geometry; the last byte 0x106F of the request lies in B's raw region (0x42 content) \u2014 a false-pass read returns A's 0x41",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (A/B)"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0x6f, raw end 0x473 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x6f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x106f..0x1072: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x106f..0x1072: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x6f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": null,
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": "41 41 41 41",
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": true,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-DESKTOP-3",
+      "desktop_case": "PE32_ABSOLUTE_VA_END_CROSSES_4GB",
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0xFFBFFFF0",
+            "vsize": "0x80",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x00FFFFFFFE",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "VA+n = 0x100000002 > 2**32 \u2014 invalid by address arithmetic BEFORE section matching",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "VA+n > 2**32"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0xe, raw end 0x412 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xe raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "half-open interval [VA, VA+n) exceeds the 32-bit address space: VA 0xfffffffe + n 4 = 0x100000002 > 2**32"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] half-open interval [VA, VA+n) exceeds the 32-bit address space: VA 0xfffffffe + n 4 = 0x100000002 > 2**32"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xe raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": null,
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": "41 41 41 41",
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": true,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-DESKTOP-4",
+      "desktop_case": "PE32_ABSOLUTE_VA_START_ABOVE_4GB",
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0xFFC00000",
+            "vsize": "0x80",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x0100000000",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "VA = 2**32 \u2014 outside the PE32 32-bit address space",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "VA >= 2**32"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0100000000",
+          "n": 4
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0x0, raw end 0x404 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0100000000",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0100000000",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "VA 0x100000000 is outside the PE32 32-bit address space (VA >= 2**32)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] VA 0x100000000 is outside the PE32 32-bit address space (VA >= 2**32)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0100000000",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": null,
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": "41 41 41 41",
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": true,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-BOUNDARY-VALID-1",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0xFFBFFFF0",
+            "vsize": "0x80",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x00FFFFFFFF",
+        "n": 1
+      },
+      "expected_classification": "RAW_BACKED",
+      "expected_basis": "VA=0xFFFFFFFF,n=1: the exclusive endpoint equals 2**32 \u2014 VALID half-open interval; the fixture section genuinely covers RVA 0xFFBFFFFF (raw-backed); must NOT be rejected",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00FFFFFFFF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0xf, raw end 0x410 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "41"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00FFFFFFFF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xf raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "41"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00FFFFFFFF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0xf, raw end 0x410 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "41"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00FFFFFFFF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xf raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "RAW_BACKED",
+      "exception_class_v1": null,
+      "exception_class_v2": null,
+      "returned_bytes_v1": "41",
+      "returned_bytes_v2": "41",
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-BOUNDARY-VALID-2",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0xFFBFFFF0",
+            "vsize": "0x80",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x00FFFFFFFE",
+        "n": 2
+      },
+      "expected_classification": "RAW_BACKED",
+      "expected_basis": "VA=0xFFFFFFFE,n=2: exclusive endpoint exactly 2**32 \u2014 VALID; raw-backed; must NOT be rejected",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 2
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0xe, raw end 0x410 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 2,
+          "bytes_hex": "41 41"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 2
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xe raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 2,
+          "bytes_hex": "41 41"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 2
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0xe, raw end 0x410 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 2,
+          "bytes_hex": "41 41"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 2
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xe raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 2,
+          "bytes_hex": "41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "RAW_BACKED",
+      "exception_class_v1": null,
+      "exception_class_v2": null,
+      "returned_bytes_v1": "41 41",
+      "returned_bytes_v2": "41 41",
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-TOUCH-INSIDE-S1",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".s1",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": ".s2",
+            "rva": "0x00001100",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x00004010F8",
+        "n": 8
+      },
+      "expected_classification": "RAW_BACKED",
+      "expected_basis": "non-overlapping sections touching at an endpoint: the request [0x10F8,0x1100) ends exactly at .s2's start \u2014 NO intersection with .s2; single-section read is legitimate",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00004010F8",
+          "n": 8
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s1: delta=0xf8, raw end 0x500 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 8,
+          "bytes_hex": "CC CC CC CC CC CC CC CC"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00004010F8",
+          "n": 8
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s1 delta 0xf8 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 8,
+          "bytes_hex": "CC CC CC CC CC CC CC CC"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004010F8",
+          "n": 8
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s1: delta=0xf8, raw end 0x500 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 8,
+          "bytes_hex": "CC CC CC CC CC CC CC CC"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004010F8",
+          "n": 8
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s1 delta 0xf8 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 8,
+          "bytes_hex": "CC CC CC CC CC CC CC CC"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "RAW_BACKED",
+      "exception_class_v1": null,
+      "exception_class_v2": null,
+      "returned_bytes_v1": "CC CC CC CC CC CC CC CC",
+      "returned_bytes_v2": "CC CC CC CC CC CC CC CC",
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-TOUCH-LAST-BYTE-S1",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".s1",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": ".s2",
+            "rva": "0x00001100",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x00004010FF",
+        "n": 1
+      },
+      "expected_classification": "RAW_BACKED",
+      "expected_basis": "the last byte of .s1; endpoint touching .s2 is not overlap",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00004010FF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s1: delta=0xff, raw end 0x500 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00004010FF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s1 delta 0xff raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004010FF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s1: delta=0xff, raw end 0x500 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004010FF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s1 delta 0xff raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "RAW_BACKED",
+      "exception_class_v1": null,
+      "exception_class_v2": null,
+      "returned_bytes_v1": "CC",
+      "returned_bytes_v2": "CC",
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-TOUCH-FIRST-BYTE-S2",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".s1",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": ".s2",
+            "rva": "0x00001100",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x0000401100",
+        "n": 1
+      },
+      "expected_classification": "RAW_BACKED",
+      "expected_basis": "the first byte of .s2 (start of the second section)",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000401100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s2: delta=0x0, raw end 0x601 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000401100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s2 delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s2: delta=0x0, raw end 0x601 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s2 delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "RAW_BACKED",
+      "exception_class_v1": null,
+      "exception_class_v2": null,
+      "returned_bytes_v1": "CC",
+      "returned_bytes_v2": "CC",
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-TOUCH-CROSSING",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".s1",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": ".s2",
+            "rva": "0x00001100",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x00004010FE",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "the request [0x10FE,0x1102) crosses .s1->.s2: BOTH sections intersect \u2014 a cross-section interval never yields bytes",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (.s1/.s2)"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00004010FE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "UNMAPPED",
+          "detail": "RVA range 0x10fe..0x1101 is inside no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[UNMAPPED] RVA range 0x10fe..0x1101 is inside no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00004010FE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x10fe+4 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x10fe+4 inside no section"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004010FE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x10fe..0x1101: 2 sections INTERSECT (.s1/.s2); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x10fe..0x1101: 2 sections INTERSECT (.s1/.s2); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004010FE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x10fe+4 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x10fe+4 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "UNMAPPED",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": "ControlledReadError",
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": null,
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": true,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-HIST-AMBIGUOUS",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".secA",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": ".secB",
+            "rva": "0x00001080",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x500"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x0000401090",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "historical control: BOTH sections fully contain the read \u2014 full-section-overlap rejection preserved",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (.secA/.secB)"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000401090",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x1090..0x1093 (sections .secA/.secB); no arbitrary first-section choice"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x1090..0x1093 (sections .secA/.secB); no arbitrary first-section choice"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000401090",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping: .secA/.secB"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] ambiguous section mapping: .secA/.secB"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401090",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x1090..0x1093: 2 sections INTERSECT (.secA/.secB); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x1090..0x1093: 2 sections INTERSECT (.secA/.secB); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401090",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping: .secA/.secB"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] ambiguous section mapping: .secA/.secB"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "REJECTED_INVALID_INPUT",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": "ControlledReadError",
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": null,
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-PARTIAL-START",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": "A",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x100",
+            "roff": "0x400"
+          },
+          {
+            "name": "B",
+            "rva": "0x00001050",
+            "vsize": "0x20",
+            "rsize": "0x20",
+            "roff": "0x600"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x900"
+      },
+      "request": {
+        "va": "0x0000400FF0",
+        "n": 24
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "the request [0x0FF0,0x1008) starts below section A and intersects it \u2014 partially unmapped interval, no bytes",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "partially covered by the single intersecting section"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000400FF0",
+          "n": 24
+        },
+        "classify": {
+          "classification": "UNMAPPED",
+          "detail": "RVA range 0xff0..0x1007 is inside no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[UNMAPPED] RVA range 0xff0..0x1007 is inside no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000400FF0",
+          "n": 24
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0xff0+24 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0xff0+24 inside no section"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000400FF0",
+          "n": 24
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "RVA range 0xff0..0x1007 is only PARTIALLY inside section A [0x1000..0x1100) \u2014 a cross-section or partially unmapped interval never yields bytes"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] RVA range 0xff0..0x1007 is only PARTIALLY inside section A [0x1000..0x1100) \u2014 a cross-section or partially unmapped interval never yields bytes"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000400FF0",
+          "n": 24
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0xff0+24 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0xff0+24 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "UNMAPPED",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": "ControlledReadError",
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": null,
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": true,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-PARTIAL-END",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x500"
+      },
+      "request": {
+        "va": "0x00004011F8",
+        "n": 16
+      },
+      "expected_classification": "UNMAPPED",
+      "expected_basis": "runner case-design correction (disclosed): the request [0x11F8,0x1208) lies ENTIRELY past the single section's membership end 0x1100 \u2014 no section intersects, so UNMAPPED is the correct expectation (v1 agreed); the true partial-end demonstration is the separate case P2A-PARTIAL-END-2; the immutable PRE raw carries the earlier wrong expected label for this case_id (the REQUEST never changed)",
+      "oracle_expected": {
+        "classification": "UNMAPPED",
+        "basis": "intersects no section"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00004011F8",
+          "n": 16
+        },
+        "classify": {
+          "classification": "UNMAPPED",
+          "detail": "RVA range 0x11f8..0x1207 is inside no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[UNMAPPED] RVA range 0x11f8..0x1207 is inside no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00004011F8",
+          "n": 16
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x11f8+16 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x11f8+16 inside no section"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004011F8",
+          "n": 16
+        },
+        "classify": {
+          "classification": "UNMAPPED",
+          "detail": "RVA range 0x11f8..0x1207 intersects no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[UNMAPPED] RVA range 0x11f8..0x1207 intersects no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004011F8",
+          "n": 16
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x11f8+16 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x11f8+16 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "UNMAPPED",
+      "observed_classification_v2": "UNMAPPED",
+      "exception_class_v1": "ControlledReadError",
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": null,
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-PARTIAL-END-2",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x500"
+      },
+      "request": {
+        "va": "0x00004010F8",
+        "n": 16
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "expected_basis": "the request [0x10F8,0x1108) STARTS inside the section membership [0x1000,0x1100) and extends past its end \u2014 partially unmapped interval, no bytes (POST-run case added after the runner case-design correction; disclosed as NOT_IN_PRE)",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "partially covered by the single intersecting section"
+      },
+      "pre_production_v1": {
+        "note": "NOT_IN_PRE (runner case-design correction; case added after the PRE run; disclosed)"
+      },
+      "pre_qc_v1": {
+        "note": "NOT_IN_PRE (runner case-design correction; case added after the PRE run; disclosed)"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004010F8",
+          "n": 16
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "RVA range 0x10f8..0x1107 is only PARTIALLY inside section .text [0x1000..0x1100) \u2014 a cross-section or partially unmapped interval never yields bytes"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] RVA range 0x10f8..0x1107 is only PARTIALLY inside section .text [0x1000..0x1100) \u2014 a cross-section or partially unmapped interval never yields bytes"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004010F8",
+          "n": 16
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x10f8+16 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x10f8+16 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "NOT_IN_PRE",
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "exception_class_v1": "NOT_IN_PRE",
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": null,
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-RELABLED-UNMAPPED",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x500"
+      },
+      "request": {
+        "va": "0x00803FFFFF",
+        "n": 4
+      },
+      "expected_classification": "UNMAPPED",
+      "expected_basis": "RELABELLED: ImageBase+0x7FFFFFFF is a VALID 32-bit range that intersects no section \u2014 UNMAPPED far beyond the image; it is NOT a PE32 address-space overflow test (the real boundary tests are P2A-DESKTOP-3/4 and P2A-BOUNDARY-VALID-1/2)",
+      "oracle_expected": {
+        "classification": "UNMAPPED",
+        "basis": "intersects no section"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00803FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "UNMAPPED",
+          "detail": "RVA range 0x7fffffff..0x80000002 is inside no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[UNMAPPED] RVA range 0x7fffffff..0x80000002 is inside no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00803FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x7fffffff+4 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x7fffffff+4 inside no section"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00803FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "UNMAPPED",
+          "detail": "RVA range 0x7fffffff..0x80000002 intersects no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[UNMAPPED] RVA range 0x7fffffff..0x80000002 intersects no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00803FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x7fffffff+4 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x7fffffff+4 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "UNMAPPED",
+      "observed_classification_v2": "UNMAPPED",
+      "exception_class_v1": "ControlledReadError",
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": null,
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-RAW-CROSSING-FIRST",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x500"
+      },
+      "request": {
+        "va": "0x0000401000",
+        "n": 1
+      },
+      "expected_classification": "RAW_BACKED",
+      "expected_basis": "first raw byte of a section whose raw range (0x80) is shorter than its virtual size (0x100)",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x0, raw end 0x401 <= file size 0x500; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "00"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "00"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x0, raw end 0x401 <= file size 0x500; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "00"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "00"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "RAW_BACKED",
+      "exception_class_v1": null,
+      "exception_class_v2": null,
+      "returned_bytes_v1": "00",
+      "returned_bytes_v2": "00",
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-RAW-CROSSING-LAST",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x500"
+      },
+      "request": {
+        "va": "0x000040107F",
+        "n": 1
+      },
+      "expected_classification": "RAW_BACKED",
+      "expected_basis": "last raw byte of the same section",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x7f, raw end 0x480 <= file size 0x500; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "7F"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x7f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "7F"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x7f, raw end 0x480 <= file size 0x500; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "7F"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x7f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "7F"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "RAW_BACKED",
+      "observed_classification_v2": "RAW_BACKED",
+      "exception_class_v1": null,
+      "exception_class_v2": null,
+      "returned_bytes_v1": "7F",
+      "returned_bytes_v2": "7F",
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-RAW-CROSSING-CROSS",
+      "desktop_case": null,
+      "geometry": {
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "rsize": "0x80",
+            "roff": "0x400"
+          }
+        ],
+        "image_base": "0x00400000",
+        "file_size": "0x500"
+      },
+      "request": {
+        "va": "0x000040107F",
+        "n": 2
+      },
+      "expected_classification": "VIRTUAL_BSS",
+      "expected_basis": "read from the LAST raw byte crossing raw->BSS \u2014 controlled FAIL, no fabricated bytes, even though plausible bytes exist further in the file",
+      "oracle_expected": {
+        "classification": "VIRTUAL_BSS",
+        "basis": "crosses raw->BSS boundary"
+      },
+      "pre_production_v1": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 2
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "read starts in the raw range of section .text but CROSSES into the virtual tail (delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize); controlled FAIL at the raw->BSS boundary"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] read starts in the raw range of section .text but CROSSES into the virtual tail (delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize); controlled FAIL at the raw->BSS boundary"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 2
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "cross raw->BSS in .text: delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] cross raw->BSS in .text: delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 2
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "read starts in the raw range of section .text but CROSSES into the virtual tail (delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize); controlled FAIL at the raw->BSS boundary"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] read starts in the raw range of section .text but CROSSES into the virtual tail (delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize); controlled FAIL at the raw->BSS boundary"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 2
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "cross raw->BSS in .text: delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] cross raw->BSS in .text: delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE (qc_countercheck_v2.py is the fresh-QC worker's own implementation \u2014 a separate parent phase)",
+      "observed_classification_v1": "VIRTUAL_BSS",
+      "observed_classification_v2": "VIRTUAL_BSS",
+      "exception_class_v1": "ControlledReadError",
+      "exception_class_v2": "ControlledReadError",
+      "returned_bytes_v1": null,
+      "returned_bytes_v2": null,
+      "verdict": "PASS",
+      "pre_falsifier_demonstrated": false,
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-REAL-PIN-6E8FA5",
+      "geometry": {
+        "image": "the pinned physical EXE",
+        "image_base": "0x00400000",
+        "file_size": "0x7A5000"
+      },
+      "request": {
+        "va": "0x00006E8FA5",
+        "n": 3
+      },
+      "expected_classification": "RAW_BACKED",
+      "expected_basis": "contract par. 2 item 4: the ordinary pinned byte-pin read must return 89 46 04 on the pinned physical EXE",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00006E8FA5",
+          "n": 3
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x2e7fa5, raw end 0x2e8fa8 <= file size 0x7a5000; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 3,
+          "bytes_hex": "89 46 04"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00006E8FA5",
+          "n": 3
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x2e7fa5 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 3,
+          "bytes_hex": "89 46 04"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00006E8FA5",
+          "n": 3
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x2e7fa5, raw end 0x2e8fa8 <= file size 0x7a5000; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 3,
+          "bytes_hex": "89 46 04"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00006E8FA5",
+          "n": 3
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x2e7fa5 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 3,
+          "bytes_hex": "89 46 04"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_classification_v2": "RAW_BACKED",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-REAL-BSS-BA1100",
+      "geometry": {
+        "image": "the pinned physical EXE",
+        "image_base": "0x00400000",
+        "file_size": "0x7A5000"
+      },
+      "request": {
+        "va": "0x0000BA1100",
+        "n": 1
+      },
+      "expected_classification": "VIRTUAL_BSS",
+      "expected_basis": "contract par. 2 item 4: the .data zero-init tail VA must classify VIRTUAL_BSS and never return fabricated file bytes",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000BA1100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "RVA 0x7a1100 is inside the virtual extent of section .data but past its raw range (delta 0x35100 >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] RVA 0x7a1100 is inside the virtual extent of section .data but past its raw range (delta 0x35100 >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000BA1100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "RVA 0x7a1100 in .data virtual tail: delta 0x35100 >= rsize 0x34000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] RVA 0x7a1100 in .data virtual tail: delta 0x35100 >= rsize 0x34000"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000BA1100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "RVA 0x7a1100 is inside the virtual extent of section .data but past its raw range (delta 0x35100 >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] RVA 0x7a1100 is inside the virtual extent of section .data but past its raw range (delta 0x35100 >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000BA1100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "RVA 0x7a1100 in .data virtual tail: delta 0x35100 >= rsize 0x34000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] RVA 0x7a1100 in .data virtual tail: delta 0x35100 >= rsize 0x34000"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_classification_v2": "VIRTUAL_BSS",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-REAL-BSS-BA73BC",
+      "geometry": {
+        "image": "the pinned physical EXE",
+        "image_base": "0x00400000",
+        "file_size": "0x7A5000"
+      },
+      "request": {
+        "va": "0x0000BA73BC",
+        "n": 1
+      },
+      "expected_classification": "VIRTUAL_BSS",
+      "expected_basis": "same for the second named BSS VA",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000BA73BC",
+          "n": 1
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "RVA 0x7a73bc is inside the virtual extent of section .data but past its raw range (delta 0x3b3bc >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] RVA 0x7a73bc is inside the virtual extent of section .data but past its raw range (delta 0x3b3bc >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000BA73BC",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "RVA 0x7a73bc in .data virtual tail: delta 0x3b3bc >= rsize 0x34000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] RVA 0x7a73bc in .data virtual tail: delta 0x3b3bc >= rsize 0x34000"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000BA73BC",
+          "n": 1
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "RVA 0x7a73bc is inside the virtual extent of section .data but past its raw range (delta 0x3b3bc >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] RVA 0x7a73bc is inside the virtual extent of section .data but past its raw range (delta 0x3b3bc >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000BA73BC",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "RVA 0x7a73bc in .data virtual tail: delta 0x3b3bc >= rsize 0x34000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] RVA 0x7a73bc in .data virtual tail: delta 0x3b3bc >= rsize 0x34000"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_classification_v2": "VIRTUAL_BSS",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-INPUT-BOOL-VA",
+      "request": {
+        "va": "True",
+        "n": 1
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "pre_production_v1": {
+        "request": {
+          "va": "True",
+          "n": 1
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=True, n=1)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=True, n=1)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "True",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "True",
+          "n": 1
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=True, n=1)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=True, n=1)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "True",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      },
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-INPUT-BOOL-N",
+      "request": {
+        "va": "0x0000401000",
+        "n": true
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": true
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=4198400, n=True)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=4198400, n=True)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": true
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": true
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=4198400, n=True)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=4198400, n=True)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": true
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      },
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-INPUT-STR-VA",
+      "request": {
+        "va": "'0x00401000'",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "pre_production_v1": {
+        "request": {
+          "va": "'0x00401000'",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va='0x00401000', n=4)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va='0x00401000', n=4)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "'0x00401000'",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "'0x00401000'",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va='0x00401000', n=4)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va='0x00401000', n=4)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "'0x00401000'",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      },
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-INPUT-FLOAT-N",
+      "request": {
+        "va": "0x0000401000",
+        "n": 4.0
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 4.0
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=4198400, n=4.0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=4198400, n=4.0)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 4.0
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 4.0
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=4198400, n=4.0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=4198400, n=4.0)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 4.0
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      },
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-INPUT-N-ZERO",
+      "request": {
+        "va": "0x0000401000",
+        "n": 0
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 0
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=0 (must be > 0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] invalid length n=0 (must be > 0)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 0
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=0"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] invalid length n=0"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 0
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=0 (must be > 0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] invalid length n=0 (must be > 0)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 0
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=0"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] invalid length n=0"
+        }
+      },
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-INPUT-N-NEGATIVE",
+      "request": {
+        "va": "0x0000401000",
+        "n": -3
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": -3
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=-3 (must be > 0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] invalid length n=-3 (must be > 0)"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x0000401000",
+          "n": -3
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=-3"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] invalid length n=-3"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": -3
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=-3 (must be > 0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] invalid length n=-3 (must be > 0)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": -3
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=-3"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] invalid length n=-3"
+        }
+      },
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-INPUT-VA-NEGATIVE",
+      "request": {
+        "va": "0x-000000001",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x-000000001",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "negative VA -1"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] negative VA -1"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x-000000001",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "negative VA -1"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] negative VA -1"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x-000000001",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "negative VA -1"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] negative VA -1"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x-000000001",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "negative VA -1"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] negative VA -1"
+        }
+      },
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2A-INPUT-VA-UNDERFLOW",
+      "request": {
+        "va": "0x00003FFFFF",
+        "n": 4
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT",
+      "pre_production_v1": {
+        "request": {
+          "va": "0x00003FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "VA underflow: 0x003fffff < ImageBase 0x00400000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] VA underflow: 0x003fffff < ImageBase 0x00400000"
+        }
+      },
+      "pre_qc_v1": {
+        "request": {
+          "va": "0x00003FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "VA underflow 0x3fffff < ImageBase"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] VA underflow 0x3fffff < ImageBase"
+        }
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00003FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "VA underflow: 0x003fffff < ImageBase 0x00400000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] VA underflow: 0x003fffff < ImageBase 0x00400000"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00003FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "VA underflow 0x3fffff < ImageBase"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] VA underflow 0x3fffff < ImageBase"
+        }
+      },
+      "observed_classification_v2": "REJECTED_INVALID_INPUT",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2B-TRUNC-0X98",
+      "geometry": {
+        "total_synthetic_file_size_bytes": "0x98",
+        "fixture_layout": "same Desktop layout as PRE"
+      },
+      "request": {
+        "operation": "construct the PE mapper (header parse)"
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT (ControlledReadError)",
+      "oracle_constructor_expectation": {
+        "outcome": "EXCEPTION",
+        "failing_stage": "optional-header Magic @0x98",
+        "bytes_needed": 154
+      },
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 152)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 152)",
+        "controlled": false
+      },
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header PE32 Magic field at 0x98 (need 0x9a, file 0x98)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 152)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_outcome_v1": "EXCEPTION",
+      "observed_exception_type_v1": "error",
+      "observed_outcome_v2": "EXCEPTION",
+      "observed_exception_type_v2": "ControlledReadError",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2B-TRUNC-0X99",
+      "geometry": {
+        "total_synthetic_file_size_bytes": "0x99",
+        "fixture_layout": "same Desktop layout as PRE"
+      },
+      "request": {
+        "operation": "construct the PE mapper (header parse)"
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT (ControlledReadError)",
+      "oracle_constructor_expectation": {
+        "outcome": "EXCEPTION",
+        "failing_stage": "optional-header Magic @0x98",
+        "bytes_needed": 154
+      },
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 153)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 153)",
+        "controlled": false
+      },
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header PE32 Magic field at 0x98 (need 0x9a, file 0x99)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 154 bytes for unpacking 2 bytes at offset 152 (actual buffer size is 153)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_outcome_v1": "EXCEPTION",
+      "observed_exception_type_v1": "error",
+      "observed_outcome_v2": "EXCEPTION",
+      "observed_exception_type_v2": "ControlledReadError",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2B-TRUNC-0XB4",
+      "geometry": {
+        "total_synthetic_file_size_bytes": "0xB4",
+        "fixture_layout": "same Desktop layout as PRE"
+      },
+      "request": {
+        "operation": "construct the PE mapper (header parse)"
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT (ControlledReadError)",
+      "oracle_constructor_expectation": {
+        "outcome": "EXCEPTION",
+        "failing_stage": "optional-header ImageBase @0xB4",
+        "bytes_needed": 184
+      },
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 180)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 180)",
+        "controlled": false
+      },
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header ImageBase field at 0xb4 (need 0xb8, file 0xb4)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 180)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_outcome_v1": "EXCEPTION",
+      "observed_exception_type_v1": "error",
+      "observed_outcome_v2": "EXCEPTION",
+      "observed_exception_type_v2": "ControlledReadError",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2B-TRUNC-0XB7",
+      "geometry": {
+        "total_synthetic_file_size_bytes": "0xB7",
+        "fixture_layout": "same Desktop layout as PRE"
+      },
+      "request": {
+        "operation": "construct the PE mapper (header parse)"
+      },
+      "expected_classification": "REJECTED_INVALID_INPUT (ControlledReadError)",
+      "oracle_constructor_expectation": {
+        "outcome": "EXCEPTION",
+        "failing_stage": "optional-header ImageBase @0xB4",
+        "bytes_needed": 184
+      },
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 183)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 183)",
+        "controlled": false
+      },
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header ImageBase field at 0xb4 (need 0xb8, file 0xb7)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 183)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_outcome_v1": "EXCEPTION",
+      "observed_exception_type_v1": "error",
+      "observed_outcome_v2": "EXCEPTION",
+      "observed_exception_type_v2": "ControlledReadError",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2B-PROBE-0X9A",
+      "geometry": {
+        "total_synthetic_file_size_bytes": "0x9A",
+        "fixture_layout": "same Desktop layout as PRE"
+      },
+      "request": {
+        "operation": "construct the PE mapper (header parse)"
+      },
+      "expected_classification": "probe oracle expectation: EXCEPTION at stage 'optional-header ImageBase @0xB4'",
+      "oracle_constructor_expectation": {
+        "outcome": "EXCEPTION",
+        "failing_stage": "optional-header ImageBase @0xB4",
+        "bytes_needed": 184
+      },
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 154)",
+        "controlled": false
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 154)",
+        "controlled": false
+      },
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] physical buffer too short for the optional-header ImageBase field at 0xb4 (need 0xb8, file 0x9a)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "error",
+        "exception_message": "unpack_from requires a buffer of at least 184 bytes for unpacking 4 bytes at offset 180 (actual buffer size is 154)",
+        "controlled": false
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_outcome_v1": "EXCEPTION",
+      "observed_exception_type_v1": "error",
+      "observed_outcome_v2": "EXCEPTION",
+      "observed_exception_type_v2": "ControlledReadError",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2B-PROBE-0XB8",
+      "geometry": {
+        "total_synthetic_file_size_bytes": "0xB8",
+        "fixture_layout": "same Desktop layout as PRE"
+      },
+      "request": {
+        "operation": "construct the PE mapper (header parse)"
+      },
+      "expected_classification": "probe oracle expectation: EXCEPTION at stage 'section table (0x178 + 40*nsec)'",
+      "oracle_constructor_expectation": {
+        "outcome": "EXCEPTION",
+        "failing_stage": "section table (0x178 + 40*nsec)",
+        "bytes_needed": 416
+      },
+      "pre_production_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] incomplete section table",
+        "controlled": true
+      },
+      "pre_qc_v1": {
+        "outcome": "EXCEPTION",
+        "exception_type": "QCReadError",
+        "exception_message": "[QC_REJECTED_INVALID_INPUT] incomplete section table",
+        "controlled": true
+      },
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] incomplete section table (1 sections need 0x1a0 bytes; file is 0xb8)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "QCReadError",
+        "exception_message": "[QC_REJECTED_INVALID_INPUT] incomplete section table",
+        "controlled": true
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_outcome_v1": "EXCEPTION",
+      "observed_exception_type_v1": "ControlledReadError",
+      "observed_outcome_v2": "EXCEPTION",
+      "observed_exception_type_v2": "ControlledReadError",
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2B-PROBE-0X1C0",
+      "geometry": {
+        "total_synthetic_file_size_bytes": "0x1C0",
+        "fixture_layout": "same Desktop layout as PRE"
+      },
+      "request": {
+        "operation": "construct the PE mapper (header parse)"
+      },
+      "expected_classification": "probe oracle expectation: CONSTRUCTED",
+      "oracle_constructor_expectation": {
+        "outcome": "CONSTRUCTED",
+        "failing_stage": null,
+        "note": "all header stages physically available; only raw reads remain (a short raw region is rejected per-read)"
+      },
+      "pre_production_v1": {
+        "outcome": "CONSTRUCTED",
+        "image_base": "0x00400000",
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ]
+      },
+      "pre_qc_v1": {
+        "outcome": "CONSTRUCTED",
+        "image_base": "0x00400000",
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ]
+      },
+      "post_production_v2": {
+        "outcome": "CONSTRUCTED",
+        "image_base": "0x00400000",
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ]
+      },
+      "post_qc_v1_historical": {
+        "outcome": "CONSTRUCTED",
+        "image_base": "0x00400000",
+        "sections": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ]
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_outcome_v1": "CONSTRUCTED",
+      "observed_exception_type_v1": null,
+      "observed_outcome_v2": "CONSTRUCTED",
+      "observed_exception_type_v2": null,
+      "verdict": "PASS",
+      "negative_finding": null
+    },
+    {
+      "case_id": "P2B-PROBE-0X190",
+      "geometry": {
+        "total_synthetic_file_size_bytes": "0x190",
+        "fixture_layout": "same Desktop layout as PRE"
+      },
+      "request": {
+        "operation": "construct the PE mapper (header parse)"
+      },
+      "expected_classification": "probe oracle expectation: EXCEPTION at stage 'section table (0x178 + 40*nsec)'",
+      "oracle_constructor_expectation": {
+        "outcome": "EXCEPTION",
+        "failing_stage": "section table (0x178 + 40*nsec)",
+        "bytes_needed": 416
+      },
+      "pre_production_v1": "NOT_IN_PRE (POST-only probe)",
+      "pre_qc_v1": "NOT_IN_PRE (POST-only probe)",
+      "post_production_v2": {
+        "outcome": "EXCEPTION",
+        "exception_type": "ControlledReadError",
+        "exception_message": "[REJECTED_INVALID_INPUT] incomplete section table (1 sections need 0x1a0 bytes; file is 0x190)",
+        "controlled": true
+      },
+      "post_qc_v1_historical": {
+        "outcome": "EXCEPTION",
+        "exception_type": "QCReadError",
+        "exception_message": "[QC_REJECTED_INVALID_INPUT] incomplete section table",
+        "controlled": true
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE",
+      "observed_outcome_v1": "NOT_IN_PRE (POST-only probe)",
+      "observed_exception_type_v1": "NOT_IN_PRE (POST-only probe)",
+      "observed_outcome_v2": "EXCEPTION",
+      "observed_exception_type_v2": "ControlledReadError",
+      "verdict": "PASS",
+      "negative_finding": null
+    }
+  ],
+  "header_positive_intact": {
+    "pre_production_v1": {
+      "outcome": "CONSTRUCTED",
+      "image_base": "0x00400000",
+      "sections": [
+        {
+          "name": ".text",
+          "rva": "0x00001000",
+          "vsize": "0x100",
+          "raw_offset": "0x400",
+          "raw_size": "0x100",
+          "member_end": "0x1100"
+        }
+      ]
+    },
+    "pre_qc_v1": {
+      "outcome": "CONSTRUCTED",
+      "image_base": "0x00400000",
+      "sections": [
+        {
+          "name": ".text",
+          "rva": "0x00001000",
+          "vsize": "0x100",
+          "raw_offset": "0x400",
+          "raw_size": "0x100",
+          "member_end": "0x1100"
+        }
+      ]
+    },
+    "post_production_v2": {
+      "outcome": "CONSTRUCTED",
+      "image_base": "0x00400000",
+      "sections": [
+        {
+          "name": ".text",
+          "rva": "0x00001000",
+          "vsize": "0x100",
+          "raw_offset": "0x400",
+          "raw_size": "0x100",
+          "member_end": "0x1100"
+        }
+      ]
+    },
+    "measured_vs_fixture_verification": {
+      "e_lfanew": {
+        "measured": "0x80",
+        "expected": "0x80",
+        "match": true
+      },
+      "pe_signature": {
+        "measured": "b'PE\\x00\\x00'",
+        "expected": "b'PE\\x00\\x00'",
+        "match": true
+      },
+      "machine": {
+        "measured": "0x014C",
+        "expected": "0x14C",
+        "match": true
+      },
+      "number_of_sections": {
+        "measured": 1,
+        "expected": 1,
+        "match": true
+      },
+      "size_of_optional_header": {
+        "measured": "0xE0",
+        "expected": "0xE0",
+        "match": true
+      },
+      "optional_header_magic": {
+        "measured": "0x010B",
+        "expected": "0x10B (PE32)",
+        "match": true
+      },
+      "image_base": {
+        "measured": "0x00400000",
+        "expected": "0x00400000",
+        "match": true
+      },
+      "image_base_measured_via_mapper": {
+        "measured": "0x00400000",
+        "expected": "0x00400000",
+        "match": true
+      },
+      "section": {
+        "measured": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ],
+        "expected": [
+          {
+            "name": ".text",
+            "rva": "0x00001000",
+            "vsize": "0x100",
+            "raw_offset": "0x400",
+            "raw_size": "0x100",
+            "member_end": "0x1100"
+          }
+        ],
+        "match": true
+      },
+      "all_match": true
+    },
+    "header_field_expectations": {
+      "e_lfanew": "0x80",
+      "pe_signature": "PE\\x00\\x00",
+      "machine": "0x14C",
+      "number_of_sections": 1,
+      "size_of_optional_header": "0xE0",
+      "optional_header_magic": "0x10B (PE32)",
+      "image_base": "0x00400000",
+      "coff_file_offset": "0x84",
+      "magic_file_offset": "0x98",
+      "image_base_file_offset": "0xB4",
+      "section_table_file_offset": "0x178",
+      "sections": [
+        {
+          "name": ".text",
+          "rva": "0x00001000",
+          "vsize": "0x100",
+          "raw_offset": "0x400",
+          "raw_size": "0x100",
+          "member_end": "0x1100"
+        }
+      ],
+      "note": "runner self-correction disclosed: an earlier version of this helper stated section_table_file_offset 0x1A0 \u2014 the correct value is 0x178 (= 0x84 + 20 + 0xE0); the wrong value was copied into the immutable PRE raw as a descriptive-only defect (no gate consumed it); corrected before the POST phase"
+    },
+    "verdict": "PASS"
+  },
+  "oracle_discipline": {
+    "measured_quantity": "classification + returned bytes of every boundary request, and constructor behavior on every truncated synthetic file",
+    "independent_source_of_truth": "this runner's own interval/build arithmetic (oracle_expectation) + the constructed fixture bytes + the pinned Desktop expectations for the EXE pin cases (89 46 04 out-of-band pin) + the Desktop's recorded PRE observations",
+    "why_non_circular": "the expected classification is computed by a separate implementation of the contract rule in THIS driver, never by replaying the mapper under test; the historical QCPE is a second mapper (PRE), and the fixed QC v2 is a separate parent phase (never claimed here)",
+    "failure_case_detected": "P2A-DESKTOP-1/2 (partial overlap), P2A-DESKTOP-3/4 (32-bit boundary), P2B truncations 0x98/0x99/0xB4/0xB7 \u2014 each failed on v1 (false PASS / raw struct.error) and is controlled on v2"
+  }
+}

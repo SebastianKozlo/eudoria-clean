@@ -1,0 +1,1274 @@
+{
+  "phase": "POST",
+  "stamp": "20261009T035740Z",
+  "executed_implementations": {
+    "production": "03_SCRIPTS/checker_plus4_successor_v2.py (corrected production)",
+    "qc": "historical QCPE v1 (AST-extracted; UNFIXED \u2014 the fixed independent QC is the separate parent QC phase; recorded for continuity, NOT presented as the corrected QC)"
+  },
+  "p2a_cases": [
+    {
+      "case_id": "P2A-DESKTOP-1",
+      "request": {
+        "va": "0x000040104F",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "two sections intersect the half-open range; VA=0xFFFFFFFF-family not involved",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (A/B)"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x104f..0x1052: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x104f..0x1052: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x4f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-DESKTOP-2",
+      "request": {
+        "va": "0x000040106F",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "two sections intersect (B-intersection is exactly ONE byte 0x106F)",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (A/B)"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x106f..0x1072: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x106f..0x1072: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x6f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-DISTINCT-1",
+      "request": {
+        "va": "0x000040104F",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "same geometry; section B raw bytes are 0x42 \u2014 a false-pass read would provably return the WRONG section's bytes (A=0x41) for a range that covers B's region",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (A/B)"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x104f..0x1052: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x104f..0x1052: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040104F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x4f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-DISTINCT-2",
+      "request": {
+        "va": "0x000040106F",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "same geometry; the last byte 0x106F of the request lies in B's raw region (0x42 content) \u2014 a false-pass read returns A's 0x41",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (A/B)"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x106f..0x1072: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x106f..0x1072: 2 sections INTERSECT (A/B); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040106F",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x6f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-DESKTOP-3",
+      "request": {
+        "va": "0x00FFFFFFFE",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "VA+n = 0x100000002 > 2**32 \u2014 invalid by address arithmetic BEFORE section matching",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "VA+n > 2**32"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "half-open interval [VA, VA+n) exceeds the 32-bit address space: VA 0xfffffffe + n 4 = 0x100000002 > 2**32"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] half-open interval [VA, VA+n) exceeds the 32-bit address space: VA 0xfffffffe + n 4 = 0x100000002 > 2**32"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xe raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-DESKTOP-4",
+      "request": {
+        "va": "0x0100000000",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "VA = 2**32 \u2014 outside the PE32 32-bit address space",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "VA >= 2**32"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0100000000",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "VA 0x100000000 is outside the PE32 32-bit address space (VA >= 2**32)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] VA 0x100000000 is outside the PE32 32-bit address space (VA >= 2**32)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0100000000",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 4,
+          "bytes_hex": "41 41 41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-BOUNDARY-VALID-1",
+      "request": {
+        "va": "0x00FFFFFFFF",
+        "n": 1
+      },
+      "contract_expected": "RAW_BACKED",
+      "contract_basis": "VA=0xFFFFFFFF,n=1: the exclusive endpoint equals 2**32 \u2014 VALID half-open interval; the fixture section genuinely covers RVA 0xFFBFFFFF (raw-backed); must NOT be rejected",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00FFFFFFFF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0xf, raw end 0x410 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "41"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00FFFFFFFF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xf raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-BOUNDARY-VALID-2",
+      "request": {
+        "va": "0x00FFFFFFFE",
+        "n": 2
+      },
+      "contract_expected": "RAW_BACKED",
+      "contract_basis": "VA=0xFFFFFFFE,n=2: exclusive endpoint exactly 2**32 \u2014 VALID; raw-backed; must NOT be rejected",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 2
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section A: delta=0xe, raw end 0x410 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 2,
+          "bytes_hex": "41 41"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00FFFFFFFE",
+          "n": 2
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section A delta 0xe raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 2,
+          "bytes_hex": "41 41"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-TOUCH-INSIDE-S1",
+      "request": {
+        "va": "0x00004010F8",
+        "n": 8
+      },
+      "contract_expected": "RAW_BACKED",
+      "contract_basis": "non-overlapping sections touching at an endpoint: the request [0x10F8,0x1100) ends exactly at .s2's start \u2014 NO intersection with .s2; single-section read is legitimate",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004010F8",
+          "n": 8
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s1: delta=0xf8, raw end 0x500 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 8,
+          "bytes_hex": "CC CC CC CC CC CC CC CC"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004010F8",
+          "n": 8
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s1 delta 0xf8 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 8,
+          "bytes_hex": "CC CC CC CC CC CC CC CC"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-TOUCH-LAST-BYTE-S1",
+      "request": {
+        "va": "0x00004010FF",
+        "n": 1
+      },
+      "contract_expected": "RAW_BACKED",
+      "contract_basis": "the last byte of .s1; endpoint touching .s2 is not overlap",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004010FF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s1: delta=0xff, raw end 0x500 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004010FF",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s1 delta 0xff raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-TOUCH-FIRST-BYTE-S2",
+      "request": {
+        "va": "0x0000401100",
+        "n": 1
+      },
+      "contract_expected": "RAW_BACKED",
+      "contract_basis": "the first byte of .s2 (start of the second section)",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .s2: delta=0x0, raw end 0x601 <= file size 0x900; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .s2 delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "CC"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-TOUCH-CROSSING",
+      "request": {
+        "va": "0x00004010FE",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "the request [0x10FE,0x1102) crosses .s1->.s2: BOTH sections intersect \u2014 a cross-section interval never yields bytes",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (.s1/.s2)"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004010FE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x10fe..0x1101: 2 sections INTERSECT (.s1/.s2); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x10fe..0x1101: 2 sections INTERSECT (.s1/.s2); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004010FE",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x10fe+4 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x10fe+4 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-HIST-AMBIGUOUS",
+      "request": {
+        "va": "0x0000401090",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "historical control: BOTH sections fully contain the read \u2014 full-section-overlap rejection preserved",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "2 sections intersect (.secA/.secB)"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401090",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping for RVA range 0x1090..0x1093: 2 sections INTERSECT (.secA/.secB); no arbitrary first-section choice, even if one fully contains the read"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] ambiguous section mapping for RVA range 0x1090..0x1093: 2 sections INTERSECT (.secA/.secB); no arbitrary first-section choice, even if one fully contains the read"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401090",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "ambiguous section mapping: .secA/.secB"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] ambiguous section mapping: .secA/.secB"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-PARTIAL-START",
+      "request": {
+        "va": "0x0000400FF0",
+        "n": 24
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "the request [0x0FF0,0x1008) starts below section A and intersects it \u2014 partially unmapped interval, no bytes",
+      "oracle_expected": {
+        "classification": "REJECTED_INVALID_INPUT",
+        "basis": "partially covered by the single intersecting section"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000400FF0",
+          "n": 24
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "RVA range 0xff0..0x1007 is only PARTIALLY inside section A [0x1000..0x1100) \u2014 a cross-section or partially unmapped interval never yields bytes"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] RVA range 0xff0..0x1007 is only PARTIALLY inside section A [0x1000..0x1100) \u2014 a cross-section or partially unmapped interval never yields bytes"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000400FF0",
+          "n": 24
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0xff0+24 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0xff0+24 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-PARTIAL-END",
+      "request": {
+        "va": "0x00004011F8",
+        "n": 16
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "contract_basis": "the request [0x11F8,0x1208) extends past the single section's membership end 0x1100 \u2014 partially unmapped, no bytes",
+      "oracle_expected": {
+        "classification": "UNMAPPED",
+        "basis": "intersects no section"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00004011F8",
+          "n": 16
+        },
+        "classify": {
+          "classification": "UNMAPPED",
+          "detail": "RVA range 0x11f8..0x1207 intersects no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[UNMAPPED] RVA range 0x11f8..0x1207 intersects no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00004011F8",
+          "n": 16
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x11f8+16 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x11f8+16 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-RELABLED-UNMAPPED",
+      "request": {
+        "va": "0x00803FFFFF",
+        "n": 4
+      },
+      "contract_expected": "UNMAPPED",
+      "contract_basis": "RELABELLED: ImageBase+0x7FFFFFFF is a VALID 32-bit range that intersects no section \u2014 UNMAPPED far beyond the image; it is NOT a PE32 address-space overflow test (the real boundary tests are P2A-DESKTOP-3/4 and P2A-BOUNDARY-VALID-1/2)",
+      "oracle_expected": {
+        "classification": "UNMAPPED",
+        "basis": "intersects no section"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x00803FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "UNMAPPED",
+          "detail": "RVA range 0x7fffffff..0x80000002 intersects no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[UNMAPPED] RVA range 0x7fffffff..0x80000002 intersects no section (PE-header VAs are UNMAPPED: the suite requires no header read)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00803FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_UNMAPPED",
+          "detail": "RVA 0x7fffffff+4 inside no section"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_UNMAPPED] RVA 0x7fffffff+4 inside no section"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-RAW-CROSSING-FIRST",
+      "request": {
+        "va": "0x0000401000",
+        "n": 1
+      },
+      "contract_expected": "RAW_BACKED",
+      "contract_basis": "first raw byte of a section whose raw range (0x80) is shorter than its virtual size (0x100)",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x0, raw end 0x401 <= file size 0x500; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "00"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x0 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "00"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-RAW-CROSSING-LAST",
+      "request": {
+        "va": "0x000040107F",
+        "n": 1
+      },
+      "contract_expected": "RAW_BACKED",
+      "contract_basis": "last raw byte of the same section",
+      "oracle_expected": {
+        "classification": "RAW_BACKED",
+        "basis": "whole range inside one section's raw range and the file"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 1
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x7f, raw end 0x480 <= file size 0x500; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "7F"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x7f raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 1,
+          "bytes_hex": "7F"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-RAW-CROSSING-CROSS",
+      "request": {
+        "va": "0x000040107F",
+        "n": 2
+      },
+      "contract_expected": "VIRTUAL_BSS",
+      "contract_basis": "read from the LAST raw byte crossing raw->BSS \u2014 controlled FAIL, no fabricated bytes, even though plausible bytes exist further in the file",
+      "oracle_expected": {
+        "classification": "VIRTUAL_BSS",
+        "basis": "crosses raw->BSS boundary"
+      },
+      "post_production_v2": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 2
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "read starts in the raw range of section .text but CROSSES into the virtual tail (delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize); controlled FAIL at the raw->BSS boundary"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] read starts in the raw range of section .text but CROSSES into the virtual tail (delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize); controlled FAIL at the raw->BSS boundary"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x000040107F",
+          "n": 2
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "cross raw->BSS in .text: delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] cross raw->BSS in .text: delta 0x7f < rsize 0x80 but delta+n 0x81 > rsize"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    }
+  ],
+  "p2a_exe_cases": [
+    {
+      "case_id": "P2A-REAL-PIN-6E8FA5",
+      "request": {
+        "va": "0x00006E8FA5",
+        "n": 3
+      },
+      "contract_expected": "RAW_BACKED",
+      "contract_basis": "contract par. 2 item 4: the ordinary pinned byte-pin read must return 89 46 04 on the pinned physical EXE",
+      "post_production_v2": {
+        "request": {
+          "va": "0x00006E8FA5",
+          "n": 3
+        },
+        "classify": {
+          "classification": "RAW_BACKED",
+          "detail": "section .text: delta=0x2e7fa5, raw end 0x2e8fa8 <= file size 0x7a5000; wholly inside the raw range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 3,
+          "bytes_hex": "89 46 04"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00006E8FA5",
+          "n": 3
+        },
+        "classify": {
+          "classification": "QC_RAW_BACKED",
+          "detail": "section .text delta 0x2e7fa5 raw whole-range"
+        },
+        "read": {
+          "outcome": "RETURNED",
+          "length": 3,
+          "bytes_hex": "89 46 04"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-REAL-BSS-BA1100",
+      "request": {
+        "va": "0x0000BA1100",
+        "n": 1
+      },
+      "contract_expected": "VIRTUAL_BSS",
+      "contract_basis": "contract par. 2 item 4: the .data zero-init tail VA must classify VIRTUAL_BSS and never return fabricated file bytes",
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000BA1100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "RVA 0x7a1100 is inside the virtual extent of section .data but past its raw range (delta 0x35100 >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] RVA 0x7a1100 is inside the virtual extent of section .data but past its raw range (delta 0x35100 >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000BA1100",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "RVA 0x7a1100 in .data virtual tail: delta 0x35100 >= rsize 0x34000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] RVA 0x7a1100 in .data virtual tail: delta 0x35100 >= rsize 0x34000"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    },
+    {
+      "case_id": "P2A-REAL-BSS-BA73BC",
+      "request": {
+        "va": "0x0000BA73BC",
+        "n": 1
+      },
+      "contract_expected": "VIRTUAL_BSS",
+      "contract_basis": "same for the second named BSS VA",
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000BA73BC",
+          "n": 1
+        },
+        "classify": {
+          "classification": "VIRTUAL_BSS",
+          "detail": "RVA 0x7a73bc is inside the virtual extent of section .data but past its raw range (delta 0x3b3bc >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[VIRTUAL_BSS] RVA 0x7a73bc is inside the virtual extent of section .data but past its raw range (delta 0x3b3bc >= rsize 0x34000); zero-init tail \u2014 physically absent from the file"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000BA73BC",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_VIRTUAL_BSS",
+          "detail": "RVA 0x7a73bc in .data virtual tail: delta 0x3b3bc >= rsize 0x34000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_VIRTUAL_BSS] RVA 0x7a73bc in .data virtual tail: delta 0x3b3bc >= rsize 0x34000"
+        }
+      },
+      "post_qc_v2_fixed": "DEFERRED_TO_QC_PHASE"
+    }
+  ],
+  "p2a_input_type_cases": [
+    {
+      "case_id": "P2A-INPUT-BOOL-VA",
+      "request": {
+        "va": "True",
+        "n": 1
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "post_production_v2": {
+        "request": {
+          "va": "True",
+          "n": 1
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=True, n=1)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=True, n=1)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "True",
+          "n": 1
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      }
+    },
+    {
+      "case_id": "P2A-INPUT-BOOL-N",
+      "request": {
+        "va": "0x0000401000",
+        "n": true
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": true
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=4198400, n=True)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=4198400, n=True)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": true
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      }
+    },
+    {
+      "case_id": "P2A-INPUT-STR-VA",
+      "request": {
+        "va": "'0x00401000'",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "post_production_v2": {
+        "request": {
+          "va": "'0x00401000'",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va='0x00401000', n=4)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va='0x00401000', n=4)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "'0x00401000'",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      }
+    },
+    {
+      "case_id": "P2A-INPUT-FLOAT-N",
+      "request": {
+        "va": "0x0000401000",
+        "n": 4.0
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 4.0
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers (got va=4198400, n=4.0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] va/n must be integers (got va=4198400, n=4.0)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 4.0
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "va/n must be integers"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] va/n must be integers"
+        }
+      }
+    },
+    {
+      "case_id": "P2A-INPUT-N-ZERO",
+      "request": {
+        "va": "0x0000401000",
+        "n": 0
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 0
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=0 (must be > 0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] invalid length n=0 (must be > 0)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": 0
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=0"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] invalid length n=0"
+        }
+      }
+    },
+    {
+      "case_id": "P2A-INPUT-N-NEGATIVE",
+      "request": {
+        "va": "0x0000401000",
+        "n": -3
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "post_production_v2": {
+        "request": {
+          "va": "0x0000401000",
+          "n": -3
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=-3 (must be > 0)"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] invalid length n=-3 (must be > 0)"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x0000401000",
+          "n": -3
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "invalid length n=-3"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] invalid length n=-3"
+        }
+      }
+    },
+    {
+      "case_id": "P2A-INPUT-VA-NEGATIVE",
+      "request": {
+        "va": "0x-000000001",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "post_production_v2": {
+        "request": {
+          "va": "0x-000000001",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "negative VA -1"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] negative VA -1"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x-000000001",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "negative VA -1"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] negative VA -1"
+        }
+      }
+    },
+    {
+      "case_id": "P2A-INPUT-VA-UNDERFLOW",
+      "request": {
+        "va": "0x00003FFFFF",
+        "n": 4
+      },
+      "contract_expected": "REJECTED_INVALID_INPUT",
+      "post_production_v2": {
+        "request": {
+          "va": "0x00003FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "REJECTED_INVALID_INPUT",
+          "detail": "VA underflow: 0x003fffff < ImageBase 0x00400000"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "ControlledReadError",
+          "exception_message": "[REJECTED_INVALID_INPUT] VA underflow: 0x003fffff < ImageBase 0x00400000"
+        }
+      },
+      "post_qc_v1_historical": {
+        "request": {
+          "va": "0x00003FFFFF",
+          "n": 4
+        },
+        "classify": {
+          "classification": "QC_REJECTED_INVALID_INPUT",
+          "detail": "VA underflow 0x3fffff < ImageBase"
+        },
+        "read": {
+          "outcome": "EXCEPTION",
+          "exception_type": "QCReadError",
+          "exception_message": "[QC_REJECTED_INVALID_INPUT] VA underflow 0x3fffff < ImageBase"
+        }
+      }
+    }
+  ]
+}
