@@ -1,0 +1,1790 @@
+{
+  "run_id": "PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009",
+  "produced_by": "03_SCRIPTS/run_frame_bridge.py controls (production side)",
+  "tool": {
+    "name": "GNU objdump (GNU Binutils for Debian) 2.44",
+    "rc": 0
+  },
+  "matrix_total_expected": 24,
+  "production_case_count": 12,
+  "fresh_qc_side": "NOT_PERFORMED_BY_THIS_WORKER (separate fresh-QC worker per dispatch; never invented)",
+  "cases": [
+    {
+      "case": "A_CLEAN",
+      "window": "A",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture": {
+        "name": "A_CLEAN.bin",
+        "size": 66,
+        "sha256": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/A_CLEAN.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/A_CLEAN_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 23,
+        "covers_window_exactly": true,
+        "first_va": "0x00528E50",
+        "last_instruction": "0x00528E8D (e8 1e 23 33 00)",
+        "window": "[0x00528E50,0x00528E92)"
+      },
+      "derived_facts": {
+        "S_delta": -56,
+        "source_slot_delta": 4,
+        "entry_slot_value_preserved": true,
+        "edi_preserved": true,
+        "tail_target": "0x0085B1B0",
+        "arg1_kind": "STACK_READ"
+      },
+      "expected_text": "S=E-0x38; source [E+4]; value preserved/delivered",
+      "checks": [
+        {
+          "fact": "S_delta",
+          "expected": -56,
+          "actual": -56,
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "STACK_READ",
+          "actual": "STACK_READ",
+          "match": true
+        },
+        {
+          "fact": "edi_preserved",
+          "expected": true,
+          "actual": true,
+          "match": true
+        },
+        {
+          "fact": "entry_slot_value_preserved",
+          "expected": true,
+          "actual": true,
+          "match": true
+        },
+        {
+          "fact": "source_slot_delta",
+          "expected": 4,
+          "actual": 4,
+          "match": true
+        },
+        {
+          "fact": "tail_target",
+          "expected": "0x0085B1B0",
+          "actual": "0x0085B1B0",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_a_facts": {
+        "S_delta": -56,
+        "source_load_va": "0x00528E84",
+        "source_slot_delta": 4,
+        "source_slot_expr": "[E+0x4]",
+        "source_pivot_expr": "[S+0x3c]",
+        "entry_slot_value_preserved": true,
+        "writes_before_source_load": [
+          {
+            "va": "0x00528E50",
+            "kind": "PUSH",
+            "slot": "[E-0x4]",
+            "value": "0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "kind": "PUSH",
+            "slot": "[E-0x8]",
+            "value": "0x9bf53f"
+          },
+          {
+            "va": "0x00528E5D",
+            "kind": "PUSH",
+            "slot": "[E-0xc]",
+            "value": "FS0"
+          },
+          {
+            "va": "0x00528E61",
+            "kind": "PUSH",
+            "slot": "[E-0x2c]",
+            "value": "EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "kind": "PUSH",
+            "slot": "[E-0x30]",
+            "value": "ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "kind": "PUSH",
+            "slot": "[E-0x34]",
+            "value": "EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E6B",
+            "kind": "PUSH",
+            "slot": "[E-0x38]",
+            "value": "Moffs(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E78",
+            "kind": "MOV_STORE",
+            "slot": "[E-0x28]",
+            "value": "ECX_ENTRY"
+          }
+        ],
+        "segment_writes_before_source_load": [
+          {
+            "va": "0x00528E70",
+            "segment": "fs:[0x0]",
+            "value": "E-0xc (computed)"
+          }
+        ],
+        "aliasing_writes_to_source_slot": [],
+        "edi_preserved": true,
+        "edi_reaching_def_at_push": "0x00528E84",
+        "pushed_register": "edi",
+        "delivery_push_va": "0x00528E8A",
+        "tail_call_va": "0x00528E8D",
+        "tail_target": "0x0085B1B0",
+        "esp_before_tail_call_delta": -68,
+        "callee_entry_esp_delta": -72,
+        "esp_before_tail_call": "E-0x44",
+        "esp_before_tail_call_S": "S-0xc",
+        "callee_entry_esp": "E-0x48",
+        "callee_entry_esp_S": "S-0x10",
+        "arg1_slot_delta": -68,
+        "arg1_slot_expr": "[E-0x44]",
+        "arg1_slot_expr_S": "[S-0xc]",
+        "arg1_value_kind": "STACK_READ",
+        "arg1_value_delta": 4,
+        "receiver_expr": "ECX_ENTRY",
+        "receiver_kind": "ENTRY_RECEIVER",
+        "instruction_count": 23
+      }
+    },
+    {
+      "case": "B_CLEAN_NONNULL",
+      "window": "B",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture": {
+        "name": "B_CLEAN_NONNULL.bin",
+        "size": 52,
+        "sha256": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/B_CLEAN_NONNULL.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/B_CLEAN_NONNULL_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "CALL reachable; arg1 ADDRESS(T+8); receiver = return value",
+      "checks": [
+        {
+          "fact": "T_delta",
+          "expected": 0,
+          "actual": 0,
+          "match": true
+        },
+        {
+          "fact": "arg1_expr",
+          "expected": "ADDRESS(T+0x8)",
+          "actual": "ADDRESS(T+0x8)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "ADDRESS",
+          "actual": "ADDRESS",
+          "match": true
+        },
+        {
+          "fact": "bridge_target",
+          "expected": "0x00528E50",
+          "actual": "0x00528E50",
+          "match": true
+        },
+        {
+          "fact": "flags_preserved_test_to_je",
+          "expected": true,
+          "actual": true,
+          "match": true
+        },
+        {
+          "fact": "nonnull_reaches_call",
+          "expected": true,
+          "actual": true,
+          "match": true
+        },
+        {
+          "fact": "receiver_kind",
+          "expected": "OPAQUE_RET",
+          "actual": "OPAQUE_RET",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 2,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "je     0x4c47c8",
+          "branch_mnemonic": "je",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": true,
+          "unconditional_exit": false,
+          "call_reached": false
+        },
+        "nonnull_path": {
+          "T_delta": 0,
+          "flags": {
+            "test_va": "0x004C47A3",
+            "test_op": "test   eax,eax",
+            "je_va": "0x004C47AD",
+            "je_op": "je     0x4c47c8",
+            "flag_writers_between": [],
+            "flags_preserved_test_to_je": true,
+            "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+          },
+          "opaque_call": {
+            "va": "0x004C4797",
+            "target": "0x0095D3C4",
+            "preceding_push": "push 0x128",
+            "following_cleanup": "add esp,0x4",
+            "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+            "callee_body_opened": false
+          },
+          "lea_instruction": {
+            "va": "0x004C47BA",
+            "op": "lea    ecx,[esp+0x14]",
+            "dst": "ecx",
+            "kind": "ADDRESS",
+            "expr": "T0+0x8 (computed)",
+            "value_delta": 8,
+            "reaching_def_va": "0x004C47BA"
+          },
+          "arg1": {
+            "final_push_va": "0x004C47BE",
+            "pushed_register": "ecx",
+            "slot_delta_T0": -16,
+            "value_kind": "ADDRESS",
+            "value_delta": 8,
+            "value_provenance": "lea@0x004C47BA",
+            "reaching_def_va": "0x004C47BA",
+            "value_expr": "ADDRESS(T+0x8)"
+          },
+          "arg_slots": {
+            "arg1": {
+              "kind": "ADDRESS",
+              "delta": 8,
+              "expr": "T0+0x8 (computed)"
+            },
+            "arg2": {
+              "kind": "UNKNOWN_REG",
+              "delta": null,
+              "expr": "ESI_UNKNOWN_T"
+            },
+            "arg3": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            },
+            "arg4": {
+              "kind": "STACK_READ",
+              "delta": 80,
+              "expr": "[T0+0x50]"
+            }
+          },
+          "arg_slot_deltas": {
+            "arg1": -16,
+            "arg2": -12,
+            "arg3": -8,
+            "arg4": -4
+          },
+          "receiver": {
+            "kind": "OPAQUE_RET",
+            "expr": "OPAQUE_RET(0x0095D3C4)"
+          },
+          "call": {
+            "va": "0x004C47C1",
+            "target": "0x00528E50",
+            "target_recomputed": "0x00528E50",
+            "esp_before_call_delta_T0": -16,
+            "callee_entry_esp_delta_T0": -20,
+            "bridge_valid": true
+          }
+        }
+      }
+    },
+    {
+      "case": "B_CLEAN_NULL",
+      "window": "B",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture": {
+        "name": "B_CLEAN_NULL.bin",
+        "size": 52,
+        "sha256": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/B_CLEAN_NULL.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/B_CLEAN_NULL_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "JE taken; target CALL not reached; no fabricated delivery",
+      "checks": [
+        {
+          "fact": "null_call_reached",
+          "expected": false,
+          "actual": false,
+          "match": true
+        },
+        {
+          "fact": "null_je_taken",
+          "expected": true,
+          "actual": true,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 2,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "je     0x4c47c8",
+          "branch_mnemonic": "je",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": true,
+          "unconditional_exit": false,
+          "call_reached": false
+        },
+        "nonnull_path": {
+          "T_delta": 0,
+          "flags": {
+            "test_va": "0x004C47A3",
+            "test_op": "test   eax,eax",
+            "je_va": "0x004C47AD",
+            "je_op": "je     0x4c47c8",
+            "flag_writers_between": [],
+            "flags_preserved_test_to_je": true,
+            "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+          },
+          "opaque_call": {
+            "va": "0x004C4797",
+            "target": "0x0095D3C4",
+            "preceding_push": "push 0x128",
+            "following_cleanup": "add esp,0x4",
+            "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+            "callee_body_opened": false
+          },
+          "lea_instruction": {
+            "va": "0x004C47BA",
+            "op": "lea    ecx,[esp+0x14]",
+            "dst": "ecx",
+            "kind": "ADDRESS",
+            "expr": "T0+0x8 (computed)",
+            "value_delta": 8,
+            "reaching_def_va": "0x004C47BA"
+          },
+          "arg1": {
+            "final_push_va": "0x004C47BE",
+            "pushed_register": "ecx",
+            "slot_delta_T0": -16,
+            "value_kind": "ADDRESS",
+            "value_delta": 8,
+            "value_provenance": "lea@0x004C47BA",
+            "reaching_def_va": "0x004C47BA",
+            "value_expr": "ADDRESS(T+0x8)"
+          },
+          "arg_slots": {
+            "arg1": {
+              "kind": "ADDRESS",
+              "delta": 8,
+              "expr": "T0+0x8 (computed)"
+            },
+            "arg2": {
+              "kind": "UNKNOWN_REG",
+              "delta": null,
+              "expr": "ESI_UNKNOWN_T"
+            },
+            "arg3": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            },
+            "arg4": {
+              "kind": "STACK_READ",
+              "delta": 80,
+              "expr": "[T0+0x50]"
+            }
+          },
+          "arg_slot_deltas": {
+            "arg1": -16,
+            "arg2": -12,
+            "arg3": -8,
+            "arg4": -4
+          },
+          "receiver": {
+            "kind": "OPAQUE_RET",
+            "expr": "OPAQUE_RET(0x0095D3C4)"
+          },
+          "call": {
+            "va": "0x004C47C1",
+            "target": "0x00528E50",
+            "target_recomputed": "0x00528E50",
+            "esp_before_call_delta_T0": -16,
+            "callee_entry_esp_delta_T0": -20,
+            "bridge_valid": true
+          }
+        }
+      }
+    },
+    {
+      "case": "M1_A_FRAME",
+      "window": "A",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M1_A_FRAME @0x00528E5E: 83 ec 1c -> 83 ec 18 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M1_A_FRAME.bin",
+        "size": 66,
+        "sha256": "f9b3f4e76860905a1d4fd4ded056bd82d5f9d4f5a850dae245eda4370967ad2b",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M1_A_FRAME.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M1_A_FRAME_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 23,
+        "covers_window_exactly": true,
+        "first_va": "0x00528E50",
+        "last_instruction": "0x00528E8D (e8 1e 23 33 00)",
+        "window": "[0x00528E50,0x00528E92)"
+      },
+      "derived_facts": {
+        "S_delta": -52,
+        "source_slot_delta": 8,
+        "entry_slot_value_preserved": true,
+        "edi_preserved": true,
+        "tail_target": "0x0085B1B0",
+        "arg1_kind": "STACK_READ"
+      },
+      "expected_text": "S=E-0x34; later source [E+8], not entry arg1 [E+4]",
+      "checks": [
+        {
+          "fact": "S_delta",
+          "expected": -52,
+          "actual": -52,
+          "match": true
+        },
+        {
+          "fact": "source_slot_delta",
+          "expected": 8,
+          "actual": 8,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_a_facts": {
+        "S_delta": -52,
+        "source_load_va": "0x00528E84",
+        "source_slot_delta": 8,
+        "source_slot_expr": "[E+0x8]",
+        "source_pivot_expr": "[S+0x3c]",
+        "entry_slot_value_preserved": true,
+        "writes_before_source_load": [
+          {
+            "va": "0x00528E50",
+            "kind": "PUSH",
+            "slot": "[E-0x4]",
+            "value": "0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "kind": "PUSH",
+            "slot": "[E-0x8]",
+            "value": "0x9bf53f"
+          },
+          {
+            "va": "0x00528E5D",
+            "kind": "PUSH",
+            "slot": "[E-0xc]",
+            "value": "FS0"
+          },
+          {
+            "va": "0x00528E61",
+            "kind": "PUSH",
+            "slot": "[E-0x28]",
+            "value": "EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "kind": "PUSH",
+            "slot": "[E-0x2c]",
+            "value": "ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "kind": "PUSH",
+            "slot": "[E-0x30]",
+            "value": "EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E6B",
+            "kind": "PUSH",
+            "slot": "[E-0x34]",
+            "value": "Moffs(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E78",
+            "kind": "MOV_STORE",
+            "slot": "[E-0x24]",
+            "value": "ECX_ENTRY"
+          }
+        ],
+        "segment_writes_before_source_load": [
+          {
+            "va": "0x00528E70",
+            "segment": "fs:[0x0]",
+            "value": "E-0x8 (computed)"
+          }
+        ],
+        "aliasing_writes_to_source_slot": [],
+        "edi_preserved": true,
+        "edi_reaching_def_at_push": "0x00528E84",
+        "pushed_register": "edi",
+        "delivery_push_va": "0x00528E8A",
+        "tail_call_va": "0x00528E8D",
+        "tail_target": "0x0085B1B0",
+        "esp_before_tail_call_delta": -64,
+        "callee_entry_esp_delta": -68,
+        "esp_before_tail_call": "E-0x40",
+        "esp_before_tail_call_S": "S-0xc",
+        "callee_entry_esp": "E-0x44",
+        "callee_entry_esp_S": "S-0x10",
+        "arg1_slot_delta": -64,
+        "arg1_slot_expr": "[E-0x40]",
+        "arg1_slot_expr_S": "[S-0xc]",
+        "arg1_value_kind": "STACK_READ",
+        "arg1_value_delta": 8,
+        "receiver_expr": "ECX_ENTRY",
+        "receiver_kind": "ENTRY_RECEIVER",
+        "instruction_count": 23
+      }
+    },
+    {
+      "case": "M2_A_SLOT",
+      "window": "A",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M2_A_SLOT @0x00528E84: 8b 7c 24 3c -> 8b 7c 24 38 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M2_A_SLOT.bin",
+        "size": 66,
+        "sha256": "ae7bd7c4394d852205fc2ad292bca12a1c7dfb8ad46c91bc67bca9429470ddaa",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M2_A_SLOT.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M2_A_SLOT_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 23,
+        "covers_window_exactly": true,
+        "first_va": "0x00528E50",
+        "last_instruction": "0x00528E8D (e8 1e 23 33 00)",
+        "window": "[0x00528E50,0x00528E92)"
+      },
+      "derived_facts": {
+        "S_delta": -56,
+        "source_slot_delta": 0,
+        "entry_slot_value_preserved": true,
+        "edi_preserved": true,
+        "tail_target": "0x0085B1B0",
+        "arg1_kind": "STACK_READ"
+      },
+      "expected_text": "Source [E] under original frame, not [E+4]",
+      "checks": [
+        {
+          "fact": "S_delta",
+          "expected": -56,
+          "actual": -56,
+          "match": true
+        },
+        {
+          "fact": "source_slot_delta",
+          "expected": 0,
+          "actual": 0,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_a_facts": {
+        "S_delta": -56,
+        "source_load_va": "0x00528E84",
+        "source_slot_delta": 0,
+        "source_slot_expr": "[E]",
+        "source_pivot_expr": "[S+0x38]",
+        "entry_slot_value_preserved": true,
+        "writes_before_source_load": [
+          {
+            "va": "0x00528E50",
+            "kind": "PUSH",
+            "slot": "[E-0x4]",
+            "value": "0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "kind": "PUSH",
+            "slot": "[E-0x8]",
+            "value": "0x9bf53f"
+          },
+          {
+            "va": "0x00528E5D",
+            "kind": "PUSH",
+            "slot": "[E-0xc]",
+            "value": "FS0"
+          },
+          {
+            "va": "0x00528E61",
+            "kind": "PUSH",
+            "slot": "[E-0x2c]",
+            "value": "EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "kind": "PUSH",
+            "slot": "[E-0x30]",
+            "value": "ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "kind": "PUSH",
+            "slot": "[E-0x34]",
+            "value": "EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E6B",
+            "kind": "PUSH",
+            "slot": "[E-0x38]",
+            "value": "Moffs(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E78",
+            "kind": "MOV_STORE",
+            "slot": "[E-0x28]",
+            "value": "ECX_ENTRY"
+          }
+        ],
+        "segment_writes_before_source_load": [
+          {
+            "va": "0x00528E70",
+            "segment": "fs:[0x0]",
+            "value": "E-0xc (computed)"
+          }
+        ],
+        "aliasing_writes_to_source_slot": [],
+        "edi_preserved": true,
+        "edi_reaching_def_at_push": "0x00528E84",
+        "pushed_register": "edi",
+        "delivery_push_va": "0x00528E8A",
+        "tail_call_va": "0x00528E8D",
+        "tail_target": "0x0085B1B0",
+        "esp_before_tail_call_delta": -68,
+        "callee_entry_esp_delta": -72,
+        "esp_before_tail_call": "E-0x44",
+        "esp_before_tail_call_S": "S-0xc",
+        "callee_entry_esp": "E-0x48",
+        "callee_entry_esp_S": "S-0x10",
+        "arg1_slot_delta": -68,
+        "arg1_slot_expr": "[E-0x44]",
+        "arg1_slot_expr_S": "[S-0xc]",
+        "arg1_value_kind": "STACK_READ",
+        "arg1_value_delta": 0,
+        "receiver_expr": "ECX_ENTRY",
+        "receiver_kind": "ENTRY_RECEIVER",
+        "instruction_count": 23
+      }
+    },
+    {
+      "case": "M3_B_LEA_DISP",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M3_B_LEA_DISP @0x004C47BA: 8d 4c 24 14 -> 8d 4c 24 18 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M3_B_LEA_DISP.bin",
+        "size": 52,
+        "sha256": "4d19e0548af86d97eb808a2ed6b5f5799f777d0fb4d028d19f42775ed0379a5c",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M3_B_LEA_DISP.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M3_B_LEA_DISP_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0xc)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "arg1 ADDRESS(T+0xC), not ADDRESS(T+8)",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "ADDRESS(T+0xc)",
+          "actual": "ADDRESS(T+0xc)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "ADDRESS",
+          "actual": "ADDRESS",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 2,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "je     0x4c47c8",
+          "branch_mnemonic": "je",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": true,
+          "unconditional_exit": false,
+          "call_reached": false
+        },
+        "nonnull_path": {
+          "T_delta": 0,
+          "flags": {
+            "test_va": "0x004C47A3",
+            "test_op": "test   eax,eax",
+            "je_va": "0x004C47AD",
+            "je_op": "je     0x4c47c8",
+            "flag_writers_between": [],
+            "flags_preserved_test_to_je": true,
+            "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+          },
+          "opaque_call": {
+            "va": "0x004C4797",
+            "target": "0x0095D3C4",
+            "preceding_push": "push 0x128",
+            "following_cleanup": "add esp,0x4",
+            "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+            "callee_body_opened": false
+          },
+          "lea_instruction": {
+            "va": "0x004C47BA",
+            "op": "lea    ecx,[esp+0x18]",
+            "dst": "ecx",
+            "kind": "ADDRESS",
+            "expr": "T0+0xc (computed)",
+            "value_delta": 12,
+            "reaching_def_va": "0x004C47BA"
+          },
+          "arg1": {
+            "final_push_va": "0x004C47BE",
+            "pushed_register": "ecx",
+            "slot_delta_T0": -16,
+            "value_kind": "ADDRESS",
+            "value_delta": 12,
+            "value_provenance": "lea@0x004C47BA",
+            "reaching_def_va": "0x004C47BA",
+            "value_expr": "ADDRESS(T+0xc)"
+          },
+          "arg_slots": {
+            "arg1": {
+              "kind": "ADDRESS",
+              "delta": 12,
+              "expr": "T0+0xc (computed)"
+            },
+            "arg2": {
+              "kind": "UNKNOWN_REG",
+              "delta": null,
+              "expr": "ESI_UNKNOWN_T"
+            },
+            "arg3": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            },
+            "arg4": {
+              "kind": "STACK_READ",
+              "delta": 80,
+              "expr": "[T0+0x50]"
+            }
+          },
+          "arg_slot_deltas": {
+            "arg1": -16,
+            "arg2": -12,
+            "arg3": -8,
+            "arg4": -4
+          },
+          "receiver": {
+            "kind": "OPAQUE_RET",
+            "expr": "OPAQUE_RET(0x0095D3C4)"
+          },
+          "call": {
+            "va": "0x004C47C1",
+            "target": "0x00528E50",
+            "target_recomputed": "0x00528E50",
+            "esp_before_call_delta_T0": -16,
+            "callee_entry_esp_delta_T0": -20,
+            "bridge_valid": true
+          }
+        }
+      }
+    },
+    {
+      "case": "M4_B_LAST_PUSH",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M4_B_LAST_PUSH @0x004C47BE: 51 -> 52 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M4_B_LAST_PUSH.bin",
+        "size": 52,
+        "sha256": "6a4677bd55f0b143c9e9f82d26e1264ff9fe3765837b8f589c3005f8996db374",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M4_B_LAST_PUSH.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M4_B_LAST_PUSH_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "STACK_READ",
+        "arg1_expr": "MEM(T+0x4c)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "arg1 is the earlier EDX load value MEM(T+0x4C), not the LEA address",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "MEM(T+0x4c)",
+          "actual": "MEM(T+0x4c)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "STACK_READ",
+          "actual": "STACK_READ",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 2,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "je     0x4c47c8",
+          "branch_mnemonic": "je",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": true,
+          "unconditional_exit": false,
+          "call_reached": false
+        },
+        "nonnull_path": {
+          "T_delta": 0,
+          "flags": {
+            "test_va": "0x004C47A3",
+            "test_op": "test   eax,eax",
+            "je_va": "0x004C47AD",
+            "je_op": "je     0x4c47c8",
+            "flag_writers_between": [],
+            "flags_preserved_test_to_je": true,
+            "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+          },
+          "opaque_call": {
+            "va": "0x004C4797",
+            "target": "0x0095D3C4",
+            "preceding_push": "push 0x128",
+            "following_cleanup": "add esp,0x4",
+            "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+            "callee_body_opened": false
+          },
+          "lea_instruction": {
+            "va": "0x004C47BA",
+            "op": "lea    ecx,[esp+0x14]",
+            "dst": "ecx",
+            "kind": "ADDRESS",
+            "expr": "T0+0x8 (computed)",
+            "value_delta": 8,
+            "reaching_def_va": "0x004C47BA"
+          },
+          "arg1": {
+            "final_push_va": "0x004C47BE",
+            "pushed_register": "edx",
+            "slot_delta_T0": -16,
+            "value_kind": "STACK_READ",
+            "value_delta": 76,
+            "value_provenance": "caller_area_unknown",
+            "reaching_def_va": "0x004C47B3",
+            "value_expr": "MEM(T+0x4c)"
+          },
+          "arg_slots": {
+            "arg1": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            },
+            "arg2": {
+              "kind": "UNKNOWN_REG",
+              "delta": null,
+              "expr": "ESI_UNKNOWN_T"
+            },
+            "arg3": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            },
+            "arg4": {
+              "kind": "STACK_READ",
+              "delta": 80,
+              "expr": "[T0+0x50]"
+            }
+          },
+          "arg_slot_deltas": {
+            "arg1": -16,
+            "arg2": -12,
+            "arg3": -8,
+            "arg4": -4
+          },
+          "receiver": {
+            "kind": "OPAQUE_RET",
+            "expr": "OPAQUE_RET(0x0095D3C4)"
+          },
+          "call": {
+            "va": "0x004C47C1",
+            "target": "0x00528E50",
+            "target_recomputed": "0x00528E50",
+            "esp_before_call_delta_T0": -16,
+            "callee_entry_esp_delta_T0": -20,
+            "bridge_valid": true
+          }
+        }
+      }
+    },
+    {
+      "case": "M5_B_EARLY_PUSH_ORDER",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M5_B_EARLY_PUSH_ORDER @0x004C47B7: 51 52 -> 52 51 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M5_B_EARLY_PUSH_ORDER.bin",
+        "size": 52,
+        "sha256": "6cb86b8cc3b88fbcccb869d7758734a85fbd0bb7e35e0a94718207fa625329d7",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M5_B_EARLY_PUSH_ORDER.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M5_B_EARLY_PUSH_ORDER_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x50)",
+        "arg4_expr": "MEM(T+0x4c)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "Earlier argument order changes; final arg1 ADDRESS(T+8) and its slot remain unchanged",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "ADDRESS(T+0x8)",
+          "actual": "ADDRESS(T+0x8)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "ADDRESS",
+          "actual": "ADDRESS",
+          "match": true
+        },
+        {
+          "fact": "arg1_slot_delta",
+          "expected": -16,
+          "actual": -16,
+          "match": true
+        },
+        {
+          "fact": "arg3_expr",
+          "expected": "MEM(T+0x50)",
+          "actual": "MEM(T+0x50)",
+          "match": true
+        },
+        {
+          "fact": "arg4_expr",
+          "expected": "MEM(T+0x4c)",
+          "actual": "MEM(T+0x4c)",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 2,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "je     0x4c47c8",
+          "branch_mnemonic": "je",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": true,
+          "unconditional_exit": false,
+          "call_reached": false
+        },
+        "nonnull_path": {
+          "T_delta": 0,
+          "flags": {
+            "test_va": "0x004C47A3",
+            "test_op": "test   eax,eax",
+            "je_va": "0x004C47AD",
+            "je_op": "je     0x4c47c8",
+            "flag_writers_between": [],
+            "flags_preserved_test_to_je": true,
+            "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+          },
+          "opaque_call": {
+            "va": "0x004C4797",
+            "target": "0x0095D3C4",
+            "preceding_push": "push 0x128",
+            "following_cleanup": "add esp,0x4",
+            "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+            "callee_body_opened": false
+          },
+          "lea_instruction": {
+            "va": "0x004C47BA",
+            "op": "lea    ecx,[esp+0x14]",
+            "dst": "ecx",
+            "kind": "ADDRESS",
+            "expr": "T0+0x8 (computed)",
+            "value_delta": 8,
+            "reaching_def_va": "0x004C47BA"
+          },
+          "arg1": {
+            "final_push_va": "0x004C47BE",
+            "pushed_register": "ecx",
+            "slot_delta_T0": -16,
+            "value_kind": "ADDRESS",
+            "value_delta": 8,
+            "value_provenance": "lea@0x004C47BA",
+            "reaching_def_va": "0x004C47BA",
+            "value_expr": "ADDRESS(T+0x8)"
+          },
+          "arg_slots": {
+            "arg1": {
+              "kind": "ADDRESS",
+              "delta": 8,
+              "expr": "T0+0x8 (computed)"
+            },
+            "arg2": {
+              "kind": "UNKNOWN_REG",
+              "delta": null,
+              "expr": "ESI_UNKNOWN_T"
+            },
+            "arg3": {
+              "kind": "STACK_READ",
+              "delta": 80,
+              "expr": "[T0+0x50]"
+            },
+            "arg4": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            }
+          },
+          "arg_slot_deltas": {
+            "arg1": -16,
+            "arg2": -12,
+            "arg3": -8,
+            "arg4": -4
+          },
+          "receiver": {
+            "kind": "OPAQUE_RET",
+            "expr": "OPAQUE_RET(0x0095D3C4)"
+          },
+          "call": {
+            "va": "0x004C47C1",
+            "target": "0x00528E50",
+            "target_recomputed": "0x00528E50",
+            "esp_before_call_delta_T0": -16,
+            "callee_entry_esp_delta_T0": -20,
+            "bridge_valid": true
+          }
+        }
+      }
+    },
+    {
+      "case": "M6_B_SKIP",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M6_B_SKIP @0x004C47AD: 74 19 -> eb 19 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M6_B_SKIP.bin",
+        "size": 52,
+        "sha256": "21d70faf884712ddd9c80236e781cbd26182cd8919e8f886aecd2fae498e081e",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M6_B_SKIP.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M6_B_SKIP_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "nonnull_reaches_call": false,
+        "bridge_target": null,
+        "bridge_target_actual": null,
+        "bridge_valid": false,
+        "null_je_taken": false,
+        "null_call_reached": false,
+        "unconditional_exit": true
+      },
+      "expected_text": "Unconditional exit; no delivery at the target CALL",
+      "checks": [
+        {
+          "fact": "nonnull_reaches_call",
+          "expected": false,
+          "actual": false,
+          "match": true
+        },
+        {
+          "fact": "unconditional_exit",
+          "expected": true,
+          "actual": true,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 1,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "jmp    0x4c47c8",
+          "branch_mnemonic": "jmp",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": false,
+          "unconditional_exit": true,
+          "call_reached": false
+        }
+      }
+    },
+    {
+      "case": "M7_B_RECEIVER_ONLY",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M7_B_RECEIVER_ONLY @0x004C47BF: 8b c8 -> 8b ce (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M7_B_RECEIVER_ONLY.bin",
+        "size": 52,
+        "sha256": "da36a328b63dcbebf2ebb65e411e76e9dce5af7dd51a79c6754ed1ff8a61fc73",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M7_B_RECEIVER_ONLY.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M7_B_RECEIVER_ONLY_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "UNKNOWN_REG",
+        "receiver_expr": "ESI_UNKNOWN_T",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "Receiver becomes the T-point ESI; already pushed arg1 and its slot remain unchanged",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "ADDRESS(T+0x8)",
+          "actual": "ADDRESS(T+0x8)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "ADDRESS",
+          "actual": "ADDRESS",
+          "match": true
+        },
+        {
+          "fact": "arg1_slot_delta",
+          "expected": -16,
+          "actual": -16,
+          "match": true
+        },
+        {
+          "fact": "receiver_expr",
+          "expected": "ESI_UNKNOWN_T",
+          "actual": "ESI_UNKNOWN_T",
+          "match": true
+        },
+        {
+          "fact": "receiver_kind",
+          "expected": "UNKNOWN_REG",
+          "actual": "UNKNOWN_REG",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 2,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "je     0x4c47c8",
+          "branch_mnemonic": "je",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": true,
+          "unconditional_exit": false,
+          "call_reached": false
+        },
+        "nonnull_path": {
+          "T_delta": 0,
+          "flags": {
+            "test_va": "0x004C47A3",
+            "test_op": "test   eax,eax",
+            "je_va": "0x004C47AD",
+            "je_op": "je     0x4c47c8",
+            "flag_writers_between": [],
+            "flags_preserved_test_to_je": true,
+            "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+          },
+          "opaque_call": {
+            "va": "0x004C4797",
+            "target": "0x0095D3C4",
+            "preceding_push": "push 0x128",
+            "following_cleanup": "add esp,0x4",
+            "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+            "callee_body_opened": false
+          },
+          "lea_instruction": {
+            "va": "0x004C47BA",
+            "op": "lea    ecx,[esp+0x14]",
+            "dst": "ecx",
+            "kind": "ADDRESS",
+            "expr": "T0+0x8 (computed)",
+            "value_delta": 8,
+            "reaching_def_va": "0x004C47BA"
+          },
+          "arg1": {
+            "final_push_va": "0x004C47BE",
+            "pushed_register": "ecx",
+            "slot_delta_T0": -16,
+            "value_kind": "ADDRESS",
+            "value_delta": 8,
+            "value_provenance": "lea@0x004C47BA",
+            "reaching_def_va": "0x004C47BA",
+            "value_expr": "ADDRESS(T+0x8)"
+          },
+          "arg_slots": {
+            "arg1": {
+              "kind": "ADDRESS",
+              "delta": 8,
+              "expr": "T0+0x8 (computed)"
+            },
+            "arg2": {
+              "kind": "UNKNOWN_REG",
+              "delta": null,
+              "expr": "ESI_UNKNOWN_T"
+            },
+            "arg3": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            },
+            "arg4": {
+              "kind": "STACK_READ",
+              "delta": 80,
+              "expr": "[T0+0x50]"
+            }
+          },
+          "arg_slot_deltas": {
+            "arg1": -16,
+            "arg2": -12,
+            "arg3": -8,
+            "arg4": -4
+          },
+          "receiver": {
+            "kind": "UNKNOWN_REG",
+            "expr": "ESI_UNKNOWN_T"
+          },
+          "call": {
+            "va": "0x004C47C1",
+            "target": "0x00528E50",
+            "target_recomputed": "0x00528E50",
+            "esp_before_call_delta_T0": -16,
+            "callee_entry_esp_delta_T0": -20,
+            "bridge_valid": true
+          }
+        }
+      }
+    },
+    {
+      "case": "M8_B_WRONG_TARGET",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M8_B_WRONG_TARGET @0x004C47C1: e8 8a 46 06 00 -> e8 8b 46 06 00 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M8_B_WRONG_TARGET.bin",
+        "size": 52,
+        "sha256": "d1ec352fc0e5d3e09c33570d0485f8652f8370be414c188c665a1bc8cb6fe652",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M8_B_WRONG_TARGET.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M8_B_WRONG_TARGET_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8b 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E51",
+        "bridge_target_actual": "0x00528E51",
+        "bridge_valid": false,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "Actual target 0x00528E51; no valid bridge to entry 0x00528E50; wrong target NOT followed",
+      "checks": [
+        {
+          "fact": "bridge_target_actual",
+          "expected": "0x00528E51",
+          "actual": "0x00528E51",
+          "match": true
+        },
+        {
+          "fact": "bridge_valid",
+          "expected": false,
+          "actual": false,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 2,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "je     0x4c47c8",
+          "branch_mnemonic": "je",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": true,
+          "unconditional_exit": false,
+          "call_reached": false
+        },
+        "nonnull_path": {
+          "T_delta": 0,
+          "flags": {
+            "test_va": "0x004C47A3",
+            "test_op": "test   eax,eax",
+            "je_va": "0x004C47AD",
+            "je_op": "je     0x4c47c8",
+            "flag_writers_between": [],
+            "flags_preserved_test_to_je": true,
+            "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+          },
+          "opaque_call": {
+            "va": "0x004C4797",
+            "target": "0x0095D3C4",
+            "preceding_push": "push 0x128",
+            "following_cleanup": "add esp,0x4",
+            "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+            "callee_body_opened": false
+          },
+          "lea_instruction": {
+            "va": "0x004C47BA",
+            "op": "lea    ecx,[esp+0x14]",
+            "dst": "ecx",
+            "kind": "ADDRESS",
+            "expr": "T0+0x8 (computed)",
+            "value_delta": 8,
+            "reaching_def_va": "0x004C47BA"
+          },
+          "arg1": {
+            "final_push_va": "0x004C47BE",
+            "pushed_register": "ecx",
+            "slot_delta_T0": -16,
+            "value_kind": "ADDRESS",
+            "value_delta": 8,
+            "value_provenance": "lea@0x004C47BA",
+            "reaching_def_va": "0x004C47BA",
+            "value_expr": "ADDRESS(T+0x8)"
+          },
+          "arg_slots": {
+            "arg1": {
+              "kind": "ADDRESS",
+              "delta": 8,
+              "expr": "T0+0x8 (computed)"
+            },
+            "arg2": {
+              "kind": "UNKNOWN_REG",
+              "delta": null,
+              "expr": "ESI_UNKNOWN_T"
+            },
+            "arg3": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            },
+            "arg4": {
+              "kind": "STACK_READ",
+              "delta": 80,
+              "expr": "[T0+0x50]"
+            }
+          },
+          "arg_slot_deltas": {
+            "arg1": -16,
+            "arg2": -12,
+            "arg3": -8,
+            "arg4": -4
+          },
+          "receiver": {
+            "kind": "OPAQUE_RET",
+            "expr": "OPAQUE_RET(0x0095D3C4)"
+          },
+          "call": {
+            "va": "0x004C47C1",
+            "target": "0x00528E51",
+            "target_recomputed": "0x00528E51",
+            "esp_before_call_delta_T0": -16,
+            "callee_entry_esp_delta_T0": -20,
+            "bridge_valid": false
+          }
+        }
+      }
+    },
+    {
+      "case": "M9_B_LEA_TO_MOV",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M9_B_LEA_TO_MOV @0x004C47BA: 8d 4c 24 14 -> 8b 4c 24 14 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M9_B_LEA_TO_MOV.bin",
+        "size": 52,
+        "sha256": "bcdafba824a1b20121008da10058202dfd824bd867bf13660307d9696b0ead57",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M9_B_LEA_TO_MOV.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M9_B_LEA_TO_MOV_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "STACK_READ",
+        "arg1_expr": "MEM(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "arg1 MEM(T+8), not ADDRESS(T+8); no pointee interpretation",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "MEM(T+0x8)",
+          "actual": "MEM(T+0x8)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "STACK_READ",
+          "actual": "STACK_READ",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS",
+      "phase_b_facts": {
+        "path_count": 2,
+        "instruction_count": 16,
+        "null_path": {
+          "branch_va": "0x004C47AD",
+          "branch_op": "je     0x4c47c8",
+          "branch_mnemonic": "je",
+          "exit_va": "0x004C47C8",
+          "exit_inside_window": false,
+          "je_taken": true,
+          "unconditional_exit": false,
+          "call_reached": false
+        },
+        "nonnull_path": {
+          "T_delta": 0,
+          "flags": {
+            "test_va": "0x004C47A3",
+            "test_op": "test   eax,eax",
+            "je_va": "0x004C47AD",
+            "je_op": "je     0x4c47c8",
+            "flag_writers_between": [],
+            "flags_preserved_test_to_je": true,
+            "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+          },
+          "opaque_call": {
+            "va": "0x004C4797",
+            "target": "0x0095D3C4",
+            "preceding_push": "push 0x128",
+            "following_cleanup": "add esp,0x4",
+            "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+            "callee_body_opened": false
+          },
+          "lea_instruction": {
+            "va": "0x004C47BA",
+            "op": "mov    ecx,DWORD PTR [esp+0x14]",
+            "dst": "ecx",
+            "kind": "STACK_READ",
+            "expr": "[T0+0x8]",
+            "value_delta": 8,
+            "reaching_def_va": "0x004C47BA"
+          },
+          "arg1": {
+            "final_push_va": "0x004C47BE",
+            "pushed_register": "ecx",
+            "slot_delta_T0": -16,
+            "value_kind": "STACK_READ",
+            "value_delta": 8,
+            "value_provenance": "caller_area_unknown",
+            "reaching_def_va": "0x004C47BA",
+            "value_expr": "MEM(T+0x8)"
+          },
+          "arg_slots": {
+            "arg1": {
+              "kind": "STACK_READ",
+              "delta": 8,
+              "expr": "[T0+0x8]"
+            },
+            "arg2": {
+              "kind": "UNKNOWN_REG",
+              "delta": null,
+              "expr": "ESI_UNKNOWN_T"
+            },
+            "arg3": {
+              "kind": "STACK_READ",
+              "delta": 76,
+              "expr": "[T0+0x4c]"
+            },
+            "arg4": {
+              "kind": "STACK_READ",
+              "delta": 80,
+              "expr": "[T0+0x50]"
+            }
+          },
+          "arg_slot_deltas": {
+            "arg1": -16,
+            "arg2": -12,
+            "arg3": -8,
+            "arg4": -4
+          },
+          "receiver": {
+            "kind": "OPAQUE_RET",
+            "expr": "OPAQUE_RET(0x0095D3C4)"
+          },
+          "call": {
+            "va": "0x004C47C1",
+            "target": "0x00528E50",
+            "target_recomputed": "0x00528E50",
+            "esp_before_call_delta_T0": -16,
+            "callee_entry_esp_delta_T0": -20,
+            "bridge_valid": true
+          }
+        }
+      }
+    }
+  ],
+  "summary": {
+    "cases": 12,
+    "control_pass": 12,
+    "control_fail": 0,
+    "unresolved": 0
+  }
+}

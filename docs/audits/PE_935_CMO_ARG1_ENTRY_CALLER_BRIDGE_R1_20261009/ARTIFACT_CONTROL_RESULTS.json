@@ -1,0 +1,492 @@
+{
+  "baseline": {
+    "description": "re-read of persisted load-bearing artifacts through the ordinary final gate; facts compared to physical bytes / persisted objdump text / independent ESP walk",
+    "artifact_set": {
+      "WINDOW_IDENTITIES.json": "persisted",
+      "ENTRY_FRAME_LEDGER.csv": "persisted",
+      "CALLER_STACK_LEDGER.csv": "persisted",
+      "BRIDGE_PROVENANCE.json": "persisted"
+    },
+    "checks": [
+      {
+        "check": "WID-A-SHA",
+        "fact": "window SHA256 vs physical EXE bytes",
+        "claimed": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "actual": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "pass": true
+      },
+      {
+        "check": "WID-A-SIZE",
+        "fact": "window size",
+        "claimed": 66,
+        "actual": 66,
+        "pass": true
+      },
+      {
+        "check": "WID-A-INTERVAL",
+        "fact": "window interval",
+        "claimed": "[0x00528E50,0x00528E92)",
+        "actual": "[0x00528E50,0x00528E92)",
+        "pass": true
+      },
+      {
+        "check": "WID-B-SHA",
+        "fact": "window SHA256 vs physical EXE bytes",
+        "claimed": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "actual": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "pass": true
+      },
+      {
+        "check": "WID-B-SIZE",
+        "fact": "window size",
+        "claimed": 52,
+        "actual": 52,
+        "pass": true
+      },
+      {
+        "check": "WID-B-INTERVAL",
+        "fact": "window interval",
+        "claimed": "[0x004C4792,0x004C47C6)",
+        "actual": "[0x004C4792,0x004C47C6)",
+        "pass": true
+      },
+      {
+        "check": "EFL-ROWS",
+        "fact": "ledger rows vs persisted objdump text + independent ESP walk",
+        "claimed": "23 rows",
+        "actual": "23 instructions",
+        "pass": true
+      },
+      {
+        "check": "EFL-ESP-S",
+        "fact": "S = ESP at 0x00528E76 (independent walk)",
+        "claimed": -56,
+        "actual": -56,
+        "pass": true
+      },
+      {
+        "check": "EFL-ESP-BEFORE-CALL",
+        "fact": "ESP before tail call 0x00528E8D",
+        "claimed": -68,
+        "actual": -68,
+        "pass": true
+      },
+      {
+        "check": "CSL-ROWS",
+        "fact": "caller ledger rows vs persisted objdump text + independent ESP walk",
+        "claimed": "25 rows",
+        "actual": "nonnull rows=17",
+        "pass": true
+      },
+      {
+        "check": "CSL-ESP-T",
+        "fact": "T = ESP at 0x004C47AF (independent walk)",
+        "claimed": 0,
+        "actual": 0,
+        "pass": true
+      },
+      {
+        "check": "CSL-ESP-BEFORE-BRIDGE",
+        "fact": "ESP before bridge call 0x004C47C1",
+        "claimed": -16,
+        "actual": -16,
+        "pass": true
+      },
+      {
+        "check": "PROV-A-SLOT",
+        "fact": "clean entry source slot (bytes 0x3c disp + S)",
+        "claimed": "[E+0x4]",
+        "actual": "[E+0x4]",
+        "pass": true
+      },
+      {
+        "check": "PROV-A-DELIVERY",
+        "fact": "tail call delivery ESP facts",
+        "claimed": [
+          "E-0x44",
+          "E-0x48"
+        ],
+        "actual": [
+          "E-0x44",
+          "E-0x48"
+        ],
+        "pass": true
+      },
+      {
+        "check": "PROV-B-ARG1-KIND",
+        "fact": "arg1 value kind vs LEA/MOV opcode byte 0x8D at 0x004C47BA (address-vs-MEM kind)",
+        "claimed": "ADDRESS",
+        "actual": "ADDRESS",
+        "pass": true
+      },
+      {
+        "check": "PROV-B-LEA-EXPR",
+        "fact": "LEA result expression (bytes 0x14 disp + independent ESP)",
+        "claimed": "ADDRESS(T+0x8)",
+        "actual": "ADDRESS(T+0x8)",
+        "pass": true
+      },
+      {
+        "check": "PROV-BRIDGE-SLOT",
+        "fact": "joined entry-slot identity [E+4]==[T-0x10]",
+        "claimed": "[T-0x10]",
+        "actual": "[T-0x10]",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-A-0x00528E8D",
+        "fact": "call target at 0x00528E8D (rel32 recompute + pinned role)",
+        "claimed": "0x0085B1B0",
+        "actual": "0x0085B1B0",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-B-0x004C4797",
+        "fact": "call target at 0x004C4797 (rel32 recompute + pinned role)",
+        "claimed": "0x0095D3C4",
+        "actual": "0x0095D3C4",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-B-0x004C47C1",
+        "fact": "call target at 0x004C47C1 (rel32 recompute + pinned role)",
+        "claimed": "0x00528E50",
+        "actual": "0x00528E50",
+        "pass": true
+      },
+      {
+        "check": "PROV-B-FLAGS",
+        "fact": "no non-MOV (flag-writing) instruction between TEST and JE",
+        "claimed": [],
+        "actual": [],
+        "pass": true
+      }
+    ],
+    "verdict": "PASS"
+  },
+  "AC1": {
+    "mutation": "copied BRIDGE_PROVENANCE.json with the clean arg1 value kind/expression replaced: ADDRESS(T+8) -> MEM(T+8)",
+    "expected": "REJECTED by the same ordinary final gate",
+    "checks": [
+      {
+        "check": "WID-A-SHA",
+        "fact": "window SHA256 vs physical EXE bytes",
+        "claimed": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "actual": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "pass": true
+      },
+      {
+        "check": "WID-A-SIZE",
+        "fact": "window size",
+        "claimed": 66,
+        "actual": 66,
+        "pass": true
+      },
+      {
+        "check": "WID-A-INTERVAL",
+        "fact": "window interval",
+        "claimed": "[0x00528E50,0x00528E92)",
+        "actual": "[0x00528E50,0x00528E92)",
+        "pass": true
+      },
+      {
+        "check": "WID-B-SHA",
+        "fact": "window SHA256 vs physical EXE bytes",
+        "claimed": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "actual": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "pass": true
+      },
+      {
+        "check": "WID-B-SIZE",
+        "fact": "window size",
+        "claimed": 52,
+        "actual": 52,
+        "pass": true
+      },
+      {
+        "check": "WID-B-INTERVAL",
+        "fact": "window interval",
+        "claimed": "[0x004C4792,0x004C47C6)",
+        "actual": "[0x004C4792,0x004C47C6)",
+        "pass": true
+      },
+      {
+        "check": "EFL-ROWS",
+        "fact": "ledger rows vs persisted objdump text + independent ESP walk",
+        "claimed": "23 rows",
+        "actual": "23 instructions",
+        "pass": true
+      },
+      {
+        "check": "EFL-ESP-S",
+        "fact": "S = ESP at 0x00528E76 (independent walk)",
+        "claimed": -56,
+        "actual": -56,
+        "pass": true
+      },
+      {
+        "check": "EFL-ESP-BEFORE-CALL",
+        "fact": "ESP before tail call 0x00528E8D",
+        "claimed": -68,
+        "actual": -68,
+        "pass": true
+      },
+      {
+        "check": "CSL-ROWS",
+        "fact": "caller ledger rows vs persisted objdump text + independent ESP walk",
+        "claimed": "25 rows",
+        "actual": "nonnull rows=17",
+        "pass": true
+      },
+      {
+        "check": "CSL-ESP-T",
+        "fact": "T = ESP at 0x004C47AF (independent walk)",
+        "claimed": 0,
+        "actual": 0,
+        "pass": true
+      },
+      {
+        "check": "CSL-ESP-BEFORE-BRIDGE",
+        "fact": "ESP before bridge call 0x004C47C1",
+        "claimed": -16,
+        "actual": -16,
+        "pass": true
+      },
+      {
+        "check": "PROV-A-SLOT",
+        "fact": "clean entry source slot (bytes 0x3c disp + S)",
+        "claimed": "[E+0x4]",
+        "actual": "[E+0x4]",
+        "pass": true
+      },
+      {
+        "check": "PROV-A-DELIVERY",
+        "fact": "tail call delivery ESP facts",
+        "claimed": [
+          "E-0x44",
+          "E-0x48"
+        ],
+        "actual": [
+          "E-0x44",
+          "E-0x48"
+        ],
+        "pass": true
+      },
+      {
+        "check": "PROV-B-ARG1-KIND",
+        "fact": "arg1 value kind vs LEA/MOV opcode byte 0x8D at 0x004C47BA (address-vs-MEM kind)",
+        "claimed": "STACK_READ",
+        "actual": "ADDRESS",
+        "pass": false
+      },
+      {
+        "check": "PROV-B-LEA-EXPR",
+        "fact": "LEA result expression (bytes 0x14 disp + independent ESP)",
+        "claimed": "MEM(T+0x8)",
+        "actual": "ADDRESS(T+0x8)",
+        "pass": false
+      },
+      {
+        "check": "PROV-BRIDGE-SLOT",
+        "fact": "joined entry-slot identity [E+4]==[T-0x10]",
+        "claimed": "[T-0x10]",
+        "actual": "[T-0x10]",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-A-0x00528E8D",
+        "fact": "call target at 0x00528E8D (rel32 recompute + pinned role)",
+        "claimed": "0x0085B1B0",
+        "actual": "0x0085B1B0",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-B-0x004C4797",
+        "fact": "call target at 0x004C4797 (rel32 recompute + pinned role)",
+        "claimed": "0x0095D3C4",
+        "actual": "0x0095D3C4",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-B-0x004C47C1",
+        "fact": "call target at 0x004C47C1 (rel32 recompute + pinned role)",
+        "claimed": "0x00528E50",
+        "actual": "0x00528E50",
+        "pass": true
+      },
+      {
+        "check": "PROV-B-FLAGS",
+        "fact": "no non-MOV (flag-writing) instruction between TEST and JE",
+        "claimed": [],
+        "actual": [],
+        "pass": true
+      }
+    ],
+    "verdict": "REJECTED",
+    "result": "CONTROL_PASS",
+    "scope_note": "package hash/manifest checks are bypassed ONLY in this isolated synthetic artifact control (it tests the fact predicate itself); the persisted original is never mutated; the mutated copy lives in the OS temp dir outside Git"
+  },
+  "AC2": {
+    "mutation": "copied BRIDGE_PROVENANCE.json with the clean entry source changed: [E+4] -> [E+8]",
+    "expected": "REJECTED by the same ordinary final gate",
+    "checks": [
+      {
+        "check": "WID-A-SHA",
+        "fact": "window SHA256 vs physical EXE bytes",
+        "claimed": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "actual": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "pass": true
+      },
+      {
+        "check": "WID-A-SIZE",
+        "fact": "window size",
+        "claimed": 66,
+        "actual": 66,
+        "pass": true
+      },
+      {
+        "check": "WID-A-INTERVAL",
+        "fact": "window interval",
+        "claimed": "[0x00528E50,0x00528E92)",
+        "actual": "[0x00528E50,0x00528E92)",
+        "pass": true
+      },
+      {
+        "check": "WID-B-SHA",
+        "fact": "window SHA256 vs physical EXE bytes",
+        "claimed": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "actual": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "pass": true
+      },
+      {
+        "check": "WID-B-SIZE",
+        "fact": "window size",
+        "claimed": 52,
+        "actual": 52,
+        "pass": true
+      },
+      {
+        "check": "WID-B-INTERVAL",
+        "fact": "window interval",
+        "claimed": "[0x004C4792,0x004C47C6)",
+        "actual": "[0x004C4792,0x004C47C6)",
+        "pass": true
+      },
+      {
+        "check": "EFL-ROWS",
+        "fact": "ledger rows vs persisted objdump text + independent ESP walk",
+        "claimed": "23 rows",
+        "actual": "23 instructions",
+        "pass": true
+      },
+      {
+        "check": "EFL-ESP-S",
+        "fact": "S = ESP at 0x00528E76 (independent walk)",
+        "claimed": -56,
+        "actual": -56,
+        "pass": true
+      },
+      {
+        "check": "EFL-ESP-BEFORE-CALL",
+        "fact": "ESP before tail call 0x00528E8D",
+        "claimed": -68,
+        "actual": -68,
+        "pass": true
+      },
+      {
+        "check": "CSL-ROWS",
+        "fact": "caller ledger rows vs persisted objdump text + independent ESP walk",
+        "claimed": "25 rows",
+        "actual": "nonnull rows=17",
+        "pass": true
+      },
+      {
+        "check": "CSL-ESP-T",
+        "fact": "T = ESP at 0x004C47AF (independent walk)",
+        "claimed": 0,
+        "actual": 0,
+        "pass": true
+      },
+      {
+        "check": "CSL-ESP-BEFORE-BRIDGE",
+        "fact": "ESP before bridge call 0x004C47C1",
+        "claimed": -16,
+        "actual": -16,
+        "pass": true
+      },
+      {
+        "check": "PROV-A-SLOT",
+        "fact": "clean entry source slot (bytes 0x3c disp + S)",
+        "claimed": "[E+0x8]",
+        "actual": "[E+0x4]",
+        "pass": false
+      },
+      {
+        "check": "PROV-A-DELIVERY",
+        "fact": "tail call delivery ESP facts",
+        "claimed": [
+          "E-0x44",
+          "E-0x48"
+        ],
+        "actual": [
+          "E-0x44",
+          "E-0x48"
+        ],
+        "pass": true
+      },
+      {
+        "check": "PROV-B-ARG1-KIND",
+        "fact": "arg1 value kind vs LEA/MOV opcode byte 0x8D at 0x004C47BA (address-vs-MEM kind)",
+        "claimed": "ADDRESS",
+        "actual": "ADDRESS",
+        "pass": true
+      },
+      {
+        "check": "PROV-B-LEA-EXPR",
+        "fact": "LEA result expression (bytes 0x14 disp + independent ESP)",
+        "claimed": "ADDRESS(T+0x8)",
+        "actual": "ADDRESS(T+0x8)",
+        "pass": true
+      },
+      {
+        "check": "PROV-BRIDGE-SLOT",
+        "fact": "joined entry-slot identity [E+4]==[T-0x10]",
+        "claimed": "[T-0x10]",
+        "actual": "[T-0x10]",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-A-0x00528E8D",
+        "fact": "call target at 0x00528E8D (rel32 recompute + pinned role)",
+        "claimed": "0x0085B1B0",
+        "actual": "0x0085B1B0",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-B-0x004C4797",
+        "fact": "call target at 0x004C4797 (rel32 recompute + pinned role)",
+        "claimed": "0x0095D3C4",
+        "actual": "0x0095D3C4",
+        "pass": true
+      },
+      {
+        "check": "PROV-CALL-B-0x004C47C1",
+        "fact": "call target at 0x004C47C1 (rel32 recompute + pinned role)",
+        "claimed": "0x00528E50",
+        "actual": "0x00528E50",
+        "pass": true
+      },
+      {
+        "check": "PROV-B-FLAGS",
+        "fact": "no non-MOV (flag-writing) instruction between TEST and JE",
+        "claimed": [],
+        "actual": [],
+        "pass": true
+      }
+    ],
+    "verdict": "REJECTED",
+    "result": "CONTROL_PASS",
+    "scope_note": "package hash/manifest checks are bypassed ONLY in this isolated synthetic artifact control; the persisted original is never mutated"
+  },
+  "overall": "ARTIFACT_CONSISTENCY_PASS"
+}

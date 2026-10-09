@@ -1,0 +1,108 @@
+{
+  "run_id": "PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009",
+  "exe": {
+    "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+    "size": 8015872,
+    "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+    "image_base": "0x00400000",
+    "read_scope": "whole-file hash + PE header/section mapping + the two pinned window byte ranges only"
+  },
+  "tool": {
+    "name": "GNU objdump (GNU Binutils for Debian) 2.44",
+    "rc": 0,
+    "command_form": "objdump -D -b binary -m i386 -M intel --adjust-vma=<VA> <fixture.bin>"
+  },
+  "windows": {
+    "A": {
+      "va_start": "0x00528E50",
+      "va_end_exclusive": "0x00528E92",
+      "interval": "[0x00528E50,0x00528E92)",
+      "size": 66,
+      "raw_offset": 1216080,
+      "raw_offset_hex": "0x128e50",
+      "sha256": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+      "sha256_matches_contract_pin": true,
+      "pe_mapping": {
+        "section": ".text",
+        "section_rva_range": "[0x1000,0x6745E5)",
+        "section_raw_backed": true,
+        "raw_range": "[0x1000,0x675000)",
+        "unique_mapping": true,
+        "note": "RVA = VA - ImageBase; raw offset = RVA for .text (PointerToRawData == VirtualAddress == 0x1000)"
+      },
+      "decode": {
+        "instructions": 23,
+        "covers_window_exactly": true,
+        "first_va": "0x00528E50",
+        "last_instruction_va": "0x00528E8D",
+        "last_instruction_end": "0x00528E92",
+        "visible_calls": [
+          {
+            "va": "0x00528E8D",
+            "target": "0x85b1b0",
+            "bytes": "e8 1e 23 33 00"
+          }
+        ]
+      },
+      "raw_text_file": "01_RAW/WINDOW_A_OBJDUMP.txt",
+      "retry_raw_text_file": "01_RAW/WINDOW_A_OBJDUMP_RETRY.txt",
+      "objdump_rc": 0
+    },
+    "B": {
+      "va_start": "0x004C4792",
+      "va_end_exclusive": "0x004C47C6",
+      "interval": "[0x004C4792,0x004C47C6)",
+      "size": 52,
+      "raw_offset": 804754,
+      "raw_offset_hex": "0xc4792",
+      "sha256": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+      "sha256_matches_contract_pin": true,
+      "pe_mapping": {
+        "section": ".text",
+        "section_rva_range": "[0x1000,0x6745E5)",
+        "section_raw_backed": true,
+        "raw_range": "[0x1000,0x675000)",
+        "unique_mapping": true,
+        "note": "RVA = VA - ImageBase; raw offset = RVA for .text (PointerToRawData == VirtualAddress == 0x1000)"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction_va": "0x004C47C1",
+        "last_instruction_end": "0x004C47C6",
+        "visible_calls": [
+          {
+            "va": "0x004C4797",
+            "target": "0x95d3c4",
+            "bytes": "e8 28 8c 49 00"
+          },
+          {
+            "va": "0x004C47C1",
+            "target": "0x528e50",
+            "bytes": "e8 8a 46 06 00"
+          }
+        ]
+      },
+      "raw_text_file": "01_RAW/WINDOW_B_OBJDUMP.txt",
+      "retry_raw_text_file": "01_RAW/WINDOW_B_OBJDUMP_RETRY.txt",
+      "objdump_rc": 0
+    }
+  },
+  "crash_continuation_verification": {
+    "A": {
+      "persisted_raw_file": "01_RAW/WINDOW_A_OBJDUMP.txt",
+      "fresh_retry_file": "01_RAW/WINDOW_A_OBJDUMP_RETRY.txt",
+      "disassembly_lines_identical": true,
+      "old_line_count": 23,
+      "new_line_count": 23
+    },
+    "B": {
+      "persisted_raw_file": "01_RAW/WINDOW_B_OBJDUMP.txt",
+      "fresh_retry_file": "01_RAW/WINDOW_B_OBJDUMP_RETRY.txt",
+      "disassembly_lines_identical": true,
+      "old_line_count": 17,
+      "new_line_count": 17
+    }
+  }
+}

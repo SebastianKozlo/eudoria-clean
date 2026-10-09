@@ -1,0 +1,3466 @@
+{
+  "run_id": "PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009",
+  "qc_origin": "pe-master-auditor fresh-context internal QC (internal to PE-MASTER; NOT an independent Desktop post-audit; NOT executor self-review)",
+  "qc_session": "OpenCode pe-master-auditor session 2026-10-09, model nask-glm/glm-5-3; python3 -B (WSL PE-AI, Debian, kernel 6.18.33.2-microsoft-standard-WSL2)",
+  "independence": {
+    "window_extraction_hashing_pe_mapping": "INDEPENDENT (this session)",
+    "disassembler": "SAME TOOL as production (GNU objdump 2.44 via WSL PE-AI) - the same GNU objdump is NOT two independent disassemblers (honest; not claimed as a cross-disassembler check)",
+    "objdump_invocations": "INDEPENDENT (this session's own commands; rc recorded per invocation)",
+    "symbolic_replay": "INDEPENDENT implementation (03_SCRIPTS/qc_frame_bridge.py; does NOT import run_frame_bridge.py)",
+    "esp_walk": "INDEPENDENT minimal arithmetic walk (separate function from the replay engine)",
+    "expected_facts": "re-encoded from the CONTRACT section 7 matrix by this session",
+    "artifact_gate": "INDEPENDENT implementation (gate())",
+    "executor_artifacts": "read ONLY for agree/disagree adjudication (adjudication + prod_compare), never as derivation input"
+  },
+  "exe_before": {
+    "size": 8015872,
+    "sha": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+    "pin_match": true
+  },
+  "tool": {
+    "name": "GNU objdump (GNU Binutils for Debian) 2.44",
+    "version_rc": 0,
+    "command_form": "objdump -D -b binary -m i386 -M intel --adjust-vma=<VA> <fixture.bin>"
+  },
+  "pe_mapping": {
+    "image_base": 4194304,
+    "machine": 332,
+    "sections": [
+      {
+        "name": ".text",
+        "va": 4096,
+        "vsize": 6764005,
+        "raw": 4096,
+        "rsize": 6766592
+      },
+      {
+        "name": ".rdata",
+        "va": 6770688,
+        "vsize": 1009001,
+        "raw": 6770688,
+        "rsize": 1011712
+      },
+      {
+        "name": ".data",
+        "va": 7782400,
+        "vsize": 251620,
+        "raw": 7782400,
+        "rsize": 212992
+      },
+      {
+        "name": ".tls",
+        "va": 8036352,
+        "vsize": 10,
+        "raw": 7995392,
+        "rsize": 4096
+      },
+      {
+        "name": ".rsrc",
+        "va": 8040448,
+        "vsize": 15444,
+        "raw": 7999488,
+        "rsize": 16384
+      }
+    ],
+    "windows": {
+      "A": {
+        "rva": 1216080,
+        "section": ".text",
+        "section_va": 4096,
+        "section_vsize": 6764005,
+        "section_rsize": 6766592,
+        "raw_backed": true,
+        "raw_offset_formula": 1216080,
+        "raw_offset_pinned": 1216080,
+        "formula_match": true,
+        "size": 66,
+        "sha": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "pin_match": true,
+        "inside_raw_range": true
+      },
+      "B": {
+        "rva": 804754,
+        "section": ".text",
+        "section_va": 4096,
+        "section_vsize": 6764005,
+        "section_rsize": 6766592,
+        "raw_backed": true,
+        "raw_offset_formula": 804754,
+        "raw_offset_pinned": 804754,
+        "formula_match": true,
+        "size": 52,
+        "sha": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "pin_match": true,
+        "inside_raw_range": true
+      }
+    }
+  },
+  "pe_disjoint": true,
+  "unique_bytes": 118,
+  "my_window_objdump": {
+    "A": {
+      "rc": 0,
+      "cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/qc_window_A.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/qc_window_A.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00528e50 <.data>:\n  528e50:\t6a ff                \tpush   0xffffffff\n  528e52:\t68 3f f5 9b 00       \tpush   0x9bf53f\n  528e57:\t64 a1 00 00 00 00    \tmov    eax,fs:0x0\n  528e5d:\t50                   \tpush   eax\n  528e5e:\t83 ec 1c             \tsub    esp,0x1c\n  528e61:\t53                   \tpush   ebx\n  528e62:\t56                   \tpush   esi\n  528e63:\t57                   \tpush   edi\n  528e64:\ta1 d0 d8 b9 00       \tmov    eax,ds:0xb9d8d0\n  528e69:\t33 c4                \txor    eax,esp\n  528e6b:\t50                   \tpush   eax\n  528e6c:\t8d 44 24 2c          \tlea    eax,[esp+0x2c]\n  528e70:\t64 a3 00 00 00 00    \tmov    fs:0x0,eax\n  528e76:\t8b f1                \tmov    esi,ecx\n  528e78:\t89 74 24 10          \tmov    DWORD PTR [esp+0x10],esi\n  528e7c:\t8b 44 24 44          \tmov    eax,DWORD PTR [esp+0x44]\n  528e80:\t8b 4c 24 40          \tmov    ecx,DWORD PTR [esp+0x40]\n  528e84:\t8b 7c 24 3c          \tmov    edi,DWORD PTR [esp+0x3c]\n  528e88:\t50                   \tpush   eax\n  528e89:\t51                   \tpush   ecx\n  528e8a:\t57                   \tpush   edi\n  528e8b:\t8b ce                \tmov    ecx,esi\n  528e8d:\te8 1e 23 33 00       \tcall   0x85b1b0\n"
+    },
+    "B": {
+      "rc": 0,
+      "cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/qc_window_B.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/qc_window_B.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n"
+    }
+  },
+  "crash_verification": {
+    "01_RAW/WINDOW_A_OBJDUMP.txt": {
+      "sha": "7aaba008cfbd8baf4cdf868ba25e3e9a014e9f732e375402553aaa3282d2c86b",
+      "expect": "7aaba008cfbd8baf4cdf868ba25e3e9a014e9f732e375402553aaa3282d2c86b",
+      "unchanged_since_discovery": true
+    },
+    "01_RAW/WINDOW_B_OBJDUMP.txt": {
+      "sha": "b82c5532d1e10ee3116c7e74ea72471257fa1e3a110f7bcfea0c452b01ed99cc",
+      "expect": "b82c5532d1e10ee3116c7e74ea72471257fa1e3a110f7bcfea0c452b01ed99cc",
+      "unchanged_since_discovery": true
+    },
+    "PREREGISTRATION.md": {
+      "size": 22192,
+      "full_sha": "6f99be9d64549ba2cdbc71bea6beb8198f0a62c6a1669f891918bf0c98672025",
+      "prefix_19151_sha": "f36de40af53cee9fe2f0f5a11a65475239e5035de96f2fd45d4e5669e775eacc",
+      "prefix_matches_discovery": true,
+      "note": "P1-P9 are byte-identical to the crashed session's preregistration (pure P10 append) iff prefix_matches_discovery is true"
+    },
+    "ident_A": {
+      "mine_vs_crashkept": true,
+      "mine_vs_retry": true,
+      "crashkept_vs_retry": true,
+      "my_line_count": 23,
+      "kept_line_count": 23
+    },
+    "ident_B": {
+      "mine_vs_crashkept": true,
+      "mine_vs_retry": true,
+      "crashkept_vs_retry": true,
+      "my_line_count": 17,
+      "kept_line_count": 17
+    }
+  },
+  "phase_a_mine": {
+    "S": -56,
+    "src_va": 5410436,
+    "src_off": 4,
+    "src_disp": 60,
+    "src_slot_E": "[E+0x4]",
+    "src_slot_S": "[S+0x3c]",
+    "preserved": true,
+    "alias": [],
+    "wbefore": [
+      [
+        "0x00528E50",
+        "PUSH",
+        -4,
+        "0xffffffff"
+      ],
+      [
+        "0x00528E52",
+        "PUSH",
+        -8,
+        "0x9bf53f"
+      ],
+      [
+        "0x00528E5D",
+        "PUSH",
+        -12,
+        "FS0_PREV"
+      ],
+      [
+        "0x00528E61",
+        "PUSH",
+        -44,
+        "EBX_ENTRY"
+      ],
+      [
+        "0x00528E62",
+        "PUSH",
+        -48,
+        "ESI_ENTRY"
+      ],
+      [
+        "0x00528E63",
+        "PUSH",
+        -52,
+        "EDI_ENTRY"
+      ],
+      [
+        "0x00528E6B",
+        "PUSH",
+        -56,
+        "MOFFS(ds:0xb9d8d0) XOR ESP"
+      ],
+      [
+        "0x00528E78",
+        "MOV_STORE",
+        -40,
+        "ECX_ENTRY"
+      ]
+    ],
+    "segbefore": [
+      [
+        "0x00528E70",
+        "fs:[0x0]",
+        "ADDRESS([-12]) (lea@0x00528E6C)"
+      ]
+    ],
+    "stack_write_offs": [
+      -56,
+      -52,
+      -48,
+      -44,
+      -40,
+      -12,
+      -8,
+      -4
+    ],
+    "fs_stored_off": -12,
+    "edi_ok": true,
+    "edi_def": 5410436,
+    "push_va": 5410442,
+    "push_reg": "edi",
+    "arg1_slot": -68,
+    "esp_before": -68,
+    "callee_entry": -72,
+    "target": 8761776,
+    "target_rc": 8761776,
+    "arg1_kind": "MEM",
+    "arg1_text": "MEM([+4])",
+    "recv_kind": "RECV",
+    "recv_text": "ECX_ENTRY",
+    "esp_before_S": -12,
+    "callee_entry_S": -16,
+    "arg1_slot_S": -12,
+    "instr_count": 23,
+    "steps": [
+      {
+        "va": "0x00528E50",
+        "bytes": "6a ff",
+        "op": "push   0xffffffff",
+        "esp": -4,
+        "note": "push -> [-4] := 0xffffffff"
+      },
+      {
+        "va": "0x00528E52",
+        "bytes": "68 3f f5 9b 00",
+        "op": "push   0x9bf53f",
+        "esp": -8,
+        "note": "push -> [-8] := 0x9bf53f"
+      },
+      {
+        "va": "0x00528E57",
+        "bytes": "64 a1 00 00 00 00",
+        "op": "mov    eax,fs:0x0",
+        "esp": -8,
+        "note": "seg load fs:0x0 -> eax (opaque)"
+      },
+      {
+        "va": "0x00528E5D",
+        "bytes": "50",
+        "op": "push   eax",
+        "esp": -12,
+        "note": "push -> [-12] := FS0_PREV"
+      },
+      {
+        "va": "0x00528E5E",
+        "bytes": "83 ec 1c",
+        "op": "sub    esp,0x1c",
+        "esp": -40,
+        "note": "sub esp,0x1c -> esp=-40"
+      },
+      {
+        "va": "0x00528E61",
+        "bytes": "53",
+        "op": "push   ebx",
+        "esp": -44,
+        "note": "push -> [-44] := EBX_ENTRY"
+      },
+      {
+        "va": "0x00528E62",
+        "bytes": "56",
+        "op": "push   esi",
+        "esp": -48,
+        "note": "push -> [-48] := ESI_ENTRY"
+      },
+      {
+        "va": "0x00528E63",
+        "bytes": "57",
+        "op": "push   edi",
+        "esp": -52,
+        "note": "push -> [-52] := EDI_ENTRY"
+      },
+      {
+        "va": "0x00528E64",
+        "bytes": "a1 d0 d8 b9 00",
+        "op": "mov    eax,ds:0xb9d8d0",
+        "esp": -52,
+        "note": "seg load ds:0xb9d8d0 -> eax (opaque)"
+      },
+      {
+        "va": "0x00528E69",
+        "bytes": "33 c4",
+        "op": "xor    eax,esp",
+        "esp": -52,
+        "note": "opaque xor; value changes, ESP/width unchanged"
+      },
+      {
+        "va": "0x00528E6B",
+        "bytes": "50",
+        "op": "push   eax",
+        "esp": -56,
+        "note": "push -> [-56] := MOFFS(ds:0xb9d8d0) XOR ESP"
+      },
+      {
+        "va": "0x00528E6C",
+        "bytes": "8d 44 24 2c",
+        "op": "lea    eax,[esp+0x2c]",
+        "esp": -56,
+        "note": "lea eax := ADDRESS([-12]) [kind=ADDR, opcode 8D]"
+      },
+      {
+        "va": "0x00528E70",
+        "bytes": "64 a3 00 00 00 00",
+        "op": "mov    fs:0x0,eax",
+        "esp": -56,
+        "note": "SEGMENT fs:0x0 := ADDRESS([-12]) (lea@0x00528E6C) (NOT a stack write; AS4)"
+      },
+      {
+        "va": "0x00528E76",
+        "bytes": "8b f1",
+        "op": "mov    esi,ecx",
+        "esp": -56,
+        "note": "mov esi := ecx (ECX_ENTRY)"
+      },
+      {
+        "va": "0x00528E78",
+        "bytes": "89 74 24 10",
+        "op": "mov    DWORD PTR [esp+0x10],esi",
+        "esp": -56,
+        "note": "store [-40] := ECX_ENTRY (no flag write)"
+      },
+      {
+        "va": "0x00528E7C",
+        "bytes": "8b 44 24 44",
+        "op": "mov    eax,DWORD PTR [esp+0x44]",
+        "esp": -56,
+        "note": "load eax := MEM[+12] (caller_area_unknown)"
+      },
+      {
+        "va": "0x00528E80",
+        "bytes": "8b 4c 24 40",
+        "op": "mov    ecx,DWORD PTR [esp+0x40]",
+        "esp": -56,
+        "note": "load ecx := MEM[+8] (caller_area_unknown)"
+      },
+      {
+        "va": "0x00528E84",
+        "bytes": "8b 7c 24 3c",
+        "op": "mov    edi,DWORD PTR [esp+0x3c]",
+        "esp": -56,
+        "note": "load edi := MEM[+4] (caller_area_unknown)"
+      },
+      {
+        "va": "0x00528E88",
+        "bytes": "50",
+        "op": "push   eax",
+        "esp": -60,
+        "note": "push -> [-60] := MEM([+12])"
+      },
+      {
+        "va": "0x00528E89",
+        "bytes": "51",
+        "op": "push   ecx",
+        "esp": -64,
+        "note": "push -> [-64] := MEM([+8])"
+      },
+      {
+        "va": "0x00528E8A",
+        "bytes": "57",
+        "op": "push   edi",
+        "esp": -68,
+        "note": "push -> [-68] := MEM([+4])"
+      },
+      {
+        "va": "0x00528E8B",
+        "bytes": "8b ce",
+        "op": "mov    ecx,esi",
+        "esp": -68,
+        "note": "mov ecx := esi (ECX_ENTRY)"
+      },
+      {
+        "va": "0x00528E8D",
+        "bytes": "e8 1e 23 33 00",
+        "op": "call   0x85b1b0",
+        "esp": -72,
+        "note": "BOUNDARY call -> 0x0085B1B0 (callee not opened; hardware ret push applied; esp_before=-68)"
+      }
+    ]
+  },
+  "phase_b_mine": {
+    "path_count": 2,
+    "instr_count": 16,
+    "null": {
+      "exit_va": 4999112,
+      "in_window": false,
+      "uncond": false,
+      "je": true,
+      "call_reached": false,
+      "delivered": null
+    },
+    "nonnull": {
+      "T": 0,
+      "flags_ok": true,
+      "flag_between": [],
+      "br_mn": "je",
+      "br_target": 4999112,
+      "opaque": {
+        "found": true,
+        "push128": true,
+        "add_esp4": true,
+        "target": 9819076
+      },
+      "val_insn": {
+        "va": 4999098,
+        "opcode": "8d",
+        "kind": "ADDR",
+        "disp": 20,
+        "reg": "ecx",
+        "reg_off": 8,
+        "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+      },
+      "arg1": {
+        "kind": "ADDR",
+        "off": 8,
+        "text": "ADDRESS([+8]) (lea@0x004C47BA)",
+        "slot": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "def_va": 4999098
+      },
+      "aslots": {
+        "a1": [
+          "ADDR",
+          8,
+          "ADDRESS([+8]) (lea@0x004C47BA)"
+        ],
+        "a2": [
+          "UNK",
+          null,
+          "ESI_UNKNOWN_T"
+        ],
+        "a3": [
+          "MEM",
+          76,
+          "MEM([+76])"
+        ],
+        "a4": [
+          "MEM",
+          80,
+          "MEM([+80])"
+        ]
+      },
+      "recv": {
+        "kind": "OPRET",
+        "text": "OPAQUE_RET(0x0095D3C4)"
+      },
+      "call": {
+        "va": 4999105,
+        "target": 5410384,
+        "target_rc": 5410384,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "bvalid": true
+      },
+      "steps": [
+        {
+          "va": "0x004C4792",
+          "bytes": "68 28 01 00 00",
+          "op": "push   0x128",
+          "esp": -4,
+          "note": "push -> [-4] := 0x128"
+        },
+        {
+          "va": "0x004C4797",
+          "bytes": "e8 28 8c 49 00",
+          "op": "call   0x95d3c4",
+          "esp": -4,
+          "note": "OPAQUE call 0x0095D3C4: ret-push recorded at [-8]; AS3 ESP restored; EAX := OPAQUE_RET"
+        },
+        {
+          "va": "0x004C479C",
+          "bytes": "83 c4 04",
+          "op": "add    esp,0x4",
+          "esp": 0,
+          "note": "add esp,0x4 -> esp=+0"
+        },
+        {
+          "va": "0x004C479F",
+          "bytes": "89 44 24 44",
+          "op": "mov    DWORD PTR [esp+0x44],eax",
+          "esp": 0,
+          "note": "store [+68] := OPAQUE_RET(0x0095D3C4) (no flag write)"
+        },
+        {
+          "va": "0x004C47A3",
+          "bytes": "85 c0",
+          "op": "test   eax,eax",
+          "esp": 0,
+          "note": "test eax,eax -> ZF := (OPAQUE_RET(0x0095D3C4) == 0)"
+        },
+        {
+          "va": "0x004C47A5",
+          "bytes": "c7 44 24 3c 00 00 00 00",
+          "op": "mov    DWORD PTR [esp+0x3c],0x0",
+          "esp": 0,
+          "note": "store [+60] := 0x0 (no flag write)"
+        },
+        {
+          "va": "0x004C47AD",
+          "bytes": "74 19",
+          "op": "je     0x4c47c8",
+          "esp": 0,
+          "note": "je 0x4C47C8"
+        },
+        {
+          "va": "0x004C47AF",
+          "bytes": "8b 4c 24 50",
+          "op": "mov    ecx,DWORD PTR [esp+0x50]",
+          "esp": 0,
+          "note": "load ecx := MEM[+80] (caller_area_unknown)"
+        },
+        {
+          "va": "0x004C47B3",
+          "bytes": "8b 54 24 4c",
+          "op": "mov    edx,DWORD PTR [esp+0x4c]",
+          "esp": 0,
+          "note": "load edx := MEM[+76] (caller_area_unknown)"
+        },
+        {
+          "va": "0x004C47B7",
+          "bytes": "51",
+          "op": "push   ecx",
+          "esp": -4,
+          "note": "push -> [-4] := MEM([+80])"
+        },
+        {
+          "va": "0x004C47B8",
+          "bytes": "52",
+          "op": "push   edx",
+          "esp": -8,
+          "note": "push -> [-8] := MEM([+76])"
+        },
+        {
+          "va": "0x004C47B9",
+          "bytes": "56",
+          "op": "push   esi",
+          "esp": -12,
+          "note": "push -> [-12] := ESI_UNKNOWN_T"
+        },
+        {
+          "va": "0x004C47BA",
+          "bytes": "8d 4c 24 14",
+          "op": "lea    ecx,[esp+0x14]",
+          "esp": -12,
+          "note": "lea ecx := ADDRESS([+8]) [kind=ADDR, opcode 8D]"
+        },
+        {
+          "va": "0x004C47BE",
+          "bytes": "51",
+          "op": "push   ecx",
+          "esp": -16,
+          "note": "push -> [-16] := ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        {
+          "va": "0x004C47BF",
+          "bytes": "8b c8",
+          "op": "mov    ecx,eax",
+          "esp": -16,
+          "note": "mov ecx := eax (OPAQUE_RET(0x0095D3C4))"
+        },
+        {
+          "va": "0x004C47C1",
+          "bytes": "e8 8a 46 06 00",
+          "op": "call   0x528e50",
+          "esp": -20,
+          "note": "BOUNDARY call -> 0x00528E50 (callee not opened; hardware ret push applied; esp_before=-16)"
+        }
+      ],
+      "writes": [
+        [
+          4999058,
+          "PUSH",
+          -4,
+          "0x128"
+        ],
+        [
+          4999063,
+          "RET_PUSH",
+          -8,
+          "RETADDR@0x004C4797"
+        ],
+        [
+          4999071,
+          "MOV_STORE",
+          68,
+          "OPAQUE_RET(0x0095D3C4)"
+        ],
+        [
+          4999077,
+          "MOV_STORE",
+          60,
+          "0x0"
+        ],
+        [
+          4999095,
+          "PUSH",
+          -4,
+          "MEM([+80])"
+        ],
+        [
+          4999096,
+          "PUSH",
+          -8,
+          "MEM([+76])"
+        ],
+        [
+          4999097,
+          "PUSH",
+          -12,
+          "ESI_UNKNOWN_T"
+        ],
+        [
+          4999102,
+          "PUSH",
+          -16,
+          "ADDRESS([+8]) (lea@0x004C47BA)"
+        ],
+        [
+          4999105,
+          "RET_PUSH",
+          -20,
+          "RETADDR@0x004C47C1"
+        ]
+      ]
+    }
+  },
+  "bridge_mine": {
+    "join": "E = T-0x14",
+    "E_off": -20,
+    "a_src_T0": -16,
+    "b_arg1_T0": -16,
+    "a_src_T": -16,
+    "b_arg1_T": -16,
+    "slot_identity": true,
+    "intervening": [],
+    "status": "POINTER_VALUE_IDENTITY_ESTABLISHED_CONDITIONAL",
+    "cross_value": [
+      "ADDR",
+      8
+    ],
+    "boundaries": [
+      "arg1@FUN_00528E50 entry via CALL 0x004C47C1",
+      "arg1@FUN_0085B1B0 entry via CALL 0x00528E8D"
+    ],
+    "conditions": [
+      "AS1/AS2 x86 push/call + cdecl arg order",
+      "AS3 opaque 0x0095D3C4 normal ABI-compatible return",
+      "EAX != 0 at 0x004C47AD (qualified branch only)",
+      "AS4 FS/TIB disjoint from live argument stack region",
+      "AS5 straight-line window-A path from 0x00528E50"
+    ]
+  },
+  "adjudication": [
+    {
+      "field": "A.window.size",
+      "claimed": 66,
+      "mine": 66,
+      "agree": true
+    },
+    {
+      "field": "A.window.instrs",
+      "claimed": 23,
+      "mine": 23,
+      "agree": true
+    },
+    {
+      "field": "A.window.first",
+      "claimed": 5410384,
+      "mine": 5410384,
+      "agree": true
+    },
+    {
+      "field": "A.window.last_end",
+      "claimed": 5410450,
+      "mine": 5410450,
+      "agree": true
+    },
+    {
+      "field": "A.tail_target",
+      "claimed": 8761776,
+      "mine": 8761776,
+      "agree": true
+    },
+    {
+      "field": "A.S_delta",
+      "claimed": -56,
+      "mine": -56,
+      "agree": true
+    },
+    {
+      "field": "A.src_slot_delta",
+      "claimed": 4,
+      "mine": 4,
+      "agree": true
+    },
+    {
+      "field": "A.src_slot_expr",
+      "claimed": "[E+0x4]",
+      "mine": "[E+0x4]",
+      "agree": true
+    },
+    {
+      "field": "A.src_pivot_expr",
+      "claimed": "[S+0x3c]",
+      "mine": "[S+0x3c]",
+      "agree": true
+    },
+    {
+      "field": "A.preserved",
+      "claimed": true,
+      "mine": true,
+      "agree": true
+    },
+    {
+      "field": "A.edi_ok",
+      "claimed": true,
+      "mine": true,
+      "agree": true
+    },
+    {
+      "field": "A.edi_def",
+      "claimed": 5410436,
+      "mine": 5410436,
+      "agree": true
+    },
+    {
+      "field": "A.push_va",
+      "claimed": 5410442,
+      "mine": 5410442,
+      "agree": true
+    },
+    {
+      "field": "A.push_reg",
+      "claimed": "edi",
+      "mine": "edi",
+      "agree": true
+    },
+    {
+      "field": "A.esp_before_call",
+      "claimed": -68,
+      "mine": -68,
+      "agree": true
+    },
+    {
+      "field": "A.callee_entry",
+      "claimed": -72,
+      "mine": -72,
+      "agree": true
+    },
+    {
+      "field": "A.arg1_slot_S",
+      "claimed": -12,
+      "mine": -12,
+      "agree": true
+    },
+    {
+      "field": "A.callee_entry_S",
+      "claimed": -16,
+      "mine": -16,
+      "agree": true
+    },
+    {
+      "field": "A.esp_before_S",
+      "claimed": -12,
+      "mine": -12,
+      "agree": true
+    },
+    {
+      "field": "A.arg1_kind",
+      "claimed": "STACK_READ",
+      "mine": "MEM",
+      "agree": true
+    },
+    {
+      "field": "A.stack_write_offs",
+      "claimed": [
+        -56,
+        -52,
+        -48,
+        -44,
+        -40,
+        -12,
+        -8,
+        -4
+      ],
+      "mine": [
+        -56,
+        -52,
+        -48,
+        -44,
+        -40,
+        -12,
+        -8,
+        -4
+      ],
+      "agree": true
+    },
+    {
+      "field": "A.seg_writes",
+      "claimed": [
+        "fs:[0x0]"
+      ],
+      "mine": [
+        "fs:[0x0]"
+      ],
+      "agree": true
+    },
+    {
+      "field": "A.recv_kind",
+      "claimed": "ENTRY_RECEIVER",
+      "mine": "RECV",
+      "agree": true
+    },
+    {
+      "field": "A.fs_stored_off",
+      "claimed": -12,
+      "mine": -12,
+      "agree": true
+    },
+    {
+      "field": "B.window.size",
+      "claimed": 52,
+      "mine": 52,
+      "agree": true
+    },
+    {
+      "field": "B.window.instrs",
+      "claimed": 16,
+      "mine": 16,
+      "agree": true
+    },
+    {
+      "field": "B.window.first",
+      "claimed": 4999058,
+      "mine": 4999058,
+      "agree": true
+    },
+    {
+      "field": "B.window.last_end",
+      "claimed": 4999110,
+      "mine": 4999110,
+      "agree": true
+    },
+    {
+      "field": "B.calls",
+      "claimed": [
+        [
+          4999063,
+          9819076
+        ],
+        [
+          4999105,
+          5410384
+        ]
+      ],
+      "mine": [
+        [
+          4999063,
+          9819076
+        ],
+        [
+          4999105,
+          5410384
+        ]
+      ],
+      "agree": true
+    },
+    {
+      "field": "B.T_delta",
+      "claimed": 0,
+      "mine": 0,
+      "agree": true
+    },
+    {
+      "field": "B.flags_ok",
+      "claimed": true,
+      "mine": true,
+      "agree": true
+    },
+    {
+      "field": "B.je_target",
+      "claimed": 4999112,
+      "mine": 4999112,
+      "agree": true
+    },
+    {
+      "field": "B.opaque.push128",
+      "claimed": true,
+      "mine": true,
+      "agree": true
+    },
+    {
+      "field": "B.opaque.add_esp4",
+      "claimed": true,
+      "mine": true,
+      "agree": true
+    },
+    {
+      "field": "B.lea.kind",
+      "claimed": "ADDRESS",
+      "mine": "ADDR",
+      "agree": true
+    },
+    {
+      "field": "B.lea.disp",
+      "claimed": 20,
+      "mine": 20,
+      "agree": true
+    },
+    {
+      "field": "B.arg1.kind",
+      "claimed": "ADDRESS",
+      "mine": "ADDR",
+      "agree": true
+    },
+    {
+      "field": "B.arg1.slot",
+      "claimed": -16,
+      "mine": -16,
+      "agree": true
+    },
+    {
+      "field": "B.arg1.val",
+      "claimed": 8,
+      "mine": 8,
+      "agree": true
+    },
+    {
+      "field": "B.arg1.push_va",
+      "claimed": 4999102,
+      "mine": 4999102,
+      "agree": true
+    },
+    {
+      "field": "B.arg1.push_reg",
+      "claimed": "ecx",
+      "mine": "ecx",
+      "agree": true
+    },
+    {
+      "field": "B.arg2",
+      "claimed": "ESI_UNKNOWN_T",
+      "mine": "ESI_UNKNOWN_T",
+      "agree": true
+    },
+    {
+      "field": "B.arg3",
+      "claimed": [
+        "MEM",
+        76
+      ],
+      "mine": [
+        "MEM",
+        76
+      ],
+      "agree": true
+    },
+    {
+      "field": "B.arg4",
+      "claimed": [
+        "MEM",
+        80
+      ],
+      "mine": [
+        "MEM",
+        80
+      ],
+      "agree": true
+    },
+    {
+      "field": "B.recv.kind",
+      "claimed": "OPAQUE_RET",
+      "mine": "OPRET",
+      "agree": true
+    },
+    {
+      "field": "B.call.target",
+      "claimed": 5410384,
+      "mine": 5410384,
+      "agree": true
+    },
+    {
+      "field": "B.call.esp_before",
+      "claimed": -16,
+      "mine": -16,
+      "agree": true
+    },
+    {
+      "field": "B.call.callee_entry",
+      "claimed": -20,
+      "mine": -20,
+      "agree": true
+    },
+    {
+      "field": "B.call.bvalid",
+      "claimed": true,
+      "mine": true,
+      "agree": true
+    },
+    {
+      "field": "B.null.je",
+      "claimed": true,
+      "mine": true,
+      "agree": true
+    },
+    {
+      "field": "B.null.reached",
+      "claimed": false,
+      "mine": false,
+      "agree": true
+    },
+    {
+      "field": "BR.join",
+      "claimed": "E = T-0x14",
+      "mine": "E = T-0x14",
+      "agree": true
+    },
+    {
+      "field": "BR.slot_identity",
+      "claimed": -16,
+      "mine": -16,
+      "agree": true
+    },
+    {
+      "field": "BR.value",
+      "claimed": 8,
+      "mine": 8,
+      "agree": true
+    },
+    {
+      "field": "BR.intervening",
+      "claimed": [],
+      "mine": [],
+      "agree": true
+    },
+    {
+      "field": "BR.status",
+      "claimed": "POINTER_VALUE_IDENTITY_ESTABLISHED_CONDITIONAL",
+      "mine": "POINTER_VALUE_IDENTITY_ESTABLISHED_CONDITIONAL",
+      "agree": true
+    }
+  ],
+  "adjudication_summary": {
+    "fields": 56,
+    "agree": 56,
+    "disagree": []
+  },
+  "matrix_qc": [
+    {
+      "case": "A_CLEAN",
+      "window": "A",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture_size": 66,
+      "fixture_sha": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/A_CLEAN.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/A_CLEAN.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00528e50 <.data>:\n  528e50:\t6a ff                \tpush   0xffffffff\n  528e52:\t68 3f f5 9b 00       \tpush   0x9bf53f\n  528e57:\t64 a1 00 00 00 00    \tmov    eax,fs:0x0\n  528e5d:\t50                   \tpush   eax\n  528e5e:\t83 ec 1c             \tsub    esp,0x1c\n  528e61:\t53                   \tpush   ebx\n  528e62:\t56                   \tpush   esi\n  528e63:\t57                   \tpush   edi\n  528e64:\ta1 d0 d8 b9 00       \tmov    eax,ds:0xb9d8d0\n  528e69:\t33 c4                \txor    eax,esp\n  528e6b:\t50                   \tpush   eax\n  528e6c:\t8d 44 24 2c          \tlea    eax,[esp+0x2c]\n  528e70:\t64 a3 00 00 00 00    \tmov    fs:0x0,eax\n  528e76:\t8b f1                \tmov    esi,ecx\n  528e78:\t89 74 24 10          \tmov    DWORD PTR [esp+0x10],esi\n  528e7c:\t8b 44 24 44          \tmov    eax,DWORD PTR [esp+0x44]\n  528e80:\t8b 4c 24 40          \tmov    ecx,DWORD PTR [esp+0x40]\n  528e84:\t8b 7c 24 3c          \tmov    edi,DWORD PTR [esp+0x3c]\n  528e88:\t50                   \tpush   eax\n  528e89:\t51                   \tpush   ecx\n  528e8a:\t57                   \tpush   edi\n  528e8b:\t8b ce                \tmov    ecx,esi\n  528e8d:\te8 1e 23 33 00       \tcall   0x85b1b0\n",
+      "decode": {
+        "instrs": 23,
+        "first": "0x00528E50",
+        "last_end": "0x00528E92",
+        "covers": true
+      },
+      "derived": {
+        "S": -56,
+        "src": 4,
+        "src_disp": 60,
+        "preserved": true,
+        "edi_ok": true,
+        "tail": 8761776,
+        "tail_rc": 8761776,
+        "arg1_kind": "MEM",
+        "arg1_text": "MEM([+4])",
+        "arg1_slot": -68,
+        "esp_before": -68,
+        "callee_entry": -72,
+        "esp_before_S": -12,
+        "callee_entry_S": -16,
+        "arg1_slot_S": -12,
+        "push_va": 5410442,
+        "push_reg": "edi",
+        "recv_kind": "RECV",
+        "fs_stored_off": -12,
+        "steps": [
+          {
+            "va": "0x00528E50",
+            "bytes": "6a ff",
+            "op": "push   0xffffffff",
+            "esp": -4,
+            "note": "push -> [-4] := 0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "bytes": "68 3f f5 9b 00",
+            "op": "push   0x9bf53f",
+            "esp": -8,
+            "note": "push -> [-8] := 0x9bf53f"
+          },
+          {
+            "va": "0x00528E57",
+            "bytes": "64 a1 00 00 00 00",
+            "op": "mov    eax,fs:0x0",
+            "esp": -8,
+            "note": "seg load fs:0x0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E5D",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -12,
+            "note": "push -> [-12] := FS0_PREV"
+          },
+          {
+            "va": "0x00528E5E",
+            "bytes": "83 ec 1c",
+            "op": "sub    esp,0x1c",
+            "esp": -40,
+            "note": "sub esp,0x1c -> esp=-40"
+          },
+          {
+            "va": "0x00528E61",
+            "bytes": "53",
+            "op": "push   ebx",
+            "esp": -44,
+            "note": "push -> [-44] := EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "bytes": "56",
+            "op": "push   esi",
+            "esp": -48,
+            "note": "push -> [-48] := ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -52,
+            "note": "push -> [-52] := EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E64",
+            "bytes": "a1 d0 d8 b9 00",
+            "op": "mov    eax,ds:0xb9d8d0",
+            "esp": -52,
+            "note": "seg load ds:0xb9d8d0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E69",
+            "bytes": "33 c4",
+            "op": "xor    eax,esp",
+            "esp": -52,
+            "note": "opaque xor; value changes, ESP/width unchanged"
+          },
+          {
+            "va": "0x00528E6B",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -56,
+            "note": "push -> [-56] := MOFFS(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E6C",
+            "bytes": "8d 44 24 2c",
+            "op": "lea    eax,[esp+0x2c]",
+            "esp": -56,
+            "note": "lea eax := ADDRESS([-12]) [kind=ADDR, opcode 8D]"
+          },
+          {
+            "va": "0x00528E70",
+            "bytes": "64 a3 00 00 00 00",
+            "op": "mov    fs:0x0,eax",
+            "esp": -56,
+            "note": "SEGMENT fs:0x0 := ADDRESS([-12]) (lea@0x00528E6C) (NOT a stack write; AS4)"
+          },
+          {
+            "va": "0x00528E76",
+            "bytes": "8b f1",
+            "op": "mov    esi,ecx",
+            "esp": -56,
+            "note": "mov esi := ecx (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E78",
+            "bytes": "89 74 24 10",
+            "op": "mov    DWORD PTR [esp+0x10],esi",
+            "esp": -56,
+            "note": "store [-40] := ECX_ENTRY (no flag write)"
+          },
+          {
+            "va": "0x00528E7C",
+            "bytes": "8b 44 24 44",
+            "op": "mov    eax,DWORD PTR [esp+0x44]",
+            "esp": -56,
+            "note": "load eax := MEM[+12] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E80",
+            "bytes": "8b 4c 24 40",
+            "op": "mov    ecx,DWORD PTR [esp+0x40]",
+            "esp": -56,
+            "note": "load ecx := MEM[+8] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E84",
+            "bytes": "8b 7c 24 3c",
+            "op": "mov    edi,DWORD PTR [esp+0x3c]",
+            "esp": -56,
+            "note": "load edi := MEM[+4] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E88",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -60,
+            "note": "push -> [-60] := MEM([+12])"
+          },
+          {
+            "va": "0x00528E89",
+            "bytes": "51",
+            "op": "push   ecx",
+            "esp": -64,
+            "note": "push -> [-64] := MEM([+8])"
+          },
+          {
+            "va": "0x00528E8A",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -68,
+            "note": "push -> [-68] := MEM([+4])"
+          },
+          {
+            "va": "0x00528E8B",
+            "bytes": "8b ce",
+            "op": "mov    ecx,esi",
+            "esp": -68,
+            "note": "mov ecx := esi (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E8D",
+            "bytes": "e8 1e 23 33 00",
+            "op": "call   0x85b1b0",
+            "esp": -72,
+            "note": "BOUNDARY call -> 0x0085B1B0 (callee not opened; hardware ret push applied; esp_before=-68)"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "fact": "S",
+          "got": -56,
+          "want": -56,
+          "ok": true
+        },
+        {
+          "fact": "src",
+          "got": 4,
+          "want": 4,
+          "ok": true
+        },
+        {
+          "fact": "preserved",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "edi_ok",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "tail",
+          "got": 8761776,
+          "want": 8761776,
+          "ok": true
+        },
+        {
+          "fact": "arg1_kind",
+          "got": "MEM",
+          "want": "MEM",
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "B_CLEAN_NONNULL",
+      "window": "B",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture_size": 52,
+      "fixture_sha": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/B_CLEAN_NONNULL.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/B_CLEAN_NONNULL.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "T",
+          "got": 0,
+          "want": 0,
+          "ok": true
+        },
+        {
+          "fact": "reaches",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "flags_ok",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "arg1_kind",
+          "got": "ADDR",
+          "want": "ADDR",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        },
+        {
+          "fact": "arg1_slot",
+          "got": -16,
+          "want": -16,
+          "ok": true
+        },
+        {
+          "fact": "arg2_kind",
+          "got": "UNK",
+          "want": "UNK",
+          "ok": true
+        },
+        {
+          "fact": "arg3",
+          "got": [
+            "MEM",
+            76
+          ],
+          "want": [
+            "MEM",
+            76
+          ],
+          "ok": true
+        },
+        {
+          "fact": "arg4",
+          "got": [
+            "MEM",
+            80
+          ],
+          "want": [
+            "MEM",
+            80
+          ],
+          "ok": true
+        },
+        {
+          "fact": "recv_kind",
+          "got": "OPRET",
+          "want": "OPRET",
+          "ok": true
+        },
+        {
+          "fact": "target",
+          "got": 5410384,
+          "want": 5410384,
+          "ok": true
+        },
+        {
+          "fact": "bvalid",
+          "got": true,
+          "want": true,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "B_CLEAN_NULL",
+      "window": "B",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture_size": 52,
+      "fixture_sha": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/B_CLEAN_NULL.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/B_CLEAN_NULL.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "je_taken",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "call_reached",
+          "got": false,
+          "want": false,
+          "ok": true
+        },
+        {
+          "fact": "delivered_None",
+          "got": true,
+          "want": true,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M1_A_FRAME",
+      "window": "A",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M1_A_FRAME @0x00528E5E: 83 ec 1c -> 83 ec 18 (synthetic copy; EXE untouched)",
+      "fixture_size": 66,
+      "fixture_sha": "f9b3f4e76860905a1d4fd4ded056bd82d5f9d4f5a850dae245eda4370967ad2b",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M1_A_FRAME.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M1_A_FRAME.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00528e50 <.data>:\n  528e50:\t6a ff                \tpush   0xffffffff\n  528e52:\t68 3f f5 9b 00       \tpush   0x9bf53f\n  528e57:\t64 a1 00 00 00 00    \tmov    eax,fs:0x0\n  528e5d:\t50                   \tpush   eax\n  528e5e:\t83 ec 18             \tsub    esp,0x18\n  528e61:\t53                   \tpush   ebx\n  528e62:\t56                   \tpush   esi\n  528e63:\t57                   \tpush   edi\n  528e64:\ta1 d0 d8 b9 00       \tmov    eax,ds:0xb9d8d0\n  528e69:\t33 c4                \txor    eax,esp\n  528e6b:\t50                   \tpush   eax\n  528e6c:\t8d 44 24 2c          \tlea    eax,[esp+0x2c]\n  528e70:\t64 a3 00 00 00 00    \tmov    fs:0x0,eax\n  528e76:\t8b f1                \tmov    esi,ecx\n  528e78:\t89 74 24 10          \tmov    DWORD PTR [esp+0x10],esi\n  528e7c:\t8b 44 24 44          \tmov    eax,DWORD PTR [esp+0x44]\n  528e80:\t8b 4c 24 40          \tmov    ecx,DWORD PTR [esp+0x40]\n  528e84:\t8b 7c 24 3c          \tmov    edi,DWORD PTR [esp+0x3c]\n  528e88:\t50                   \tpush   eax\n  528e89:\t51                   \tpush   ecx\n  528e8a:\t57                   \tpush   edi\n  528e8b:\t8b ce                \tmov    ecx,esi\n  528e8d:\te8 1e 23 33 00       \tcall   0x85b1b0\n",
+      "decode": {
+        "instrs": 23,
+        "first": "0x00528E50",
+        "last_end": "0x00528E92",
+        "covers": true
+      },
+      "derived": {
+        "S": -52,
+        "src": 8,
+        "src_disp": 60,
+        "preserved": true,
+        "edi_ok": true,
+        "tail": 8761776,
+        "tail_rc": 8761776,
+        "arg1_kind": "MEM",
+        "arg1_text": "MEM([+8])",
+        "arg1_slot": -64,
+        "esp_before": -64,
+        "callee_entry": -68,
+        "esp_before_S": -12,
+        "callee_entry_S": -16,
+        "arg1_slot_S": -12,
+        "push_va": 5410442,
+        "push_reg": "edi",
+        "recv_kind": "RECV",
+        "fs_stored_off": -8,
+        "steps": [
+          {
+            "va": "0x00528E50",
+            "bytes": "6a ff",
+            "op": "push   0xffffffff",
+            "esp": -4,
+            "note": "push -> [-4] := 0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "bytes": "68 3f f5 9b 00",
+            "op": "push   0x9bf53f",
+            "esp": -8,
+            "note": "push -> [-8] := 0x9bf53f"
+          },
+          {
+            "va": "0x00528E57",
+            "bytes": "64 a1 00 00 00 00",
+            "op": "mov    eax,fs:0x0",
+            "esp": -8,
+            "note": "seg load fs:0x0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E5D",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -12,
+            "note": "push -> [-12] := FS0_PREV"
+          },
+          {
+            "va": "0x00528E5E",
+            "bytes": "83 ec 18",
+            "op": "sub    esp,0x18",
+            "esp": -36,
+            "note": "sub esp,0x18 -> esp=-36"
+          },
+          {
+            "va": "0x00528E61",
+            "bytes": "53",
+            "op": "push   ebx",
+            "esp": -40,
+            "note": "push -> [-40] := EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "bytes": "56",
+            "op": "push   esi",
+            "esp": -44,
+            "note": "push -> [-44] := ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -48,
+            "note": "push -> [-48] := EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E64",
+            "bytes": "a1 d0 d8 b9 00",
+            "op": "mov    eax,ds:0xb9d8d0",
+            "esp": -48,
+            "note": "seg load ds:0xb9d8d0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E69",
+            "bytes": "33 c4",
+            "op": "xor    eax,esp",
+            "esp": -48,
+            "note": "opaque xor; value changes, ESP/width unchanged"
+          },
+          {
+            "va": "0x00528E6B",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -52,
+            "note": "push -> [-52] := MOFFS(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E6C",
+            "bytes": "8d 44 24 2c",
+            "op": "lea    eax,[esp+0x2c]",
+            "esp": -52,
+            "note": "lea eax := ADDRESS([-8]) [kind=ADDR, opcode 8D]"
+          },
+          {
+            "va": "0x00528E70",
+            "bytes": "64 a3 00 00 00 00",
+            "op": "mov    fs:0x0,eax",
+            "esp": -52,
+            "note": "SEGMENT fs:0x0 := ADDRESS([-8]) (lea@0x00528E6C) (NOT a stack write; AS4)"
+          },
+          {
+            "va": "0x00528E76",
+            "bytes": "8b f1",
+            "op": "mov    esi,ecx",
+            "esp": -52,
+            "note": "mov esi := ecx (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E78",
+            "bytes": "89 74 24 10",
+            "op": "mov    DWORD PTR [esp+0x10],esi",
+            "esp": -52,
+            "note": "store [-36] := ECX_ENTRY (no flag write)"
+          },
+          {
+            "va": "0x00528E7C",
+            "bytes": "8b 44 24 44",
+            "op": "mov    eax,DWORD PTR [esp+0x44]",
+            "esp": -52,
+            "note": "load eax := MEM[+16] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E80",
+            "bytes": "8b 4c 24 40",
+            "op": "mov    ecx,DWORD PTR [esp+0x40]",
+            "esp": -52,
+            "note": "load ecx := MEM[+12] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E84",
+            "bytes": "8b 7c 24 3c",
+            "op": "mov    edi,DWORD PTR [esp+0x3c]",
+            "esp": -52,
+            "note": "load edi := MEM[+8] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E88",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -56,
+            "note": "push -> [-56] := MEM([+16])"
+          },
+          {
+            "va": "0x00528E89",
+            "bytes": "51",
+            "op": "push   ecx",
+            "esp": -60,
+            "note": "push -> [-60] := MEM([+12])"
+          },
+          {
+            "va": "0x00528E8A",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -64,
+            "note": "push -> [-64] := MEM([+8])"
+          },
+          {
+            "va": "0x00528E8B",
+            "bytes": "8b ce",
+            "op": "mov    ecx,esi",
+            "esp": -64,
+            "note": "mov ecx := esi (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E8D",
+            "bytes": "e8 1e 23 33 00",
+            "op": "call   0x85b1b0",
+            "esp": -68,
+            "note": "BOUNDARY call -> 0x0085B1B0 (callee not opened; hardware ret push applied; esp_before=-64)"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "fact": "S",
+          "got": -52,
+          "want": -52,
+          "ok": true
+        },
+        {
+          "fact": "src",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M2_A_SLOT",
+      "window": "A",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M2_A_SLOT @0x00528E84: 8b 7c 24 3c -> 8b 7c 24 38 (synthetic copy; EXE untouched)",
+      "fixture_size": 66,
+      "fixture_sha": "ae7bd7c4394d852205fc2ad292bca12a1c7dfb8ad46c91bc67bca9429470ddaa",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M2_A_SLOT.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M2_A_SLOT.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00528e50 <.data>:\n  528e50:\t6a ff                \tpush   0xffffffff\n  528e52:\t68 3f f5 9b 00       \tpush   0x9bf53f\n  528e57:\t64 a1 00 00 00 00    \tmov    eax,fs:0x0\n  528e5d:\t50                   \tpush   eax\n  528e5e:\t83 ec 1c             \tsub    esp,0x1c\n  528e61:\t53                   \tpush   ebx\n  528e62:\t56                   \tpush   esi\n  528e63:\t57                   \tpush   edi\n  528e64:\ta1 d0 d8 b9 00       \tmov    eax,ds:0xb9d8d0\n  528e69:\t33 c4                \txor    eax,esp\n  528e6b:\t50                   \tpush   eax\n  528e6c:\t8d 44 24 2c          \tlea    eax,[esp+0x2c]\n  528e70:\t64 a3 00 00 00 00    \tmov    fs:0x0,eax\n  528e76:\t8b f1                \tmov    esi,ecx\n  528e78:\t89 74 24 10          \tmov    DWORD PTR [esp+0x10],esi\n  528e7c:\t8b 44 24 44          \tmov    eax,DWORD PTR [esp+0x44]\n  528e80:\t8b 4c 24 40          \tmov    ecx,DWORD PTR [esp+0x40]\n  528e84:\t8b 7c 24 38          \tmov    edi,DWORD PTR [esp+0x38]\n  528e88:\t50                   \tpush   eax\n  528e89:\t51                   \tpush   ecx\n  528e8a:\t57                   \tpush   edi\n  528e8b:\t8b ce                \tmov    ecx,esi\n  528e8d:\te8 1e 23 33 00       \tcall   0x85b1b0\n",
+      "decode": {
+        "instrs": 23,
+        "first": "0x00528E50",
+        "last_end": "0x00528E92",
+        "covers": true
+      },
+      "derived": {
+        "S": -56,
+        "src": 0,
+        "src_disp": 56,
+        "preserved": true,
+        "edi_ok": true,
+        "tail": 8761776,
+        "tail_rc": 8761776,
+        "arg1_kind": "MEM",
+        "arg1_text": "MEM([+0])",
+        "arg1_slot": -68,
+        "esp_before": -68,
+        "callee_entry": -72,
+        "esp_before_S": -12,
+        "callee_entry_S": -16,
+        "arg1_slot_S": -12,
+        "push_va": 5410442,
+        "push_reg": "edi",
+        "recv_kind": "RECV",
+        "fs_stored_off": -12,
+        "steps": [
+          {
+            "va": "0x00528E50",
+            "bytes": "6a ff",
+            "op": "push   0xffffffff",
+            "esp": -4,
+            "note": "push -> [-4] := 0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "bytes": "68 3f f5 9b 00",
+            "op": "push   0x9bf53f",
+            "esp": -8,
+            "note": "push -> [-8] := 0x9bf53f"
+          },
+          {
+            "va": "0x00528E57",
+            "bytes": "64 a1 00 00 00 00",
+            "op": "mov    eax,fs:0x0",
+            "esp": -8,
+            "note": "seg load fs:0x0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E5D",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -12,
+            "note": "push -> [-12] := FS0_PREV"
+          },
+          {
+            "va": "0x00528E5E",
+            "bytes": "83 ec 1c",
+            "op": "sub    esp,0x1c",
+            "esp": -40,
+            "note": "sub esp,0x1c -> esp=-40"
+          },
+          {
+            "va": "0x00528E61",
+            "bytes": "53",
+            "op": "push   ebx",
+            "esp": -44,
+            "note": "push -> [-44] := EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "bytes": "56",
+            "op": "push   esi",
+            "esp": -48,
+            "note": "push -> [-48] := ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -52,
+            "note": "push -> [-52] := EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E64",
+            "bytes": "a1 d0 d8 b9 00",
+            "op": "mov    eax,ds:0xb9d8d0",
+            "esp": -52,
+            "note": "seg load ds:0xb9d8d0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E69",
+            "bytes": "33 c4",
+            "op": "xor    eax,esp",
+            "esp": -52,
+            "note": "opaque xor; value changes, ESP/width unchanged"
+          },
+          {
+            "va": "0x00528E6B",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -56,
+            "note": "push -> [-56] := MOFFS(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E6C",
+            "bytes": "8d 44 24 2c",
+            "op": "lea    eax,[esp+0x2c]",
+            "esp": -56,
+            "note": "lea eax := ADDRESS([-12]) [kind=ADDR, opcode 8D]"
+          },
+          {
+            "va": "0x00528E70",
+            "bytes": "64 a3 00 00 00 00",
+            "op": "mov    fs:0x0,eax",
+            "esp": -56,
+            "note": "SEGMENT fs:0x0 := ADDRESS([-12]) (lea@0x00528E6C) (NOT a stack write; AS4)"
+          },
+          {
+            "va": "0x00528E76",
+            "bytes": "8b f1",
+            "op": "mov    esi,ecx",
+            "esp": -56,
+            "note": "mov esi := ecx (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E78",
+            "bytes": "89 74 24 10",
+            "op": "mov    DWORD PTR [esp+0x10],esi",
+            "esp": -56,
+            "note": "store [-40] := ECX_ENTRY (no flag write)"
+          },
+          {
+            "va": "0x00528E7C",
+            "bytes": "8b 44 24 44",
+            "op": "mov    eax,DWORD PTR [esp+0x44]",
+            "esp": -56,
+            "note": "load eax := MEM[+12] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E80",
+            "bytes": "8b 4c 24 40",
+            "op": "mov    ecx,DWORD PTR [esp+0x40]",
+            "esp": -56,
+            "note": "load ecx := MEM[+8] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E84",
+            "bytes": "8b 7c 24 38",
+            "op": "mov    edi,DWORD PTR [esp+0x38]",
+            "esp": -56,
+            "note": "load edi := MEM[+0] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E88",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -60,
+            "note": "push -> [-60] := MEM([+12])"
+          },
+          {
+            "va": "0x00528E89",
+            "bytes": "51",
+            "op": "push   ecx",
+            "esp": -64,
+            "note": "push -> [-64] := MEM([+8])"
+          },
+          {
+            "va": "0x00528E8A",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -68,
+            "note": "push -> [-68] := MEM([+0])"
+          },
+          {
+            "va": "0x00528E8B",
+            "bytes": "8b ce",
+            "op": "mov    ecx,esi",
+            "esp": -68,
+            "note": "mov ecx := esi (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E8D",
+            "bytes": "e8 1e 23 33 00",
+            "op": "call   0x85b1b0",
+            "esp": -72,
+            "note": "BOUNDARY call -> 0x0085B1B0 (callee not opened; hardware ret push applied; esp_before=-68)"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "fact": "S",
+          "got": -56,
+          "want": -56,
+          "ok": true
+        },
+        {
+          "fact": "src",
+          "got": 0,
+          "want": 0,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M3_B_LEA_DISP",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M3_B_LEA_DISP @0x004C47BA: 8d 4c 24 14 -> 8d 4c 24 18 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "4d19e0548af86d97eb808a2ed6b5f5799f777d0fb4d028d19f42775ed0379a5c",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M3_B_LEA_DISP.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M3_B_LEA_DISP.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 18          \tlea    ecx,[esp+0x18]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 24,
+          "reg": "ecx",
+          "reg_off": 12,
+          "reg_text": "ADDRESS([+12]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 12,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            12
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "ADDR",
+          "want": "ADDR",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 12,
+          "want": 12,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M4_B_LAST_PUSH",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M4_B_LAST_PUSH @0x004C47BE: 51 -> 52 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "6a4677bd55f0b143c9e9f82d26e1264ff9fe3765837b8f589c3005f8996db374",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M4_B_LAST_PUSH.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M4_B_LAST_PUSH.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t52                   \tpush   edx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "MEM",
+        "arg1_T": 76,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "edx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "MEM",
+            76
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "MEM",
+          "want": "MEM",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 76,
+          "want": 76,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M5_B_EARLY_PUSH_ORDER",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M5_B_EARLY_PUSH_ORDER @0x004C47B7: 51 52 -> 52 51 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "6cb86b8cc3b88fbcccb869d7758734a85fbd0bb7e35e0a94718207fa625329d7",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M5_B_EARLY_PUSH_ORDER.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M5_B_EARLY_PUSH_ORDER.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t52                   \tpush   edx\n  4c47b8:\t51                   \tpush   ecx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            80
+          ],
+          "a4": [
+            "MEM",
+            76
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "ADDR",
+          "want": "ADDR",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        },
+        {
+          "fact": "arg1_slot",
+          "got": -16,
+          "want": -16,
+          "ok": true
+        },
+        {
+          "fact": "arg3",
+          "got": [
+            "MEM",
+            80
+          ],
+          "want": [
+            "MEM",
+            80
+          ],
+          "ok": true
+        },
+        {
+          "fact": "arg4",
+          "got": [
+            "MEM",
+            76
+          ],
+          "want": [
+            "MEM",
+            76
+          ],
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M6_B_SKIP",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M6_B_SKIP @0x004C47AD: 74 19 -> eb 19 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "21d70faf884712ddd9c80236e781cbd26182cd8919e8f886aecd2fae498e081e",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M6_B_SKIP.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M6_B_SKIP.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\teb 19                \tjmp    0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 1,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": true,
+          "je": false,
+          "call_reached": false,
+          "delivered": null
+        },
+        "reaches": false,
+        "uncond": true,
+        "call_reached": false
+      },
+      "checks": [
+        {
+          "fact": "reaches",
+          "got": false,
+          "want": false,
+          "ok": true
+        },
+        {
+          "fact": "uncond",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "call_reached",
+          "got": false,
+          "want": false,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M7_B_RECEIVER_ONLY",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M7_B_RECEIVER_ONLY @0x004C47BF: 8b c8 -> 8b ce (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "da36a328b63dcbebf2ebb65e411e76e9dce5af7dd51a79c6754ed1ff8a61fc73",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M7_B_RECEIVER_ONLY.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M7_B_RECEIVER_ONLY.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b ce                \tmov    ecx,esi\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "UNK",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "ADDR",
+          "want": "ADDR",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        },
+        {
+          "fact": "arg1_slot",
+          "got": -16,
+          "want": -16,
+          "ok": true
+        },
+        {
+          "fact": "recv_kind",
+          "got": "UNK",
+          "want": "UNK",
+          "ok": true
+        },
+        {
+          "fact": "recv_is_esi_UNK",
+          "got": true,
+          "want": true,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M8_B_WRONG_TARGET",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M8_B_WRONG_TARGET @0x004C47C1: e8 8a 46 06 00 -> e8 8b 46 06 00 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "d1ec352fc0e5d3e09c33570d0485f8652f8370be414c188c665a1bc8cb6fe652",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M8_B_WRONG_TARGET.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M8_B_WRONG_TARGET.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8b 46 06 00       \tcall   0x528e51\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410385,
+        "target_rc": 5410385,
+        "bvalid": false,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "actual_target",
+          "got": 5410385,
+          "want": 5410385,
+          "ok": true
+        },
+        {
+          "fact": "target_rc",
+          "got": 5410385,
+          "want": 5410385,
+          "ok": true
+        },
+        {
+          "fact": "bvalid",
+          "got": false,
+          "want": false,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M9_B_LEA_TO_MOV",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M9_B_LEA_TO_MOV @0x004C47BA: 8d 4c 24 14 -> 8b 4c 24 14 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "bcdafba824a1b20121008da10058202dfd824bd867bf13660307d9696b0ead57",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M9_B_LEA_TO_MOV.bin",
+      "raw_stdout": "\n/mnt/c/Users/User/AppData/Local/Temp/opencode/QC_PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/cases/M9_B_LEA_TO_MOV.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8b 4c 24 14          \tmov    ecx,DWORD PTR [esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8b",
+          "kind": "MEM",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "MEM([+8])"
+        },
+        "reaches": true,
+        "arg1_kind": "MEM",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "MEM",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "MEM",
+          "want": "MEM",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    }
+  ],
+  "matrix_qc_summary": {
+    "cases": 12,
+    "control_pass": 12,
+    "control_fail": 0,
+    "unresolved": 0
+  },
+  "prod_vs_qc": [
+    {
+      "case": "A_CLEAN",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "B_CLEAN_NONNULL",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "B_CLEAN_NULL",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "M1_A_FRAME",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "M2_A_SLOT",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "M3_B_LEA_DISP",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "M4_B_LAST_PUSH",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "M5_B_EARLY_PUSH_ORDER",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "M6_B_SKIP",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": [
+        {
+          "field": "bvalid",
+          "prod": false,
+          "mine": null
+        }
+      ]
+    },
+    {
+      "case": "M7_B_RECEIVER_ONLY",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "M8_B_WRONG_TARGET",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    },
+    {
+      "case": "M9_B_LEA_TO_MOV",
+      "prod_verdict": "CONTROL_PASS",
+      "qc_verdict": "CONTROL_PASS",
+      "agree": true,
+      "diffs": []
+    }
+  ],
+  "prod_vs_qc_summary": {
+    "cases": 12,
+    "agree": 12,
+    "disagree": []
+  },
+  "artifact_gate_qc": {
+    "baseline": {
+      "checks": [
+        {
+          "check": "WID-A-SHA",
+          "fact": "window SHA vs physical EXE bytes",
+          "claimed": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+          "actual": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+          "ok": true
+        },
+        {
+          "check": "WID-A-SIZE",
+          "fact": "window size",
+          "claimed": 66,
+          "actual": 66,
+          "ok": true
+        },
+        {
+          "check": "WID-A-INT",
+          "fact": "window interval",
+          "claimed": "[0x00528E50,0x00528E92)",
+          "actual": "[0x00528E50,0x00528E92)",
+          "ok": true
+        },
+        {
+          "check": "WID-B-SHA",
+          "fact": "window SHA vs physical EXE bytes",
+          "claimed": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+          "actual": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+          "ok": true
+        },
+        {
+          "check": "WID-B-SIZE",
+          "fact": "window size",
+          "claimed": 52,
+          "actual": 52,
+          "ok": true
+        },
+        {
+          "check": "WID-B-INT",
+          "fact": "window interval",
+          "claimed": "[0x004C4792,0x004C47C6)",
+          "actual": "[0x004C4792,0x004C47C6)",
+          "ok": true
+        },
+        {
+          "check": "EFL-ROWS",
+          "fact": "A ledger rows vs my parse+walk",
+          "claimed": 23,
+          "actual": 23,
+          "ok": true
+        },
+        {
+          "check": "EFL-S",
+          "fact": "S = ESP at 0x00528E76 (my walk)",
+          "claimed": -56,
+          "actual": -56,
+          "ok": true
+        },
+        {
+          "check": "EFL-BEFCALL",
+          "fact": "ESP before tail call 0x00528E8D (my walk)",
+          "claimed": -68,
+          "actual": -68,
+          "ok": true
+        },
+        {
+          "check": "CSL-ROWS",
+          "fact": "B ledger NONNULL rows vs my parse+walk",
+          "claimed": 17,
+          "actual": 16,
+          "ok": true
+        },
+        {
+          "check": "CSL-T",
+          "fact": "T = ESP at 0x004C47AF (my walk)",
+          "claimed": 0,
+          "actual": 0,
+          "ok": true
+        },
+        {
+          "check": "CSL-BEFCALL",
+          "fact": "ESP before bridge call 0x004C47C1 (my walk)",
+          "claimed": -16,
+          "actual": -16,
+          "ok": true
+        },
+        {
+          "check": "PROV-A-SLOT",
+          "fact": "clean entry source slot (my disp byte + walk S)",
+          "claimed": "[E+0x4]",
+          "actual": "[E+4]",
+          "ok": true
+        },
+        {
+          "check": "PROV-A-DELIVERY",
+          "fact": "A delivery ESP facts (my walk)",
+          "claimed": [
+            "E-0x44",
+            "E-0x48"
+          ],
+          "actual": [
+            "E-0x44",
+            "E-0x48"
+          ],
+          "ok": true
+        },
+        {
+          "check": "PROV-B-KIND",
+          "fact": "arg1 kind vs opcode byte 0x8d at 0x4C47BA",
+          "claimed": "ADDRESS",
+          "actual": "ADDRESS",
+          "ok": true
+        },
+        {
+          "check": "PROV-B-LEA",
+          "fact": "LEA result expr (my disp + walk)",
+          "claimed": "ADDRESS(T+0x8)",
+          "actual": "ADDRESS(T+0x8)",
+          "ok": true
+        },
+        {
+          "check": "PROV-BRIDGE-SLOT",
+          "fact": "joined entry-slot identity [E+4]==[T-0x10]",
+          "claimed": "[T-0x10]",
+          "actual": "[T-16]",
+          "ok": true
+        },
+        {
+          "check": "PROV-CALL-A-0x00528E8D",
+          "fact": "call target (my rel32 recompute) at 0x00528E8D",
+          "claimed": 8761776,
+          "actual": "0x0085B1B0",
+          "ok": true
+        },
+        {
+          "check": "PROV-CALL-B-0x004C4797",
+          "fact": "call target (my rel32 recompute) at 0x004C4797",
+          "claimed": 9819076,
+          "actual": "0x0095D3C4",
+          "ok": true
+        },
+        {
+          "check": "PROV-CALL-B-0x004C47C1",
+          "fact": "call target (my rel32 recompute) at 0x004C47C1",
+          "claimed": 5410384,
+          "actual": "0x00528E50",
+          "ok": true
+        },
+        {
+          "check": "PROV-B-FLAGS",
+          "fact": "no flag-writing insn between TEST and JE (my census)",
+          "claimed": [],
+          "actual": [],
+          "ok": true
+        }
+      ],
+      "verdict": "PASS",
+      "check_count": 21,
+      "all_pass": true
+    },
+    "controls": {
+      "AC1": {
+        "mutation": "copied BRIDGE_PROVENANCE.json: clean arg1 value kind/expression replaced ADDRESS(T+8) -> MEM(T+8)",
+        "verdict": "REJECTED",
+        "result": "CONTROL_PASS",
+        "failing": [
+          "PROV-B-KIND",
+          "PROV-B-LEA"
+        ],
+        "checks": [
+          {
+            "check": "WID-A-SHA",
+            "fact": "window SHA vs physical EXE bytes",
+            "claimed": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+            "actual": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+            "ok": true
+          },
+          {
+            "check": "WID-A-SIZE",
+            "fact": "window size",
+            "claimed": 66,
+            "actual": 66,
+            "ok": true
+          },
+          {
+            "check": "WID-A-INT",
+            "fact": "window interval",
+            "claimed": "[0x00528E50,0x00528E92)",
+            "actual": "[0x00528E50,0x00528E92)",
+            "ok": true
+          },
+          {
+            "check": "WID-B-SHA",
+            "fact": "window SHA vs physical EXE bytes",
+            "claimed": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+            "actual": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+            "ok": true
+          },
+          {
+            "check": "WID-B-SIZE",
+            "fact": "window size",
+            "claimed": 52,
+            "actual": 52,
+            "ok": true
+          },
+          {
+            "check": "WID-B-INT",
+            "fact": "window interval",
+            "claimed": "[0x004C4792,0x004C47C6)",
+            "actual": "[0x004C4792,0x004C47C6)",
+            "ok": true
+          },
+          {
+            "check": "EFL-ROWS",
+            "fact": "A ledger rows vs my parse+walk",
+            "claimed": 23,
+            "actual": 23,
+            "ok": true
+          },
+          {
+            "check": "EFL-S",
+            "fact": "S = ESP at 0x00528E76 (my walk)",
+            "claimed": -56,
+            "actual": -56,
+            "ok": true
+          },
+          {
+            "check": "EFL-BEFCALL",
+            "fact": "ESP before tail call 0x00528E8D (my walk)",
+            "claimed": -68,
+            "actual": -68,
+            "ok": true
+          },
+          {
+            "check": "CSL-ROWS",
+            "fact": "B ledger NONNULL rows vs my parse+walk",
+            "claimed": 17,
+            "actual": 16,
+            "ok": true
+          },
+          {
+            "check": "CSL-T",
+            "fact": "T = ESP at 0x004C47AF (my walk)",
+            "claimed": 0,
+            "actual": 0,
+            "ok": true
+          },
+          {
+            "check": "CSL-BEFCALL",
+            "fact": "ESP before bridge call 0x004C47C1 (my walk)",
+            "claimed": -16,
+            "actual": -16,
+            "ok": true
+          },
+          {
+            "check": "PROV-A-SLOT",
+            "fact": "clean entry source slot (my disp byte + walk S)",
+            "claimed": "[E+0x4]",
+            "actual": "[E+4]",
+            "ok": true
+          },
+          {
+            "check": "PROV-A-DELIVERY",
+            "fact": "A delivery ESP facts (my walk)",
+            "claimed": [
+              "E-0x44",
+              "E-0x48"
+            ],
+            "actual": [
+              "E-0x44",
+              "E-0x48"
+            ],
+            "ok": true
+          },
+          {
+            "check": "PROV-B-KIND",
+            "fact": "arg1 kind vs opcode byte 0x8d at 0x4C47BA",
+            "claimed": "STACK_READ",
+            "actual": "ADDRESS",
+            "ok": false
+          },
+          {
+            "check": "PROV-B-LEA",
+            "fact": "LEA result expr (my disp + walk)",
+            "claimed": "MEM(T+0x8)",
+            "actual": "ADDRESS(T+0x8)",
+            "ok": false
+          },
+          {
+            "check": "PROV-BRIDGE-SLOT",
+            "fact": "joined entry-slot identity [E+4]==[T-0x10]",
+            "claimed": "[T-0x10]",
+            "actual": "[T-16]",
+            "ok": true
+          },
+          {
+            "check": "PROV-CALL-A-0x00528E8D",
+            "fact": "call target (my rel32 recompute) at 0x00528E8D",
+            "claimed": 8761776,
+            "actual": "0x0085B1B0",
+            "ok": true
+          },
+          {
+            "check": "PROV-CALL-B-0x004C4797",
+            "fact": "call target (my rel32 recompute) at 0x004C4797",
+            "claimed": 9819076,
+            "actual": "0x0095D3C4",
+            "ok": true
+          },
+          {
+            "check": "PROV-CALL-B-0x004C47C1",
+            "fact": "call target (my rel32 recompute) at 0x004C47C1",
+            "claimed": 5410384,
+            "actual": "0x00528E50",
+            "ok": true
+          },
+          {
+            "check": "PROV-B-FLAGS",
+            "fact": "no flag-writing insn between TEST and JE (my census)",
+            "claimed": [],
+            "actual": [],
+            "ok": true
+          }
+        ]
+      },
+      "AC2": {
+        "mutation": "copied BRIDGE_PROVENANCE.json: clean entry source [E+4] -> [E+8]",
+        "verdict": "REJECTED",
+        "result": "CONTROL_PASS",
+        "failing": [
+          "PROV-A-SLOT"
+        ],
+        "checks": [
+          {
+            "check": "WID-A-SHA",
+            "fact": "window SHA vs physical EXE bytes",
+            "claimed": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+            "actual": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+            "ok": true
+          },
+          {
+            "check": "WID-A-SIZE",
+            "fact": "window size",
+            "claimed": 66,
+            "actual": 66,
+            "ok": true
+          },
+          {
+            "check": "WID-A-INT",
+            "fact": "window interval",
+            "claimed": "[0x00528E50,0x00528E92)",
+            "actual": "[0x00528E50,0x00528E92)",
+            "ok": true
+          },
+          {
+            "check": "WID-B-SHA",
+            "fact": "window SHA vs physical EXE bytes",
+            "claimed": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+            "actual": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+            "ok": true
+          },
+          {
+            "check": "WID-B-SIZE",
+            "fact": "window size",
+            "claimed": 52,
+            "actual": 52,
+            "ok": true
+          },
+          {
+            "check": "WID-B-INT",
+            "fact": "window interval",
+            "claimed": "[0x004C4792,0x004C47C6)",
+            "actual": "[0x004C4792,0x004C47C6)",
+            "ok": true
+          },
+          {
+            "check": "EFL-ROWS",
+            "fact": "A ledger rows vs my parse+walk",
+            "claimed": 23,
+            "actual": 23,
+            "ok": true
+          },
+          {
+            "check": "EFL-S",
+            "fact": "S = ESP at 0x00528E76 (my walk)",
+            "claimed": -56,
+            "actual": -56,
+            "ok": true
+          },
+          {
+            "check": "EFL-BEFCALL",
+            "fact": "ESP before tail call 0x00528E8D (my walk)",
+            "claimed": -68,
+            "actual": -68,
+            "ok": true
+          },
+          {
+            "check": "CSL-ROWS",
+            "fact": "B ledger NONNULL rows vs my parse+walk",
+            "claimed": 17,
+            "actual": 16,
+            "ok": true
+          },
+          {
+            "check": "CSL-T",
+            "fact": "T = ESP at 0x004C47AF (my walk)",
+            "claimed": 0,
+            "actual": 0,
+            "ok": true
+          },
+          {
+            "check": "CSL-BEFCALL",
+            "fact": "ESP before bridge call 0x004C47C1 (my walk)",
+            "claimed": -16,
+            "actual": -16,
+            "ok": true
+          },
+          {
+            "check": "PROV-A-SLOT",
+            "fact": "clean entry source slot (my disp byte + walk S)",
+            "claimed": "[E+0x8]",
+            "actual": "[E+4]",
+            "ok": false
+          },
+          {
+            "check": "PROV-A-DELIVERY",
+            "fact": "A delivery ESP facts (my walk)",
+            "claimed": [
+              "E-0x44",
+              "E-0x48"
+            ],
+            "actual": [
+              "E-0x44",
+              "E-0x48"
+            ],
+            "ok": true
+          },
+          {
+            "check": "PROV-B-KIND",
+            "fact": "arg1 kind vs opcode byte 0x8d at 0x4C47BA",
+            "claimed": "ADDRESS",
+            "actual": "ADDRESS",
+            "ok": true
+          },
+          {
+            "check": "PROV-B-LEA",
+            "fact": "LEA result expr (my disp + walk)",
+            "claimed": "ADDRESS(T+0x8)",
+            "actual": "ADDRESS(T+0x8)",
+            "ok": true
+          },
+          {
+            "check": "PROV-BRIDGE-SLOT",
+            "fact": "joined entry-slot identity [E+4]==[T-0x10]",
+            "claimed": "[T-0x10]",
+            "actual": "[T-16]",
+            "ok": true
+          },
+          {
+            "check": "PROV-CALL-A-0x00528E8D",
+            "fact": "call target (my rel32 recompute) at 0x00528E8D",
+            "claimed": 8761776,
+            "actual": "0x0085B1B0",
+            "ok": true
+          },
+          {
+            "check": "PROV-CALL-B-0x004C4797",
+            "fact": "call target (my rel32 recompute) at 0x004C4797",
+            "claimed": 9819076,
+            "actual": "0x0095D3C4",
+            "ok": true
+          },
+          {
+            "check": "PROV-CALL-B-0x004C47C1",
+            "fact": "call target (my rel32 recompute) at 0x004C47C1",
+            "claimed": 5410384,
+            "actual": "0x00528E50",
+            "ok": true
+          },
+          {
+            "check": "PROV-B-FLAGS",
+            "fact": "no flag-writing insn between TEST and JE (my census)",
+            "claimed": [],
+            "actual": [],
+            "ok": true
+          }
+        ]
+      }
+    },
+    "overall": "ARTIFACT_CONSISTENCY_PASS"
+  },
+  "raw_va_census": [
+    {
+      "file": "01_RAW/WINDOW_A_OBJDUMP.txt",
+      "va_lines": 23,
+      "unique_vas": 23,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/WINDOW_A_OBJDUMP_RETRY.txt",
+      "va_lines": 23,
+      "unique_vas": 23,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/WINDOW_B_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/WINDOW_B_OBJDUMP_RETRY.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/A_CLEAN_OBJDUMP.txt",
+      "va_lines": 23,
+      "unique_vas": 23,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/B_CLEAN_NONNULL_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/B_CLEAN_NULL_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M1_A_FRAME_OBJDUMP.txt",
+      "va_lines": 23,
+      "unique_vas": 23,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M2_A_SLOT_OBJDUMP.txt",
+      "va_lines": 23,
+      "unique_vas": 23,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M3_B_LEA_DISP_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M4_B_LAST_PUSH_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M5_B_EARLY_PUSH_ORDER_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M6_B_SKIP_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M7_B_RECEIVER_ONLY_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M8_B_WRONG_TARGET_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    },
+    {
+      "file": "01_RAW/CONTROLS/M9_B_LEA_TO_MOV_OBJDUMP.txt",
+      "va_lines": 17,
+      "unique_vas": 17,
+      "outside_count": 0,
+      "outside": []
+    }
+  ],
+  "raw_va_census_summary": {
+    "files": 16,
+    "outside_total": 0
+  },
+  "standing_scan": {
+    "files_scanned": 27,
+    "forbidden": {
+      "WORLD_XYZ_RECOVERED = YES": [],
+      "WORLD_XYZ_RECOVERED=YES": [],
+      "FIELD_SEMANTICS = VERIFIED": [],
+      "FIELD_SEMANTICS=VERIFIED": [],
+      "WORLD_INSTANCE_IDENTITY = ESTABLISHED": [],
+      "HISTORICAL_PLACEMENT = ESTABLISHED": [],
+      "SAME_INSTANCE_TRANSFORM_RELATION_FROM_THIS_RUN = CONFIRMED_STATIC": []
+    },
+    "forbidden_clean": true,
+    "required": {
+      "ARG1_DIRECT_SOURCE = CONFIRMED_STATIC_CONDITIONAL": 1,
+      "CMO_C1 = CLOSED_FOR_AUDITED_STATE": 2,
+      "CORE_RECEIVER_VALUE_CHAIN = PRESERVED_CONFIRMED_STATIC_CONDITIONAL": 2,
+      "PHYSICAL_TRANSFORM_MEASUREMENTS = PRESERVED": 1,
+      "NEW_TRANSFORM_TRACE = MEASURED_INCIDENTAL_OUTSIDE_PERMITTED_PROMOTION": 1,
+      "SAME_INSTANCE_TRANSFORM_RELATION_FROM_THIS_RUN = NOT_QUALIFIED_BY_ORIGINAL_SCOPE": 1,
+      "WORLD_XYZ_RECOVERED = NO": 3,
+      "FIELD_SEMANTICS = UNVERIFIED": 3,
+      "POINTEE_CONTENTS_PROVENANCE = UNRESOLVED_UPSTREAM": 3,
+      "WORLD_INSTANCE_IDENTITY = NOT_ESTABLISHED": 3,
+      "HISTORICAL_PLACEMENT = NOT_ESTABLISHED": 2
+    },
+    "required_all_present": true,
+    "context_hits": {
+      "pointee": [
+        "03_SCRIPTS/run_frame_bridge.py :: ...OV\": {         \"text\": \"arg1 MEM(T+8), not ADDRESS(T+8); no pointee interpretation\",         \"facts\": {\"arg1_kind\": \"STACK_READ...",
+        "03_SCRIPTS/run_frame_bridge.py :: ...       \"ADDRESS(T+8) -- the ADDRESS value, NOT DWORD [T+8] (pointee contents \"         \"not read).\", \"0x004C47C1\", \"B\", \"call 0...",
+        "03_SCRIPTS/run_frame_bridge.py :: ...S4/AS5 and the EAX!=0 branch; no claim \"         \"about the pointee area at [T+8], no type/lifetime/history claim, no \"        ...",
+        "03_SCRIPTS/run_frame_bridge.py :: ...y boundaries only. FIELD_SEMANTICS = UNVERIFIED; \"         \"POINTEE_CONTENTS_PROVENANCE = UNRESOLVED_UPSTREAM; \"         \"WORLD...",
+        "03_SCRIPTS/run_frame_bridge.py :: ...scope fence)\", [],         \"this run does not interpret the pointee, its type, or any world \"         \"semantics\"))      doc = ...",
+        "BRIDGE_PROVENANCE.json :: ...ontains ADDRESS(T+8) -- the ADDRESS value, NOT DWORD [T+8] (pointee contents not read).\",       \"build_exe\": {         \"path\": ...",
+        "BRIDGE_PROVENANCE.json :: ...1/AS2/AS3/AS4/AS5 and the EAX!=0 branch; no claim about the pointee area at [T+8], no type/lifetime/history claim, no global un...",
+        "BRIDGE_PROVENANCE.json :: ...two delivery boundaries only. FIELD_SEMANTICS = UNVERIFIED; POINTEE_CONTENTS_PROVENANCE = UNRESOLVED_UPSTREAM; WORLD_INSTANCE_I...",
+        "BRIDGE_PROVENANCE.json :: ...  \"remaining_uncertainty\": \"this run does not interpret the pointee, its type, or any world semantics\"     }   ] }...",
+        "CLAIM_MATRIX.csv :: ..._LEA_TO_MOV,PRODUCTION,\"arg1 MEM(T+8), not ADDRESS(T+8); no pointee interpretation\",\"{\"\"T_delta\"\": 0, \"\"arg1_expr\"\": \"\"MEM(T+0x...",
+        "CLAIM_MATRIX.csv :: ..._B_LEA_TO_MOV,QC_FRESH,\"arg1 MEM(T+8), not ADDRESS(T+8); no pointee interpretation\",NOT_PERFORMED_BY_THIS_WORKER,NOT_PERFORMED_...",
+        "CONTROL_RESULTS.json :: ...      \"expected_text\": \"arg1 MEM(T+8), not ADDRESS(T+8); no pointee interpretation\",       \"checks\": [         {           \"fac...",
+        "PREREGISTRATION.md :: ...slot, prepared argument-slot address, LEA-computed address, pointee contents, receiver ECX, semantic role. Address equality alo...",
+        "PREREGISTRATION.md :: ...085B1B0 entry). It does NOT prove any value inside   [T+8] (pointee contents), any type/lifetime beyond the examined calls, the...",
+        "PREREGISTRATION.md :: ...4C 24 14 | arg1 MEM(T+8) (value read), not ADDRESS(T+8); no pointee interpretation. |  Rules: M5 and M7 must retain unchanged a...",
+        "PREREGISTRATION.md :: ...ndary; finalize rather than tracing another function. 3. No pointee contents tracing; no earlier producer of the pointed-to are..."
+      ],
+      "NiPoint3": [
+        "PREREGISTRATION.md :: ...prove memory-value preservation. No assumption of position, NiPoint3, world instance, building, network packet, model or XYZ. No...",
+        "SUPERSESSION_AND_STANDING.md :: ...ull signature is inferred from visible pushes. No position, NiPoint3, world instance, building, network packet, model or XYZ is ..."
+      ],
+      "ACLD": [
+        "PREREGISTRATION.md :: ...rg1+8] \u2192 MovableObject+0x44 store; no callee re-opening; no ACLD\u2194CMO identity transfer;    historical labels are not type ev...",
+        "SUPERSESSION_AND_STANDING.md :: ..._ORIGINAL_SCOPE ```  No transfer of object identity between ACLD+0x18 SF and CMO+0xC0 SF. R/P/T, PLUS4 and CMO-C1 correction..."
+      ]
+    }
+  },
+  "exe_after": {
+    "sha": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+    "unchanged": true
+  },
+  "verdict_inputs": {
+    "production_12_outcomes_all_CONTROL_PASS": true,
+    "qc_matrix_12_12": true,
+    "artifact_controls": true,
+    "adjudication_zero_disagreements": true,
+    "prod_vs_qc_12_12_agree": true,
+    "crash_continuation_physical": true,
+    "scope_standing_scan": true
+  }
+}

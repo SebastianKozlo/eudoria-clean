@@ -1,0 +1,26 @@
+PATH,SEQ,VA,BYTES,DECODED_OP,ESP_BEFORE,ESP_AFTER,ESP_DELTA,NOTES,STACK_WRITES,STACK_READS,FLAG_WRITER
+NULL,1,0x004C4792,68 28 01 00 00,push   0x128,T0,T0-0x4,-0x4,push immediate 0x128,PUSH [T0-0x4] := 0x128,,
+NULL,2,0x004C4797,e8 28 8c 49 00,call   0x95d3c4,T0-0x4,T0-0x4,0,INCIDENTAL OPAQUE CALL -> 0x0095D3C4 (body NOT opened; normal-return condition AS3 applied; ESP restored; EAX := OPAQUE_RET),RET_PUSH [T0-0x8] := RETURN_ADDRESS@0x004C4797,,
+NULL,3,0x004C479C,83 c4 04,"add    esp,0x4",T0-0x4,T0,+0x4,"add esp,0x4",,,YES
+NULL,4,0x004C479F,89 44 24 44,"mov    DWORD PTR [esp+0x44],eax",T0,T0,0,store [T0+0x44] := OPAQUE_RET(0x0095D3C4) (no flag write),MOV_STORE [T0+0x44] := OPAQUE_RET(0x0095D3C4),,
+NULL,5,0x004C47A3,85 c0,"test   eax,eax",T0,T0,0,"TEST eax,eax -> ZF := (OPAQUE_RET(0x0095D3C4) == 0)",,,YES
+NULL,6,0x004C47A5,c7 44 24 3c 00 00 00 00,"mov    DWORD PTR [esp+0x3c],0x0",T0,T0,0,store [T0+0x3c] := 0x0 (no flag write),MOV_STORE [T0+0x3c] := 0x0,,
+NULL,7,0x004C47AD,74 19,je     0x4c47c8,T0,T0,0,je 0x4C47C8,,,
+NULL,8,0x004C47AD,74 19,je     0x4c47c8,T0,T0,0,PATH FORK: ZF=1 branch taken,,,
+NONNULL,1,0x004C4792,68 28 01 00 00,push   0x128,T0,T0-0x4,-0x4,push immediate 0x128,PUSH [T0-0x4] := 0x128,,
+NONNULL,2,0x004C4797,e8 28 8c 49 00,call   0x95d3c4,T0-0x4,T0-0x4,0,INCIDENTAL OPAQUE CALL -> 0x0095D3C4 (body NOT opened; normal-return condition AS3 applied; ESP restored; EAX := OPAQUE_RET),RET_PUSH [T0-0x8] := RETURN_ADDRESS@0x004C4797,,
+NONNULL,3,0x004C479C,83 c4 04,"add    esp,0x4",T0-0x4,T0,+0x4,"add esp,0x4",,,YES
+NONNULL,4,0x004C479F,89 44 24 44,"mov    DWORD PTR [esp+0x44],eax",T0,T0,0,store [T0+0x44] := OPAQUE_RET(0x0095D3C4) (no flag write),MOV_STORE [T0+0x44] := OPAQUE_RET(0x0095D3C4),,
+NONNULL,5,0x004C47A3,85 c0,"test   eax,eax",T0,T0,0,"TEST eax,eax -> ZF := (OPAQUE_RET(0x0095D3C4) == 0)",,,YES
+NONNULL,6,0x004C47A5,c7 44 24 3c 00 00 00 00,"mov    DWORD PTR [esp+0x3c],0x0",T0,T0,0,store [T0+0x3c] := 0x0 (no flag write),MOV_STORE [T0+0x3c] := 0x0,,
+NONNULL,7,0x004C47AD,74 19,je     0x4c47c8,T0,T0,0,je 0x4C47C8,,,
+NONNULL,8,0x004C47AD,74 19,je     0x4c47c8,T0,T0,0,PATH FORK: ZF=0 fall-through,,,
+NONNULL,9,0x004C47AF,8b 4c 24 50,"mov    ecx,DWORD PTR [esp+0x50]",T0,T0,0,"load ecx := MEM(T0+0x50) [slot [T0+0x50], caller_area_unknown]",,READ [T0+0x50] -> [T0+0x50] (caller_area_unknown),
+NONNULL,10,0x004C47B3,8b 54 24 4c,"mov    edx,DWORD PTR [esp+0x4c]",T0,T0,0,"load edx := MEM(T0+0x4c) [slot [T0+0x4c], caller_area_unknown]",,READ [T0+0x4c] -> [T0+0x4c] (caller_area_unknown),
+NONNULL,11,0x004C47B7,51,push   ecx,T0,T0-0x4,-0x4,push ecx (value: [T0+0x50]),PUSH [T0-0x4] := [T0+0x50],,
+NONNULL,12,0x004C47B8,52,push   edx,T0-0x4,T0-0x8,-0x4,push edx (value: [T0+0x4c]),PUSH [T0-0x8] := [T0+0x4c],,
+NONNULL,13,0x004C47B9,56,push   esi,T0-0x8,T0-0xc,-0x4,push esi (value: ESI_UNKNOWN_T),PUSH [T0-0xc] := ESI_UNKNOWN_T,,
+NONNULL,14,0x004C47BA,8d 4c 24 14,"lea    ecx,[esp+0x14]",T0-0xc,T0-0xc,0,"LEA ecx := ADDRESS(T0+0x8) [kind=ADDRESS, opcode 8D; computed, not a read]",,,
+NONNULL,15,0x004C47BE,51,push   ecx,T0-0xc,T0-0x10,-0x4,push ecx (value: T0+0x8 (computed)),PUSH [T0-0x10] := T0+0x8 (computed),,
+NONNULL,16,0x004C47BF,8b c8,"mov    ecx,eax",T0-0x10,T0-0x10,0,transfer ecx := eax (OPAQUE_RET(0x0095D3C4)),,,
+NONNULL,17,0x004C47C1,e8 8a 46 06 00,call   0x528e50,T0-0x10,T0-0x14,-0x4,CALL boundary -> 0x00528E50 (callee NOT opened; ESP before call recorded; hardware return-address push applied),RET_PUSH [T0-0x14] := RETURN_ADDRESS@0x004C47C1,,
