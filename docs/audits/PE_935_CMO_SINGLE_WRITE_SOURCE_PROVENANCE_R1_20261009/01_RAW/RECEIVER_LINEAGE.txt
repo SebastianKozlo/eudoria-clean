@@ -1,0 +1,101 @@
+RECEIVER_LINEAGE — PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009
+=======================================================================
+
+All VAs/bytes below were PHYSICALLY re-pinned this run from the pinned EXE
+(8015872 B / SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31)
+through the Source-B range-safe reader, and boundary-decoded with this run's
+independent x86_minidec_r1 (see SELECTED_WRITE_BYTES.txt). Committed prior
+evidence is cited per pin; nothing below relies on function naming alone.
+
+FUNCTION_IDENTITY
+  FUN_0085B1B0 = the MovableObject BASE constructor of the CMO-family
+  construction chain (thiscall: this=ECX, arg1=[esp+4], arg2=[esp+8],
+  arg3=[esp+0xC]; terminal RET 0xC per committed prior evidence).
+  Physical basis measured this run: base vtable store
+  `C7 06 4C 1E A9 00` @0x0085B1C1 = mov [esi], 0x00A91E4C;
+  RTTI chain re-walked physically this run:
+    0x00A91E4C-4 -> COL 0x00AB33D0 (sig=0) -> TD 0x00B7997C
+    -> name `.?AVMovableObject@@`   [MATCH with committed prior pins]
+
+RECEIVER CHAIN (entry this -> store effective address; every hop measured)
+  R1. FUN_00528E50 (the derived ctor; entry 0x00528E50):
+        `8B F1` @0x00528E76 = mov esi, ecx
+        ESI := FUN_00528E50's entry ECX = ITS `this` (the new object).
+      Prior committed canon for the same pin: PE_935_INSTANCE_KEY_RESOURCE_
+      EDGE_MICRO_R1_202601006 E-C1 chain ("8B F1 MOV ESI ECX @0x00528E76");
+      PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913 REPORT section 3.
+  R2. `8B CE` @0x00528E8B = mov ecx, esi   (this -> base-ctor this argument)
+  R3. `E8 1E 23 33 00` @0x00528E8D = call 0x0085B1B0
+        rel32 recomputed this run: 0x00528E8D+5+0x33231E = 0x0085B1B0 [MATCH]
+      Prior committed canon: attribute-seam REPORT S8 ("base FUN_0085B1B0
+      @0x00528E8D"); position-corrections REPORT section 4.1.
+      (Upstream committed canon, cited only: the object is the new(0x128)
+      block created in FUN_004C46C0 @0x004C4792 -> ctor call @0x004C47C1;
+      attribute seam S8; not re-derived this run.)
+  R4. FUN_0085B1B0 entry: `8B F1` @0x0085B1B7 = mov esi, ecx
+        ESI := entry ECX = THE SAME OBJECT (no interior-pointer adjustment,
+        no indirect pointer hop on the receiver path).
+  R5. STORE EFFECTIVE ADDRESS @0x0085B281: [esi+0x44] (disp8 0x44).
+        ESI reaching definition: 0x0085B1B7 (R4).
+        Measured clobber scan (this run, over the full 64-instruction
+        boundary decode of 0x0085B1B0..0x0085B290): instructions in
+        (0x0085B1B7, 0x0085B281] that write ESI: NONE (measured count 0).
+        Intervening direct calls (FUN_007345C0 @0x0085B1D3, FUN_004123D0
+        @0x0085B20A, FUN_00746550 @0x0085B214, FUN_00746570 @0x0085B22D,
+        FUN_00746560 @0x0085B27A) preserve ESI/EDI per the x86 MSVC thiscall
+        ABI (EBX/EBP/ESI/EDI callee-saved); the one value-producing callee
+        FUN_00746560 is a 4-byte `8D 41 08 C3` (lea eax,[ecx+8]; ret)
+        physically re-read this run and trivially preserves ESI.
+        Alternate reaching definitions of ESI: NONE (single definition in
+        the straight-line body; the fail-closed decode proves no branch in
+        0x0085B1B0..0x0085B290, so the path is unconditional).
+  R6. Same-object completion (measured @W3): after the base ctor returns,
+        FUN_00528E50 stamps the DERIVED vtable on the SAME ESI/object:
+        `C7 06 B0 DC A7 00` @0x00528EA2 = mov [esi], 0x00A7DCB0;
+        RTTI chain re-walked physically this run:
+          0x00A7DCB0-4 -> COL 0x00AA17CC (sig=0) -> TD 0x00B79958
+          -> name `.?AVClientMovableObject@@`   [MATCH with committed pins]
+        Prior committed canon: MICRO_R1 (vtable store @0x00528EA2,
+        corrected P3-2 wording in PE_935_INSTANCE_KEY_RESOURCE_EDGE_POST_
+        AUDIT_CORRECTION_R1_20261006: at 0x00528EA8 sits the DIFFERENT store
+        `89 9E A4 00 00 00`).
+
+RECEIVER_IDENTITY (status: CONFIRMED, scoped to the examined construction
+  path FUN_00528E50 -> FUN_0085B1B0)
+  The store @0x0085B281 writes the dword at +0x44 of the object under
+  construction — the MovableObject (vtable 0x00A91E4C at store time) that
+  FUN_00528E50 turns into a ClientMovableObject (vtable 0x00A7DCB0 stamped
+  on the same memory after the base ctor returns). TEMPORAL NUANCE (honest):
+  at the exact store time the object is not yet vtable-stamped as the derived
+  class; it becomes the ClientMovableObject instance of the examined chain
+  by construction order, on the same object memory. No other receiver kind
+  (SF / NiNode / any other class) exists on this dataflow: the store's base
+  register ESI is proven to be the ctor `this`, not [CMO+0xC0] (SF) and not
+  [SF+0x30] (NiNode).
+
+FIELD_ADDRESS_IDENTITY
+  The destination field = instance+0x44 (a 32-bit slot at this+0x44 of the
+  CMO-family instance). Its sibling stores in the same copy triple are
+  +0x48 @0x0085B287 and +0x4C @0x0085B28D (documented in the census; NOT
+  separately analyzed this run — one store maximum).
+
+FINAL_SEMANTIC_ROLE: UNVERIFIED (pre-registered ceiling). This run makes NO
+  claim that the field is a position/coordinate/vector/XYZ component. The
+  historical "POZYCJA/position" label for record+8..0x10 / instance+0x44..0x4C
+  exists in prior committed evidence (attribute seam RESEARCH_FINDINGS; its
+  own recorded caveat: axes/units/space UNRESOLVED) and is cited ONLY as
+  historical context. No semantic promotion is performed (budget: 0).
+
+CONDITIONS AND PATH NOTES
+  - The receiver path is UNCONDITIONAL within the examined construction:
+    the fail-closed linear decode of 0x0085B1B0..0x0085B290 contains no
+    branch/jump opcode, so every execution of FUN_0085B1B0 that reaches
+    0x0085B1B7 reaches the store @0x0085B281 with the same ESI lineage.
+  - RUNTIME_JOIN_OBSERVED-style caveats apply: STATIC-ONLY run; the client
+    never ran; no claim that any historical instance was ever constructed.
+
+LAST PROVED BOUNDARY: the receiver chain is proved from the FUN_0085B1B0
+  entry `this` backward to the FUN_00528E50 caller pins (all re-pinned);
+  upstream of FUN_00528E50 (FUN_004C46C0's new(0x128) chain) is committed
+  prior canon cited, not re-derived. RECEIVER resolution is NOT
+  WRITE_CONFIRMED_RECEIVER_UNRESOLVED: the receiver is resolved.

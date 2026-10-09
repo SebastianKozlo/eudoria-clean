@@ -1,0 +1,83 @@
+VALUE_PRODUCER_LINEAGE — PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009
+=============================================================================
+
+All VAs/bytes below were PHYSICALLY re-pinned this run from the pinned EXE
+(8015872 B / SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31)
+through the Source-B range-safe reader; the chain stays ENTIRELY inside the
+one selected body (FUN_0085B1B0) plus the already-decoded, already-pinned
+4-byte accessor. ZERO new callee bodies, ZERO new call edges (contract
+section 7; budget section 8).
+
+THE STORED VALUE AND ITS PRODUCER CHAIN (store @0x0085B281: [esi+0x44] := ecx)
+
+  V1. `8B 7C 24 14` @0x0085B1DA = mov edi, [esp+0x14]
+        EDI := the ctor's FIRST STACK ARGUMENT (arg1). Stack proof (measured
+        prologue): 0x0085B1B0 reads arg2 from [esp+8] BEFORE the pushes;
+        after push ebx/ebp/esi/edi (16 = 0x10 bytes) arg1 (entry [esp+4])
+        sits at [esp+0x14]. EDI clobber scan over the boundary decode:
+        instructions in (0x0085B1DA, 0x0085B24B] writing EDI: NONE.
+        (Intervening calls preserve EDI: callee-saved ABI.)
+  V2. `8B CF` @0x0085B24B = mov ecx, edi
+        ECX := arg1 (the thiscall `this` argument for the accessor call).
+        ECX clobber scan in (0x0085B24B, 0x0085B27A): NONE (the intervening
+        instructions are fld1/fstp/mov [esi+0x8C],edx/byte-and-word stores —
+        none writes ECX).
+  V3. `E8 E1 B2 EE FF` @0x0085B27A = call 0x00746560
+        rel32 recomputed this run: 0x0085B27A+5+(-0x114D1F) = 0x00746560
+        [MATCH]. The callee is an ALREADY-DECODED prior pin re-read this
+        run (4 bytes, W2): `8D 41 08 C3` = lea eax, [ecx+8]; ret — i.e. it
+        RETURNS arg1+8 and touches nothing else (no memory read, no GPR
+        side effect besides EAX). Prior committed pin:
+        PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913
+        01_RAW/F00746560_CTOR_COPY.txt (own capstone decode of the same
+        4 bytes). NOT a newly opened callee body.
+        => EAX after the call = arg1 + 8 (an ADDRESS, not a value).
+  V4. `8B 08` @0x0085B27F = mov ecx, [eax]
+        ECX := the DWORD AT ADDRESS arg1+8. This is the immediate producer
+        of the stored value. ECX clobber scan in (0x0085B27F, 0x0085B281):
+        NONE (the store is the very next instruction).
+  V5. `89 4E 44` @0x0085B281 = mov [esi+0x44], ecx   (the selected store)
+
+  Therefore: STORED VALUE = the 32-bit dword at [arg1+8], copied verbatim
+  (a straight mov load + mov store: no conversion, no arithmetic, no x87
+  round-trip anywhere in the chain).
+
+VALUE_SOURCE_CLASS = COPY_FROM_MEMORY
+  (the value is copied from memory pointed to by the constructor's first
+  stack argument, at offset +8 of that object).
+  VALUE_PRODUCER_VA = 0x0085B27F (`8B 08` mov ecx, [eax]).
+  Address producer VA = 0x0085B27A (call of the pinned 4-byte accessor
+  `lea eax,[ecx+8]; ret` with ECX = arg1 set at 0x0085B24B; arg1 loaded
+  into EDI at 0x0085B1DA).
+  Operand width: 32 bits at every hop. Intermediate conversions: NONE.
+  Path conditions: NONE — the whole chain sits in the straight-line body
+  (fail-closed decode proves no branch in 0x0085B1B0..0x0085B290), so on
+  every execution of the ctor the stored value is exactly [arg1+8].
+
+ARG1'S UPSTREAM IDENTITY — HISTORICAL CONTEXT ONLY, NOT THIS RUN'S CLAIM
+  Within this run's budget the trace correctly terminates at "the ctor's
+  first stack argument". The committed prior evidence (NOT re-derived this
+  run; citing it would cost new bodies/edges beyond the budget) records
+  arg1 as the pointer to the corrected copy ("kopia_poprawiona"/z') of the
+  placement record built in the message-processor frame
+  (PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913 S6-S9 + ERRATA_R4 [SE-R4-6];
+  PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913 ERRATA_R5), with
+  the record's +8..0x10 written by the placement setter FUN_00730F90 from
+  the deserialized message cursor (same evidence). The prior evidence's
+  own recorded caveat for the field labels: axes/units/space UNRESOLVED.
+  THIS RUN does NOT assert any of those semantics; the dword is an opaque
+  bit pattern as far as this run's measurements go.
+
+REPRESENTATION DISCIPLINE (contract section 7)
+  A float/vector-like representation alone does NOT establish X/Y/Z or
+  global-coordinate semantics. This run does not even establish the
+  representation (f32 vs u32 vs other) of [arg1+8]: the chain copies the
+  dword verbatim. No semantic field role is promoted.
+
+TERMINAL STATUS
+  VALUE_PROVENANCE = CONFIRMED (COPY_FROM_MEMORY from [arg1+8], producer
+  chain fully inside the selected body + the already-pinned 4-byte
+  accessor). The classification is NOT UNRESOLVED_WITHIN_BOUND: the budget
+  was not exhausted by this chain; it ends at the ctor argument by design
+  (the argument's upstream is prior committed context, out of this run's
+  scope), not by an unresolved break.

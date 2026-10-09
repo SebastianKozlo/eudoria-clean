@@ -1,0 +1,144 @@
+SELECTED_WRITE_BYTES — PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009
+============================================================
+
+SOURCE OF TRUTH (physical, fail-closed through the Source-B range-safe PE
+reader — checker_plus4_successor_v2.py reused READ-ONLY, size 38568, SHA256
+80EBEE27883AA61173737590FB822B3503B4658CDA511B4B690F8E75B6B64E62):
+  Entropia.exe = 8015872 bytes, SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31
+  ImageBase 0x00400000 (measured, Source-B pin IMAGE_BASE_PIN)
+
+WINDOW W1 = [0x0085B1A8, 0x0085B290), physical raw offset 4567464
+  (overlaps ONLY prior pinned scope: PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913
+   01_RAW/T1_REGION_0085B100_0085B900.txt)
+  the 8 bytes immediately before the function start 0x0085B1B0:
+  A4 82 BB FF C3 CC CC CC
+  = ...E9 A4 82 BB FF (jmp rel32 tail of the previous thunk) | C3 (terminal
+  ret of the previous function) @0x0085B1AC | CC CC CC (int3 padding)
+  @0x0085B1AD..0x0085B1AF | FUN_0085B1B0 entry
+  boundary pre-conditions (measured): ret_C3 = True;
+  padding_CCx3 = True; padding-proven start = True
+
+INDEPENDENT BOUNDARY DECODE (x86_minidec_r1 (this run; pure stdlib; table-driven for the window's opcode set; fail-closed on unknown opcode))
+  linear decode from the CC-padding-proven start 0x0085B1B0 through
+  0x0085B290 (past the selected store); the decoder is table-driven for this
+  window's opcode set and fail-closed on any unknown opcode, so a successful
+  full decode ending exactly at 0x0085B290 also proves NO jump/unknown opcode
+  hides an alternate instruction boundary in the window (straight-line body:
+  the zero-init at 0x0085B1E4 is unconditionally overwritten by the selected
+  copy store at 0x0085B281 in the same construction sequence).
+  instruction count: 64; total decoded bytes: 224;
+  decode reached exactly 0x0085B290: True
+
+  0x0085B1B0  8B 44 24 08          mov eax, [esp+0x8]
+  0x0085B1B4  53                   push ebx
+  0x0085B1B5  55                   push ebp
+  0x0085B1B6  56                   push esi
+  0x0085B1B7  8B F1                mov esi, ecx
+  0x0085B1B9  33 DB                xor ebx, ebx
+  0x0085B1BB  8D 6E 14             lea ebp, [esi+0x14]
+  0x0085B1BE  57                   push edi
+  0x0085B1BF  8B CD                mov ecx, ebp
+  0x0085B1C1  C7 06 4C 1E A9 00    mov [esi], 0x00a91e4c
+  0x0085B1C7  89 5E 04             mov [esi+0x4], ebx
+  0x0085B1CA  89 46 08             mov [esi+0x8], eax
+  0x0085B1CD  89 5E 0C             mov [esi+0xc], ebx
+  0x0085B1D0  89 5E 10             mov [esi+0x10], ebx
+  0x0085B1D3  E8 E8 93 ED FF       call 0x007345c0
+  0x0085B1D8  D9 EE                fldz
+  0x0085B1DA  8B 7C 24 14          mov edi, [esp+0x14]
+  0x0085B1DE  89 5E 3C             mov [esi+0x3c], ebx
+  0x0085B1E1  89 5E 40             mov [esi+0x40], ebx
+  0x0085B1E4  D9 56 44             fst [esi+0x44]
+  0x0085B1E7  D9 56 48             fst [esi+0x48]
+  0x0085B1EA  8B CF                mov ecx, edi
+  0x0085B1EC  D9 56 4C             fst [esi+0x4c]
+  0x0085B1EF  D9 56 50             fst [esi+0x50]
+  0x0085B1F2  D9 56 54             fst [esi+0x54]
+  0x0085B1F5  D9 56 58             fst [esi+0x58]
+  0x0085B1F8  D9 56 5C             fst [esi+0x5c]
+  0x0085B1FB  D9 56 60             fst [esi+0x60]
+  0x0085B1FE  D9 56 64             fst [esi+0x64]
+  0x0085B201  D9 56 68             fst [esi+0x68]
+  0x0085B204  D9 56 6C             fst [esi+0x6c]
+  0x0085B207  D9 5E 70             fstp [esi+0x70]
+  0x0085B20A  E8 C1 71 BB FF       call 0x004123d0
+  0x0085B20F  8B CF                mov ecx, edi
+  0x0085B211  89 46 74             mov [esi+0x74], eax
+  0x0085B214  E8 37 B3 EE FF       call 0x00746550
+  0x0085B219  8B CF                mov ecx, edi
+  0x0085B21B  89 46 78             mov [esi+0x78], eax
+  0x0085B21E  89 5E 7C             mov [esi+0x7c], ebx
+  0x0085B221  89 9E 80 00 00 00    mov [esi+0x80], ebx
+  0x0085B227  89 9E 84 00 00 00    mov [esi+0x84], ebx
+  0x0085B22D  E8 3E B3 EE FF       call 0x00746570
+  0x0085B232  D9 EE                fldz
+  0x0085B234  8B 08                mov ecx, [eax]
+  0x0085B236  89 8E 88 00 00 00    mov [esi+0x88], ecx
+  0x0085B23C  8B 50 04             mov edx, [eax+0x4]
+  0x0085B23F  D9 96 90 00 00 00    fst [esi+0x90]
+  0x0085B245  D9 9E 94 00 00 00    fstp [esi+0x94]
+  0x0085B24B  8B CF                mov ecx, edi
+  0x0085B24D  D9 E8                fld1
+  0x0085B24F  89 96 8C 00 00 00    mov [esi+0x8c], edx
+  0x0085B255  D9 9E 98 00 00 00    fstp [esi+0x98]
+  0x0085B25B  88 9E 9C 00 00 00    mov [esi+0x9c], bl
+  0x0085B261  88 9E 9D 00 00 00    mov [esi+0x9d], bl
+  0x0085B267  88 9E 9E 00 00 00    mov [esi+0x9e], bl
+  0x0085B26D  88 9E 9F 00 00 00    mov [esi+0x9f], bl
+  0x0085B273  66 89 9E A0 00 00 00 mov [esi+0xa0], bx
+  0x0085B27A  E8 E1 B2 EE FF       call 0x00746560
+  0x0085B27F  8B 08                mov ecx, [eax]
+  0x0085B281  89 4E 44             mov [esi+0x44], ecx
+  0x0085B284  8B 50 04             mov edx, [eax+0x4]
+  0x0085B287  89 56 48             mov [esi+0x48], edx
+  0x0085B28A  8B 40 08             mov eax, [eax+0x8]
+  0x0085B28D  89 46 4C             mov [esi+0x4c], eax
+
+THE SELECTED STORE (falsifier F1/F2 evaluated on the physical bytes):
+  VA                 : 0x0085B281
+  physical offset    : 4567681 (file offset, Source-B raw_offset)
+  original bytes     : 89 4E 44
+  instruction size   : 3 bytes
+  mnemonic           : mov (opcode 89 = MOV r/m32, r32)
+  destination        : [esi+0x44]   (ModRM 0x4E = mod01 reg=ECX rm=ESI, disp8)
+  source             : ecx
+  addressing mode     : base register + displacement; base=esi,
+                       disp=68 (disp8), 32-bit store
+  operand width      : 32 bits (no 66 prefix; dword store)
+  enclosing function : FUN_0085B1B0, entry 0x0085B1B0 (padding-proven)
+
+W2 (accessor prior pin re-read) = 0x00746560..0x00746563: 8D 41 08 C3
+  = lea eax, [ecx+8]; ret  (returns arg1+8)
+W3 (caller prior pins re-read) = 0x00528E74..0x00528EA7: 00 00 8B F1 89 74 24 10 8B 44 24 44 8B 4C 24 40 8B 7C 24 3C 50 51 57 8B CE E8 1E 23 33 00 D9 EE 33 DB D9 96 AC 00 00 00 D9 96 B4 00 00 00 C7 06 B0 DC A7 00
+  pins inside: 8B F1 @0x00528E76 (esi := this); E8 1E 23 33 00 @0x00528E8D
+  (call 0x0085B1B0, ecx=esi); C7 06 B0 DC A7 00 @0x00528EA2
+  (mov [esi], 0x00A7DCB0 — derived ClientMovableObject vtable, stamped AFTER
+  the base ctor returns, on the same object memory)
+
+CROSS-REFERENCES (committed prior decodes, re-verified byte-identical against
+the physical EXE this run):
+  - PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913/01_RAW/T1_REGION_0085B100_0085B900.txt
+    rows 0085B270/0085B280: ... E8 E1 B2 EE FF | 8B 08 89 4E 44 8B 50 04
+    89 56 48 8B 40 08 89 46 4C
+  - PE_NIGHT_AGGREGATE_20260905_160000/GHIDRA_H5_VTABLE2.txt lines
+    1169820-1169826 (Ghidra): 0085b27a CALL 0x00746560; 0085b27f MOV
+    ECX,[EAX]; 0085b281 MOV [ESI+0x44],ECX; 0085b284 MOV EDX,[EAX+0x4];
+    0085b287 MOV [ESI+0x48],EDX; 0085b28a MOV EAX,[EAX+0x8];
+    0085b28d MOV [ESI+0x4C],EAX
+  - PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913/01_RAW/DECOMP/F0085B1B0.c
+    (Ghidra decompile): param_1_00[0x11..0x13] = *puVar2..puVar2[2] with
+    puVar2 = FUN_00746560()
+  - PE_935_POSITION_CONSTRUCTION_CORRECTIONS_R1_20260913 06_REPORT/REPORT.md
+    section 4.1 item 4 + line 197; ERRATA_R5.md line 44
+
+STATUS (this run, per PREREGISTRATION section 6 ceilings):
+  INSTRUCTION_IDENTITY = CONFIRMED (physical re-pin + independent boundary
+    decode + committed cross-references; no disagreement anywhere)
+  RECEIVER_IDENTITY = CONFIRMED for the examined construction path (see
+    RECEIVER_LINEAGE.txt; temporal nuance: base vtable at store time,
+    derived vtable stamped after the base ctor returns)
+  VALUE_PROVENANCE = CONFIRMED as COPY_FROM_MEMORY (see
+    VALUE_PRODUCER_LINEAGE.txt)
+  FIELD_SEMANTICS = UNVERIFIED (no promotion; no XYZ/world-coordinate claim)
+  WORLD_INSTANCE_IDENTITY = NOT_ESTABLISHED; HISTORICAL_PLACEMENT =
+    NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO

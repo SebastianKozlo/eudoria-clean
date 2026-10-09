@@ -1,0 +1,321 @@
+{
+  "run_id": "PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009",
+  "qc_class": "FRESH_CONTEXT_INTERNAL_QC",
+  "qc_agent": "pe-master-auditor (fresh context, direct PE-MASTER dispatch)",
+  "origin_note": "REAL origin = pe-master-auditor fresh-context internal QC, internal to PE-MASTER; NOT an independent Desktop post-audit; PE-MASTER remains advisory (Q1 unqualified).",
+  "contract": {
+    "path": "C:\\Users\\User\\Downloads\\OPENCODE_CMO_SINGLE_WRITE_PROVENANCE_R1_REVISED.md",
+    "size_bytes": 20158,
+    "sha256": "C6599C0CCEB93DA5CD0E6B950DC3EF8AE6826FA962ABE99492F3931C7244CEB5",
+    "identity_match": true,
+    "sections_binding": ["3", "5", "6", "7", "9", "12"]
+  },
+  "inputs": {
+    "exe_pre_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+    "exe_post_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+    "exe_size": 8015872,
+    "exe_unchanged": true,
+    "base_sha_expected": "b2feef34122d2118da6ab38fc78f20f337315570",
+    "base_sha_measured_start": "b2feef34122d2118da6ab38fc78f20f337315570",
+    "base_sha_measured_end": "b2feef34122d2118da6ab38fc78f20f337315570",
+    "tracked_tree_clean": true
+  },
+  "method_independence": {
+    "pe_reader": "OWN minimal PE parser (PE header -> section table -> VA->file offset); Source B NOT imported by QC.",
+    "decoder": "OWN x86-32 boundary decoder (independent implementation, different structure from executor x86_minidec_r1: opcode-class table + ModRM/SIB split, writes/reads per class).",
+    "pe_header_measured": {"image_base": 4194304, "section_alignment": 4096, "file_alignment": 4096,
+      "sections": [".text", ".rdata", ".data", ".tls", ".rsrc"]},
+    "exe_modification": "NONE (all mutations on in-memory bytearray copies)",
+    "qc_exe_bytes_read": "456 B total (W1 232 + W3 52 + W2 4 + RTTI chains 94 + exclusion-census instruction pins 74); single-instruction pins only, no new bodies, no xref expansion, no callee analysis"
+  },
+  "duty_1_byte_remeasurement": {
+    "verdict": "PASS",
+    "va_to_offset": {"va": "0x0085B281", "own_file_offset": 4567681, "executor_claim": 4567681, "match": true},
+    "store_bytes_0x0085B281": {"expected": "89 4E 44", "measured": "89 4E 44", "match": true},
+    "boundary": {"ret_C3_at_0x0085B1AC": {"measured": "C3", "match": true},
+                 "padding_CCx3_0x0085B1AD_AF": {"measured": "CC CC CC", "match": true},
+                 "entry_0x0085B1B0": {"measured": "8B 44 24 08", "match": true},
+                 "padding_proven_start": true},
+    "value_chain_pins": {
+      "0x0085B1DA": {"expected": "8B 7C 24 14", "measured": "8B 7C 24 14", "match": true},
+      "0x0085B24B": {"expected": "8B CF", "measured": "8B CF", "match": true},
+      "0x0085B27A": {"expected": "E8 E1 B2 EE FF", "measured": "E8 E1 B2 EE FF", "match": true},
+      "0x0085B27F": {"expected": "8B 08", "measured": "8B 08", "match": true},
+      "accessor_0x00746560": {"expected": "8D 41 08 C3", "measured": "8D 41 08 C3", "match": true}},
+    "w3_pins": {
+      "0x00528E76": {"expected": "8B F1", "measured": "8B F1", "match": true},
+      "0x00528E8B": {"expected": "8B CE", "measured": "8B CE", "match": true},
+      "0x00528E8D": {"expected": "E8 1E 23 33 00", "measured": "E8 1E 23 33 00", "match": true},
+      "0x00528EA2": {"expected": "C7 06 B0 DC A7 00", "measured": "C7 06 B0 DC A7 00", "match": true}},
+    "rel32_own_recomputation": {
+      "call_0x0085B27A": {"rel32_signed": -1133855, "target": 7628128, "target_hex": "0x00746560", "match": true},
+      "call_0x00528E8D": {"rel32_signed": 3351326, "target": 8761776, "target_hex": "0x0085B1B0", "match": true}},
+    "rtti_own_walk": {
+      "vtable_0x00A91E4C": {"col_ptr": "0x00AB33D0", "col_sig": 0, "td": "0x00B7997C",
+                            "name": ".?AVMovableObject@@", "null_terminated": true, "bytes_read": 44, "match": true},
+      "vtable_0x00A7DCB0": {"col_ptr": "0x00AA17CC", "col_sig": 0, "td": "0x00B79958",
+                            "name": ".?AVClientMovableObject@@", "null_terminated": true, "bytes_read": 50, "match": true}},
+    "w1_window_own_read_vs_executor": {"byte_identical": true, "length": 232},
+    "store_semantics_own_decode": {"mnemonic": "mov", "dst": "[esi+0x44]", "src": "ecx",
+      "width_bits": 32, "size_bytes": 3, "mem_dst": {"base": "esi", "disp": 68, "disp_kind": "disp8"},
+      "genuine_memory_store": true}
+  },
+  "duty_2_boundary_decode": {
+    "verdict": "PASS",
+    "own_decoder_result": {"instruction_count": 64, "total_bytes": 224, "ends_at": "0x0085B290",
+                           "ends_exact": true, "any_jump_or_unknown": false},
+    "boundary_starts_confirmed": {
+      "0x0085B1B7": "8B F1", "0x0085B1C1": "C7 06 4C 1E A9 00", "0x0085B1DA": "8B 7C 24 14",
+      "0x0085B1E4": "D9 56 44", "0x0085B1E7": "D9 56 48", "0x0085B1EC": "D9 56 4C",
+      "0x0085B24B": "8B CF", "0x0085B27A": "E8 E1 B2 EE FF", "0x0085B27F": "8B 08",
+      "0x0085B281": "89 4E 44", "0x0085B284": "8B 50 04", "0x0085B287": "89 56 48",
+      "0x0085B28A": "8B 40 08", "0x0085B28D": "89 46 4C"},
+    "copy_triple": {"0x0085B281": "89 4E 44 mov [esi+0x44], ecx",
+                    "0x0085B287": "89 56 48 mov [esi+0x48], edx",
+                    "0x0085B28D": "89 46 4C mov [esi+0x4c], eax"},
+    "zero_init_triple": {"0x0085B1E4": "D9 56 44 fst [esi+0x44]",
+                         "0x0085B1E7": "D9 56 48 fst [esi+0x48]",
+                         "0x0085B1EC": "D9 56 4C fst [esi+0x4c]"},
+    "executor_instruction_table_confirmed": true,
+    "straight_line_window": true
+  },
+  "duty_3_receiver_temporal_nuance_adjudication": {
+    "verdict": "ADJUDICATED_SUPPORTED — the wording survives; outcome A stands as worded",
+    "physical_evidence": {
+      "base_vtable_stamp_before_store": "C7 06 4C 1E A9 00 @0x0085B1C1 (mov [esi], 0x00A91E4C) is decoded as an instruction start and precedes the store linearly (no jump in window 0x0085B1B0..0x0085B290)",
+      "rtti_base": "vtable 0x00A91E4C -> .?AVMovableObject@@ (own RTTI walk, MATCH)",
+      "derived_stamp_after_return": "C7 06 B0 DC A7 00 @0x00528EA2 (mov [esi], 0x00A7DCB0) in FUN_00528E50 AFTER the base-ctor call returns",
+      "rtti_derived": "vtable 0x00A7DCB0 -> .?AVClientMovableObject@@ (own RTTI walk, MATCH)",
+      "same_object_chain": "caller ESI := entry ECX @0x00528E76 -> ECX := ESI @0x00528E8B -> call 0x0085B1B0 @0x00528E8D -> base-ctor ESI := entry ECX @0x0085B1B7 -> store [esi+0x44] @0x0085B281; derived stamp on the SAME ESI/memory @0x00528EA2",
+      "store_time_class": "at store time the object memory carries vtable 0x00A91E4C (.?AVMovableObject@@): the object is the MovableObject-under-construction"},
+    "wording_audit": {
+      "claim_site_reading": "PREREGISTRATION s6, CLAIM_MATRIX CL-02, RECEIVER_LINEAGE.txt, ANCHOR_SELECTION s4, SELECTED_WRITE_BYTES STATUS all describe the receiver as 'the MovableObject (vtable 0x00A91E4C at store time) that FUN_00528E50 turns into a ClientMovableObject (vtable 0x00A7DCB0 stamped on the same memory after the base ctor returns)', explicitly 'not as a finished CMO at store time'",
+      "overstatement_found": false,
+      "cmo_label_honesty": "calling the destination 'CMO+0x44' is honest under contract s3 ('CMO where physically established'): the ClientMovableObject identity of the examined construction chain is PHYSICALLY established (same-pointer chain + both RTTI walks + derived vtable stamp), not class-similarity conflation; no wording claims the object is already a ClientMovableObject at store time",
+      "temporal_nuance_documented": true,
+      "required_correction": "NONE for the receiver wording"},
+    "abi_assumption_disclosure": "ESI/EDI preservation across the 5 in-window calls (FUN_007345C0, FUN_004123D0, FUN_00746550, FUN_00746570 — bodies NOT read) rests on the standard x86 MSVC thiscall callee-saved ABI (EBX/EBP/ESI/EDI); FUN_00746560 is physically 4 bytes (lea eax,[ecx+8]; ret) and preserves ESI trivially. The executor documents this assumption explicitly (RECEIVER_LINEAGE R5, VALUE_PRODUCER_LINEAGE V1). QC accepts it as a disclosed, standard RE assumption; it is an assumption about unread callee bodies, recorded here as a limitation, not a break.",
+    "receiver_identity_status_upheld": "CONFIRMED (scoped to the examined FUN_00528E50 -> FUN_0085B1B0 construction path)"
+  },
+  "duty_4_value_provenance": {
+    "verdict": "PASS",
+    "chain_hop_by_hop": [
+      "H05 0x0085B1DA 8B 7C 24 14 mov edi,[esp+0x14] — arg1 load; own decode + stack proof: first insn reads arg2 from [esp+8] pre-push; 4 pushes (ebx/ebp/esi/edi @0x0085B1B4/B5/B6/BE) move entry [esp+4] (arg1) to [esp+0x14]",
+      "H04 0x0085B24B 8B CF mov ecx, edi — ECX := arg1",
+      "H03 0x0085B27A E8 E1 B2 EE FF call 0x00746560 — own rel32 recomputation MATCH",
+      "H12 0x00746560 8D 41 08 C3 lea eax,[ecx+8]; ret — pinned 4-byte accessor re-read; own decode: returns arg1+8, no GPR side effect except EAX, no memory read",
+      "H02 0x0085B27F 8B 08 mov ecx,[eax] — ECX := dword at [arg1+8] (VALUE_PRODUCER_VA)",
+      "H01 0x0085B281 89 4E 44 mov [esi+0x44], ecx — the store"],
+    "own_clobber_scans": {
+      "edi_writers_(0x0085B1DA,0x0085B24B]": [],
+      "ecx_writers_(0x0085B24B,0x0085B27A)": [],
+      "ecx_writers_(0x0085B27F,0x0085B281)": [],
+      "esi_writers_(0x0085B1B7,0x0085B281]": [],
+      "calls_(0x0085B24B,0x0085B27A)": [],
+      "calls_(0x0085B27F,0x0085B281)": [],
+      "esi_def_sites_in_window": [8761783],
+      "edi_def_sites_in_window": [8761818]},
+    "value_source_class_upheld": "COPY_FROM_MEMORY (stored value = dword at [arg1+8], copied verbatim; no conversion/arithmetic/x87 round-trip)",
+    "value_producer_va_upheld": "0x0085B27F",
+    "arg1_upstream_honesty": "terminates at the ctor's first stack argument BY DESIGN; upstream (placement-record corrected-copy z' chain) is cited ONLY as committed historical context with its own axes/units-UNRESOLVED caveat; representation (f32 vs u32) explicitly NOT established — verified present in VALUE_PRODUCER_LINEAGE (REPRESENTATION DISCIPLINE section)",
+    "abi_note": "EDI preservation across FUN_004123D0/FUN_00746550/FUN_00746570 calls is the documented callee-saved ABI assumption (see duty_3 disclosure)"
+  },
+  "duty_5_anchor_census_and_selection": {
+    "verdict": "PASS (with two non-material record-description findings F-QC-2/F-QC-3)",
+    "six_qualifying_stores_byte_exist": true,
+    "census_store_pins": {"0x0085B281": "89 4E 44", "0x0085B287": "89 56 48", "0x0085B28D": "89 46 4C",
+                          "0x0085B1E4": "D9 56 44", "0x0085B1E7": "D9 56 48", "0x0085B1EC": "D9 56 4C"},
+    "exclusion_records_verified": {
+      "C_G_FUN_00509510_rep_movsd_SF": {"pins": {"0x00509557": "F3 A5", "0x0050954D": "8D 7B 4C",
+                                                  "0x00509518": "8B D9", "0x00529025": "8B 8E C0 00 00 00"},
+                                        "genuine": true, "reason": "receiver EBX = SF (mov ebx,ecx; lea edi,[ebx+0x4c]); SF received via ecx=[CMO+0xC0]; NOT a CMO store"},
+      "C_H_CMO_0xC0": {"pin": "0x00528FEA: 89 86 C0 00 00 00", "genuine": true, "reason": "real CMO store, offset +0xC0 outside the lead set"},
+      "C_I_CMO_0xB4": {"pin": "0x00529058: D9 9E B4 00 00 00", "genuine": true, "reason": "real CMO store at +0xB4 outside the lead set"},
+      "C_J_FUN_00745360_rec_ctor": {"pins": {"0x0074539B": "89 46 44", "0x007453A4": "89 4E 48",
+                                             "0x007453AD": "89 56 4C"},
+                                    "genuine": true, "reason": "receiver is the placement RECORD object (committed F00745360_REC_CTOR.txt), not the CMO instance"},
+      "C_K_FUN_008550C0_mgr": {"pin": "0x008551CA: 89 46 44", "region_probe_0x00855260": "89 46 48 C7 44 24 44 0A 00 00 00 74",
+                               "genuine": true, "reason": "receiver is the manager singleton (mov esi,ecx @0x008550E8 in committed window); NOTE F-QC-3 on the citation path"},
+      "C_L_FUN_00509330_SF": {"pins": {"0x005093E9": "D9 55 44", "0x005093F1": "D9 55 48",
+                                       "0x0050944C": "89 45 44", "0x00509455": "89 4D 48"},
+                              "genuine": true, "reason": "receiver EBP = SF (SceneFeederObject); NOTE F-QC-2: both committed evidence and own decode show FST (D9 55 xx, reg=2) at BOTH 0x005093E9 and 0x005093F1; the census wrote 'fstp' for 0x005093E9 — mnemonic typo, receiver/class unaffected"},
+      "C_M_FUN_008BD720_neighborhood": {"pin": "0x008BD750: 89 46 44", "genuine": true,
+                                        "reason": "no committed receiver-lineage ties its ESI to the CMO instance (committed FUN_008BD720_DECODE.txt)"},
+      "C_N_FUN_006C8F80_CAND4": {"pins": {"0x006C8FBB": "89 5E 48", "0x006C8FBE": "89 5E 4C"},
+                                 "genuine": true, "reason": "CAND-4 child-family base ctor (ArkModelManager), different class"},
+      "C_O_FUN_006C94FF_request_queue": {"pin": "0x006C94FF: 89 46 44", "genuine": true,
+                                         "reason": "request-queue family store (committed ORIGIN_TRIPLE_WRITE_CENSUS_RAW.txt line 378)"},
+      "C_P_S5_transform_bulk_inits": {"pin": "0x005D48B6: C7 06 A4 14 A8 00",
+                                      "genuine": true, "reason": "bulk zero-inits with their OWN vtable stamps (e.g. 0x00A814A4) in transform-object ctors (committed S5_TRANSFORM_WRITES.json); not the CMO instance"}},
+    "selection_rule_pre_registered": {
+      "declared_before_science": "PREREGISTRATION.md s4 fixes the candidate priority rule (copy family over zero-init bulk idiom; lowest VA within family) and the SELECTED STORE with EXPECTED bytes ('89 4E 44') from committed evidence, BEFORE the physical re-pin; PREREGISTRATION contains no measured new values (all 'expected'); measurements appear only in CONTROL_RESULTS.json/SELECTED_WRITE_BYTES.txt",
+      "tie_break_alternative_disclosed": true,
+      "strict_lowest_va_alternative": "a strict lowest-VA rule would pick the zero-init fst @0x0085B1E4 with a CONSTANT (fldz) source; PREREGISTRATION s4 and ANCHOR_SELECTION s4 disclose and reject it (anti-manufacturing clause: bulk 12-field float-zero idiom +0x44..0x70; degenerate CONSTANT provenance; unconditionally overwritten by the copy triple in the same straight-line sequence — QC's own decode confirms no branch in the window)",
+      "no_manufacturing_from_CMO_label": true},
+    "prereg_discipline_assessment": "PASS (documentary consistency: pre-registration uses only committed-evidence values; no independent timestamp evidence exists or is claimed)"
+  },
+  "duty_6_budget_audit": {
+    "verdict": "PASS with finding F-QC-1 (off-by-one in the declared byte total; no budget limit affected)",
+    "target_store_instructions": {"limit": 1, "used": 1, "ok": true},
+    "new_detailed_function_bodies": {
+      "limit": "<=1", "charged": "1 (as re-pin)", "honesty_check": "FUN_0085B1B0 IS previously fully decoded in COMMITTED evidence (verified by QC: T1_REGION_0085B100_0085B900.txt raw hex rows 0085B1B0..0085B28F; 01_RAW/DECOMP/F0085B1B0.c Ghidra decompile of the same body; PE_NIGHT_AGGREGATE GHIDRA_H5_VTABLE2.txt lines 1169820-1169826 instruction-level) -> '0 new body semantics opened' is TRUE; the 1-body charge in already-decoded status is honest"},
+    "new_call_edges": {
+      "limit": 0, "used": 0, "both_edges_prior_committed": {
+        "FUN_00528E50->FUN_0085B1B0": "call @0x00528E8D committed (attribute seam REPORT S8 'base FUN_0085B1B0 @0x00528E8D'; position corrections REPORT line 196) — verified in committed files by QC",
+        "FUN_0085B1B0->FUN_00746560": "call @0x0085B27A committed (Ghidra H5 line 1169820; position corrections REPORT line 197; F00746560_CTOR_COPY.txt accessor pin) — verified in committed files by QC"}},
+    "new_callee_bodies": {"limit": 0, "used": 0, "note": "FUN_00746560 = prior 4-byte pin re-read; FUN_007345C0/FUN_004123D0/FUN_00746550/FUN_0040B070/FUN_00746570 bodies NOT read (QC confirms no callee body appears in any package output)"},
+    "byte_total_recount": {
+      "executor_declared_total": 381,
+      "qc_recount_from_executor_script_logic": 382,
+      "components": {"W1": 232, "W2": 4, "W3": 52,
+                     "rtti_0x00A91E4C": 44, "rtti_0x00A7DCB0": 50},
+      "discrepancy": "executor declared RTTI chain 0x00A7DCB0 as '4+20+25 = 49 B'; its script reads len('.?AVClientMovableObject@@')+1 = 26 name bytes -> 50 B; declared total 381 vs actual 382",
+      "scope_impact": "NONE — every read byte still lies inside prior-pinned scope (MICRO_R1 RTTI_PROBES canon read the same chains); no contract limit exists on 'bytes read'; the defect is numeric transparency only (F-QC-1)"}
+  },
+  "duty_7_controls_reverification": {
+    "verdict": "PASS",
+    "own_mutants_on_in_memory_copies": {
+      "M1_opcode_mutation": {"mutant": "89->8B @file offset 4567681", "real_pin_pass": true, "mutant_pin_fail": true, "control_pass": true},
+      "M3_offset_mutation": {"mutant": "disp 0x44->0x48", "real_pin_pass": true, "mutant_pin_fail": true, "control_pass": true},
+      "M2_va_shift": {"shifted_va": "0x0085B282", "shifted_pin_fails": true, "control_pass": true},
+      "M5_accessor_mutation": {"mutant": "byte0 0x8D^0xFF @0x00746560", "real_pin_pass": true, "mutant_pin_fail": true, "control_pass": true},
+      "M6_sf_conflation_control": {
+        "selected_store_va": "0x0085B281", "sf_store_va": "0x00509557",
+        "receiver_registers_distinct": "selected base = esi (ctor this, def @0x0085B1B7, 0 clobber writers) vs SF store receiver ebx=SF (mov ebx,ecx @0x00509518) with edi=[ebx+0x4C] (lea @0x0050954D), SF via ecx=[CMO+0xC0] @0x00529025 — all pins byte-verified by QC",
+        "conflation_claim_evaluates": "FALSE", "control_pass": true}},
+    "falsifier_semantics_check": "executor's FALSIFIER_REJECTED_HYPOTHESIS = NOT_TRIGGERED usage is correct under contract s9: F1/F2 were evaluated on UNMODIFIED original-client bytes (they MATCH the pre-registered hypothesis; no contradiction); synthetic mutations establish CONTROL_PASS only — executor states this explicitly",
+    "token_gates_own_scan": {
+      "files_scanned": "12/12 executor package files (including BOTH .py scripts — the executor's own token_gates.py scanned 10/12, excluding .py files)",
+      "forbidden_active_hits_in_evidence_files": [],
+      "hits_in_gate_script_only": ["token_gates.py line 8 (WORLD_XYZ_RECOVERED=YES pattern DESCRIPTION)",
+                                    "token_gates.py line 9 (CMO+0x4C == SF+0x4C pattern DESCRIPTION)",
+                                    "token_gates.py lines 10/116 (promotion probe DESCRIPTION)"],
+      "transform_CONFIRMED_STATIC_mentions": [{"file": "INPUT_IDENTITIES.md", "line": 45, "supersession_marked": true,
+                                                "text": "(`SAME_INSTANCE_TRANSFORM_RELATION = CONFIRMED_STATIC`) is SUPERSEDED by J3 S-5"}],
+      "unmarked_transform_mentions": [],
+      "world_xyz_recovered_yes_hits": 0,
+      "object_conflation_hits_in_evidence": 0,
+      "promotion_probe_hits_in_evidence_files": 0,
+      "verdict": "M7/M8 PASS — no restoration of J3-superseded standing as active; CMO/SF/NiNode kept distinct; FIELD_SEMANTICS ceiling UNVERIFIED upheld"}
+  },
+  "duty_8_source_artifact_identities": {
+    "verdict": "PASS",
+    "pinned_sources_measured": {
+      "source_A.PRE_REGISTERED_ANCHORS.md": {"size": 10650, "sha256": "ABC21A0D9C36C564F2328648AF1997D93810813B44D337C55A027B1B24F3A695", "match": true},
+      "source_A.01_RAW/FUN_00528E50_CONTINUATION.txt": {"size": 5471, "sha256": "BAB06CEB76C33AB47B69A9A27E7D18F1AAA81481EB8F5AA1D9DD3EE5AF16DBD1", "match": true},
+      "source_A.01_RAW/FUN_509x_SF_METHODS.txt": {"size": 6078, "sha256": "3A011632A3D96050FDB1DA81D3231C28BECDE3E8517F3820E57E495C8B9FEC85", "match": true},
+      "source_A.FINAL_REPORT.md": {"size": 13663, "sha256": "E62B7581564A2A6B6946EDFDA29D5077D333C485647A9E2F5969E5732AD8C75B", "match": true},
+      "source_B.checker_plus4_successor_v2.py": {"size": 38568, "sha256": "80EBEE27883AA61173737590FB822B3503B4658CDA511B4B690F8E75B6B64E62", "match": true},
+      "J3.SUPERSESSION.md": {"size": 8339, "sha256": "DD11137A0E79491511A7688B7C1DE9252DB7BA443FA31892C345CA76CE136845", "match": true},
+      "J3.CORRECTED_STATUS_ALGEBRA.md": {"size": 8987, "sha256": "00D09B0F72F1F6859C9DAF8A73C592659F253B596588DA304D9BC6912A40FA9F", "match": true}},
+    "historical_context_files_measured": {
+      "MICRO_R1/FINAL_REPORT.md": {"size": 14656, "sha256": "39DA4D869400D43F3675280EA38B6314618EAD10F3FD1DB1E839DE5989BEEA7A", "match_vs_input_identities": true},
+      "source_A/CLAIM_MATRIX.csv": {"size": 5232, "sha256": "32F81A962262ACB5DAF668A425B57775F2F6BD2C117D702B26EBF23763C75DDF", "match_vs_input_identities": true},
+      "source_A/01_RAW/REPIN_ANCHOR_WINDOWS.txt": {"size": 18633, "sha256": "5BE0AC8A5BE0F46BD9FE1E200173E86174CF795D3D5A000E028C5C8032D370F3", "match_vs_input_identities": true}},
+    "governance": {"AUDIT_ENTRYPOINT.md": {"size": 266375, "sha256": "9377E0FE6E288EE321C44D7FB0BDBDDDF04F375F800F942AA41546729DA21EF4", "modified_by_run": false},
+                   "PROJECT_OPERATING_MODEL.md": {"size": 54413, "sha256": "99AE12375A9C4D60A4034263F2DE1D26EA5A817F12D630BA5B5340C672169E2A", "modified_by_run": false},
+                   "PROJECT_STATE.json": "ABSENT (recorded N/A; not invented)"},
+    "committed_prior_evidence_citations_verified": {
+      "T1_REGION_0085B100_0085B900.txt": {"tracked": true, "size": 9854, "content_verified": "raw hex rows 0085B1B0..0085B28F match the EXE bytes AND the executor W1 hex (byte-identical, QC-compared)"},
+      "DECOMP/F0085B1B0.c": {"tracked": true, "size": 2128, "content_verified": "Ghidra decompile shows param_1_00[0x11..0x13] = *puVar2..puVar2[2] from puVar2 = FUN_00746560() — the committed prior decode of the SAME body"},
+      "GHIDRA_H5_VTABLE2.txt": {"tracked": true, "size": 50780146, "content_verified": "lines 1169820-1169826: 0085b27a CALL 0x00746560; 0085b27f MOV ECX,[EAX]; 0085b281 MOV [ESI+0x44],ECX; 0085b284/287/28a/28d — exactly as cited"},
+      "F00746560_CTOR_COPY.txt": {"tracked": true, "size": 262, "content_verified": "capstone decode: 00746560 lea eax,[ecx+8]; ret"},
+      "position_corrections_REPORT.md": {"tracked": true, "size": 46418, "content_verified": "line 89 (s4.1 item 4), line 196 (vtables/ctor call), line 197 ([+0x44..0x4C]=[FUN_00746560(record)+0..8] @0x0085B27A-2D)"},
+      "ERRATA_R5.md": {"tracked": true, "size": 26769, "content_verified": "line 44 + lines 91-93 (z' corrected-copy context)"},
+      "mgr_ctor_FUN_008550C0.txt": {"tracked": true, "size": 288, "note": "see F-QC-3"}},
+    "source_package_unchanged": "verified: tracked tree clean at HEAD b2feef34 (start and end of QC); no source file touched"
+  },
+  "duty_9_status_epistemology": {
+    "verdict": "PASS",
+    "instruction_identity": "CONFIRMED (own bytes + own decode + committed cross-refs)",
+    "receiver_identity": "CONFIRMED (scoped to the examined construction path; temporal nuance adjudicated SUPPORTED)",
+    "value_provenance": "CONFIRMED (COPY_FROM_MEMORY, producer 0x0085B27F; own hop-by-hop verification)",
+    "field_semantics": "UNVERIFIED (ceiling upheld everywhere: FUNCTION_AND_EDGE_BUDGET.csv:8, SELECTED_WRITE_BYTES.txt:142, repin script)",
+    "world_instance_identity": "NOT_ESTABLISHED",
+    "historical_placement": "NOT_ESTABLISHED",
+    "world_xyz_recovered": "NO",
+    "global_coordinate_frame": "NOT_ESTABLISHED",
+    "instance_model_join": "NOT_ESTABLISHED",
+    "coverage_classes_present": "PREREGISTRATION s6: CLIENT_KNOWLEDGE_COVERAGE = one store's write provenance (bounded); RECONSTRUCTION_IMPLEMENTATION_COVERAGE = NONE; HISTORICAL_GAME_RECOVERY_COVERAGE = NONE",
+    "j3_standing_carried": "PHYSICAL_TRANSFORM_MEASUREMENTS = PRESERVED; NEW_TRANSFORM_TRACE = MEASURED_INCIDENTAL_OUTSIDE_PERMITTED_PROMOTION; SAME_INSTANCE_TRANSFORM_RELATION_FROM_THIS_RUN = NOT_QUALIFIED_BY_ORIGINAL_SCOPE; J3 historical ORIGINAL_EDGE_BUDGET_COMPLIANCE = FAIL (22 vs 6) preserved WITHOUT transfer (this run 0 new edges)",
+    "plus4_standing": "preserved (not a subject of this run)",
+    "falsifier_status": "FALSIFIER_REJECTED_HYPOTHESIS = NOT_TRIGGERED is CORRECT usage (no unmodified-bytes contradiction); M1-M6 CONTROL_PASS; M7/M8 token gates PASS",
+    "no_semantic_promotion_derived": true,
+    "science_outcome_upheld": "A (WRITE_AND_IMMEDIATE_SOURCE_ESTABLISHED)"
+  },
+  "findings": [
+    {
+      "id": "F-QC-1",
+      "severity": "P2",
+      "title": "Budget byte-total off-by-one: declared 381 B, actual 382 B (RTTI ClientMovableObject name read counted as 25 instead of len+1=26)",
+      "location": "FUNCTION_AND_EDGE_BUDGET.csv row windows_read, detail field: 'RTTI chain 0x00A7DCB0 = 4+20+25 = 49 B ... TOTAL EXE BYTES READ = 381 B'",
+      "contradicted_claim": "the declared total EXE byte count of the run",
+      "physical_evidence": "repin_write_provenance.py rtti_chain(): name = pe.read(ptd + 8, len(exp_name) + 1); len('.?AVClientMovableObject@@') = 25 -> 26 bytes read -> chain = 4+20+26 = 50 B; 232+4+52+44+50 = 382",
+      "failure_mechanism": "counting error in the transparency declaration (name length used instead of name length + null)",
+      "affected_claims": "budget transparency only; no science claim, no gate predicate, no contract limit depends on 381",
+      "required_correction": "at persistence/finalization, record the corrected count (382 B; RTTI CMO chain 50 B) in the final report or errata — executor files are NOT edited by QC",
+      "revalidation_predicate": "recompute total from the executed script's read calls: sum(window lengths + RTTI reads) == 382"
+    },
+    {
+      "id": "F-QC-2",
+      "severity": "P2",
+      "title": "Census record C-L mnemonic typo: 'fstp [ebp+0x44] @0x005093E9' — physical bytes and committed evidence show FST (D9 55 44, reg=2)",
+      "location": "ANCHOR_SELECTION.md section 3.2, row C-L",
+      "contradicted_claim": "none load-bearing (the exclusion verdict and the mov pins 89 45 44/89 4D 48 are correct)",
+      "physical_evidence": "EXE bytes D9 55 44 @0x005093E9 (QC pin + own decode: ModRM 0x55 -> reg=2 -> FST); committed F00509330_SUBC0_B.txt lines 63/65: 'fst dword ptr [ebp+0x44]' @0x005093E9, 'fst dword ptr [ebp+0x48]' @0x005093F1",
+      "failure_mechanism": "transcription slip in a non-load-bearing context description of a reclassified record",
+      "affected_claims": "none — receiver EBP=SF and the reclassification stand",
+      "required_correction": "optional wording correction at persistence: 'fst [ebp+0x44] @0x005093E9'",
+      "revalidation_predicate": "decode D9 55 44 -> FST (reg=2)"
+    },
+    {
+      "id": "F-QC-3",
+      "severity": "P3",
+      "title": "Census record C-K secondary claim '+0x48/+0x4C stores @0x00855260 region' is physically true but not covered by the cited committed file",
+      "location": "ANCHOR_SELECTION.md section 3.2, row C-K (citation: attribute seam T2_HEX/mgr_ctor_FUN_008550C0.txt)",
+      "contradicted_claim": "none (the primary pin 89 46 44 @0x008551CA IS in the cited file and is byte-verified)",
+      "physical_evidence": "cited committed file ends at 0x008551DF; QC's own EXE probe @0x00855260 shows 89 46 48 (mov [esi+0x48],eax) — the +0x48 store exists physically, but the citation path does not document it",
+      "failure_mechanism": "citation imprecision in a reclassified record",
+      "affected_claims": "none — C-K remains a genuine exclusion (receiver = manager singleton)",
+      "required_correction": "at persistence, optionally annotate the +0x48/+0x4C region claim with its actual committed source or mark it as QC-byte-verified",
+      "revalidation_predicate": "pin bytes @0x00855260.. and locate a committed window covering them"
+    },
+    {
+      "id": "F-QC-4",
+      "severity": "OBSERVATION",
+      "title": "Executor token gates scanned 10/12 package files (both .py scripts excluded by suffix filter)",
+      "location": "token_gates.py SCANNED_SUFFIXES = ('.md','.txt','.csv','.json'); files_scanned_count = 10",
+      "contradicted_claim": "none — QC's own 12/12 scan (including both .py scripts) finds NO forbidden active standing anywhere in the package",
+      "physical_evidence": "QC token scan over all 12 executor files: zero forbidden-active hits in evidence/report files; the only pattern matches are the gate script's own self-descriptions (token_gates.py lines 8-10, 116) and one supersession-marked historical mention (INPUT_IDENTITIES.md:45)",
+      "affected_claims": "none",
+      "required_correction": "for future runs, include .py scripts in the gate scan or record their exclusion explicitly as script-code (not evidence)",
+      "revalidation_predicate": "rescan with .py included -> 0 evidence-file hits"
+    }
+  ],
+  "qc_verdict": "QC_PASS",
+  "qc_verdict_scope": "Fresh-context internal QC of the executor phase package (12 files) against contract OPENCODE_CMO_SINGLE_WRITE_PROVENANCE_R1_REVISED.md; internal to PE-MASTER; not MASTER_ACCEPTED, not milestone closure; PE-MASTER advisory (Q1 unqualified)",
+  "science_outcome_upheld": "A: WRITE_AND_IMMEDIATE_SOURCE_ESTABLISHED",
+  "required_wording_corrections_for_persistence_phase": [
+    "F-QC-1: record TOTAL EXE BYTES READ = 382 (RTTI 0x00A7DCB0 chain = 4+20+26 = 50 B) in the final report/errata",
+    "F-QC-2: optional: C-L record mnemonic fst (not fstp) @0x005093E9",
+    "F-QC-3: optional: C-K +0x48 store @0x00855260 citation annotation (QC byte-verified)"
+  ],
+  "coverage": {
+    "executor_package_files_full_read": "12/12 (FULL_READ: all report/ledger/CSV/JSON/raw/script files read to EOF by QC)",
+    "exe_bytes_read_by_qc": "456 B (W1 232 + W3 52 + W2 4 + RTTI 94 + exclusion pins 74); single-instruction pins only; no new bodies; no xref expansion; no callee analysis",
+    "committed_evidence_read": "contract (full), J3 (full), source A pinned files (full), T1_REGION (full), F0085B1B0.c (full), F00746560_CTOR_COPY.txt (full), mgr_ctor_FUN_008550C0.txt (full), Ghidra H5 cited line range (1169813-1169832), position corrections REPORT/ERRATA_R5 cited lines, MICRO_R1 FINAL_REPORT cited sections, REPIN_ANCHOR_WINDOWS PA4 sections, ORIGIN_TRIPLE_WRITE_CENSUS_RAW line 378, S5_TRANSFORM_WRITES.json head, F00745360_REC_CTOR/F00509330_SUBC0_B/FUN_008BD720_DECODE/FUN_006C8F80_BASECTOR_DECODE cited pins, RTTI_PROBES.json cited names, source A CLAIM_MATRIX CL-08"
+  },
+  "not_checked": [
+    "callee bodies FUN_007345C0/FUN_004123D0/FUN_00746550/FUN_00746570 (callee-saved ABI assumption, disclosed; bodies remain undecoded)",
+    "FUN_00528E50 entry boundary @0x00528E50 (outside budget; W3 pins sufficient for the receiver chain)",
+    "FUN_0085B1B0 extent beyond 0x0085B290 (terminal RET 0xC per committed T1_REGION evidence; not re-decoded)",
+    "runtime behavior (STATIC-ONLY run; client never executed)",
+    "remote repository state (no publication actions in this phase; local HEAD verified == EXPECTED_BASE_SHA; remote equality NOT claimed)",
+    "no independent timestamp proof of pre-registration authorship (documentary consistency assessed instead; no contrary evidence)"
+  ],
+  "qc_outputs": {
+    "qc_results_json": "QC_RESULTS.json (this file)",
+    "qc_report_md": "QC_REPORT.md",
+    "qc_script": "03_SCRIPTS/qc_remeasure.py (python -B; read-only over the EXE; mutations in-memory only)"
+  }
+}
