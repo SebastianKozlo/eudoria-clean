@@ -1,0 +1,2432 @@
+{
+  "phase": "REGRESSION",
+  "run_id": "PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009",
+  "description": "re-execution of the UNCHANGED existing 12-case production byte matrix (run_case/EXPECTED/MUTATIONS) and 12-case QC byte matrix (run_matrix/EXP/MUT) through the corrected copies' PRESERVED helpers; all writes redirected to SCRATCH",
+  "tool": {
+    "name": "GNU objdump (GNU Binutils for Debian) 2.44",
+    "rc": 0
+  },
+  "exe_sha256_before": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+  "exe_sha256_after": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+  "exe_unchanged": true,
+  "unchanged_helper_preservation": {
+    "production_EXPECTED_identical": true,
+    "production_MUTATIONS_identical": true,
+    "production_CASE_ORDER_identical": true,
+    "qc_EXP_identical": true,
+    "qc_MUT_identical": true,
+    "qc_CASE_ORDER_identical": true
+  },
+  "production_cases": [
+    {
+      "case": "A_CLEAN",
+      "window": "A",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture": {
+        "name": "A_CLEAN.bin",
+        "size": 66,
+        "sha256": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/A_CLEAN.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/A_CLEAN_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 23,
+        "covers_window_exactly": true,
+        "first_va": "0x00528E50",
+        "last_instruction": "0x00528E8D (e8 1e 23 33 00)",
+        "window": "[0x00528E50,0x00528E92)"
+      },
+      "derived_facts": {
+        "S_delta": -56,
+        "source_slot_delta": 4,
+        "entry_slot_value_preserved": true,
+        "edi_preserved": true,
+        "tail_target": "0x0085B1B0",
+        "arg1_kind": "STACK_READ"
+      },
+      "expected_text": "S=E-0x38; source [E+4]; value preserved/delivered",
+      "checks": [
+        {
+          "fact": "S_delta",
+          "expected": -56,
+          "actual": -56,
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "STACK_READ",
+          "actual": "STACK_READ",
+          "match": true
+        },
+        {
+          "fact": "edi_preserved",
+          "expected": true,
+          "actual": true,
+          "match": true
+        },
+        {
+          "fact": "entry_slot_value_preserved",
+          "expected": true,
+          "actual": true,
+          "match": true
+        },
+        {
+          "fact": "source_slot_delta",
+          "expected": 4,
+          "actual": 4,
+          "match": true
+        },
+        {
+          "fact": "tail_target",
+          "expected": "0x0085B1B0",
+          "actual": "0x0085B1B0",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "B_CLEAN_NONNULL",
+      "window": "B",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture": {
+        "name": "B_CLEAN_NONNULL.bin",
+        "size": 52,
+        "sha256": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/B_CLEAN_NONNULL.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/B_CLEAN_NONNULL_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "CALL reachable; arg1 ADDRESS(T+8); receiver = return value",
+      "checks": [
+        {
+          "fact": "T_delta",
+          "expected": 0,
+          "actual": 0,
+          "match": true
+        },
+        {
+          "fact": "arg1_expr",
+          "expected": "ADDRESS(T+0x8)",
+          "actual": "ADDRESS(T+0x8)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "ADDRESS",
+          "actual": "ADDRESS",
+          "match": true
+        },
+        {
+          "fact": "bridge_target",
+          "expected": "0x00528E50",
+          "actual": "0x00528E50",
+          "match": true
+        },
+        {
+          "fact": "flags_preserved_test_to_je",
+          "expected": true,
+          "actual": true,
+          "match": true
+        },
+        {
+          "fact": "nonnull_reaches_call",
+          "expected": true,
+          "actual": true,
+          "match": true
+        },
+        {
+          "fact": "receiver_kind",
+          "expected": "OPAQUE_RET",
+          "actual": "OPAQUE_RET",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "B_CLEAN_NULL",
+      "window": "B",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture": {
+        "name": "B_CLEAN_NULL.bin",
+        "size": 52,
+        "sha256": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/B_CLEAN_NULL.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/B_CLEAN_NULL_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "JE taken; target CALL not reached; no fabricated delivery",
+      "checks": [
+        {
+          "fact": "null_call_reached",
+          "expected": false,
+          "actual": false,
+          "match": true
+        },
+        {
+          "fact": "null_je_taken",
+          "expected": true,
+          "actual": true,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M1_A_FRAME",
+      "window": "A",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M1_A_FRAME @0x00528E5E: 83 ec 1c -> 83 ec 18 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M1_A_FRAME.bin",
+        "size": 66,
+        "sha256": "f9b3f4e76860905a1d4fd4ded056bd82d5f9d4f5a850dae245eda4370967ad2b",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M1_A_FRAME.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M1_A_FRAME_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 23,
+        "covers_window_exactly": true,
+        "first_va": "0x00528E50",
+        "last_instruction": "0x00528E8D (e8 1e 23 33 00)",
+        "window": "[0x00528E50,0x00528E92)"
+      },
+      "derived_facts": {
+        "S_delta": -52,
+        "source_slot_delta": 8,
+        "entry_slot_value_preserved": true,
+        "edi_preserved": true,
+        "tail_target": "0x0085B1B0",
+        "arg1_kind": "STACK_READ"
+      },
+      "expected_text": "S=E-0x34; later source [E+8], not entry arg1 [E+4]",
+      "checks": [
+        {
+          "fact": "S_delta",
+          "expected": -52,
+          "actual": -52,
+          "match": true
+        },
+        {
+          "fact": "source_slot_delta",
+          "expected": 8,
+          "actual": 8,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M2_A_SLOT",
+      "window": "A",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M2_A_SLOT @0x00528E84: 8b 7c 24 3c -> 8b 7c 24 38 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M2_A_SLOT.bin",
+        "size": 66,
+        "sha256": "ae7bd7c4394d852205fc2ad292bca12a1c7dfb8ad46c91bc67bca9429470ddaa",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M2_A_SLOT.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M2_A_SLOT_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 23,
+        "covers_window_exactly": true,
+        "first_va": "0x00528E50",
+        "last_instruction": "0x00528E8D (e8 1e 23 33 00)",
+        "window": "[0x00528E50,0x00528E92)"
+      },
+      "derived_facts": {
+        "S_delta": -56,
+        "source_slot_delta": 0,
+        "entry_slot_value_preserved": true,
+        "edi_preserved": true,
+        "tail_target": "0x0085B1B0",
+        "arg1_kind": "STACK_READ"
+      },
+      "expected_text": "Source [E] under original frame, not [E+4]",
+      "checks": [
+        {
+          "fact": "S_delta",
+          "expected": -56,
+          "actual": -56,
+          "match": true
+        },
+        {
+          "fact": "source_slot_delta",
+          "expected": 0,
+          "actual": 0,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M3_B_LEA_DISP",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M3_B_LEA_DISP @0x004C47BA: 8d 4c 24 14 -> 8d 4c 24 18 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M3_B_LEA_DISP.bin",
+        "size": 52,
+        "sha256": "4d19e0548af86d97eb808a2ed6b5f5799f777d0fb4d028d19f42775ed0379a5c",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M3_B_LEA_DISP.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M3_B_LEA_DISP_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0xc)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "arg1 ADDRESS(T+0xC), not ADDRESS(T+8)",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "ADDRESS(T+0xc)",
+          "actual": "ADDRESS(T+0xc)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "ADDRESS",
+          "actual": "ADDRESS",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M4_B_LAST_PUSH",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M4_B_LAST_PUSH @0x004C47BE: 51 -> 52 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M4_B_LAST_PUSH.bin",
+        "size": 52,
+        "sha256": "6a4677bd55f0b143c9e9f82d26e1264ff9fe3765837b8f589c3005f8996db374",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M4_B_LAST_PUSH.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M4_B_LAST_PUSH_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "STACK_READ",
+        "arg1_expr": "MEM(T+0x4c)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "arg1 is the earlier EDX load value MEM(T+0x4C), not the LEA address",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "MEM(T+0x4c)",
+          "actual": "MEM(T+0x4c)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "STACK_READ",
+          "actual": "STACK_READ",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M5_B_EARLY_PUSH_ORDER",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M5_B_EARLY_PUSH_ORDER @0x004C47B7: 51 52 -> 52 51 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M5_B_EARLY_PUSH_ORDER.bin",
+        "size": 52,
+        "sha256": "6cb86b8cc3b88fbcccb869d7758734a85fbd0bb7e35e0a94718207fa625329d7",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M5_B_EARLY_PUSH_ORDER.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M5_B_EARLY_PUSH_ORDER_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x50)",
+        "arg4_expr": "MEM(T+0x4c)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "Earlier argument order changes; final arg1 ADDRESS(T+8) and its slot remain unchanged",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "ADDRESS(T+0x8)",
+          "actual": "ADDRESS(T+0x8)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "ADDRESS",
+          "actual": "ADDRESS",
+          "match": true
+        },
+        {
+          "fact": "arg1_slot_delta",
+          "expected": -16,
+          "actual": -16,
+          "match": true
+        },
+        {
+          "fact": "arg3_expr",
+          "expected": "MEM(T+0x50)",
+          "actual": "MEM(T+0x50)",
+          "match": true
+        },
+        {
+          "fact": "arg4_expr",
+          "expected": "MEM(T+0x4c)",
+          "actual": "MEM(T+0x4c)",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M6_B_SKIP",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M6_B_SKIP @0x004C47AD: 74 19 -> eb 19 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M6_B_SKIP.bin",
+        "size": 52,
+        "sha256": "21d70faf884712ddd9c80236e781cbd26182cd8919e8f886aecd2fae498e081e",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M6_B_SKIP.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M6_B_SKIP_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "nonnull_reaches_call": false,
+        "bridge_target": null,
+        "bridge_target_actual": null,
+        "bridge_valid": false,
+        "null_je_taken": false,
+        "null_call_reached": false,
+        "unconditional_exit": true
+      },
+      "expected_text": "Unconditional exit; no delivery at the target CALL",
+      "checks": [
+        {
+          "fact": "nonnull_reaches_call",
+          "expected": false,
+          "actual": false,
+          "match": true
+        },
+        {
+          "fact": "unconditional_exit",
+          "expected": true,
+          "actual": true,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M7_B_RECEIVER_ONLY",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M7_B_RECEIVER_ONLY @0x004C47BF: 8b c8 -> 8b ce (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M7_B_RECEIVER_ONLY.bin",
+        "size": 52,
+        "sha256": "da36a328b63dcbebf2ebb65e411e76e9dce5af7dd51a79c6754ed1ff8a61fc73",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M7_B_RECEIVER_ONLY.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M7_B_RECEIVER_ONLY_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "UNKNOWN_REG",
+        "receiver_expr": "ESI_UNKNOWN_T",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "Receiver becomes the T-point ESI; already pushed arg1 and its slot remain unchanged",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "ADDRESS(T+0x8)",
+          "actual": "ADDRESS(T+0x8)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "ADDRESS",
+          "actual": "ADDRESS",
+          "match": true
+        },
+        {
+          "fact": "arg1_slot_delta",
+          "expected": -16,
+          "actual": -16,
+          "match": true
+        },
+        {
+          "fact": "receiver_expr",
+          "expected": "ESI_UNKNOWN_T",
+          "actual": "ESI_UNKNOWN_T",
+          "match": true
+        },
+        {
+          "fact": "receiver_kind",
+          "expected": "UNKNOWN_REG",
+          "actual": "UNKNOWN_REG",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M8_B_WRONG_TARGET",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M8_B_WRONG_TARGET @0x004C47C1: e8 8a 46 06 00 -> e8 8b 46 06 00 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M8_B_WRONG_TARGET.bin",
+        "size": 52,
+        "sha256": "d1ec352fc0e5d3e09c33570d0485f8652f8370be414c188c665a1bc8cb6fe652",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M8_B_WRONG_TARGET.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M8_B_WRONG_TARGET_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8b 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "ADDRESS",
+        "arg1_expr": "ADDRESS(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E51",
+        "bridge_target_actual": "0x00528E51",
+        "bridge_valid": false,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "Actual target 0x00528E51; no valid bridge to entry 0x00528E50; wrong target NOT followed",
+      "checks": [
+        {
+          "fact": "bridge_target_actual",
+          "expected": "0x00528E51",
+          "actual": "0x00528E51",
+          "match": true
+        },
+        {
+          "fact": "bridge_valid",
+          "expected": false,
+          "actual": false,
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M9_B_LEA_TO_MOV",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M9_B_LEA_TO_MOV @0x004C47BA: 8d 4c 24 14 -> 8b 4c 24 14 (synthetic copy; EXE untouched)",
+      "fixture": {
+        "name": "M9_B_LEA_TO_MOV.bin",
+        "size": 52,
+        "sha256": "bcdafba824a1b20121008da10058202dfd824bd867bf13660307d9696b0ead57",
+        "note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash"
+      },
+      "objdump": {
+        "command": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work/cases/M9_B_LEA_TO_MOV.bin",
+        "rc": 0,
+        "raw_output": "01_RAW/CONTROLS/M9_B_LEA_TO_MOV_OBJDUMP.txt"
+      },
+      "decode": {
+        "instructions": 16,
+        "covers_window_exactly": true,
+        "first_va": "0x004C4792",
+        "last_instruction": "0x004C47C1 (e8 8a 46 06 00)",
+        "window": "[0x004C4792,0x004C47C6)"
+      },
+      "derived_facts": {
+        "T_delta": 0,
+        "flags_preserved_test_to_je": true,
+        "nonnull_reaches_call": true,
+        "arg1_kind": "STACK_READ",
+        "arg1_expr": "MEM(T+0x8)",
+        "arg1_slot_delta": -16,
+        "receiver_kind": "OPAQUE_RET",
+        "receiver_expr": "OPAQUE_RET(0x0095D3C4)",
+        "bridge_target": "0x00528E50",
+        "bridge_target_actual": "0x00528E50",
+        "bridge_valid": true,
+        "arg2_expr": "ESI_UNKNOWN_T",
+        "arg3_expr": "MEM(T+0x4c)",
+        "arg4_expr": "MEM(T+0x50)",
+        "null_je_taken": true,
+        "null_call_reached": false,
+        "unconditional_exit": false
+      },
+      "expected_text": "arg1 MEM(T+8), not ADDRESS(T+8); no pointee interpretation",
+      "checks": [
+        {
+          "fact": "arg1_expr",
+          "expected": "MEM(T+0x8)",
+          "actual": "MEM(T+0x8)",
+          "match": true
+        },
+        {
+          "fact": "arg1_kind",
+          "expected": "STACK_READ",
+          "actual": "STACK_READ",
+          "match": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    }
+  ],
+  "qc_cases": [
+    {
+      "case": "A_CLEAN",
+      "window": "A",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture_size": 66,
+      "fixture_sha": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/A_CLEAN.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/A_CLEAN.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00528e50 <.data>:\n  528e50:\t6a ff                \tpush   0xffffffff\n  528e52:\t68 3f f5 9b 00       \tpush   0x9bf53f\n  528e57:\t64 a1 00 00 00 00    \tmov    eax,fs:0x0\n  528e5d:\t50                   \tpush   eax\n  528e5e:\t83 ec 1c             \tsub    esp,0x1c\n  528e61:\t53                   \tpush   ebx\n  528e62:\t56                   \tpush   esi\n  528e63:\t57                   \tpush   edi\n  528e64:\ta1 d0 d8 b9 00       \tmov    eax,ds:0xb9d8d0\n  528e69:\t33 c4                \txor    eax,esp\n  528e6b:\t50                   \tpush   eax\n  528e6c:\t8d 44 24 2c          \tlea    eax,[esp+0x2c]\n  528e70:\t64 a3 00 00 00 00    \tmov    fs:0x0,eax\n  528e76:\t8b f1                \tmov    esi,ecx\n  528e78:\t89 74 24 10          \tmov    DWORD PTR [esp+0x10],esi\n  528e7c:\t8b 44 24 44          \tmov    eax,DWORD PTR [esp+0x44]\n  528e80:\t8b 4c 24 40          \tmov    ecx,DWORD PTR [esp+0x40]\n  528e84:\t8b 7c 24 3c          \tmov    edi,DWORD PTR [esp+0x3c]\n  528e88:\t50                   \tpush   eax\n  528e89:\t51                   \tpush   ecx\n  528e8a:\t57                   \tpush   edi\n  528e8b:\t8b ce                \tmov    ecx,esi\n  528e8d:\te8 1e 23 33 00       \tcall   0x85b1b0\n",
+      "decode": {
+        "instrs": 23,
+        "first": "0x00528E50",
+        "last_end": "0x00528E92",
+        "covers": true
+      },
+      "derived": {
+        "S": -56,
+        "src": 4,
+        "src_disp": 60,
+        "preserved": true,
+        "edi_ok": true,
+        "tail": 8761776,
+        "tail_rc": 8761776,
+        "arg1_kind": "MEM",
+        "arg1_text": "MEM([+4])",
+        "arg1_slot": -68,
+        "esp_before": -68,
+        "callee_entry": -72,
+        "esp_before_S": -12,
+        "callee_entry_S": -16,
+        "arg1_slot_S": -12,
+        "push_va": 5410442,
+        "push_reg": "edi",
+        "recv_kind": "RECV",
+        "fs_stored_off": -12,
+        "steps": [
+          {
+            "va": "0x00528E50",
+            "bytes": "6a ff",
+            "op": "push   0xffffffff",
+            "esp": -4,
+            "note": "push -> [-4] := 0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "bytes": "68 3f f5 9b 00",
+            "op": "push   0x9bf53f",
+            "esp": -8,
+            "note": "push -> [-8] := 0x9bf53f"
+          },
+          {
+            "va": "0x00528E57",
+            "bytes": "64 a1 00 00 00 00",
+            "op": "mov    eax,fs:0x0",
+            "esp": -8,
+            "note": "seg load fs:0x0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E5D",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -12,
+            "note": "push -> [-12] := FS0_PREV"
+          },
+          {
+            "va": "0x00528E5E",
+            "bytes": "83 ec 1c",
+            "op": "sub    esp,0x1c",
+            "esp": -40,
+            "note": "sub esp,0x1c -> esp=-40"
+          },
+          {
+            "va": "0x00528E61",
+            "bytes": "53",
+            "op": "push   ebx",
+            "esp": -44,
+            "note": "push -> [-44] := EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "bytes": "56",
+            "op": "push   esi",
+            "esp": -48,
+            "note": "push -> [-48] := ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -52,
+            "note": "push -> [-52] := EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E64",
+            "bytes": "a1 d0 d8 b9 00",
+            "op": "mov    eax,ds:0xb9d8d0",
+            "esp": -52,
+            "note": "seg load ds:0xb9d8d0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E69",
+            "bytes": "33 c4",
+            "op": "xor    eax,esp",
+            "esp": -52,
+            "note": "opaque xor; value changes, ESP/width unchanged"
+          },
+          {
+            "va": "0x00528E6B",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -56,
+            "note": "push -> [-56] := MOFFS(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E6C",
+            "bytes": "8d 44 24 2c",
+            "op": "lea    eax,[esp+0x2c]",
+            "esp": -56,
+            "note": "lea eax := ADDRESS([-12]) [kind=ADDR, opcode 8D]"
+          },
+          {
+            "va": "0x00528E70",
+            "bytes": "64 a3 00 00 00 00",
+            "op": "mov    fs:0x0,eax",
+            "esp": -56,
+            "note": "SEGMENT fs:0x0 := ADDRESS([-12]) (lea@0x00528E6C) (NOT a stack write; AS4)"
+          },
+          {
+            "va": "0x00528E76",
+            "bytes": "8b f1",
+            "op": "mov    esi,ecx",
+            "esp": -56,
+            "note": "mov esi := ecx (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E78",
+            "bytes": "89 74 24 10",
+            "op": "mov    DWORD PTR [esp+0x10],esi",
+            "esp": -56,
+            "note": "store [-40] := ECX_ENTRY (no flag write)"
+          },
+          {
+            "va": "0x00528E7C",
+            "bytes": "8b 44 24 44",
+            "op": "mov    eax,DWORD PTR [esp+0x44]",
+            "esp": -56,
+            "note": "load eax := MEM[+12] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E80",
+            "bytes": "8b 4c 24 40",
+            "op": "mov    ecx,DWORD PTR [esp+0x40]",
+            "esp": -56,
+            "note": "load ecx := MEM[+8] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E84",
+            "bytes": "8b 7c 24 3c",
+            "op": "mov    edi,DWORD PTR [esp+0x3c]",
+            "esp": -56,
+            "note": "load edi := MEM[+4] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E88",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -60,
+            "note": "push -> [-60] := MEM([+12])"
+          },
+          {
+            "va": "0x00528E89",
+            "bytes": "51",
+            "op": "push   ecx",
+            "esp": -64,
+            "note": "push -> [-64] := MEM([+8])"
+          },
+          {
+            "va": "0x00528E8A",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -68,
+            "note": "push -> [-68] := MEM([+4])"
+          },
+          {
+            "va": "0x00528E8B",
+            "bytes": "8b ce",
+            "op": "mov    ecx,esi",
+            "esp": -68,
+            "note": "mov ecx := esi (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E8D",
+            "bytes": "e8 1e 23 33 00",
+            "op": "call   0x85b1b0",
+            "esp": -72,
+            "note": "BOUNDARY call -> 0x0085B1B0 (callee not opened; hardware ret push applied; esp_before=-68)"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "fact": "S",
+          "got": -56,
+          "want": -56,
+          "ok": true
+        },
+        {
+          "fact": "src",
+          "got": 4,
+          "want": 4,
+          "ok": true
+        },
+        {
+          "fact": "preserved",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "edi_ok",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "tail",
+          "got": 8761776,
+          "want": 8761776,
+          "ok": true
+        },
+        {
+          "fact": "arg1_kind",
+          "got": "MEM",
+          "want": "MEM",
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "B_CLEAN_NONNULL",
+      "window": "B",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture_size": 52,
+      "fixture_sha": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/B_CLEAN_NONNULL.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/B_CLEAN_NONNULL.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "T",
+          "got": 0,
+          "want": 0,
+          "ok": true
+        },
+        {
+          "fact": "reaches",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "flags_ok",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "arg1_kind",
+          "got": "ADDR",
+          "want": "ADDR",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        },
+        {
+          "fact": "arg1_slot",
+          "got": -16,
+          "want": -16,
+          "ok": true
+        },
+        {
+          "fact": "arg2_kind",
+          "got": "UNK",
+          "want": "UNK",
+          "ok": true
+        },
+        {
+          "fact": "arg3",
+          "got": [
+            "MEM",
+            76
+          ],
+          "want": [
+            "MEM",
+            76
+          ],
+          "ok": true
+        },
+        {
+          "fact": "arg4",
+          "got": [
+            "MEM",
+            80
+          ],
+          "want": [
+            "MEM",
+            80
+          ],
+          "ok": true
+        },
+        {
+          "fact": "recv_kind",
+          "got": "OPRET",
+          "want": "OPRET",
+          "ok": true
+        },
+        {
+          "fact": "target",
+          "got": 5410384,
+          "want": 5410384,
+          "ok": true
+        },
+        {
+          "fact": "bvalid",
+          "got": true,
+          "want": true,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "B_CLEAN_NULL",
+      "window": "B",
+      "input_kind": "ORIGINAL",
+      "mutation": null,
+      "fixture_size": 52,
+      "fixture_sha": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/B_CLEAN_NULL.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/B_CLEAN_NULL.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "je_taken",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "call_reached",
+          "got": false,
+          "want": false,
+          "ok": true
+        },
+        {
+          "fact": "delivered_None",
+          "got": true,
+          "want": true,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M1_A_FRAME",
+      "window": "A",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M1_A_FRAME @0x00528E5E: 83 ec 1c -> 83 ec 18 (synthetic copy; EXE untouched)",
+      "fixture_size": 66,
+      "fixture_sha": "f9b3f4e76860905a1d4fd4ded056bd82d5f9d4f5a850dae245eda4370967ad2b",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M1_A_FRAME.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M1_A_FRAME.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00528e50 <.data>:\n  528e50:\t6a ff                \tpush   0xffffffff\n  528e52:\t68 3f f5 9b 00       \tpush   0x9bf53f\n  528e57:\t64 a1 00 00 00 00    \tmov    eax,fs:0x0\n  528e5d:\t50                   \tpush   eax\n  528e5e:\t83 ec 18             \tsub    esp,0x18\n  528e61:\t53                   \tpush   ebx\n  528e62:\t56                   \tpush   esi\n  528e63:\t57                   \tpush   edi\n  528e64:\ta1 d0 d8 b9 00       \tmov    eax,ds:0xb9d8d0\n  528e69:\t33 c4                \txor    eax,esp\n  528e6b:\t50                   \tpush   eax\n  528e6c:\t8d 44 24 2c          \tlea    eax,[esp+0x2c]\n  528e70:\t64 a3 00 00 00 00    \tmov    fs:0x0,eax\n  528e76:\t8b f1                \tmov    esi,ecx\n  528e78:\t89 74 24 10          \tmov    DWORD PTR [esp+0x10],esi\n  528e7c:\t8b 44 24 44          \tmov    eax,DWORD PTR [esp+0x44]\n  528e80:\t8b 4c 24 40          \tmov    ecx,DWORD PTR [esp+0x40]\n  528e84:\t8b 7c 24 3c          \tmov    edi,DWORD PTR [esp+0x3c]\n  528e88:\t50                   \tpush   eax\n  528e89:\t51                   \tpush   ecx\n  528e8a:\t57                   \tpush   edi\n  528e8b:\t8b ce                \tmov    ecx,esi\n  528e8d:\te8 1e 23 33 00       \tcall   0x85b1b0\n",
+      "decode": {
+        "instrs": 23,
+        "first": "0x00528E50",
+        "last_end": "0x00528E92",
+        "covers": true
+      },
+      "derived": {
+        "S": -52,
+        "src": 8,
+        "src_disp": 60,
+        "preserved": true,
+        "edi_ok": true,
+        "tail": 8761776,
+        "tail_rc": 8761776,
+        "arg1_kind": "MEM",
+        "arg1_text": "MEM([+8])",
+        "arg1_slot": -64,
+        "esp_before": -64,
+        "callee_entry": -68,
+        "esp_before_S": -12,
+        "callee_entry_S": -16,
+        "arg1_slot_S": -12,
+        "push_va": 5410442,
+        "push_reg": "edi",
+        "recv_kind": "RECV",
+        "fs_stored_off": -8,
+        "steps": [
+          {
+            "va": "0x00528E50",
+            "bytes": "6a ff",
+            "op": "push   0xffffffff",
+            "esp": -4,
+            "note": "push -> [-4] := 0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "bytes": "68 3f f5 9b 00",
+            "op": "push   0x9bf53f",
+            "esp": -8,
+            "note": "push -> [-8] := 0x9bf53f"
+          },
+          {
+            "va": "0x00528E57",
+            "bytes": "64 a1 00 00 00 00",
+            "op": "mov    eax,fs:0x0",
+            "esp": -8,
+            "note": "seg load fs:0x0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E5D",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -12,
+            "note": "push -> [-12] := FS0_PREV"
+          },
+          {
+            "va": "0x00528E5E",
+            "bytes": "83 ec 18",
+            "op": "sub    esp,0x18",
+            "esp": -36,
+            "note": "sub esp,0x18 -> esp=-36"
+          },
+          {
+            "va": "0x00528E61",
+            "bytes": "53",
+            "op": "push   ebx",
+            "esp": -40,
+            "note": "push -> [-40] := EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "bytes": "56",
+            "op": "push   esi",
+            "esp": -44,
+            "note": "push -> [-44] := ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -48,
+            "note": "push -> [-48] := EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E64",
+            "bytes": "a1 d0 d8 b9 00",
+            "op": "mov    eax,ds:0xb9d8d0",
+            "esp": -48,
+            "note": "seg load ds:0xb9d8d0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E69",
+            "bytes": "33 c4",
+            "op": "xor    eax,esp",
+            "esp": -48,
+            "note": "opaque xor; value changes, ESP/width unchanged"
+          },
+          {
+            "va": "0x00528E6B",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -52,
+            "note": "push -> [-52] := MOFFS(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E6C",
+            "bytes": "8d 44 24 2c",
+            "op": "lea    eax,[esp+0x2c]",
+            "esp": -52,
+            "note": "lea eax := ADDRESS([-8]) [kind=ADDR, opcode 8D]"
+          },
+          {
+            "va": "0x00528E70",
+            "bytes": "64 a3 00 00 00 00",
+            "op": "mov    fs:0x0,eax",
+            "esp": -52,
+            "note": "SEGMENT fs:0x0 := ADDRESS([-8]) (lea@0x00528E6C) (NOT a stack write; AS4)"
+          },
+          {
+            "va": "0x00528E76",
+            "bytes": "8b f1",
+            "op": "mov    esi,ecx",
+            "esp": -52,
+            "note": "mov esi := ecx (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E78",
+            "bytes": "89 74 24 10",
+            "op": "mov    DWORD PTR [esp+0x10],esi",
+            "esp": -52,
+            "note": "store [-36] := ECX_ENTRY (no flag write)"
+          },
+          {
+            "va": "0x00528E7C",
+            "bytes": "8b 44 24 44",
+            "op": "mov    eax,DWORD PTR [esp+0x44]",
+            "esp": -52,
+            "note": "load eax := MEM[+16] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E80",
+            "bytes": "8b 4c 24 40",
+            "op": "mov    ecx,DWORD PTR [esp+0x40]",
+            "esp": -52,
+            "note": "load ecx := MEM[+12] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E84",
+            "bytes": "8b 7c 24 3c",
+            "op": "mov    edi,DWORD PTR [esp+0x3c]",
+            "esp": -52,
+            "note": "load edi := MEM[+8] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E88",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -56,
+            "note": "push -> [-56] := MEM([+16])"
+          },
+          {
+            "va": "0x00528E89",
+            "bytes": "51",
+            "op": "push   ecx",
+            "esp": -60,
+            "note": "push -> [-60] := MEM([+12])"
+          },
+          {
+            "va": "0x00528E8A",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -64,
+            "note": "push -> [-64] := MEM([+8])"
+          },
+          {
+            "va": "0x00528E8B",
+            "bytes": "8b ce",
+            "op": "mov    ecx,esi",
+            "esp": -64,
+            "note": "mov ecx := esi (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E8D",
+            "bytes": "e8 1e 23 33 00",
+            "op": "call   0x85b1b0",
+            "esp": -68,
+            "note": "BOUNDARY call -> 0x0085B1B0 (callee not opened; hardware ret push applied; esp_before=-64)"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "fact": "S",
+          "got": -52,
+          "want": -52,
+          "ok": true
+        },
+        {
+          "fact": "src",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M2_A_SLOT",
+      "window": "A",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M2_A_SLOT @0x00528E84: 8b 7c 24 3c -> 8b 7c 24 38 (synthetic copy; EXE untouched)",
+      "fixture_size": 66,
+      "fixture_sha": "ae7bd7c4394d852205fc2ad292bca12a1c7dfb8ad46c91bc67bca9429470ddaa",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x528e50 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M2_A_SLOT.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M2_A_SLOT.bin:     file format binary\n\n\nDisassembly of section .data:\n\n00528e50 <.data>:\n  528e50:\t6a ff                \tpush   0xffffffff\n  528e52:\t68 3f f5 9b 00       \tpush   0x9bf53f\n  528e57:\t64 a1 00 00 00 00    \tmov    eax,fs:0x0\n  528e5d:\t50                   \tpush   eax\n  528e5e:\t83 ec 1c             \tsub    esp,0x1c\n  528e61:\t53                   \tpush   ebx\n  528e62:\t56                   \tpush   esi\n  528e63:\t57                   \tpush   edi\n  528e64:\ta1 d0 d8 b9 00       \tmov    eax,ds:0xb9d8d0\n  528e69:\t33 c4                \txor    eax,esp\n  528e6b:\t50                   \tpush   eax\n  528e6c:\t8d 44 24 2c          \tlea    eax,[esp+0x2c]\n  528e70:\t64 a3 00 00 00 00    \tmov    fs:0x0,eax\n  528e76:\t8b f1                \tmov    esi,ecx\n  528e78:\t89 74 24 10          \tmov    DWORD PTR [esp+0x10],esi\n  528e7c:\t8b 44 24 44          \tmov    eax,DWORD PTR [esp+0x44]\n  528e80:\t8b 4c 24 40          \tmov    ecx,DWORD PTR [esp+0x40]\n  528e84:\t8b 7c 24 38          \tmov    edi,DWORD PTR [esp+0x38]\n  528e88:\t50                   \tpush   eax\n  528e89:\t51                   \tpush   ecx\n  528e8a:\t57                   \tpush   edi\n  528e8b:\t8b ce                \tmov    ecx,esi\n  528e8d:\te8 1e 23 33 00       \tcall   0x85b1b0\n",
+      "decode": {
+        "instrs": 23,
+        "first": "0x00528E50",
+        "last_end": "0x00528E92",
+        "covers": true
+      },
+      "derived": {
+        "S": -56,
+        "src": 0,
+        "src_disp": 56,
+        "preserved": true,
+        "edi_ok": true,
+        "tail": 8761776,
+        "tail_rc": 8761776,
+        "arg1_kind": "MEM",
+        "arg1_text": "MEM([+0])",
+        "arg1_slot": -68,
+        "esp_before": -68,
+        "callee_entry": -72,
+        "esp_before_S": -12,
+        "callee_entry_S": -16,
+        "arg1_slot_S": -12,
+        "push_va": 5410442,
+        "push_reg": "edi",
+        "recv_kind": "RECV",
+        "fs_stored_off": -12,
+        "steps": [
+          {
+            "va": "0x00528E50",
+            "bytes": "6a ff",
+            "op": "push   0xffffffff",
+            "esp": -4,
+            "note": "push -> [-4] := 0xffffffff"
+          },
+          {
+            "va": "0x00528E52",
+            "bytes": "68 3f f5 9b 00",
+            "op": "push   0x9bf53f",
+            "esp": -8,
+            "note": "push -> [-8] := 0x9bf53f"
+          },
+          {
+            "va": "0x00528E57",
+            "bytes": "64 a1 00 00 00 00",
+            "op": "mov    eax,fs:0x0",
+            "esp": -8,
+            "note": "seg load fs:0x0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E5D",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -12,
+            "note": "push -> [-12] := FS0_PREV"
+          },
+          {
+            "va": "0x00528E5E",
+            "bytes": "83 ec 1c",
+            "op": "sub    esp,0x1c",
+            "esp": -40,
+            "note": "sub esp,0x1c -> esp=-40"
+          },
+          {
+            "va": "0x00528E61",
+            "bytes": "53",
+            "op": "push   ebx",
+            "esp": -44,
+            "note": "push -> [-44] := EBX_ENTRY"
+          },
+          {
+            "va": "0x00528E62",
+            "bytes": "56",
+            "op": "push   esi",
+            "esp": -48,
+            "note": "push -> [-48] := ESI_ENTRY"
+          },
+          {
+            "va": "0x00528E63",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -52,
+            "note": "push -> [-52] := EDI_ENTRY"
+          },
+          {
+            "va": "0x00528E64",
+            "bytes": "a1 d0 d8 b9 00",
+            "op": "mov    eax,ds:0xb9d8d0",
+            "esp": -52,
+            "note": "seg load ds:0xb9d8d0 -> eax (opaque)"
+          },
+          {
+            "va": "0x00528E69",
+            "bytes": "33 c4",
+            "op": "xor    eax,esp",
+            "esp": -52,
+            "note": "opaque xor; value changes, ESP/width unchanged"
+          },
+          {
+            "va": "0x00528E6B",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -56,
+            "note": "push -> [-56] := MOFFS(ds:0xb9d8d0) XOR ESP"
+          },
+          {
+            "va": "0x00528E6C",
+            "bytes": "8d 44 24 2c",
+            "op": "lea    eax,[esp+0x2c]",
+            "esp": -56,
+            "note": "lea eax := ADDRESS([-12]) [kind=ADDR, opcode 8D]"
+          },
+          {
+            "va": "0x00528E70",
+            "bytes": "64 a3 00 00 00 00",
+            "op": "mov    fs:0x0,eax",
+            "esp": -56,
+            "note": "SEGMENT fs:0x0 := ADDRESS([-12]) (lea@0x00528E6C) (NOT a stack write; AS4)"
+          },
+          {
+            "va": "0x00528E76",
+            "bytes": "8b f1",
+            "op": "mov    esi,ecx",
+            "esp": -56,
+            "note": "mov esi := ecx (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E78",
+            "bytes": "89 74 24 10",
+            "op": "mov    DWORD PTR [esp+0x10],esi",
+            "esp": -56,
+            "note": "store [-40] := ECX_ENTRY (no flag write)"
+          },
+          {
+            "va": "0x00528E7C",
+            "bytes": "8b 44 24 44",
+            "op": "mov    eax,DWORD PTR [esp+0x44]",
+            "esp": -56,
+            "note": "load eax := MEM[+12] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E80",
+            "bytes": "8b 4c 24 40",
+            "op": "mov    ecx,DWORD PTR [esp+0x40]",
+            "esp": -56,
+            "note": "load ecx := MEM[+8] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E84",
+            "bytes": "8b 7c 24 38",
+            "op": "mov    edi,DWORD PTR [esp+0x38]",
+            "esp": -56,
+            "note": "load edi := MEM[+0] (caller_area_unknown)"
+          },
+          {
+            "va": "0x00528E88",
+            "bytes": "50",
+            "op": "push   eax",
+            "esp": -60,
+            "note": "push -> [-60] := MEM([+12])"
+          },
+          {
+            "va": "0x00528E89",
+            "bytes": "51",
+            "op": "push   ecx",
+            "esp": -64,
+            "note": "push -> [-64] := MEM([+8])"
+          },
+          {
+            "va": "0x00528E8A",
+            "bytes": "57",
+            "op": "push   edi",
+            "esp": -68,
+            "note": "push -> [-68] := MEM([+0])"
+          },
+          {
+            "va": "0x00528E8B",
+            "bytes": "8b ce",
+            "op": "mov    ecx,esi",
+            "esp": -68,
+            "note": "mov ecx := esi (ECX_ENTRY)"
+          },
+          {
+            "va": "0x00528E8D",
+            "bytes": "e8 1e 23 33 00",
+            "op": "call   0x85b1b0",
+            "esp": -72,
+            "note": "BOUNDARY call -> 0x0085B1B0 (callee not opened; hardware ret push applied; esp_before=-68)"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "fact": "S",
+          "got": -56,
+          "want": -56,
+          "ok": true
+        },
+        {
+          "fact": "src",
+          "got": 0,
+          "want": 0,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M3_B_LEA_DISP",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M3_B_LEA_DISP @0x004C47BA: 8d 4c 24 14 -> 8d 4c 24 18 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "4d19e0548af86d97eb808a2ed6b5f5799f777d0fb4d028d19f42775ed0379a5c",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M3_B_LEA_DISP.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M3_B_LEA_DISP.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 18          \tlea    ecx,[esp+0x18]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 24,
+          "reg": "ecx",
+          "reg_off": 12,
+          "reg_text": "ADDRESS([+12]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 12,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            12
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "ADDR",
+          "want": "ADDR",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 12,
+          "want": 12,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M4_B_LAST_PUSH",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M4_B_LAST_PUSH @0x004C47BE: 51 -> 52 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "6a4677bd55f0b143c9e9f82d26e1264ff9fe3765837b8f589c3005f8996db374",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M4_B_LAST_PUSH.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M4_B_LAST_PUSH.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t52                   \tpush   edx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "MEM",
+        "arg1_T": 76,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "edx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "MEM",
+            76
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "MEM",
+          "want": "MEM",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 76,
+          "want": 76,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M5_B_EARLY_PUSH_ORDER",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M5_B_EARLY_PUSH_ORDER @0x004C47B7: 51 52 -> 52 51 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "6cb86b8cc3b88fbcccb869d7758734a85fbd0bb7e35e0a94718207fa625329d7",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M5_B_EARLY_PUSH_ORDER.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M5_B_EARLY_PUSH_ORDER.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t52                   \tpush   edx\n  4c47b8:\t51                   \tpush   ecx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            80
+          ],
+          "a4": [
+            "MEM",
+            76
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "ADDR",
+          "want": "ADDR",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        },
+        {
+          "fact": "arg1_slot",
+          "got": -16,
+          "want": -16,
+          "ok": true
+        },
+        {
+          "fact": "arg3",
+          "got": [
+            "MEM",
+            80
+          ],
+          "want": [
+            "MEM",
+            80
+          ],
+          "ok": true
+        },
+        {
+          "fact": "arg4",
+          "got": [
+            "MEM",
+            76
+          ],
+          "want": [
+            "MEM",
+            76
+          ],
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M6_B_SKIP",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M6_B_SKIP @0x004C47AD: 74 19 -> eb 19 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "21d70faf884712ddd9c80236e781cbd26182cd8919e8f886aecd2fae498e081e",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M6_B_SKIP.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M6_B_SKIP.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\teb 19                \tjmp    0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 1,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": true,
+          "je": false,
+          "call_reached": false,
+          "delivered": null
+        },
+        "reaches": false,
+        "uncond": true,
+        "call_reached": false
+      },
+      "checks": [
+        {
+          "fact": "reaches",
+          "got": false,
+          "want": false,
+          "ok": true
+        },
+        {
+          "fact": "uncond",
+          "got": true,
+          "want": true,
+          "ok": true
+        },
+        {
+          "fact": "call_reached",
+          "got": false,
+          "want": false,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M7_B_RECEIVER_ONLY",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M7_B_RECEIVER_ONLY @0x004C47BF: 8b c8 -> 8b ce (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "da36a328b63dcbebf2ebb65e411e76e9dce5af7dd51a79c6754ed1ff8a61fc73",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M7_B_RECEIVER_ONLY.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M7_B_RECEIVER_ONLY.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b ce                \tmov    ecx,esi\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "UNK",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "ADDR",
+          "want": "ADDR",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        },
+        {
+          "fact": "arg1_slot",
+          "got": -16,
+          "want": -16,
+          "ok": true
+        },
+        {
+          "fact": "recv_kind",
+          "got": "UNK",
+          "want": "UNK",
+          "ok": true
+        },
+        {
+          "fact": "recv_is_esi_UNK",
+          "got": true,
+          "want": true,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M8_B_WRONG_TARGET",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M8_B_WRONG_TARGET @0x004C47C1: e8 8a 46 06 00 -> e8 8b 46 06 00 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "d1ec352fc0e5d3e09c33570d0485f8652f8370be414c188c665a1bc8cb6fe652",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M8_B_WRONG_TARGET.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M8_B_WRONG_TARGET.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8d 4c 24 14          \tlea    ecx,[esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8b 46 06 00       \tcall   0x528e51\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8d",
+          "kind": "ADDR",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "ADDRESS([+8]) (lea@0x004C47BA)"
+        },
+        "reaches": true,
+        "arg1_kind": "ADDR",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410385,
+        "target_rc": 5410385,
+        "bvalid": false,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "ADDR",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "actual_target",
+          "got": 5410385,
+          "want": 5410385,
+          "ok": true
+        },
+        {
+          "fact": "target_rc",
+          "got": 5410385,
+          "want": 5410385,
+          "ok": true
+        },
+        {
+          "fact": "bvalid",
+          "got": false,
+          "want": false,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    },
+    {
+      "case": "M9_B_LEA_TO_MOV",
+      "window": "B",
+      "input_kind": "SYNTHETIC_MUTATION",
+      "mutation": "M9_B_LEA_TO_MOV @0x004C47BA: 8d 4c 24 14 -> 8b 4c 24 14 (synthetic copy; EXE untouched)",
+      "fixture_size": 52,
+      "fixture_sha": "bcdafba824a1b20121008da10058202dfd824bd867bf13660307d9696b0ead57",
+      "fixture_note": "identity hashes qualify ORIGINAL inputs only; synthetic fixtures are analyzed, never rejected by hash",
+      "objdump_rc": 0,
+      "objdump_cmd": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x4c4792 /mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M9_B_LEA_TO_MOV.bin",
+      "raw_stdout": "\n/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg/cases/M9_B_LEA_TO_MOV.bin:     file format binary\n\n\nDisassembly of section .data:\n\n004c4792 <.data>:\n  4c4792:\t68 28 01 00 00       \tpush   0x128\n  4c4797:\te8 28 8c 49 00       \tcall   0x95d3c4\n  4c479c:\t83 c4 04             \tadd    esp,0x4\n  4c479f:\t89 44 24 44          \tmov    DWORD PTR [esp+0x44],eax\n  4c47a3:\t85 c0                \ttest   eax,eax\n  4c47a5:\tc7 44 24 3c 00 00 00 \tmov    DWORD PTR [esp+0x3c],0x0\n  4c47ac:\t00 \n  4c47ad:\t74 19                \tje     0x4c47c8\n  4c47af:\t8b 4c 24 50          \tmov    ecx,DWORD PTR [esp+0x50]\n  4c47b3:\t8b 54 24 4c          \tmov    edx,DWORD PTR [esp+0x4c]\n  4c47b7:\t51                   \tpush   ecx\n  4c47b8:\t52                   \tpush   edx\n  4c47b9:\t56                   \tpush   esi\n  4c47ba:\t8b 4c 24 14          \tmov    ecx,DWORD PTR [esp+0x14]\n  4c47be:\t51                   \tpush   ecx\n  4c47bf:\t8b c8                \tmov    ecx,eax\n  4c47c1:\te8 8a 46 06 00       \tcall   0x528e50\n",
+      "decode": {
+        "instrs": 16,
+        "first": "0x004C4792",
+        "last_end": "0x004C47C6",
+        "covers": true
+      },
+      "path_count": 2,
+      "derived": {
+        "null": {
+          "exit_va": 4999112,
+          "in_window": false,
+          "uncond": false,
+          "je": true,
+          "call_reached": false,
+          "delivered": null
+        },
+        "T": 0,
+        "flags_ok": true,
+        "br_mn": "je",
+        "br_target": 4999112,
+        "opaque": {
+          "found": true,
+          "push128": true,
+          "add_esp4": true,
+          "target": 9819076
+        },
+        "val_insn": {
+          "va": 4999098,
+          "opcode": "8b",
+          "kind": "MEM",
+          "disp": 20,
+          "reg": "ecx",
+          "reg_off": 8,
+          "reg_text": "MEM([+8])"
+        },
+        "reaches": true,
+        "arg1_kind": "MEM",
+        "arg1_T": 8,
+        "arg1_slot": -16,
+        "arg1_slot_T0": -16,
+        "push_va": 4999102,
+        "push_reg": "ecx",
+        "recv_kind": "OPRET",
+        "target": 5410384,
+        "target_rc": 5410384,
+        "bvalid": true,
+        "esp_before": -16,
+        "callee_entry": -20,
+        "aslots": {
+          "a1": [
+            "MEM",
+            8
+          ],
+          "a2": [
+            "UNK",
+            null
+          ],
+          "a3": [
+            "MEM",
+            76
+          ],
+          "a4": [
+            "MEM",
+            80
+          ]
+        }
+      },
+      "checks": [
+        {
+          "fact": "arg1_kind",
+          "got": "MEM",
+          "want": "MEM",
+          "ok": true
+        },
+        {
+          "fact": "arg1_off",
+          "got": 8,
+          "want": 8,
+          "ok": true
+        }
+      ],
+      "verdict": "CONTROL_PASS"
+    }
+  ],
+  "summary": {
+    "production_control_pass": 12,
+    "production_total": 12,
+    "qc_control_pass": 12,
+    "qc_total": 12,
+    "required_byte_matrix": "correct outcomes / 24",
+    "correct_outcomes": 24,
+    "m5_production": {
+      "arg1_kind_unchanged": true,
+      "arg1_expr_unchanged": true,
+      "arg1_slot_unchanged": true,
+      "arg3_changed_vs_clean": true,
+      "arg4_changed_vs_clean": true,
+      "arg3_is_clean_arg4": true,
+      "arg4_is_clean_arg3": true
+    },
+    "m7_production": {
+      "arg1_kind_unchanged": true,
+      "arg1_expr_unchanged": true,
+      "arg1_slot_unchanged": true,
+      "receiver_changed_vs_clean": true
+    },
+    "m5_qc": {
+      "arg1_kind_unchanged": true,
+      "arg1_slot_unchanged": true,
+      "arg3_swapped": true,
+      "arg4_swapped": true
+    },
+    "m7_qc": {
+      "arg1_kind_unchanged": true,
+      "arg1_slot_unchanged": true,
+      "receiver_changed_vs_clean": true
+    }
+  },
+  "scratch_paths": {
+    "production_raw_out": "/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_out",
+    "production_work": "/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/reg_prod_work",
+    "qc_work": "/mnt/d/Eudoria_Reconstruction/99_Audits/PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009/SCRATCH/qc_work/reg"
+  },
+  "started_utc": "2026-10-09T15:56:59.562033+00:00",
+  "finished_utc": "2026-10-09T15:56:59.562049+00:00"
+}

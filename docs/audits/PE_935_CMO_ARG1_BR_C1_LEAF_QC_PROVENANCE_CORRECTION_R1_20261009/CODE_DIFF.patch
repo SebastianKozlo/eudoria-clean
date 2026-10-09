@@ -1,0 +1,129 @@
+--- predecessor:03_SCRIPTS/run_frame_bridge.py (a7b1dc0, 1B11B3A1...)
++++ corrected:03_SCRIPTS/run_frame_bridge.py
+@@ -1964,16 +1964,38 @@
+     br = prov["bridge"]
+ 
+     # 6a) A source slot: bytes 8b 7c 24 3c at 0x00528E84 + S=-0x38 -> [E+4]
++    #     (BR-C1-R1 leaf-field correction, run
++    #      PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009:
++    #      the two phase_a.source_slot leaves are now checked INDIVIDUALLY
++    #      with the existing safe typed helpers — check_slot_expr for the
++    #      expression leaf, check_int for the delta leaf (native JSON
++    #      integer; JSON booleans and floats rejected as WRONG_TYPE) —
++    #      against the bytes-derived src_delta_rederived. The aggregate
++    #      PROV-A-SLOT is the conjunction of BOTH typed leaf comparisons.
++    #      Both leaves are evaluated even if one fails; no direct indexing
++    #      of a tested leaf can raise on a missing field; no catch-and-pass,
++    #      no coercion, no silent defaults.)
+     src_ins = by_va.get(SOURCE_LOAD_VA)
+     src_disp = int.from_bytes(bytes(int(b, 16) for b in src_ins.bytes_hex[3:4]),
+-                             "little")
++                              "little")
+     src_delta_rederived = espA[PIVOT_S_VA] + src_disp
+-    chk("PROV-A-SLOT", "clean entry source slot (bytes 0x3c disp + S)",
+-        pa["source_slot"]["slot_expr_from_E"],
+-        slot_expr("E", src_delta_rederived),
+-        pa["source_slot"]["slot_expr_from_E"]
+-        == slot_expr("E", src_delta_rederived)
+-        and pa["source_slot"]["slot_delta_from_E"] == src_delta_rederived)
++    ok_slot_expr, dg_slot_expr, val_slot_expr = check_slot_expr(
++        prov, "phase_a.source_slot.slot_expr_from_E", "E",
++        src_delta_rederived)
++    chk_d("PROV-A-SLOT-EXPR", "persisted entry source-slot expression leaf "
++          "(typed; '[E+0x..]' form) vs bytes-derived slot", val_slot_expr,
++          slot_expr("E", src_delta_rederived), ok_slot_expr, dg_slot_expr)
++    ok_slot_delta, dg_slot_delta, val_slot_delta = check_int(
++        prov, "phase_a.source_slot.slot_delta_from_E", src_delta_rederived)
++    chk_d("PROV-A-SLOT-DELTA", "persisted entry source-slot delta leaf "
++          "(typed; native JSON integer; JSON booleans/floats rejected) vs "
++          "bytes-derived delta", val_slot_delta, src_delta_rederived,
++          ok_slot_delta, dg_slot_delta)
++    chk("PROV-A-SLOT", "clean entry source slot (bytes 0x3c disp + S); "
++        "aggregate conjunction of BOTH typed leaf comparisons",
++        (val_slot_expr, val_slot_delta),
++        (slot_expr("E", src_delta_rederived), src_delta_rederived),
++        ok_slot_expr and ok_slot_delta)
+ 
+     # 6b) A delivery deltas
+     chk("PROV-A-DELIVERY", "tail call delivery ESP facts",
+--- predecessor:03_SCRIPTS/qc_frame_bridge.py (a7b1dc0, 1D6E168C...)
++++ corrected:03_SCRIPTS/qc_frame_bridge.py
+@@ -963,6 +963,37 @@
+     return True, "OK", v
+ 
+ 
++def qc_eslot_expr(delta):
++    """QC-local '[E+0x4]' formatter (E base, fmt_off hex notation; no
++    production import). Added by the leaf-field correction run
++    PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009."""
++    return "[E%s]" % fmt_off(delta)
++
++
++def qc_check_eslot_expr(container, dotted, derived_delta):
++    """QC's OWN safe string helper for the persisted E-based source-slot
++    expression leaf 'phase_a.source_slot.slot_expr_from_E'. The expected
++    expression is constructed from MY independently derived source-slot
++    delta (my_src), never from a copied persisted claim or the production
++    verdict. Never raises: a missing field, wrong native JSON type,
++    malformed supported expression or mismatch returns a named diagnostic.
++    Added by the leaf-field correction run
++    PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    if not re.match(r"^\[E(?:[+-]0x[0-9a-fA-F]+)?\]$", v):
++        return False, ("MALFORMED_EXPR:%s:not a supported [E+0x..] slot "
++                       "expression" % dotted), v
++    if v != qc_eslot_expr(derived_delta):
++        return False, ("VALUE_MISMATCH:%s:my derivation %s, got %r"
++                       % (dotted, qc_eslot_expr(derived_delta), v)), v
++    return True, "OK", v
++
++
+ def qc_check_addr_expr(container, dotted, derived_delta):
+     present, v = field_get(container, dotted)
+     if not present:
+@@ -1131,13 +1162,36 @@
+     br = prov["bridge"]
+ 
+     # 6a) A source slot: disp byte at 0x528E84 + my walk S
++    #     (BR-C1-R1 leaf-field correction, run
++    #      PE_935_CMO_ARG1_BR_C1_LEAF_QC_PROVENANCE_CORRECTION_R1_20261009:
++    #      the two phase_a.source_slot leaves are now checked INDIVIDUALLY
++    #      with QC's OWN safe typed helpers — qc_check_eslot_expr for the
++    #      expression leaf (expected constructed from my independently
++    #      derived my_src, never from a copied claim or the production
++    #      verdict; the old hardcoded "[E+0x4]" string comparison is
++    #      removed), qc_check_int for the delta leaf (native JSON integer;
++    #      JSON booleans and floats rejected as WRONG_TYPE). The aggregate
++    #      PROV-A-SLOT is the conjunction of BOTH typed leaf comparisons.
++    #      Both leaves are evaluated even if one fails; no direct indexing
++    #      of a tested leaf can raise on a missing field.)
+     src_ins = by_va[0x528E84]
+     disp = int(src_ins.bytes[3], 16)
+     my_src = walkA[0x528E76] + disp
+-    chk("PROV-A-SLOT", "clean entry source slot (my disp byte + walk S)",
+-        pa["source_slot"]["slot_expr_from_E"], "[E%+d]" % my_src,
+-        pa["source_slot"]["slot_expr_from_E"] == "[E+0x4]"
+-        and pa["source_slot"]["slot_delta_from_E"] == my_src)
++    ok_slot_expr, dg_slot_expr, val_slot_expr = qc_check_eslot_expr(
++        prov, "phase_a.source_slot.slot_expr_from_E", my_src)
++    chk_d("QC-A-SLOT-EXPR", "persisted entry source-slot expression leaf "
++          "(typed; '[E+0x..]' form) vs my bytes-derived slot", val_slot_expr,
++          qc_eslot_expr(my_src), ok_slot_expr, dg_slot_expr)
++    ok_slot_delta, dg_slot_delta, val_slot_delta = qc_check_int(
++        prov, "phase_a.source_slot.slot_delta_from_E", my_src)
++    chk_d("QC-A-SLOT-DELTA", "persisted entry source-slot delta leaf "
++          "(typed; native JSON integer; JSON booleans/floats rejected) vs my "
++          "bytes-derived delta", val_slot_delta, my_src, ok_slot_delta,
++          dg_slot_delta)
++    chk("PROV-A-SLOT", "clean entry source slot (my disp byte + walk S); "
++        "aggregate conjunction of BOTH typed leaf comparisons",
++        (val_slot_expr, val_slot_delta), (qc_eslot_expr(my_src), my_src),
++        ok_slot_expr and ok_slot_delta)
+     chk("PROV-A-DELIVERY", "A delivery ESP facts (my walk)",
+         [pa["delivery"]["esp_before_call"],
+          pa["delivery"]["callee_entry_esp"]], ["E-0x44", "E-0x48"],

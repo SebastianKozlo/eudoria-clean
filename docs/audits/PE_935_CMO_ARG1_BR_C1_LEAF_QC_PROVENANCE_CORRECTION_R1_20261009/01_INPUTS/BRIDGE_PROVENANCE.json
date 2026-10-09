@@ -1,0 +1,662 @@
+{
+  "run_id": "PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009",
+  "run_class": "BOUNDED_STATIC_ARGUMENT_PROVENANCE",
+  "tool": {
+    "name": "GNU objdump (GNU Binutils for Debian) 2.44",
+    "rc": 0
+  },
+  "windows": {
+    "run_id": "PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009",
+    "exe": {
+      "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+      "size": 8015872,
+      "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+      "image_base": "0x00400000",
+      "read_scope": "whole-file hash + PE header/section mapping + the two pinned window byte ranges only"
+    },
+    "tool": {
+      "name": "GNU objdump (GNU Binutils for Debian) 2.44",
+      "rc": 0,
+      "command_form": "objdump -D -b binary -m i386 -M intel --adjust-vma=<VA> <fixture.bin>"
+    },
+    "windows": {
+      "A": {
+        "va_start": "0x00528E50",
+        "va_end_exclusive": "0x00528E92",
+        "interval": "[0x00528E50,0x00528E92)",
+        "size": 66,
+        "raw_offset": 1216080,
+        "raw_offset_hex": "0x128e50",
+        "sha256": "f8735567340cd3be2f6b64b4bbc2be292487e97b6184758ca408e6ff1ce78e85",
+        "sha256_matches_contract_pin": true,
+        "pe_mapping": {
+          "section": ".text",
+          "section_rva_range": "[0x1000,0x6745E5)",
+          "section_raw_backed": true,
+          "raw_range": "[0x1000,0x675000)",
+          "unique_mapping": true,
+          "note": "RVA = VA - ImageBase; raw offset = RVA for .text (PointerToRawData == VirtualAddress == 0x1000)"
+        },
+        "decode": {
+          "instructions": 23,
+          "covers_window_exactly": true,
+          "first_va": "0x00528E50",
+          "last_instruction_va": "0x00528E8D",
+          "last_instruction_end": "0x00528E92",
+          "visible_calls": [
+            {
+              "va": "0x00528E8D",
+              "target": "0x85b1b0",
+              "bytes": "e8 1e 23 33 00"
+            }
+          ]
+        },
+        "raw_text_file": "01_RAW/WINDOW_A_OBJDUMP.txt",
+        "retry_raw_text_file": "01_RAW/WINDOW_A_OBJDUMP_RETRY.txt",
+        "objdump_rc": 0
+      },
+      "B": {
+        "va_start": "0x004C4792",
+        "va_end_exclusive": "0x004C47C6",
+        "interval": "[0x004C4792,0x004C47C6)",
+        "size": 52,
+        "raw_offset": 804754,
+        "raw_offset_hex": "0xc4792",
+        "sha256": "b59e16dc116f4ce0438a1e92bc6b2cbc33fab0b19fabc24cb3a29c911c1efb6a",
+        "sha256_matches_contract_pin": true,
+        "pe_mapping": {
+          "section": ".text",
+          "section_rva_range": "[0x1000,0x6745E5)",
+          "section_raw_backed": true,
+          "raw_range": "[0x1000,0x675000)",
+          "unique_mapping": true,
+          "note": "RVA = VA - ImageBase; raw offset = RVA for .text (PointerToRawData == VirtualAddress == 0x1000)"
+        },
+        "decode": {
+          "instructions": 16,
+          "covers_window_exactly": true,
+          "first_va": "0x004C4792",
+          "last_instruction_va": "0x004C47C1",
+          "last_instruction_end": "0x004C47C6",
+          "visible_calls": [
+            {
+              "va": "0x004C4797",
+              "target": "0x95d3c4",
+              "bytes": "e8 28 8c 49 00"
+            },
+            {
+              "va": "0x004C47C1",
+              "target": "0x528e50",
+              "bytes": "e8 8a 46 06 00"
+            }
+          ]
+        },
+        "raw_text_file": "01_RAW/WINDOW_B_OBJDUMP.txt",
+        "retry_raw_text_file": "01_RAW/WINDOW_B_OBJDUMP_RETRY.txt",
+        "objdump_rc": 0
+      }
+    },
+    "crash_continuation_verification": {
+      "A": {
+        "persisted_raw_file": "01_RAW/WINDOW_A_OBJDUMP.txt",
+        "fresh_retry_file": "01_RAW/WINDOW_A_OBJDUMP_RETRY.txt",
+        "disassembly_lines_identical": true,
+        "old_line_count": 23,
+        "new_line_count": 23
+      },
+      "B": {
+        "persisted_raw_file": "01_RAW/WINDOW_B_OBJDUMP.txt",
+        "fresh_retry_file": "01_RAW/WINDOW_B_OBJDUMP_RETRY.txt",
+        "disassembly_lines_identical": true,
+        "old_line_count": 17,
+        "new_line_count": 17
+      }
+    }
+  },
+  "phase_a": {
+    "entry_esp_symbol": "E",
+    "entry_va": "0x00528E50",
+    "pivot_S": {
+      "va": "0x00528E76",
+      "esp_expr": "E-0x38",
+      "esp_delta_from_E": -56
+    },
+    "source_slot": {
+      "load_va": "0x00528E84",
+      "load_expr": "mov edi,DWORD PTR [esp+0x3c]",
+      "slot_expr_from_E": "[E+0x4]",
+      "slot_expr_from_S": "[S+0x3c]",
+      "slot_delta_from_E": 4
+    },
+    "preservation": {
+      "entry_slot_value_preserved_to_load": true,
+      "writes_before_load": [
+        {
+          "va": "0x00528E50",
+          "kind": "PUSH",
+          "slot": "[E-0x4]",
+          "value": "0xffffffff"
+        },
+        {
+          "va": "0x00528E52",
+          "kind": "PUSH",
+          "slot": "[E-0x8]",
+          "value": "0x9bf53f"
+        },
+        {
+          "va": "0x00528E5D",
+          "kind": "PUSH",
+          "slot": "[E-0xc]",
+          "value": "FS0"
+        },
+        {
+          "va": "0x00528E61",
+          "kind": "PUSH",
+          "slot": "[E-0x2c]",
+          "value": "EBX_ENTRY"
+        },
+        {
+          "va": "0x00528E62",
+          "kind": "PUSH",
+          "slot": "[E-0x30]",
+          "value": "ESI_ENTRY"
+        },
+        {
+          "va": "0x00528E63",
+          "kind": "PUSH",
+          "slot": "[E-0x34]",
+          "value": "EDI_ENTRY"
+        },
+        {
+          "va": "0x00528E6B",
+          "kind": "PUSH",
+          "slot": "[E-0x38]",
+          "value": "Moffs(ds:0xb9d8d0) XOR ESP"
+        },
+        {
+          "va": "0x00528E78",
+          "kind": "MOV_STORE",
+          "slot": "[E-0x28]",
+          "value": "ECX_ENTRY"
+        }
+      ],
+      "segment_writes_before_load": [
+        {
+          "va": "0x00528E70",
+          "segment": "fs:[0x0]",
+          "value": "E-0xc (computed)"
+        }
+      ],
+      "aliasing_writes_to_source_slot": [],
+      "edi_preserved_to_push": true,
+      "edi_reaching_def_at_push": "0x00528E84"
+    },
+    "delivery": {
+      "tail_call_va": "0x00528E8D",
+      "tail_target": "0x0085B1B0",
+      "esp_before_call": "E-0x44",
+      "esp_before_call_S": "S-0xc",
+      "callee_entry_esp": "E-0x48",
+      "callee_entry_esp_S": "S-0x10",
+      "arg1_slot": "[E-0x44]",
+      "arg1_slot_S": "[S-0xc]",
+      "arg1_value_kind": "STACK_READ",
+      "arg1_value_expr": "MEM(E+0x4)@0x00528E84"
+    },
+    "receiver": {
+      "expr": "ECX_ENTRY",
+      "kind": "ENTRY_RECEIVER",
+      "channel": "ECX via ESI (mov esi,ecx @0x00528E76; mov ecx,esi @0x00528E8B); separate from arg1"
+    }
+  },
+  "phase_b": {
+    "path_count": 2,
+    "instruction_count": 16,
+    "null_path": {
+      "branch_va": "0x004C47AD",
+      "branch_op": "je     0x4c47c8",
+      "branch_mnemonic": "je",
+      "exit_va": "0x004C47C8",
+      "exit_inside_window": false,
+      "je_taken": true,
+      "unconditional_exit": false,
+      "call_reached": false
+    },
+    "nonnull_path": {
+      "T_delta": 0,
+      "flags": {
+        "test_va": "0x004C47A3",
+        "test_op": "test   eax,eax",
+        "je_va": "0x004C47AD",
+        "je_op": "je     0x4c47c8",
+        "flag_writers_between": [],
+        "flags_preserved_test_to_je": true,
+        "je_condition": "EAX==0 -> taken (exit); EAX!=0 -> fall-through"
+      },
+      "opaque_call": {
+        "va": "0x004C4797",
+        "target": "0x0095D3C4",
+        "preceding_push": "push 0x128",
+        "following_cleanup": "add esp,0x4",
+        "return_condition": "AS3 normal ABI-compatible return: pops exactly the return address (ESP restored), return value in EAX; body NOT opened",
+        "callee_body_opened": false
+      },
+      "lea_instruction": {
+        "va": "0x004C47BA",
+        "op": "lea    ecx,[esp+0x14]",
+        "dst": "ecx",
+        "kind": "ADDRESS",
+        "expr": "T0+0x8 (computed)",
+        "value_delta": 8,
+        "reaching_def_va": "0x004C47BA"
+      },
+      "arg1": {
+        "final_push_va": "0x004C47BE",
+        "pushed_register": "ecx",
+        "slot_delta_T0": -16,
+        "value_kind": "ADDRESS",
+        "value_delta": 8,
+        "value_provenance": "lea@0x004C47BA",
+        "reaching_def_va": "0x004C47BA",
+        "value_expr": "ADDRESS(T+0x8)"
+      },
+      "arg_slots": {
+        "arg1": {
+          "kind": "ADDRESS",
+          "delta": 8,
+          "expr": "T0+0x8 (computed)"
+        },
+        "arg2": {
+          "kind": "UNKNOWN_REG",
+          "delta": null,
+          "expr": "ESI_UNKNOWN_T"
+        },
+        "arg3": {
+          "kind": "STACK_READ",
+          "delta": 76,
+          "expr": "[T0+0x4c]"
+        },
+        "arg4": {
+          "kind": "STACK_READ",
+          "delta": 80,
+          "expr": "[T0+0x50]"
+        }
+      },
+      "arg_slot_deltas": {
+        "arg1": -16,
+        "arg2": -12,
+        "arg3": -8,
+        "arg4": -4
+      },
+      "receiver": {
+        "kind": "OPAQUE_RET",
+        "expr": "OPAQUE_RET(0x0095D3C4)"
+      },
+      "call": {
+        "va": "0x004C47C1",
+        "target": "0x00528E50",
+        "target_recomputed": "0x00528E50",
+        "esp_before_call_delta_T0": -16,
+        "callee_entry_esp_delta_T0": -20,
+        "bridge_valid": true
+      }
+    }
+  },
+  "bridge": {
+    "join_expr": "E = T-0x14",
+    "E_delta_from_T": -20,
+    "a_source_slot_from_T": "[T-0x10]",
+    "b_arg1_slot": "[T-0x10]",
+    "slot_address_identity": true,
+    "b_arg1_value_kind": "ADDRESS",
+    "b_arg1_value_expr": "ADDRESS(T+0x8)",
+    "b_final_push_va": "0x004C47BE",
+    "a_source_load_va": "0x00528E84",
+    "a_delivered_value_kind": "STACK_READ",
+    "intervening_writes_to_joined_slot": [],
+    "status": "POINTER_VALUE_IDENTITY_ESTABLISHED_CONDITIONAL",
+    "cross_call_value_expr": "ADDRESS(T+0x8)",
+    "delivered_boundaries": [
+      "arg1 of FUN_00528E50 at its entry (CALL 0x004C47C1)",
+      "arg1 of FUN_0085B1B0 at its entry (CALL 0x00528E8D)"
+    ],
+    "conditions": [
+      "AS3 opaque callee 0x0095D3C4 normal ABI-compatible return",
+      "EAX != 0 at 0x004C47AD (qualified branch only)",
+      "AS4 FS/TIB disjoint from the live argument stack region",
+      "AS5 straight-line window-A path from entry 0x00528E50",
+      "AS1/AS2 x86 push/call stack semantics and cdecl argument order"
+    ]
+  },
+  "claims": [
+    {
+      "claim_id": "A-1",
+      "claim_class": "FUNCTION_IDENTITY",
+      "statement": "Window A decodes as a valid 32-bit instruction stream of 23 instructions starting exactly at the pinned entry VA 0x00528E50 and ending exactly at 0x00528E92; it is the entry portion of the function entered via CALL 0x004C47C1 (boundary provenance: the direct call target and the pinned historical listing F00528E50_CTOR_MOBJ.txt; the body beyond the window is NOT opened).",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x00528E50",
+      "window": "A",
+      "decoded_op": "first=push 0xffffffff; last=call 0x85b1b0",
+      "esp_register_memory_fact": "entry ESP := E (symbolic)",
+      "path_abi_alias_assumptions": [
+        "decode coverage check from objdump output"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED_AS_DECODED_ENTRY_PORTION",
+      "remaining_uncertainty": "function identity beyond the entry boundary is NOT claimed"
+    },
+    {
+      "claim_id": "A-2",
+      "claim_class": "OBSERVED_STATIC_OPERATION",
+      "statement": "SEH prologue chain: push -1; push 0x9BF53F; mov eax,fs:0x0; push eax; sub esp,0x1c -> ESP = E-0x28 measured (pushes write E-4, E-8, E-0xC).",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x00528E50..0x00528E5E",
+      "window": "A",
+      "decoded_op": "push 0xffffffff / push 0x9bf53f / mov eax,fs:0x0 / push eax / sub esp,0x1c",
+      "esp_register_memory_fact": "E-0x0 -> E-0x28 (5 instructions)",
+      "path_abi_alias_assumptions": [],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED",
+      "remaining_uncertainty": "none for this bounded operation"
+    },
+    {
+      "claim_id": "A-3",
+      "claim_class": "OBSERVED_STATIC_OPERATION",
+      "statement": "Register saves and security cookie: push ebx; push esi; push edi; mov eax,ds:0xB9D8D0; xor eax,esp; push eax -> ESP = E-0x38 =: S; the cookie computation changes a value, not the push width.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x00528E61..0x00528E6B",
+      "window": "A",
+      "decoded_op": "push ebx / push esi / push edi / mov eax,ds:0xb9d8d0 / xor eax,esp / push eax",
+      "esp_register_memory_fact": "E-0x28 -> E-0x38 (6 instructions)",
+      "path_abi_alias_assumptions": [],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED",
+      "remaining_uncertainty": "the cookie value itself is opaque and irrelevant to slot identity"
+    },
+    {
+      "claim_id": "A-4",
+      "claim_class": "OBSERVED_STATIC_OPERATION",
+      "statement": "mov DWORD PTR [esp+0x10],esi @0x00528E78 stores the entry receiver value at [E-0x28] (below E); mov fs:0x0,eax @0x00528E70 is a SEGMENT write of the TIB chain head (stores the address E-0xC), not a stack write.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x00528E70 / 0x00528E78",
+      "window": "A",
+      "decoded_op": "mov fs:0x0,eax / mov DWORD PTR [esp+0x10],esi",
+      "esp_register_memory_fact": "store target [E-0x28]; segment target FS:[0]",
+      "path_abi_alias_assumptions": [
+        "AS4: FS segment base (TIB) is disjoint from the live argument stack region containing [E+4]; runtime FS base not statically resolvable"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED_WITH_ASSUMPTION_AS4",
+      "remaining_uncertainty": "AS4 is an assumption; no runtime verification in this run"
+    },
+    {
+      "claim_id": "A-5",
+      "claim_class": "ARGUMENT_DELIVERY",
+      "statement": "Source load: EDI := DWORD [ESP+0x3C] @0x00528E84 with ESP = E-0x38 = S reads the slot [E+4] == [S+0x3C] (address equivalence of the old source slot and the entry first stack-argument slot, both derived).",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x00528E84",
+      "window": "A",
+      "decoded_op": "mov edi,DWORD PTR [esp+0x3c] (8b 7c 24 3c)",
+      "esp_register_memory_fact": "read slot [E+0x4] = [S+0x3C]",
+      "path_abi_alias_assumptions": [
+        "AS2: [ESP_at_entry+4] is the first explicit stack argument slot"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED",
+      "remaining_uncertainty": "none for the slot-address equivalence",
+      "MEASURED_QUANTITY": "[E+4] == [S+0x3C] slot-address equivalence; S=E-0x38 chain",
+      "INDEPENDENT_SOURCE_OF_TRUTH": "byte-decoded displacement 0x3C against the measured ESP chain from the physical A bytes",
+      "WHY_NON_CIRCULAR": "the replay reads only objdump output and EXE bytes; no expected result is fed into the derivation",
+      "FAILURE_CASE_DETECTED": "control M2 (displacement 0x38) correctly yields source [E], and control M1 (SUB 0x18) correctly yields source [E+8] under the altered frame: the checker discriminates"
+    },
+    {
+      "claim_id": "A-6",
+      "claim_class": "ARGUMENT_DELIVERY",
+      "statement": "Entry-slot value preservation: no write touches [E+4] in [0x00528E50,0x00528E84): 8 stack writes (E-4, E-8, E-0xC, E-0x2C, E-0x30, E-0x34, E-0x38 via pushes; E-0x28 via the [esp+0x10] store) and 1 segment write (FS:[0]) are enumerated; none has delta +4; the entry-slot value therefore reaches the load unchanged.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x00528E50..0x00528E84",
+      "window": "A",
+      "decoded_op": "all writes enumerated in ENTRY_FRAME_LEDGER.csv",
+      "esp_register_memory_fact": "writes: 8 stack (all deltas <= -4) + 1 segment",
+      "path_abi_alias_assumptions": [
+        "AS4 (segment write is not a stack alias)"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED",
+      "remaining_uncertainty": "aliasing by unmodeled hardware events is out of static scope",
+      "MEASURED_QUANTITY": "write census: zero writes to delta +4 before the load",
+      "INDEPENDENT_SOURCE_OF_TRUTH": "per-instruction write log replayed from the decoded stream",
+      "WHY_NON_CIRCULAR": "the write log is derived from bytes, not from the hypothesis",
+      "FAILURE_CASE_DETECTED": "any write at delta +4 before 0x00528E84 would flip entry_slot_value_preserved and fail the gate"
+    },
+    {
+      "claim_id": "A-7",
+      "claim_class": "ARGUMENT_DELIVERY",
+      "statement": "EDI preservation: EDI's reaching definition at PUSH EDI 0x00528E8A is the load @0x00528E84; the two intervening instructions (push eax @0x00528E88, push ecx @0x00528E89) do not write EDI.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x00528E84..0x00528E8A",
+      "window": "A",
+      "decoded_op": "push eax / push ecx / push edi",
+      "esp_register_memory_fact": "EDI def unchanged 0x00528E84 -> 0x00528E8A",
+      "path_abi_alias_assumptions": [],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED",
+      "remaining_uncertainty": "none",
+      "MEASURED_QUANTITY": "reg_defs['edi'] at the push == 0x00528E84",
+      "INDEPENDENT_SOURCE_OF_TRUTH": "register-definition tracking over the decoded stream",
+      "WHY_NON_CIRCULAR": "derived from bytes; independent of the expected hypothesis",
+      "FAILURE_CASE_DETECTED": "any EDI write between load and push fails the gate"
+    },
+    {
+      "claim_id": "A-8",
+      "claim_class": "ARGUMENT_DELIVERY",
+      "statement": "Delivery at CALL 0x00528E8D: ESP before the call = E-0x44 = S-0xC (three net pushes after S); hardware return-address push -> callee entry ESP = E-0x48 = S-0x10; first explicit stack argument slot = [S-0xC] = [E-0x44], written by PUSH EDI @0x00528E8A with the value loaded from [E+4]; receiver ECX = entry ECX via ESI (separate channel).",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x00528E8D",
+      "window": "A",
+      "decoded_op": "call 0x85b1b0 (e8 1e 23 33 00)",
+      "esp_register_memory_fact": "ESP before=E-0x44=S-0xC; entry ESP=E-0x48=S-0x10; arg1 slot [S-0xC]",
+      "path_abi_alias_assumptions": [
+        "AS1",
+        "AS2"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED",
+      "remaining_uncertainty": "delivery at entry does not require the callee to return",
+      "MEASURED_QUANTITY": "esp_before=-0x44; callee entry=-0x48; arg1 slot=[S-0xC]",
+      "INDEPENDENT_SOURCE_OF_TRUTH": "ESP chain from the decoded push sequence + hardware call push",
+      "WHY_NON_CIRCULAR": "byte-derived; cross-checked with the prior pinned result ARG1_PROVENANCE.json (S-0xC / S-0x10 / [S-0x3C] source)",
+      "FAILURE_CASE_DETECTED": "the M4-style last-push change (control M4 in B) shows the checker rejects an arg1 that is not the last pushed value"
+    },
+    {
+      "claim_id": "B-1",
+      "claim_class": "OBSERVED_STATIC_OPERATION",
+      "statement": "Opaque-call sequence @0x004C4792..0x004C479F: push 0x128; CALL 0x0095D3C4 (rel32 verified from bytes); add esp,0x4; mov [esp+0x44],eax. The callee 0x0095D3C4 is treated as opaque: no body, no heap-origin claim, no allocator-wide semantics. Recorded normal ABI-compatible return condition (AS3): pops exactly its return address (ESP restored), return value in EAX. Under AS3, T = ESP at 0x004C47AF equals the window-start ESP (T0).",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x004C4792..0x004C47AF",
+      "window": "B",
+      "decoded_op": "push 0x128 / call 0x95d3c4 / add esp,0x4 / mov DWORD PTR [esp+0x44],eax",
+      "esp_register_memory_fact": "T0-4 during the argument; T0 restored; T := T0 measured",
+      "path_abi_alias_assumptions": [
+        "AS3"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED_CONDITIONAL_ON_AS3",
+      "remaining_uncertainty": "if AS3 is unsupported the Phase-B result stays conditional/unresolved; the callee is NOT opened to verify it"
+    },
+    {
+      "claim_id": "B-2",
+      "claim_class": "OBSERVED_STATIC_OPERATION",
+      "statement": "Flags TEST->JE: TEST EAX,EAX @0x004C47A3 defines ZF := (EAX==0); the only intervening instruction mov DWORD PTR [esp+0x3c],0x0 @0x004C47A5 writes no flags; therefore the JE @0x004C47AD branches precisely on EAX==0 (the opaque return value), and its target 0x004C47C8 lies OUTSIDE window B and is not opened.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x004C47A3..0x004C47AD",
+      "window": "B",
+      "decoded_op": "test eax,eax / mov DWORD PTR [esp+0x3c],0x0 / je 0x4c47c8",
+      "esp_register_memory_fact": "flag writers between TEST and JE: none (census)",
+      "path_abi_alias_assumptions": [],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED",
+      "remaining_uncertainty": "the out-of-window branch target is not interpreted",
+      "MEASURED_QUANTITY": "flag-writer census between 0x004C47A3 and 0x004C47AD = empty",
+      "INDEPENDENT_SOURCE_OF_TRUTH": "per-instruction flag-writer log from the decoded stream",
+      "WHY_NON_CIRCULAR": "derived from decoded MOV flag semantics, not from the hypothesis",
+      "FAILURE_CASE_DETECTED": "a flag-writing instruction between TEST and JE would flip flags_preserved_test_to_je and fail the gate"
+    },
+    {
+      "claim_id": "B-3",
+      "claim_class": "ARGUMENT_DELIVERY",
+      "statement": "Qualified branch (EAX!=0, normal opaque return): loads ECX:=[T+0x50], EDX:=[T+0x4C]; pushes ECX, EDX, ESI -> ESP = T-0xC; LEA ECX,[ESP+0x14] @0x004C47BA computes ECX = ADDRESS(T-0xC+0x14) = ADDRESS(T+8), kind=ADDRESS (opcode 8D LEA: a computed address, not a memory read); PUSH ECX @0x004C47BE -> [T-0x10] := ADDRESS(T+8); MOV ECX,EAX @0x004C47BF -> receiver = the opaque return value.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x004C47AF..0x004C47BF",
+      "window": "B",
+      "decoded_op": "mov ecx,[esp+0x50] / mov edx,[esp+0x4c] / push ecx / push edx / push esi / lea ecx,[esp+0x14] / push ecx / mov ecx,eax",
+      "esp_register_memory_fact": "ESP T-0x0 -> T-0x10; LEA input ESP=T-0xC",
+      "path_abi_alias_assumptions": [
+        "AS3",
+        "EAX!=0 at 0x004C47AD"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED (EAX!=0 branch only)",
+      "remaining_uncertainty": "ESI's producer is outside window B and remains unknown",
+      "MEASURED_QUANTITY": "LEA result = ADDRESS(T+8); final arg slot [T-0x10]",
+      "INDEPENDENT_SOURCE_OF_TRUTH": "byte-decoded LEA displacement 0x14 against the measured ESP chain T-0xC",
+      "WHY_NON_CIRCULAR": "replay reads only objdump output and EXE bytes; M3/M9 controls prove the checker discriminates displacement and LEA/MOV kind",
+      "FAILURE_CASE_DETECTED": "M3 (disp 0x18 -> ADDRESS(T+0xC)) and M9 (8D->8B, MEM kind) are correctly rejected as different facts"
+    },
+    {
+      "claim_id": "B-4",
+      "claim_class": "ARGUMENT_DELIVERY",
+      "statement": "CALL 0x00528E50 @0x004C47C1 (E8 8A 46 06 00; rel32 recompute 0x004C47C6 + 0x0006468A = 0x00528E50 matches objdump): ESP before the call = T-0x10; hardware return-address push -> callee entry ESP = T-0x14 =: E; entry arg1 slot [E+4] = [T-0x10] contains ADDRESS(T+8) -- the ADDRESS value, NOT DWORD [T+8] (pointee contents not read).",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x004C47C1",
+      "window": "B",
+      "decoded_op": "call 0x528e50",
+      "esp_register_memory_fact": "ESP before=T-0x10; entry ESP=T-0x14; arg1 slot [T-0x10]",
+      "path_abi_alias_assumptions": [
+        "AS1",
+        "AS2",
+        "AS3",
+        "EAX!=0"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED (EAX!=0 branch only)",
+      "remaining_uncertainty": "no claim about [T+8] contents, type, lifetime or frame layout",
+      "MEASURED_QUANTITY": "callee entry ESP = T-0x14; arg1 slot value kind=ADDRESS",
+      "INDEPENDENT_SOURCE_OF_TRUTH": "rel32 recompute from the physical bytes + ESP chain",
+      "WHY_NON_CIRCULAR": "M8 control (rel32 +1) shows the checker computes the actual target from bytes and rejects the wrong bridge",
+      "FAILURE_CASE_DETECTED": "M8 (target 0x00528E51) correctly yields bridge_valid=False"
+    },
+    {
+      "claim_id": "B-5",
+      "claim_class": "ARGUMENT_DELIVERY",
+      "statement": "Null branch (EAX==0): ZF=1 -> JE taken -> control exits window B at 0x004C47C8 (outside); the constructor CALL 0x004C47C1 is NOT reached on this path; NO delivery is fabricated. No claim is made about the out-of-window branch and no allocation success is asserted.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x004C47AD",
+      "window": "B",
+      "decoded_op": "je 0x4c47c8",
+      "esp_register_memory_fact": "exit path ends outside the window; call_reached=False",
+      "path_abi_alias_assumptions": [],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "QUALIFIED_AS_NO_DELIVERY",
+      "remaining_uncertainty": "out-of-window behavior unknown and unexamined"
+    },
+    {
+      "claim_id": "BR-1",
+      "claim_class": "POINTER_VALUE_IDENTITY",
+      "statement": "Cross-call bridge (CROSS_CALL_IDENTITY): joining by E = T-0x14 (the callee-entry ESP measured in Phase B), the Phase-A source slot [E+4] is the SAME slot as the Phase-B prepared arg1 slot [T-0x10] (slot-address identity), and no write touches that slot between the B-side write @0x004C47BE and the A-side load @0x00528E84 (the hardware return-address push writes [T-0x14]; all A-side writes are at or below [T-0x18]; the only writes above T are the two B-side caller-frame stores at [T+0x3C] and [T+0x44]). Therefore the SAME pointer value ADDRESS(T+8) is (1) delivered as arg1 of FUN_00528E50 at CALL 0x004C47C1 and (2) loaded into EDI @0x00528E84, preserved, and delivered as arg1 of FUN_0085B1B0 at CALL 0x00528E8D.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "0x004C47BE / 0x00528E84",
+      "window": "B->A",
+      "decoded_op": "push ecx (4c47be) ... mov edi,[esp+0x3c] (528e84)",
+      "esp_register_memory_fact": "joined slot [T-0x10]; value ADDRESS(T+8) both sides",
+      "path_abi_alias_assumptions": [
+        "AS3 opaque callee 0x0095D3C4 normal ABI-compatible return",
+        "EAX != 0 at 0x004C47AD (qualified branch only)",
+        "AS4 FS/TIB disjoint from the live argument stack region",
+        "AS5 straight-line window-A path from entry 0x00528E50",
+        "AS1/AS2 x86 push/call stack semantics and cdecl argument order"
+      ],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "POINTER_VALUE_IDENTITY_ESTABLISHED_CONDITIONAL",
+      "remaining_uncertainty": "conditional on AS1/AS2/AS3/AS4/AS5 and the EAX!=0 branch; no claim about the pointee area at [T+8], no type/lifetime/history claim, no global uniqueness across unexamined callers",
+      "MEASURED_QUANTITY": "slot identity + zero intervening writes to the joined slot",
+      "INDEPENDENT_SOURCE_OF_TRUTH": "independent write-log census of both replays in T terms",
+      "WHY_NON_CIRCULAR": "the census is byte-derived; the artifact controls AC1/AC2 prove the final gate rejects a mutated kind or slot claim",
+      "FAILURE_CASE_DETECTED": "any write to [T-0x10] between 0x004C47BE and 0x00528E84 would be enumerated and would reject the bridge"
+    },
+    {
+      "claim_id": "BR-2",
+      "claim_class": "FINAL_SEMANTIC_ROLE",
+      "statement": "The qualified relation is a POINTER_VALUE_IDENTITY across two delivery boundaries only. FIELD_SEMANTICS = UNVERIFIED; POINTEE_CONTENTS_PROVENANCE = UNRESOLVED_UPSTREAM; WORLD_INSTANCE_IDENTITY = NOT_ESTABLISHED; HISTORICAL_PLACEMENT = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO.",
+      "build_exe": {
+        "path": "/mnt/d/Eudoria_Reconstruction/pcg_install/Entropia.exe",
+        "size": 8015872,
+        "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31"
+      },
+      "va": "-",
+      "window": "-",
+      "decoded_op": "no promotion performed",
+      "esp_register_memory_fact": "n/a",
+      "path_abi_alias_assumptions": [],
+      "evidence_origin": "01_RAW objdump text (GNU objdump 2.44 raw output) replayed by 03_SCRIPTS/run_frame_bridge.py; physical window bytes from the EXE",
+      "status": "NOT_PERFORMED (scope fence)",
+      "remaining_uncertainty": "this run does not interpret the pointee, its type, or any world semantics"
+    }
+  ]
+}
