@@ -1,0 +1,72 @@
+{
+  "run_id": "PE_935_TEMPLATE_FORWARD_TARGET_R1_20261009",
+  "artifact": "FALSIFIER_RESULTS.json",
+  "record": "All 8 contract-required falsifiers designed BEFORE execution (PREREGISTRATION section 7) and executed on the dual-verified instruction stream (own decoder + GNU objdump 2.44, F8 gate 0 disagreements over 451 body instructions).",
+  "falsifiers": {
+    "F1_ECX_does_not_contain_lookup_result_at_subject_CALL": {
+      "design": "byte-trace every instruction between the lookup CALL return and each subject CALL; enumerate every ECX writer and every intervening CALL (volatility audit)",
+      "measured_quantity": "per-edge ECX-writer census: E1 = 1 writer (MOV ECX,EAX @0x00511257), 0 intervening calls; E2 = 1 writer (MOV ECX,EDI @0x006C3F6E; EDI's only body writer = MOV EDI,EAX @0x006C3F67), 0 intervening calls; E3 = 1 writer (MOV ECX,EDI @0x006C3FAE); intervening calls between the lookup return 0x006C3F67 and the subject CALL: 1 on BOTH paths (CALL 0x006C3F74 @0x006C3F74 — byte-proven EDI-safe: the callee's open 4-byte body 8B 41 08 C3 never writes EDI) plus 1 on the growth path (CALL 0x006C2E00 @0x006C3FA9, body CLOSED — the ABI-assumption crossing) [E3 crossings census completed per QC finding P3-2, records correction 2026-10-09; the classification and its condition are unchanged]",
+      "independent_source_of_truth": "own decoder regs_written trace + objdump instruction streams (two independent decoders agree on every instruction and boundary)",
+      "why_non_circular": "the writer census is machine-extracted from two independently produced instruction listings; no Ghidra input feeds it",
+      "failure_case_detected": "NONE for E1/E2. For E3 the growth-path intervening call is exactly the failure case this falsifier hunts: the classification was downgraded to POINTER_IDENTITY_CONFIRMED_CONDITIONAL (callee-saved EDI across CALL 0x006C2E00 assumed per x86 ABI; not byte-verifiable within pre-registered windows) rather than claimed CONFIRMED",
+      "outcome": "E1 CONFIRMED, E2 CONFIRMED, E3 CONFIRMED_CONDITIONAL — falsifier EXECUTED, PASS with the E3 condition honestly recorded"
+    },
+    "F2_pointer_equals_notfound_sentinel": {
+      "design": "re-pin the lookup's not-found path; identify where the sentinel enters; classify each edge conditional on it",
+      "measured_quantity": "not-found path bytes: JE @0x0072F59C (74 07) guards MOV EAX,0x00BA5800 @0x0072F5A5 (B8 00 58 BA 00) + POP ECX + RET 0x4; sentinel VA 0x00BA5800 mapped to .data zero-initialized tail (raw .data ends 0x00BA0000; va_to_off=None; 16 static bytes = all 0x00); NO caller instruction in any window compares P against 0x00BA5800",
+      "independent_source_of_truth": "PE section table from my own PE parser; raw byte read; objdump stream for the guard instructions",
+      "why_non_circular": "the sentinel dump comes from the physical file via an independent PE mapping; the zero-tail interpretation is a PE-format fact (beyond-raw .data is loader-zeroed), with the honest caveat that runtime writers are not statically observable",
+      "failure_case_detected": "the sentinel case is REAL and UNCHECKED by the code: on not-found, the callers silently read [0x00BA5800+8/+0x14/+0x18] = static zeros and forward them. Every edge classification carries this condition; no claim of 'template present' is made",
+      "outcome": "EXECUTED, PASS (sentinel path fully byte-pinned; all classifications conditional on it)"
+    },
+    "F3_field_access_actually_belongs_to_another_object": {
+      "design": "for every [reg+off] operand in the windows, track the base register's provenance to its producing instruction",
+      "measured_quantity": "complete memory-operand census of all 6 bodies: every [reg+off] operand classified by base provenance; template-derived = 4 direct accesses (rows in CALLEE_FIELD_ACCESS_CENSUS.json); 11 rejection classes enumerated (vector header/slot, frame locals, struct-copy sources 0x50CAF0/0x50D8C0, the 0x843DD0-result read @0x005111A5, the EAX=ESP stack-write regions, struct-copy stack destinations, param_3 struct, cookie/SEH, unrelated globals) [class count 8 -> 11 and the W_A [EAX]-class provenance split per QC finding P2-1, records correction 2026-10-09: the former single class over-labeled 7 non-template operands; the corrected classifier re-run over all 135 memory-form operands yields unclassified=[] — see CALLEE_FIELD_ACCESS_CENSUS.json census_completeness_revalidation]",
+      "independent_source_of_truth": "own decoder mem_ops + regs trace; objdump operand agreement",
+      "why_non_circular": "base-register provenance chains are byte-walked producer->consumer with the intervening-writer census from F1",
+      "failure_case_detected": "YES (worked as designed): the 5-dword struct copies at 0x005112B1+ / 0x0051130C+ superficially resemble 'template field vectors'; provenance traced their base to CALL 0x0050CAF0 / 0x0050D8C0 results — classified as different objects; also the second FUN_007CE1E0 use @0x0051115B has a non-template receiver (FUN_0041B3A0 result)",
+      "outcome": "EXECUTED, PASS (all template-derived accesses provenance-pinned; misattribution cases caught and recorded)"
+    },
+    "F4_float_value_misclassified_as_coordinate": {
+      "design": "NO field named position/rotation/scale/transform/world-coordinate on float-or-vector-shape evidence alone; machine-scan for FPU/SSE first",
+      "measured_quantity": "0 FPU instructions, 0 SSE instructions in ALL SIX body ranges (machine-measured); 0 float constants; the [P+0x14],[P+0x18] consecutive-dword pair and [P+0x8] all keep semantics UNKNOWN",
+      "independent_source_of_truth": "mnemonic census from own decoder + objdump over the exact body ranges",
+      "why_non_circular": "the scan is over the dual-verified instruction set; the naming discipline is a negative control (absence of claim), not a positive finding",
+      "failure_case_detected": "NONE POSSIBLE in-window: no float exists to misclassify; the pair-shape of [P+0x14]/[P+0x18] was explicitly NOT promoted to 'vector' or 'coordinate'",
+      "outcome": "EXECUTED, PASS by demonstrated discipline (TRANSFORM_SEMANTICS = UNVERIFIED preserved)"
+    },
+    "F5_call_destroys_register_assumed_preserved": {
+      "design": "for every dataflow hop crossing a CALL: volatile (EAX/ECX/EDX) => invalid unless reloaded; callee-saved (EBX/ESI/EDI/EBP) => audit callee prologue if openable, else record ABI assumption",
+      "measured_quantity": "E1/E2 chains cross 0 calls; E3 direct path 0 calls, growth path 1 call (EDI carried, callee-saved, callee body CLOSED -> recorded as the E3 condition). In-window compiler corroboration of volatility discipline: FUN_006C3F50 saves EAX (the [P+8] product) to [ESP+0x10] @0x006C3F83 BEFORE the branch that crosses CALL 0x006C2E00, and reloads it at 0x006C3FBA — the shipped code itself treats EAX as NOT preserved across calls",
+      "independent_source_of_truth": "byte-pinned save/reload pair 89 44 24 10 / 8B 4C 24 10 in the dual-verified stream",
+      "why_non_circular": "the save/reload pair is direct byte evidence of the compiler's own volatility discipline, independent of my classification",
+      "failure_case_detected": "the E3 growth path is the live instance of this falsifier; it downgraded E3 to _CONDITIONAL (documented, not waived). The save/reload pair proves the discipline for the VOLATILE register (EAX) but the callee-saved assumption for EDI remains an ABI-level condition",
+      "outcome": "EXECUTED, PASS with E3 condition honestly recorded"
+    },
+    "F6_return_value_incorrectly_attributed": {
+      "design": "where multiple CALLs exist between producer and consumer, attribute EAX to the most recent CALL with no intervening EAX writer",
+      "measured_quantity": "[P+8]-flow: CALL 0x007CE1E0 @0x006C3F74 -> MOV [ESP+0x10],EAX @0x006C3F83 (attribution immediate; 3 intervening instructions, none writes EAX — machine-checked); [P+0x14]-flow: CALL 0x0040B070 @0x006C3FB5 -> MOV ECX,[ESP+0x10] @0x006C3FBA (reads, not writes EAX) -> reads @0x006C3FBE/C1 (EAX still = 0x40B070 return)",
+      "independent_source_of_truth": "own decoder regs_written trace per instruction; objdump agreement",
+      "why_non_circular": "attribution is a mechanical last-writer-wins walk over dual-verified instructions",
+      "failure_case_detected": "YES (worked as designed): the predecessor's loose phrasing 'FUN_0040b070(0x8BD720)' is corrected — FUN_0040B070 takes NO stack argument (receiver-only; the 4-byte body proves it); 0x8BD720 (MOV EBX,0x8BD720 @0x006C3FB0) is prepared for the LATER 0x006C3640 call as arg5, never passed to the subject call",
+      "outcome": "EXECUTED, PASS (attribution chains machine-verified; one inherited misreading corrected)"
+    },
+    "F7_claim_depends_only_on_Ghidra_inferred_type": {
+      "design": "every load-bearing claim must cite own decoder + objdump agreement; Ghidra output quarantined as HYPOTHESIS",
+      "measured_quantity": "3 concrete Ghidra-vs-bytes adjudications: (a) Ghidra signature 'FUN_0043a550(param_1)' CONTRADICTED by bytes — the getter never reads its first stack arg (full 35-insn body census: only stack reads are the saved SEH head at [ESP+0x8] and frame-local writes); (b) Ghidra name 'FUN_008bd720' for the 0x8BD720 immediate — bytes show a bare immediate in .text range, never called in-window, semantics UNRESOLVED; (c) Ghidra decompiles of FUN_007ce1e0 ('return *(param_1+8)') and FUN_0040b070 ('return param_1+0x14') AGREE with the byte bodies — used as corroboration only, never as identity evidence",
+      "independent_source_of_truth": "byte-level arg-read census vs Ghidra-inferred signatures (GHIDRA_HYPOTHESIS_EXPORT.json preserved in 01_RAW/ labeled as hypothesis)",
+      "why_non_circular": "each adjudication resolves against the dual-verified byte stream, not against another decompiler output",
+      "failure_case_detected": "the getter-signature artifact (a) is a REAL caught instance: had the run trusted Ghidra's param_1, the ESI/EDI chain narrative would have been wrong",
+      "outcome": "EXECUTED, PASS (zero load-bearing claims rest on Ghidra types)"
+    },
+    "F8_call_target_or_instruction_boundary_incorrect": {
+      "design": "dual-decoder boundary-by-boundary agreement over all 6 bodies; every CALL rel32 target recomputed from its own opcode bytes",
+      "measured_quantity": "451 body instructions dual-verified: 339+54+2+2+19+35; 0 boundary disagreements; 0 call-target disagreements (all rel32 targets recomputed independently by own decoder and by objdump, byte-exact); body ends determined by the pre-registered rule with padding runs 4/4/12/12/2/9 x CC and next-function prologues identified",
+      "independent_source_of_truth": "GNU objdump 2.44 (WSL Debian) — a third-party disassembler with zero shared code with my decoder",
+      "why_non_circular": "two independent decoders produced identical instruction streams; disagreement would have been a hard defect",
+      "failure_case_detected": "YES (worked as designed, pre-analysis): during calibration my own decoder had 3 real defects (modrm wrapper bug; ALU family table incomplete; SIB index=4 meaning; FS-prefix display) — ALL caught by the objdump cross-check, fixed, and the ENTIRE pipeline re-run and re-measured BEFORE analysis proceeded; the final state is 0 disagreements (see 01_RAW/F8_BODY_CROSSCHECK.json)",
+      "outcome": "EXECUTED, PASS (final state; defect history honestly disclosed)"
+    }
+  },
+  "aggregate": "8/8 falsifiers EXECUTED with MEASURED_QUANTITY / INDEPENDENT_SOURCE_OF_TRUTH / WHY_NON_CIRCULAR / FAILURE_CASE_DETECTED recorded for each. No falsifier invalidated a load-bearing classification; 2 falsifiers (F3, F6) caught real near-miss misattriburations; 1 (F8) caught and repaired decoder defects pre-analysis; 1 (F5) produced the honest E3 down-grade to _CONDITIONAL."
+}

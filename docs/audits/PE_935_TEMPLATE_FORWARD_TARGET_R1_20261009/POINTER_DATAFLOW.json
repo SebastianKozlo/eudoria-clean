@@ -1,0 +1,136 @@
+{
+  "run_id": "PE_935_TEMPLATE_FORWARD_TARGET_R1_20261009",
+  "artifact": "POINTER_DATAFLOW.json",
+  "evidence_class": "BYTE_OBSERVATION + RELATION (own decoder; independent GNU objdump 2.44 agreement, F8 gate = 0 disagreements over all 6 bodies, 451 instructions; every CALL rel32 target dual-computed 0 disagreements)",
+  "definitions": {
+    "P": "the value returned by FUN_0072F580 in EAX (the template-registry lookup return; the predecessor canon names it the template object pointer — this run refines the byte facts: on the found path P = mapfind_result + 0x14 (ADD EAX,0x14 @0x0072F59E, 83 C0 14); on the not-found path P = 0x00BA5800 (MOV EAX,0x00BA5800 @0x0072F5A5, B8 00 58 BA 00)).",
+    "POINTER_VALUE_IDENTITY": "ECX_at_subject_CALL == EAX_at_lookup_return as bit values, proven by exhaustive register-writer tracing between the two points.",
+    "POINTEE_CONTENTS_IDENTITY": "what P points at. UNRESOLVED within this run's pre-registered windows: the mapfind callee FUN_004D1430 (body CLOSED) determines what the result slot holds; the +0x14 arithmetic is byte-proven, its node-vs-object meaning is not.",
+    "sentinel": "0x00BA5800, in the .data zero-initialized tail beyond raw size (raw .data ends 0x00BA0000); statically 16 bytes of 0x00; callers never compare P against it in-window.",
+    "getter": "FUN_0043A550, 119 B, returns the registry singleton at [0x00BA1824] (also zero-init tail); NEVER reads its own first stack argument (the pending lookup key) — Ghidra signature 'FUN_0043a550(param_1)' is an inferred-type artifact (see FALIFIER F7)."
+  },
+  "edges": {
+    "E1_FUN_00511070_CALL_0x00511259_to_FUN_007CE1E0": {
+      "callsite": {"va": "0x00511259", "bytes": "E8 82 CF 2B 00", "target_recomputed": "0x007CE1E0"},
+      "classification": "POINTER_IDENTITY_CONFIRMED",
+      "incoming_register_state_at_call": {
+        "ECX": "= P (set by MOV ECX,EAX @0x00511257, 8B C8)",
+        "EAX": "= P (lookup return)",
+        "EBX": "unrelated flow value (callee-saved; not template-derived)",
+        "ESI": "= param_1 of FUN_00511070 (MOV ESI,[ESP+0x168] @0x0051109D; frame base entry-0x164 => [entry+4])",
+        "EDI": "0 (XOR EDI,EDI @0x005110DF) or prior flow value; overwritten with the product right after the call",
+        "EBP": "= param_3 (MOV EBP,[ESP+0x170] @0x0051137 => [entry+0xC])"
+      },
+      "stack_arguments_at_call": "NONE (FUN_007CE1E0 is receiver-only thiscall: its 4-byte body reads ECX only; no stack read)",
+      "chain_lookup_return_to_call": [
+        {"va": "0x00511252", "bytes": "E8 29 E3 21 00", "mn": "CALL 0x0072F580", "effect": "EAX := lookup result P"},
+        {"va": "0x00511257", "bytes": "8B C8", "mn": "MOV ECX,EAX", "effect": "ECX := P (the ONLY ECX writer between lookup return and the call)"}
+      ],
+      "intervening_calls": "NONE",
+      "ecx_writer_census_between_lookup_return_and_call": "exactly 1: MOV ECX,EAX @0x00511257; no other instruction in [0x00511257,0x00511259) writes ECX (machine-verified regs_written trace)",
+      "conditions": [
+        "The chain executes only on the branch-fallthrough of JE @0x00511243 (74 1B) — the lookup itself is branch-selected: id := 0x2DFA @0x0051121C (B8 FA 2D 00 00) if pred(FUN_0041B3A0-path) holds, else id := 0x2DF9 @0x00511245 (B8 F9 2D 00 00) if pred holds, else NO lookup at all (JE to 0x00511260). ids 0x2DF9=11769 and 0x2DFA=11770; neither equals 0xFD9=4057.",
+        "P may be the not-found sentinel 0x00BA5800 (FUN_0072F580 not-found path); no in-window test against it.",
+        "The getter may return NULL on alloc-failure (XOR EAX,EAX @0x0043A5B0; MOV [0xBA1824],EAX @0x0043A5B2) — the lookup would then run with this=NULL (error path; not further analyzed)."
+      ],
+      "product": "EAX := [P+0x8] (inside FUN_007CE1E0); immediately stored MOV EDI,EAX @0x0051125E (8B F8).",
+      "product_forwarding": "EDI=[P+8] is forwarded: PUSH EDI @0x00511293 -> arg2 of CALL 0x00414670 @0x0051129C (3-arg call: arg1=FUN_004123D0(ESI) result, arg2=[P+8], arg3=EBX) and PUSH EDI @0x005112E4 -> arg3 of CALL 0x00414670 @0x005112F7 (5-arg call: arg1=FUN_004123D0(ESI) result, arg2=FUN_004123D0(&local) result, arg3=[P+8], arg4=EBX, arg5=byte from [0x00BA2CE4]); both callee bodies CLOSED, edges recorded. On the no-lookup path (JE @0x00511243 taken) EDI remains 0 at those pushes — the forwarded value is PATH-CONDITIONAL: [P+8] or 0. LIVENESS END: XOR EDI,EDI @0x0051133F (33 FF) terminates the [P+8] live range; the later EDI uses (0x00511392 CMP, 0x00511418 PUSH, 0x005114AC PUSH, MOV ECX,EDI @0x005113F2) carry the redefined value (0 or the FUN_006C0D50 result from MOV EDI,EAX @0x005113B4), NOT [P+8]."
+    },
+    "E2_FUN_006C3F50_CALL_0x006C3F74_to_FUN_007CE1E0": {
+      "callsite": {"va": "0x006C3F74", "bytes": "E8 67 A2 10 00", "target_recomputed": "0x007CE1E0"},
+      "classification": "POINTER_IDENTITY_CONFIRMED",
+      "incoming_register_state_at_call": {
+        "ECX": "= P (set by MOV ECX,EDI @0x006C3F6E, 8B CF)",
+        "EAX": "= P (then clobbered by the call)",
+        "EDI": "= P (MOV EDI,EAX @0x006C3F67, 8B F8 — the only EDI writer in the whole body)",
+        "EBX": "0x66 (MOV EBX,0x66 @0x006C3F69, BB 66 00 00 00)",
+        "[ESP+0xC]": "0x66 (MOV [ESP+0xC],EBX @0x006C3F70, 89 5C 24 0C — frame local, not an argument)",
+        "ESI": "not yet param_2 (loaded AFTER the call, MOV ESI,[ESP+0x1C] @0x006C3F79)"
+      },
+      "stack_arguments_at_call": "NONE (receiver-only thiscall per the 4-byte body)",
+      "chain_lookup_return_to_call": [
+        {"va": "0x006C3F62", "bytes": "E8 19 B6 06 00", "mn": "CALL 0x0072F580", "effect": "EAX := P (callee cleans the pushed key with RET 0x4)"},
+        {"va": "0x006C3F67", "bytes": "8B F8", "mn": "MOV EDI,EAX", "effect": "EDI := P"},
+        {"va": "0x006C3F69", "bytes": "BB 66 00 00 00", "mn": "MOV EBX,0x66", "effect": "EBX := 0x66 (tag constant; NOT an argument of the subject call)"},
+        {"va": "0x006C3F6E", "bytes": "8B CF", "mn": "MOV ECX,EDI", "effect": "ECX := P"},
+        {"va": "0x006C3F70", "bytes": "89 5C 24 0C", "mn": "MOV [ESP+0xC],EBX", "effect": "local := 0x66"}
+      ],
+      "intervening_calls": "NONE",
+      "ecx_writer_census_between_lookup_return_and_call": "exactly 1: MOV ECX,EDI @0x006C3F6E; EDI's only writer in the body is MOV EDI,EAX @0x006C3F67 (machine-verified)",
+      "conditions": [
+        "P may be the not-found sentinel 0x00BA5800 (no in-window test); getter-NULL error path as in E1.",
+        "FUN_006C3F50 is cdecl with 2 stack params: param_1 = lookup key (provenance LEAVES WINDOW at [ESP+0xC] @0x006C3F53, 8B 44 24 0C -> [entry+4]); param_2 = a vector-like object (ESI from [ESP+0x1C] -> [entry+8]; fields [ESI+4]=cursor, [ESI+8]=end read @0x006C3F7D/80; [ESI+4] += 8 @0x006C3F92). POST-BODY raw context (outside the window, labeled as such): the adjacent function 0x006C3FE0 loops over an id array calling FUN_006C3F50(id, vector) cdecl with caller-side ADD ESP,0x8 @0x006C4004."
+      ],
+      "product": "EAX := [P+0x8]; stored to frame local MOV [ESP+0x10],EAX @0x006C3F83 (89 44 24 10) BEFORE the branch that crosses a call — the compiler itself treats EAX as volatile (F5 corroboration).",
+      "product_forwarding": [
+        "vector fast path: MOV [ECX],EBX + MOV [ECX+4],EAX @0x006C3F8D/F (89 19 / 89 41 04) writes the pair (0x66, [P+8]) into the caller-owned vector slot [ESI+4] (param_2's vector, NOT template memory); then ADD [ESI+4],0x8 @0x006C3F92",
+        "vector growth path: CALL 0x006C2E00 @0x006C3FA9 (this=ESI=param_2, args incl. the pair local at [ESP+0x18]-class) — body CLOSED, edge recorded",
+        "final: reloaded MOV ECX,[ESP+0x10] @0x006C3FBA and PUSHed @0x006C3FC3 -> arg6 of CALL 0x006C3640 @0x006C3FCD"
+      ]
+    },
+    "E3_FUN_006C3F50_CALL_0x006C3FB5_to_FUN_0040B070": {
+      "callsite": {"va": "0x006C3FB5", "bytes": "E8 B6 70 D4 FF", "target_recomputed": "0x0040B070"},
+      "classification": "POINTER_IDENTITY_CONFIRMED_CONDITIONAL",
+      "classification_reason": "direct (vector fast) path fully byte-confirmed; the vector-growth path crosses CALL 0x006C2E00 @0x006C3FA9 (body CLOSED, outside pre-registered windows) — EDI (callee-saved register) survival across that call rests on the standard x86 callee-saved discipline (EBX/ESI/EDI/EBP), which cannot be byte-verified within this run's windows. Honest classification: _CONDITIONAL, not CONFIRMED.",
+      "incoming_register_state_at_call": {
+        "ECX": "= P (MOV ECX,EDI @0x006C3FAE, 8B CF)",
+        "EDI": "= P (unchanged since 0x006C3F67 on the direct path; assumed preserved across CALL 0x006C2E00 on the growth path)",
+        "EBX": "0x8BD720 (MOV EBX,0x8BD720 @0x006C3FB0, BB 20 D7 8B 00) — a .text-range immediate PREPARED FOR THE LATER CALL 0x006C3640 (arg5); NOT an argument of this subject call (corrects the predecessor's loose 'FUN_0040b070(0x8BD720)' phrasing; see falsifier F6)",
+        "ESI": "= param_2 (loaded @0x006C3F79)",
+        "[ESP+0x10]": "= [P+8] (saved @0x006C3F83)"
+      },
+      "stack_arguments_at_call": "NONE (receiver-only thiscall per the 4-byte body)",
+      "chain_from_template_capture_to_call": [
+        {"va": "0x006C3F67", "bytes": "8B F8", "mn": "MOV EDI,EAX", "effect": "EDI := P (single EDI writer in body)"},
+        {"va": "0x006C3FAE", "bytes": "8B CF", "mn": "MOV ECX,EDI", "effect": "ECX := P (single ECX writer since 0x006C3F79's MOV ECX,[ESI+4])"}
+      ],
+      "intervening_calls": {
+        "crossing_1_CALL_0x006C3F74": "crossed on BOTH paths — the chain anchor 0x006C3F67 (from_template_capture) lies BEFORE this E2 subject call, so it executes on the direct AND the growth path before the E3 subject CALL @0x006C3FB5; verification mode = BYTE-PROVEN EDI-SAFE: the callee FUN_007CE1E0 is the OPEN 4-byte body 8B 41 08 C3 (MOV EAX,[ECX+0x8]; RET) which never writes EDI [crossing added to the census per QC finding P3-2, records correction 2026-10-09]",
+        "crossing_2_CALL_0x006C2E00": "crossed on the GROWTH path only, @0x006C3FA9 (E8 52 EE FF FF); verification mode = ABI ASSUMPTION (callee-saved EDI per standard x86 discipline; callee body CLOSED — not byte-verifiable in-window). This remains the ONLY ABI-assumption crossing exactly as recorded in classification_reason — the classification and its condition are UNCHANGED",
+        "direct_path": "after crossing_1: NONE (0x006C3F8D -> 0x006C3F92 -> JMP 0x006C3FAE: 89 19 / 89 41 04 / 83 46 04 08 / EB 16)",
+        "growth_path": "crossing_1 (byte-proven EDI-safe) + crossing_2 CALL 0x006C2E00 @0x006C3FA9 (ABI assumption, body CLOSED)"
+      },
+      "conditions": ["same sentinel/getter-NULL conditions as E2"],
+      "product": "EAX := P + 0x14 (LEA EAX,[ECX+0x14] inside FUN_0040B070 — INTERIOR POINTER into the SAME object; NO memory access in the callee)",
+      "phase3_reads_of_product": [
+        {"va": "0x006C3FBA", "bytes": "8B 4C 24 10", "mn": "MOV ECX,[ESP+0x10]", "effect": "ECX := [P+8] reload (reads a frame local; does NOT write EAX)"},
+        {"va": "0x006C3FBE", "bytes": "8B 50 04", "mn": "MOV EDX,[EAX+0x4]", "effect": "EDX := [ (P+0x14) + 4 ] = [P+0x18] — 32-bit READ of the template object at offset +0x18"},
+        {"va": "0x006C3FC1", "bytes": "8B 00", "mn": "MOV EAX,[EAX]", "effect": "EAX := [ (P+0x14) ] = [P+0x14] — 32-bit READ of the template object at offset +0x14 (EAX not clobbered by the previous MOV EDX,[EAX+4])"}
+      ],
+      "read_forwarding": "both dwords pushed as args of CALL 0x006C3640 @0x006C3FCD: PUSH order (0x006C3FC3..0x006C3FCC): ECX=[P+8] (arg6), EBX=0x8BD720 (arg5), ESI=param_2 (arg4), EDX=[P+0x18] (arg3), EAX=[P+0x14] (arg2), &[ESP+0x30]=&param_2-slot (arg1); ECX(this) = &[ESP+0x30] (LEA ECX,[ESP+0x30] @0x006C3FC8). Caller cleans ADD ESP,0x18 @0x006C3FD2 (6 args, cdecl). 0x008BD720 is a .text-range immediate (file-mapped, section-level metadata only; semantics UNRESOLVED; never called in-window; Ghidra name 'FUN_008bd720' is a name artifact)."
+    }
+  },
+  "anchor_facts": {
+    "FUN_0072F580_body": {
+      "body": "0x0072F580-0x0072F5AD (46 B; RET 0x4 @0x0072F5AB; +2 x CC; next-prologue 55 8B EC)",
+      "abi": "thiscall(this=registry map in ECX, 1 stack arg = lookup key, callee cleans RET 0x4)",
+      "flow": [
+        "0x0072F580 51 PUSH ECX (allocates 4-B result local)",
+        "0x0072F581 56 PUSH ESI; 0x0072F582 8B F1 MOV ESI,ECX (this)",
+        "0x0072F584 8D 44 24 0C LEA EAX,[ESP+0xC] = &key (caller-pushed arg)",
+        "0x0072F588 50 PUSH EAX; 0x0072F589 8D 4C 24 08 LEA ECX,[ESP+0x8] = &result_local; 0x0072F58D 51 PUSH ECX",
+        "0x0072F58E 8B CE MOV ECX,ESI (this); 0x0072F590 E8 9B 1E DA FF CALL 0x004D1430 (mapfind; body CLOSED)",
+        "0x0072F595 8B 44 24 04 MOV EAX,[ESP+0x4] (result slot; callee-cleaned args assumed RET 8-class)",
+        "0x0072F599 3B C6 CMP EAX,ESI (result vs map); 0x0072F59B 5E POP ESI; 0x0072F59C 74 07 JE 0x0072F5A5",
+        "FOUND: 0x0072F59E 83 C0 14 ADD EAX,0x14; 0x0072F5A1 59 POP ECX; 0x0072F5A2 C2 04 00 RET 0x4 -> returns mapfind_result+0x14",
+        "NOT FOUND: 0x0072F5A5 B8 00 58 BA 00 MOV EAX,0x00BA5800; 0x0072F5AA 59 POP ECX; 0x0072F5AB C2 04 00 RET 0x4 -> returns sentinel"
+      ],
+      "unresolved": "what FUN_004D1430 writes into the result slot (node pointer vs other) — its body is CLOSED this run; therefore whether P (result+0x14) is a node-interior pair slot or an object pointer is UNRESOLVED at window level. The predecessor's 'template object' label is preserved as the inherited hypothesis, not re-promoted."
+    },
+    "FUN_0043A550_body": {
+      "body": "0x0043A550-0x0043A5C6 (119 B; RET C3 @0x0043A5C6; +9 x CC; adjacent thunk at 0x0043A5CF '8B 09 E9 C9 0B 42 00' = MOV ECX,[ECX]; JMP 0x0085B1B0 — a SEPARATE function after padding; 0x0085B1B0 body contract-FORBIDDEN, only the adjacent bytes recorded as body-end context)",
+      "abi": "cdecl-equivalent, RETURN-ONLY in practice: never reads [entry+4] (its only stack argument); returns singleton in EAX",
+      "flow": [
+        "SEH prologue: 6A FF / 68 8B C6 99 00 / 64 A1 00000000 / 51 / A1 D0 D8 B9 00 (GS cookie) / 33 C4 / 50 / 8D 44 24 08 / 64 A3 00000000",
+        "0x0043A571 A1 24 18 BA 00 MOV EAX,[0x00BA1824]; 0x0043A576 85 C0 TEST EAX,EAX; 0x0043A578 75 3D JNE 0x0043A5B7 (already-exists path)",
+        "create path: 0x0043A57A 6A 18 PUSH 0x18; 0x0043A57C E8 43 2E 52 00 CALL 0x0095D3C4 (operator new; body contract-FORBIDDEN, edge recorded); 0x0043A581 83 C4 04 ADD ESP,0x4 (cdecl); save; TEST; 0x0043A592 74 1C JE 0x0043A5B0 (alloc-fail)",
+        "0x0043A594 8B C8 MOV ECX,EAX; 0x0043A596 E8 C5 FC 0E 00 CALL 0x0052A260 (ctor; body CLOSED); 0x0043A59B A3 24 18 BA 00 MOV [0x00BA1824],EAX",
+        "SEH restore + epilogue; RET",
+        "alloc-fail: 0x0043A5B0 33 C0 XOR EAX,EAX; 0x0043A5B2 A3 24 18 BA 00 MOV [0x00BA1824],EAX (store NULL); falls into the common epilogue returning EAX=0"
+      ],
+      "key_finding": "THE GETTER NEVER READS ITS FIRST STACK ARGUMENT — machine-verified over its full 35-insn body: its only stack-slot reads are [ESP+0x8] (the saved SEH head, restored via 64 89 0D 00000000 MOV FS:[0],ECX) and the frame-local writes [ESP+0x4]/[ESP+0x10]. The pending lookup key sits further down the stack and is consumed later by FUN_0072F580's RET 0x4. Ghidra's 'FUN_0043a550(param_1)' signature is an inferred-type artifact (falsifier F7 catch)."
+    },
+    "FUN_007CE1E0_body": "4 bytes: 0x007CE1E0 8B 41 08 MOV EAX,[ECX+0x8]; 0x007CE1E3 C3 RET. 12 x CC; next prologue 53 55 8B E9. GENERIC ACCESSOR: the SAME function is called at 0x0051115B inside FUN_00511070 with receiver = result of CALL 0x0041B3A0 @0x00511154 (NOT template-derived) — object-type-agnostic getter (byte-anchored in-window).",
+    "FUN_0040B070_body": "4 bytes: 0x0040B070 8D 41 14 LEA EAX,[ECX+0x14]; 0x0040B073 C3 RET. 12 x CC; next function at 0x0040B080 (8B 01 C1 E8...). Interior-pointer thunk: NO memory access, NO dereference, NO allocation, NO vtable read — pure address arithmetic returning this+0x14."
+  }
+}

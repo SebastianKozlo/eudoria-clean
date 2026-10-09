@@ -1,0 +1,216 @@
+{
+ "run_id_qc": "PE_935_TEMPLATE_FORWARD_TARGET_R1_20261009_QC_R1_20261009",
+ "run_id_audited": "PE_935_TEMPLATE_FORWARD_TARGET_R1_20261009",
+ "qc_class": "INTERNAL_QC_INSIDE_PE_MASTER (fresh-context pe-master-auditor; NOT an independent Desktop post-audit; NOT executor self-review)",
+ "audit_output_root": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_TEMPLATE_FORWARD_TARGET_R1_20261009\\",
+ "qc_scratch_root": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_TEMPLATE_FORWARD_TARGET_R1_20261009\\SCRATCH\\QC_FRESH\\",
+ "measurement_label": "AUDITOR_RECHECK (every load-bearing value in this file re-measured by the auditor's own PE parser, byte extraction and independent x86-32 decoder; executor artifacts were read but never trusted as measurement sources)",
+
+ "verdict": "QC_PASS_WITH_FINDINGS",
+ "verdict_basis": "All contract claims and all 7 gates independently re-verified from physical bytes; zero P0/P1 findings; 1 P2 (census machine-classifier provenance precision) and 5 P3 (bookkeeping/definition) findings, none invalidating a load-bearing conclusion.",
+
+ "per_duty": {
+  "D1_IDENTITY": {
+   "result": "PASS",
+   "exe_remeasured": {"path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe", "size_bytes": 8015872, "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31", "matches_expected": true},
+   "ghidra_sandbox_exe_remeasured": {"path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_LANDMARK4057_GHIDRA_SCRATCH_20261003\\Entropia.exe", "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31", "matches_physical": true},
+   "predecessor_package_rehash": {"manifest": "docs/audits/PE_935_TEMPLATE_4057_CONSUMER_CHAIN_R1_20261009/MANIFEST_SHA256.csv", "data_rows_total": 26, "package_rows": 25, "audit_entrypoint_row": 1, "all_sha_match": true, "all_size_match": true, "note": "executor claimed 25/25 package rows before AND after; auditor re-hashed ALL 26 data rows now (including AUDIT_ENTRYPOINT.md) - all byte-identical to the manifest"},
+   "git": {"HEAD": "cea10e9cfcaa2e814f5cfe4269fd2a6a409d54da", "origin_master": "cea10e9cfcaa2e814f5cfe4269fd2a6a409d54da", "ls_remote_master": "cea10e9cfcaa2e814f5cfe4269fd2a6a409d54da", "equals_BASE": true, "tracked_diff": "EMPTY (zero modified/staged tracked files)", "untracked": "5 foreign audit packages + experiments/ (untouched) + this run's package (expected)", "branch": "master"},
+   "pyc_residue_scan": {"locations": "package + SCRATCH (recursive incl. this QC's own work under QC_FRESH)", "count": 0}
+  },
+  "D2_SUBJECT_PINS": {
+   "result": "PASS",
+   "byte_pins_remeasured": 72,
+   "byte_pin_mismatches": 0,
+   "pins": {
+    "FUN_007CE1E0_body@0x007CE1E0": {"expected": "8B 41 08 C3", "measured": "8B 41 08 C3", "match": true, "semantics_reverified": "MOV EAX,[ECX+0x8]; RET - 4-byte getter dereferencing [P+8]"},
+    "FUN_0040B070_body@0x0040B070": {"expected": "8D 41 14 C3", "measured": "8D 41 14 C3", "match": true, "semantics_reverified": "LEA EAX,[ECX+0x14]; RET - interior pointer, NO dereference"},
+    "W_C_padding_next_prologue@0x007CE1E4": {"measured": "12x CC then 53 55 8B E9", "match": true},
+    "W_D_padding_next_fn@0x0040B074": {"measured": "12x CC then 8B 01 C1 E8", "match": true},
+    "call_0x00511259": {"opcode": "E8 82 CF 2B 00", "rel32_recomputed": "0x007CE1E0", "match": true},
+    "call_0x006C3F74": {"opcode": "E8 67 A2 10 00", "rel32_recomputed": "0x007CE1E0", "match": true},
+    "call_0x006C3FB5": {"opcode": "E8 B6 70 D4 FF", "rel32_recomputed": "0x0040B070", "match": true},
+    "read@0x006C3FBE": {"measured": "8B 50 04", "match": true, "semantics": "MOV EDX,[EAX+0x4] = [P+0x18] (EAX = P+0x14 sole producer FUN_0040B070; no intervening EAX writer - auditor-censused)"},
+    "read@0x006C3FC1": {"measured": "8B 00", "match": true, "semantics": "MOV EAX,[EAX] = [P+0x14] (prior MOV writes only EDX)"},
+    "FUN_0072F580_ADD@0x0072F59E": {"measured": "83 C0 14", "match": true, "semantics": "found path returns mapfind_result+0x14; not-found: B8 00 58 BA 00 @0x0072F5A5 returns 0x00BA5800 (JE 74 07 @0x0072F59C re-verified)"},
+    "sentinel_0x00BA5800": {"auditor_pe_parse": ".data VA 0x00B6C000 vsize 0x3D6E4 rsize 0x34000 -> raw end VA 0x00BA0000 < 0x00BA5800 < virtual end 0x00BA96E4 -> ZERO-INITIALIZED TAIL (file_offset=None, vsize>rsize confirmed)", "static_bytes": "loader-zeroed = static 0x00 (16-byte dump all-zero consistent)", "callers_never_test_it": "CONFIRMED - auditor imm-scan over all six bodies finds 0xBA5800 ONLY in W_E1's not-found load B8 00 58 BA 00 @0x72F5A5; no CMP/TEST against it anywhere in W_A/W_B caller windows"},
+    "FUN_0043A550_body": {"size_remeasured": "0x0043A5C7-0x0043A550 = 119 B, 35 instructions to RET @0x0043A5C6 (+9xCC; adjacent thunk 8B 09 E9 C9 0B 42 00 @0x0043A5CF recorded as body-end context)", "stack_arg_claim": "CONFIRMED - auditor's own decode: the incoming key would sit at [post-prologue ESP+0x18]; the body's ONLY stack reads are [ESP+0x8] (saved SEH head, 2x restore) plus writes [ESP+0x4]/[ESP+0x10]; [ESP+0x18] NEVER read -> getter never consumes its stack arg (F7 CONFIRMED)"}
+   },
+   "rel32_recompute_table": {
+    "0x511259->0x7CE1E0": true, "0x6C3F74->0x7CE1E0": true, "0x6C3FB5->0x40B070": true,
+    "0x51124B->0x43A550": true, "0x511252->0x72F580": true, "0x6C3F5B->0x43A550": true,
+    "0x6C3F62->0x72F580": true, "0x6C3FA9->0x6C2E00": true, "0x6C3FCD->0x6C3640": true,
+    "0x51115B->0x7CE1E0": true, "0x511154->0x41B3A0": true, "0x72F590->0x4D1430": true,
+    "0x43A57C->0x95D3C4": true, "0x43A596->0x52A260": true
+   },
+   "rel32_note": "SELF_CHECK says checked=14; CALL_EDGE_PROVENANCE lists 13 entries (the 14th, 0x511154->0x41B3A0, exists in selfcheck.py only). ALL 14 recomputed by the auditor: MATCH. See finding P3-4."
+  },
+  "D3_DATAFLOW": {
+   "result": "PASS",
+   "auditor_own_decode": {"method": "fresh independent x86-32 decoder + PE parser written by the auditor in QC_FRESH (third decoder, zero shared code with executor's x86probe or GNU objdump)", "body_instruction_counts": {"W_A": 339, "W_B": 54, "W_C": 2, "W_D": 2, "W_E1": 19, "W_E2": 35, "TOTAL": 451}, "agreement": "VA boundaries identical to the executor's OWN_DECODER output on ALL SIX bodies (451/451); their raw bytes match the physical EXE at every instruction; objdump W_B listing parsed and identical (54/54); => three-way decoder agreement on 451 body instructions, 0 boundary + 0 call-target disagreements. F8 CONFIRMED independently."},
+   "E1_0x00511259": {"classification_claimed": "POINTER_IDENTITY_CONFIRMED", "auditor_verification": "between lookup CALL return (0x511257) and subject CALL (0x511259): exactly ONE ECX writer (MOV ECX,EAX 8B C8 @0x511257), ZERO intervening calls. CONFIRMED."},
+   "E2_0x006C3F74": {"classification_claimed": "POINTER_IDENTITY_CONFIRMED", "auditor_verification": "between lookup return (0x6C3F67) and CALL (0x6C3F74): one ECX writer (MOV ECX,EDI 8B CF @0x6C3F6E); EDI's only body writer before the subject calls is MOV EDI,EAX 8B F8 @0x6C3F67 (POP EDI @0x6C3FD5 is epilogue, after); ZERO intervening calls. CONFIRMED."},
+   "E3_0x006C3FB5": {"classification_claimed": "POINTER_IDENTITY_CONFIRMED_CONDITIONAL", "auditor_verification": "EDI capture @0x6C3F67 is the ONLY EDI write in-window; last ECX writer before the CALL is MOV ECX,EDI @0x6C3FAE on both converged paths; growth path crosses CALL 0x6C2E00 @0x6C3FA9 (body CLOSED) - EDI survival there rests on x86 callee-saved discipline, exactly as recorded. The direct path ALSO crosses CALL 0x7CE1E0 @0x6C3F74 (byte-open 4-byte body: never writes EDI -> byte-proven safe). The recorded condition (0x6C2E00 only) is correct and non-weakened; see finding P3-2 for the census-completeness note."},
+   "missed_writes_aliases": "NONE found for the template chains. Auditor register-writer censuses: W_B EAX writers between the E2 call and the reads = only LEA EAX,[ESP+0x18] @0x6C3FA1 (growth path, AFTER the [P+8] save @0x6C3F83 and BEFORE the reload); no EAX writer between CALL 0x40B070 and reads 0x6C3FBE/C1; 0x6C3FBA MOV ECX,[ESP+0x10] reads a frame local, does NOT write EAX.",
+   "P8_forwarding_verified": {
+    "0x6C3F83": "MOV [ESP+0x10],EAX = save [P+8] to frame local (89 44 24 10)",
+    "0x6C3F8D_F": "MOV [ECX],EBX + MOV [ECX+4],EAX (89 19 / 89 41 04) = (0x66,[P+8]) pair into the caller-owned vector slot [ESI+4] (ECX = [ESI+4] cursor loaded @0x6C3F7D; EAX still = [P+8]: no EAX writer in that range)",
+    "FUN_006C3640_args@0x6C3FCD": "push order verified from bytes: PUSH ECX=[P+8] (arg6, reloaded @0x6C3FBA), PUSH EBX=0x8BD720 (arg5), PUSH ESI=param_2 (arg4), PUSH EDX=[P+0x18] (arg3), PUSH EAX=[P+0x14] (arg2), PUSH &[ESP+0x30]=&param_2-slot (arg1, LEA ECX,[ESP+0x30] @0x6C3FC8); caller cleans ADD ESP,0x18 (6 args cdecl). Arg mapping CONFIRMED.",
+    "FUN_00414670_args": "3-arg call @0x51129C: arg1=FUN_004123D0(ESI) result, arg2=EDI=[P+8] or 0, arg3=EBX; 5-arg call @0x5112F7: arg1=FUN_004123D0(ESI), arg2=FUN_004123D0(&local), arg3=EDI=[P+8] or 0, arg4=EBX, arg5=MOVZX byte from [0x00BA2CE4]. Path-conditionality verified: EDI=0 from XOR EDI,EDI @0x5110DF (auditor-verified: NO other EDI writer between 0x5110DF and the capture 0x51125E), capture @0x51125E, liveness end XOR EDI,EDI @0x51133F, redefinition MOV EDI,EAX @0x5113B4. CONFIRMED."
+   },
+   "FUN_00567170_family": "NOT involved - auditor's complete call-target census of W_A/W_B (46 distinct targets) contains no 0x567170. CONFIRMED.",
+   "post_body_context": "adjacent 0x6C3FE0 calls FUN_006C3F50 cdecl: E8 4F FF FF FF @0x6C3FFC -> 0x6C3F50, caller cleans ADD ESP,0x8 @0x6C4004. Re-verified."
+  },
+  "D4_FALSIFIER_AUDIT": {
+   "result": "PASS",
+   "falsifiers_designed_and_executed": "8/8 (each with MEASURED_QUANTITY / INDEPENDENT_SOURCE_OF_TRUTH / WHY_NON_CIRCULAR / FAILURE_CASE_DETECTED - auditor read all eight records and re-executed the load-bearing ones)",
+   "F1": "EXECUTED as designed - auditor's own writer censuses reproduce E1/E2 clean single-writer chains and the E3 growth-path condition; the honest _CONDITIONAL downgrade is the falsifier working.",
+   "F2": "EXECUTED - not-found path byte-pinned; sentinel zero-init-tail verified from the auditor's own PE parse; callers-never-test re-verified by immediate scan.",
+   "F3": "EXECUTED - auditor verified the two struct-copy families: CALL 0x50CAF0 @0x5112AC produces the base of the 0x5112B1-0x5112CF copy, CALL 0x50D8C0 @0x511307 produces the base of the 0x51130C-0x511330 copy, destinations base ECX=ESP (MOV ECX,ESP 8B CC @0x5112B6/@0x511311) = stack, NOT template memory; second FUN_007CE1E0 use @0x51115B receiver = FUN_0041B3A0 result @0x511154 (CALL re-verified -> 0x41B3A0). See finding P2-1 for the 7 operands the executor's machine classifier mislabels within this class.",
+   "F4": "EXECUTED - auditor's own mnemonic census over the auditor's own decode of all six bodies: ZERO FPU opcodes (D8-DF/9B), ZERO SSE-like 0F forms, ZERO F2/F3/66+0F prefixed forms. The zero-FPU/SSE claim is auditor-confirmed. Pair-shape not promoted anywhere (grep of all package documents: every coordinate-term occurrence is prohibitive/negative).",
+   "F5": "EXECUTED - save/reload pair 89 44 24 10 @0x6C3F83 / 8B 4C 24 10 @0x6C3FBA re-pinned (compiler treats EAX as volatile); E3 callee-saved condition recorded, not waived.",
+   "F6": "EXECUTED - auditor re-verified with own bytes: FUN_0040B070 takes NO stack argument (4-byte body, receiver-only); 0x8BD720 is prepared by MOV EBX,0x8BD720 (BB 20 D7 8B 00) @0x6C3FB0 for the LATER call (arg5 of FUN_006C3640); 0x8BD720 is a .text-range immediate (auditor PE parse: 0x401000..0xA745E5) and NO call in W_B targets it. The inherited 'FUN_0040b070(0x8BD720)' misreading is genuinely corrected.",
+   "F7": "EXECUTED - getter stack-arg claim auditor-verified ([ESP+0x18] never read); Ghidra export quarantined (artifact_class GHIDRA_HYPOTHESIS_ONLY, 'NOT identity evidence' labels present); zero load-bearing claims cite Ghidra.",
+   "F8": "EXECUTED and auditor-replicated - the auditor built a THIRD independent decoder; body-instruction counts 339/54/2/2/19/35 = 451 all match; VA boundaries identical on all six bodies; their raws match the physical EXE; objdump W_B listing identical 54/54. Defect-history disclosure verified: SCRATCH f8_boundary_crosscheck.json records the pre-fix state (135 disagreements, f8_initial_state DEFECTS_TO_FIX) and the final F8_BODY_CROSSCHECK.json records 0; the repair loop is genuine and pre-analysis.",
+   "auditor_negative_controls": "the auditor's own pin checker was tested with deliberately corrupted expectations (wrong opcode bytes / wrong rel32 byte / wrong disp) - all detected as MISMATCH (method not vacuously agreeing); the auditor's own decoder bugs (found during bring-up: ALU lo=2/3 boundary bug, missing XCHG 0x90-0x97) produced loud decode failures/count mismatches that were fixed BEFORE any QC conclusion - demonstrating failure-detection rather than silent agreement."
+  },
+  "D5_GATES_AND_RECORDS": {
+   "result": "PASS_WITH_FINDINGS",
+   "gates": {
+    "G1_ANCHORS_REPINNED": "PASS - all 72 auditor byte pins + 14/14 rel32 recomputations match; all six entries re-pinned from physical bytes",
+    "G2_EDGES_CLASSIFIED": "PASS - 3/3 edges re-derived by the auditor (CONFIRMED, CONFIRMED, CONFIRMED_CONDITIONAL with byte-documented ABI condition)",
+    "G3_CALLEE_CENSUSED": "PASS with findings P2-1/P3-1 - the 4 direct template rows and 7 store/forward rows are exact and complete (auditor re-verified each, and audited ALL 135 memory-form operands in the six bodies: none is a missed template-derived access); the machine classifier's rejection-class labeling has the P2-1 precision defect",
+    "G4_DERIVED_OBJECT_ADJUDICATED": "PASS - INTERIOR_POINTER_SAME_OBJECT byte-proven (LEA + caller reads at +0x14/+0x18 of the SAME object; no allocation/indirection/wrapper); TRANSFORM_SEMANTICS=UNVERIFIED auditor-confirmed (zero FPU/SSE)",
+    "G5_FALSIFIERS_EXECUTED": "PASS - 8/8 designed, executed, recorded with the 4-part requirement",
+    "G6_IDENTITY": "PASS - EXE unchanged (auditor re-hash); predecessor package 26/26 manifest data rows byte-unchanged (auditor re-hash); tracked tree clean; HEAD==origin==live remote==BASE; zero .pyc (auditor scan incl. QC_FRESH)",
+    "G7_NO_PROMOTION": "PASS - auditor grep: every coordinate/placement term in the package is prohibitive or negative; claim limits verbatim (MODEL_218757_TO_CMO_JOIN / WORLD_INSTANCE_IDENTITY / HISTORICAL_PLACEMENT = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO); all findings STATIC_ONLY at BYTE_OBSERVATION/STRUCTURE/RELATION maturity"
+   },
+   "preregistration_before_science": "CONSISTENT - PREREGISTRATION.md mtime 10:31:15 precedes every decode/analysis artifact (first decode tooling 10:35:04, decoder outputs 10:44:29+, package science artifacts 10:47:40+); pre-registered windows/caps/falsifiers/gates match the executed run exactly (caps 0x600/0x200/0x1000/0x1000/0x80/0xC0 + 16B; slice sizes match); caveat: mtime is last-write evidence, not proof of first-write - accepted as consistent with content (L14 applied)",
+   "self_check_credibility": "CREDIBLE - all 46 byte re-checks of SELF_CHECK re-verified by the auditor (byte-exact); the 14 rel32 checks all re-verified; census_completeness 126 re-derived (modrm-form count; see P3-1); package_hygiene files=22 reflects the pre-EVIDENCE_INDEX state (see P3-3)",
+   "evidence_index_verification": {"package_rows": 22, "all_match": true, "unindexed_files": [], "scratch_rows_unique": 35, "scratch_all_match": true, "self_exclusion": "EVIDENCE_INDEX.md correctly self-excluded"},
+   "handoff_final_report_consistency": {"files": "HANDOFF 23 vs actual 23 (SELF_CHECK 22 = pre-index state; P3-3)", "body_instructions_dual_decoded": "451 = auditor recount 451", "memory_operands": "claimed 126 = auditor's modrm-form count 126 (auditor all-forms count 135 incl. 9 A0-A3 moffs + 42 LEA forms; P3-1)", "rel32": "14/14 auditor-recomputed", "counts_agree": true},
+   "not_checked_honesty": "HONEST - all NOT_CHECKED items (FUN_004D1430, FUN_006C2E00, FUN_006C3640, FUN_00414670 bodies; 0x0085B1B0/0x0095D3C4 contract-forbidden; runtime behavior) verified as genuinely outside the pre-registered windows: auditor's window census of OWN_DECODER keys + objdump listings covers only W_A..W_F; no forbidden body appears in any decoded artifact; 0x0085B1B0 and 0x0095D3C4 fall outside every window range (auditor-verified against caps)",
+   "intervention_ledger_adjudication": "HONEST - (a) Ghidra LANDMARK4057 project reuse was pre-declared in PREREGISTRATION section 6 (a declared method, not a hidden intervention) and its sandbox EXE hash was re-verified = physical (auditor re-hash confirms); (b) the own-decoder repair loop (3 defects) is disclosed under F8 and evidenced by the calibration artifact (135 initial disagreements -> DEFECTS_TO_FIX -> fixed -> final 0; auditor replicated the final 0); (c) objdump slices = genuine physical-EXE bytes (auditor compared all 7 SCRATCH slice .bin files against the EXE at their VAs: identical); (d) no runtime/network experiments, no package installs, no tracked-file modifications, no commits (git clean), python -B with zero .pyc (auditor scan). VIOLATION: none."
+  }
+ },
+
+ "findings": [
+  {
+   "id": "P2-1",
+   "severity": "P2",
+   "title": "Census machine-classifier provenance over-broad: 7 non-template W_A [EAX]-based memory operands are labeled under the '0x50CAF0/0x50D8C0 result struct' class",
+   "source": "SCRATCH\\selfcheck.py line ~140 ('elif w == \"W_A_FUN_00511070\" and ea.startswith(\"[EAX\")') and CALLEE_FIELD_ACCESS_CENSUS.json non_template_memory_rejections (the '[EAX]/[EAX+0x4]..[EAX+0x10] source reads @0x005112B1-0x005112CF and @0x0051130C-0x00511330' class); affected operands: 0x005111A5 (MOV ECX,[EAX], base = result of CALL 0x00843DD0 @0x005111A0), 0x005113DC/0x005113DE/0x005113E5 and 0x00511455/0x0051145A/0x0051145D (MOV [EAX],ECX etc., base EAX = ESP set by MOV EAX,ESP @0x005113D5 / @0x00511453 after SUB ESP,0xC - STACK writes)",
+   "contradicted_claim": "the census completeness proof's implicit claim that every [EAX]-prefixed W_A operand belongs to the 0x50CAF0/0x50D8C0 struct-copy families",
+   "skutek_impact": "the 'unclassified=[]' machine result rests on a class rule whose provenance label is wrong for 7 of its members; the completeness DEMONSTRATION is weakened, but no scientific conclusion is affected - the auditor traced all 7 independently: ALL are non-template (0x843DD0 result; ESP-based stack writes), so NO template-derived access is missing from the direct/forward rows",
+   "correction_requirement": "records-correction round (via PE-MASTER; executor artifacts are immutable for the QC): split the classifier rule and the census class text into (a) 'struct-copy sources 0x50CAF0/0x50D8C0 (2 ranges)', (b) '0x843DD0-result read @0x005111A5', (c) 'EAX=ESP stack-write regions @0x005113D2-0x005113E5 / @0x00511450-0x0051145D'",
+   "revalidation_predicate": "re-run the completeness classifier over ALL memory-form operands (135 incl. moffs and LEA forms): expected unclassified=[] with the 7 operands carrying their true base provenance; auditor reference: QC_D6_FINAL_PINS.json my_unclassified + this finding's list"
+  },
+  {
+   "id": "P3-1",
+   "severity": "P3",
+   "title": "SELF_CHECK 'memory_operands_in_bodies: 126' excludes the 9 A0-A3 moffs-form memory accesses (denominator definition)",
+   "source": "SCRATCH\\x86probe.py A0-A3 branch (sets reads_m/writes_m but never appends to mem) -> SELF_CHECK.json census_completeness; the 9 operands: W_A 64 A1 (FS:[0] read @0x00511077), 64 A3 (FS:[0] write @0x00511097), A1 [0x00B9D8D0] cookie (@0x00511088); W_E2 64 A1 (@0x0043A557), A1 cookie (@0x0043A55F), A1 [0x00BA1824] singleton (@0x0043A571), 64 A3 (@0x0043A56B), A3 singleton store (@0x0043A59B), A3 NULL store (@0x0043A5B2)",
+   "contradicted_claim": "none as stated - the 9 ARE enumerated in census classes (anchor_registry_memory rows + rejection classes 'cookie / FS:[0x0] SEH'), so completeness substantively holds; the defect is definitional opacity: a reader of SELF_CHECK would believe the bodies contain exactly 126 memory operands, while the auditor counts 135 memory-form operands (126 modrm-form incl. 42 LEA + 9 moffs)",
+   "skutek_impact": "bookkeeping precision only; no template access missed (all 9 are SEH/cookie/registry-global accesses, non-template; auditor-verified)",
+   "correction_requirement": "in the next records pass, document the denominator definition in SELF_CHECK/census ('126 = modrm-form memory operands; the 9 A0-A3 moffs accesses are enumerated in census classes') or extend the classifier to moffs",
+   "revalidation_predicate": "classifier over 135 forms with unclassified=[]; auditor reference: QC_D6_FINAL_PINS.json (total 135) and QC_D2_DECODE.json"
+  },
+  {
+   "id": "P3-2",
+   "severity": "P3",
+   "title": "E3 intervening-call census omits the byte-proven-safe crossing CALL 0x006C3F74 (E2 subject call) shared by both paths",
+   "source": "POINTER_DATAFLOW.json E3.intervening_calls (direct_path 'NONE' listed from 0x006C3F8D onward; the chain is anchored 'from_template_capture' 0x006C3F67, which lies BEFORE the E2 subject CALL @0x006C3F74)",
+   "contradicted_claim": "the literal completeness of the E3 intervening-calls census; NOT the classification - EDI survival across 0x006C3F74 is byte-provable (FUN_007CE1E0's open 4-byte body 8B 41 08 C3 never writes EDI), so the only ABI-assumption crossing remains CALL 0x006C2E00 exactly as recorded; CONFIRMED_CONDITIONAL stands",
+   "skutek_impact": "none on conclusions; census prose completeness only",
+   "correction_requirement": "records pass: add the 0x006C3F74 crossing to the E3 chain census with the note 'byte-proven EDI-safe (open 4-byte callee body)'",
+   "revalidation_predicate": "E3 chain census lists both crossings with their verification mode (byte-proven vs ABI-assumption)"
+  },
+  {
+   "id": "P3-3",
+   "severity": "P3",
+   "title": "SELF_CHECK package_hygiene 'files: 22' vs HANDOFF '23 physical files' (EVIDENCE_INDEX.md written after SELF_CHECK ran)",
+   "source": "SELF_CHECK.json package_hygiene.files=22 (mtime 10:52:46) vs HANDOFF.md Phase-5 '23 physical files' and actual package census 23 (auditor count); EVIDENCE_INDEX.md mtime 10:53:29",
+   "contradicted_claim": "none - both numbers are honest for their moment; the inconsistency is temporal bookkeeping",
+   "skutek_impact": "none; auditor hygiene re-scan: 23 files, 0 violations (no .pyc/.bin, no BOM)",
+   "correction_requirement": "none mandatory; optional note in a records pass that SELF_CHECK predates EVIDENCE_INDEX.md",
+   "revalidation_predicate": "n/a"
+  },
+  {
+   "id": "P3-4",
+   "severity": "P3",
+   "title": "CALL_EDGE_PROVENANCE lists 13 callsite entries while SELF_CHECK rel32 'checked: 14' (the 14th, 0x00511154->0x0041B3A0, lives only in selfcheck.py)",
+   "source": "CALL_EDGE_PROVENANCE.json (3 subject + 10 anchor entries) vs SELF_CHECK.json rel32_independent_recomputation.checked=14 and SCRATCH\\selfcheck.py call_targets dict (14 keys incl. 0x00511154->0x41B3A0)",
+   "contradicted_claim": "none - all 14 sites auditor-recomputed: MATCH; the artifact scopes simply differ by one entry",
+   "skutek_impact": "none",
+   "correction_requirement": "optional records pass: add the 0x00511154->0x0041B3A0 edge row (receiver producer of the second FUN_007CE1E0 use) to CALL_EDGE_PROVENANCE or note the scope",
+   "revalidation_predicate": "n/a (auditor already recomputed all 14)"
+  },
+  {
+   "id": "P3-5",
+   "severity": "P3",
+   "title": "Informational: W_A body-end analysis marks the next function's SEH prologue (6A FF 68 ...) as is_next_prologue:false",
+   "source": "01_RAW/BODY_END_ANALYSIS.json W_A ret_candidates[0].next_bytes '6A FF 68 D6 BE 9B 00 64 A1 00 00 00' with is_next_prologue:false, is_padding_terminated:true (4xCC)",
+   "contradicted_claim": "none - the pre-registered body-end rule (RET + alignment padding) is satisfied by the 4x CC run; the conservative pattern-miss on 6A FF-type prologues does not affect the 1212 B determination (auditor re-derived: 0x0051152C-0x00511070 = 1212 B, 339 instructions to RET @0x0051152B)",
+   "skutek_impact": "none",
+   "correction_requirement": "none (recorded for the pattern library: MSVC SEH prologues start 6A FF)",
+   "revalidation_predicate": "n/a"
+  }
+ ],
+
+ "auditor_own_toolchain_disclosure": {
+  "decoder": "fresh pure-Python x86-32 decoder + PE parser written by the auditor for this QC (QC_FRESH); third independent implementation",
+  "defects_found_and_fixed_during_this_qc": [
+   "ALU opcodes with lo=2/3 (0x03/0x0B/0x13/0x1B/0x23/0x2B/0x33/0x3B) initially parsed as immediate forms -> wrong boundaries (caught loudly: W_E1 count 17 vs expected 19; W_A decode error)",
+   "missing 0x90-0x97 XCHG (caught: W_A decode error @0x00511344)",
+   "group1 /4-/5 mnemonic mislabel AND<->SUB (mnemonic-only; lengths/write-sets unaffected; no pin or census conclusion relied on it)",
+   "CMP reg-dest forms wrongly listed in regs_w (census-only; manually excluded in conclusions)",
+   "raw-field truncation on prefix bytes (display-only; boundaries unaffected; comparisons redone via EXE re-extraction)"
+  ],
+  "control": "all defects produced loud failures (decode errors / count mismatches) fixed BEFORE conclusions; final three-way agreement computed only after fixes; negative controls executed (corrupted expectations detected as MISMATCH)"
+ },
+
+ "claim_status_recheck": {
+  "DERIVED_OBJECT_IDENTITY": "CONFIRMED (= INTERIOR_POINTER_SAME_OBJECT, byte-level, auditor re-derived)",
+  "TRANSFORM_SEMANTICS": "CONFIRMED (= UNVERIFIED; zero FPU/SSE auditor-re-measured)",
+  "POINTER_IDENTITY_E1_E2": "CONFIRMED (auditor re-derived)",
+  "POINTER_IDENTITY_E3": "CONFIRMED_CONDITIONAL (condition correctly isolated to CALL 0x006C2E00 ABI assumption; P3-2 census note)",
+  "sentinel_static_zero": "CONFIRMED (zero-init .data tail, auditor PE parse; callers never test it, auditor scan)",
+  "lookup_returns_mapfind_result_plus_0x14": "CONFIRMED (83 C0 14 @0x0072F59E auditor byte-verified)",
+  "getter_never_reads_stack_arg": "CONFIRMED (auditor decode; [ESP+0x18] never read)",
+  "FUN_00567170_family_not_involved": "CONFIRMED (auditor call-target census)",
+  "runtime_identity": "NOT_ESTABLISHED (STATIC_ONLY preserved)",
+  "claim_limits": "verbatim preserved (MODEL_218757_TO_CMO_JOIN / WORLD_INSTANCE_IDENTITY / HISTORICAL_PLACEMENT = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO)"
+ },
+
+ "full_read_log": [
+  "FINAL_REPORT.md (full)", "HANDOFF.md (full)", "PREREGISTRATION.md (full)", "FALSIFIER_RESULTS.json (full)",
+  "INPUT_IDENTITIES.json (full)", "CALL_EDGE_PROVENANCE.json (full)", "CALLEE_FIELD_ACCESS_CENSUS.json (full)",
+  "POINTER_DATAFLOW.json (full)", "EVIDENCE_INDEX.md (full)", "01_RAW/SELF_CHECK.json (full)",
+  "01_RAW/F8_BODY_CROSSCHECK.json (full)", "01_RAW/BODY_END_ANALYSIS.json (full)",
+  "01_RAW/SENTINEL_00BA5800_DUMP.json (full)", "01_RAW/PHASE0_INPUT_IDENTITIES_RAW.json (full)",
+  "01_RAW/KEY_REGION_LISTINGS.md (full)", "01_RAW/GHIDRA_HYPOTHESIS_EXPORT.json (structure + quarantine labels)",
+  "01_RAW/OWN_DECODER_WINDOWS.json (all six bodies' body-range instructions compared 451/451 vs auditor decode)",
+  "01_RAW/OBJDUMP_LISTINGS/objdump_W_B_FUN_006C3F50.txt (full, 54/54 identical to auditor decode)",
+  "SCRATCH: selfcheck.py (full), crosscheck_objdump.py (full), final_identity_checks.py (full)",
+  "SCRATCH: x86probe.py (key sections: read_va/modrm/mem_ops/moffs/group tables; behavior verified by output agreement rather than full read)",
+  "SCRATCH: f8_boundary_crosscheck.json (summary + defect records)", "SCRATCH: slices (byte-compared against EXE)",
+  "predecessor MANIFEST_SHA256.csv (full row re-hash)"
+ ],
+
+ "not_checked_by_auditor": [
+  "objdump listings for W_A/W_C/W_D/W_E1/W_E2 were not re-parsed line-by-line by the auditor (W_B was, 54/54; the others are covered by the executor's crosscheck artifact + the auditor's own full decode of the same bytes; three-way agreement on instruction boundaries)",
+  "remaining SCRATCH generator scripts beyond key sections (assemble_package.py, gen_evidence_index.py, phase0_input_identities.py, run_windows.py, dump_bodies.py/2, crosscheck2.py, ghidra_export_fwd.py, body_end_analysis.py) - their outputs were hash-verified and their load-bearing products independently re-measured, but the full text was not read to EOF",
+  "the historical 'before AND after' moments of the executor's identity checks cannot be re-executed; the auditor verified the CURRENT state (EXE hash, predecessor 26/26 rows, git state) which is consistent with all recorded checks",
+  "Ghidra project internal state (timestamps advancing from the headless reuse) - outside QC scope; the disclosure is accepted as honest",
+  "PREREGISTRATION.md first-write time (mtime is last-write evidence; content consistency + all artifacts' mtimes accepted; L14 caveat recorded)"
+ ],
+
+ "qc_artifacts": {
+  "package_root": ["QC_RESULTS.json (this file)", "QC_REPORT.md"],
+  "qc_scratch": ["QC_FRESH/qc_d1_identity.py", "QC_FRESH/QC_D1_IDENTITY.json", "QC_FRESH/qc_d2_decode.py", "QC_FRESH/QC_D2_DECODE.json", "QC_FRESH/qc_d2_pins.py", "QC_FRESH/QC_D2_PINS.json", "QC_FRESH/qc_d3_dataflow.py", "QC_FRESH/QC_D3_DATAFLOW.json", "QC_FRESH/qc_d5_records.py", "QC_FRESH/QC_D5_RECORDS.json", "QC_FRESH/qc_d5b_scratch.py", "QC_FRESH/qc_d5c_agreement.py", "QC_FRESH/QC_D5B_DECODER_AGREEMENT.json", "QC_FRESH/qc_d6_final.py", "QC_FRESH/QC_D6_FINAL_PINS.json", "QC_FRESH/qc_peek_calib.py"]
+ },
+
+ "git_state_at_qc_end": {"BASE_SHA": "cea10e9cfcaa2e814f5cfe4269fd2a6a409d54da", "HEAD_SHA": "cea10e9cfcaa2e814f5cfe4269fd2a6a409d54da", "push_status": "NOT_PUSHED (QC does not commit/push per dispatch)", "files_changed_by_qc": "package: +QC_RESULTS.json +QC_REPORT.md (new files only; zero executor artifacts modified; AUDIT_ENTRYPOINT.md untouched; no MANIFEST created); SCRATCH\\QC_FRESH\\* local-only"},
+ "unrelated_work_excluded": "none encountered",
+ "next_parent_action": "PE-MASTER adjudicates: (a) accept the package with this QC verdict and the findings ledger (P2-1 correction can ride the next records-correction dispatch or a future run's evidence-index update), (b) optionally dispatch a bounded records-correction for P2-1/P3-1..P3-4, then (c) proceed to the persistence/publication phase per the parent's plan. No technical implementation defect was found that would require pe-reconstruction rework."
+}

@@ -1,0 +1,28 @@
+{
+ "label": "SELF_CHECK (executor's own machine re-verification; NOT an independent audit)",
+ "byte_rechecks": {
+  "checked": 46,
+  "fails": [],
+  "pass": true
+ },
+ "rel32_independent_recomputation": {
+  "checked": 14,
+  "fails": [],
+  "pass": true
+ },
+ "census_completeness": {
+  "memory_operands_in_bodies": 135,
+  "memory_operands_in_bodies_modrm_form": 126,
+  "moffs_a0_a3_forms_enumerated": 9,
+  "denominator_definition": "126 = modrm-form memory operands (incl. 42 LEA address-computation forms), counted by this SELF_CHECK's classifier over the decoder's mem_ops (x86probe's A0-A3 moffs branch sets reads_m/writes_m but never appends to mem_ops); + 9 A0-A3 moffs-form accesses = 135 all-forms memory operands in the six bodies. The 9 moffs: W_A 64 A1 FS:[0x0] read @0x00511077, 64 A3 FS:[0x0] write @0x00511097, A1 [0x00B9D8D0] cookie read @0x00511088; W_E2 64 A1 FS:[0x0] read @0x0043A557, A1 [0x00B9D8D0] cookie read @0x0043A55F, A1 [0x00BA1824] registry-singleton read @0x0043A571, 64 A3 FS:[0x0] write @0x0043A56B, A3 [0x00BA1824] singleton store @0x0043A59B, A3 [0x00BA1824] NULL store @0x0043A5B2 — all enumerated in the census classes (CALLEE_FIELD_ACCESS_CENSUS.json anchor_registry_memory rows + cookie/FS:[0x0] SEH rejection classes) [denominator documented per QC finding P3-1, records correction 2026-10-09; re-validated by the corrected classifier over all 135 forms: unclassified=[] — see CALLEE_FIELD_ACCESS_CENSUS.json census_completeness_revalidation]",
+  "unclassified": [],
+  "pass": true
+ },
+ "package_hygiene": {
+  "files": 22,
+  "files_note": "22 = physical package file census at SELF_CHECK execution time (mtime 10:52:46), BEFORE EVIDENCE_INDEX.md was written (mtime 10:53:29). The true final assembled-package census is 23 physical files (HANDOFF.md Phase-5 '23 physical files' is correct; EVIDENCE_INDEX.md is the 23rd file and is self-excluded from its own index). Both numbers are honest for their moment — temporal bookkeeping, not a defect [reconciliation note per QC finding P3-3, records correction 2026-10-09. After that correction round the package additionally contains AMEND_LOG.md, plus the QC's own QC_RESULTS.json/QC_REPORT.md — see AMEND_LOG.md for the post-correction census]",
+  "violations": [],
+  "pass": true
+ },
+ "SELF_CHECK_VERDICT": "PASS"
+}

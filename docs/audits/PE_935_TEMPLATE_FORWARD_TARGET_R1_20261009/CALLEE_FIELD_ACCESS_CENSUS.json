@@ -1,0 +1,214 @@
+{
+  "run_id": "PE_935_TEMPLATE_FORWARD_TARGET_R1_20261009",
+  "artifact": "CALLEE_FIELD_ACCESS_CENSUS.json",
+  "evidence_class": "BYTE_OBSERVATION (own decoder; independent objdump agreement, F8 = 0 disagreements)",
+  "scope": "EVERY access to template-derived memory inside the two primary subject bodies (FUN_007CE1E0, FUN_0040B070) PLUS the caller-side accesses of template-derived values, PLUS the registry-anchor memory. All other memory operands in the six window bodies are enumerated in 'non_template_memory_rejections' to prove census completeness.",
+  "naming_discipline": "NO field is named position/rotation/scale/transform/world-coordinate. No float exists anywhere in the six bodies (machine-measured: 0 FPU/SSE instructions). All field semantics = UNKNOWN.",
+  "template_pointer_direct_memory_accesses": [
+    {
+      "instruction_va": "0x007CE1E0",
+      "opcode_bytes": "8B 41 08",
+      "mnemonic": "MOV EAX,[ECX+0x8]",
+      "effective_address": "[ECX+0x8]",
+      "base_pointer_provenance": "ECX = the receiver passed at the subject callsites = P (the FUN_0072F580 lookup return; E1/E2 pointer-identity CONFIRMED, see POINTER_DATAFLOW.json)",
+      "offset": "+0x8 (relative to P)",
+      "access_width": "32 bits",
+      "direction": "READ",
+      "consumer_operation": "returned in EAX to the caller (FUN_007CE1E0 is a 2-instruction getter)",
+      "control_flow_dependencies": "unconditional within the callee; reached on the branch-selected lookup paths (E1: JE @0x00511243 fall-through; E2: direct after lookup); on the lookup not-found path P=0x00BA5800 so this reads [0x00BA5808] = static 0x00000000 (zero-init .data tail)",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)",
+      "field_semantics": "UNKNOWN (dword-shaped; not named)"
+    },
+    {
+      "instruction_va": "0x0040B070",
+      "opcode_bytes": "8D 41 14",
+      "mnemonic": "LEA EAX,[ECX+0x14]",
+      "effective_address": "ECX+0x14 (computed; NOT dereferenced)",
+      "base_pointer_provenance": "ECX = P (E3 pointer-identity CONFIRMED_CONDITIONAL; see POINTER_DATAFLOW.json)",
+      "offset": "+0x14 (relative to P)",
+      "access_width": "address computation only (no memory operand touched)",
+      "direction": "NO MEMORY ACCESS (LEA)",
+      "consumer_operation": "the interior pointer P+0x14 is returned in EAX; the CALLER dereferences it at 0x006C3FBE / 0x006C3FC1 (rows below)",
+      "control_flow_dependencies": "unconditional within the callee; E3 growth-path condition documented in POINTER_DATAFLOW.json",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)",
+      "field_semantics": "n/a (no access)"
+    },
+    {
+      "instruction_va": "0x006C3FBE",
+      "opcode_bytes": "8B 50 04",
+      "mnemonic": "MOV EDX,[EAX+0x4]",
+      "effective_address": "[(P+0x14)+0x4] = [P+0x18]",
+      "base_pointer_provenance": "EAX = P+0x14 = FUN_0040B070 return @0x006C3FB5 (the ONLY EAX-producing instruction between the call and this read; the single intervening instruction 0x006C3FBA MOV ECX,[ESP+0x10] reads a frame local and does not write EAX)",
+      "offset": "+0x18 (relative to P) — equivalently +0x4 relative to the returned interior pointer",
+      "access_width": "32 bits",
+      "direction": "READ",
+      "consumer_operation": "EDX -> PUSH EDX @0x006C3FC6 -> arg3 of CALL 0x006C3640 @0x006C3FCD (callee body CLOSED, edge recorded)",
+      "control_flow_dependencies": "executes on both converged paths (fast + growth) after 0x006C3FAE; on the lookup not-found path reads [0x00BA5800+0x18] = static 0",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)",
+      "field_semantics": "UNKNOWN (dword-shaped; could be half of a 64-bit value, a pointer, an id, an index, or coordinates — NOT determinable statically in-window; NOT named; NO promotion)"
+    },
+    {
+      "instruction_va": "0x006C3FC1",
+      "opcode_bytes": "8B 00",
+      "mnemonic": "MOV EAX,[EAX]",
+      "effective_address": "[(P+0x14)+0x0] = [P+0x14]",
+      "base_pointer_provenance": "EAX = P+0x14 (unchanged by the previous MOV EDX,[EAX+0x4] which writes only EDX)",
+      "offset": "+0x14 (relative to P) — offset 0 relative to the interior pointer",
+      "access_width": "32 bits",
+      "direction": "READ",
+      "consumer_operation": "EAX -> PUSH EAX @0x006C3FC7 -> arg2 of CALL 0x006C3640 @0x006C3FCD",
+      "control_flow_dependencies": "same as the row above; note the two reads form the CONSECUTIVE DWORD PAIR [P+0x14],[P+0x18]",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)",
+      "field_semantics": "UNKNOWN (as above; the pair shape alone is NOT evidence of a coordinate/vector — falsifier F4 discipline)"
+    }
+  ],
+  "template_derived_value_stores_and_forwards": [
+    {
+      "instruction_va": "0x006C3F83",
+      "opcode_bytes": "89 44 24 10",
+      "mnemonic": "MOV [ESP+0x10],EAX",
+      "what_is_stored": "[P+0x8] (the FUN_007CE1E0 product loaded at 0x006C3F74)",
+      "target_object": "frame local of FUN_006C3F50 (NOT template memory)",
+      "direction": "WRITE to non-template memory of a template-derived value",
+      "conditions": "unconditional after the E2 call; the save itself demonstrates the compiler's EAX-volatility discipline (falsifier F5 corroboration)",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)"
+    },
+    {
+      "instruction_va": "0x006C3F8D",
+      "opcode_bytes": "89 19",
+      "mnemonic": "MOV [ECX],EBX",
+      "what_is_stored": "0x66 (EBX; NOT template-derived — recorded for pair completeness)",
+      "target_object": "vector slot *[ESI+4] (param_2's vector; caller-owned; NOT template memory)",
+      "direction": "WRITE",
+      "conditions": "vector fast path (JE @0x006C3F87 NOT taken; TEST ECX,ECX @0x006C3F89 non-zero)",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)"
+    },
+    {
+      "instruction_va": "0x006C3F8F",
+      "opcode_bytes": "89 41 04",
+      "mnemonic": "MOV [ECX+0x4],EAX",
+      "what_is_stored": "[P+0x8] — written as the SECOND dword of the (0x66, [P+8]) pair appended to the caller-owned vector (matches the predecessor's byte-pinned pair finding)",
+      "target_object": "vector slot [ESI+4]+4 (param_2's vector; NOT template memory)",
+      "direction": "WRITE to non-template memory of a template-derived value",
+      "conditions": "same fast path as the row above",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)"
+    },
+    {
+      "instruction_va": "0x006C3FC3 / 0x006C3FC6 / 0x006C3FC7",
+      "opcode_bytes": "51 / 52 / 50",
+      "mnemonic": "PUSH ECX / PUSH EDX / PUSH EAX",
+      "what_is_forwarded": "arg6=[P+8] (reloaded from [ESP+0x10] @0x006C3FBA), arg3=[P+0x18], arg2=[P+0x14] of CALL 0x006C3640 @0x006C3FCD (arg1=&param_2-slot, arg4=param_2, arg5=0x8BD720 .text-range immediate)",
+      "target_object": "callee 0x006C3640 argument stack (callee body CLOSED)",
+      "direction": "STACK WRITE (forward)",
+      "conditions": "unconditional on the converged path",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)"
+    },
+    {
+      "instruction_va": "0x0051125E",
+      "opcode_bytes": "8B F8",
+      "mnemonic": "MOV EDI,EAX",
+      "what_is_captured": "EDI := [P+0x8] (the FUN_007CE1E0 product at the E1 callsite)",
+      "conditions": "lookup path only (JE @0x00511243 fall-through)",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)"
+    },
+    {
+      "instruction_va": "0x00511293",
+      "opcode_bytes": "57",
+      "mnemonic": "PUSH EDI",
+      "what_is_forwarded": "[P+0x8] (or 0 on the no-lookup path) -> arg2 of CALL 0x00414670 @0x0051129C (3-arg call)",
+      "conditions": "PATH-CONDITIONAL value; callee body CLOSED, edge recorded",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)"
+    },
+    {
+      "instruction_va": "0x005112E4",
+      "opcode_bytes": "57",
+      "mnemonic": "PUSH EDI",
+      "what_is_forwarded": "[P+0x8] (or 0) -> arg3 of CALL 0x00414670 @0x005112F7 (5-arg call: the byte from [0x00BA2CE4] is arg5)",
+      "conditions": "PATH-CONDITIONAL value; EDI liveness ends at XOR EDI,EDI @0x0051133F",
+      "confidence": "CONFIRMED_STATIC (BYTE_OBSERVATION)"
+    }
+  ],
+  "anchor_registry_memory": [
+    {"instruction_va": "0x0043A571", "opcode_bytes": "A1 24 18 BA 00", "mnemonic": "MOV EAX,[0x00BA1824]", "note": "registry singleton read (global .data zero-init tail)"},
+    {"instruction_va": "0x0043A59B", "opcode_bytes": "A3 24 18 BA 00", "mnemonic": "MOV [0x00BA1824],EAX", "note": "singleton store (created object)"},
+    {"instruction_va": "0x0043A5B2", "opcode_bytes": "A3 24 18 BA 00", "mnemonic": "MOV [0x00BA1824],EAX", "note": "singleton NULL store (alloc-fail path)"},
+    {"instruction_va": "0x0072F595", "opcode_bytes": "8B 44 24 04", "mnemonic": "MOV EAX,[ESP+0x4]", "note": "mapfind result-slot read (stack local)"},
+    {"instruction_va": "0x0072F59E", "opcode_bytes": "83 C0 14", "mnemonic": "ADD EAX,0x14", "note": "the +0x14 found-path address arithmetic; the meaning of the mapfind result is UNRESOLVED (FUN_004D1430 body CLOSED)"}
+  ],
+  "non_template_memory_rejections": [
+    "W_B: [ESI+0x4]/[ESI+0x8]/[ESI+0x4]+=8 @0x006C3F7D/80/92 — param_2 vector header (caller-owned object, NOT template)",
+    "W_B: [ESP+0xC]/[ESP+0x10]/[ESP+0x30-class] frame locals and arg slots — stack frame, NOT template",
+    "W_A: struct-copy SOURCE reads [EAX],[EAX+0x4],[EAX+0x8],[EAX+0xC],[EAX+0x10] @0x005112B1/0x005112BA/0x005112C0/0x005112C6/0x005112C9 (range 1: 5 dwords; base = result of CALL 0x0050CAF0 @0x005112AC) and [EAX],[EAX+0x4],[EAX+0x8],[EAX+0xC],[EAX+0x10],[EAX+0x14] @0x0051130C/0x00511315/0x0051131B/0x00511321/0x00511327/0x0051132A (range 2: 6 dwords; base = result of CALL 0x0050D8C0 @0x00511307) — different objects; provenance-traced, falsifier F3 demonstration [class split per QC finding P2-1: this class now contains ONLY these 11 struct-copy source reads; the former machine rule 'W_A and EA starts with [EAX' over-labeled 7 other operands into it]",
+    "W_A: [EAX] read @0x005111A5 (8B 08 MOV ECX,[EAX]) — base = result of CALL 0x00843DD0 @0x005111A0 (E8 2B 2C 33 00, the immediately preceding instruction); a different object from the struct-copy sources; NOT template memory [true provenance restored per QC finding P2-1 — formerly over-labeled under the 0x50CAF0/0x50D8C0 class]",
+    "W_A: [EAX],[EAX+0x4],[EAX+0x8] STACK WRITES @0x005113DC (89 08 MOV [EAX],ECX), @0x005113DE (89 50 04 MOV [EAX+0x4],EDX), @0x005113E5 (89 58 08 MOV [EAX+0x8],EBX) and @0x00511455 (89 08 MOV [EAX],ECX), @0x0051145A (89 50 04 MOV [EAX+0x4],EDX), @0x0051145D (89 48 08 MOV [EAX+0x8],ECX) — base EAX = ESP (MOV EAX,ESP 8B C4 @0x005113D5 / @0x00511453, after SUB ESP,0xC 83 EC 0C @0x005113D2 / @0x00511450): STACK writes through an EAX=ESP alias, NOT template memory [true provenance restored per QC finding P2-1 — formerly over-labeled under the 0x50CAF0/0x50D8C0 class]",
+    "W_A: struct-copy DESTINATION stores [ECX],[ECX+0x4],[ECX+0x8],[ECX+0xC],[ECX+0x10] @0x005112B8/0x005112BD/0x005112C3/0x005112CC/0x005112CF and [ECX],[ECX+0x4],[ECX+0x8],[ECX+0xC],[ECX+0x10],[ECX+0x14] @0x00511313/0x00511318/0x0051131E/0x00511324/0x0051132D/0x00511330 — base ECX = ESP (set by MOV ECX,ESP 8B CC @0x005112B6 / @0x00511311): STACK destinations of the same copies, NOT template memory [split out of the former combined [EAX]-class rejection entry per QC finding P2-1]",
+    "W_A: [EBP]/[EBP+0x4]/[EBP+0x8]/[EBP+0x9]/[EBP+0x1] @0x00511351/0x00511274/0x0051144A-D/0x00511412/0x00511490 — base = param_3 (caller-owned struct)",
+    "W_A: [0x00BA2CE4] byte read @0x005112DB — unrelated global",
+    "W_A: [0x00B9D8D0] GS cookie; FS:[0x0] SEH frame slots",
+    "W_E1: [ESP+0xC]=key / [ESP+0x8]=result local — stack",
+    "W_E2: [0x00B9D8D0] cookie; FS:[0x0] SEH; [ESP+0x4]/[ESP+0x8]/[ESP+0x10] locals"
+  ],
+  "machine_classifier_rules_corrected": {
+    "added_by": "records-correction round 2026-10-09 (QC finding P2-1; SCRATCH\\selfcheck.py itself is immutable for this round — these are the corrected rule definitions, machine-re-executed and recorded below)",
+    "defect_corrected": "the original classifier rule 'elif w == \"W_A_FUN_00511070\" and ea.startswith(\"[EAX\")' labeled ALL W_A [EAX…]-prefixed memory operands under the '0x50CAF0/0x50D8C0 result struct' class; 7 of its 18 members have a different true base provenance (1 x CALL 0x00843DD0-result read @0x005111A5; 6 x EAX=ESP stack writes @0x005113DC/DE/E5 and @0x00511455/5A/5D) — see census_completeness_revalidation",
+    "rules": [
+      {"id": "R1", "rule": "W_C_FUN_007CE1E0 and ea == '[ECX+0x8]'", "class": "template_pointer_direct_memory_accesses row 1", "status": "unchanged"},
+      {"id": "R2", "rule": "W_D_FUN_0040B070 and ea == '[ECX+0x14]' (LEA form)", "class": "template_pointer_direct_memory_accesses row 2", "status": "unchanged"},
+      {"id": "R3", "rule": "W_B_FUN_006C3F50 and ea in ('[EAX+0x4]', '[EAX]')", "class": "template_pointer_direct_memory_accesses rows 3-4 (the [P+0x18]/[P+0x14] reads @0x006C3FBE/0x006C3FC1)", "status": "unchanged"},
+      {"id": "R4a", "rule": "W_E1_FUN_0072F580 and (va, ea) == (0x72F595, '[ESP+0x4]')", "class": "anchor_registry_memory row 'mapfind result-slot read'", "status": "subset refinement added 2026-10-09 (fires before R4; changes no coverage outcome, only names the census row)"},
+      {"id": "R4b", "rule": "W_E2_FUN_0043A550 and ea == '[0xBA1824]' (moffs form)", "class": "anchor_registry_memory rows 1-3 (registry singleton read / store / NULL-store)", "status": "subset refinement added 2026-10-09 (fires before R4; changes no coverage outcome, only names the census rows)"},
+      {"id": "R4", "rule": "'[ESP' in ea or 'FS:' in ea or 'GS:' in ea", "class": "frame locals / SEH / cookie (covers the W_B frame-local, W_A/W_E2 cookie+FS:[0x0] SEH, W_E1/W_E2 stack rejection classes)", "status": "unchanged"},
+      {"id": "R5", "rule": "W_B_FUN_006C3F50 and ea in ('[ESI+0x4]', '[ESI+0x8]', '[ECX]', '[ECX+0x4]')", "class": "param_2 vector header / slot (rejection class 1; the [ECX]/[ECX+0x4] members are the vector slot stores @0x006C3F8D/F)", "status": "unchanged"},
+      {"id": "R6", "rule": "W_E1_FUN_0072F580 and ea in ('[ESP+0xC]', '[ESP+0x8]', '[ESP+0x4]')", "class": "key/result/frame stack", "status": "unchanged (shadowed by R4 in the chain order, exactly as in the original classifier)"},
+      {"id": "R7", "rule": "W_E2_FUN_0043A550 and (ea.startswith('[0x') or '[ESP' in ea)", "class": "W_E2 globals/SEH/frame (effective member: the cookie moffs read @0x0043A55F)", "status": "unchanged"},
+      {"id": "R8", "rule": "W_A_FUN_00511070 and ea.startswith('[EBP')", "class": "param_3 struct (caller-owned)", "status": "unchanged"},
+      {"id": "R9", "rule": "W_A_FUN_00511070 and ea.startswith('[0x')", "class": "globals/cookie ([0x00B9D8D0] cookie moffs @0x00511088; [0x00BA2CE4] MOVZX read @0x005112DB)", "status": "unchanged"},
+      {"id": "R10a", "rule": "W_A_FUN_00511070 and ea.startswith('[EAX') and 0x005112B1 <= va <= 0x005112CF", "class": "struct-copy SOURCE range 1 (base = CALL 0x0050CAF0 result @0x005112AC)", "status": "SPLIT of the former defective W_A '[EAX' rule (QC finding P2-1)"},
+      {"id": "R10b", "rule": "W_A_FUN_00511070 and ea.startswith('[EAX') and 0x0051130C <= va <= 0x00511330", "class": "struct-copy SOURCE range 2 (base = CALL 0x0050D8C0 result @0x00511307)", "status": "SPLIT of the former defective W_A '[EAX' rule (QC finding P2-1)"},
+      {"id": "R10c", "rule": "W_A_FUN_00511070 and ea.startswith('[EAX') and va == 0x005111A5", "class": "CALL 0x00843DD0-result read (base = CALL 0x00843DD0 result @0x005111A0)", "status": "SPLIT of the former defective W_A '[EAX' rule (QC finding P2-1)"},
+      {"id": "R10d", "rule": "W_A_FUN_00511070 and ea.startswith('[EAX') and 0x005113D2 <= va <= 0x005113E5", "class": "EAX=ESP STACK-WRITE region 1 (MOV EAX,ESP @0x005113D5 after SUB ESP,0xC @0x005113D2)", "status": "SPLIT of the former defective W_A '[EAX' rule (QC finding P2-1)"},
+      {"id": "R10e", "rule": "W_A_FUN_00511070 and ea.startswith('[EAX') and 0x00511450 <= va <= 0x0051145D", "class": "EAX=ESP STACK-WRITE region 2 (MOV EAX,ESP @0x00511453 after SUB ESP,0xC @0x00511450)", "status": "SPLIT of the former defective W_A '[EAX' rule (QC finding P2-1)"},
+      {"id": "R11", "rule": "W_A_FUN_00511070 and ea.startswith('[ECX') and 0x005112B0 <= va <= 0x00511334", "class": "struct-copy STACK destinations (ECX = ESP @0x005112B6 / @0x00511311)", "status": "unchanged"},
+      {"id": "EXT1", "rule": "moffs extension (QC finding P3-1 denominator): the 9 A0-A3 accumulator<->moffs forms are collected in addition to modrm mem_ops (x86probe's A0-A3 branch sets reads_m/writes_m but never appends them to mem)", "class": "they classify under R4 (FS:[0x0] SEH moffs x4), R9 (W_A cookie moffs), R4b (W_E2 singleton moffs x3) and R7 (W_E2 cookie moffs)", "status": "added 2026-10-09 (coverage extension required by the revalidation predicate: ALL memory-form operands)"}
+    ]
+  },
+  "census_completeness_revalidation": {
+    "added_by": "records-correction round 2026-10-09 (revalidation predicate of QC findings P2-1 + P3-1)",
+    "method": "corrected completeness classifier (machine_classifier_rules_corrected) re-executed from scratch on 2026-10-09: the six body ranges were decoded FRESH from the physical EXE D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe (SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, read-only, re-verified before the run) using the run's own decoder x86probe.py imported READ-ONLY from SCRATCH (unmodified); body ranges from SCRATCH\\body_end_analysis.json (read-only). The classifier wrote NOTHING to SCRATCH or to the package; its only output is this record (classifier script SHA256 recorded in AMEND_LOG.md).",
+    "coverage": "ALL memory-form operands in the six bodies: 126 modrm-form operands (incl. 42 LEA address-computation forms) + 9 A0-A3 moffs-form accesses = 135; zero string-op forms; zero incomplete decodes",
+    "body_instruction_counts_reproduced": {"W_A_FUN_00511070": 339, "W_B_FUN_006C3F50": 54, "W_C_FUN_007CE1E0": 2, "W_D_FUN_0040B070": 2, "W_E1_FUN_0072F580": 19, "W_E2_FUN_0043A550": 35, "total": 451},
+    "per_window_memory_form_counts": {"W_A_FUN_00511070": 102, "W_B_FUN_006C3F50": 15, "W_C_FUN_007CE1E0": 1, "W_D_FUN_0040B070": 1, "W_E1_FUN_0072F580": 3, "W_E2_FUN_0043A550": 13},
+    "unclassified": [],
+    "p21_the_7_formerly_mislabeled_operands_true_provenance": [
+      {"instruction_va": "0x005111A5", "opcode_bytes": "8B 08", "mnemonic": "MOV ECX,[EAX]", "direction": "READ", "true_class": "CALL 0x00843DD0-result read", "true_base_provenance": "EAX = result of CALL 0x00843DD0 @0x005111A0 (E8 2B 2C 33 00), the immediately preceding instruction"},
+      {"instruction_va": "0x005113DC", "opcode_bytes": "89 08", "mnemonic": "MOV [EAX],ECX", "direction": "WRITE", "true_class": "EAX=ESP stack-write region 1", "true_base_provenance": "EAX = ESP (MOV EAX,ESP 8B C4 @0x005113D5 after SUB ESP,0xC 83 EC 0C @0x005113D2)"},
+      {"instruction_va": "0x005113DE", "opcode_bytes": "89 50 04", "mnemonic": "MOV [EAX+0x4],EDX", "direction": "WRITE", "true_class": "EAX=ESP stack-write region 1", "true_base_provenance": "same EAX=ESP alias as 0x005113DC"},
+      {"instruction_va": "0x005113E5", "opcode_bytes": "89 58 08", "mnemonic": "MOV [EAX+0x8],EBX", "direction": "WRITE", "true_class": "EAX=ESP stack-write region 1", "true_base_provenance": "same EAX=ESP alias as 0x005113DC"},
+      {"instruction_va": "0x00511455", "opcode_bytes": "89 08", "mnemonic": "MOV [EAX],ECX", "direction": "WRITE", "true_class": "EAX=ESP stack-write region 2", "true_base_provenance": "EAX = ESP (MOV EAX,ESP 8B C4 @0x00511453 after SUB ESP,0xC 83 EC 0C @0x00511450)"},
+      {"instruction_va": "0x0051145A", "opcode_bytes": "89 50 04", "mnemonic": "MOV [EAX+0x4],EDX", "direction": "WRITE", "true_class": "EAX=ESP stack-write region 2", "true_base_provenance": "same EAX=ESP alias as 0x00511455"},
+      {"instruction_va": "0x0051145D", "opcode_bytes": "89 48 08", "mnemonic": "MOV [EAX+0x8],ECX", "direction": "WRITE", "true_class": "EAX=ESP stack-write region 2", "true_base_provenance": "same EAX=ESP alias as 0x00511455"}
+    ],
+    "class_operand_census": {
+      "CENSUS_ROW_1_TEMPLATE_[ECX+8]_READ": {"count": 1, "operands": ["0x007CE1E0:[ECX+0x8]/R/modrm"]},
+      "CENSUS_ROW_2_TEMPLATE_LEA_[ECX+14]": {"count": 1, "operands": ["0x0040B070:[ECX+0x14]/RW(modrm LEA form; no memory access)/modrm"]},
+      "CENSUS_ROWS_3_4_TEMPLATE_[P+18]/[P+14]_READS": {"count": 2, "operands": ["0x006C3FBE:[EAX+0x4]/R/modrm", "0x006C3FC1:[EAX]/R/modrm"]},
+      "CENSUS_ANCHOR_ROW_mapfind_result_slot_read": {"count": 1, "operands": ["0x0072F595:[ESP+0x4]/R/modrm"]},
+      "CENSUS_ANCHOR_ROWS_registry_singleton_read/store/NULL_store": {"count": 3, "operands": ["0x0043A571:[0xBA1824]/R/moffs", "0x0043A59B:[0xBA1824]/W/moffs", "0x0043A5B2:[0xBA1824]/W/moffs"]},
+      "FRAME_SEH_COOKIE": {"count": 82, "per_window": {"W_A": 65, "W_B": 8, "W_E1": 2, "W_E2": 7}, "note": "frame locals / SEH forms: ESP-relative frame locals (incl. 41 of the 42 total LEA address-computation forms; the 42nd is the W_D template LEA row) + FS:[0x0] SEH slots (moffs x4 + modrm x3); the [0x00B9D8D0] cookie accesses are NOT here — they fall under the W_A_GLOBALS_COOKIE / W_E2_GLOBALS_SEH_FRAME classes"},
+      "W_A_0x843DD0_RESULT_READ": {"count": 1, "operands": ["0x005111A5:[EAX]/R/modrm"]},
+      "W_A_EAX_ESP_STACK_WRITE_REGION_1": {"count": 3, "operands": ["0x005113DC:[EAX]/W/modrm", "0x005113DE:[EAX+0x4]/W/modrm", "0x005113E5:[EAX+0x8]/W/modrm"]},
+      "W_A_EAX_ESP_STACK_WRITE_REGION_2": {"count": 3, "operands": ["0x00511455:[EAX]/W/modrm", "0x0051145A:[EAX+0x4]/W/modrm", "0x0051145D:[EAX+0x8]/W/modrm"]},
+      "W_A_GLOBALS_COOKIE": {"count": 2, "operands": ["0x00511088:[0xB9D8D0]/R/moffs", "0x005112DB:[0xBA2CE4]/R/modrm"]},
+      "W_A_PARAM3_STRUCT": {"count": 8, "operands": ["0x00511274:[EBP+0x4]/R/modrm", "0x00511351:[EBP]/R/modrm", "0x00511412:[EBP+0x9]/R/modrm", "0x0051144A:[EBP]/R/modrm", "0x0051144D:[EBP+0x4]/R/modrm", "0x00511457:[EBP+0x8]/R/modrm", "0x00511490:[EBP+0x1]/R/modrm", "0x00511495:[EBP+0x8]/R/modrm"]},
+      "W_A_STRUCTCOPY_SOURCE_1_base_0x50CAF0_RESULT": {"count": 5, "operands": ["0x005112B1:[EAX]/R/modrm", "0x005112BA:[EAX+0x4]/R/modrm", "0x005112C0:[EAX+0x8]/R/modrm", "0x005112C6:[EAX+0xC]/R/modrm", "0x005112C9:[EAX+0x10]/R/modrm"]},
+      "W_A_STRUCTCOPY_SOURCE_2_base_0x50D8C0_RESULT": {"count": 6, "operands": ["0x0051130C:[EAX]/R/modrm", "0x00511315:[EAX+0x4]/R/modrm", "0x0051131B:[EAX+0x8]/R/modrm", "0x00511321:[EAX+0xC]/R/modrm", "0x00511327:[EAX+0x10]/R/modrm", "0x0051132A:[EAX+0x14]/R/modrm"]},
+      "W_A_STRUCTCOPY_STACK_DESTINATIONS_ECX_ESP": {"count": 11, "operands": ["0x005112B8:[ECX]/W/modrm", "0x005112BD:[ECX+0x4]/W/modrm", "0x005112C3:[ECX+0x8]/W/modrm", "0x005112CC:[ECX+0xC]/W/modrm", "0x005112CF:[ECX+0x10]/W/modrm", "0x00511313:[ECX]/W/modrm", "0x00511318:[ECX+0x4]/W/modrm", "0x0051131E:[ECX+0x8]/W/modrm", "0x00511324:[ECX+0xC]/W/modrm", "0x0051132D:[ECX+0x10]/W/modrm", "0x00511330:[ECX+0x14]/W/modrm"]},
+      "W_B_VECTOR_HEADER_OR_SLOT": {"count": 5, "operands": ["0x006C3F7D:[ESI+0x4]/R/modrm", "0x006C3F80:[ESI+0x8]/R/modrm", "0x006C3F8D:[ECX]/W/modrm", "0x006C3F8F:[ECX+0x4]/W/modrm", "0x006C3F92:[ESI+0x4]/RW/modrm"]},
+      "W_E2_GLOBALS_SEH_FRAME": {"count": 1, "operands": ["0x0043A55F:[0xB9D8D0]/R/moffs"]}
+    },
+    "class_operand_census_note": "per-operand rows are 'VA:[EA]/direction(R|W|RW)/form(modrm|moffs)'; RW = the decoder's conservative read+write marking (x86probe marks MOV rm,reg destinations r=True w=True); direction is a decoder flag, not a census claim change. The full 135-row machine output (per window, per instruction, with read/write flags) is preserved in the correction round's temp workspace (p21_census_revalidation_output.json; SHA256 in AMEND_LOG.md).",
+    "cross_check_vs_auditor": "agrees with the internal QC's own measurements: SCRATCH\\QC_FRESH\\QC_D6_FINAL_PINS.json my_total_memops_all_forms = 135 and my_unclassified = exactly these 7 operands; per-window counts agree with SCRATCH\\QC_FRESH\\QC_D2_DECODE.json census (102/15/1/1/3/13)",
+    "result": "PASS — 135/135 memory-form operands classified, unclassified = [], and the 7 formerly mislabeled operands carry their true base provenance; no template-derived access is missing from the direct/forward rows (the completeness demonstration now rests on a correct class rule)"
+  },
+  "float_census": "0 FPU/SSE instructions in ALL SIX bodies (machine-measured over body ranges; see FALSIFIER_RESULTS.json F4). No float exists anywhere in this consumer chain — no field can be, or was, named as a coordinate."
+}
