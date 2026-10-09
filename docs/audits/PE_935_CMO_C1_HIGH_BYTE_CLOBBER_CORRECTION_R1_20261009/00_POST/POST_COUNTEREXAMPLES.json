@@ -1,0 +1,6814 @@
+{
+ "run_id": "PE_935_CMO_C1_HIGH_BYTE_CLOBBER_CORRECTION_R1_20261009",
+ "phase": "POST_COUNTEREXAMPLES",
+ "driver": "03_SCRIPTS/run_alias_controls.py (python -B)",
+ "python": "3.12.10",
+ "script_mapping": {
+  "OLD_EXECUTOR_SCRIPT": {
+   "path": "docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/03_SCRIPTS/repin_write_provenance.py",
+   "size": 34043,
+   "sha256": "45120C91AD6A94A79C56E9B06F1C035481FB99D3017688E7F589732BEC6EE931",
+   "status": "historical, IMMUTABLE, not edited"
+  },
+  "CORRECTED_EXECUTOR_SCRIPT": {
+   "path": "docs/audits/PE_935_CMO_C1_HIGH_BYTE_CLOBBER_CORRECTION_R1_20261009/03_SCRIPTS/corrected_executor_decoder.py",
+   "size": 20675,
+   "sha256": "C9B553AA90D449871643D27C76F96BCFEB989ABDF20B0BADD1F8530868FCD2C5",
+   "status": "corrected successor (this run; CMO-C1 fix)"
+  },
+  "OLD_QC_SCRIPT": {
+   "path": "docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/03_SCRIPTS/qc_remeasure.py",
+   "size": 31970,
+   "sha256": "4E5426AEAB8FBD9A9364A5FE445ED2EA7C5D9F4B3E2F2E71B3EB5B3F3F8DDE1A",
+   "status": "historical, IMMUTABLE, not edited"
+  },
+  "CORRECTED_QC_SCRIPT": {
+   "path": "03_SCRIPTS/corrected_qc_decoder.py (TO BE WRITTEN by the fresh-QC worker phase; NOT this executor phase)",
+   "status": "NOT_PERFORMED_IN_EXECUTOR_PHASE (delegation note in PREREGISTRATION section 6)"
+  }
+ },
+ "methodology": {
+  "C1": {
+   "measured_quantity": "physical window decode (count/end), the D9 E8 mutation-site pin, the ECX reaching-definition writer scan and the production provenance gate on the pinned physical bytes",
+   "independent_source_of_truth": "the physical EXE (SHA256 fail-closed) + the committed CONTROL_RESULTS.json instruction table",
+   "why_non_circular": "expectations pre-registered in PREREGISTRATION from committed evidence independent of this run; the decoder is exercised on physical bytes, never on its own outputs",
+   "failure_case_detected": "C2/C3: the same gate FAILs exactly on the two byte mutants through the ECX scan"
+  },
+  "C2": {
+   "measured_quantity": "mutant decode writes/reads/bit-ranges at 0x0085B24D + ECX scan + per-check gate decomposition",
+   "independent_source_of_truth": "x86-32 alias semantics via the independent reference table and the production byte pins",
+   "why_non_circular": "the gate is the SAME predicate as C1; the mutant differs from clean only in the two bytes at 0x0085B24D; every pin, the rel32 recomputation and the accessor check still PASS, so the failure is causally the broken ECX reaching definition \u2014 no hard-coded mutant assertion exists in the gate",
+   "failure_case_detected": "the CH counterexample itself (DETECTED); C5 negatives prove the detector is not an always-fail oracle"
+  },
+  "C3": {
+   "measured_quantity": "same as C2 for the 88 D9 CL mutant",
+   "independent_source_of_truth": "same as C2",
+   "why_non_circular": "same as C2; CL additionally crosses the low-alias boundary (dst bits [0,8) vs CH's [8,16))",
+   "failure_case_detected": "CL counterexample DETECTED"
+  },
+  "C4": {
+   "measured_quantity": "64 standalone 2-byte decodes (all 8 destinations x all 8 sources) with per-case property checks",
+   "independent_source_of_truth": "REF_BYTE8 defined in this driver (NOT imported from the production decoder helper) + x86-32 ModRM encoding rules",
+   "why_non_circular": "the decoder under test never sees the reference table; expectations are derived from the external table, not from the decoder's own mapping",
+   "failure_case_detected": "the PRE historical matrix shows the same 64 cases fail 48/64 (executor) on the historical decoders \u2014 the matrix has discriminating power"
+  },
+  "C5": {
+   "measured_quantity": "4 negative mutants at the mutation site: parent attribution + ECX scan + gate",
+   "independent_source_of_truth": "REF_BYTE8 + the production gate",
+   "why_non_circular": "the negatives must NOT flip the gate; an always-fail gate would fail here; a byte READ (e.g. CL source parent ECX in mov dh,cl) must not trigger the WRITER-based scan",
+   "failure_case_detected": "C2/C3 flip the gate; C5.1-C5.4 do not"
+  },
+  "C6": {
+   "measured_quantity": "23 byte pins + 2 rel32 recomputations + 2 RTTI walks + corrected clean decode vs the committed table AND vs the re-executed AST-extracted historical decoder (field-level equality) + receiver/value chain scans",
+   "independent_source_of_truth": "the physical EXE + the immutable committed records + the immutable historical implementation",
+   "why_non_circular": "the no-behavior-change property is proven by equality against the historical implementation re-executed read-only, not by re-asserting the correction",
+   "failure_case_detected": "any pin/row/field divergence or gate flip would FAIL C6"
+  }
+ },
+ "controls": {
+  "C1_clean_baseline": {
+   "input": "physical window bytes [0x0085B1B0,0x0085B290) (read-only)",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_pin": {
+    "va": "0x0085B24D",
+    "expected": "D9 E8",
+    "measured": "D9 E8",
+    "match": true
+   },
+   "ecx_clobber_scan_(0x0085B24B,0x0085B27A)": [],
+   "ECX_CLOBBER_AT_MUTATION_SITE": "NO",
+   "provenance_gate": {
+    "gate": "PASS",
+    "checks": {
+     "pin_0x0085B1DA_8B7C2414": true,
+     "pin_0x0085B24B_8BCF": true,
+     "pin_0x0085B27A_E8E1B2EEFF": true,
+     "rel32_target_0x00746560": true,
+     "accessor_0x00746560_8D4108C3": true,
+     "pin_0x0085B27F_8B08": true,
+     "pin_0x0085B281_894E44": true,
+     "edi_reaching_definition_intact": true,
+     "ecx_reaching_definition_intact": true
+    },
+    "edi_clobber_vas": [],
+    "ecx_clobber_vas": [],
+    "failure_reasons": [],
+    "core_value_source": "[arg1+8]",
+    "value_provenance": "CONFIRMED_COPY_FROM_MEMORY"
+   },
+   "expected": {
+    "DECODE": "PASS",
+    "INSTRUCTION_COUNT": 64,
+    "DECODE_END": "0x0085B290",
+    "ECX_CLOBBER_AT_MUTATION_SITE": "NO",
+    "CORE_VALUE_SOURCE": "[arg1+8]",
+    "VALUE_PROVENANCE_GATE": "PASS"
+   },
+   "verdict": "PASS"
+  },
+  "C2_ch_mutant_88_DD": {
+   "input": "in-memory window copy; bytes 88 DD @0x0085B24D (physical EXE untouched)",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_instruction": {
+    "va": "0x0085B24D",
+    "length": 2,
+    "bytes": "88 DD",
+    "mnemonic": "mov",
+    "text": "mov ch, bl",
+    "dst": "ch",
+    "src": "bl",
+    "width": 8,
+    "writes": [
+     "ecx"
+    ],
+    "reads": [
+     "ebx"
+    ],
+    "mem_dst": null,
+    "byte_dst": "ch",
+    "byte_dst_parent": "ecx",
+    "byte_dst_bits": [
+     8,
+     16
+    ],
+    "byte_src": "bl",
+    "byte_src_parent": "ebx",
+    "byte_src_bits": [
+     0,
+     8
+    ],
+    "partial_gpr_write": true,
+    "gpr_write_bits": [
+     8,
+     16
+    ]
+   },
+   "ecx_clobber_scan_(0x0085B24B,0x0085B27A)": [
+    "0x0085B24D"
+   ],
+   "provenance_gate": {
+    "gate": "FAIL",
+    "checks": {
+     "pin_0x0085B1DA_8B7C2414": true,
+     "pin_0x0085B24B_8BCF": true,
+     "pin_0x0085B27A_E8E1B2EEFF": true,
+     "rel32_target_0x00746560": true,
+     "accessor_0x00746560_8D4108C3": true,
+     "pin_0x0085B27F_8B08": true,
+     "pin_0x0085B281_894E44": true,
+     "edi_reaching_definition_intact": true,
+     "ecx_reaching_definition_intact": false
+    },
+    "edi_clobber_vas": [],
+    "ecx_clobber_vas": [
+     "0x0085B24D"
+    ],
+    "failure_reasons": [
+     "ECX_REACHING_DEF_BROKEN"
+    ],
+    "core_value_source": null,
+    "value_provenance": "BROKEN"
+   },
+   "expected": {
+    "DECODE": "PASS",
+    "INSTRUCTION_COUNT": 64,
+    "DECODE_END": "0x0085B290",
+    "OPERAND": "ch",
+    "WRITES_PARENT": "ecx",
+    "CLOBBER_SCAN": "DETECTED",
+    "CLOBBER_VA": "0x0085B24D",
+    "VALUE_PROVENANCE_GATE": "FAIL",
+    "GATE_FAILURE_REASON": "ECX_REACHING_DEF_BROKEN"
+   },
+   "checks": {
+    "decode_pass_64_exact": true,
+    "operand": true,
+    "writes_parent": true,
+    "byte_dst_bits": true,
+    "width_8_partial": true,
+    "length_2": true,
+    "clobber_scan_detected": true,
+    "gate_fail": true,
+    "gate_failure_came_from_broken_ecx_reaching_def": true,
+    "gate_all_other_checks_pass": true,
+    "exe_identity_unaffected": true
+   },
+   "verdict": "PASS"
+  },
+  "C3_cl_control_88_D9": {
+   "input": "in-memory window copy; bytes 88 D9 @0x0085B24D (physical EXE untouched)",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_instruction": {
+    "va": "0x0085B24D",
+    "length": 2,
+    "bytes": "88 D9",
+    "mnemonic": "mov",
+    "text": "mov cl, bl",
+    "dst": "cl",
+    "src": "bl",
+    "width": 8,
+    "writes": [
+     "ecx"
+    ],
+    "reads": [
+     "ebx"
+    ],
+    "mem_dst": null,
+    "byte_dst": "cl",
+    "byte_dst_parent": "ecx",
+    "byte_dst_bits": [
+     0,
+     8
+    ],
+    "byte_src": "bl",
+    "byte_src_parent": "ebx",
+    "byte_src_bits": [
+     0,
+     8
+    ],
+    "partial_gpr_write": true,
+    "gpr_write_bits": [
+     0,
+     8
+    ]
+   },
+   "ecx_clobber_scan_(0x0085B24B,0x0085B27A)": [
+    "0x0085B24D"
+   ],
+   "provenance_gate": {
+    "gate": "FAIL",
+    "checks": {
+     "pin_0x0085B1DA_8B7C2414": true,
+     "pin_0x0085B24B_8BCF": true,
+     "pin_0x0085B27A_E8E1B2EEFF": true,
+     "rel32_target_0x00746560": true,
+     "accessor_0x00746560_8D4108C3": true,
+     "pin_0x0085B27F_8B08": true,
+     "pin_0x0085B281_894E44": true,
+     "edi_reaching_definition_intact": true,
+     "ecx_reaching_definition_intact": false
+    },
+    "edi_clobber_vas": [],
+    "ecx_clobber_vas": [
+     "0x0085B24D"
+    ],
+    "failure_reasons": [
+     "ECX_REACHING_DEF_BROKEN"
+    ],
+    "core_value_source": null,
+    "value_provenance": "BROKEN"
+   },
+   "expected": {
+    "DECODE": "PASS",
+    "INSTRUCTION_COUNT": 64,
+    "DECODE_END": "0x0085B290",
+    "OPERAND": "cl",
+    "WRITES_PARENT": "ecx",
+    "CLOBBER_SCAN": "DETECTED",
+    "CLOBBER_VA": "0x0085B24D",
+    "VALUE_PROVENANCE_GATE": "FAIL",
+    "GATE_FAILURE_REASON": "ECX_REACHING_DEF_BROKEN"
+   },
+   "checks": {
+    "decode_pass_64_exact": true,
+    "operand": true,
+    "writes_parent": true,
+    "byte_dst_bits": true,
+    "width_8_partial": true,
+    "length_2": true,
+    "clobber_scan_detected": true,
+    "gate_fail": true,
+    "gate_failure_came_from_broken_ecx_reaching_def": true,
+    "gate_all_other_checks_pass": true,
+    "exe_identity_unaffected": true
+   },
+   "verdict": "PASS"
+  },
+  "C4_alias_matrix": {
+   "design": "complete 8x8 register-direct matrix for opcode 0x88, mod=11: 64 distinct 2-byte instruction cases per decoder (8 byte destinations x 8 byte sources, AH/CH/DH/BH on both sides); synthetic alias matrix, NOT 128 provenance-path tests; cases, implementations and outcomes are reported as different units",
+   "independent_reference_table": {
+    "definition": "REF_BYTE8 defined inside run_alias_controls.py; does NOT import corrected_executor_decoder.BYTE8_PARENT",
+    "values": [
+     [
+      "al",
+      "eax",
+      [
+       0,
+       8
+      ]
+     ],
+     [
+      "cl",
+      "ecx",
+      [
+       0,
+       8
+      ]
+     ],
+     [
+      "dl",
+      "edx",
+      [
+       0,
+       8
+      ]
+     ],
+     [
+      "bl",
+      "ebx",
+      [
+       0,
+       8
+      ]
+     ],
+     [
+      "ah",
+      "eax",
+      [
+       8,
+       16
+      ]
+     ],
+     [
+      "ch",
+      "ecx",
+      [
+       8,
+       16
+      ]
+     ],
+     [
+      "dh",
+      "edx",
+      [
+       8,
+       16
+      ]
+     ],
+     [
+      "bh",
+      "ebx",
+      [
+       8,
+       16
+      ]
+     ]
+    ]
+   },
+   "cases_per_decoder": 64,
+   "implementations": {
+    "corrected_executor_decoder (this phase)": {
+     "outcomes_measured": 64,
+     "outcomes_pass": 64
+    },
+    "corrected_qc_decoder (fresh-QC worker phase)": {
+     "outcomes_measured": 0,
+     "status": "NOT_PERFORMED_IN_EXECUTOR_PHASE \u2014 assigned to the fresh-QC worker (03_SCRIPTS/corrected_qc_decoder.py + QC_RESULTS.json); the full 128-outcome two-implementation total completes in that phase"
+    }
+   },
+   "coverage": {
+    "distinct_destinations_exercised": [
+     "ah",
+     "al",
+     "bh",
+     "bl",
+     "ch",
+     "cl",
+     "dh",
+     "dl"
+    ],
+    "distinct_destinations_count": 8,
+    "distinct_sources_exercised": [
+     "ah",
+     "al",
+     "bh",
+     "bl",
+     "ch",
+     "cl",
+     "dh",
+     "dl"
+    ],
+    "distinct_sources_count": 8,
+    "destination_alias_coverage": "8/8",
+    "source_alias_coverage": "8/8",
+    "note": "each of the 8 aliases appears as destination in 8 cases and as source in 8 cases; testing all destinations against only BL is insufficient and was NOT done"
+   },
+   "partial_write_semantics_note": "a partial-byte write CLOBBERS the parent register for reaching-definition purposes but is NOT a full 32-bit overwrite; preserved via width=8, byte bit-ranges (low [0,8), high [8,16)) and partial_gpr_write/gpr_write_bits",
+   "rows": [
+    {
+     "case_id": "A-0000",
+     "bytes": "88 C0",
+     "modrm": "0xC0",
+     "x86_32_meaning": "mov al, al",
+     "reference": {
+      "dst_name": "al",
+      "dst_parent": "eax",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "al",
+      "src_parent": "eax",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C0",
+      "mnemonic": "mov",
+      "text": "mov al, al",
+      "dst": "al",
+      "src": "al",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "al",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "al",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0001",
+     "bytes": "88 C8",
+     "modrm": "0xC8",
+     "x86_32_meaning": "mov al, cl",
+     "reference": {
+      "dst_name": "al",
+      "dst_parent": "eax",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "cl",
+      "src_parent": "ecx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C8",
+      "mnemonic": "mov",
+      "text": "mov al, cl",
+      "dst": "al",
+      "src": "cl",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "al",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "cl",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0002",
+     "bytes": "88 D0",
+     "modrm": "0xD0",
+     "x86_32_meaning": "mov al, dl",
+     "reference": {
+      "dst_name": "al",
+      "dst_parent": "eax",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "dl",
+      "src_parent": "edx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D0",
+      "mnemonic": "mov",
+      "text": "mov al, dl",
+      "dst": "al",
+      "src": "dl",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "al",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "dl",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0003",
+     "bytes": "88 D8",
+     "modrm": "0xD8",
+     "x86_32_meaning": "mov al, bl",
+     "reference": {
+      "dst_name": "al",
+      "dst_parent": "eax",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "bl",
+      "src_parent": "ebx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D8",
+      "mnemonic": "mov",
+      "text": "mov al, bl",
+      "dst": "al",
+      "src": "bl",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "al",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "bl",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0004",
+     "bytes": "88 E0",
+     "modrm": "0xE0",
+     "x86_32_meaning": "mov al, ah",
+     "reference": {
+      "dst_name": "al",
+      "dst_parent": "eax",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "ah",
+      "src_parent": "eax",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E0",
+      "mnemonic": "mov",
+      "text": "mov al, ah",
+      "dst": "al",
+      "src": "ah",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "al",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "ah",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0005",
+     "bytes": "88 E8",
+     "modrm": "0xE8",
+     "x86_32_meaning": "mov al, ch",
+     "reference": {
+      "dst_name": "al",
+      "dst_parent": "eax",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "ch",
+      "src_parent": "ecx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E8",
+      "mnemonic": "mov",
+      "text": "mov al, ch",
+      "dst": "al",
+      "src": "ch",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "al",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "ch",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0006",
+     "bytes": "88 F0",
+     "modrm": "0xF0",
+     "x86_32_meaning": "mov al, dh",
+     "reference": {
+      "dst_name": "al",
+      "dst_parent": "eax",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "dh",
+      "src_parent": "edx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F0",
+      "mnemonic": "mov",
+      "text": "mov al, dh",
+      "dst": "al",
+      "src": "dh",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "al",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "dh",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0007",
+     "bytes": "88 F8",
+     "modrm": "0xF8",
+     "x86_32_meaning": "mov al, bh",
+     "reference": {
+      "dst_name": "al",
+      "dst_parent": "eax",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "bh",
+      "src_parent": "ebx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F8",
+      "mnemonic": "mov",
+      "text": "mov al, bh",
+      "dst": "al",
+      "src": "bh",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "al",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "bh",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0100",
+     "bytes": "88 C1",
+     "modrm": "0xC1",
+     "x86_32_meaning": "mov cl, al",
+     "reference": {
+      "dst_name": "cl",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "al",
+      "src_parent": "eax",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C1",
+      "mnemonic": "mov",
+      "text": "mov cl, al",
+      "dst": "cl",
+      "src": "al",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "cl",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "al",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0101",
+     "bytes": "88 C9",
+     "modrm": "0xC9",
+     "x86_32_meaning": "mov cl, cl",
+     "reference": {
+      "dst_name": "cl",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "cl",
+      "src_parent": "ecx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C9",
+      "mnemonic": "mov",
+      "text": "mov cl, cl",
+      "dst": "cl",
+      "src": "cl",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "cl",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "cl",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0102",
+     "bytes": "88 D1",
+     "modrm": "0xD1",
+     "x86_32_meaning": "mov cl, dl",
+     "reference": {
+      "dst_name": "cl",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "dl",
+      "src_parent": "edx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D1",
+      "mnemonic": "mov",
+      "text": "mov cl, dl",
+      "dst": "cl",
+      "src": "dl",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "cl",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "dl",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0103",
+     "bytes": "88 D9",
+     "modrm": "0xD9",
+     "x86_32_meaning": "mov cl, bl",
+     "reference": {
+      "dst_name": "cl",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "bl",
+      "src_parent": "ebx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D9",
+      "mnemonic": "mov",
+      "text": "mov cl, bl",
+      "dst": "cl",
+      "src": "bl",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "cl",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "bl",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0104",
+     "bytes": "88 E1",
+     "modrm": "0xE1",
+     "x86_32_meaning": "mov cl, ah",
+     "reference": {
+      "dst_name": "cl",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "ah",
+      "src_parent": "eax",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E1",
+      "mnemonic": "mov",
+      "text": "mov cl, ah",
+      "dst": "cl",
+      "src": "ah",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "cl",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "ah",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0105",
+     "bytes": "88 E9",
+     "modrm": "0xE9",
+     "x86_32_meaning": "mov cl, ch",
+     "reference": {
+      "dst_name": "cl",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "ch",
+      "src_parent": "ecx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E9",
+      "mnemonic": "mov",
+      "text": "mov cl, ch",
+      "dst": "cl",
+      "src": "ch",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "cl",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "ch",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0106",
+     "bytes": "88 F1",
+     "modrm": "0xF1",
+     "x86_32_meaning": "mov cl, dh",
+     "reference": {
+      "dst_name": "cl",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "dh",
+      "src_parent": "edx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F1",
+      "mnemonic": "mov",
+      "text": "mov cl, dh",
+      "dst": "cl",
+      "src": "dh",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "cl",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "dh",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0107",
+     "bytes": "88 F9",
+     "modrm": "0xF9",
+     "x86_32_meaning": "mov cl, bh",
+     "reference": {
+      "dst_name": "cl",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "bh",
+      "src_parent": "ebx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F9",
+      "mnemonic": "mov",
+      "text": "mov cl, bh",
+      "dst": "cl",
+      "src": "bh",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "cl",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "bh",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0200",
+     "bytes": "88 C2",
+     "modrm": "0xC2",
+     "x86_32_meaning": "mov dl, al",
+     "reference": {
+      "dst_name": "dl",
+      "dst_parent": "edx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "al",
+      "src_parent": "eax",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C2",
+      "mnemonic": "mov",
+      "text": "mov dl, al",
+      "dst": "dl",
+      "src": "al",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dl",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "al",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0201",
+     "bytes": "88 CA",
+     "modrm": "0xCA",
+     "x86_32_meaning": "mov dl, cl",
+     "reference": {
+      "dst_name": "dl",
+      "dst_parent": "edx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "cl",
+      "src_parent": "ecx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 CA",
+      "mnemonic": "mov",
+      "text": "mov dl, cl",
+      "dst": "dl",
+      "src": "cl",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dl",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "cl",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0202",
+     "bytes": "88 D2",
+     "modrm": "0xD2",
+     "x86_32_meaning": "mov dl, dl",
+     "reference": {
+      "dst_name": "dl",
+      "dst_parent": "edx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "dl",
+      "src_parent": "edx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D2",
+      "mnemonic": "mov",
+      "text": "mov dl, dl",
+      "dst": "dl",
+      "src": "dl",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dl",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "dl",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0203",
+     "bytes": "88 DA",
+     "modrm": "0xDA",
+     "x86_32_meaning": "mov dl, bl",
+     "reference": {
+      "dst_name": "dl",
+      "dst_parent": "edx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "bl",
+      "src_parent": "ebx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 DA",
+      "mnemonic": "mov",
+      "text": "mov dl, bl",
+      "dst": "dl",
+      "src": "bl",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dl",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "bl",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0204",
+     "bytes": "88 E2",
+     "modrm": "0xE2",
+     "x86_32_meaning": "mov dl, ah",
+     "reference": {
+      "dst_name": "dl",
+      "dst_parent": "edx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "ah",
+      "src_parent": "eax",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E2",
+      "mnemonic": "mov",
+      "text": "mov dl, ah",
+      "dst": "dl",
+      "src": "ah",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dl",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "ah",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0205",
+     "bytes": "88 EA",
+     "modrm": "0xEA",
+     "x86_32_meaning": "mov dl, ch",
+     "reference": {
+      "dst_name": "dl",
+      "dst_parent": "edx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "ch",
+      "src_parent": "ecx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 EA",
+      "mnemonic": "mov",
+      "text": "mov dl, ch",
+      "dst": "dl",
+      "src": "ch",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dl",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "ch",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0206",
+     "bytes": "88 F2",
+     "modrm": "0xF2",
+     "x86_32_meaning": "mov dl, dh",
+     "reference": {
+      "dst_name": "dl",
+      "dst_parent": "edx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "dh",
+      "src_parent": "edx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F2",
+      "mnemonic": "mov",
+      "text": "mov dl, dh",
+      "dst": "dl",
+      "src": "dh",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dl",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "dh",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0207",
+     "bytes": "88 FA",
+     "modrm": "0xFA",
+     "x86_32_meaning": "mov dl, bh",
+     "reference": {
+      "dst_name": "dl",
+      "dst_parent": "edx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "bh",
+      "src_parent": "ebx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 FA",
+      "mnemonic": "mov",
+      "text": "mov dl, bh",
+      "dst": "dl",
+      "src": "bh",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dl",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "bh",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0300",
+     "bytes": "88 C3",
+     "modrm": "0xC3",
+     "x86_32_meaning": "mov bl, al",
+     "reference": {
+      "dst_name": "bl",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "al",
+      "src_parent": "eax",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C3",
+      "mnemonic": "mov",
+      "text": "mov bl, al",
+      "dst": "bl",
+      "src": "al",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bl",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "al",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0301",
+     "bytes": "88 CB",
+     "modrm": "0xCB",
+     "x86_32_meaning": "mov bl, cl",
+     "reference": {
+      "dst_name": "bl",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "cl",
+      "src_parent": "ecx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 CB",
+      "mnemonic": "mov",
+      "text": "mov bl, cl",
+      "dst": "bl",
+      "src": "cl",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bl",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "cl",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0302",
+     "bytes": "88 D3",
+     "modrm": "0xD3",
+     "x86_32_meaning": "mov bl, dl",
+     "reference": {
+      "dst_name": "bl",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "dl",
+      "src_parent": "edx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D3",
+      "mnemonic": "mov",
+      "text": "mov bl, dl",
+      "dst": "bl",
+      "src": "dl",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bl",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "dl",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0303",
+     "bytes": "88 DB",
+     "modrm": "0xDB",
+     "x86_32_meaning": "mov bl, bl",
+     "reference": {
+      "dst_name": "bl",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "bl",
+      "src_parent": "ebx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 DB",
+      "mnemonic": "mov",
+      "text": "mov bl, bl",
+      "dst": "bl",
+      "src": "bl",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bl",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "bl",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0304",
+     "bytes": "88 E3",
+     "modrm": "0xE3",
+     "x86_32_meaning": "mov bl, ah",
+     "reference": {
+      "dst_name": "bl",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "ah",
+      "src_parent": "eax",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E3",
+      "mnemonic": "mov",
+      "text": "mov bl, ah",
+      "dst": "bl",
+      "src": "ah",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bl",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "ah",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0305",
+     "bytes": "88 EB",
+     "modrm": "0xEB",
+     "x86_32_meaning": "mov bl, ch",
+     "reference": {
+      "dst_name": "bl",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "ch",
+      "src_parent": "ecx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 EB",
+      "mnemonic": "mov",
+      "text": "mov bl, ch",
+      "dst": "bl",
+      "src": "ch",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bl",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "ch",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0306",
+     "bytes": "88 F3",
+     "modrm": "0xF3",
+     "x86_32_meaning": "mov bl, dh",
+     "reference": {
+      "dst_name": "bl",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "dh",
+      "src_parent": "edx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F3",
+      "mnemonic": "mov",
+      "text": "mov bl, dh",
+      "dst": "bl",
+      "src": "dh",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bl",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "dh",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0307",
+     "bytes": "88 FB",
+     "modrm": "0xFB",
+     "x86_32_meaning": "mov bl, bh",
+     "reference": {
+      "dst_name": "bl",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       0,
+       8
+      ],
+      "src_name": "bh",
+      "src_parent": "ebx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 FB",
+      "mnemonic": "mov",
+      "text": "mov bl, bh",
+      "dst": "bl",
+      "src": "bh",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bl",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       0,
+       8
+      ],
+      "byte_src": "bh",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       0,
+       8
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0400",
+     "bytes": "88 C4",
+     "modrm": "0xC4",
+     "x86_32_meaning": "mov ah, al",
+     "reference": {
+      "dst_name": "ah",
+      "dst_parent": "eax",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "al",
+      "src_parent": "eax",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C4",
+      "mnemonic": "mov",
+      "text": "mov ah, al",
+      "dst": "ah",
+      "src": "al",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ah",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "al",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0401",
+     "bytes": "88 CC",
+     "modrm": "0xCC",
+     "x86_32_meaning": "mov ah, cl",
+     "reference": {
+      "dst_name": "ah",
+      "dst_parent": "eax",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "cl",
+      "src_parent": "ecx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 CC",
+      "mnemonic": "mov",
+      "text": "mov ah, cl",
+      "dst": "ah",
+      "src": "cl",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ah",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "cl",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0402",
+     "bytes": "88 D4",
+     "modrm": "0xD4",
+     "x86_32_meaning": "mov ah, dl",
+     "reference": {
+      "dst_name": "ah",
+      "dst_parent": "eax",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "dl",
+      "src_parent": "edx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D4",
+      "mnemonic": "mov",
+      "text": "mov ah, dl",
+      "dst": "ah",
+      "src": "dl",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ah",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "dl",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0403",
+     "bytes": "88 DC",
+     "modrm": "0xDC",
+     "x86_32_meaning": "mov ah, bl",
+     "reference": {
+      "dst_name": "ah",
+      "dst_parent": "eax",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "bl",
+      "src_parent": "ebx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 DC",
+      "mnemonic": "mov",
+      "text": "mov ah, bl",
+      "dst": "ah",
+      "src": "bl",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ah",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "bl",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0404",
+     "bytes": "88 E4",
+     "modrm": "0xE4",
+     "x86_32_meaning": "mov ah, ah",
+     "reference": {
+      "dst_name": "ah",
+      "dst_parent": "eax",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "ah",
+      "src_parent": "eax",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E4",
+      "mnemonic": "mov",
+      "text": "mov ah, ah",
+      "dst": "ah",
+      "src": "ah",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ah",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "ah",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0405",
+     "bytes": "88 EC",
+     "modrm": "0xEC",
+     "x86_32_meaning": "mov ah, ch",
+     "reference": {
+      "dst_name": "ah",
+      "dst_parent": "eax",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "ch",
+      "src_parent": "ecx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 EC",
+      "mnemonic": "mov",
+      "text": "mov ah, ch",
+      "dst": "ah",
+      "src": "ch",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ah",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "ch",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0406",
+     "bytes": "88 F4",
+     "modrm": "0xF4",
+     "x86_32_meaning": "mov ah, dh",
+     "reference": {
+      "dst_name": "ah",
+      "dst_parent": "eax",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "dh",
+      "src_parent": "edx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F4",
+      "mnemonic": "mov",
+      "text": "mov ah, dh",
+      "dst": "ah",
+      "src": "dh",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ah",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "dh",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0407",
+     "bytes": "88 FC",
+     "modrm": "0xFC",
+     "x86_32_meaning": "mov ah, bh",
+     "reference": {
+      "dst_name": "ah",
+      "dst_parent": "eax",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "bh",
+      "src_parent": "ebx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 FC",
+      "mnemonic": "mov",
+      "text": "mov ah, bh",
+      "dst": "ah",
+      "src": "bh",
+      "width": 8,
+      "writes": [
+       "eax"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ah",
+      "byte_dst_parent": "eax",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "bh",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0500",
+     "bytes": "88 C5",
+     "modrm": "0xC5",
+     "x86_32_meaning": "mov ch, al",
+     "reference": {
+      "dst_name": "ch",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "al",
+      "src_parent": "eax",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C5",
+      "mnemonic": "mov",
+      "text": "mov ch, al",
+      "dst": "ch",
+      "src": "al",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ch",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "al",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0501",
+     "bytes": "88 CD",
+     "modrm": "0xCD",
+     "x86_32_meaning": "mov ch, cl",
+     "reference": {
+      "dst_name": "ch",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "cl",
+      "src_parent": "ecx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 CD",
+      "mnemonic": "mov",
+      "text": "mov ch, cl",
+      "dst": "ch",
+      "src": "cl",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ch",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "cl",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0502",
+     "bytes": "88 D5",
+     "modrm": "0xD5",
+     "x86_32_meaning": "mov ch, dl",
+     "reference": {
+      "dst_name": "ch",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "dl",
+      "src_parent": "edx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D5",
+      "mnemonic": "mov",
+      "text": "mov ch, dl",
+      "dst": "ch",
+      "src": "dl",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ch",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "dl",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0503",
+     "bytes": "88 DD",
+     "modrm": "0xDD",
+     "x86_32_meaning": "mov ch, bl",
+     "reference": {
+      "dst_name": "ch",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "bl",
+      "src_parent": "ebx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 DD",
+      "mnemonic": "mov",
+      "text": "mov ch, bl",
+      "dst": "ch",
+      "src": "bl",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ch",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "bl",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0504",
+     "bytes": "88 E5",
+     "modrm": "0xE5",
+     "x86_32_meaning": "mov ch, ah",
+     "reference": {
+      "dst_name": "ch",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "ah",
+      "src_parent": "eax",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E5",
+      "mnemonic": "mov",
+      "text": "mov ch, ah",
+      "dst": "ch",
+      "src": "ah",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ch",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "ah",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0505",
+     "bytes": "88 ED",
+     "modrm": "0xED",
+     "x86_32_meaning": "mov ch, ch",
+     "reference": {
+      "dst_name": "ch",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "ch",
+      "src_parent": "ecx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 ED",
+      "mnemonic": "mov",
+      "text": "mov ch, ch",
+      "dst": "ch",
+      "src": "ch",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ch",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "ch",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0506",
+     "bytes": "88 F5",
+     "modrm": "0xF5",
+     "x86_32_meaning": "mov ch, dh",
+     "reference": {
+      "dst_name": "ch",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "dh",
+      "src_parent": "edx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F5",
+      "mnemonic": "mov",
+      "text": "mov ch, dh",
+      "dst": "ch",
+      "src": "dh",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ch",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "dh",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0507",
+     "bytes": "88 FD",
+     "modrm": "0xFD",
+     "x86_32_meaning": "mov ch, bh",
+     "reference": {
+      "dst_name": "ch",
+      "dst_parent": "ecx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "bh",
+      "src_parent": "ebx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 FD",
+      "mnemonic": "mov",
+      "text": "mov ch, bh",
+      "dst": "ch",
+      "src": "bh",
+      "width": 8,
+      "writes": [
+       "ecx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "ch",
+      "byte_dst_parent": "ecx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "bh",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0600",
+     "bytes": "88 C6",
+     "modrm": "0xC6",
+     "x86_32_meaning": "mov dh, al",
+     "reference": {
+      "dst_name": "dh",
+      "dst_parent": "edx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "al",
+      "src_parent": "eax",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C6",
+      "mnemonic": "mov",
+      "text": "mov dh, al",
+      "dst": "dh",
+      "src": "al",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dh",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "al",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0601",
+     "bytes": "88 CE",
+     "modrm": "0xCE",
+     "x86_32_meaning": "mov dh, cl",
+     "reference": {
+      "dst_name": "dh",
+      "dst_parent": "edx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "cl",
+      "src_parent": "ecx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 CE",
+      "mnemonic": "mov",
+      "text": "mov dh, cl",
+      "dst": "dh",
+      "src": "cl",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dh",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "cl",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0602",
+     "bytes": "88 D6",
+     "modrm": "0xD6",
+     "x86_32_meaning": "mov dh, dl",
+     "reference": {
+      "dst_name": "dh",
+      "dst_parent": "edx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "dl",
+      "src_parent": "edx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D6",
+      "mnemonic": "mov",
+      "text": "mov dh, dl",
+      "dst": "dh",
+      "src": "dl",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dh",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "dl",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0603",
+     "bytes": "88 DE",
+     "modrm": "0xDE",
+     "x86_32_meaning": "mov dh, bl",
+     "reference": {
+      "dst_name": "dh",
+      "dst_parent": "edx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "bl",
+      "src_parent": "ebx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 DE",
+      "mnemonic": "mov",
+      "text": "mov dh, bl",
+      "dst": "dh",
+      "src": "bl",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dh",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "bl",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0604",
+     "bytes": "88 E6",
+     "modrm": "0xE6",
+     "x86_32_meaning": "mov dh, ah",
+     "reference": {
+      "dst_name": "dh",
+      "dst_parent": "edx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "ah",
+      "src_parent": "eax",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E6",
+      "mnemonic": "mov",
+      "text": "mov dh, ah",
+      "dst": "dh",
+      "src": "ah",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dh",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "ah",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0605",
+     "bytes": "88 EE",
+     "modrm": "0xEE",
+     "x86_32_meaning": "mov dh, ch",
+     "reference": {
+      "dst_name": "dh",
+      "dst_parent": "edx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "ch",
+      "src_parent": "ecx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 EE",
+      "mnemonic": "mov",
+      "text": "mov dh, ch",
+      "dst": "dh",
+      "src": "ch",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dh",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "ch",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0606",
+     "bytes": "88 F6",
+     "modrm": "0xF6",
+     "x86_32_meaning": "mov dh, dh",
+     "reference": {
+      "dst_name": "dh",
+      "dst_parent": "edx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "dh",
+      "src_parent": "edx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F6",
+      "mnemonic": "mov",
+      "text": "mov dh, dh",
+      "dst": "dh",
+      "src": "dh",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dh",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "dh",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0607",
+     "bytes": "88 FE",
+     "modrm": "0xFE",
+     "x86_32_meaning": "mov dh, bh",
+     "reference": {
+      "dst_name": "dh",
+      "dst_parent": "edx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "bh",
+      "src_parent": "ebx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 FE",
+      "mnemonic": "mov",
+      "text": "mov dh, bh",
+      "dst": "dh",
+      "src": "bh",
+      "width": 8,
+      "writes": [
+       "edx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "dh",
+      "byte_dst_parent": "edx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "bh",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0700",
+     "bytes": "88 C7",
+     "modrm": "0xC7",
+     "x86_32_meaning": "mov bh, al",
+     "reference": {
+      "dst_name": "bh",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "al",
+      "src_parent": "eax",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 C7",
+      "mnemonic": "mov",
+      "text": "mov bh, al",
+      "dst": "bh",
+      "src": "al",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bh",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "al",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0701",
+     "bytes": "88 CF",
+     "modrm": "0xCF",
+     "x86_32_meaning": "mov bh, cl",
+     "reference": {
+      "dst_name": "bh",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "cl",
+      "src_parent": "ecx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 CF",
+      "mnemonic": "mov",
+      "text": "mov bh, cl",
+      "dst": "bh",
+      "src": "cl",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bh",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "cl",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0702",
+     "bytes": "88 D7",
+     "modrm": "0xD7",
+     "x86_32_meaning": "mov bh, dl",
+     "reference": {
+      "dst_name": "bh",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "dl",
+      "src_parent": "edx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 D7",
+      "mnemonic": "mov",
+      "text": "mov bh, dl",
+      "dst": "bh",
+      "src": "dl",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bh",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "dl",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0703",
+     "bytes": "88 DF",
+     "modrm": "0xDF",
+     "x86_32_meaning": "mov bh, bl",
+     "reference": {
+      "dst_name": "bh",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "bl",
+      "src_parent": "ebx",
+      "src_bits": [
+       0,
+       8
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 DF",
+      "mnemonic": "mov",
+      "text": "mov bh, bl",
+      "dst": "bh",
+      "src": "bl",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bh",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "bl",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       0,
+       8
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0704",
+     "bytes": "88 E7",
+     "modrm": "0xE7",
+     "x86_32_meaning": "mov bh, ah",
+     "reference": {
+      "dst_name": "bh",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "ah",
+      "src_parent": "eax",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 E7",
+      "mnemonic": "mov",
+      "text": "mov bh, ah",
+      "dst": "bh",
+      "src": "ah",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "eax"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bh",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "ah",
+      "byte_src_parent": "eax",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0705",
+     "bytes": "88 EF",
+     "modrm": "0xEF",
+     "x86_32_meaning": "mov bh, ch",
+     "reference": {
+      "dst_name": "bh",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "ch",
+      "src_parent": "ecx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 EF",
+      "mnemonic": "mov",
+      "text": "mov bh, ch",
+      "dst": "bh",
+      "src": "ch",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "ecx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bh",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "ch",
+      "byte_src_parent": "ecx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0706",
+     "bytes": "88 F7",
+     "modrm": "0xF7",
+     "x86_32_meaning": "mov bh, dh",
+     "reference": {
+      "dst_name": "bh",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "dh",
+      "src_parent": "edx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 F7",
+      "mnemonic": "mov",
+      "text": "mov bh, dh",
+      "dst": "bh",
+      "src": "dh",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "edx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bh",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "dh",
+      "byte_src_parent": "edx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    },
+    {
+     "case_id": "A-0707",
+     "bytes": "88 FF",
+     "modrm": "0xFF",
+     "x86_32_meaning": "mov bh, bh",
+     "reference": {
+      "dst_name": "bh",
+      "dst_parent": "ebx",
+      "dst_bits": [
+       8,
+       16
+      ],
+      "src_name": "bh",
+      "src_parent": "ebx",
+      "src_bits": [
+       8,
+       16
+      ]
+     },
+     "decoded": {
+      "va": "0x0085B24D",
+      "length": 2,
+      "bytes": "88 FF",
+      "mnemonic": "mov",
+      "text": "mov bh, bh",
+      "dst": "bh",
+      "src": "bh",
+      "width": 8,
+      "writes": [
+       "ebx"
+      ],
+      "reads": [
+       "ebx"
+      ],
+      "mem_dst": null,
+      "byte_dst": "bh",
+      "byte_dst_parent": "ebx",
+      "byte_dst_bits": [
+       8,
+       16
+      ],
+      "byte_src": "bh",
+      "byte_src_parent": "ebx",
+      "byte_src_bits": [
+       8,
+       16
+      ],
+      "partial_gpr_write": true,
+      "gpr_write_bits": [
+       8,
+       16
+      ]
+     },
+     "checks": {
+      "exact_destination_operand": true,
+      "byte_dst_name": true,
+      "correct_parent": true,
+      "writes_set_is_exactly_parent": true,
+      "no_false_write_to_unrelated_parent": true,
+      "width_8": true,
+      "length_2": true,
+      "partial_write_not_full_32bit": true,
+      "dst_bit_range": true,
+      "exact_source_operand": true,
+      "byte_src_name": true,
+      "source_parent": true,
+      "reads_set_is_exactly_source_parent": true,
+      "src_bit_range": true,
+      "text_form": true
+     },
+     "outcome": "PASS"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  "C5_unrelated_parent_negatives": {
+   "C5.1_mov_bh_bl_88_DF": {
+    "input": "in-memory window copy; bytes 88 DF @0x0085B24D",
+    "x86_32_meaning": "mov bh, bl",
+    "expected_parent": "ebx",
+    "decode": {
+     "instruction_count": 64,
+     "total_bytes": 224,
+     "end_va": "0x0085B290",
+     "end_exact_0x0085B290": true
+    },
+    "mutation_site_instruction": {
+     "va": "0x0085B24D",
+     "length": 2,
+     "bytes": "88 DF",
+     "mnemonic": "mov",
+     "text": "mov bh, bl",
+     "dst": "bh",
+     "src": "bl",
+     "width": 8,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "mem_dst": null,
+     "byte_dst": "bh",
+     "byte_dst_parent": "ebx",
+     "byte_dst_bits": [
+      8,
+      16
+     ],
+     "byte_src": "bl",
+     "byte_src_parent": "ebx",
+     "byte_src_bits": [
+      0,
+      8
+     ],
+     "partial_gpr_write": true,
+     "gpr_write_bits": [
+      8,
+      16
+     ]
+    },
+    "ecx_clobber_scan_(0x0085B24B,0x0085B27A)": [],
+    "provenance_gate": {
+     "gate": "PASS",
+     "checks": {
+      "pin_0x0085B1DA_8B7C2414": true,
+      "pin_0x0085B24B_8BCF": true,
+      "pin_0x0085B27A_E8E1B2EEFF": true,
+      "rel32_target_0x00746560": true,
+      "accessor_0x00746560_8D4108C3": true,
+      "pin_0x0085B27F_8B08": true,
+      "pin_0x0085B281_894E44": true,
+      "edi_reaching_definition_intact": true,
+      "ecx_reaching_definition_intact": true
+     },
+     "edi_clobber_vas": [],
+     "ecx_clobber_vas": [],
+     "failure_reasons": [],
+     "core_value_source": "[arg1+8]",
+     "value_provenance": "CONFIRMED_COPY_FROM_MEMORY"
+    },
+    "checks": {
+     "attributed_to_correct_parent": true,
+     "not_attributed_to_edi": true,
+     "not_attributed_to_ecx": true,
+     "ecx_scan_does_not_report_ecx_modified": true,
+     "provenance_gate_stays_pass": true,
+     "source_parent_recorded": true,
+     "reads_are_not_clobbers": "a byte READ of a parent (e.g. the CL source parent ECX in mov dh,cl) appears in the READS set but never triggers the WRITER-based clobber scan"
+    },
+    "expected": {
+     "WRITES_PARENT": "ebx",
+     "CLOBBER_SCAN": "[] (ECX not modified)",
+     "VALUE_PROVENANCE_GATE": "PASS (chain intact)"
+    },
+    "verdict": "PASS"
+   },
+   "C5.2_mov_ah_bl_88_DC": {
+    "input": "in-memory window copy; bytes 88 DC @0x0085B24D",
+    "x86_32_meaning": "mov ah, bl",
+    "expected_parent": "eax",
+    "decode": {
+     "instruction_count": 64,
+     "total_bytes": 224,
+     "end_va": "0x0085B290",
+     "end_exact_0x0085B290": true
+    },
+    "mutation_site_instruction": {
+     "va": "0x0085B24D",
+     "length": 2,
+     "bytes": "88 DC",
+     "mnemonic": "mov",
+     "text": "mov ah, bl",
+     "dst": "ah",
+     "src": "bl",
+     "width": 8,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "mem_dst": null,
+     "byte_dst": "ah",
+     "byte_dst_parent": "eax",
+     "byte_dst_bits": [
+      8,
+      16
+     ],
+     "byte_src": "bl",
+     "byte_src_parent": "ebx",
+     "byte_src_bits": [
+      0,
+      8
+     ],
+     "partial_gpr_write": true,
+     "gpr_write_bits": [
+      8,
+      16
+     ]
+    },
+    "ecx_clobber_scan_(0x0085B24B,0x0085B27A)": [],
+    "provenance_gate": {
+     "gate": "PASS",
+     "checks": {
+      "pin_0x0085B1DA_8B7C2414": true,
+      "pin_0x0085B24B_8BCF": true,
+      "pin_0x0085B27A_E8E1B2EEFF": true,
+      "rel32_target_0x00746560": true,
+      "accessor_0x00746560_8D4108C3": true,
+      "pin_0x0085B27F_8B08": true,
+      "pin_0x0085B281_894E44": true,
+      "edi_reaching_definition_intact": true,
+      "ecx_reaching_definition_intact": true
+     },
+     "edi_clobber_vas": [],
+     "ecx_clobber_vas": [],
+     "failure_reasons": [],
+     "core_value_source": "[arg1+8]",
+     "value_provenance": "CONFIRMED_COPY_FROM_MEMORY"
+    },
+    "checks": {
+     "attributed_to_correct_parent": true,
+     "not_attributed_to_edi": true,
+     "not_attributed_to_ecx": true,
+     "ecx_scan_does_not_report_ecx_modified": true,
+     "provenance_gate_stays_pass": true,
+     "source_parent_recorded": true,
+     "reads_are_not_clobbers": "a byte READ of a parent (e.g. the CL source parent ECX in mov dh,cl) appears in the READS set but never triggers the WRITER-based clobber scan"
+    },
+    "expected": {
+     "WRITES_PARENT": "eax",
+     "CLOBBER_SCAN": "[] (ECX not modified)",
+     "VALUE_PROVENANCE_GATE": "PASS (chain intact)"
+    },
+    "verdict": "PASS"
+   },
+   "C5.3_mov_dh_cl_88_CE": {
+    "input": "in-memory window copy; bytes 88 CE @0x0085B24D",
+    "x86_32_meaning": "mov dh, cl",
+    "expected_parent": "edx",
+    "decode": {
+     "instruction_count": 64,
+     "total_bytes": 224,
+     "end_va": "0x0085B290",
+     "end_exact_0x0085B290": true
+    },
+    "mutation_site_instruction": {
+     "va": "0x0085B24D",
+     "length": 2,
+     "bytes": "88 CE",
+     "mnemonic": "mov",
+     "text": "mov dh, cl",
+     "dst": "dh",
+     "src": "cl",
+     "width": 8,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "mem_dst": null,
+     "byte_dst": "dh",
+     "byte_dst_parent": "edx",
+     "byte_dst_bits": [
+      8,
+      16
+     ],
+     "byte_src": "cl",
+     "byte_src_parent": "ecx",
+     "byte_src_bits": [
+      0,
+      8
+     ],
+     "partial_gpr_write": true,
+     "gpr_write_bits": [
+      8,
+      16
+     ]
+    },
+    "ecx_clobber_scan_(0x0085B24B,0x0085B27A)": [],
+    "provenance_gate": {
+     "gate": "PASS",
+     "checks": {
+      "pin_0x0085B1DA_8B7C2414": true,
+      "pin_0x0085B24B_8BCF": true,
+      "pin_0x0085B27A_E8E1B2EEFF": true,
+      "rel32_target_0x00746560": true,
+      "accessor_0x00746560_8D4108C3": true,
+      "pin_0x0085B27F_8B08": true,
+      "pin_0x0085B281_894E44": true,
+      "edi_reaching_definition_intact": true,
+      "ecx_reaching_definition_intact": true
+     },
+     "edi_clobber_vas": [],
+     "ecx_clobber_vas": [],
+     "failure_reasons": [],
+     "core_value_source": "[arg1+8]",
+     "value_provenance": "CONFIRMED_COPY_FROM_MEMORY"
+    },
+    "checks": {
+     "attributed_to_correct_parent": true,
+     "not_attributed_to_edi": true,
+     "not_attributed_to_ecx": true,
+     "ecx_scan_does_not_report_ecx_modified": true,
+     "provenance_gate_stays_pass": true,
+     "source_parent_recorded": true,
+     "reads_are_not_clobbers": "a byte READ of a parent (e.g. the CL source parent ECX in mov dh,cl) appears in the READS set but never triggers the WRITER-based clobber scan"
+    },
+    "expected": {
+     "WRITES_PARENT": "edx",
+     "CLOBBER_SCAN": "[] (ECX not modified)",
+     "VALUE_PROVENANCE_GATE": "PASS (chain intact)"
+    },
+    "verdict": "PASS"
+   },
+   "C5.4_mov_bh_bh_88_FF": {
+    "input": "in-memory window copy; bytes 88 FF @0x0085B24D",
+    "x86_32_meaning": "mov bh, bh",
+    "expected_parent": "ebx",
+    "decode": {
+     "instruction_count": 64,
+     "total_bytes": 224,
+     "end_va": "0x0085B290",
+     "end_exact_0x0085B290": true
+    },
+    "mutation_site_instruction": {
+     "va": "0x0085B24D",
+     "length": 2,
+     "bytes": "88 FF",
+     "mnemonic": "mov",
+     "text": "mov bh, bh",
+     "dst": "bh",
+     "src": "bh",
+     "width": 8,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "mem_dst": null,
+     "byte_dst": "bh",
+     "byte_dst_parent": "ebx",
+     "byte_dst_bits": [
+      8,
+      16
+     ],
+     "byte_src": "bh",
+     "byte_src_parent": "ebx",
+     "byte_src_bits": [
+      8,
+      16
+     ],
+     "partial_gpr_write": true,
+     "gpr_write_bits": [
+      8,
+      16
+     ]
+    },
+    "ecx_clobber_scan_(0x0085B24B,0x0085B27A)": [],
+    "provenance_gate": {
+     "gate": "PASS",
+     "checks": {
+      "pin_0x0085B1DA_8B7C2414": true,
+      "pin_0x0085B24B_8BCF": true,
+      "pin_0x0085B27A_E8E1B2EEFF": true,
+      "rel32_target_0x00746560": true,
+      "accessor_0x00746560_8D4108C3": true,
+      "pin_0x0085B27F_8B08": true,
+      "pin_0x0085B281_894E44": true,
+      "edi_reaching_definition_intact": true,
+      "ecx_reaching_definition_intact": true
+     },
+     "edi_clobber_vas": [],
+     "ecx_clobber_vas": [],
+     "failure_reasons": [],
+     "core_value_source": "[arg1+8]",
+     "value_provenance": "CONFIRMED_COPY_FROM_MEMORY"
+    },
+    "checks": {
+     "attributed_to_correct_parent": true,
+     "not_attributed_to_edi": true,
+     "not_attributed_to_ecx": true,
+     "ecx_scan_does_not_report_ecx_modified": true,
+     "provenance_gate_stays_pass": true,
+     "source_parent_recorded": true,
+     "reads_are_not_clobbers": "a byte READ of a parent (e.g. the CL source parent ECX in mov dh,cl) appears in the READS set but never triggers the WRITER-based clobber scan"
+    },
+    "expected": {
+     "WRITES_PARENT": "ebx",
+     "CLOBBER_SCAN": "[] (ECX not modified)",
+     "VALUE_PROVENANCE_GATE": "PASS (chain intact)"
+    },
+    "verdict": "PASS"
+   }
+  },
+  "C6_historical_regression": {
+   "scope": "revalidation of existing original-client measurements ONLY (no new bodies); the sibling stores +0x48/+0x4C are byte-pinned ONLY (NO analysis, contract section 9); exclusion-census pins outside the approved windows were NOT re-read (NOT_PERFORMED by scope)",
+   "pins": {
+    "boundary_ret_0x0085B1AC": {
+     "va": "0x0085B1AC",
+     "expected": "C3",
+     "measured": "C3",
+     "match": true
+    },
+    "boundary_pad_0x0085B1AD_AF": {
+     "va": "0x0085B1AD",
+     "expected": "CC CC CC",
+     "measured": "CC CC CC",
+     "match": true
+    },
+    "entry_0x0085B1B0": {
+     "va": "0x0085B1B0",
+     "expected": "8B 44 24 08",
+     "measured": "8B 44 24 08",
+     "match": true
+    },
+    "receiver_def_0x0085B1B7": {
+     "va": "0x0085B1B7",
+     "expected": "8B F1",
+     "measured": "8B F1",
+     "match": true
+    },
+    "vbase_stamp_0x0085B1C1": {
+     "va": "0x0085B1C1",
+     "expected": "C7 06 4C 1E A9 00",
+     "measured": "C7 06 4C 1E A9 00",
+     "match": true
+    },
+    "arg1_load_0x0085B1DA": {
+     "va": "0x0085B1DA",
+     "expected": "8B 7C 24 14",
+     "measured": "8B 7C 24 14",
+     "match": true
+    },
+    "zeroinit_0x0085B1E4": {
+     "va": "0x0085B1E4",
+     "expected": "D9 56 44",
+     "measured": "D9 56 44",
+     "match": true
+    },
+    "zeroinit_0x0085B1E7": {
+     "va": "0x0085B1E7",
+     "expected": "D9 56 48",
+     "measured": "D9 56 48",
+     "match": true
+    },
+    "zeroinit_0x0085B1EC": {
+     "va": "0x0085B1EC",
+     "expected": "D9 56 4C",
+     "measured": "D9 56 4C",
+     "match": true
+    },
+    "ecx_from_edi_0x0085B24B": {
+     "va": "0x0085B24B",
+     "expected": "8B CF",
+     "measured": "8B CF",
+     "match": true
+    },
+    "mutation_site_0x0085B24D": {
+     "va": "0x0085B24D",
+     "expected": "D9 E8",
+     "measured": "D9 E8",
+     "match": true
+    },
+    "call_0x0085B27A": {
+     "va": "0x0085B27A",
+     "expected": "E8 E1 B2 EE FF",
+     "measured": "E8 E1 B2 EE FF",
+     "match": true
+    },
+    "value_load_0x0085B27F": {
+     "va": "0x0085B27F",
+     "expected": "8B 08",
+     "measured": "8B 08",
+     "match": true
+    },
+    "store_0x0085B281": {
+     "va": "0x0085B281",
+     "expected": "89 4E 44",
+     "measured": "89 4E 44",
+     "match": true
+    },
+    "load_edx_0x0085B284": {
+     "va": "0x0085B284",
+     "expected": "8B 50 04",
+     "measured": "8B 50 04",
+     "match": true
+    },
+    "copy48_0x0085B287_PIN_ONLY_NO_ANALYSIS": {
+     "va": "0x0085B287",
+     "expected": "89 56 48",
+     "measured": "89 56 48",
+     "match": true
+    },
+    "load_eax_0x0085B28A": {
+     "va": "0x0085B28A",
+     "expected": "8B 40 08",
+     "measured": "8B 40 08",
+     "match": true
+    },
+    "copy4C_0x0085B28D_PIN_ONLY_NO_ANALYSIS": {
+     "va": "0x0085B28D",
+     "expected": "89 46 4C",
+     "measured": "89 46 4C",
+     "match": true
+    },
+    "accessor_0x00746560": {
+     "va": "0x00746560",
+     "expected": "8D 41 08 C3",
+     "measured": "8D 41 08 C3",
+     "match": true
+    },
+    "caller_esi_0x00528E76": {
+     "va": "0x00528E76",
+     "expected": "8B F1",
+     "measured": "8B F1",
+     "match": true
+    },
+    "caller_ecx_0x00528E8B": {
+     "va": "0x00528E8B",
+     "expected": "8B CE",
+     "measured": "8B CE",
+     "match": true
+    },
+    "caller_call_0x00528E8D": {
+     "va": "0x00528E8D",
+     "expected": "E8 1E 23 33 00",
+     "measured": "E8 1E 23 33 00",
+     "match": true
+    },
+    "derived_vtable_0x00528EA2": {
+     "va": "0x00528EA2",
+     "expected": "C7 06 B0 DC A7 00",
+     "measured": "C7 06 B0 DC A7 00",
+     "match": true
+    }
+   },
+   "pins_all_match": true,
+   "rel32_recomputation": {
+    "call_0x0085B27A": {
+     "rel32_signed": -1133855,
+     "target": "0x00746560",
+     "expected": "0x00746560",
+     "match": true
+    },
+    "call_0x00528E8D": {
+     "rel32_signed": 3351326,
+     "target": "0x0085B1B0",
+     "expected": "0x0085B1B0",
+     "match": true
+    }
+   },
+   "rtti": {
+    "MovableObject_vtable_0x00A91E4C": {
+     "vtable": "0x00A91E4C",
+     "col_ptr": "0x00AB33D0",
+     "col_sig": 0,
+     "td": "0x00B7997C",
+     "name": ".?AVMovableObject@@",
+     "null_terminated": true,
+     "expected_col": "0x00AB33D0",
+     "expected_td": "0x00B7997C",
+     "expected_name": ".?AVMovableObject@@",
+     "match": true
+    },
+    "ClientMovableObject_vtable_0x00A7DCB0": {
+     "vtable": "0x00A7DCB0",
+     "col_ptr": "0x00AA17CC",
+     "col_sig": 0,
+     "td": "0x00B79958",
+     "name": ".?AVClientMovableObject@@",
+     "null_terminated": true,
+     "expected_col": "0x00AA17CC",
+     "expected_td": "0x00B79958",
+     "expected_name": ".?AVClientMovableObject@@",
+     "match": true
+    }
+   },
+   "clean_decode_corrected": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "committed_table_anchor": {
+    "source": "CONTROL_RESULTS.json (immutable; SHA256 verified)",
+    "rows_compared": 64,
+    "all_va_len_bytes_text_match": true,
+    "rows": [
+     {
+      "va": "0x0085B1B0",
+      "corrected": {
+       "len": 4,
+       "bytes": "8B 44 24 08",
+       "text": "mov eax, [esp+0x8]"
+      },
+      "committed": {
+       "len": 4,
+       "bytes": "8B 44 24 08",
+       "text": "mov eax, [esp+0x8]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1B4",
+      "corrected": {
+       "len": 1,
+       "bytes": "53",
+       "text": "push ebx"
+      },
+      "committed": {
+       "len": 1,
+       "bytes": "53",
+       "text": "push ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1B5",
+      "corrected": {
+       "len": 1,
+       "bytes": "55",
+       "text": "push ebp"
+      },
+      "committed": {
+       "len": 1,
+       "bytes": "55",
+       "text": "push ebp"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1B6",
+      "corrected": {
+       "len": 1,
+       "bytes": "56",
+       "text": "push esi"
+      },
+      "committed": {
+       "len": 1,
+       "bytes": "56",
+       "text": "push esi"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1B7",
+      "corrected": {
+       "len": 2,
+       "bytes": "8B F1",
+       "text": "mov esi, ecx"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "8B F1",
+       "text": "mov esi, ecx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1B9",
+      "corrected": {
+       "len": 2,
+       "bytes": "33 DB",
+       "text": "xor ebx, ebx"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "33 DB",
+       "text": "xor ebx, ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1BB",
+      "corrected": {
+       "len": 3,
+       "bytes": "8D 6E 14",
+       "text": "lea ebp, [esi+0x14]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "8D 6E 14",
+       "text": "lea ebp, [esi+0x14]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1BE",
+      "corrected": {
+       "len": 1,
+       "bytes": "57",
+       "text": "push edi"
+      },
+      "committed": {
+       "len": 1,
+       "bytes": "57",
+       "text": "push edi"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1BF",
+      "corrected": {
+       "len": 2,
+       "bytes": "8B CD",
+       "text": "mov ecx, ebp"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "8B CD",
+       "text": "mov ecx, ebp"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1C1",
+      "corrected": {
+       "len": 6,
+       "bytes": "C7 06 4C 1E A9 00",
+       "text": "mov [esi], 0x00a91e4c"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "C7 06 4C 1E A9 00",
+       "text": "mov [esi], 0x00a91e4c"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1C7",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 5E 04",
+       "text": "mov [esi+0x4], ebx"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 5E 04",
+       "text": "mov [esi+0x4], ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1CA",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 46 08",
+       "text": "mov [esi+0x8], eax"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 46 08",
+       "text": "mov [esi+0x8], eax"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1CD",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 5E 0C",
+       "text": "mov [esi+0xc], ebx"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 5E 0C",
+       "text": "mov [esi+0xc], ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1D0",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 5E 10",
+       "text": "mov [esi+0x10], ebx"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 5E 10",
+       "text": "mov [esi+0x10], ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1D3",
+      "corrected": {
+       "len": 5,
+       "bytes": "E8 E8 93 ED FF",
+       "text": "call 0x007345c0"
+      },
+      "committed": {
+       "len": 5,
+       "bytes": "E8 E8 93 ED FF",
+       "text": "call 0x007345c0"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1D8",
+      "corrected": {
+       "len": 2,
+       "bytes": "D9 EE",
+       "text": "fldz"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "D9 EE",
+       "text": "fldz"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1DA",
+      "corrected": {
+       "len": 4,
+       "bytes": "8B 7C 24 14",
+       "text": "mov edi, [esp+0x14]"
+      },
+      "committed": {
+       "len": 4,
+       "bytes": "8B 7C 24 14",
+       "text": "mov edi, [esp+0x14]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1DE",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 5E 3C",
+       "text": "mov [esi+0x3c], ebx"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 5E 3C",
+       "text": "mov [esi+0x3c], ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1E1",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 5E 40",
+       "text": "mov [esi+0x40], ebx"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 5E 40",
+       "text": "mov [esi+0x40], ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1E4",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 44",
+       "text": "fst [esi+0x44]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 44",
+       "text": "fst [esi+0x44]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1E7",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 48",
+       "text": "fst [esi+0x48]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 48",
+       "text": "fst [esi+0x48]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1EA",
+      "corrected": {
+       "len": 2,
+       "bytes": "8B CF",
+       "text": "mov ecx, edi"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "8B CF",
+       "text": "mov ecx, edi"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1EC",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 4C",
+       "text": "fst [esi+0x4c]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 4C",
+       "text": "fst [esi+0x4c]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1EF",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 50",
+       "text": "fst [esi+0x50]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 50",
+       "text": "fst [esi+0x50]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1F2",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 54",
+       "text": "fst [esi+0x54]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 54",
+       "text": "fst [esi+0x54]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1F5",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 58",
+       "text": "fst [esi+0x58]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 58",
+       "text": "fst [esi+0x58]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1F8",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 5C",
+       "text": "fst [esi+0x5c]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 5C",
+       "text": "fst [esi+0x5c]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1FB",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 60",
+       "text": "fst [esi+0x60]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 60",
+       "text": "fst [esi+0x60]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B1FE",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 64",
+       "text": "fst [esi+0x64]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 64",
+       "text": "fst [esi+0x64]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B201",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 68",
+       "text": "fst [esi+0x68]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 68",
+       "text": "fst [esi+0x68]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B204",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 56 6C",
+       "text": "fst [esi+0x6c]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 56 6C",
+       "text": "fst [esi+0x6c]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B207",
+      "corrected": {
+       "len": 3,
+       "bytes": "D9 5E 70",
+       "text": "fstp [esi+0x70]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "D9 5E 70",
+       "text": "fstp [esi+0x70]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B20A",
+      "corrected": {
+       "len": 5,
+       "bytes": "E8 C1 71 BB FF",
+       "text": "call 0x004123d0"
+      },
+      "committed": {
+       "len": 5,
+       "bytes": "E8 C1 71 BB FF",
+       "text": "call 0x004123d0"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B20F",
+      "corrected": {
+       "len": 2,
+       "bytes": "8B CF",
+       "text": "mov ecx, edi"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "8B CF",
+       "text": "mov ecx, edi"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B211",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 46 74",
+       "text": "mov [esi+0x74], eax"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 46 74",
+       "text": "mov [esi+0x74], eax"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B214",
+      "corrected": {
+       "len": 5,
+       "bytes": "E8 37 B3 EE FF",
+       "text": "call 0x00746550"
+      },
+      "committed": {
+       "len": 5,
+       "bytes": "E8 37 B3 EE FF",
+       "text": "call 0x00746550"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B219",
+      "corrected": {
+       "len": 2,
+       "bytes": "8B CF",
+       "text": "mov ecx, edi"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "8B CF",
+       "text": "mov ecx, edi"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B21B",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 46 78",
+       "text": "mov [esi+0x78], eax"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 46 78",
+       "text": "mov [esi+0x78], eax"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B21E",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 5E 7C",
+       "text": "mov [esi+0x7c], ebx"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 5E 7C",
+       "text": "mov [esi+0x7c], ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B221",
+      "corrected": {
+       "len": 6,
+       "bytes": "89 9E 80 00 00 00",
+       "text": "mov [esi+0x80], ebx"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "89 9E 80 00 00 00",
+       "text": "mov [esi+0x80], ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B227",
+      "corrected": {
+       "len": 6,
+       "bytes": "89 9E 84 00 00 00",
+       "text": "mov [esi+0x84], ebx"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "89 9E 84 00 00 00",
+       "text": "mov [esi+0x84], ebx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B22D",
+      "corrected": {
+       "len": 5,
+       "bytes": "E8 3E B3 EE FF",
+       "text": "call 0x00746570"
+      },
+      "committed": {
+       "len": 5,
+       "bytes": "E8 3E B3 EE FF",
+       "text": "call 0x00746570"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B232",
+      "corrected": {
+       "len": 2,
+       "bytes": "D9 EE",
+       "text": "fldz"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "D9 EE",
+       "text": "fldz"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B234",
+      "corrected": {
+       "len": 2,
+       "bytes": "8B 08",
+       "text": "mov ecx, [eax]"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "8B 08",
+       "text": "mov ecx, [eax]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B236",
+      "corrected": {
+       "len": 6,
+       "bytes": "89 8E 88 00 00 00",
+       "text": "mov [esi+0x88], ecx"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "89 8E 88 00 00 00",
+       "text": "mov [esi+0x88], ecx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B23C",
+      "corrected": {
+       "len": 3,
+       "bytes": "8B 50 04",
+       "text": "mov edx, [eax+0x4]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "8B 50 04",
+       "text": "mov edx, [eax+0x4]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B23F",
+      "corrected": {
+       "len": 6,
+       "bytes": "D9 96 90 00 00 00",
+       "text": "fst [esi+0x90]"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "D9 96 90 00 00 00",
+       "text": "fst [esi+0x90]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B245",
+      "corrected": {
+       "len": 6,
+       "bytes": "D9 9E 94 00 00 00",
+       "text": "fstp [esi+0x94]"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "D9 9E 94 00 00 00",
+       "text": "fstp [esi+0x94]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B24B",
+      "corrected": {
+       "len": 2,
+       "bytes": "8B CF",
+       "text": "mov ecx, edi"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "8B CF",
+       "text": "mov ecx, edi"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B24D",
+      "corrected": {
+       "len": 2,
+       "bytes": "D9 E8",
+       "text": "fld1"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "D9 E8",
+       "text": "fld1"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B24F",
+      "corrected": {
+       "len": 6,
+       "bytes": "89 96 8C 00 00 00",
+       "text": "mov [esi+0x8c], edx"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "89 96 8C 00 00 00",
+       "text": "mov [esi+0x8c], edx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B255",
+      "corrected": {
+       "len": 6,
+       "bytes": "D9 9E 98 00 00 00",
+       "text": "fstp [esi+0x98]"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "D9 9E 98 00 00 00",
+       "text": "fstp [esi+0x98]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B25B",
+      "corrected": {
+       "len": 6,
+       "bytes": "88 9E 9C 00 00 00",
+       "text": "mov [esi+0x9c], bl"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "88 9E 9C 00 00 00",
+       "text": "mov [esi+0x9c], bl"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B261",
+      "corrected": {
+       "len": 6,
+       "bytes": "88 9E 9D 00 00 00",
+       "text": "mov [esi+0x9d], bl"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "88 9E 9D 00 00 00",
+       "text": "mov [esi+0x9d], bl"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B267",
+      "corrected": {
+       "len": 6,
+       "bytes": "88 9E 9E 00 00 00",
+       "text": "mov [esi+0x9e], bl"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "88 9E 9E 00 00 00",
+       "text": "mov [esi+0x9e], bl"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B26D",
+      "corrected": {
+       "len": 6,
+       "bytes": "88 9E 9F 00 00 00",
+       "text": "mov [esi+0x9f], bl"
+      },
+      "committed": {
+       "len": 6,
+       "bytes": "88 9E 9F 00 00 00",
+       "text": "mov [esi+0x9f], bl"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B273",
+      "corrected": {
+       "len": 7,
+       "bytes": "66 89 9E A0 00 00 00",
+       "text": "mov [esi+0xa0], bx"
+      },
+      "committed": {
+       "len": 7,
+       "bytes": "66 89 9E A0 00 00 00",
+       "text": "mov [esi+0xa0], bx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B27A",
+      "corrected": {
+       "len": 5,
+       "bytes": "E8 E1 B2 EE FF",
+       "text": "call 0x00746560"
+      },
+      "committed": {
+       "len": 5,
+       "bytes": "E8 E1 B2 EE FF",
+       "text": "call 0x00746560"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B27F",
+      "corrected": {
+       "len": 2,
+       "bytes": "8B 08",
+       "text": "mov ecx, [eax]"
+      },
+      "committed": {
+       "len": 2,
+       "bytes": "8B 08",
+       "text": "mov ecx, [eax]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B281",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 4E 44",
+       "text": "mov [esi+0x44], ecx"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 4E 44",
+       "text": "mov [esi+0x44], ecx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B284",
+      "corrected": {
+       "len": 3,
+       "bytes": "8B 50 04",
+       "text": "mov edx, [eax+0x4]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "8B 50 04",
+       "text": "mov edx, [eax+0x4]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B287",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 56 48",
+       "text": "mov [esi+0x48], edx"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 56 48",
+       "text": "mov [esi+0x48], edx"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B28A",
+      "corrected": {
+       "len": 3,
+       "bytes": "8B 40 08",
+       "text": "mov eax, [eax+0x8]"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "8B 40 08",
+       "text": "mov eax, [eax+0x8]"
+      },
+      "match": true
+     },
+     {
+      "va": "0x0085B28D",
+      "corrected": {
+       "len": 3,
+       "bytes": "89 46 4C",
+       "text": "mov [esi+0x4c], eax"
+      },
+      "committed": {
+       "len": 3,
+       "bytes": "89 46 4C",
+       "text": "mov [esi+0x4c], eax"
+      },
+      "match": true
+     }
+    ]
+   },
+   "historical_executor_equality": {
+    "method": "the AST-extracted HISTORICAL executor decoder (read-only, top level never executed) re-decoded the physical clean window; the corrected decode must be field-by-field identical on the physical bytes (the CMO-C1 fix is invisible on this window)",
+    "rows_compared": 64,
+    "all_fields_equal": true,
+    "fields_compared": [
+     "va",
+     "length",
+     "bytes",
+     "text",
+     "writes",
+     "reads",
+     "dst",
+     "src",
+     "width",
+     "mnemonic"
+    ],
+    "rows": [
+     {
+      "va": "0x0085B1B0",
+      "match": true
+     },
+     {
+      "va": "0x0085B1B4",
+      "match": true
+     },
+     {
+      "va": "0x0085B1B5",
+      "match": true
+     },
+     {
+      "va": "0x0085B1B6",
+      "match": true
+     },
+     {
+      "va": "0x0085B1B7",
+      "match": true
+     },
+     {
+      "va": "0x0085B1B9",
+      "match": true
+     },
+     {
+      "va": "0x0085B1BB",
+      "match": true
+     },
+     {
+      "va": "0x0085B1BE",
+      "match": true
+     },
+     {
+      "va": "0x0085B1BF",
+      "match": true
+     },
+     {
+      "va": "0x0085B1C1",
+      "match": true
+     },
+     {
+      "va": "0x0085B1C7",
+      "match": true
+     },
+     {
+      "va": "0x0085B1CA",
+      "match": true
+     },
+     {
+      "va": "0x0085B1CD",
+      "match": true
+     },
+     {
+      "va": "0x0085B1D0",
+      "match": true
+     },
+     {
+      "va": "0x0085B1D3",
+      "match": true
+     },
+     {
+      "va": "0x0085B1D8",
+      "match": true
+     },
+     {
+      "va": "0x0085B1DA",
+      "match": true
+     },
+     {
+      "va": "0x0085B1DE",
+      "match": true
+     },
+     {
+      "va": "0x0085B1E1",
+      "match": true
+     },
+     {
+      "va": "0x0085B1E4",
+      "match": true
+     },
+     {
+      "va": "0x0085B1E7",
+      "match": true
+     },
+     {
+      "va": "0x0085B1EA",
+      "match": true
+     },
+     {
+      "va": "0x0085B1EC",
+      "match": true
+     },
+     {
+      "va": "0x0085B1EF",
+      "match": true
+     },
+     {
+      "va": "0x0085B1F2",
+      "match": true
+     },
+     {
+      "va": "0x0085B1F5",
+      "match": true
+     },
+     {
+      "va": "0x0085B1F8",
+      "match": true
+     },
+     {
+      "va": "0x0085B1FB",
+      "match": true
+     },
+     {
+      "va": "0x0085B1FE",
+      "match": true
+     },
+     {
+      "va": "0x0085B201",
+      "match": true
+     },
+     {
+      "va": "0x0085B204",
+      "match": true
+     },
+     {
+      "va": "0x0085B207",
+      "match": true
+     },
+     {
+      "va": "0x0085B20A",
+      "match": true
+     },
+     {
+      "va": "0x0085B20F",
+      "match": true
+     },
+     {
+      "va": "0x0085B211",
+      "match": true
+     },
+     {
+      "va": "0x0085B214",
+      "match": true
+     },
+     {
+      "va": "0x0085B219",
+      "match": true
+     },
+     {
+      "va": "0x0085B21B",
+      "match": true
+     },
+     {
+      "va": "0x0085B21E",
+      "match": true
+     },
+     {
+      "va": "0x0085B221",
+      "match": true
+     },
+     {
+      "va": "0x0085B227",
+      "match": true
+     },
+     {
+      "va": "0x0085B22D",
+      "match": true
+     },
+     {
+      "va": "0x0085B232",
+      "match": true
+     },
+     {
+      "va": "0x0085B234",
+      "match": true
+     },
+     {
+      "va": "0x0085B236",
+      "match": true
+     },
+     {
+      "va": "0x0085B23C",
+      "match": true
+     },
+     {
+      "va": "0x0085B23F",
+      "match": true
+     },
+     {
+      "va": "0x0085B245",
+      "match": true
+     },
+     {
+      "va": "0x0085B24B",
+      "match": true
+     },
+     {
+      "va": "0x0085B24D",
+      "match": true
+     },
+     {
+      "va": "0x0085B24F",
+      "match": true
+     },
+     {
+      "va": "0x0085B255",
+      "match": true
+     },
+     {
+      "va": "0x0085B25B",
+      "match": true
+     },
+     {
+      "va": "0x0085B261",
+      "match": true
+     },
+     {
+      "va": "0x0085B267",
+      "match": true
+     },
+     {
+      "va": "0x0085B26D",
+      "match": true
+     },
+     {
+      "va": "0x0085B273",
+      "match": true
+     },
+     {
+      "va": "0x0085B27A",
+      "match": true
+     },
+     {
+      "va": "0x0085B27F",
+      "match": true
+     },
+     {
+      "va": "0x0085B281",
+      "match": true
+     },
+     {
+      "va": "0x0085B284",
+      "match": true
+     },
+     {
+      "va": "0x0085B287",
+      "match": true
+     },
+     {
+      "va": "0x0085B28A",
+      "match": true
+     },
+     {
+      "va": "0x0085B28D",
+      "match": true
+     }
+    ]
+   },
+   "receiver_chain": {
+    "esi_def_pin_0x0085B1B7": true,
+    "base_vtable_stamp_0x0085B1C1": true,
+    "esi_writers_(0x0085B1B7,0x0085B281]": [],
+    "derived_stamp_after_return_0x00528EA2": true,
+    "rtti_MovableObject": true,
+    "rtti_ClientMovableObject": true
+   },
+   "value_chain": {
+    "edi_def_pin_0x0085B1DA": true,
+    "ecx_def_pin_0x0085B24B": true,
+    "edi_writers_(0x0085B1DA,0x0085B24B]": [],
+    "ecx_writers_(0x0085B24B,0x0085B27A)": [],
+    "ecx_writers_(0x0085B27F,0x0085B281)": [],
+    "accessor_pin": true,
+    "value_load_pin_0x0085B27F": true,
+    "store_pin_0x0085B281": true,
+    "provenance_gate": {
+     "gate": "PASS",
+     "checks": {
+      "pin_0x0085B1DA_8B7C2414": true,
+      "pin_0x0085B24B_8BCF": true,
+      "pin_0x0085B27A_E8E1B2EEFF": true,
+      "rel32_target_0x00746560": true,
+      "accessor_0x00746560_8D4108C3": true,
+      "pin_0x0085B27F_8B08": true,
+      "pin_0x0085B281_894E44": true,
+      "edi_reaching_definition_intact": true,
+      "ecx_reaching_definition_intact": true
+     },
+     "edi_clobber_vas": [],
+     "ecx_clobber_vas": [],
+     "failure_reasons": [],
+     "core_value_source": "[arg1+8]",
+     "value_provenance": "CONFIRMED_COPY_FROM_MEMORY"
+    },
+    "CORE_VALUE_SOURCE": "[arg1+8]"
+   },
+   "j3_statuses_carried_verbatim": {
+    "PHYSICAL_TRANSFORM_MEASUREMENTS": "PRESERVED",
+    "NEW_TRANSFORM_TRACE": "MEASURED_INCIDENTAL_OUTSIDE_PERMITTED_PROMOTION",
+    "SAME_INSTANCE_TRANSFORM_RELATION_FROM_THIS_RUN": "NOT_QUALIFIED_BY_ORIGINAL_SCOPE",
+    "ORIGINAL_J3_EDGE_BUDGET_COMPLIANCE": "FAIL",
+    "WORLD_XYZ_RECOVERED": "NO",
+    "source": "J3 SUPERSESSION.md (docs/audits/PE_935_MODEL_CHILD_SCENEFEEDER_NINODE_JOIN_POST_AUDIT_CORRECTION_R1_20261007/, 8339 B / DD11137A\u2026) + source FINAL_REPORT section 8; statuses carried, NOT re-derived, NOT reinterpreted by this run"
+   },
+   "expected": {
+    "store_0x0085B281": "89 4E 44",
+    "caller_target": "0x0085B1B0",
+    "accessor_target": "0x00746560",
+    "rtti": "MovableObject + ClientMovableObject",
+    "clean_decode": "64 instructions ending exactly 0x0085B290",
+    "receiver_chain": "ESI := ctor this; no intervening ESI writer",
+    "value_chain": "CORE_VALUE_SOURCE = [arg1+8]",
+    "CORE_RECEIVER_VALUE_CHAIN": "PRESERVED_CONFIRMED_STATIC_CONDITIONAL"
+   },
+   "CORE_RECEIVER_VALUE_CHAIN": "PRESERVED_CONFIRMED_STATIC_CONDITIONAL",
+   "verdict": "PASS"
+  },
+  "AUX-1_unsupported_opcode_fail_closed": {
+   "input": "in-memory window copy; unsupported opcode bytes 0F B0 @0x0085B24D",
+   "expected": "controlled UNSUPPORTED fail-closed result (DecodeError), never a silent acceptance",
+   "outcome": "UNSUPPORTED_FAIL_CLOSED",
+   "exception_class": "DecodeError",
+   "exception_message": "unsupported opcode 0x0f @0x85b24d",
+   "verdict": "PASS"
+  }
+ },
+ "repairs_disclosed": {
+  "POST_C5.4_test_data_repair": {
+   "what": "the first POST run declared case C5.4 as 'mov bh, bh' but supplied ModRM 0xF7, which per x86-32 rules is reg=6 (DH source), rm=7 (BH dest) = mov bh, dh",
+   "who_was_right": "the CORRECTED DECODER was right (it decoded 88 F7 as 'mov bh, dh' with writes={ebx}, reads={edx}); the TEST DATA was wrong \u2014 the control verdict FAIL was the control doing its job (the mismatch appeared exactly as source_parent_recorded=false)",
+   "repair": "case bytes corrected to 88 FF (reg=7 rm=7 = mov bh, bh, the originally intended negative control); no decoder change was needed or made",
+   "first_run_measured": "C5.4 bytes 88 F7 decoded 'mov bh, dh'; writes=['ebx'], reads=['edx'], gate=PASS, verdict=FAIL (source-parent mismatch against the declared expectation)",
+   "attempt_preservation": "the failed attempt's substance is recorded here and in the run handoff; the corrected re-run replaced the POST outputs (same executor phase, no completed run was modified)"
+  },
+  "PRE_regeneration_note": {
+   "what": "the PRE phase was regenerated once during this executor phase to fix two evidence-completeness defects caught by self-check BEFORE finalization: (a) the per-case decode records were not being attached to PRE_COUNTEREXAMPLES.json (R['cases'] omission); (b) the mutation-site file-offset cross-check used the window-start VA instead of the committed W1 base VA as its base, producing a false 'file_offset_consistent=false' flag (MyPE was right; the cross-check formula was wrong)",
+   "measured_values_affected": "none \u2014 all measured decode/scan values were identical across both PRE runs; only the completeness of the evidence file and the consistency flag changed"
+  },
+  "POST_csv_expected_column_repair": {
+   "what": "the CONTROL_MATRIX.csv C5 'expected' column initially rendered the destination NAME (e.g. 'bh,') instead of the expected PARENT (ebx/eax/edx) due to a row-generator slicing slip",
+   "affected": "presentation only \u2014 every C5 verdict and measured value was correct in all runs; the JSON evidence records carried the correct expectations throughout",
+   "repair": "expected_parent stored per C5 record and used in the CSV row generation"
+  }
+ },
+ "exe_identity_post": {
+  "size": 8015872,
+  "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+  "unchanged": true
+ },
+ "source_package_unchanged": {
+  "repin_write_provenance.py": true,
+  "CONTROL_RESULTS.json": true,
+  "qc_remeasure.py": true,
+  "QC_RESULTS.json": true
+ },
+ "residue_scan": {
+  "hits": [],
+  "count": 0
+ }
+}

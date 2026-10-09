@@ -1,0 +1,3663 @@
+{
+ "run_id": "PE_935_CMO_C1_HIGH_BYTE_CLOBBER_CORRECTION_R1_20261009",
+ "phase": "PRE_COUNTEREXAMPLES",
+ "generator": "03_SCRIPTS/run_pre_counterexamples.py (python -B)",
+ "python": "3.12.10",
+ "input_identities": {
+  "repin_write_provenance.py": {
+   "size": 34043,
+   "sha256": "45120C91AD6A94A79C56E9B06F1C035481FB99D3017688E7F589732BEC6EE931",
+   "match": true,
+   "path": "docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/03_SCRIPTS/repin_write_provenance.py"
+  },
+  "qc_remeasure.py": {
+   "size": 31970,
+   "sha256": "4E5426AEAB8FBD9A9364A5FE445ED2EA7C5D9F4B3E2F2E71B3EB5B3F3F8DDE1A",
+   "match": true,
+   "path": "docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/03_SCRIPTS/qc_remeasure.py"
+  },
+  "CONTROL_RESULTS.json": {
+   "size": 18509,
+   "sha256": "9545D0D78881C29BC805EA3A05C8AA936D364256671D31A1AE907677A63DE2F8",
+   "match": true,
+   "path": "docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/CONTROL_RESULTS.json"
+  },
+  "QC_RESULTS.json": {
+   "size": 31350,
+   "sha256": "DE7DF210FAFA465E27D7A7C4410C9D9C44C9BAE1492B9FEDE2B3101F01BF0545",
+   "match": true,
+   "path": "docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/QC_RESULTS.json"
+  },
+  "contract": {
+   "size": 16623,
+   "sha256": "61AAA55854942A22085F3767A7D64512248EDFAE3A7B9BB54A5CBE36F36D3981",
+   "match": true,
+   "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_CMO_C1_HIGH_BYTE_CORRECTION_PROMPT_20261008\\OPENCODE_CMO_C1_HIGH_BYTE_CLOBBER_CORRECTION_R1_20261009.md"
+  }
+ },
+ "exe_identity": {
+  "size": 8015872,
+  "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+  "policy": "read-only; mutants are in-memory copies; the physical file is never modified and never rehashed as the original"
+ },
+ "ast_extraction": {
+  "policy": "the historical scripts were NEVER executed at top level and NEVER imported as modules; definitions were AST-extracted by name and exec'd in isolated namespaces (struct injected as the only external dependency, matching the historical module imports used by these definitions)",
+  "executor_script": {
+   "path": "docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/03_SCRIPTS/repin_write_provenance.py",
+   "extracted": [
+    "REGS",
+    "R8",
+    "R16",
+    "DecodeError",
+    "_modrm",
+    "_fmt_mem",
+    "decode_instruction",
+    "linear_decode_window",
+    "hexs"
+   ],
+   "not_extracted_not_executed": [
+    "main",
+    "build_selected_txt",
+    "module-level imports (sys.path insertion + checker_plus4_successor_v2 import)",
+    "RUN_ID",
+    "OUT_RAW and all package-file writes"
+   ],
+   "top_level_effects_avoided": "the executor script's module level inserts SOURCE_B_DIR into sys.path and imports checker_plus4_successor_v2; its main() writes 01_RAW/SELECTED_WRITE_BYTES.txt and CONTROL_RESULTS.json into the HISTORICAL package - none of this ran",
+   "free_name_verification": {
+    "_modrm": {
+     "free_names": [
+      "REGS",
+      "struct"
+     ],
+     "unresolved": []
+    },
+    "_fmt_mem": {
+     "free_names": [],
+     "unresolved": []
+    },
+    "decode_instruction": {
+     "free_names": [
+      "DecodeError",
+      "R16",
+      "R8",
+      "REGS",
+      "_fmt_mem",
+      "_modrm",
+      "struct"
+     ],
+     "unresolved": []
+    },
+    "linear_decode_window": {
+     "free_names": [
+      "decode_instruction"
+     ],
+     "unresolved": []
+    },
+    "hexs": {
+     "free_names": [],
+     "unresolved": []
+    }
+   }
+  },
+  "qc_script": {
+   "path": "docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/03_SCRIPTS/qc_remeasure.py",
+   "extracted": [
+    "GPR",
+    "GPR8",
+    "GPR16",
+    "QcDecodeError",
+    "MyPE",
+    "my_modrm",
+    "_mem_str",
+    "my_decode",
+    "linear_decode",
+    "hx",
+    "writers_between (nested def inside main, AST-extracted)",
+    "calls_between (nested, extracted for completeness of the historical scan helper set)"
+   ],
+   "not_extracted_not_executed": [
+    "main",
+    "module-level constants (EXE paths, pins dict, regexes)",
+    "the package-wide token/epistemology file scans"
+   ],
+   "top_level_effects_avoided": "the QC script's main() loads the EXE and walks the ENTIRE historical package scanning files - none of this ran",
+   "free_name_verification": {
+    "my_modrm": {
+     "free_names": [
+      "struct"
+     ],
+     "unresolved": []
+    },
+    "_mem_str": {
+     "free_names": [
+      "GPR"
+     ],
+     "unresolved": []
+    },
+    "my_decode": {
+     "free_names": [
+      "GPR",
+      "GPR16",
+      "GPR8",
+      "QcDecodeError",
+      "_mem_str",
+      "my_modrm",
+      "struct"
+     ],
+     "unresolved": []
+    },
+    "linear_decode": {
+     "free_names": [
+      "my_decode"
+     ],
+     "unresolved": []
+    },
+    "hx": {
+     "free_names": [],
+     "unresolved": []
+    },
+    "writers_between": {
+     "free_names": [
+      "ins_list"
+     ],
+     "note": "ins_list is resolved at call time from this namespace (the historical closure over main()'s local ins_list is reproduced by binding ins_list in the namespace before the verbatim call)"
+    }
+   }
+  }
+ },
+ "scan_verbatim": {
+  "executor_scan": {
+   "source": "repin_write_provenance.py main(), source lines 444-446",
+   "verbatim_text": "ecx_writers = [i[\"va\"] for i in ins_list\n               if 0x0085B24B < i[\"va\"] < 0x0085B27A\n               and \"ecx\" in i[\"writes\"]]",
+   "byte_for_byte_verified": true,
+   "execution": "the VERBATIM extracted text itself is exec'd with ins_list bound to the decoded window (line 447's results[] assignment is the only omitted context)"
+  },
+  "qc_scan": {
+   "helper_source": "qc_remeasure.py main(), nested def writers_between, source lines 497-499 (AST-extracted)",
+   "call_source": "qc_remeasure.py main(), source line 509",
+   "verbatim_call_text": "writers_between(0x0085B24B, 0x0085B27A - 1, \"ecx\")",
+   "byte_for_byte_verified": true,
+   "execution": "the VERBATIM extracted call is eval'd in the QC namespace with ins_list bound to the decoded window"
+  }
+ },
+ "window_identity": {
+  "w1_own_hex": "A4 82 BB FF C3 CC CC CC 8B 44 24 08 53 55 56 8B F1 33 DB 8D 6E 14 57 8B CD C7 06 4C 1E A9 00 89 5E 04 89 46 08 89 5E 0C 89 5E 10 E8 E8 93 ED FF D9 EE 8B 7C 24 14 89 5E 3C 89 5E 40 D9 56 44 D9 56 48 8B CF D9 56 4C D9 56 50 D9 56 54 D9 56 58 D9 56 5C D9 56 60 D9 56 64 D9 56 68 D9 56 6C D9 5E 70 E8 C1 71 BB FF 8B CF 89 46 74 E8 37 B3 EE FF 8B CF 89 46 78 89 5E 7C 89 9E 80 00 00 00 89 9E 84 00 00 00 E8 3E B3 EE FF D9 EE 8B 08 89 8E 88 00 00 00 8B 50 04 D9 96 90 00 00 00 D9 9E 94 00 00 00 8B CF D9 E8 89 96 8C 00 00 00 D9 9E 98 00 00 00 88 9E 9C 00 00 00 88 9E 9D 00 00 00 88 9E 9E 00 00 00 88 9E 9F 00 00 00 66 89 9E A0 00 00 00 E8 E1 B2 EE FF 8B 08 89 4E 44 8B 50 04 89 56 48 8B 40 08 89 46 4C",
+  "w1_committed_hex_match": true,
+  "window": "[0x0085B1B0, 0x0085B290) 224 bytes",
+  "mutation_site": {
+   "va": "0x0085B24D",
+   "window_offset": 157,
+   "file_offset": 4567629,
+   "original_bytes": "D9 E8",
+   "expected_file_offset": 4567629,
+   "expected_offset_formula": "committed W1 raw_offset 4567464 (VA 0x0085B1A8) + (MUT_VA - W1_VA = 165)",
+   "file_offset_consistent": true
+  },
+  "exe_hash_after_load_recheck": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+ },
+ "falsifier_adjudication": {
+  "F-PRE-1_executor_ch_writes_is_ebp_NOT_ecx": {
+   "measured_writes": [
+    "ebp"
+   ],
+   "expected_wrong_value": [
+    "ebp"
+   ],
+   "reproduced": true,
+   "dst_string_correct_anyway": true,
+   "reads_measured": [
+    "ebx"
+   ],
+   "reads_note": "reads=['ebx'] is BL's parent - correct only by LOW-ALIAS COINCIDENCE (REGS[3]==ebx==parent(BL))"
+  },
+  "F-PRE-2_executor_ch_ecx_scan_false_empty": {
+   "measured_scan": [],
+   "expected_false_value": [],
+   "reproduced": true,
+   "false_pass_derivation": "the scan guarding the ECX reaching definition returned [] on a mutant that physically writes CH (ECX bits [8,16)); any historical provenance conclusion built on this scan would PASS on the mutant - the component-level false PASS of CMO-C1",
+   "supplementary_ebp_scan": [
+    "0x0085B24D"
+   ],
+   "supplementary_note": "the false EBP attribution lands INSIDE the same interval - the clobber exists, it is merely misfiled under EBP"
+  },
+  "F-PRE-3_qc_ch_writes_is_ebp_NOT_ecx": {
+   "measured_writes": [
+    "ebp"
+   ],
+   "expected_wrong_value": [
+    "ebp"
+   ],
+   "reproduced": true,
+   "dst_string_correct_anyway": true,
+   "reads_measured": [],
+   "reads_note": "reads=[] - the register-direct byte SOURCE parent was never recorded by the historical QC decoder (missing, not merely wrong)"
+  },
+  "F-PRE-4_qc_ch_ecx_scan_false_empty": {
+   "measured_scan": [],
+   "expected_false_value": [],
+   "reproduced": true
+  },
+  "F-PRE-5_clean_no_ecx_clobber_both_impls": {
+   "executor_scan": [],
+   "qc_scan": [],
+   "executor_site_bytes": "D9 E8",
+   "executor_site_mnemonic": "fld1",
+   "qc_site_bytes": "D9 E8",
+   "reproduced": true
+  },
+  "F-PRE-6_cl_detected_by_coincidence_both_impls": {
+   "executor_scan": [
+    "0x0085B24D"
+   ],
+   "qc_scan": [
+    "0x0085B24D"
+   ],
+   "executor_writes": [
+    "ecx"
+   ],
+   "qc_writes": [
+    "ecx"
+   ],
+   "reproduced": true,
+   "note": "CL is a LOW alias (R8[1]); REGS[1]==ecx==parent(CL) - the low-alias path was correct by COINCIDENCE"
+  },
+  "F-PRE-7_length_preservation_all_mutants": {
+   "counts": {
+    "PRE-EX-CLEAN": 64,
+    "PRE-QC-CLEAN": 64,
+    "PRE-EX-CH": 64,
+    "PRE-QC-CH": 64,
+    "PRE-EX-CL": 64,
+    "PRE-QC-CL": 64
+   },
+   "ends_exact": {
+    "PRE-EX-CLEAN": true,
+    "PRE-QC-CLEAN": true,
+    "PRE-EX-CH": true,
+    "PRE-QC-CH": true,
+    "PRE-EX-CL": true,
+    "PRE-QC-CL": true
+   },
+   "reproduced": true
+  }
+ },
+ "cases": {
+  "PRE-EX-CLEAN": {
+   "case_id": "PRE-EX-CLEAN",
+   "implementation": "executor",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_instruction": {
+    "va": "0x0085B24D",
+    "va_int": 8761933,
+    "length": 2,
+    "bytes": "D9 E8",
+    "mnemonic": "fld1",
+    "text": "fld1",
+    "dst": null,
+    "src": null,
+    "width": 32,
+    "writes": [],
+    "reads": [],
+    "mem_dst": null,
+    "prefix66": false,
+    "impl": "executor"
+   },
+   "scans": {
+    "historical_executor_ecx_scan_(0x0085B24B,0x0085B27A)": [],
+    "supplementary_nonhistorical_ebp_scan": []
+   },
+   "status": "OK"
+  },
+  "PRE-QC-CLEAN": {
+   "case_id": "PRE-QC-CLEAN",
+   "implementation": "qc",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_instruction": {
+    "va": "0x0085B24D",
+    "va_int": 8761933,
+    "length": 2,
+    "bytes": "D9 E8",
+    "mnemonic": "fld1",
+    "text": "fld1",
+    "dst": null,
+    "src": null,
+    "width": 32,
+    "writes": [],
+    "reads": [],
+    "mem_dst": null,
+    "prefix66": false,
+    "impl": "qc"
+   },
+   "scans": {
+    "historical_qc_ecx_scan_(0x0085B24B,0x0085B27A)": []
+   },
+   "status": "OK"
+  },
+  "PRE-EX-CH": {
+   "case_id": "PRE-EX-CH",
+   "implementation": "executor",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_instruction": {
+    "va": "0x0085B24D",
+    "va_int": 8761933,
+    "length": 2,
+    "bytes": "88 DD",
+    "mnemonic": "mov",
+    "text": "mov ch, bl",
+    "dst": "ch",
+    "src": "bl",
+    "width": 8,
+    "writes": [
+     "ebp"
+    ],
+    "reads": [
+     "ebx"
+    ],
+    "mem_dst": null,
+    "prefix66": false,
+    "impl": "executor"
+   },
+   "scans": {
+    "historical_executor_ecx_scan_(0x0085B24B,0x0085B27A)": [],
+    "supplementary_nonhistorical_ebp_scan": [
+     "0x0085B24D"
+    ]
+   },
+   "status": "OK"
+  },
+  "PRE-QC-CH": {
+   "case_id": "PRE-QC-CH",
+   "implementation": "qc",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_instruction": {
+    "va": "0x0085B24D",
+    "va_int": 8761933,
+    "length": 2,
+    "bytes": "88 DD",
+    "mnemonic": "mov",
+    "text": "mov ch, bl",
+    "dst": "ch",
+    "src": "bl",
+    "width": 8,
+    "writes": [
+     "ebp"
+    ],
+    "reads": [],
+    "mem_dst": null,
+    "prefix66": false,
+    "impl": "qc"
+   },
+   "scans": {
+    "historical_qc_ecx_scan_(0x0085B24B,0x0085B27A)": []
+   },
+   "status": "OK"
+  },
+  "PRE-EX-CL": {
+   "case_id": "PRE-EX-CL",
+   "implementation": "executor",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_instruction": {
+    "va": "0x0085B24D",
+    "va_int": 8761933,
+    "length": 2,
+    "bytes": "88 D9",
+    "mnemonic": "mov",
+    "text": "mov cl, bl",
+    "dst": "cl",
+    "src": "bl",
+    "width": 8,
+    "writes": [
+     "ecx"
+    ],
+    "reads": [
+     "ebx"
+    ],
+    "mem_dst": null,
+    "prefix66": false,
+    "impl": "executor"
+   },
+   "scans": {
+    "historical_executor_ecx_scan_(0x0085B24B,0x0085B27A)": [
+     "0x0085B24D"
+    ],
+    "supplementary_nonhistorical_ebp_scan": []
+   },
+   "status": "OK"
+  },
+  "PRE-QC-CL": {
+   "case_id": "PRE-QC-CL",
+   "implementation": "qc",
+   "decode": {
+    "instruction_count": 64,
+    "total_bytes": 224,
+    "end_va": "0x0085B290",
+    "end_exact_0x0085B290": true
+   },
+   "mutation_site_instruction": {
+    "va": "0x0085B24D",
+    "va_int": 8761933,
+    "length": 2,
+    "bytes": "88 D9",
+    "mnemonic": "mov",
+    "text": "mov cl, bl",
+    "dst": "cl",
+    "src": "bl",
+    "width": 8,
+    "writes": [
+     "ecx"
+    ],
+    "reads": [],
+    "mem_dst": null,
+    "prefix66": false,
+    "impl": "qc"
+   },
+   "scans": {
+    "historical_qc_ecx_scan_(0x0085B24B,0x0085B27A)": [
+     "0x0085B24D"
+    ]
+   },
+   "status": "OK"
+  }
+ },
+ "pre_summary": {
+  "PRE_EXECUTOR_FALSE_PASS_REPRODUCED": true,
+  "PRE_QC_FALSE_PASS_REPRODUCED": true,
+  "WRONG_WRITES_SET_OBSERVED": {
+   "executor_ch_mutant": [
+    "ebp"
+   ],
+   "qc_ch_mutant": [
+    "ebp"
+   ]
+  },
+  "CLEAN_NO_ECX_CLOBBER": true,
+  "CL_DETECTED_BY_HISTORICAL": true,
+  "HISTORICAL_WOULD_BE_PROVENANCE_VERDICT_ON_CH_MUTANT": "PASS (FALSE) - the historical ECX-clobber scan returned [] on the CH mutant, so the historical reaching-definition guard cannot see the clobber; this is the reproduced false PASS"
+ },
+ "historical_alias_matrix_census": {
+  "purpose": "blast-radius census of the historical alias-index defect across the complete 8x8 register-direct 0x88 matrix; expected-WRONG values for high aliases are the point (this is a historical census, NOT a pass/fail control; low-alias correctness is coincidence: R8[i]==parent only for i<4 because the R8 table is not parallel to REGS)",
+  "cases": 64,
+  "decoders": 2,
+  "historical_outcomes": 128,
+  "executor": {
+   "writes_parent_correct": 32,
+   "writes_parent_wrong": 32,
+   "writes_wrong_detail": "dest 4-7 (AH,CH,DH,BH) map to esp,ebp,esi,edi instead of eax,ecx,edx,ebx",
+   "reads_parent_correct": 32,
+   "reads_parent_wrong": 32,
+   "reads_wrong_detail": "source 4-7 (AH,CH,DH,BH) map to esp,ebp,esi,edi instead of eax,ecx,edx,ebx",
+   "both_writes_and_reads_correct": 16,
+   "both_correct_detail": "exactly the 16 cases with dst<=3 AND src<=3 (coincidence, not correctness of the mapping)"
+  },
+  "qc": {
+   "writes_parent_correct": 32,
+   "writes_parent_wrong": 32,
+   "register_form_source_parent_recorded": 0,
+   "source_parent_absent": 64,
+   "reads_detail": "the register-direct byte SOURCE parent was never recorded in any of the 64 cases (missing, not merely wrong)"
+  },
+  "rows": [
+   {
+    "case_id": "H-0000",
+    "bytes": "88 C0",
+    "modrm": "0xC0",
+    "x86_32_meaning": "mov al, al (reg=al source, rm=al dest)",
+    "reference": {
+     "dst_name": "al",
+     "dst_parent": "eax",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "al",
+     "src_parent": "eax",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "al",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "eax"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "al",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0001",
+    "bytes": "88 C8",
+    "modrm": "0xC8",
+    "x86_32_meaning": "mov al, cl (reg=cl source, rm=al dest)",
+    "reference": {
+     "dst_name": "al",
+     "dst_parent": "eax",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "cl",
+     "src_parent": "ecx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "al",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "al",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0002",
+    "bytes": "88 D0",
+    "modrm": "0xD0",
+    "x86_32_meaning": "mov al, dl (reg=dl source, rm=al dest)",
+    "reference": {
+     "dst_name": "al",
+     "dst_parent": "eax",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "dl",
+     "src_parent": "edx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "al",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "edx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "al",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0003",
+    "bytes": "88 D8",
+    "modrm": "0xD8",
+    "x86_32_meaning": "mov al, bl (reg=bl source, rm=al dest)",
+    "reference": {
+     "dst_name": "al",
+     "dst_parent": "eax",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "bl",
+     "src_parent": "ebx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "al",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "al",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0004",
+    "bytes": "88 E0",
+    "modrm": "0xE0",
+    "x86_32_meaning": "mov al, ah (reg=ah source, rm=al dest)",
+    "reference": {
+     "dst_name": "al",
+     "dst_parent": "eax",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "ah",
+     "src_parent": "eax",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "al",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "esp"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "al",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0005",
+    "bytes": "88 E8",
+    "modrm": "0xE8",
+    "x86_32_meaning": "mov al, ch (reg=ch source, rm=al dest)",
+    "reference": {
+     "dst_name": "al",
+     "dst_parent": "eax",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "ch",
+     "src_parent": "ecx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "al",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "ebp"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "al",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0006",
+    "bytes": "88 F0",
+    "modrm": "0xF0",
+    "x86_32_meaning": "mov al, dh (reg=dh source, rm=al dest)",
+    "reference": {
+     "dst_name": "al",
+     "dst_parent": "eax",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "dh",
+     "src_parent": "edx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "al",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "esi"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "al",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0007",
+    "bytes": "88 F8",
+    "modrm": "0xF8",
+    "x86_32_meaning": "mov al, bh (reg=bh source, rm=al dest)",
+    "reference": {
+     "dst_name": "al",
+     "dst_parent": "eax",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "bh",
+     "src_parent": "ebx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "al",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [
+      "edi"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "al",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "eax"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0100",
+    "bytes": "88 C1",
+    "modrm": "0xC1",
+    "x86_32_meaning": "mov cl, al (reg=al source, rm=cl dest)",
+    "reference": {
+     "dst_name": "cl",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "al",
+     "src_parent": "eax",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "cl",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [
+      "eax"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "cl",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0101",
+    "bytes": "88 C9",
+    "modrm": "0xC9",
+    "x86_32_meaning": "mov cl, cl (reg=cl source, rm=cl dest)",
+    "reference": {
+     "dst_name": "cl",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "cl",
+     "src_parent": "ecx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "cl",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "cl",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0102",
+    "bytes": "88 D1",
+    "modrm": "0xD1",
+    "x86_32_meaning": "mov cl, dl (reg=dl source, rm=cl dest)",
+    "reference": {
+     "dst_name": "cl",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "dl",
+     "src_parent": "edx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "cl",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [
+      "edx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "cl",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0103",
+    "bytes": "88 D9",
+    "modrm": "0xD9",
+    "x86_32_meaning": "mov cl, bl (reg=bl source, rm=cl dest)",
+    "reference": {
+     "dst_name": "cl",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "bl",
+     "src_parent": "ebx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "cl",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "cl",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0104",
+    "bytes": "88 E1",
+    "modrm": "0xE1",
+    "x86_32_meaning": "mov cl, ah (reg=ah source, rm=cl dest)",
+    "reference": {
+     "dst_name": "cl",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "ah",
+     "src_parent": "eax",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "cl",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [
+      "esp"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "cl",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0105",
+    "bytes": "88 E9",
+    "modrm": "0xE9",
+    "x86_32_meaning": "mov cl, ch (reg=ch source, rm=cl dest)",
+    "reference": {
+     "dst_name": "cl",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "ch",
+     "src_parent": "ecx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "cl",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [
+      "ebp"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "cl",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0106",
+    "bytes": "88 F1",
+    "modrm": "0xF1",
+    "x86_32_meaning": "mov cl, dh (reg=dh source, rm=cl dest)",
+    "reference": {
+     "dst_name": "cl",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "dh",
+     "src_parent": "edx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "cl",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [
+      "esi"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "cl",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0107",
+    "bytes": "88 F9",
+    "modrm": "0xF9",
+    "x86_32_meaning": "mov cl, bh (reg=bh source, rm=cl dest)",
+    "reference": {
+     "dst_name": "cl",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "bh",
+     "src_parent": "ebx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "cl",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [
+      "edi"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "cl",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ecx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0200",
+    "bytes": "88 C2",
+    "modrm": "0xC2",
+    "x86_32_meaning": "mov dl, al (reg=al source, rm=dl dest)",
+    "reference": {
+     "dst_name": "dl",
+     "dst_parent": "edx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "al",
+     "src_parent": "eax",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "dl",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "eax"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "dl",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0201",
+    "bytes": "88 CA",
+    "modrm": "0xCA",
+    "x86_32_meaning": "mov dl, cl (reg=cl source, rm=dl dest)",
+    "reference": {
+     "dst_name": "dl",
+     "dst_parent": "edx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "cl",
+     "src_parent": "ecx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "dl",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "dl",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0202",
+    "bytes": "88 D2",
+    "modrm": "0xD2",
+    "x86_32_meaning": "mov dl, dl (reg=dl source, rm=dl dest)",
+    "reference": {
+     "dst_name": "dl",
+     "dst_parent": "edx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "dl",
+     "src_parent": "edx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "dl",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "edx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "dl",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0203",
+    "bytes": "88 DA",
+    "modrm": "0xDA",
+    "x86_32_meaning": "mov dl, bl (reg=bl source, rm=dl dest)",
+    "reference": {
+     "dst_name": "dl",
+     "dst_parent": "edx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "bl",
+     "src_parent": "ebx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "dl",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "dl",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0204",
+    "bytes": "88 E2",
+    "modrm": "0xE2",
+    "x86_32_meaning": "mov dl, ah (reg=ah source, rm=dl dest)",
+    "reference": {
+     "dst_name": "dl",
+     "dst_parent": "edx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "ah",
+     "src_parent": "eax",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "dl",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "esp"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "dl",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0205",
+    "bytes": "88 EA",
+    "modrm": "0xEA",
+    "x86_32_meaning": "mov dl, ch (reg=ch source, rm=dl dest)",
+    "reference": {
+     "dst_name": "dl",
+     "dst_parent": "edx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "ch",
+     "src_parent": "ecx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "dl",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "ebp"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "dl",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0206",
+    "bytes": "88 F2",
+    "modrm": "0xF2",
+    "x86_32_meaning": "mov dl, dh (reg=dh source, rm=dl dest)",
+    "reference": {
+     "dst_name": "dl",
+     "dst_parent": "edx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "dh",
+     "src_parent": "edx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "dl",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "esi"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "dl",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0207",
+    "bytes": "88 FA",
+    "modrm": "0xFA",
+    "x86_32_meaning": "mov dl, bh (reg=bh source, rm=dl dest)",
+    "reference": {
+     "dst_name": "dl",
+     "dst_parent": "edx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "bh",
+     "src_parent": "ebx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "dl",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [
+      "edi"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "dl",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0300",
+    "bytes": "88 C3",
+    "modrm": "0xC3",
+    "x86_32_meaning": "mov bl, al (reg=al source, rm=bl dest)",
+    "reference": {
+     "dst_name": "bl",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "al",
+     "src_parent": "eax",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "bl",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "eax"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "bl",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0301",
+    "bytes": "88 CB",
+    "modrm": "0xCB",
+    "x86_32_meaning": "mov bl, cl (reg=cl source, rm=bl dest)",
+    "reference": {
+     "dst_name": "bl",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "cl",
+     "src_parent": "ecx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "bl",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "bl",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0302",
+    "bytes": "88 D3",
+    "modrm": "0xD3",
+    "x86_32_meaning": "mov bl, dl (reg=dl source, rm=bl dest)",
+    "reference": {
+     "dst_name": "bl",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "dl",
+     "src_parent": "edx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "bl",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "edx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "bl",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0303",
+    "bytes": "88 DB",
+    "modrm": "0xDB",
+    "x86_32_meaning": "mov bl, bl (reg=bl source, rm=bl dest)",
+    "reference": {
+     "dst_name": "bl",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "bl",
+     "src_parent": "ebx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "bl",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "bl",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "dst<=3 and src<=3: LOW-ALIAS COINCIDENCE - correct parents despite the alias-index defect"
+   },
+   {
+    "case_id": "H-0304",
+    "bytes": "88 E3",
+    "modrm": "0xE3",
+    "x86_32_meaning": "mov bl, ah (reg=ah source, rm=bl dest)",
+    "reference": {
+     "dst_name": "bl",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "ah",
+     "src_parent": "eax",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "bl",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "esp"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "bl",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0305",
+    "bytes": "88 EB",
+    "modrm": "0xEB",
+    "x86_32_meaning": "mov bl, ch (reg=ch source, rm=bl dest)",
+    "reference": {
+     "dst_name": "bl",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "ch",
+     "src_parent": "ecx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "bl",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "ebp"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "bl",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0306",
+    "bytes": "88 F3",
+    "modrm": "0xF3",
+    "x86_32_meaning": "mov bl, dh (reg=dh source, rm=bl dest)",
+    "reference": {
+     "dst_name": "bl",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "dh",
+     "src_parent": "edx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "bl",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "esi"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "bl",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0307",
+    "bytes": "88 FB",
+    "modrm": "0xFB",
+    "x86_32_meaning": "mov bl, bh (reg=bh source, rm=bl dest)",
+    "reference": {
+     "dst_name": "bl",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      0,
+      8
+     ],
+     "src_name": "bh",
+     "src_parent": "ebx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "bl",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [
+      "edi"
+     ],
+     "writes_parent_correct": true,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": null
+    },
+    "historical_qc": {
+     "dst": "bl",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebx"
+     ],
+     "reads": [],
+     "writes_parent_correct": true,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0400",
+    "bytes": "88 C4",
+    "modrm": "0xC4",
+    "x86_32_meaning": "mov ah, al (reg=al source, rm=ah dest)",
+    "reference": {
+     "dst_name": "ah",
+     "dst_parent": "eax",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "al",
+     "src_parent": "eax",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "ah",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [
+      "eax"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "esp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ah",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0401",
+    "bytes": "88 CC",
+    "modrm": "0xCC",
+    "x86_32_meaning": "mov ah, cl (reg=cl source, rm=ah dest)",
+    "reference": {
+     "dst_name": "ah",
+     "dst_parent": "eax",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "cl",
+     "src_parent": "ecx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "ah",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "esp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ah",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0402",
+    "bytes": "88 D4",
+    "modrm": "0xD4",
+    "x86_32_meaning": "mov ah, dl (reg=dl source, rm=ah dest)",
+    "reference": {
+     "dst_name": "ah",
+     "dst_parent": "eax",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "dl",
+     "src_parent": "edx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "ah",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [
+      "edx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "esp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ah",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0403",
+    "bytes": "88 DC",
+    "modrm": "0xDC",
+    "x86_32_meaning": "mov ah, bl (reg=bl source, rm=ah dest)",
+    "reference": {
+     "dst_name": "ah",
+     "dst_parent": "eax",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "bl",
+     "src_parent": "ebx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "ah",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "esp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ah",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0404",
+    "bytes": "88 E4",
+    "modrm": "0xE4",
+    "x86_32_meaning": "mov ah, ah (reg=ah source, rm=ah dest)",
+    "reference": {
+     "dst_name": "ah",
+     "dst_parent": "eax",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "ah",
+     "src_parent": "eax",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "ah",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [
+      "esp"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "esp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ah",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0405",
+    "bytes": "88 EC",
+    "modrm": "0xEC",
+    "x86_32_meaning": "mov ah, ch (reg=ch source, rm=ah dest)",
+    "reference": {
+     "dst_name": "ah",
+     "dst_parent": "eax",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "ch",
+     "src_parent": "ecx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "ah",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [
+      "ebp"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "esp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ah",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0406",
+    "bytes": "88 F4",
+    "modrm": "0xF4",
+    "x86_32_meaning": "mov ah, dh (reg=dh source, rm=ah dest)",
+    "reference": {
+     "dst_name": "ah",
+     "dst_parent": "eax",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "dh",
+     "src_parent": "edx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "ah",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [
+      "esi"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "esp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ah",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0407",
+    "bytes": "88 FC",
+    "modrm": "0xFC",
+    "x86_32_meaning": "mov ah, bh (reg=bh source, rm=ah dest)",
+    "reference": {
+     "dst_name": "ah",
+     "dst_parent": "eax",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "bh",
+     "src_parent": "ebx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "ah",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [
+      "edi"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "esp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ah",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0500",
+    "bytes": "88 C5",
+    "modrm": "0xC5",
+    "x86_32_meaning": "mov ch, al (reg=al source, rm=ch dest)",
+    "reference": {
+     "dst_name": "ch",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "al",
+     "src_parent": "eax",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "ch",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [
+      "eax"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "ebp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ch",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0501",
+    "bytes": "88 CD",
+    "modrm": "0xCD",
+    "x86_32_meaning": "mov ch, cl (reg=cl source, rm=ch dest)",
+    "reference": {
+     "dst_name": "ch",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "cl",
+     "src_parent": "ecx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "ch",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "ebp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ch",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0502",
+    "bytes": "88 D5",
+    "modrm": "0xD5",
+    "x86_32_meaning": "mov ch, dl (reg=dl source, rm=ch dest)",
+    "reference": {
+     "dst_name": "ch",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "dl",
+     "src_parent": "edx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "ch",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [
+      "edx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "ebp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ch",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0503",
+    "bytes": "88 DD",
+    "modrm": "0xDD",
+    "x86_32_meaning": "mov ch, bl (reg=bl source, rm=ch dest)",
+    "reference": {
+     "dst_name": "ch",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "bl",
+     "src_parent": "ebx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "ch",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "ebp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ch",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0504",
+    "bytes": "88 E5",
+    "modrm": "0xE5",
+    "x86_32_meaning": "mov ch, ah (reg=ah source, rm=ch dest)",
+    "reference": {
+     "dst_name": "ch",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "ah",
+     "src_parent": "eax",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "ch",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [
+      "esp"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "ebp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ch",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0505",
+    "bytes": "88 ED",
+    "modrm": "0xED",
+    "x86_32_meaning": "mov ch, ch (reg=ch source, rm=ch dest)",
+    "reference": {
+     "dst_name": "ch",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "ch",
+     "src_parent": "ecx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "ch",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [
+      "ebp"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "ebp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ch",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0506",
+    "bytes": "88 F5",
+    "modrm": "0xF5",
+    "x86_32_meaning": "mov ch, dh (reg=dh source, rm=ch dest)",
+    "reference": {
+     "dst_name": "ch",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "dh",
+     "src_parent": "edx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "ch",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [
+      "esi"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "ebp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ch",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0507",
+    "bytes": "88 FD",
+    "modrm": "0xFD",
+    "x86_32_meaning": "mov ch, bh (reg=bh source, rm=ch dest)",
+    "reference": {
+     "dst_name": "ch",
+     "dst_parent": "ecx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "bh",
+     "src_parent": "ebx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "ch",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [
+      "edi"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "ebp"
+     ]
+    },
+    "historical_qc": {
+     "dst": "ch",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "ebp"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0600",
+    "bytes": "88 C6",
+    "modrm": "0xC6",
+    "x86_32_meaning": "mov dh, al (reg=al source, rm=dh dest)",
+    "reference": {
+     "dst_name": "dh",
+     "dst_parent": "edx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "al",
+     "src_parent": "eax",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "dh",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [
+      "eax"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "esi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "dh",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0601",
+    "bytes": "88 CE",
+    "modrm": "0xCE",
+    "x86_32_meaning": "mov dh, cl (reg=cl source, rm=dh dest)",
+    "reference": {
+     "dst_name": "dh",
+     "dst_parent": "edx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "cl",
+     "src_parent": "ecx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "dh",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "esi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "dh",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0602",
+    "bytes": "88 D6",
+    "modrm": "0xD6",
+    "x86_32_meaning": "mov dh, dl (reg=dl source, rm=dh dest)",
+    "reference": {
+     "dst_name": "dh",
+     "dst_parent": "edx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "dl",
+     "src_parent": "edx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "dh",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [
+      "edx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "esi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "dh",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0603",
+    "bytes": "88 DE",
+    "modrm": "0xDE",
+    "x86_32_meaning": "mov dh, bl (reg=bl source, rm=dh dest)",
+    "reference": {
+     "dst_name": "dh",
+     "dst_parent": "edx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "bl",
+     "src_parent": "ebx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "dh",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "esi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "dh",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0604",
+    "bytes": "88 E6",
+    "modrm": "0xE6",
+    "x86_32_meaning": "mov dh, ah (reg=ah source, rm=dh dest)",
+    "reference": {
+     "dst_name": "dh",
+     "dst_parent": "edx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "ah",
+     "src_parent": "eax",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "dh",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [
+      "esp"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "esi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "dh",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0605",
+    "bytes": "88 EE",
+    "modrm": "0xEE",
+    "x86_32_meaning": "mov dh, ch (reg=ch source, rm=dh dest)",
+    "reference": {
+     "dst_name": "dh",
+     "dst_parent": "edx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "ch",
+     "src_parent": "ecx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "dh",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [
+      "ebp"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "esi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "dh",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0606",
+    "bytes": "88 F6",
+    "modrm": "0xF6",
+    "x86_32_meaning": "mov dh, dh (reg=dh source, rm=dh dest)",
+    "reference": {
+     "dst_name": "dh",
+     "dst_parent": "edx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "dh",
+     "src_parent": "edx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "dh",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [
+      "esi"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "esi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "dh",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0607",
+    "bytes": "88 FE",
+    "modrm": "0xFE",
+    "x86_32_meaning": "mov dh, bh (reg=bh source, rm=dh dest)",
+    "reference": {
+     "dst_name": "dh",
+     "dst_parent": "edx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "bh",
+     "src_parent": "ebx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "dh",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [
+      "edi"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "esi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "dh",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "esi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0700",
+    "bytes": "88 C7",
+    "modrm": "0xC7",
+    "x86_32_meaning": "mov bh, al (reg=al source, rm=bh dest)",
+    "reference": {
+     "dst_name": "bh",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "al",
+     "src_parent": "eax",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "bh",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [
+      "eax"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "edi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "bh",
+     "src": "al",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0701",
+    "bytes": "88 CF",
+    "modrm": "0xCF",
+    "x86_32_meaning": "mov bh, cl (reg=cl source, rm=bh dest)",
+    "reference": {
+     "dst_name": "bh",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "cl",
+     "src_parent": "ecx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "bh",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [
+      "ecx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "edi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "bh",
+     "src": "cl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0702",
+    "bytes": "88 D7",
+    "modrm": "0xD7",
+    "x86_32_meaning": "mov bh, dl (reg=dl source, rm=bh dest)",
+    "reference": {
+     "dst_name": "bh",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "dl",
+     "src_parent": "edx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "bh",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [
+      "edx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "edi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "bh",
+     "src": "dl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0703",
+    "bytes": "88 DF",
+    "modrm": "0xDF",
+    "x86_32_meaning": "mov bh, bl (reg=bl source, rm=bh dest)",
+    "reference": {
+     "dst_name": "bh",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "bl",
+     "src_parent": "ebx",
+     "src_bits": [
+      0,
+      8
+     ]
+    },
+    "historical_executor": {
+     "dst": "bh",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [
+      "ebx"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": true,
+     "expected_wrong_writes_when_incorrect": [
+      "edi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "bh",
+     "src": "bl",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0704",
+    "bytes": "88 E7",
+    "modrm": "0xE7",
+    "x86_32_meaning": "mov bh, ah (reg=ah source, rm=bh dest)",
+    "reference": {
+     "dst_name": "bh",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "ah",
+     "src_parent": "eax",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "bh",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [
+      "esp"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "edi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "bh",
+     "src": "ah",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0705",
+    "bytes": "88 EF",
+    "modrm": "0xEF",
+    "x86_32_meaning": "mov bh, ch (reg=ch source, rm=bh dest)",
+    "reference": {
+     "dst_name": "bh",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "ch",
+     "src_parent": "ecx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "bh",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [
+      "ebp"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "edi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "bh",
+     "src": "ch",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0706",
+    "bytes": "88 F7",
+    "modrm": "0xF7",
+    "x86_32_meaning": "mov bh, dh (reg=dh source, rm=bh dest)",
+    "reference": {
+     "dst_name": "bh",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "dh",
+     "src_parent": "edx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "bh",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [
+      "esi"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "edi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "bh",
+     "src": "dh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   },
+   {
+    "case_id": "H-0707",
+    "bytes": "88 FF",
+    "modrm": "0xFF",
+    "x86_32_meaning": "mov bh, bh (reg=bh source, rm=bh dest)",
+    "reference": {
+     "dst_name": "bh",
+     "dst_parent": "ebx",
+     "dst_bits": [
+      8,
+      16
+     ],
+     "src_name": "bh",
+     "src_parent": "ebx",
+     "src_bits": [
+      8,
+      16
+     ]
+    },
+    "historical_executor": {
+     "dst": "bh",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [
+      "edi"
+     ],
+     "writes_parent_correct": false,
+     "reads_parent_correct": false,
+     "expected_wrong_writes_when_incorrect": [
+      "edi"
+     ]
+    },
+    "historical_qc": {
+     "dst": "bh",
+     "src": "bh",
+     "width": 8,
+     "length": 2,
+     "writes": [
+      "edi"
+     ],
+     "reads": [],
+     "writes_parent_correct": false,
+     "source_parent_recorded": false
+    },
+    "verdict_note": "at least one high alias (index>=4): historical writes/reads parent WRONG or missing by design of the defect"
+   }
+  ]
+ }
+}
