@@ -1,0 +1,100 @@
+{
+  "run_id": "PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009",
+  "artifact": "ARGUMENT_PROVENANCE.json",
+  "record_class": "STATIC_ONLY; era PCG/EU 9.3.5; evidence maturity: BYTE_OBSERVATION (bytes, offsets, slots) + STRUCTURE (roles derived from operations); no MECHANISM/RUNTIME claims",
+  "anchor_call": {
+    "va": "0x006C3FCD",
+    "bytes": "e8 6e f6 ff ff",
+    "opcode": "E8 rel32",
+    "rel32_signed": -2450,
+    "rel32_hex": "0xFFFFF66E",
+    "next_instruction_va": "0x006C3FD2",
+    "recomputed_target": "0x006C3640",
+    "target_equals_subject_entry": true,
+    "verification": "recomputed from the call's own opcode bytes by both decoders (F7 gate: 0 disagreements)"
+  },
+  "calling_convention": {
+    "verdict": "cdecl: 6 dword stack arguments, CALLER-cleans",
+    "callee_side_evidence": "FUN_006C3640 epilogues: RET C3 (no imm16) @0x006C369B and @0x006C36A8 - the callee cleans NO stack arguments (byte-observed)",
+    "caller_side_evidence": "ADD ESP,0x18 @0x006C3FD2 immediately after CALL - 24 bytes = 6 x 4-byte args cleaned by the caller (byte-observed)",
+    "register_arguments": "NONE - the callee reads all six arguments from the stack ([esp+disp] at entry push depths; machine slot map in 01_RAW/ESP_SLOT_MAP.json); no this-register argument is used by FUN_006C3640 itself",
+    "retaddr_slot": "entry [esp+0]; arg1 [esp+4]; arg2 [esp+8]; arg3 [esp+0xC]; arg4 [esp+0x10]; arg5 [esp+0x14]; arg6 [esp+0x18]"
+  },
+  "push_order_and_width": {
+    "order": "cdecl right-to-left: first push = arg6, last push = arg1",
+    "widths": "all six pushes are 1-byte push-r32 opcodes (50-57) = 4-byte dword values; total 24 bytes matches the caller's ADD ESP,0x18",
+    "stack_depth_at_call": 44,
+    "callee_slot_map_method": "CFG-worklist ESP-depth sim; entry_offset = disp - depth; both merges and both RETs asserted consistent (01_RAW/ESP_SLOT_MAP.json)"
+  },
+  "argument_table": [
+    {
+      "slot": "arg1",
+      "push_va": "0x006C3FCC",
+      "push_bytes": "51",
+      "source_register": "ecx",
+      "producing_instruction": "0x006C3FC8: lea ecx,[esp+0x30] (8d 4c 24 30)",
+      "depth_at_lea": 40,
+      "lea_entry_offset": 8,
+      "value": "&caller_param_2_slot (the ADDRESS of the slot holding the caller's param_2 - an output slot address)",
+      "value_provenance": "stack address arithmetic on the caller's own incoming param_2 slot ([esp+0x1c] @0x006C3F79 resolves to entry_offset 8 = param_2)",
+      "evidence_status": "BYTE_OBSERVATION (address arithmetic) + STRUCTURE (used as output slot by the callee)"
+    },
+    {
+      "slot": "arg2",
+      "push_va": "0x006C3FC7",
+      "push_bytes": "50",
+      "source_register": "eax",
+      "producing_instruction": "0x006C3FC1: mov eax,[eax] (8b 00)",
+      "value": "the dword at (P+0x14)+0 - inherited label '[P+0x14]' (P = FUN_0072F580 lookup return; P pointee identity UNRESOLVED_UPSTREAM)",
+      "value_provenance": "EAX = CALL 0x0040B070 @0x006C3FB5 return; callee body re-verified THIS RUN (W-DEP1, 4 bytes): lea eax,[ecx+0x14]; ret - so EAX = P+0x14 (interior pointer); ECX=P from 0x006C3FAE mov ecx,edi; EDI=P from 0x006C3F67 mov edi,eax; EAX from CALL 0x0072F580 @0x006C3F62",
+      "evidence_status": "BYTE_OBSERVATION (full producer chain byte-pinned in-window + 4-byte dependency body)"
+    },
+    {
+      "slot": "arg3",
+      "push_va": "0x006C3FC6",
+      "push_bytes": "52",
+      "source_register": "edx",
+      "producing_instruction": "0x006C3FBE: mov edx,[eax+4] (8b 50 04)",
+      "value": "the dword at (P+0x14)+4 - inherited label '[P+0x18]'",
+      "value_provenance": "same EAX = P+0x14 interior pointer (no intervening EAX writer between 0x006C3FB5 and 0x006C3FBE - machine EAX census)",
+      "evidence_status": "BYTE_OBSERVATION"
+    },
+    {
+      "slot": "arg4",
+      "push_va": "0x006C3FC5",
+      "push_bytes": "56",
+      "source_register": "esi",
+      "producing_instruction": "0x006C3F79: mov esi,[esp+0x1c] (8b 74 24 1c)",
+      "value": "the caller's OWN param_2 - a vector-like container object (fields +0x4 cursor / +0x8 end used in both windows)",
+      "value_provenance": "caller's incoming stack argument (entry_offset 8); provenance LEAVES THE WINDOW at the caller's caller (NOT the template chain)",
+      "evidence_status": "BYTE_OBSERVATION (load) + STRUCTURE (container role from in-window operations)"
+    },
+    {
+      "slot": "arg5",
+      "push_va": "0x006C3FC4",
+      "push_bytes": "53",
+      "source_register": "ebx",
+      "producing_instruction": "0x006C3FB0: mov ebx,0x008BD720 (bb 20 d7 8b 00)",
+      "value": "the immediate 0x008BD720 - a .text code address (identity classification: ANCHOR_008BD720_CLASSIFICATION.json)",
+      "value_provenance": "compiler materialized immediate; the ONLY EBX writer between 0x006C3FB0 and the push (machine census; the earlier EBX=0x66 writer at 0x006C3F69 precedes it)",
+      "evidence_status": "BYTE_OBSERVATION"
+    },
+    {
+      "slot": "arg6",
+      "push_va": "0x006C3FC3",
+      "push_bytes": "51",
+      "source_register": "ecx",
+      "producing_instruction": "0x006C3FBA: mov ecx,[esp+0x10] (8b 4c 24 10) - reload of the frame local saved @0x006C3F83 (89 44 24 10)",
+      "value": "the dword at P+0x8 - inherited label '[P+8]'",
+      "value_provenance": "saved from EAX = CALL 0x007CE1E0 @0x006C3F74 return; callee body re-verified THIS RUN (W-DEP2, 4 bytes): mov eax,[ecx+8]; ret - EAX = the dword at (P)+8; ECX=P from 0x006C3F6E",
+      "evidence_status": "BYTE_OBSERVATION"
+    }
+  ],
+  "contract_va_annotation_correction": {
+    "finding": "The frozen contract text said 'arg2 = [P+0x14] @0x006C3FC3, arg3 = [P+0x18] @0x006C3FC7 area'. The SLOT attributions are CONFIRMED, but the VA annotations were imprecise: the push at 0x006C3FC3 carries [P+8] (arg6); [P+0x14] is pushed at 0x006C3FC7 (arg2) and [P+0x18] at 0x006C3FC6 (arg3).",
+    "classification": "PROMPT_VA_ANNOTATION_CORRECTION (the contract itself ordered re-derivation of every slot from bytes; no analysis impact)",
+    "callee_side_cross_check": "independent: the callee's own read offsets (arg2 @0x006C3646, arg3 @0x006C3641, arg5 @0x006C364F, arg4 @0x006C3654, arg1 @0x006C3691/0x006C369C) were derived from FUN_006C3640's body alone and agree with the caller's push order"
+  },
+  "predecessor_inheritance_note": "The labels '[P+0x14]', '[P+0x18]', '[P+8]' denote the predecessor's byte-proven pointer-arithmetic chain on the template-registry lookup return P. P's POINTEE identity vs the registry node remains UNRESOLVED_UPSTREAM (predecessor's open item, untouched this run). No template-object semantics are claimed or promoted.",
+  "sentinel_condition": "If P equals the lookup's not-found sentinel 0x00BA5800 (predecessor byte-fact: static all-zero .data tail), then [P+0x14] and [P+0x18] both read 0, so arg2 == arg3 and FUN_006C3640 takes its empty path (je @0x006C364C) - the vector is passed through unchanged (aside from the caller's earlier (0x66, [P+8]=0) insert). All consumer findings carry this condition."
+}

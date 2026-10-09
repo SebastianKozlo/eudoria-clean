@@ -1,0 +1,37 @@
+{
+  "run_id": "PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009",
+  "artifact": "ANCHOR_008BD720_CLASSIFICATION.json",
+  "subject": "arg5 of the anchor CALL 0x006C3FCD = the immediate 0x008BD720, classified WITHOUT assuming transform, callback or world-object reference - from BEHAVIOR + BYTES only",
+  "behavior_evidence": {
+    "in_the_caller_FUN_006C3F50": "materialized by 'mov ebx,0x008BD720' (bb 20 d7 8b 00) @0x006C3FB0; pushed as the callee's arg5 @0x006C3FC4 (53)",
+    "in_the_callee_FUN_006C3640": "loaded to EBX @0x006C364F; EXECUTED by 'CALL EBX' (ff d3) @0x006C365A, once per 0x20-stride element of the range [arg2, arg3), with ECX = the current element address (thiscall receiver) and NO stack arguments; the return value EAX is treated as a pointer to an 8-byte pair that is appended to the arg4 container",
+    "verdict": "0x008BD720 is CALLED. Its identity class cannot be 'data' or a 'world-object reference' in this dataflow: the shipped code executes it as an instruction pointer."
+  },
+  "bytes_evidence": {
+    "va": "0x008BD720",
+    "section": ".text (measured section table: .text VA 0x00401000-0x00A745E5; the VA is file-mapped at file offset 0x4BD720) - CODE RANGE",
+    "raw_16B_read": "8d 41 18 c3 cc cc cc cc cc cc cc cc cc cc cc cc",
+    "all_zero": false,
+    "sha256_of_16B": "recorded in 01_RAW/ANCHOR_008BD720_16B_DUMP.json",
+    "read_window": "W-ANCHOR (preregistered bounded dependency; 16-byte DATA read; NO decode of any body at/after this VA)"
+  },
+  "identity_class": "CALL_TARGET (function pointer; code address in .text; invoked as the per-element thiscall callback of FUN_006C3640)",
+  "identity_class_confidence": "CONFIRMED (era PCG 9.3.5, STATIC_ONLY): behavior (CALL EBX with the value) + .text membership + non-zero code-section bytes; dual-verified instruction stream",
+  "what_it_is_NOT": [
+    "NOT a transform/matrix: zero FPU/SSE instructions anywhere in the consumer window; no transform-relevant operation touches this value in-window",
+    "NOT a world-object reference: it is never dereferenced as data, never stored, never compared - only CALLED",
+    "NOT named: no symbol/string/RTTI evidence was used or exists in-window; Ghidra's 'FUN_008bd720' is a NAME ARTIFACT (quarantined hypothesis)"
+  ],
+  "quarantined_hypothesis_body_shape": {
+    "status": "UNVERIFIED HYPOTHESIS - excluded from all gates; the callee body is CLOSED per the preregistration and was NOT decoded this run",
+    "observation": "The 16 preregistered raw bytes begin '8d 41 18 c3' followed by 12 x CC. The 4 leading bytes have the same shape as the W-DEP1 thunk family byte-proven this run ('8d 41 14 c3' = LEA EAX,[ECX+0x14]; RET at 0x0040B070), with displacement 0x18 instead of 0x14, and the trailing CC run matches this binary's documented body-end padding pattern. Ghidra's function manager (imported auto-analysis; QUARANTINED HYPOTHESIS) also holds a 4-byte function 'FUN_008bd720' with body 008bd720..008bd723.",
+    "if_true": "IF the 4 bytes were decoded as the same 4-byte thiscall interior-pointer thunk (LEA EAX,[ECX+0x18]; RET), the callback would return element+0x18, and the in-window pair reads [EAX]/[EAX+4] would then be the dwords at element+0x18/+0x1C - the LAST 8 bytes of each 0x20-byte element - which the container would then collect alongside the caller's (0x66, [P+8]) record.",
+    "verification_requirement": "confirming or refuting this requires a NEW bounded contract for a 4-byte dual decode at 0x008BD720 (the callee of the subject is CLOSED under THIS run's preregistration). NO promotion of this hypothesis is made anywhere in this package."
+  },
+  "closed_edges_recorded": [
+    "FUN_006C3640 -> 0x008BD720 (CALL EBX @0x006C365A; per-element thiscall; body CLOSED)",
+    "FUN_006C3640 -> 0x006C2E00 (CALL @0x006C3685; growth append; body CLOSED)",
+    "FUN_006C3F50 -> 0x0043A550 / 0x0072F580 / 0x007CE1E0 / 0x0040B070 / 0x006C2E00 / 0x006C3640 (caller-window edges; 0x007CE1E0 and 0x0040B070 bodies re-verified as the preregistered 4-byte dependencies W-DEP2/W-DEP1; the others recorded as edges only, bodies not opened)"
+  ],
+  "forbidden_respected": "0x0085B1B0 and 0x0095D3C4 were never opened; no callee body of FUN_006C3640 was decoded; no recursive chain-chasing was performed."
+}

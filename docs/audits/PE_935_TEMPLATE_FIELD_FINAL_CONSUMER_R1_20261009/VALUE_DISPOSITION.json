@@ -1,0 +1,60 @@
+{
+  "run_id": "PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009",
+  "artifact": "VALUE_DISPOSITION.json",
+  "scope": "the three forwarded template-field values (arg2/arg3/arg6) + arg5, tracked through FUN_006C3640's FULL preregistered window to their final in-window disposition (STATIC_ONLY; era PCG/EU 9.3.5)",
+  "dispositions": [
+    {
+      "value": "arg2 = the dword at (P+0x14) ('[P+0x14]', inherited label)",
+      "carrier": "EDI (loaded @0x006C3646, the only body writer)",
+      "operations": [
+        "compared against arg3 @0x006C364A (empty-range check: je @0x006C364C)",
+        "used as the loop BEGIN/CURRENT pointer: ECX := EDI @0x006C3658 passes the CURRENT ELEMENT address to the per-element callback as its thiscall receiver",
+        "incremented by 0x20 per iteration @0x006C368A (element stride)",
+        "compared against arg3 @0x006C368D (jne @0x006C368F loop-back)"
+      ],
+      "final_disposition": "CONSUMED IN-REGISTER as the iteration BEGIN pointer and per-element callback receiver. NEVER written to memory, NEVER dereferenced, NEVER compared against anything except arg3, NEVER forwarded to any callee as a data argument (it reaches the callback only as the ECX receiver value).",
+      "classification": "STRUCTURE: the consumer treats arg2 as the begin of a 0x20-stride element range. This is an OPERATION classification (pointer-arithmetic), NOT a value-semantics promotion.",
+      "conditions": "if arg2 == arg3 (incl. the sentinel case where both read 0), the empty path runs and arg2 is not otherwise used",
+      "evidence_status": "BYTE_OBSERVATION (all VAs byte-pinned, dual-verified) + STRUCTURE (loop role)",
+      "unknowns": "whether [P+0x14] holds a pointer at RUNTIME (STATIC_ONLY); the ELEMENTS' contents are never read in-window (only their addresses reach the callback, whose body is CLOSED)"
+    },
+    {
+      "value": "arg3 = the dword at (P+0x18) ('[P+0x18]', inherited label)",
+      "carrier": "EBP (loaded @0x006C3641, the only body writer)",
+      "operations": [
+        "compared against arg2 @0x006C364A (empty-range check)",
+        "compared against EDI (arg2+0x20*k) @0x006C368D (loop termination)"
+      ],
+      "final_disposition": "CONSUMED IN-REGISTER as the iteration END/LIMIT. NEVER dereferenced, NEVER stored, NEVER used as a memory base, NEVER forwarded.",
+      "classification": "STRUCTURE: range END paired with arg2's BEGIN. The consecutive-dword pair shape ([P+0x14],[P+0x18]) is here consumed as a RANGE - explicitly NOT promoted to 'vector' or 'coordinate' (falsifier F3 discipline; zero FPU/SSE).",
+      "conditions": "sentinel case as above (both zero -> empty path)",
+      "evidence_status": "BYTE_OBSERVATION + STRUCTURE",
+      "unknowns": "runtime value semantics UNKNOWN"
+    },
+    {
+      "value": "arg6 = the dword at (P+8) ('[P+8]', inherited label)",
+      "carrier": "none in the callee - it occupies entry_offset 0x18 on the stack only",
+      "operations": [],
+      "final_disposition": "DEAD ARGUMENT in this consumer: NEVER READ by FUN_006C3640 (machine-verified: zero of the window's 16 memory accesses + 1 LEA resolve to entry_offset 0x18). The caller's ADD ESP,0x18 discards it together with the other five slots.",
+      "note": "[P+8]'s real consumer in this chain was byte-proven by the PREDECESSOR and re-verified in-window this run as caller-side context: FUN_006C3F50 inserts the pair (0x66, [P+8]) into the caller-owned vector (@0x006C3F8D/F fast path; growth @0x006C3FA9) BEFORE the anchor call. Its forwarding into arg6 adds nothing in this consumer.",
+      "evidence_status": "BYTE_OBSERVATION (machine scan) + RELATION (caller-side insert re-pinned in W-CALLER)"
+    },
+    {
+      "value": "arg5 = the immediate 0x008BD720",
+      "carrier": "EBX (loaded @0x006C364F, the only body writer)",
+      "operations": [
+        "CALL EBX @0x006C365A (ff d3) - INDIRECT CALL, executed ONCE PER 0x20-stride element with ECX = current element address (thiscall receiver), no stack arguments"
+      ],
+      "final_disposition": "CONSUMED as an INDIRECT CALL TARGET - a per-element callback dispatch. The callee's return value (EAX) is treated by the caller-side window logic as a pointer to an 8-byte pair: [EAX] and [EAX+4] are copied into the output container (fast path @0x006C3668-0x006C366F) or handed to the growth helper @0x006C3681.",
+      "classification": "IDENTITY CLASS = CALL_TARGET (function pointer / code address). Full classification: ANCHOR_008BD720_CLASSIFICATION.json.",
+      "conditions": "relies on x86 callee-saved discipline for EBX across the growth call (ABI-assumption condition, falsifier F4); sentinel case: empty path dispatches NO callback calls",
+      "evidence_status": "BYTE_OBSERVATION (call instruction, receiver setup, result dataflow) + RELATION (identity classification)"
+    }
+  ],
+  "container_dataflow_summary": {
+    "what_actually_flows_into_the_container": "NOT the tracked template values: the per-element CALLBACK RESULT 8-byte pair ([EAX], [EAX+4]) is the only data appended to the arg4 container inside this window. The tracked values arg2/arg3 never reach memory; arg6 never reaches the callee's dataflow at all.",
+    "container_provenance_vs_template": "container (arg4) chain: callee ESI <- arg4 slot <- caller ESI <- caller param_2 (its caller's stack, provenance leaves window). Template chain: P <- CALL 0x0072F580 @0x006C3F62. The two chains are DISJOINT (falsifier F8: container is NOT the template object).",
+    "output": "*arg1 := container on both paths (@0x006C3695 loop-exit, @0x006C36A5 empty) - the container pointer is written back to the caller's param_2 slot (an out-parameter pattern).",
+    "growth_edge": "when cursor == end, the append is delegated to 0x006C2E00(ECX=container, cursor, result-ptr, &arg1-slot, 1, 1) - edge CLOSED; the derived callee cleanup (20 bytes) is frame-balance-proven; whether the 8 bytes are appended is INFERRED from the loop's continued cursor arithmetic + the caller's parallel growth pattern (same helper, same arg shape) - recorded as cross-callsite analogy, not callee-internal proof."
+  }
+}

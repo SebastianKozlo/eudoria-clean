@@ -1,0 +1,74 @@
+{
+  "run_id": "PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009",
+  "artifact": "BODY_CFG_AND_ACCESS_CENSUS.json",
+  "window": "W-SUBJ FUN_006C3640, body 0x006C3640-0x006C36A8 (105 B, 47 instructions), body-end by the preregistered ret/padding rule: RET C3 @0x006C36A8 + 6xCC padding (0x006C36A9-0x006C36AF) + next function prologue @0x006C36B0 (L24 respected: census covers the FULL window incl. the empty path)",
+  "record_class": "STATIC_ONLY; era PCG/EU 9.3.5; BYTE_OBSERVATION + STRUCTURE only",
+  "cfg": {
+    "blocks": [
+      {"id": "BB0_prologue_emptycheck", "range": "0x006C3640-0x006C364C", "insns": 6, "role": "push ebp; EBP:=arg3; push edi; EDI:=arg2; CMP EDI,EBP; JE empty"},
+      {"id": "BB1_loads", "range": "0x006C364E-0x006C3657", "insns": 4, "role": "push ebx; EBX:=arg5; push esi; ESI:=arg4"},
+      {"id": "BB_loop_head", "range": "0x006C3658-0x006C3662", "insns": 5, "role": "ECX:=EDI (element); CALL EBX (per-element callback); ECX:=[ESI+4] (cursor); CMP cursor,[ESI+8] (end); JE growth"},
+      {"id": "BB_test_cursor", "range": "0x006C3664-0x006C3666", "insns": 2, "role": "TEST ECX,ECX (null-cursor check); JE advance"},
+      {"id": "BB_copy_pair", "range": "0x006C3668-0x006C3671", "insns": 4, "role": "pair copy: [cursor]<-[result], [cursor+4]<-[result+4]"},
+      {"id": "BB_advance_cursor", "range": "0x006C3672-0x006C3676", "insns": 2, "role": "cursor += 8; JMP tail"},
+      {"id": "BB_growth", "range": "0x006C3678-0x006C3685", "insns": 8, "role": "push 1,1,&arg1,result,cursor; ECX:=ESI; CALL 0x006C2E00 (growth append, edge CLOSED, derived callee cleanup 20)"},
+      {"id": "BB_tail", "range": "0x006C368A-0x006C368F", "insns": 3, "role": "EDI += 0x20 (stride); CMP EDI,EBP; JNE loop_head"},
+      {"id": "BB_exit", "range": "0x006C3691-0x006C369B", "insns": 7, "role": "EAX:=arg1; *arg1:=ESI (vector); pop esi/ebx/edi/ebp; RET"},
+      {"id": "BB_empty", "range": "0x006C369C-0x006C36A8", "insns": 6, "role": "EAX:=arg1; ECX:=arg4; pop edi; *arg1:=arg4 (vector); pop ebp; RET"}
+    ],
+    "edges": [
+      {"from": "BB0_prologue_emptycheck", "to": "BB_empty", "via": "je @0x006C364C (taken when arg2 == arg3, incl. the sentinel/zero case)"},
+      {"from": "BB0_prologue_emptycheck", "to": "BB1_loads", "via": "fallthrough"},
+      {"from": "BB1_loads", "to": "BB_loop_head", "via": "fallthrough"},
+      {"from": "BB_loop_head", "to": "BB_growth", "via": "je @0x006C3662 (cursor == end)"},
+      {"from": "BB_loop_head", "to": "BB_test_cursor", "via": "fallthrough"},
+      {"from": "BB_test_cursor", "to": "BB_advance_cursor", "via": "je @0x006C3666 (cursor == 0)"},
+      {"from": "BB_test_cursor", "to": "BB_copy_pair", "via": "fallthrough"},
+      {"from": "BB_copy_pair", "to": "BB_advance_cursor", "via": "fallthrough"},
+      {"from": "BB_advance_cursor", "to": "BB_tail", "via": "jmp @0x006C3676"},
+      {"from": "BB_growth", "to": "BB_tail", "via": "fallthrough"},
+      {"from": "BB_tail", "to": "BB_loop_head", "via": "jne @0x006C368F (EDI != arg3)"},
+      {"from": "BB_tail", "to": "BB_exit", "via": "fallthrough"}
+    ],
+    "all_branch_targets_in_window": true,
+    "callees": [
+      {"va": "0x008BD720", "via": "CALL EBX (ff d3) @0x006C365A", "convention": "thiscall-style: ECX = element address (receiver); no stack args pushed in-window; derived callee cleanup 0", "status": "CLOSED (no body decode; identity classified in ANCHOR_008BD720_CLASSIFICATION.json)"},
+      {"va": "0x006C2E00", "via": "CALL E8 52 EE FF FF rel32 @0x006C3685", "convention": "thiscall-style: ECX = ESI = arg4 vector; 5 stack args (cursor, result-ptr, &arg1-slot, 1, 1); derived callee cleanup 20 (RET 0x14-class)", "status": "CLOSED (edge recorded; observed argument setup only)"}
+    ]
+  },
+  "census_note": "16 memory accesses + 1 LEA address computation in the window - ALL enumerated (machine-extracted from the dual-verified decode; counts re-derivable from 01_RAW/OWN_DECODER_WINDOWS.json). Base-provenance classes: esp-frame/args (7 accesses + 1 LEA), container-from-arg4 (3), callback-result (2), cursor-from-container (2), arg1-slot (2).",
+  "access_census": [
+    {"va": "0x006C3641", "bytes": "8b 6c 24 10", "ea": "[esp+0x10]", "base_provenance": "esp (entry frame)", "offset": "entry_offset 0xC = arg3 slot", "width": 4, "direction": "read", "operation": "loop END := arg3 (=[P+0x18])", "control_flow": "unconditional", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C3646", "bytes": "8b 7c 24 10", "ea": "[esp+0x10]", "base_provenance": "esp (entry frame, after 1 push)", "offset": "entry_offset 0x8 = arg2 slot", "width": 4, "direction": "read", "operation": "loop BEGIN/CURRENT := arg2 (=[P+0x14])", "control_flow": "unconditional", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C364F", "bytes": "8b 5c 24 20", "ea": "[esp+0x20]", "base_provenance": "esp (entry frame, after 2 pushes)", "offset": "entry_offset 0x14 = arg5 slot", "width": 4, "direction": "read", "operation": "callback target := arg5 (=0x008BD720)", "control_flow": "unconditional", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C3654", "bytes": "8b 74 24 20", "ea": "[esp+0x20]", "base_provenance": "esp (entry frame, after 3 pushes)", "offset": "entry_offset 0x10 = arg4 slot", "width": 4, "direction": "read", "operation": "output container := arg4 (caller's vector)", "control_flow": "unconditional", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C365C", "bytes": "8b 4e 04", "ea": "[esi+0x4]", "base_provenance": "ESI = arg4 (container; chain: arg4 slot <- caller push ESI @0x006C3FC5 <- caller param_2)", "offset": "+0x4", "width": 4, "direction": "read", "operation": "container cursor load", "control_flow": "loop body", "evidence_status": "BYTE_OBSERVATION + STRUCTURE"},
+    {"va": "0x006C365F", "bytes": "3b 4e 08", "ea": "[esi+0x8]", "base_provenance": "ESI = arg4 (container)", "offset": "+0x8", "width": 4, "direction": "read", "operation": "cursor vs end comparison (capacity check)", "control_flow": "loop body", "evidence_status": "BYTE_OBSERVATION + STRUCTURE"},
+    {"va": "0x006C3668", "bytes": "8b 10", "ea": "[eax]", "base_provenance": "EAX = per-element callback return (CALL EBX @0x006C365A; last writer on this path)", "offset": "+0x0", "width": 4, "direction": "read", "operation": "callback result dword 0", "control_flow": "fast path only (cursor != end AND cursor != 0)", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C366A", "bytes": "89 11", "ea": "[ecx]", "base_provenance": "ECX = [arg4+0x4] = container cursor", "offset": "+0x0", "width": 4, "direction": "write", "operation": "pair store dword 0 into container buffer", "control_flow": "fast path only", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C366C", "bytes": "8b 40 04", "ea": "[eax+4]", "base_provenance": "EAX = callback return (NOT yet overwritten; this instruction overwrites EAX afterwards)", "offset": "+0x4", "width": 4, "direction": "read", "operation": "callback result dword 1 (last-writer-wins EAX handling)", "control_flow": "fast path only", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C366F", "bytes": "89 41 04", "ea": "[ecx+4]", "base_provenance": "ECX = container cursor", "offset": "+0x4", "width": 4, "direction": "write", "operation": "pair store dword 1 into container buffer", "control_flow": "fast path only", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C3672", "bytes": "83 46 04 08", "ea": "[esi+4]", "base_provenance": "ESI = arg4 (container)", "offset": "+0x4", "width": 4, "direction": "read-write", "operation": "container cursor += 8 (advance past the appended pair)", "control_flow": "both fast and null-cursor paths", "evidence_status": "BYTE_OBSERVATION + STRUCTURE"},
+    {"va": "0x006C367C", "bytes": "8d 54 24 1c", "ea": "LEA [esp+0x1c]", "base_provenance": "esp (entry frame, after 6 pushes incl. growth args)", "offset": "entry_offset 0x4 = &arg1 SLOT (address computation - NO memory access)", "width": 4, "direction": "addr", "operation": "address of the callee's own arg1 slot, passed as growth-helper arg3", "control_flow": "growth path only", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C3691", "bytes": "8b 44 24 14", "ea": "[esp+0x14]", "base_provenance": "esp (entry frame, after 4 pushes)", "offset": "entry_offset 0x4 = arg1 slot", "width": 4, "direction": "read", "operation": "out-slot pointer := arg1", "control_flow": "loop exit", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C3695", "bytes": "89 30", "ea": "[eax]", "base_provenance": "EAX = arg1 (the out-slot address, = &caller's param_2 slot)", "offset": "+0x0", "width": 4, "direction": "write", "operation": "*arg1 := ESI (the container pointer is stored to the caller's output slot)", "control_flow": "loop exit", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C369C", "bytes": "8b 44 24 0c", "ea": "[esp+0xC]", "base_provenance": "esp (entry frame, after 2 pushes)", "offset": "entry_offset 0x4 = arg1 slot", "width": 4, "direction": "read", "operation": "empty path: out-slot pointer := arg1", "control_flow": "empty path only (arg2 == arg3)", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C36A0", "bytes": "8b 4c 24 18", "ea": "[esp+0x18]", "base_provenance": "esp (entry frame, after 2 pushes)", "offset": "entry_offset 0x10 = arg4 slot", "width": 4, "direction": "read", "operation": "empty path: container := arg4", "control_flow": "empty path only", "evidence_status": "BYTE_OBSERVATION"},
+    {"va": "0x006C36A5", "bytes": "89 08", "ea": "[eax]", "base_provenance": "EAX = arg1 (out-slot address)", "offset": "+0x0", "width": 4, "direction": "write", "operation": "empty path: *arg1 := arg4 (container passed through unchanged)", "control_flow": "empty path only", "evidence_status": "BYTE_OBSERVATION"}
+  ],
+  "tracked_value_register_usage": {
+    "note": "machine-generated touch lists in 01_RAW/ESP_SLOT_MAP.json (W_SUBJ.touches)",
+    "arg2_carrier_edi": "loaded @0x006C3646; ECX-source @0x006C3658 (callback receiver); += 0x20 @0x006C368A; compared @0x006C364A/0x006C368D; NEVER a memory base; NEVER written to memory",
+    "arg3_carrier_ebp": "loaded @0x006C3641; compared @0x006C364A/0x006C368D; NEVER dereferenced; NEVER stored",
+    "arg5_carrier_ebx": "loaded @0x006C364F; CALL EBX @0x006C365A (the ONLY use); must survive the growth call across loop iterations (ABI-assumption condition, falsifier F4)",
+    "arg6": "NO esp-relative access in the window resolves to entry_offset 0x18 (machine scan of all 16 accesses + 1 LEA): arg6 is NEVER READ (dead argument)",
+    "arg4_carrier_esi": "loaded @0x006C3654; container base for all [esi+4]/[esi+8] operations; stored to *arg1 @0x006C3695; passed as ECX to the growth helper @0x006C3683"
+  },
+  "fpu_sse_scan": {
+    "fpu_instructions": 0,
+    "sse_instructions": 0,
+    "scope": "all 4 windows (105 instructions)",
+    "method": "machine scan over the dual-verified decode (opcode families D8-DF and 0F/SSE forms flagged by the decoder)",
+    "claim_discipline": "NO field is named position/rotation/scale/transform/world-coordinate anywhere in this package; all dword semantics remain UNKNOWN"
+  }
+}

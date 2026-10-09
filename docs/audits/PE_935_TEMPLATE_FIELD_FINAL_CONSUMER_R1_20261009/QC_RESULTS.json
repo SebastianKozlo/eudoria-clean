@@ -1,0 +1,187 @@
+{
+  "run_id": "PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_QC_R1_20261009",
+  "qc_class": "INTERNAL_QC (fresh-context PE-MASTER-AUDitor child; NO_NESTED_TASKS; not a Desktop post-audit, not executor self-review)",
+  "run_id_audited": "PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009",
+  "qc_worker": "pe-master-auditor (fresh context, dispatched by PE-MASTER 2026-10-09)",
+  "package": "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/",
+  "scratch_qc_fresh": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009\\SCRATCH\\QC_FRESH\\",
+  "scope": "D1 identity / D2 subject byte pins / D3 ESP-depth dataflow sim / D4 falsifier audit / D5 gates+records; auditor re-measurement labeled AUDITOR_RECHECK; local outputs ONLY under SCRATCH\\QC_FRESH",
+  "verdict": "QC_PASS_WITH_FINDINGS",
+  "verdict_basis": "every load-bearing executor claim independently re-measured and CONFIRMED from the physical EXE by the auditor's own pipeline (own PE parser, own x86-32 decoder, own CFG-worklist ESP sim); 0 P0/P1 findings; 3x P2 + 2x P3 documentation/record-precision findings requiring a bounded records-correction round; no scientific claim affected",
+  "qc_inputs_read": {
+    "package_files_full_read": [
+      "FINAL_REPORT.md", "PREREGISTRATION.md", "ARGUMENT_PROVENANCE.json", "INPUT_IDENTITIES.json",
+      "BODY_CFG_AND_ACCESS_CENSUS.json", "FALSIFIER_RESULTS.json", "ANCHOR_008BD720_CLASSIFICATION.json",
+      "VALUE_DISPOSITION.json", "EVIDENCE_INDEX.md", "HANDOFF.md",
+      "01_RAW/ANCHOR_008BD720_16B_DUMP.json", "01_RAW/ESP_SLOT_MAP.json",
+      "01_RAW/GHIDRA_HYPOTHESIS_EXPORT.json", "01_RAW/KEY_REGION_LISTINGS.md",
+      "01_RAW/OBJDUMP_LISTINGS/objdump_W_SUBJ_FUN_006C3640.txt",
+      "01_RAW/OBJDUMP_LISTINGS/objdump_W_CALLER_FUN_006C3F50.txt",
+      "01_RAW/OBJDUMP_LISTINGS/objdump_W_DEP1_FUN_0040B070.txt",
+      "01_RAW/OBJDUMP_LISTINGS/objdump_W_DEP2_FUN_007CE1E0.txt"
+    ],
+    "package_files_structural_read_plus_full_programmatic_processing": [
+      "01_RAW/OWN_DECODER_WINDOWS.json (all 105 per-instruction records parsed and compared field-by-field vs the auditor's independent decode: 0 diffs; headers/summaries read in full)"
+    ],
+    "scratch_evidence": [
+      "SCRATCH/raw_slices/recon_manifest.json (Phase-0 recon provenance)",
+      "SCRATCH/raw_slices/*.bin (4 window slices re-hashed vs OWN_DECODER_WINDOWS.json and vs physical EXE: all MATCH)",
+      "SCRATCH inventory enumerated"
+    ],
+    "not_read_by_auditor": "executor SCRATCH scripts (x86dec.py, sim_slots.py, analyze.py, make_listings.py, package_raw.py, make_evidence_index.py, extract_recon.py, dump_hypothesis_fc.py, verify_baseline.py, dbg_entry.py) - NOT read to EOF by the auditor; they are pinned by EVIDENCE_INDEX hashes (re-verified 10/10) and, decisively, every load-bearing output they produced was independently re-derived by the auditor's own pipeline from the physical EXE, so no claim rests on unread script internals",
+    "physical_inputs": {
+      "exe": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe re-hashed by auditor: 8015872 B, SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 == expected (MATCH)",
+      "repo_git": "HEAD == origin/master == live ls-remote master == BASE fbb6e958ab8b950406a3c34364662925bca75a4e; tracked worktree diff and cached diff EMPTY; untracked set == {new package} + {6 declared foreign paths}"
+    }
+  },
+  "duty_results": {
+    "D1_identity": {
+      "verdict": "PASS",
+      "checks": {
+        "exe_sha256_remeasured": "MATCH (E7785430...F31, 8015872 B)",
+        "predecessor_package_27_rows": "PASS - all 27 MANIFEST_SHA256.csv rows re-hashed from disk by auditor: 27/27 MATCH, 0 mismatches (incl. the entrypoint row)",
+        "git_head_origin_remote_equals_base": "PASS (fbb6e958ab8b950406a3c34364662925bca75a4e x4)",
+        "tracked_diff_empty": "PASS (worktree + cached empty)",
+        "foreign_untracked_untouched": "PASS-DECLARATION-CONSISTENT - untracked set exactly matches the 6 declared foreign paths + this package; note: absence of a baseline hash for foreign untracked dirs makes 'untouched' verifiable only as set-membership + zero tracked impact (inherent limit, not an executor defect)",
+        "pyc_residue_zero": "PASS (auditor scan incl. own QC_FRESH: 0)",
+        "package_inventory": "PASS - 19 files = 18 package files + EVIDENCE_INDEX.md (self-excluded), matches the declared count 18; 28/28 EVIDENCE_INDEX hash rows re-verified by auditor (18 package + 10 tooling scripts)"
+      }
+    },
+    "D2_subject_pins": {
+      "verdict": "PASS (all pins MATCH auditor's own byte reads via auditor's own PE parser; no PS redirection used - all byte work in binary-mode Python)",
+      "remeasured": {
+        "window_105B": "MATCH - 0x006C3640..0x006C36A8 inclusive = 105 B; RET C3 @0x006C36A8 + 6x CC (0x006C36A9-AF) + next function prologue @0x006C36B0 (55 8B 6C 24 10 ...) - body-end rule satisfied",
+        "window_caller_140B": "MATCH - 0x006C3F50..0x006C3FDB = 140 B; RET C3 @0x006C3FDB + 4x CC + next prologue @0x006C3FE0",
+        "anchor_rel32": "MATCH - bytes E8 6E F6 FF FF @0x006C3FCD; rel32 = -2450; next_va 0x006C3FD2; recomputed target 0x006C3640 == subject entry",
+        "mov_ebx_imm": "MATCH - BB 20 D7 8B 00 @0x006C3FB0, imm32 = 0x008BD720",
+        "reads": "MATCH - 8B 50 04 @0x006C3FBE ([P+0x18] via EAX+4); 8B 00 @0x006C3FC1 ([P+0x14])",
+        "push_sequence": "MATCH - 51 @FC3, 53 @FC4, 56 @FC5, 52 @FC6, 50 @FC7, LEA 8D 4C 24 30 @FC8 (= &caller param_2 slot, entry_offset 8), 51 @FCC",
+        "loop_append_growth_vas": "MATCH - 3B FD / 74 4E @0x364A/4C; 8B CF @0x3658; FF D3 @0x365A (CALL EBX); 8B 4E 04 / 3B 4E 08 @0x365C/5F; 89 11 @0x366A; 89 41 04 @0x366F; 83 46 04 08 @0x3672; 83 C7 20 @0x368A; 3B FD / 75 C7 @0x368D/8F; E8 76 F7 FF FF @0x3685 -> 0x006C2E00; 89 30 @0x3695; 89 08 @0x36A5; RET C3 @0x369B and @0x36A8",
+        "anchor_16B": "MATCH - 16 B @0x008BD720 (file-mapped @0x4BD720, .text, in_text TRUE) == 8D 41 18 C3 CC x12; SHA256 de298cd7e80f79d2d290c3bc8db81f47dc7f21ef7b6cca3f46380c6ec616d9f8 == ANCHOR_008BD720_16B_DUMP.json; NOT decoded by the auditor beyond byte verification (per QC contract)",
+        "w_dep_bodies": "MATCH - 0x0040B070 = 8D 41 14 C3 (LEA EAX,[ECX+0x14]; RET); 0x007CE1E0 = 8B 41 08 C3 (MOV EAX,[ECX+8]; RET)",
+        "independent_decode": "MATCH - auditor's own decoder: W-SUBJ 47 insns, W-CALLER 54, W-DEP1 2, W-DEP2 2 = 105 total; 0 disagreements vs the package objdump listings (va+bytes+mnemonic, all 4 windows) and 0 diffs vs all 105 executor OWN_DECODER_WINDOWS records; contiguous coverage, ends at the RETs; FPU/SSE = 0 (auditor scan; objdump mnemonics 0)"
+      }
+    },
+    "D3_dataflow_esp_sim": {
+      "verdict": "PASS (auditor's own CFG-worklist ESP-depth sim, written from scratch; no reuse of executor sim_slots.py)",
+      "remeasured": {
+        "slot_table": "CONFIRMED - arg1=&caller_param_2 (push ECX @FCC, entry_offset 4), arg2=[P+0x14] (push EAX @FC7, eo 8), arg3=[P+0x18] (push EDX @FC6, eo 0xC), arg4=caller vector (push ESI @FC5, eo 0x10), arg5=0x008BD720 (push EBX @FC4, eo 0x14), arg6=[P+8] (push ECX @FC3, eo 0x18); push depths 24/28/32/36/40/44; depth at anchor call 44; callee-side read offsets join 6/6 slots",
+        "arg6_dead": "CONFIRMED - auditor's sim enumerates exactly 8 esp-relative ops in W-SUBJ (7 accesses + 1 LEA: entry_offsets arg3@0x3641, arg2@0x3646, arg5@0x364F, arg4@0x3654, arg1@0x3691, &arg1 LEA@0x367C, arg1@0x369C, arg4@0x36A0); NONE resolves to entry_offset 0x18 = arg6 slot; arg6 is NEVER READ",
+        "growth_frame_balance": "CONFIRMED - derived growth cleanup 20 B from join equality (fast path 16 == growth path 36-X -> X=20); callback cleanup 0 (loop-back join at 0x3658 requires per-iteration delta 0); merges at 0x3672/0x3658/0x368A all (16,16) consistent; both RETs at depth 0",
+        "caller_variants": "CONFIRMED - getter+lookup combined cleanup 4; both splits (G=0,L=4) and (G=4,L=0) produce IDENTICAL downstream esp maps (split invariance independently reproduced); W-DEP2/W-DEP1 cleanup 0 (RET C3); growth @0x3FA9 cleanup 20; RET @0x3FDB depth 0",
+        "f4_conditions": "CONFIRMED REASONABLE - loop-carried carriers EDI/EBP/EBX/ESI are all callee-saved-class across the two CLOSED calls; EAX consumed immediately post-callback; ECX/EDX reloaded before every use; zero crossings rely on EAX/ECX/EDX survival; the callee-saved assumption is recorded as an explicit ABI-assumption condition (not waived, not proven - correct for CLOSED bodies)",
+        "f8_disjointness": "CONFIRMED - container chain: ESI single in-window writer @0x3F79 from incoming param_2 slot (entry_offset 8); template chain: P from CALL 0x0072F580 -> EDI @0x3F67; no in-window instruction derives ESI from P's chain; chains disjoint; tracked values reach memory as data 0 times in W-SUBJ"
+      }
+    },
+    "D4_falsifier_audit": {
+      "verdict": "PASS - all 8 falsifiers designed (PREREGISTRATION section 7, before execution) AND executed with MEASURED_QUANTITY / INDEPENDENT_SOURCE_OF_TRUTH / WHY_NON_CIRCULAR / FAILURE_CASE_DETECTED each (FALSIFIER_RESULTS.json); not assertions",
+      "f1_adjudication": {
+        "question": "who is right - the frozen contract ('arg2=[P+0x14] with push @0x006C3FC3') or the executor (push@0x006C3FC3 carries [P+8]=arg6; [P+0x14] pushed @0x006C3FC7=arg2)?",
+        "answer": "THE EXECUTOR IS RIGHT. Auditor bytes: 0x006C3FC3 = 51 (push ECX) where ECX = LOCAL_B = [P+8] (loaded @0x3FBA from the local saved @0x3F83 from getter2 0x007CE1E0 = [P+8]); [P+0x14] is EAX (loaded @0x3FC1 8B 00 from EAX = P+0x14, the 0x0040B070 thunk return) pushed @0x3FC7 = 50 (push EAX). The contract's SLOT attributions are CONFIRMED correct; its VA annotations were imprecise; the executor's corrected slot table is byte-correct. Classification PROMPT_VA_ANNOTATION_CORRECTION is appropriate."
+      },
+      "replication_note": "the auditor independently replicated the load-bearing measurements of F1 (slot join), F2 (census; base-provenance classes), F3 (FPU/SSE 0/0 over 105 insns), F4 (crossing census), F5 (EAX writer/reader per path; growth-call return machine-verified UNUSED; caller never reads EAX post-anchor), F6 (Ghidra export exists only as a quarantined hypothesis artifact; no gate claim cites it), F7 (0 disagreements - auditor's third decode), F8 (disjointness)"
+    },
+    "D5_gates_records": {
+      "verdict": "PASS with findings (7/7 gates supported; record-precision defects listed in the findings ledger)",
+      "gates": {
+        "G1": "PASS - anchor rel32 recomputed by auditor == 0x006C3640; windows + W-DEP bodies re-pinned; body-ends by the documented rule",
+        "G2": "PASS - 6/6 slots dual-side machine-verified by the auditor's own sim; cdecl caller-cleans (RET C3 both epilogues; ADD ESP,0x18 @0x3FD2); contract VA-annotation correction adjudicated CORRECT",
+        "G3": "PASS - 10 blocks / 12 edges / all branch targets in-window (auditor-verified); access census 16 accesses + 1 LEA (auditor recount MATCH); full-window census incl. empty path; 0 FPU/SSE",
+        "G4": "PASS - dispositions re-derived by the auditor (arg2/arg3 loop bounds; arg5 call target; arg6 dead; container != template)",
+        "G5": "PASS - 8/8 falsifiers executed with the 4-part requirement",
+        "G6": "PASS - EXE SHA re-measured unchanged; predecessor 27/27 re-hashed by auditor; tracked diff empty; 0 .pyc",
+        "G7": "PASS - zero promotion: auditor term-scan found 91 occurrences of position/rotation/scale/transform/coordinate/placement/XYZ - ALL in negation/discipline/claim-limit contexts; claim limits verbatim identical in FINAL_REPORT section 10 / HANDOFF / FALSIFIER_RESULTS; the 0x18-thunk hypothesis is explicitly labeled UNVERIFIED HYPOTHESIS, excluded from gates, not decoded, not promoted"
+      },
+      "preregistration_before_science": "CONSISTENT - PREREGISTRATION.md is the earliest-mtime package file (2026-10-09T11:44:13, before the final objdump listings 11:49:21 and all other artifacts); content matches the executed structure (windows, budgets, falsifiers, gates); Phase-0 recon disclosed in section 1 as pre-science; mtime is weak evidence but nothing contradicts the ordering",
+      "budget_respected": "PASS - dual-verified decode scope == declared windows: 105 + 140 + 4 + 4 = 253 B code + 16 B data (W-ANCHOR), auditor-verified by exact window sizes and full decode coverage; packaged listings contain ONLY the windows; Phase-0 raw boundary-scan slices (subj 4096 B / caller 176 B, recon_manifest.json) are disclosed pre-science recon material, raw bytes only, no published decode beyond the windows - not a budget violation (see finding P3-2 note)",
+      "counts_consistency": "105 total instructions CONFIRMED (47+54+2+2, auditor decode); census = 16 memory accesses + 1 LEA = 17 rows CONFIRMED (esp-frame/args 7 accesses + 1 LEA; container 3; callback-result 2; cursor 2; arg1-slot 2); F3 scan 0/0 replicated; NOTE: the correct decomposition is '16 accesses + 1 LEA' (FINAL_REPORT/BODY_CFG/F2 are correct; HANDOFF's '17 esp-relative operations' phrasing is wrong - see P2-3)",
+      "claim_limits_verbatim": "CONFIRMED identical strings in all three locations",
+      "intervention_ledger_adjudication": "HONEST - Ghidra LANDMARK4057 reuse pre-declared in PREREGISTRATION sections 6/11 (before the science; sandbox re-hash discipline); 4 tooling defects (PE parser VA-vs-RVA; decoder grp1-imm draft; ESP-sim sign/successor; Jython Address-vs-int) all disclosed with how they were caught, all pre-conclusion, pipeline re-run and re-measured; 2 PowerShell-inline-Python quoting failures disclosed (L23); no undisclosed intervention found; the auditor's independent replication corroborates that no defective intermediate state contaminated any conclusion; NO VIOLATION",
+      "evidence_index": "28/28 rows re-verified by the auditor (18 package + 10 SCRATCH scripts, size+SHA256 all MATCH)",
+      "not_checked_honesty": "adjudicated HONEST - closed callees (0x008BD720 body, 0x006C2E00 body) not decoded; forbidden addresses 0x0085B1B0/0x0095D3C4 have no in-window edges (auditor decode confirms) and were not opened; runtime semantics not claimed (STATIC_ONLY); P pointee identity untouched (UNRESOLVED_UPSTREAM)"
+    }
+  },
+  "findings": [
+    {
+      "id": "P2-1",
+      "severity": "P2",
+      "title": "BODY_CFG_AND_ACCESS_CENSUS.json BB_exit block instruction count off-by-one (declared 6, actual 7)",
+      "source": "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/BODY_CFG_AND_ACCESS_CENSUS.json, cfg.blocks[8]: {\"id\": \"BB_exit\", \"range\": \"0x006C3691-0x006C369B\", \"insns\": 6}",
+      "contradicted_claim": "the per-block count field for BB_exit; the 10 declared block counts sum to 46, contradicting the same artifact's window count 47",
+      "physical_counter_evidence": "the dual-verified instruction stream (and the auditor's independent decode) contains 7 instructions in 0x006C3691-0x006C369B: mov eax,[esp+0x14] @0x3691; mov [eax],esi @0x3695; pop esi @0x3697; pop ebx @0x3698; pop edi @0x3699; pop ebp @0x369A; ret @0x369B",
+      "mechanism": "manual block-census slip in a machine-readable artifact; the block RANGE and role are correct; the total instruction count stated elsewhere (47) is correct",
+      "affected_scope": "record precision only; no gate, disposition, slot, or count claim depends on the per-block field; the 47-instruction total and the 16+1 access census are independently confirmed correct",
+      "correction": "in a bounded records-correction round: change BB_exit \"insns\": 6 to 7 (block counts then sum to 47); disclose the semantic change as a record fix",
+      "revalidation_predicate": "corrected block counts sum == 47 == auditor decode count; every other census field byte-unchanged; EVIDENCE_INDEX row for BODY_CFG_AND_ACCESS_CENSUS.json updated with the new SHA256"
+    },
+    {
+      "id": "P2-2",
+      "severity": "P2",
+      "title": "FALSIFIER_RESULTS.json F1 measured_quantity itemization internally inconsistent (multiset sums to 9, stated total 8)",
+      "source": "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/FALSIFIER_RESULTS.json, falsifiers[0].measured_quantity: \"8 callee esp-relative operations resolving to entry_offsets {arg1 x3, arg2 x1, arg3 x1, arg4 x2, arg5 x1, &arg1 x1}\"",
+      "contradicted_claim": "internal consistency of the F1 itemization; 3+1+1+2+1+1 = 9 != 8",
+      "physical_counter_evidence": "ESP_SLOT_MAP.json W_SUBJ.esp_access_map and the auditor's independent sim: exactly 8 esp-relative ops = arg1 x2 (0x3691, 0x369C) + &arg1 LEA x1 (0x367C) + arg2 x1 (0x3646) + arg3 x1 (0x3641) + arg4 x2 (0x3654, 0x36A0) + arg5 x1 (0x364F)",
+      "mechanism": "prose double-count of the arg1 slot family (counting both the two value reads AND the LEA inside 'arg1 x3' while ALSO listing '&arg1 x1')",
+      "affected_scope": "prose precision only; the count 8, the join result, and the F1 PASS are all correct and independently reproduced; arg6-dead (the load-bearing point) is unaffected",
+      "correction": "reword to '{arg1 x2, &arg1 x1, arg2 x1, arg3 x1, arg4 x2, arg5 x1}' (= 8) in a records-correction round",
+      "revalidation_predicate": "corrected multiset sums to 8; ESP_SLOT_MAP and FINAL_REPORT unchanged; EVIDENCE_INDEX row updated"
+    },
+    {
+      "id": "P2-3",
+      "severity": "P2",
+      "title": "HANDOFF.md mislabels the census as '17 esp-relative operations' (actual: 8 esp-relative ops; 17 is the TOTAL census rows)",
+      "source": "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/HANDOFF.md, PER-VALUE DISPOSITION arg6 bullet: 'machine-verified: 0 of 17 esp-relative operations resolve to entry offset 0x18'",
+      "contradicted_claim": "the count of esp-relative operations in W-SUBJ (would read as 17); the intended statement is '0 of the 17 census rows (16 accesses + 1 LEA)'",
+      "physical_counter_evidence": "auditor sim: 8 esp-relative operations (7 esp-based accesses + 1 esp-based LEA); the other 9 census rows are esi/eax/ecx-based (container/result/cursor/arg1-slot classes); FINAL_REPORT section 4 ('16 memory accesses + 1 LEA') and BODY_CFG census_note are correct",
+      "mechanism": "handoff-summary wording drift (report/code-drift class); the arg6-dead claim itself is correct either way (0 of all 17 rows / 0 of the 8 esp ops)",
+      "affected_scope": "handoff precision only; no analysis impact; a downstream reader could mis-derive the esp-op denominator",
+      "correction": "reword to '0 of the window's 17 census rows (16 accesses + 1 LEA; 8 of them esp-relative) resolve to entry offset 0x18' in a records-correction round",
+      "revalidation_predicate": "wording consistent with BODY_CFG census_note and VALUE_DISPOSITION arg6 wording (which are already correct); EVIDENCE_INDEX row updated"
+    },
+    {
+      "id": "P3-1",
+      "severity": "P3",
+      "title": "Invalid UTF-8 byte 0x97 (CP1252 em-dash) in the first line of two package files",
+      "source": "docs/audits/.../EVIDENCE_INDEX.md byte offset 17 (line 1) and docs/audits/.../01_RAW/KEY_REGION_LISTINGS.md byte offset 22 (line 1); both files otherwise decode as UTF-8",
+      "contradicted_claim": "implicit machine-readable-evidence integrity expectation (package files are UTF-8; all other files decode cleanly)",
+      "physical_counter_evidence": "python utf-8 decode raises 'invalid start byte 0x97' at those offsets; the same generator's other outputs (FINAL_REPORT.md, HANDOFF.md) contain proper UTF-8 em-dashes",
+      "mechanism": "generator (make_evidence_index.py / make_listings.py) wrote a CP1252-encoded em-dash byte without explicit UTF-8 encoding on those header strings",
+      "affected_scope": "cosmetic + machine-parseability of one header byte per file; no content loss; hash-pinning is not invalidated (the bytes are pinned as-is)",
+      "correction": "in a records-correction round: replace byte 0x97 with UTF-8 em-dash (E2 80 94) or hyphen in both files; KEY_REGION_LISTINGS.md's row in EVIDENCE_INDEX.md must be re-hashed in the same round; EVIDENCE_INDEX.md is self-excluded from its own table so no self-reference problem",
+      "revalidation_predicate": "both files decode as strict UTF-8; updated EVIDENCE_INDEX row matches the new KEY_REGION_LISTINGS.md SHA256"
+    },
+    {
+      "id": "P3-2",
+      "severity": "P3 (observation, no action required)",
+      "title": "SCRATCH intermediate artifacts and Phase-0 recon slices are not hash-pinned in EVIDENCE_INDEX (scope note)",
+      "source": "EVIDENCE_INDEX.md hashes only the 10 SCRATCH scripts; SCRATCH also holds analysis_results.json, dbg_entry.json, ghidra_hypothesis_raw.json, sim_slots.json, raw_slices/ (4 final .bin slices + Phase-0 recon 4096 B/176 B slices + recon_manifest.json)",
+      "contradicted_claim": "none - the index's declared scope is package files + tooling scripts; the 4 final window slices ARE pinned by SHA256 inside OWN_DECODER_WINDOWS.json (auditor re-verified against both the physical EXE and the on-disk slices: all MATCH)",
+      "mechanism": "scope choice, not a defect; SCRATCH is declared local-only/outside-git; Phase-0 raw recon slices are disclosed pre-science material (PREREGISTRATION section 1) and no published decode exceeds the 253 B + 16 B declared windows (auditor-verified)",
+      "affected_scope": "none load-bearing; provenance completeness nit for local-only intermediates",
+      "correction": "optional future practice: pin local intermediates in a scratch-local provenance file; NO correction required for this package",
+      "revalidation_predicate": "n/a"
+    }
+  ],
+  "auditor_recheck_artifacts": {
+    "qc_fresh_scripts": [
+      "SCRATCH/QC_FRESH/qc1_identity.py (EXE/PE/slices/anchor-16B/byte pins/body-end)",
+      "SCRATCH/QC_FRESH/qc2_decode.py (independent decoder; dual comparison; FPU/SSE; counts; growth-return-unused)",
+      "SCRATCH/QC_FRESH/qc3_espsim.py (independent CFG-worklist ESP sim; slot join; arg6-dead; F8)",
+      "SCRATCH/QC_FRESH/qc4_repo.py (package inventory; EVIDENCE_INDEX 28-row re-hash; predecessor 27-row re-hash; pyc scan)"
+    ],
+    "qc_fresh_outputs": [
+      "SCRATCH/QC_FRESH/qc1_identity.json", "SCRATCH/QC_FRESH/qc2_decode.json",
+      "SCRATCH/QC_FRESH/qc3_espsim.json", "SCRATCH/QC_FRESH/qc4_repo.json",
+      "SCRATCH/QC_FRESH/AUDITOR_RECHECK_SUMMARY.json (this content)"
+    ]
+  },
+  "boundaries": {
+    "executor_artifacts_modified": "NONE (except the two QC outputs ordered to the package root by the dispatch: QC_RESULTS.json, QC_REPORT.md)",
+    "commits_or_pushes": "NONE",
+    "audit_entrypoint_touched": "NO",
+    "manifest_created": "NO (forbidden by the dispatch)",
+    "anchor_0x008BD720_decoded_by_auditor": "NO (byte verification only; the quarantined 0x18-thunk hypothesis remains un-adjudicated by this QC - confirming/refuting it needs the new bounded 4-byte dual-decode contract, exactly as the package states)",
+    "runtime_experiments": "NONE (STATIC_ONLY respected by the QC as well)"
+  },
+  "next_parent_action": "PE-MASTER decision: (a) accept QC_PASS_WITH_FINDINGS and dispatch a bounded records-correction round for P2-1/P2-2/P2-3/P3-1 (text/count fixes + EVIDENCE_INDEX re-hash; no semantic change to any claim), then persist/publish per its own plan; (b) optionally open the new bounded contract for the 4-byte dual decode at 0x008BD720 to settle the quarantined thunk-family hypothesis; (c) milestone closure remains PE-MASTER's/human's gate, NOT this QC's."
+}

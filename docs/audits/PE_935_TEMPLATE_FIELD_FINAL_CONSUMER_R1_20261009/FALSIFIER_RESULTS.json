@@ -1,0 +1,93 @@
+{
+  "run_id": "PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009",
+  "artifact": "FALSIFIER_RESULTS.json",
+  "design_source": "PREREGISTRATION section 7 (all 8 designed BEFORE execution); contract Phase 3",
+  "requirement": "every meaningful PASS carries MEASURED_QUANTITY / INDEPENDENT_SOURCE_OF_TRUTH / WHY_NON_CIRCULAR / FAILURE_CASE_DETECTED",
+  "falsifiers": [
+    {
+      "id": "F1",
+      "falsifier": "an argument slot attribution is wrong (value swapped between slots)",
+      "execution": "dual-side slot derivation: caller-side push order/registers (W-CALLER) AND callee-side [esp+disp] read offsets under live push depth (W-SUBJ), joined by the CFG-worklist ESP-depth sim; agreement required on all 6 slots",
+      "measured_quantity": "6 pushes (0x006C3FC3/FC4/FC5/FC6/FC7/FCC) -> slots arg6/arg5/arg4/arg3/arg2/arg1; 8 callee esp-relative operations resolving to entry_offsets {arg1 x2, &arg1 x1, arg2 x1, arg3 x1, arg4 x2, arg5 x1}; arg6: 0 accesses; push depths 24/28/32/36/40/44 vs callee read depths 4/8/12/16/24/16/8/8",
+      "independent_source_of_truth": "two independent decoders (own x86dec.py + GNU objdump; F7 gate = 0 disagreements over 105 instructions); slot arithmetic independent of Ghidra",
+      "why_non_circular": "the callee's slot map is derived from ITS OWN body's read offsets; the caller's from ITS OWN pushes; the two derivations share no code path; a swap would break the join (e.g. if [P+0x18] occupied arg2's slot, the callee's loop BEGIN would load it at entry_offset 8 while the caller's push evidence would place [P+0x14] there - irreconcilable)",
+      "failure_case_detected": "YES - the frozen contract's VA annotations were imprecise ('arg2 = [P+0x14] @0x006C3FC3'): the push at 0x006C3FC3 actually carries [P+8] (arg6); [P+0x14] is pushed at 0x006C3FC7 (arg2). Slot attributions themselves CONFIRMED as the contract stated. Classified PROMPT_VA_ANNOTATION_CORRECTION in ARGUMENT_PROVENANCE.json.",
+      "outcome": "PASS (all 6 slots machine-verified from both sides; contract slot claims confirmed; VA annotation corrected)"
+    },
+    {
+      "id": "F2",
+      "falsifier": "a supposed field access belongs to another object (wrong base register)",
+      "execution": "every memory operand in W-SUBJ (16 accesses + 1 LEA) enumerated with base-register provenance traced to its producing instruction in the dual-verified stream",
+      "measured_quantity": "base-provenance classes: esp-frame/args 7+1, container-from-arg4 3 ([esi+4]/[esi+8]; ESI <- arg4 slot <- caller param_2), callback-result 2 ([eax],[eax+4]; EAX <- CALL EBX), cursor-from-container 2 ([ecx],[ecx+4]; ECX <- [esi+4]), arg1-slot 2 ([eax] final stores; EAX <- arg1 slot); tracked carriers EDI/EBP/EBX appear as memory bases 0 times",
+      "independent_source_of_truth": "dual-verified decode + machine census (01_RAW/OWN_DECODER_WINDOWS.json, 01_RAW/ESP_SLOT_MAP.json)",
+      "why_non_circular": "each base register's producer is byte-pinned in the same dual-verified stream; no base provenance was inferred from names or Ghidra types",
+      "failure_case_detected": "NO wrong-object access found; the near-miss class (the callback-result reads [EAX]/[EAX+4]) was explicitly kept OUT of the template field census - those reads belong to the CLOSED callee's return object, not to P",
+      "outcome": "PASS (census complete; no template-field access misattributed; the tracked values are NEVER dereferenced in this window)"
+    },
+    {
+      "id": "F3",
+      "falsifier": "a float-shaped value is misclassified as a coordinate (discipline check)",
+      "execution": "machine scan for FPU (D8-DF) and SSE (0F families, F2/F3-prefixed) opcodes over all 4 windows; plus a name-discipline audit over every artifact",
+      "measured_quantity": "0 FPU instructions, 0 SSE instructions in 105 instructions (machine scan); 0 occurrences of position/rotation/scale/transform/world-coordinate naming for any dword in the package",
+      "independent_source_of_truth": "the decoder flags is_fpu/is_sse per instruction (OWN_DECODER_WINDOWS.json f3_fpu_sse_scan); objdump listings independently contain no fpu/sse mnemonics in the windows",
+      "why_non_circular": "presence detection is opcode-family-based, not semantic; the discipline audit is against the written artifacts themselves",
+      "failure_case_detected": "the consecutive-dword pair ([P+0x14],[P+0x18]) COULD have been read as a 2D coordinate/vector; the consumer's actual operations (cmp/add-0x20/jne loop arithmetic) classify it as a RANGE instead - the float/coordinate reading is refuted by the operation evidence, not merely avoided",
+      "outcome": "PASS by demonstrated discipline (this falsifier PASSES by discipline, not by finding coordinates)"
+    },
+    {
+      "id": "F4",
+      "falsifier": "a call destroys a register assumed preserved",
+      "execution": "every dataflow hop crossing CALL EBX (@0x006C365A) or CALL 0x006C2E00 (@0x006C3685) audited: volatile (EAX/ECX/EDX) vs callee-saved (EBX/ESI/EDI/EBP)",
+      "measured_quantity": "crossings relying on callee-saved discipline: ESI, EDI, EBP across CALL EBX (per iteration); ESI, EBX, EDI, EBP across CALL 0x006C2E00 (growth path); 0 crossings relying on EAX/ECX/EDX survival (EAX is consumed immediately as the callback result; ECX/EDX reloaded/re-derived before every use)",
+      "independent_source_of_truth": "the dual-verified instruction stream + the frame-balance derivation (growth cleanup 20, callback cleanup 0) which is independent of register preservation",
+      "why_non_circular": "the balance derivation uses only in-window pushes/pops/join-equalities; the preservation expectations are x86 ABI standard, not callee-internal claims",
+      "failure_case_detected": "NO in-window evidence of preservation violation is possible to obtain (bodies CLOSED) - therefore every dependent claim carries the EXPLICIT ABI-assumption condition instead of treating it as proven. In-window corroboration recorded: FUN_006C3640's own prologue/epilogue symmetrically preserves EBP/EDI/EBX/ESI for ITS callers, showing the binary's compiler emits callee-saved discipline (weak, environment-level corroboration)",
+      "outcome": "PASS with recorded ABI-assumption conditions (conditions NOT waived; callee bodies CLOSED)"
+    },
+    {
+      "id": "F5",
+      "falsifier": "a return value is incorrectly attributed",
+      "execution": "EAX-writer/reader census over W-SUBJ and the caller's post-call window (last-writer-wins)",
+      "measured_quantity": "EAX writers in W-SUBJ program order: CALL EBX @0x006C365A (implicit), mov eax,[eax+4] @0x006C366C, CALL 0x006C2E00 @0x006C3685 (implicit), mov eax,[esp+0x14] @0x006C3691, mov eax,[esp+0xC] @0x006C369C; readers: [eax] @0x006C3668 <- producer CALL EBX (0 intervening writers on its path), eax @0x006C366F <- producer @0x006C366C, push eax @0x006C3681 <- producer CALL EBX on the growth path (0x006C366C not executed there); growth-call return: 0 readers before the next writer (machine-verified); FUN_006C3640's own return value = arg1 (both RET paths), and the caller uses EAX 0 times after CALL 0x006C3640 (post-call census: add esp/pop x4/add esp/ret)",
+      "independent_source_of_truth": "machine EAX census over the dual-verified stream",
+      "why_non_circular": "writer attribution is per-path from the CFG blocks; the growth-path/fast-path distinction is byte-structural (je@0x006C3662), not inferred",
+      "failure_case_detected": "the growth-call return being ignored was machine-verified (not assumed); the callback-result attribution required per-path analysis because mov eax,[eax+4] @0x006C366C overwrites EAX ONLY on the fast path - a naive linear reading would have misattributed the growth path's push eax @0x006C3681",
+      "outcome": "PASS (all EAX uses attributed last-writer-wins per path; growth return confirmed UNUSED)"
+    },
+    {
+      "id": "F6",
+      "falsifier": "a claim depends only on Ghidra's inferred type",
+      "execution": "Ghidra 11.2.1 export produced under quarantine (LANDMARK4057 project reuse, -noanalysis, postScript; decompiles of the 4 preregistered windows only; identity query only for 0x008BD720); every gate claim checked for own-decoder+objdump citation",
+      "measured_quantity": "0 load-bearing claims cite Ghidra; 3 concrete Ghidra artifacts identified and quarantined: (a) FUN_006c3640 signature with 5 params (the 6th, unused arg6 is invisible to the decompiler - my byte analysis proves 6 pushed slots); (b) the name 'FUN_008bd720' (name artifact); (c) the decompiler's rendering of the caller's call as FUN_006c3640(&param_2, *puVar2, puVar2[1], iVar1, FUN_008bd720, local_4) - which CORROBORATES my slot map but is excluded from gates",
+      "independent_source_of_truth": "own decoder + objdump (0 disagreements); physical bytes outrank pseudocode",
+      "why_non_circular": "quarantine enforced structurally: Ghidra output lives only in 01_RAW/GHIDRA_HYPOTHESIS_EXPORT.json and the quarantined-hypothesis field of ANCHOR_008BD720_CLASSIFICATION.json",
+      "failure_case_detected": "YES (informational): the 5-param signature would have propagated a WRONG argument count if trusted - caught by the byte-level 6-push + ADD ESP,0x18 evidence",
+      "outcome": "PASS (zero load-bearing Ghidra dependence; corroboration documented but excluded)"
+    },
+    {
+      "id": "F7",
+      "falsifier": "instruction boundary error",
+      "execution": "byte-exact dual decode over every preregistered window (253 B of code): my fresh decoder vs GNU objdump; every CALL/JMP/JCC rel target recomputed from its own opcode bytes on both sides",
+      "measured_quantity": "105 instructions (47 subject + 54 caller + 2 + 2); 0 boundary disagreements, 0 byte disagreements, 0 mnemonic disagreements, 0 call/jump-target disagreements; anchor rel32 recomputed: e8 6e f6 ff ff @0x006C3FCD, next_va 0x006C3FD2, rel32 -2450, target 0x006C3640 == subject entry (PASS)",
+      "independent_source_of_truth": "GNU objdump (Debian binutils, via WSL) on raw slices of the physical EXE (slice SHA256s recorded)",
+      "why_non_circular": "the two decoders share no code; objdump never saw my decoder's output",
+      "failure_case_detected": "defect history (all caught BEFORE analysis conclusions, all disclosed): (1) my PE parser initially compared VAs against section RVA ranges - a Phase-0 extraction defect caught by the .rdata/.text mapping inconsistency and fixed before any science; (2) my first decoder draft mis-dispatched grp1-imm opcodes (0x80-0x83) - caught by self-review before first execution and rewritten; (3) the ESP-depth sim v1 had a sign-convention error and passed deltas instead of depths - caught by its own merge assertion at 0x006C368A and fixed; (4) a Jython Address-vs-int comparison bug in the Ghidra postScript (quarantine-side tooling). After fixes the full pipeline was re-run and re-measured to the reported state.",
+      "outcome": "PASS (0 disagreements in the final measured state; defect history disclosed)"
+    },
+    {
+      "id": "F8",
+      "falsifier": "wrong-object negative control: container is not the template object",
+      "execution": "machine-traced provenance chains: the container receiving data vs the template pointer P",
+      "measured_quantity": "container chain: callee ESI <- arg4 slot (entry_offset 0x10) <- caller push ESI @0x006C3FC5 <- caller ESI <- [esp+0x1c] @0x006C3F79 (entry_offset 8 = the caller's OWN param_2, provenance leaves the window at the caller's caller); template chain: P <- EAX of CALL 0x0072F580 @0x006C3F62 -> EDI @0x006C3F67. 0 shared nodes between the chains. The tracked template values reach memory as data 0 times inside W-SUBJ; the only data appended to the container in-window is the CLOSED-callee callback's result pair",
+      "independent_source_of_truth": "the dual-verified decode + the machine slot map",
+      "why_non_circular": "both chains are built from producing instructions in the same dual-verified stream; no names or types involved",
+      "failure_case_detected": "none needed - the control confirms the negative; the container is NOT the template object (falsification of the wrong-object hypothesis)",
+      "outcome": "PASS (container != template object, machine-proven disjoint provenance)"
+    }
+  ],
+  "negative_controls_and_conditions": {
+    "sentinel_case": "P = not-found sentinel 0x00BA5800 (predecessor byte-fact, static all-zero tail) => [P+0x14] == [P+0x18] == 0 => arg2 == arg3 => empty path: NO callback dispatch, container passed through unchanged, *arg1 := arg4. All findings conditional.",
+    "runtime_values": "STATIC_ONLY: whether the range is non-empty, what the elements contain, and what the callback returns at runtime - NOT_CHECKED (the client never ran)",
+    "claim_limits": "MODEL_218757_TO_CMO_JOIN = NOT_ESTABLISHED; WORLD_INSTANCE_IDENTITY = NOT_ESTABLISHED; HISTORICAL_PLACEMENT = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO"
+  }
+}
