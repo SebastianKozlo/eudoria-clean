@@ -1,0 +1,26 @@
+# STACK_LEDGER — PE_935_CMO_ARG1_SINGLE_CALLSITE_PROVENANCE_R1_20261009 (BASELINE fixture; S = the UNKNOWN ESP at 0x00528E76; ESP deltas in bytes)
+seq,va,bytes,objdump_text,esp_delta,esp_after,kind,dst,src_or_value,source_slot_address,note
+1,0x00528E76,8b f1,"mov    esi,ecx",0,S,REG_COPY,ESI,ECX_ENTRY,,register copy from ECX
+2,0x00528E78,89 74 24 10,"mov    DWORD PTR [esp+0x10],esi",0,S,MEM_WRITE,[S+0x10],ECX_ENTRY,,in-window memory write to S+0x10
+3,0x00528E7C,8b 44 24 44,"mov    eax,DWORD PTR [esp+0x44]",0,S,REG_LOAD,EAX,MEM(S+0x44)@0x00528E7C,S+0x44,value loaded from source slot; ESP at load = S
+4,0x00528E80,8b 4c 24 40,"mov    ecx,DWORD PTR [esp+0x40]",0,S,REG_LOAD,ECX,MEM(S+0x40)@0x00528E80,S+0x40,value loaded from source slot; ESP at load = S
+5,0x00528E84,8b 7c 24 3c,"mov    edi,DWORD PTR [esp+0x3c]",0,S,REG_LOAD,EDI,MEM(S+0x3C)@0x00528E84,S+0x3C,value loaded from source slot; ESP at load = S
+6,0x00528E88,50,push   eax,-4,S-0x4,PUSH,[S-0x4],MEM(S+0x44)@0x00528E7C,,push EAX -> prepared stack slot S-0x4
+7,0x00528E89,51,push   ecx,-4,S-0x8,PUSH,[S-0x8],MEM(S+0x40)@0x00528E80,,push ECX -> prepared stack slot S-0x8
+8,0x00528E8A,57,push   edi,-4,S-0xC,PUSH,[S-0xC],MEM(S+0x3C)@0x00528E84,,push EDI -> prepared stack slot S-0xC
+9,0x00528E8B,8b ce,"mov    ecx,esi",0,S-0xC,REG_COPY,ECX,ECX_ENTRY,,register copy from ESI
+10,0x00528E8D,e8 1e 23 33 00,call   0x85b1b0,-4,S-0x10,CALL,[S-0x10],RET@0x00528E92,,return-address push by CALL; target 0x0085B1B0
+
+# summary (baseline)
+ESP_AT_WINDOW_START,S
+ESP_BEFORE_CALL,S-0xC
+ESP_AT_CALLEE_ENTRY,S-0x10
+ARG1_ENTRY_SLOT,S-0xC
+ARG1_PUSH_INSTRUCTION_VA,0x00528E8A
+ARG1_REGISTER,edi
+ARG1_VALUE_EXPRESSION,MEM(S+0x3C)@0x00528E84
+ARG1_IMMEDIATE_PRODUCER_VA,0x00528E84
+ARG1_IMMEDIATE_SOURCE_OPERAND,DWORD [S+0x3C]
+ARG1_REACHING_DEFINITION_STATUS,IN_WINDOW_REACHING_DEFINITION_ESTABLISHED
+RECEIVER_SOURCE_REGISTER,esi
+CALL_RECOMPUTED_TARGET,0x0085B1B0

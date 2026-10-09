@@ -1,0 +1,213 @@
+{
+  "run_id": "PE_935_CMO_ARG1_SINGLE_CALLSITE_PROVENANCE_R1_20261009",
+  "run_class": "BOUNDED_STATIC_ARGUMENT_PROVENANCE",
+  "question": "What value is delivered as the first explicit stack argument (arg1) of FUN_0085B1B0 at CALL 0x00528E8D, and what is its immediate source operand?",
+  "measured_by": {
+    "disassembler": "GNU objdump (GNU Binutils for Debian) 2.44 (the ONLY decoder; raw output in 01_EVIDENCE/CALLSITE_DISASSEMBLY.txt)",
+    "symbolic_replay": "03_SCRIPTS/run_stack_controls.py (replays ONLY objdump-decoded instructions; fail-closed otherwise)",
+    "python": "3.13.5",
+    "uname": "Linux WinDev2407Eval 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 "
+  },
+  "stack_symbol": "S = the UNKNOWN ESP at 0x00528E76 (not an invented runtime address; not the caller function-entry ESP)",
+  "callsite": {
+    "va": "0x00528E8D",
+    "instruction": "call 0x85b1b0",
+    "bytes": "e8 1e 23 33 00",
+    "rel32_recomputed_target": "0x0085B1B0",
+    "callee_target": "0x0085B1B0",
+    "target_match": true
+  },
+  "arg1": {
+    "definition": "first explicit stack argument = [ESP_at_callee_entry + 4] (the ECX thiscall receiver channel is separate and NOT counted)",
+    "push_instruction_va": "0x00528E8A",
+    "push_instruction": "push edi",
+    "register": "EDI",
+    "value_expression": "MEM(S+0x3C)@0x00528E84",
+    "immediate_producer_va": "0x00528E84",
+    "immediate_producer_instruction": "mov    edi,DWORD PTR [esp+0x3c]",
+    "immediate_source_operand": "DWORD [S+0x3C] (32-bit load from the caller stack slot at ESP+0x3C with ESP = S at the load)",
+    "caller_source_slot_address": "S+0x3C",
+    "caller_source_slot_contents_before_window": "UNKNOWN",
+    "esp_before_call": "S-0xC",
+    "esp_at_callee_entry": "S-0x10",
+    "argument_slot_at_entry": "S-0xC",
+    "entry_slot_written_by_push_va": "0x00528E8A",
+    "reaching_definition_status": "IN_WINDOW_REACHING_DEFINITION_ESTABLISHED",
+    "upstream_boundary": "UNRESOLVED_UPSTREAM \u2014 the contents of the caller source slot [S+0x3C] before the window, their producer and their type are NOT traced in this run (budget UPSTREAM_PROVIDER_TRACING=0)",
+    "path_scope": "the examined straight-line path entering 0x00528E76 and normally reaching the CALL; no global uniqueness claim across unexamined entries or paths"
+  },
+  "receiver": {
+    "channel": "ECX (thiscall receiver; separate from arg1)",
+    "set_by": "mov ecx,esi @0x00528E8B",
+    "source_register": "esi",
+    "esi_origin": "mov esi,ecx @0x00528E76; prior pinned caller evidence: ESI = FUN_00528E50 this (value symbolic ECX_ENTRY at window; no identity claimed here)",
+    "value_expression": "ECX_ENTRY",
+    "separate_from_arg1": true
+  },
+  "other_prepared_slots": {
+    "arg2": {
+      "entry_slot": "S-0x8",
+      "content": "MEM(S+0x40)@0x00528E80",
+      "delivered_by": "push ecx",
+      "push_va": "0x00528E89",
+      "register": "ecx",
+      "value_expression": "MEM(S+0x40)@0x00528E80",
+      "in_window_def": {
+        "va": "0x00528E80",
+        "instruction": "mov    ecx,DWORD PTR [esp+0x40]",
+        "source_kind": "REG_LOAD",
+        "source_register": null,
+        "source_slot": "S+0x40",
+        "value_expression": "MEM(S+0x40)@0x00528E80"
+      },
+      "status": "IN_WINDOW_REACHING_DEFINITION_ESTABLISHED"
+    },
+    "arg3": {
+      "entry_slot": "S-0x4",
+      "content": "MEM(S+0x44)@0x00528E7C",
+      "delivered_by": "push eax",
+      "push_va": "0x00528E88",
+      "register": "eax",
+      "value_expression": "MEM(S+0x44)@0x00528E7C",
+      "in_window_def": {
+        "va": "0x00528E7C",
+        "instruction": "mov    eax,DWORD PTR [esp+0x44]",
+        "source_kind": "REG_LOAD",
+        "source_register": null,
+        "source_slot": "S+0x44",
+        "value_expression": "MEM(S+0x44)@0x00528E7C"
+      },
+      "status": "IN_WINDOW_REACHING_DEFINITION_ESTABLISHED"
+    },
+    "declared_semantics": "NONE \u2014 the complete function signature and the semantics of other arguments are NOT claimed by this run"
+  },
+  "callee_entry_conventions": {
+    "source": "PRIOR PINNED committed evidence (docs/audits/PE_935_CMO_SINGLE_WRITE_SOURCE_PROVENANCE_R1_20261009/CONTROL_RESULTS.json W1 decode); the callee body was NOT re-opened in this run",
+    "arg1_read_by_callee": "mov edi,[esp+0x14] @0x0085B1DA \u2014 after four pushes = [ESP_at_entry+4] = the arg1 slot",
+    "arg2_read_by_callee": "mov eax,[esp+0x8] \u2014 the entry instruction = [ESP_at_entry+8] = arg2",
+    "consistency": "the callee's pinned consumption (arg1 = [entry+4], arg2 = [entry+8]) is consistent with the caller-side delivery measured here (last push = arg1, second-to-last = arg2)",
+    "callee_body_reopened": false
+  },
+  "aliasing_checks": {
+    "in_window_memory_writes": [
+      {
+        "va": "0x00528E78",
+        "addr": "S+0x10",
+        "value": "ECX_ENTRY",
+        "src_reg": "esi"
+      }
+    ],
+    "push_slot_addresses": [
+      "S-0x4",
+      "S-0x8",
+      "S-0xC"
+    ],
+    "return_slot_address": "S-0x10",
+    "arg1_source_slot": "S+0x3C",
+    "any_in_window_write_aliasing_arg1_source_slot": false,
+    "loads_executed_at_esp": [
+      "S",
+      "S",
+      "S"
+    ],
+    "note": "the only in-window memory write is [S+0x10] @0x00528E78 \u2014 not the arg1 source slot [S+0x3C]; all three loads execute with ESP = S (before any push); the pushes write only [S-0x4],[S-0x8],[S-0xC] (below S); the CALL writes the return address at [S-0x10]"
+  },
+  "abi_assumptions": [
+    "32-bit x86 stack semantics: push = ESP-=4 then store; call = ESP-=4 then store the return address",
+    "caller pushes arguments right-to-left, so the LAST push before CALL occupies [ESP_at_entry+4] = arg1",
+    "the thiscall receiver travels in ECX and is separate from arg1",
+    "the callee's own pinned entry conventions (see callee_entry_conventions) corroborate this ordering",
+    "delivery to callee entry does NOT require claiming a later normal return"
+  ],
+  "budget": {
+    "CALLSITES_ANALYZED": 1,
+    "CALLSITES_ANALYZED_MAX": 1,
+    "NEW_FUNCTION_BODIES": 0,
+    "NEW_CALLEE_BODIES": 0,
+    "NEW_CALL_EDGES": 0,
+    "UPSTREAM_PROVIDER_TRACING": 0,
+    "FIELD_SEMANTIC_PROMOTIONS": 0,
+    "RUNTIME_WORK": 0,
+    "NETWORK_RE": 0,
+    "PLACEMENT_RE": 0,
+    "MODEL_RE": 0,
+    "GAMEBRYO_OPENMW_RESEARCH": 0
+  },
+  "standing_preserved": {
+    "CMO_C1": "CLOSED_FOR_AUDITED_STATE",
+    "CMO_C1_AUDITED_STATE": "e687eb1360cc0f6f4c4d7c8db7587bb5d357bc6b",
+    "CORE_RECEIVER_VALUE_CHAIN": "PRESERVED_CONFIRMED_STATIC_CONDITIONAL",
+    "PHYSICAL_TRANSFORM_MEASUREMENTS": "PRESERVED",
+    "NEW_TRANSFORM_TRACE": "MEASURED_INCIDENTAL_OUTSIDE_PERMITTED_PROMOTION",
+    "SAME_INSTANCE_TRANSFORM_RELATION_FROM_THIS_RUN": "NOT_QUALIFIED_BY_ORIGINAL_SCOPE",
+    "ORIGINAL_J3_EDGE_BUDGET_COMPLIANCE": "FAIL",
+    "GENERAL_X86_DECODER_CORRECTNESS": "NOT_ESTABLISHED",
+    "GENERAL_UNSUPPORTED_FORM_FAIL_CLOSED": "NOT_ESTABLISHED",
+    "FIELD_SEMANTICS": "UNVERIFIED",
+    "WORLD_INSTANCE_IDENTITY": "NOT_ESTABLISHED",
+    "HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+    "WORLD_XYZ_RECOVERED": "NO",
+    "CANONICAL_GATE_EFFECT": "NONE",
+    "NEXT_EXPERIMENT_AUTHORIZED": "NO"
+  },
+  "not_performed": [
+    "no xref/callgraph census",
+    "no upstream stack-frame reconstruction",
+    "no sibling-store analysis outside the window",
+    "no RTTI expansion",
+    "no later scene/model analysis",
+    "no callee body re-open",
+    "no runtime work (client never ran)",
+    "no field semantic promotion",
+    "no world/instance/coordinate interpretation of arg1"
+  ],
+  "controls_summary": {
+    "case_count": 6,
+    "executor_outcomes": {
+      "BASELINE": "BASELINE_QUALIFIED",
+      "M1_PUSH_ORDER": "CONTROL_PASS",
+      "M2_ESP_BEFORE_READ": "CONTROL_PASS",
+      "M3_EDI_DEFINITION_REMOVED": "CONTROL_PASS",
+      "M4_RECEIVER_ONLY": "CONTROL_PASS",
+      "M5_SOURCE_DISPLACEMENT": "CONTROL_PASS"
+    },
+    "executor_outcome_count": 6,
+    "note": "6 cases x executor = 6 executor outcomes here; the QC worker produces the other 6 of the 12 total outcomes (cases != outcomes; not 12 independent implementations)",
+    "all_cases_reached_real_analysis": true,
+    "all_mutants_control_pass": true,
+    "baseline_identity_check_is_baseline_only": true
+  },
+  "science_outcome": "ARG1_DIRECT_SOURCE_ESTABLISHED",
+  "upstream_provenance": "UNRESOLVED_UPSTREAM",
+  "falsifiers_triggered": [],
+  "self_check": {
+    "baseline_identity": "MATCH (window SHA256 == contract pin)",
+    "instruction_boundaries": "10 instructions; contiguous; ends exactly at 0x00528E92; straight line (no branches)",
+    "rel32": "recomputed 0x00528E92 + 0x0033231E = 0x0085B1B0 == objdump target",
+    "receiver_argument_separation": "receiver = ECX channel set from ESI @0x00528E8B; arg1 = the stack slot [S-0xC]; distinct",
+    "esp_deltas_derived": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      -4,
+      -4,
+      -4,
+      0,
+      -4
+    ],
+    "arg1_reaching_definition": "EDI := DWORD [S+0x3C] @0x00528E84 is the only in-window EDI definition; delivered by push edi @0x00528E8A to [S-0xC]",
+    "all_six_cases_discriminated": true,
+    "fail_closed_behavior": "unsupported instructions/decode anomalies raise controlled UNRESOLVED/FAIL; no fabricated source is possible",
+    "exe_unchanged": true
+  },
+  "falsifiers_evaluated": {
+    "F1_identity": "NOT_TRIGGERED (window bytes/size/SHA256 all MATCH the contract pins)",
+    "F2_boundaries": "NOT_TRIGGERED (10 instructions; contiguous stream; CALL is last; decode ends exactly at 0x00528E92; straight line, no branches)",
+    "F3_target": "NOT_TRIGGERED (rel32 recompute 0x00528E92 + 0x0033231E = 0x0085B1B0 == objdump target)",
+    "F4_reaching_definition": "NOT_TRIGGERED (only in-window memory write is [S+0x10]; no aliasing of [S+0x3C]; no intervening EDI redefinition; all loads at ESP = S)",
+    "F5_control_liveness": "NOT_TRIGGERED (all five mutants discriminated from baseline)",
+    "F6_fabrication_guard": "NOT_TRIGGERED (no unsupported instruction encountered in any fixture; fail-closed path unexercised by design)"
+  }
+}
