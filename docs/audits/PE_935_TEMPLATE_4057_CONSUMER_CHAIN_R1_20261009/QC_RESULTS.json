@@ -1,0 +1,261 @@
+{
+  "run_id": "PE_935_TEMPLATE_4057_CONSUMER_CHAIN_INTERNAL_QC_R1_20261009",
+  "qc_of_run_id": "PE_935_TEMPLATE_4057_CONSUMER_CHAIN_R1_20261009",
+  "qc_origin": "pe-master-auditor fresh-context internal QC, dispatched directly by PE-MASTER (NO_NESTED_TASKS). Internal to PE-MASTER — NOT an independent Desktop post-audit, NOT executor self-review.",
+  "qc_measurement_label": "AUDITOR_RECHECK",
+  "verdict": "QC_PASS_WITH_FINDINGS",
+  "verdict_binary_frame": "QC_PASS for the audited science with 4xP2 records corrections REQUIRED BEFORE persistence; NOT QC_FAIL (no load-bearing claim rejected; every core census claim independently re-measured and CONFIRMED)",
+  "duties": {
+    "D1_IDENTITY": {
+      "result": "PASS",
+      "exe_rehash": {
+        "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe",
+        "size_bytes": 8015872,
+        "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+        "matches_claim": true
+      },
+      "landmark_package_census": {
+        "package": "PE_935_STATIC_LANDMARK_4057_CALLSITE_TRACE_R1_20261003",
+        "files_hashed_by_auditor": 84,
+        "diffs_vs_executor_baseline": 0,
+        "cited_files_verified": {
+          "01_RAW/SIDS_ENTRY_PARSE.json": "58F7258AA567E06BD4A015CEAFB01ADC0BB9FDDEE1C7B3BC4A7E20653ED70E26",
+          "01_RAW/FALSIFIER_REACH_CHECK.json": "09F5989CB2864BD1C691E75F211BE1D7770CF3B0F42B79D9C38F3C8BE7ABF521"
+        },
+        "method": "FULL 84/84 SHA256 census (not a sample) vs the executor pre-work baseline HISTORICAL_BASELINE_BEFORE.txt; corroborated by empty git diff vs BASE 9124e8e (landmark package is tracked)"
+      },
+      "reused_ghidra_project_sandbox_exe": {
+        "path": "99_Audits\\PE_935_LANDMARK4057_GHIDRA_SCRATCH_20261003\\Entropia.exe",
+        "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+        "matches_claim": true
+      }
+    },
+    "D2_CENSUS_VERACITY": {
+      "result": "PASS_WITH_FINDINGS (F-QC-2, F-QC-4)",
+      "subject_pins": {
+        "FUN_0072F580": "MATCH: 46 B body 0x0072F580-0x0072F5AD; 19-instruction listing byte-identical to EXE; call FUN_004d1430 @0x0072F590 (E8 9B 1E DA FF, rel32 recomputed); add eax,0x14 '83 C0 14' @0x0072F59E; sentinel mov eax,0xBA5800 'B8 00 58 BA 00' @0x0072F5A5",
+        "FUN_0043A550": "MATCH: 119 B body 0x0043A550-0x0043A5C6; 35-instruction listing byte-identical to EXE; read 'A1 24 18 BA 00' @0x0043A571; store 'A3 24 18 BA 00' @0x0043A59B; fail-store (33 C0 A3 24 18 BA 00) @0x0043A5B2; operator_new call @0x0043A57C -> 0x0095D3C4; ctor call @0x0043A596 -> 0x0052A260 (rel32 recomputed)",
+        "DAT_00BA1824": "MATCH: own PE mapping -> within-.data offset 219172 >= raw_size 212992 -> zero-initialized tail (BSS-like, no file bytes); symbol undefined4 value 0 per raw Ghidra output; exactly 3 absolute 4-byte-LE occurrences in the WHOLE file at operand VAs 0x0043A572/0x0043A59C/0x0043A5B3 = the 3 instruction refs inside FUN_0043A550"
+      },
+      "census_counts_auditor_recheck": {
+        "method": "own PE parser (independent implementation) + own find()-based E8/E9 scan over the whole .text raw range with signed rel32 arithmetic + own whole-file 4-byte-LE scans",
+        "e8_to_0x0072F580": {"auditor_count": 25, "auditor_unique_callers_from_raw_c2": 23, "va_set_identical_to_executor": true, "disagreements": 0},
+        "e8_to_0x0043A550": {"auditor_count": 35, "auditor_unique_callers_from_raw_c2": 32, "va_set_identical_to_executor": true, "disagreements": 0},
+        "e9_to_either": {"auditor_count_lookup": 0, "auditor_count_getter": 0},
+        "absolute_va_hits": {"0x0072F580": 0, "0x0043A550": 0, "0x00BA1824": 3},
+        "raw_vs_ghidra_agreement": "three-way: my raw scan == executor raw scan (VA-identical integer sets) == Ghidra call refs (raw c2_census.json, isCall-filtered, all op_type UNCONDITIONAL_CALL); every raw candidate a defined Ghidra instruction (60/60, 0 undefined, from the raw Ghidra output)",
+        "pair_pattern": "all 23 lookup callers also call the getter (verified from the raw Ghidra unique-caller list)",
+        "selection_rule": "VERIFIED against the RAW Ghidra output: the 12 chosen windows are exactly the first 12 unique lookup-caller functions in getReferencesTo iteration order as recorded in the un-curated SCRATCH\\ghidra_out\\c2_census.json; the c2 script logic (first-12-unique-caller in reference order, lookup target first) reproduces the chosen set exactly"
+      },
+      "window_verification": {
+        "listings_byte_identical_instructions": 1169,
+        "listings_byte_mismatches": 0,
+        "subject_listings_byte_identical": "19+35 instructions, 0 mismatches",
+        "callsite_context_slices": "24 slices, 656 instructions, 0 mismatches",
+        "body_end_rule": "12/12 windows: last instruction RET/RET imm; body_end_context contains following-function content after body_end",
+        "four_load_bearing_windows_adjudicated": {
+          "FUN_006baa20": "CONFIRMED: id = [EAX] first field of FUN_00977780/FUN_004926e0 result (UNKNOWN provenance, honest); template -> EDI -> receiver of FUN_0072fce0 @0x006BAB4F -> stored [ESI+0xC] '89 7E 0C' @0x006BAB60 = CALLER-owned field; zero template-field accesses",
+          "FUN_00733490": "CONFIRMED: id = FUN_007376a0 return (UNKNOWN provenance, honest); template -> ESI -> receiver of FUN_0072fce0 @0x00733520 -> stored [EDI] '89 37' @0x00733529 into 3x0x18 record slots at this+0x14 (LEA EDI,[ECX+0x14]; ADD EDI,0x18 loop @0x00733542) = CALLER-owned; zero template-field accesses",
+          "FUN_006c3f50": "CONFIRMED with F-QC-4: id = [ESP+0xC] caller arg (UNKNOWN provenance, honest); template -> EDI -> receivers of FUN_007ce1e0(0x66) @0x006C3F74 and FUN_0040b070(0x8BD720) @0x006C3FB5; vector pair (0x66, result) stored '89 19'/'89 41 04' @0x006C3F8D/F into the vector insert slot = CALLER-owned; NOTE: in-window reads [EAX+0x4]/[EAX] @0x006C3FBE/C1 of the FUN_0040b070 result (derived object, identity UNKNOWN) are NOT disclosed in the (b) answer's consumption enumeration",
+          "FUN_00567170": "CONFIRMED: branch-selected immediates 0x3BDA @0x00567338, 0x3BDB @0x005671E0, 0x3BD9 @0x00567272, 0x3A40 @0x005672D1, 0x3A47 @0x00567302 (push esi @0x00567365); template pushed as arg to FUN_005670a0 @0x0056737A; FLD constants (D9 05 88 D6 A7 00 @0x00567324 etc.) target STACK LOCALS, never the template"
+        },
+        "accessor_windows": "CONFIRMED: FUN_006c26b0 (A+34B, A<34, table 0x00A85608 @0x006C26DC), FUN_006c2700 (16B+A, A<16, 0x00A855D0 @0x006C2727), FUN_006c27f0 (15B+A, A<15, 0x00A85804 @0x006C281B), FUN_006c2840/70 (B*4, tables 0x00A858B4/0x00A858BC), FUN_006c2750/70 (index A+10B per physical bytes — claimed A+40B, see F-QC-2); template returned in EAX; out-of-range sentinel 0x00BA5800",
+        "no_4057": "CONFIRMED AND STRENGTHENED: (i) all cited immediate ids verified != 0xFD9; (ii) full dword-0xFD9 sweep of ALL 12 window ranges: 0 hits; (iii) full .rdata-section dword-0xFD9 sweep: 0 hits (covers all rows of all 7 tables, beyond the executor's dumped first-n dwords)",
+        "unknown_provenance_marks": "3/3 verified: OBJECT_FIRST_FIELD_READ / FUNCTION_RETURN_VALUE / CALLER_SUPPLIED_STACK_ARG classes each carry __PROVENANCE_LEAVES_WINDOW with 'UNKNOWN beyond window (never guessed)'; byte-level dataflow confirms each source leaves the window"
+      },
+      "id_tables": "7/7 value-diffs MATCH (own reads vs ID_TABLE_DUMPS.json); tables 0x00A855D0 row-0 contains 4 code VAs + string bytes in dwords 0-7 (ids start at dword 8) — see F-QC-8"
+    },
+    "D3_GATE_PREDICATES": {
+      "result": "PASS_WITH_FINDINGS (F-QC-3, F-QC-5)",
+      "G1_CENSUS_COMPLETE": "SUBSTANCE PASS: 10/10 pre-registered classes (C1..C10) x 2 functions, each with method+result (PREREGISTRATION §4, FINAL_REPORT §2 table, CALLER_CENSUS.json reference_classes all = 10 keys); no silently skipped class; the single NOT_CHECKED element (register/computed-only indirect targeting) explicitly listed with reason, with 0 measured absolute-VA hits; the executor transparently offers the stricter PASS_WITH_ONE_DECLARED_LIMITATION label. DEFECT: the FINAL_REPORT/HANDOFF state '12/12 classes' — wrong denominator (12 is the window budget; census gates_self_check itself correctly says 'all 10') = F-QC-3",
+      "G2_CALLER_CLASSIFIED": "PASS: 12/12 in-budget callers with the 4-tuple, byte-anchored (all 1169 listing instructions byte-true); 3/3 UNKNOWN explicit; 0 guessed; 20 remaining callers recorded IDENTIFIED_NOT_ANALYZED with callsites (11 shared lookup + 9 getter-only, union 32 — reproduced from the raw Ghidra caller list); budget respected (12/12, none truncated). Two id_source_detail index-formula notes wrong (F-QC-2) — classes/table VAs/load VAs/bounds all correct",
+      "G3_IDENTITY": "PASS: EXE SHA before==after==expected (executor records; my fresh re-hash closes the chain); landmark 84/84 byte-identical (my full census); reused-project sandbox EXE = expected; zero .pyc in run scratch/package/historical package. DEFECT: the 'zero .pyc residue anywhere (… cwd)' wording is over-broad (19 pre-existing foreign untracked .pyc in the repo tree, mtimes 2026-09-14 / 2026-10-03/04, none from this run) = F-QC-5",
+      "G4_NO_PROMOTION": "PASS: package-wide scan — every XYZ/placement/runtime/world-instance occurrence is a negation, gate statement, preserved distinction, or the pre-registered question wording; no promotion claims; definition/resource vs world-instance distinction present verbatim; sids-4057 different-namespace statement present with UNRECONCILED label; NEITHER sids label cited as resolved; MODEL_218757_TO_CMO_JOIN = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO; no CMO+0x44->X; closed-body list honored (no callee opened)"
+    },
+    "D4_SCOPE_HYGIENE": {
+      "result": "PASS",
+      "git": "HEAD == 9124e8e == BASE_SHA; git status: only the new package untracked plus 6 pre-existing foreign untracked groups (5x PE_935_* packages + experiments/) — none modified; git diff vs 9124e8e EMPTY (tracked tree byte-unchanged, including repo-root AUDIT_ENTRYPOINT.md)",
+      "pyc": "0 in run scratch, 0 in package, 0 in historical landmark package (my scans); 19 pre-existing foreign untracked .pyc elsewhere in the repo tree (see F-QC-5 wording note)",
+      "forbidden_reads": "none: all three scripts physically read ONLY Entropia.exe (plus the run's own JSON outputs); 'templates.vfs' appears solely as the in-EXE string calibration anchor, not as a file read",
+      "intervention_ledger_adjudication": {
+        "c2_ghidra_census_bugfix_cycle": "HONEST — disclosed (Jython Data.hasValue() quirk); failed run's log overwritten by the successful run (disclosed); the failed first-draft bytes are no longer on disk (superseded in place) so its recorded pre-fix hash is unverifiable — disclosed as such; no scientific result depends on the failed attempt. DEFECT: the post-final-edit hash field recorded for the EXECUTED script is a 62-char transcription = F-QC-1",
+        "ghidra_project_reuse": "HONEST — pre-disclosed in PREREGISTRATION §6; project DB re-saved by Ghidra on open/process (disclosed; 99_Audits scratch, not a historical package; historical packages byte-verified unchanged by me); sandbox EXE hash = expected before AND after (executor) + now (auditor)",
+        "other": "none found — s1/s3 write only to SCRATCH and the package 01_RAW; no input file modified; STATIC_ONLY held (client never ran)"
+      }
+    },
+    "D5_HANDOFF_RECORD_QUALITY": {
+      "result": "PASS_WITH_FINDINGS (F-QC-6, F-QC-7, F-QC-8, F-QC-9, F-QC-10)",
+      "consistency": "HANDOFF/EVIDENCE_INDEX census numbers all cross-check (25/23, 35/32, union 32, 12 analyzed, 20 not analyzed, 11+9); EVIDENCE_INDEX §3 package hashes 21/21 MATCH (my recompute); script hashes s1/s3 MATCH; SCRATCH S1 working copy byte-identical to package copy; SCRATCH ghidra_out window files byte-identical to package window files; callsite contexts 12 windows x 2 slices",
+      "defects": "see findings ledger F-QC-6..F-QC-10"
+    }
+  },
+  "findings": [
+    {
+      "id": "F-QC-1",
+      "severity": "P2",
+      "title": "EVIDENCE_INDEX.md c2 script SHA256 field is a 62-character transcription (2 characters dropped)",
+      "path": "EVIDENCE_INDEX.md, section 2 script identities table, row 'c2_ghidra_census.py (EXECUTED version)'",
+      "claimed": "D073EC73994FA3B2A64898CFA6482CFF4FBB111203893C63D59E009AD16091 (62 hex chars — invalid SHA256 length)",
+      "actual_auditor_recheck": "D073EC73994FA3B2A64898CFA6482CFF4FFBBB111203893C63D59E009AD16091 (64 chars; SCRATCH\\scripts\\c2_ghidra_census.py, mtime 2026-10-09 09:52:03, predating the run outputs 09:52:20-24, i.e. the executed bytes)",
+      "mechanism": "manual transcription slip ('FFBBB' -> 'FBB')",
+      "impact": "manifest-identity defect (SOURCE_FILE_UNCHANGED but MANIFEST_IDENTITY_INCORRECT); no scientific result depends on it, but the published package would carry an invalid hash claim and the persistence-phase MANIFEST would conflict with it",
+      "correction": "records correction before persistence: replace the field with the actual 64-char value",
+      "revalidation": "recompute SHA256 of SCRATCH\\scripts\\c2_ghidra_census.py; assert 64 hex chars and equality with the corrected field"
+    },
+    {
+      "id": "F-QC-2",
+      "severity": "P2",
+      "title": "Wrong id-table index formula for accessor windows FUN_006c2750 / FUN_006c27a0 (claimed A+40B; physical A+10B)",
+      "path": "FINAL_REPORT.md section 3 table rows 6-7; CALLER_CENSUS.json classification id_source_detail notes for 0x006C2750 and 0x006C27A0 ('index = A + 40*B')",
+      "counter_evidence_auditor_recheck": "window 05: 0x006C2772 '8D 04 80' LEA EAX,[EAX+EAX*4] -> 5B; 0x006C2775 '8D 0C 47' LEA ECX,[EDI+EAX*2] -> index = A + 10B; 0x006C2778 '8B 14 8D 78 57 A8 00' MOV EDX,[ECX*4+0xA85778]. Window 06 identical at 0x006C27C2/C5/C8 (+0xE field variant). All bytes verified against the physical EXE",
+      "corroboration": "the dumped table sizes (10 dwords) equal the A-bound (10) — row stride 10 is the internally coherent reading; a 40-dword stride contradicts both the 10-dword dump and the A<10 bound",
+      "mechanism": "scale-factor misreading of the second LEA (x2 applied to 5B = 10B, not 40B)",
+      "impact": "id-source CLASS (STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE), table VAs, load VAs, bounds, question (a)=YES and no-4057 all UNAFFECTED; the recorded row-stride arithmetic is wrong by 4x in two summary docs and the machine-readable census. Windows 03/04/07/10/11 formulas verified CORRECT (A+34B / 16B+A / 15B+A / B)",
+      "correction": "records correction before persistence: replace (A+40B) with (A+10B) in FINAL_REPORT rows 6-7 and both census notes",
+      "revalidation": "byte re-read 0x006C2772-78 and 0x006C27C2-C8 + arithmetic recompute"
+    },
+    {
+      "id": "F-QC-3",
+      "severity": "P2",
+      "title": "G1 gate statement count '12/12 classes' is wrong (the pre-registered class universe is C1..C10 = 10)",
+      "path": "FINAL_REPORT.md section 6 G1 line; HANDOFF.md G1 line ('12/12 reference classes (C1..C10)' — internally self-contradictory); repeated in the executor's final message to PE-MASTER",
+      "counter_evidence": "PREREGISTRATION section 4 enumerates exactly 10 classes; FINAL_REPORT section 2 table has 10 rows; CALLER_CENSUS.json reference_classes has exactly 10 keys per target; the census gates_self_check itself says 'all 10 reference classes'",
+      "mechanism": "the caller-window budget number (12) substituted for the class count",
+      "impact": "G1 SUBSTANCE passes (all pre-registered classes enumerated with method+result; no silent skip; the single NOT_CHECKED sub-class explicitly listed with reason); the stated denominator is false and inconsistent across the summary documents",
+      "correction": "records correction before persistence: G1 = 10/10 classes x 2 functions (with the one declared C3 sub-class limitation; PASS_WITH_ONE_DECLARED_LIMITATION per the stricter pre-registered reading)",
+      "revalidation": "count the class keys in PREREGISTRATION section 4 and CALLER_CENSUS.json"
+    },
+    {
+      "id": "F-QC-4",
+      "severity": "P2",
+      "title": "Question (b) answer's consumption enumeration omits the in-window derived-object field reads in FUN_006c3f50",
+      "path": "FINAL_REPORT.md section 4(b) ('All consumption is: pointer STORE ... and pointer FORWARD'); CALLER_CENSUS.json question_answers.b (same wording); window-8 classification note",
+      "counter_evidence_auditor_recheck": "0x006C3FB5 CALL 0x0040b070 (receiver = template EDI, arg 0x8BD720; body CLOSED); 0x006C3FBE '8B 50 04' MOV EDX,[EAX+0x4]; 0x006C3FC1 '8B 00' MOV EAX,[EAX] — in-window field reads +0/+4 of the FUN_0040b070 RESULT (an object derived from the template by method call; identity UNKNOWN while the callee is CLOSED), forwarded as a pair into FUN_006c3640 @0x006C3FCD",
+      "adjudication": "the template POINTER itself is never field-accessed in any of the 12 windows (verified: no [template-register+offset] operands anywhere) — that sub-claim is TRUE; but question (b) as pre-registered asks about objects DERIVED from the template, and window 8 does read two fields of a derived result in-window; their transform/position relevance is UNKNOWN (no float evidence in-window), so the flat (b)=NO plus 'all consumption is STORE or FORWARD' overstates what is established. The closed-callee hedge covers closed callees but not this in-window pattern",
+      "impact": "the honest (b) form is 'NO transform-relevant access ESTABLISHED; one in-window derived-result read pattern (window 8, byte-pinned) with UNKNOWN semantics' — material for the follow-up decision (FUN_0040b070 belongs on the follow-up list alongside FUN_0072fce0 / the FUN_007ce1e0 family)",
+      "correction": "records correction before persistence: add the two byte-pinned reads to the (b) detail and the window-8 classification note",
+      "revalidation": "byte re-read 0x006C3FBE / 0x006C3FC1"
+    },
+    {
+      "id": "F-QC-5",
+      "severity": "P3",
+      "title": "G3 .pyc claim over-broad ('Zero .pyc residue anywhere (scratch, package, historical package, cwd)')",
+      "path": "FINAL_REPORT.md section 6 G3; HANDOFF.md G3; EVIDENCE_INDEX.md section 5",
+      "counter_evidence": "0 in run scratch / package / historical landmark package (auditor scans — TRUE); BUT the repo tree contains 19 pre-existing, untracked, foreign .pyc/__pycache__ artifacts (mtimes 2026-09-14 and 2026-10-03/04: tools/gamebryo_oracle/** and the foreign untracked PE_935_NINODE_SLOT17_FIRSTCALL_R1_20260914 package) — none created by this run (scripts ran with -B; residue predates the run)",
+      "impact": "load-bearing hygiene TRUE (this run created no .pyc; its own locations clean); the unqualified 'anywhere/cwd' wording is false for cwd = repo root",
+      "correction": "scope the claim to the run's own locations + disclose the pre-existing foreign residue as out of scope"
+    },
+    {
+      "id": "F-QC-6",
+      "severity": "P3",
+      "title": "Getter return wording 'Both paths RET with EAX = the singleton' wrong for the alloc-failure path",
+      "path": "FINAL_REPORT.md section 1 subject table, FUN_0043A550 row",
+      "counter_evidence": "alloc-fail path: JE @0x0043A592 -> '33 C0' XOR EAX,EAX @0x0043A5B0 -> 'A3 24 18 BA 00' store 0 @0x0043A5B2 -> common epilogue -> RET @0x0043A5C6 with EAX = 0 (NULL). The success (ctor return) and already-exists (read) paths return the singleton; the package's own decompile shows the three-path structure",
+      "impact": "no load-bearing census claim depends on the alloc-fail return value; minor structure-description imprecision",
+      "correction": "'success and already-exists paths return the singleton; the alloc-failure path stores 0 and returns 0/NULL'"
+    },
+    {
+      "id": "F-QC-7",
+      "severity": "P3",
+      "title": "HANDOFF wording 'AUDIT_ENTRYPOINT.md untouched (it does not exist yet)' is misleading",
+      "path": "HANDOFF.md final section",
+      "counter_evidence": "the repo-root AUDIT_ENTRYPOINT.md EXISTS and is tracked (byte-unchanged vs BASE — git-verified); what does not exist is docs/audits/AUDIT_ENTRYPOINT.md (per PREREGISTRATION section 8, accurate); as worded the HANDOFF sentence can be misread as 'the repo has no AUDIT_ENTRYPOINT.md'",
+      "impact": "cosmetic; the operative claims (no commit, no push, entrypoint untouched) are TRUE and git-verified",
+      "correction": "'(no docs/audits/AUDIT_ENTRYPOINT.md exists; the repo-root AUDIT_ENTRYPOINT.md is untouched; no entrypoint row created — persistence pending)'"
+    },
+    {
+      "id": "F-QC-8",
+      "severity": "P3",
+      "title": "ID_TABLE_DUMPS notes imprecision (row-0 dumps presented as 'the consumed range'; unbounded B for the twins; 0x00A855D0 mixed first row)",
+      "path": "ID_TABLE_DUMPS.json table notes + interpreted ID_TABLE_CLASSIFICATION",
+      "details": "(i) for the A-family the dump covers only the B=0 row (row stride = the A-bound; rows B>=1 not dumped); (ii) the two 37-B twins have NO bounds check on B (the FINAL_REPORT's own bounds list covers only the A-family), so 'consumed' is an assumption there — B>=5 would read code VAs/zeros as keys (byte-observation fact of the binary); (iii) 'all 7 accessor tables contain id-ranged small integers at the dword positions the accessors bounds-check' overgeneralizes for table 0x00A855D0 whose row-0 dwords 0-7 are 4 code VAs + a string tail (bytes spell '...TargetNode...'); the id-range values start at dword 8",
+      "impact": "NO_4057_IN_TABLES survives at FULL scope via the auditor's whole-.rdata dword-0xFD9 sweep (0 hits) — stronger than the executor's dumped-subset claim; question (a) unaffected",
+      "correction": "reword the notes (row-0 dumps; twins unbounded on B; 0x00A855D0's mixed first row)"
+    },
+    {
+      "id": "F-QC-9",
+      "severity": "P3",
+      "title": "'All callee bodies involved (16 names)' enumeration is a subset of the actual in-window callee set",
+      "path": "FINAL_REPORT.md section 3 closing note",
+      "counter_evidence": "the 12 windows contain 92 distinct non-subject call targets (calls_inside_window); all stayed closed (nothing was opened — the FACT is true); the 16-name list is the classification-relevant subset",
+      "impact": "wording could mislead a reader into thinking only 16 callees were touched by the windows",
+      "correction": "'all 92 distinct in-window callee targets stayed closed; the 16 listed are the classification-relevant ones'"
+    },
+    {
+      "id": "F-QC-10",
+      "severity": "P3",
+      "title": "No dedicated FULL_READ_LOG artifact in the package",
+      "path": "package deliverables (PREREGISTRATION section 9 lists no FULL_READ_LOG)",
+      "details": "the read/closed discipline is distributed across PREREGISTRATION sections 5.1/5.2, FINAL_REPORT section 3 and the census, and is HONEST (auditor verified against the window call-edge inventory); a dedicated full-read log file is absent",
+      "impact": "optional records improvement for the persistence phase; no dishonesty found",
+      "correction": "optional dedicated FULL_READ_LOG.md at persistence time, or accept the distributed disclosure"
+    }
+  ],
+  "auditor_independent_measurements_summary": {
+    "exe_sha256_rehash": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (8015872 B)",
+    "own_pe_parser": "independent implementation; sections: .text/.rdata/.data/.tls/.rsrc; image base 0x00400000; datum within-.data offset 219172 >= raw 212992 -> zero-init tail",
+    "mapper_calibrations_reverified": "string 'Parameters\\templates.vfs' @0x00A86D30 -> off 6843696 (bytes read and confirmed); PUSH 0x3ED3 '68 D3 3E 00 00' @0x005B6597 (confirmed)",
+    "e8_scans": "25 (0x0072F580) / 35 (0x0043A550) — VA sets IDENTICAL to the executor's recorded candidates (integer-set comparison, 0 disagreements)",
+    "e9_scans": "0 / 0",
+    "absolute_va_scans": "0 (0x0072F580) / 0 (0x0043A550) / 3 (0x00BA1824 at operand VAs 0x0043A572/0x0043A59C/0x0043A5B3)",
+    "instruction_byte_verification": "1169 window + 54 subject + 656 context-slice instructions = 1879/1879 byte-identical to the physical EXE, 0 mismatches",
+    "id_tables": "7/7 value-diff MATCH; no 4057 in dumped dwords; no dword 4057 anywhere in the whole .rdata section (stronger than the executor's claim)",
+    "landmark_census": "84/84 files hashed, 0 diffs vs executor baseline",
+    "package_hash_recheck": "21/21 files MATCH EVIDENCE_INDEX section 3; 1 defective hash field found (F-QC-1)",
+    "script_hash_recheck": "s1 MATCH / s3 MATCH / c2 transcription defect (F-QC-1)",
+    "git": "HEAD = 9124e8e = BASE_SHA; tracked tree unchanged; only the new package + 6 pre-existing foreign untracked groups"
+  },
+  "full_read_log": [
+    "PACKAGE: PREREGISTRATION.md (185 L, EOF), FINAL_REPORT.md (174 L, EOF), HANDOFF.md (78 L, EOF), EVIDENCE_INDEX.md (121 L, EOF)",
+    "PACKAGE 01_RAW: S1_REPIN_RAW_CENSUS.json (607 L, EOF), CENSUS_AGREEMENT.json (61 L, EOF), ID_TABLE_DUMPS.json (272 L, EOF), C2_SUBJECT_REPINS.json (full parse: subjects, datum, refs, decompiles), CALLER_CENSUS.json (full structural parse: reference_classes, analyzed_in_depth, identified_not_analyzed, question_answers, gates_self_check, budget), CALLSITE_CONTEXTS.json (12 windows, 24 slices, all instructions byte-verified), all 12 C2_CALLER_WINDOWS/*.json (full listings byte-verified; windows 00/01/02/03/04/05/06/08/09/10/11 read in detail incl. decompile heads and body_end_context)",
+    "SCRATCH: s1_repin_raw_census.py (409 L, EOF), c2_ghidra_census.py (339 L, EOF), s3_curate_census.py (730 L, EOF incl. embedded CLASS literals), ghidra_out/c2_census.json (raw: subjects refs order, budget, unique callers, datum, candidate states), analyzeHeadless_c2_log.txt (UTF-16, full), HISTORICAL_BASELINE_BEFORE.txt (full compare), SCRATCH/01_RAW S1 copy (hash-compare), ghidra_out window files (hash-compare)",
+    "CONTEXT: PE_MASTER_ACTIVE_ORDER.md (EOF), PE_MASTER_LOOP_STATE.json (EOF), AUDIT_ENTRYPOINT.md (header + current-state cells; read-only)"
+  ],
+  "not_checked": [
+    "the executor's FINAL MESSAGE to PE-MASTER (not available in this QC context; every claim restated in the dispatch was verified against artifacts)",
+    "the FAILED first c2 attempt (log overwritten — disclosed; first-draft script superseded in place): its recorded pre-fix hash is unverifiable because those bytes no longer exist; no scientific result depends on it",
+    "Ghidra's internal reference-iteration order was NOT independently re-produced by re-running Ghidra (re-running would re-save the reused project DB — a mutation outside the QC scratch allowance); the selection-rule claim was instead verified against the RAW un-curated Ghidra output order + the c2 script's selection logic, which reproduce the chosen 12 exactly",
+    "the 20 IDENTIFIED_NOT_ANALYZED callers' bodies were not opened by the QC (not required; their callsites are covered by the raw/Ghidra E8 sets)",
+    "historical landmark package content beyond the hash census (content review out of QC scope); prior-canon artifacts (FALSIFIER_REACH_CHECK.json / SIDS_ENTRY_PARSE.json semantics) only hash-verified, not re-opened",
+    "FUN_004d1430 ABI detail (callee-popped args) — not load-bearing for any census claim; body CLOSED per the run"
+  ],
+  "negative_controls_and_independence": [
+    "own scan implementation is a counter-implementation (different parser/scan code path): a systematic mapping or arithmetic error would have produced count/VA-set divergence — 0 divergence observed across 25/35/0/0/3",
+    "datum operand<->instruction pairing (offset +1 of A1/A3 opcodes) validated the VA<->offset mapping independently of the executor's mapper",
+    "both mapper calibration anchors re-read physically by the QC",
+    "package-wide hash-field validity sweep (near-miss length detector): exactly ONE defective field in the whole package (F-QC-1)",
+    "G4 promotion-word sweep across all package docs: every hit is a negation/gate/question wording — 0 violations"
+  ],
+  "files_created_by_this_qc": {
+    "package_root": ["QC_RESULTS.json (this file)", "QC_REPORT.md"],
+    "qc_scratch_only": [
+      "99_Audits\\PE_935_TEMPLATE_4057_CONSUMER_CHAIN_R1_20261009\\SCRATCH\\QC_FRESH\\auditor_recheck.py",
+      "SCRATCH\\QC_FRESH\\auditor_window_verify.py",
+      "SCRATCH\\QC_FRESH\\auditor_pkg_checks.py",
+      "SCRATCH\\QC_FRESH\\auditor_stage4.py",
+      "SCRATCH\\QC_FRESH\\AUDITOR_recheck_results.json",
+      "SCRATCH\\QC_FRESH\\AUDITOR_window_verify.json",
+      "SCRATCH\\QC_FRESH\\AUDITOR_pkg_checks.json",
+      "SCRATCH\\QC_FRESH\\AUDITOR_stage4.json",
+      "SCRATCH\\QC_FRESH\\AUDITOR_landmark_census_after.txt"
+    ],
+    "note_for_persistence": "QC_RESULTS.json + QC_REPORT.md are new QC artifacts in the package root; EVIDENCE_INDEX section 3 (21 hashes) predates them; the persistence-phase MANIFEST must either include them or record their explicit exclusion; NO executor artifact was modified by this QC"
+  },
+  "input_and_output_hashes": {
+    "exe_sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+    "landmark_baseline_diff": 0,
+    "package_files_rehashed_and_matching": 21,
+    "script_hashes": {
+      "s1_repin_raw_census.py": "05F61A5CB7E3A08F1BAE291B904B0C4986C0868B83DF9DE9F29BB8BC8F9B057C (MATCH)",
+      "c2_ghidra_census.py_actual": "D073EC73994FA3B2A64898CFA6482CFF4FFBBB111203893C63D59E009AD16091 (recorded field defective — F-QC-1)",
+      "s3_curate_census.py": "6CDAC100BD9584ADD89C1C47374BC2E8DC210488DD990F0E41E15D4AF55952FD (MATCH)"
+    }
+  },
+  "git_record": {
+    "base_sha": "9124e8e670e6ab3ce1aa69f9365c42f2e8560b8f",
+    "head_sha_at_qc": "9124e8e670e6ab3ce1aa69f9365c42f2e8560b8f",
+    "tracked_changes": "none (git diff vs BASE empty)",
+    "untracked": "the audited package (new) + 6 pre-existing foreign groups (5x PE_935_* packages + experiments/) — all untouched",
+    "push_status": "N/A — QC performed no commit/push (none authorized for the QC)"
+  }
+}

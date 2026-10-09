@@ -1,0 +1,2839 @@
+{
+  "run_id": "PE_935_TEMPLATE_4057_CONSUMER_CHAIN_R1_20261009",
+  "records": "STATIC_ONLY",
+  "era": "PCG/EU 9.3.5 (pcg_install Entropia.exe)",
+  "exe_identity": {
+    "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe",
+    "size_bytes": 8015872,
+    "sha256_before": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+  },
+  "targets": {
+    "FUN_0072F580_registry_lookup_hypothesis": {
+      "va": "0x0072F580",
+      "subject_repin": "C2_SUBJECT_REPINS.json",
+      "reference_classes": {
+        "C1_direct_call_rel32": {
+          "method": "dual: Ghidra getReferencesTo(entry) filtered isCall() AND raw E8 rel32 scan of .text with target==VA; VA sets compared in CENSUS_AGREEMENT.json",
+          "result": {
+            "ghidra_call_refs": 25,
+            "raw_e8_candidates": 25,
+            "va_sets_identical": true,
+            "undefined_code_region_callsites": []
+          }
+        },
+        "C2_tail_call_or_thunk_JMP_rel32": {
+          "method": "raw E9 rel32 scan of the whole .text raw range; a whole-function JMP would be a thunk, end-of-body JMP a tail call",
+          "result": {
+            "raw_e9_candidates": 0,
+            "thunks": 0,
+            "tail_calls": 0
+          }
+        },
+        "C3_indirect_or_computed_calls": {
+          "method": "Ghidra reference op-types (computed flags) + raw whole-file absolute 4-byte LE scan for the VA (the only static way an indirect call could carry the target)",
+          "result": {
+            "ghidra_computed_refs": false,
+            "absolute_va_immediate_hits": 0,
+            "static_indirect_path_exists": false,
+            "not_checked": "register/computed-only targeting (target VA never appearing as a static immediate) is NOT statically enumerable; with 0 absolute hits there is no static evidence of any indirect path"
+          }
+        },
+        "C4_address_taken_refs": {
+          "method": "raw whole-file absolute 4-byte LE scan (all sections incl. .tls, .rsrc)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C5_data_references": {
+          "method": "subset of C4 hits in non-code sections + Ghidra non-call refs",
+          "result": {
+            "ghidra_noncall_refs": 0,
+            "absolute_data_hits": 0
+          }
+        },
+        "C6_vtable_slots": {
+          "method": "C4/C5 hits in .rdata inside vtable-shaped pointer runs (heuristic, recorded)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C7_callbacks_incl_tls": {
+          "method": "C4 hits in .tls callback tables or any registered callback data (covered by the whole-file absolute scan)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C8_thunks": {
+          "method": "covered by C2 (whole-function JMP)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C9_jump_tables": {
+          "method": "C4 hits inside Ghidra-recognized jump-table data (x86 jump tables store absolute code VAs; the absolute scan would find any)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C10_other_ghidra_ref_types": {
+          "method": "exhaustive dump of ALL getReferencesTo op_types verbatim (C2_SUBJECT_REPINS.json)",
+          "result": {
+            "op_types_seen": [
+              "UNCONDITIONAL_CALL"
+            ],
+            "note": "all references are UNCONDITIONAL_CALL; no other op types"
+          }
+        }
+      },
+      "direct_callers": {
+        "total_callsites": 25,
+        "unique_caller_functions": 23,
+        "analyzed_in_depth": [
+          {
+            "caller_entry": "0x00511070",
+            "name": "FUN_00511070",
+            "window_bounds": {
+              "start": "0x00511070",
+              "end": "0x0051152B",
+              "size_bytes": 1212,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x0051152B"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x00511252",
+                "callsite_instruction_bytes": "E8 29 E3 21 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0051124B",
+                "callsite_instruction_bytes": "E8 00 93 F2 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "IMMEDIATE_CONSTANT_BRANCH_SELECTED",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "immediates": [
+                  {
+                    "va": "0x0051121C",
+                    "bytes": "B8 FA 2D 00 00",
+                    "text": "MOV EAX,0x2dfa",
+                    "value": 11706
+                  },
+                  {
+                    "va": "0x00511245",
+                    "bytes": "B8 F9 2D 00 00",
+                    "text": "MOV EAX,0x2df9",
+                    "value": 11705
+                  }
+                ],
+                "push_site": {
+                  "va": "0x0051124A",
+                  "bytes": "50",
+                  "text": "PUSH EAX"
+                },
+                "note": "two branch-selected immediate constants; the chosen one is pushed as the lookup key"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_TO_CALL",
+                "byte_anchors": [
+                  {
+                    "va": "0x00511257",
+                    "bytes": "8B C8",
+                    "text": "MOV ECX,EAX",
+                    "note": "lookup result -> ECX (this)"
+                  },
+                  {
+                    "va": "0x00511259",
+                    "bytes": "E8 82 CF 2B 00",
+                    "text": "CALL 0x007ce1e0",
+                    "note": "template passed as this; callee body CLOSED this run"
+                  },
+                  {
+                    "va": "0x0051125E",
+                    "bytes": "8B F8",
+                    "text": "MOV EDI,EAX",
+                    "note": "FUN_007ce1e0 result (NOT the template) to EDI"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "no direct field access on the template in-window; single forward to FUN_007ce1e0"
+              }
+            }
+          },
+          {
+            "caller_entry": "0x00567170",
+            "name": "FUN_00567170",
+            "window_bounds": {
+              "start": "0x00567170",
+              "end": "0x0056775E",
+              "size_bytes": 1519,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C2 14 00",
+                "text": "RET 0x14",
+                "addr": "0x0056775C"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x0056736D",
+                "callsite_instruction_bytes": "E8 0E 82 1C 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00567366",
+                "callsite_instruction_bytes": "E8 E5 31 ED FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "IMMEDIATE_CONSTANT_BRANCH_SELECTED",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "immediates": [
+                  {
+                    "va": "0x00567338",
+                    "bytes": "BE DA 3B 00 00",
+                    "text": "MOV ESI,0x3bda",
+                    "value": 15322
+                  }
+                ],
+                "branch_immediates_note": "the decompile of the same window shows the other branch paths setting the id register to 0x3BDB (initial), 0x3A47, 0x3A40, 0x3BD9 - all immediate constants in-window",
+                "push_site": {
+                  "va": "0x00567365",
+                  "bytes": "56",
+                  "text": "PUSH ESI"
+                }
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_TO_CALL",
+                "byte_anchors": [
+                  {
+                    "va": "0x00567372",
+                    "bytes": "50",
+                    "text": "PUSH EAX",
+                    "note": "template pushed as stack arg"
+                  },
+                  {
+                    "va": "0x0056737A",
+                    "bytes": "E8 21 FD FF FF",
+                    "text": "CALL 0x005670a0",
+                    "note": "template forwarded (ECX=&local out); body CLOSED this run"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "the window contains float operations (FLD [0x00a7d688] @0x00567324, *(float*)(FUN_00401360()+100)) but NONE of them target the template object; recorded to prevent over-claiming - the template is only forwarded"
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006BAA20",
+            "name": "FUN_006baa20",
+            "window_bounds": {
+              "start": "0x006BAA20",
+              "end": "0x006BAC1A",
+              "size_bytes": 507,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C2 04 00",
+                "text": "RET 0x4",
+                "addr": "0x006BAC18"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006BAB46",
+                "callsite_instruction_bytes": "E8 35 4A 07 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006BAB3F",
+                "callsite_instruction_bytes": "E8 0C FA D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "OBJECT_FIRST_FIELD_READ__PROVENANCE_LEAVES_WINDOW",
+              "id_source_detail": {
+                "persisted_static_source": null,
+                "read_site": {
+                  "va": "0x006BAB25",
+                  "bytes": "8B 38",
+                  "text": "MOV EDI,dword ptr [EAX]",
+                  "note": "id = first dword of object from branch-dependent getter"
+                },
+                "getter_branches": [
+                  {
+                    "va": "0x006BAB19",
+                    "bytes": "E8 C2 7B DD FF",
+                    "text": "CALL 0x004926e0"
+                  },
+                  {
+                    "va": "0x006BAB20",
+                    "bytes": "E8 5B CC 2B 00",
+                    "text": "CALL 0x00977780"
+                  }
+                ],
+                "index_sites": [
+                  {
+                    "va": "0x006BAB10",
+                    "bytes": "8B 40 08",
+                    "text": "MOV EAX,[EAX+0x8]"
+                  },
+                  {
+                    "va": "0x006BAB13",
+                    "bytes": "8B 4F 40",
+                    "text": "MOV ECX,[EDI+0x40]"
+                  },
+                  {
+                    "va": "0x006BAB16",
+                    "bytes": "8D 0C 81",
+                    "text": "LEA ECX,[ECX+EAX*0x4]"
+                  }
+                ],
+                "provenance_note": "the id object comes from FUN_004926e0 / FUN_00977780 whose bodies are CLOSED; provenance UNKNOWN beyond window (never guessed)"
+              },
+              "returned_object_role": {
+                "class": "VALIDITY_CHECK_THEN_STORED_TO_FIELD",
+                "byte_anchors": [
+                  {
+                    "va": "0x006BAB4B",
+                    "bytes": "8B F8",
+                    "text": "MOV EDI,EAX",
+                    "note": "template -> EDI"
+                  },
+                  {
+                    "va": "0x006BAB4F",
+                    "bytes": "E8 8C 51 07 00",
+                    "text": "CALL 0x0072fce0",
+                    "note": "template method call (validity); body CLOSED this run"
+                  },
+                  {
+                    "va": "0x006BAB60",
+                    "bytes": "89 7E 0C",
+                    "text": "MOV [ESI+0xc],EDI",
+                    "note": "template pointer stored at this+0xC (caller object field, not a template field)"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "store target is the CALLER object's +0xC; invalid templates are cleared via the 0x006BABEC path"
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C26B0",
+            "name": "FUN_006c26b0",
+            "window_bounds": {
+              "start": "0x006C26B0",
+              "end": "0x006C26FA",
+              "size_bytes": 75,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C26FA"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C26EB",
+                "callsite_instruction_bytes": "E8 90 CE 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C26E4",
+                "callsite_instruction_bytes": "E8 67 7E D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C26DC",
+                  "bytes": "8B 04 95 08 56 A8 00",
+                  "text": "MOV EAX,[EDX*0x4 + 0xa85608]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C26BB",
+                    "bytes": "0F BF 78 0C",
+                    "text": "MOVSX EDI,word ptr [EAX+0xc]",
+                    "note": "A = s16 field +0xC of FUN_0070ed80(4) result"
+                  },
+                  {
+                    "va": "0x006C26C1",
+                    "bytes": "E8 0A FC FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B = FUN_006b22d0(this); body CLOSED"
+                  },
+                  {
+                    "va": "0x006C26D9",
+                    "bytes": "8D 14 4F",
+                    "text": "LEA EDX,[EDI + ECX*0x2]",
+                    "note": "index = A + 34*B"
+                  },
+                  {
+                    "va": "0x006C26C6",
+                    "bytes": "83 FF 22",
+                    "text": "CMP EDI,0x22",
+                    "note": "bounds: (unsigned)A < 34"
+                  }
+                ],
+                "table_va": "0x00A85608"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C26EB",
+                    "bytes": "E8 90 CE 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C26F2",
+                    "bytes": "C3",
+                    "text": "RET",
+                    "note": "lookup result returned in EAX unchanged; out-of-range path returns the same sentinel 0x00BA5800 @0x006C26F4"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C2700",
+            "name": "FUN_006c2700",
+            "window_bounds": {
+              "start": "0x006C2700",
+              "end": "0x006C2745",
+              "size_bytes": 70,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2745"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C2736",
+                "callsite_instruction_bytes": "E8 45 CE 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C272F",
+                "callsite_instruction_bytes": "E8 1C 7E D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C2727",
+                  "bytes": "8B 04 85 D0 55 A8 00",
+                  "text": "MOV EAX,[EAX*0x4 + 0xa855d0]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C270B",
+                    "bytes": "0F BF 78 0C",
+                    "text": "MOVSX EDI,word ptr [EAX+0xc]",
+                    "note": "A; FUN_0070ed80(3)"
+                  },
+                  {
+                    "va": "0x006C2711",
+                    "bytes": "E8 BA FB FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B"
+                  },
+                  {
+                    "va": "0x006C2722",
+                    "bytes": "C1 E0 04",
+                    "text": "SHL EAX,0x4"
+                  },
+                  {
+                    "va": "0x006C2725",
+                    "bytes": "03 C7",
+                    "text": "ADD EAX,EDI",
+                    "note": "index = 16*B + A"
+                  },
+                  {
+                    "va": "0x006C2716",
+                    "bytes": "83 FF 10",
+                    "text": "CMP EDI,0x10",
+                    "note": "bounds: A < 16"
+                  }
+                ],
+                "table_va": "0x00A855D0"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C2736",
+                    "bytes": "E8 45 CE 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C273D",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C2750",
+            "name": "FUN_006c2750",
+            "window_bounds": {
+              "start": "0x006C2750",
+              "end": "0x006C2796",
+              "size_bytes": 71,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2796"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C2787",
+                "callsite_instruction_bytes": "E8 F4 CD 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2780",
+                "callsite_instruction_bytes": "E8 CB 7D D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C2778",
+                  "bytes": "8B 14 8D 78 57 A8 00",
+                  "text": "MOV EDX,[ECX*0x4 + 0xa85778]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C275B",
+                    "bytes": "0F BF 78 0C",
+                    "text": "MOVSX EDI,word ptr [EAX+0xc]",
+                    "note": "A; FUN_0070ed80(0x1F)"
+                  },
+                  {
+                    "va": "0x006C276D",
+                    "bytes": "E8 5E FB FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B"
+                  },
+                  {
+                    "va": "0x006C2772",
+                    "bytes": "8D 04 80",
+                    "text": "LEA EAX,[EAX + EAX*0x4]"
+                  },
+                  {
+                    "va": "0x006C2775",
+                    "bytes": "8D 0C 47",
+                    "text": "LEA ECX,[EDI + EAX*0x2]",
+                    "note": "index = A + 10*B"
+                  },
+                  {
+                    "va": "0x006C2766",
+                    "bytes": "83 FF 0A",
+                    "text": "CMP EDI,0xa",
+                    "note": "bounds: A < 10"
+                  }
+                ],
+                "table_va": "0x00A85778"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C2787",
+                    "bytes": "E8 F4 CD 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C278E",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C27A0",
+            "name": "FUN_006c27a0",
+            "window_bounds": {
+              "start": "0x006C27A0",
+              "end": "0x006C27E6",
+              "size_bytes": 71,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C27E6"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C27D7",
+                "callsite_instruction_bytes": "E8 A4 CD 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C27D0",
+                "callsite_instruction_bytes": "E8 7B 7D D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C27C8",
+                  "bytes": "8B 14 8D C8 57 A8 00",
+                  "text": "MOV EDX,[ECX*0x4 + 0xa857c8]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C27AB",
+                    "bytes": "0F BF 78 0E",
+                    "text": "MOVSX EDI,word ptr [EAX+0xe]",
+                    "note": "A from +0xE variant; FUN_0070ed80(0x1F)"
+                  },
+                  {
+                    "va": "0x006C27BD",
+                    "bytes": "E8 0E FB FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B"
+                  },
+                  {
+                    "va": "0x006C27C2",
+                    "bytes": "8D 04 80",
+                    "text": "LEA EAX,[EAX + EAX*0x4]"
+                  },
+                  {
+                    "va": "0x006C27C5",
+                    "bytes": "8D 0C 47",
+                    "text": "LEA ECX,[EDI + EAX*0x2]",
+                    "note": "index = A + 10*B"
+                  },
+                  {
+                    "va": "0x006C27B6",
+                    "bytes": "83 FF 0A",
+                    "text": "CMP EDI,0xa",
+                    "note": "bounds: A < 10"
+                  }
+                ],
+                "table_va": "0x00A857C8"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C27D7",
+                    "bytes": "E8 A4 CD 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C27DE",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C27F0",
+            "name": "FUN_006c27f0",
+            "window_bounds": {
+              "start": "0x006C27F0",
+              "end": "0x006C2839",
+              "size_bytes": 74,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2839"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C282A",
+                "callsite_instruction_bytes": "E8 51 CD 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2823",
+                "callsite_instruction_bytes": "E8 28 7D D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C281B",
+                  "bytes": "8B 14 8D 04 58 A8 00",
+                  "text": "MOV EDX,[ECX*0x4 + 0xa85804]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C27FB",
+                    "bytes": "0F BF 78 0C",
+                    "text": "MOVSX EDI,word ptr [EAX+0xc]",
+                    "note": "A; FUN_0070ed80(0x20)"
+                  },
+                  {
+                    "va": "0x006C280D",
+                    "bytes": "E8 BE FA FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B"
+                  },
+                  {
+                    "va": "0x006C2814",
+                    "bytes": "C1 E1 04",
+                    "text": "SHL ECX,0x4"
+                  },
+                  {
+                    "va": "0x006C2817",
+                    "bytes": "2B C8",
+                    "text": "SUB ECX,EAX"
+                  },
+                  {
+                    "va": "0x006C2819",
+                    "bytes": "03 CF",
+                    "text": "ADD ECX,EDI",
+                    "note": "index = 15*B + A"
+                  },
+                  {
+                    "va": "0x006C2806",
+                    "bytes": "83 FF 0F",
+                    "text": "CMP EDI,0xf",
+                    "note": "bounds: A < 15"
+                  }
+                ],
+                "table_va": "0x00A85804"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C282A",
+                    "bytes": "E8 51 CD 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C2831",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C2840",
+            "name": "FUN_006c2840",
+            "window_bounds": {
+              "start": "0x006C2840",
+              "end": "0x006C2864",
+              "size_bytes": 37,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2864"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C285E",
+                "callsite_instruction_bytes": "E8 1D CD 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2857",
+                "callsite_instruction_bytes": "E8 F4 7C D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C284F",
+                  "bytes": "8B 04 85 B4 58 A8 00",
+                  "text": "MOV EAX,[EAX*0x4 + 0xa858b4]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C2843",
+                    "bytes": "E8 88 FA FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B = FUN_006b22d0(this); body CLOSED"
+                  }
+                ],
+                "table_va": "0x00A858B4"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C285E",
+                    "bytes": "E8 1D CD 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C2864",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C2870",
+            "name": "FUN_006c2870",
+            "window_bounds": {
+              "start": "0x006C2870",
+              "end": "0x006C2894",
+              "size_bytes": 37,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2894"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C288E",
+                "callsite_instruction_bytes": "E8 ED CC 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2887",
+                "callsite_instruction_bytes": "E8 C4 7C D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C287F",
+                  "bytes": "8B 04 85 BC 58 A8 00",
+                  "text": "MOV EAX,[EAX*0x4 + 0xa858bc]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C2873",
+                    "bytes": "E8 58 FA FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B = FUN_006b22d0(this); body CLOSED"
+                  }
+                ],
+                "table_va": "0x00A858BC"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C288E",
+                    "bytes": "E8 ED CC 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C2894",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C3F50",
+            "name": "FUN_006c3f50",
+            "window_bounds": {
+              "start": "0x006C3F50",
+              "end": "0x006C3FDB",
+              "size_bytes": 140,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C3FDB"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C3F62",
+                "callsite_instruction_bytes": "E8 19 B6 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C3F5B",
+                "callsite_instruction_bytes": "E8 F0 65 D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "CALLER_SUPPLIED_STACK_ARG__PROVENANCE_LEAVES_WINDOW",
+              "id_source_detail": {
+                "persisted_static_source": null,
+                "arg_read": {
+                  "va": "0x006C3F53",
+                  "bytes": "8B 44 24 0C",
+                  "text": "MOV EAX,dword ptr [ESP + 0xc]",
+                  "note": "id = FUN_006c3f50's first stack argument"
+                },
+                "push_site": {
+                  "va": "0x006C3F5A",
+                  "bytes": "50",
+                  "text": "PUSH EAX"
+                },
+                "provenance_note": "the argument's producer is outside this window; provenance UNKNOWN beyond window (never guessed)"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_TO_CALL_MULTIPLE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C3F67",
+                    "bytes": "8B F8",
+                    "text": "MOV EDI,EAX",
+                    "note": "template -> EDI"
+                  },
+                  {
+                    "va": "0x006C3F6E",
+                    "bytes": "8B CF",
+                    "text": "MOV ECX,EDI",
+                    "note": "template as this"
+                  },
+                  {
+                    "va": "0x006C3F74",
+                    "bytes": "E8 67 A2 10 00",
+                    "text": "CALL 0x007ce1e0",
+                    "note": "template method with arg 0x66 (102); body CLOSED this run"
+                  },
+                  {
+                    "va": "0x006C3F8D",
+                    "bytes": "89 19",
+                    "text": "MOV [ECX],EBX",
+                    "note": "pair element store (0x66) into vector slot of the container arg, not a template field"
+                  },
+                  {
+                    "va": "0x006C3F8F",
+                    "bytes": "89 41 04",
+                    "text": "MOV [ECX+0x4],EAX",
+                    "note": "pair element store (FUN_007ce1e0 result)"
+                  },
+                  {
+                    "va": "0x006C3FAE",
+                    "bytes": "8B CF",
+                    "text": "MOV ECX,EDI",
+                    "note": "template as this again"
+                  },
+                  {
+                    "va": "0x006C3FB5",
+                    "bytes": "E8 B6 70 D4 FF",
+                    "text": "CALL 0x0040b070",
+                    "note": "template method with arg 0x8BD720; body CLOSED this run"
+                  },
+                  {
+                    "va": "0x006C3FCD",
+                    "bytes": "E8 6E F6 FF FF",
+                    "text": "CALL 0x006c3640",
+                    "note": "result pair forwarded; body CLOSED this run"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "no direct field access on the template; template forwarded to FUN_007ce1e0(0x66) and FUN_0040b070(0x8BD720); recorded in-window reads [EAX+0x4] @0x006C3FBE ('8B 50 04') and [EAX] @0x006C3FC1 ('8B 00') target the FUN_0040b070 RESULT (object derived from the template by method call, identity UNKNOWN while the callee is CLOSED), forwarded as a pair into FUN_006c3640 @0x006C3FCD - transform relevance UNKNOWN"
+              }
+            }
+          },
+          {
+            "caller_entry": "0x00733490",
+            "name": "FUN_00733490",
+            "window_bounds": {
+              "start": "0x00733490",
+              "end": "0x00733565",
+              "size_bytes": 214,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x00733565"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x00733517",
+                "callsite_instruction_bytes": "E8 64 C0 FF FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00733510",
+                "callsite_instruction_bytes": "E8 3B 70 D0 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "FUNCTION_RETURN_VALUE__PROVENANCE_LEAVES_WINDOW",
+              "id_source_detail": {
+                "persisted_static_source": null,
+                "producer": {
+                  "va": "0x0073350A",
+                  "bytes": "E8 91 41 00 00",
+                  "text": "CALL 0x007376a0",
+                  "note": "id = FUN_007376a0(local object); body CLOSED"
+                },
+                "push_site": {
+                  "va": "0x0073350F",
+                  "bytes": "50",
+                  "text": "PUSH EAX"
+                },
+                "provenance_note": "the ECX argument to FUN_007376a0 is a local filled by the FUN_00703b80 string-fetch chain; provenance UNKNOWN beyond window"
+              },
+              "returned_object_role": {
+                "class": "VALIDITY_CHECK_THEN_STORED_TO_FIELD",
+                "byte_anchors": [
+                  {
+                    "va": "0x0073351C",
+                    "bytes": "8B F0",
+                    "text": "MOV ESI,EAX",
+                    "note": "template -> ESI"
+                  },
+                  {
+                    "va": "0x00733520",
+                    "bytes": "E8 BB C7 FF FF",
+                    "text": "CALL 0x0072fce0",
+                    "note": "template method call (validity); body CLOSED this run"
+                  },
+                  {
+                    "va": "0x00733529",
+                    "bytes": "89 37",
+                    "text": "MOV [EDI],ESI",
+                    "note": "template pointer stored into per-record slot at this+0x14+i*0x18 (i in 0..2, stride 0x18 @0x00733542)"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "3-record loop (EBP=3) over 0x18-byte records; store target is a CALLER record field"
+              }
+            }
+          }
+        ],
+        "identified_not_analyzed": [
+          {
+            "caller_entry": "0x0043EAE0",
+            "name": "FUN_0043eae0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x0043EAF3",
+                "callsite_instruction_bytes": "E8 88 0A 2F 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0043EAEC",
+                "callsite_instruction_bytes": "E8 5F BA FF FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x004E68A0",
+            "name": "FUN_004e68a0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x004E6979",
+                "callsite_instruction_bytes": "E8 02 8C 24 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x004E6972",
+                "callsite_instruction_bytes": "E8 D9 3B F5 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x005B5F90",
+            "name": "FUN_005b5f90",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x005B5FEF",
+                "callsite_instruction_bytes": "E8 8C 95 17 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x005B5FE8",
+                "callsite_instruction_bytes": "E8 63 45 E8 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x0067B800",
+            "name": "FUN_0067b800",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x0067B915",
+                "callsite_instruction_bytes": "E8 66 3C 0B 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0067B90E",
+                "callsite_instruction_bytes": "E8 3D EC DB FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x0067C7C0",
+            "name": "FUN_0067c7c0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x0067C8D5",
+                "callsite_instruction_bytes": "E8 A6 2C 0B 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0067C8CE",
+                "callsite_instruction_bytes": "E8 7D DC DB FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006A3930",
+            "name": "FUN_006a3930",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006A3994",
+                "callsite_instruction_bytes": "E8 E7 BB 08 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006A398D",
+                "callsite_instruction_bytes": "E8 BE 6B D9 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006B28E0",
+            "name": "FUN_006b28e0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006B2903",
+                "callsite_instruction_bytes": "E8 78 CC 07 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006B2931",
+                "callsite_instruction_bytes": "E8 4A CC 07 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006B28FC",
+                "callsite_instruction_bytes": "E8 4F 7C D8 FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006B292A",
+                "callsite_instruction_bytes": "E8 21 7C D8 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006C2350",
+            "name": "FUN_006c2350",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C236B",
+                "callsite_instruction_bytes": "E8 10 D2 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2364",
+                "callsite_instruction_bytes": "E8 E7 81 D7 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006C2BB0",
+            "name": "FUN_006c2bb0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C2BC2",
+                "callsite_instruction_bytes": "E8 B9 C9 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C2C15",
+                "callsite_instruction_bytes": "E8 66 C9 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2BBB",
+                "callsite_instruction_bytes": "E8 90 79 D7 FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2C0E",
+                "callsite_instruction_bytes": "E8 3D 79 D7 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006E2610",
+            "name": "FUN_006e2610",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006E28E4",
+                "callsite_instruction_bytes": "E8 97 CC 04 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006E28DD",
+                "callsite_instruction_bytes": "E8 6E 7C D5 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x00848EA0",
+            "name": "FUN_00848ea0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x00848F26",
+                "callsite_instruction_bytes": "E8 55 66 EE FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00848F1F",
+                "callsite_instruction_bytes": "E8 2C 16 BF FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          }
+        ]
+      }
+    },
+    "FUN_0043A550_singleton_getter_hypothesis": {
+      "va": "0x0043A550",
+      "subject_repin": "C2_SUBJECT_REPINS.json",
+      "reference_classes": {
+        "C1_direct_call_rel32": {
+          "method": "dual: Ghidra getReferencesTo(entry) filtered isCall() AND raw E8 rel32 scan of .text with target==VA; VA sets compared in CENSUS_AGREEMENT.json",
+          "result": {
+            "ghidra_call_refs": 35,
+            "raw_e8_candidates": 35,
+            "va_sets_identical": true,
+            "undefined_code_region_callsites": []
+          }
+        },
+        "C2_tail_call_or_thunk_JMP_rel32": {
+          "method": "raw E9 rel32 scan of the whole .text raw range; a whole-function JMP would be a thunk, end-of-body JMP a tail call",
+          "result": {
+            "raw_e9_candidates": 0,
+            "thunks": 0,
+            "tail_calls": 0
+          }
+        },
+        "C3_indirect_or_computed_calls": {
+          "method": "Ghidra reference op-types (computed flags) + raw whole-file absolute 4-byte LE scan for the VA (the only static way an indirect call could carry the target)",
+          "result": {
+            "ghidra_computed_refs": false,
+            "absolute_va_immediate_hits": 0,
+            "static_indirect_path_exists": false,
+            "not_checked": "register/computed-only targeting (target VA never appearing as a static immediate) is NOT statically enumerable; with 0 absolute hits there is no static evidence of any indirect path"
+          }
+        },
+        "C4_address_taken_refs": {
+          "method": "raw whole-file absolute 4-byte LE scan (all sections incl. .tls, .rsrc)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C5_data_references": {
+          "method": "subset of C4 hits in non-code sections + Ghidra non-call refs",
+          "result": {
+            "ghidra_noncall_refs": 0,
+            "absolute_data_hits": 0
+          }
+        },
+        "C6_vtable_slots": {
+          "method": "C4/C5 hits in .rdata inside vtable-shaped pointer runs (heuristic, recorded)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C7_callbacks_incl_tls": {
+          "method": "C4 hits in .tls callback tables or any registered callback data (covered by the whole-file absolute scan)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C8_thunks": {
+          "method": "covered by C2 (whole-function JMP)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C9_jump_tables": {
+          "method": "C4 hits inside Ghidra-recognized jump-table data (x86 jump tables store absolute code VAs; the absolute scan would find any)",
+          "result": {
+            "hits": 0
+          }
+        },
+        "C10_other_ghidra_ref_types": {
+          "method": "exhaustive dump of ALL getReferencesTo op_types verbatim (C2_SUBJECT_REPINS.json)",
+          "result": {
+            "op_types_seen": [
+              "UNCONDITIONAL_CALL"
+            ],
+            "note": "all references are UNCONDITIONAL_CALL; no other op types"
+          }
+        }
+      },
+      "direct_callers": {
+        "total_callsites": 35,
+        "unique_caller_functions": 32,
+        "analyzed_in_depth": [
+          {
+            "caller_entry": "0x00511070",
+            "name": "FUN_00511070",
+            "window_bounds": {
+              "start": "0x00511070",
+              "end": "0x0051152B",
+              "size_bytes": 1212,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x0051152B"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x00511252",
+                "callsite_instruction_bytes": "E8 29 E3 21 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0051124B",
+                "callsite_instruction_bytes": "E8 00 93 F2 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "IMMEDIATE_CONSTANT_BRANCH_SELECTED",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "immediates": [
+                  {
+                    "va": "0x0051121C",
+                    "bytes": "B8 FA 2D 00 00",
+                    "text": "MOV EAX,0x2dfa",
+                    "value": 11706
+                  },
+                  {
+                    "va": "0x00511245",
+                    "bytes": "B8 F9 2D 00 00",
+                    "text": "MOV EAX,0x2df9",
+                    "value": 11705
+                  }
+                ],
+                "push_site": {
+                  "va": "0x0051124A",
+                  "bytes": "50",
+                  "text": "PUSH EAX"
+                },
+                "note": "two branch-selected immediate constants; the chosen one is pushed as the lookup key"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_TO_CALL",
+                "byte_anchors": [
+                  {
+                    "va": "0x00511257",
+                    "bytes": "8B C8",
+                    "text": "MOV ECX,EAX",
+                    "note": "lookup result -> ECX (this)"
+                  },
+                  {
+                    "va": "0x00511259",
+                    "bytes": "E8 82 CF 2B 00",
+                    "text": "CALL 0x007ce1e0",
+                    "note": "template passed as this; callee body CLOSED this run"
+                  },
+                  {
+                    "va": "0x0051125E",
+                    "bytes": "8B F8",
+                    "text": "MOV EDI,EAX",
+                    "note": "FUN_007ce1e0 result (NOT the template) to EDI"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "no direct field access on the template in-window; single forward to FUN_007ce1e0"
+              }
+            }
+          },
+          {
+            "caller_entry": "0x00567170",
+            "name": "FUN_00567170",
+            "window_bounds": {
+              "start": "0x00567170",
+              "end": "0x0056775E",
+              "size_bytes": 1519,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C2 14 00",
+                "text": "RET 0x14",
+                "addr": "0x0056775C"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x0056736D",
+                "callsite_instruction_bytes": "E8 0E 82 1C 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00567366",
+                "callsite_instruction_bytes": "E8 E5 31 ED FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "IMMEDIATE_CONSTANT_BRANCH_SELECTED",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "immediates": [
+                  {
+                    "va": "0x00567338",
+                    "bytes": "BE DA 3B 00 00",
+                    "text": "MOV ESI,0x3bda",
+                    "value": 15322
+                  }
+                ],
+                "branch_immediates_note": "the decompile of the same window shows the other branch paths setting the id register to 0x3BDB (initial), 0x3A47, 0x3A40, 0x3BD9 - all immediate constants in-window",
+                "push_site": {
+                  "va": "0x00567365",
+                  "bytes": "56",
+                  "text": "PUSH ESI"
+                }
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_TO_CALL",
+                "byte_anchors": [
+                  {
+                    "va": "0x00567372",
+                    "bytes": "50",
+                    "text": "PUSH EAX",
+                    "note": "template pushed as stack arg"
+                  },
+                  {
+                    "va": "0x0056737A",
+                    "bytes": "E8 21 FD FF FF",
+                    "text": "CALL 0x005670a0",
+                    "note": "template forwarded (ECX=&local out); body CLOSED this run"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "the window contains float operations (FLD [0x00a7d688] @0x00567324, *(float*)(FUN_00401360()+100)) but NONE of them target the template object; recorded to prevent over-claiming - the template is only forwarded"
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006BAA20",
+            "name": "FUN_006baa20",
+            "window_bounds": {
+              "start": "0x006BAA20",
+              "end": "0x006BAC1A",
+              "size_bytes": 507,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C2 04 00",
+                "text": "RET 0x4",
+                "addr": "0x006BAC18"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006BAB46",
+                "callsite_instruction_bytes": "E8 35 4A 07 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006BAB3F",
+                "callsite_instruction_bytes": "E8 0C FA D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "OBJECT_FIRST_FIELD_READ__PROVENANCE_LEAVES_WINDOW",
+              "id_source_detail": {
+                "persisted_static_source": null,
+                "read_site": {
+                  "va": "0x006BAB25",
+                  "bytes": "8B 38",
+                  "text": "MOV EDI,dword ptr [EAX]",
+                  "note": "id = first dword of object from branch-dependent getter"
+                },
+                "getter_branches": [
+                  {
+                    "va": "0x006BAB19",
+                    "bytes": "E8 C2 7B DD FF",
+                    "text": "CALL 0x004926e0"
+                  },
+                  {
+                    "va": "0x006BAB20",
+                    "bytes": "E8 5B CC 2B 00",
+                    "text": "CALL 0x00977780"
+                  }
+                ],
+                "index_sites": [
+                  {
+                    "va": "0x006BAB10",
+                    "bytes": "8B 40 08",
+                    "text": "MOV EAX,[EAX+0x8]"
+                  },
+                  {
+                    "va": "0x006BAB13",
+                    "bytes": "8B 4F 40",
+                    "text": "MOV ECX,[EDI+0x40]"
+                  },
+                  {
+                    "va": "0x006BAB16",
+                    "bytes": "8D 0C 81",
+                    "text": "LEA ECX,[ECX+EAX*0x4]"
+                  }
+                ],
+                "provenance_note": "the id object comes from FUN_004926e0 / FUN_00977780 whose bodies are CLOSED; provenance UNKNOWN beyond window (never guessed)"
+              },
+              "returned_object_role": {
+                "class": "VALIDITY_CHECK_THEN_STORED_TO_FIELD",
+                "byte_anchors": [
+                  {
+                    "va": "0x006BAB4B",
+                    "bytes": "8B F8",
+                    "text": "MOV EDI,EAX",
+                    "note": "template -> EDI"
+                  },
+                  {
+                    "va": "0x006BAB4F",
+                    "bytes": "E8 8C 51 07 00",
+                    "text": "CALL 0x0072fce0",
+                    "note": "template method call (validity); body CLOSED this run"
+                  },
+                  {
+                    "va": "0x006BAB60",
+                    "bytes": "89 7E 0C",
+                    "text": "MOV [ESI+0xc],EDI",
+                    "note": "template pointer stored at this+0xC (caller object field, not a template field)"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "store target is the CALLER object's +0xC; invalid templates are cleared via the 0x006BABEC path"
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C26B0",
+            "name": "FUN_006c26b0",
+            "window_bounds": {
+              "start": "0x006C26B0",
+              "end": "0x006C26FA",
+              "size_bytes": 75,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C26FA"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C26EB",
+                "callsite_instruction_bytes": "E8 90 CE 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C26E4",
+                "callsite_instruction_bytes": "E8 67 7E D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C26DC",
+                  "bytes": "8B 04 95 08 56 A8 00",
+                  "text": "MOV EAX,[EDX*0x4 + 0xa85608]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C26BB",
+                    "bytes": "0F BF 78 0C",
+                    "text": "MOVSX EDI,word ptr [EAX+0xc]",
+                    "note": "A = s16 field +0xC of FUN_0070ed80(4) result"
+                  },
+                  {
+                    "va": "0x006C26C1",
+                    "bytes": "E8 0A FC FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B = FUN_006b22d0(this); body CLOSED"
+                  },
+                  {
+                    "va": "0x006C26D9",
+                    "bytes": "8D 14 4F",
+                    "text": "LEA EDX,[EDI + ECX*0x2]",
+                    "note": "index = A + 34*B"
+                  },
+                  {
+                    "va": "0x006C26C6",
+                    "bytes": "83 FF 22",
+                    "text": "CMP EDI,0x22",
+                    "note": "bounds: (unsigned)A < 34"
+                  }
+                ],
+                "table_va": "0x00A85608"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C26EB",
+                    "bytes": "E8 90 CE 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C26F2",
+                    "bytes": "C3",
+                    "text": "RET",
+                    "note": "lookup result returned in EAX unchanged; out-of-range path returns the same sentinel 0x00BA5800 @0x006C26F4"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C2700",
+            "name": "FUN_006c2700",
+            "window_bounds": {
+              "start": "0x006C2700",
+              "end": "0x006C2745",
+              "size_bytes": 70,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2745"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C2736",
+                "callsite_instruction_bytes": "E8 45 CE 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C272F",
+                "callsite_instruction_bytes": "E8 1C 7E D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C2727",
+                  "bytes": "8B 04 85 D0 55 A8 00",
+                  "text": "MOV EAX,[EAX*0x4 + 0xa855d0]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C270B",
+                    "bytes": "0F BF 78 0C",
+                    "text": "MOVSX EDI,word ptr [EAX+0xc]",
+                    "note": "A; FUN_0070ed80(3)"
+                  },
+                  {
+                    "va": "0x006C2711",
+                    "bytes": "E8 BA FB FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B"
+                  },
+                  {
+                    "va": "0x006C2722",
+                    "bytes": "C1 E0 04",
+                    "text": "SHL EAX,0x4"
+                  },
+                  {
+                    "va": "0x006C2725",
+                    "bytes": "03 C7",
+                    "text": "ADD EAX,EDI",
+                    "note": "index = 16*B + A"
+                  },
+                  {
+                    "va": "0x006C2716",
+                    "bytes": "83 FF 10",
+                    "text": "CMP EDI,0x10",
+                    "note": "bounds: A < 16"
+                  }
+                ],
+                "table_va": "0x00A855D0"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C2736",
+                    "bytes": "E8 45 CE 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C273D",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C2750",
+            "name": "FUN_006c2750",
+            "window_bounds": {
+              "start": "0x006C2750",
+              "end": "0x006C2796",
+              "size_bytes": 71,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2796"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C2787",
+                "callsite_instruction_bytes": "E8 F4 CD 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2780",
+                "callsite_instruction_bytes": "E8 CB 7D D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C2778",
+                  "bytes": "8B 14 8D 78 57 A8 00",
+                  "text": "MOV EDX,[ECX*0x4 + 0xa85778]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C275B",
+                    "bytes": "0F BF 78 0C",
+                    "text": "MOVSX EDI,word ptr [EAX+0xc]",
+                    "note": "A; FUN_0070ed80(0x1F)"
+                  },
+                  {
+                    "va": "0x006C276D",
+                    "bytes": "E8 5E FB FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B"
+                  },
+                  {
+                    "va": "0x006C2772",
+                    "bytes": "8D 04 80",
+                    "text": "LEA EAX,[EAX + EAX*0x4]"
+                  },
+                  {
+                    "va": "0x006C2775",
+                    "bytes": "8D 0C 47",
+                    "text": "LEA ECX,[EDI + EAX*0x2]",
+                    "note": "index = A + 10*B"
+                  },
+                  {
+                    "va": "0x006C2766",
+                    "bytes": "83 FF 0A",
+                    "text": "CMP EDI,0xa",
+                    "note": "bounds: A < 10"
+                  }
+                ],
+                "table_va": "0x00A85778"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C2787",
+                    "bytes": "E8 F4 CD 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C278E",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C27A0",
+            "name": "FUN_006c27a0",
+            "window_bounds": {
+              "start": "0x006C27A0",
+              "end": "0x006C27E6",
+              "size_bytes": 71,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C27E6"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C27D7",
+                "callsite_instruction_bytes": "E8 A4 CD 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C27D0",
+                "callsite_instruction_bytes": "E8 7B 7D D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C27C8",
+                  "bytes": "8B 14 8D C8 57 A8 00",
+                  "text": "MOV EDX,[ECX*0x4 + 0xa857c8]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C27AB",
+                    "bytes": "0F BF 78 0E",
+                    "text": "MOVSX EDI,word ptr [EAX+0xe]",
+                    "note": "A from +0xE variant; FUN_0070ed80(0x1F)"
+                  },
+                  {
+                    "va": "0x006C27BD",
+                    "bytes": "E8 0E FB FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B"
+                  },
+                  {
+                    "va": "0x006C27C2",
+                    "bytes": "8D 04 80",
+                    "text": "LEA EAX,[EAX + EAX*0x4]"
+                  },
+                  {
+                    "va": "0x006C27C5",
+                    "bytes": "8D 0C 47",
+                    "text": "LEA ECX,[EDI + EAX*0x2]",
+                    "note": "index = A + 10*B"
+                  },
+                  {
+                    "va": "0x006C27B6",
+                    "bytes": "83 FF 0A",
+                    "text": "CMP EDI,0xa",
+                    "note": "bounds: A < 10"
+                  }
+                ],
+                "table_va": "0x00A857C8"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C27D7",
+                    "bytes": "E8 A4 CD 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C27DE",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C27F0",
+            "name": "FUN_006c27f0",
+            "window_bounds": {
+              "start": "0x006C27F0",
+              "end": "0x006C2839",
+              "size_bytes": 74,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2839"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C282A",
+                "callsite_instruction_bytes": "E8 51 CD 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2823",
+                "callsite_instruction_bytes": "E8 28 7D D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C281B",
+                  "bytes": "8B 14 8D 04 58 A8 00",
+                  "text": "MOV EDX,[ECX*0x4 + 0xa85804]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C27FB",
+                    "bytes": "0F BF 78 0C",
+                    "text": "MOVSX EDI,word ptr [EAX+0xc]",
+                    "note": "A; FUN_0070ed80(0x20)"
+                  },
+                  {
+                    "va": "0x006C280D",
+                    "bytes": "E8 BE FA FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B"
+                  },
+                  {
+                    "va": "0x006C2814",
+                    "bytes": "C1 E1 04",
+                    "text": "SHL ECX,0x4"
+                  },
+                  {
+                    "va": "0x006C2817",
+                    "bytes": "2B C8",
+                    "text": "SUB ECX,EAX"
+                  },
+                  {
+                    "va": "0x006C2819",
+                    "bytes": "03 CF",
+                    "text": "ADD ECX,EDI",
+                    "note": "index = 15*B + A"
+                  },
+                  {
+                    "va": "0x006C2806",
+                    "bytes": "83 FF 0F",
+                    "text": "CMP EDI,0xf",
+                    "note": "bounds: A < 15"
+                  }
+                ],
+                "table_va": "0x00A85804"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C282A",
+                    "bytes": "E8 51 CD 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C2831",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C2840",
+            "name": "FUN_006c2840",
+            "window_bounds": {
+              "start": "0x006C2840",
+              "end": "0x006C2864",
+              "size_bytes": 37,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2864"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C285E",
+                "callsite_instruction_bytes": "E8 1D CD 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2857",
+                "callsite_instruction_bytes": "E8 F4 7C D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C284F",
+                  "bytes": "8B 04 85 B4 58 A8 00",
+                  "text": "MOV EAX,[EAX*0x4 + 0xa858b4]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C2843",
+                    "bytes": "E8 88 FA FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B = FUN_006b22d0(this); body CLOSED"
+                  }
+                ],
+                "table_va": "0x00A858B4"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C285E",
+                    "bytes": "E8 1D CD 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C2864",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C2870",
+            "name": "FUN_006c2870",
+            "window_bounds": {
+              "start": "0x006C2870",
+              "end": "0x006C2894",
+              "size_bytes": 37,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C2894"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C288E",
+                "callsite_instruction_bytes": "E8 ED CC 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2887",
+                "callsite_instruction_bytes": "E8 C4 7C D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "STATIC_RDATA_TABLE_INDEXED_BY_OBJECT_STATE",
+              "id_source_detail": {
+                "persisted_static_source": true,
+                "table_load": {
+                  "va": "0x006C287F",
+                  "bytes": "8B 04 85 BC 58 A8 00",
+                  "text": "MOV EAX,[EAX*0x4 + 0xa858bc]"
+                },
+                "index_inputs": [
+                  {
+                    "va": "0x006C2873",
+                    "bytes": "E8 58 FA FE FF",
+                    "text": "CALL 0x006b22d0",
+                    "note": "B = FUN_006b22d0(this); body CLOSED"
+                  }
+                ],
+                "table_va": "0x00A858BC"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_AS_RETURN_VALUE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C288E",
+                    "bytes": "E8 ED CC 06 00",
+                    "text": "CALL 0x0072f580"
+                  },
+                  {
+                    "va": "0x006C2894",
+                    "bytes": "C3",
+                    "text": "RET"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false
+              }
+            }
+          },
+          {
+            "caller_entry": "0x006C3F50",
+            "name": "FUN_006c3f50",
+            "window_bounds": {
+              "start": "0x006C3F50",
+              "end": "0x006C3FDB",
+              "size_bytes": 140,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x006C3FDB"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C3F62",
+                "callsite_instruction_bytes": "E8 19 B6 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C3F5B",
+                "callsite_instruction_bytes": "E8 F0 65 D7 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "CALLER_SUPPLIED_STACK_ARG__PROVENANCE_LEAVES_WINDOW",
+              "id_source_detail": {
+                "persisted_static_source": null,
+                "arg_read": {
+                  "va": "0x006C3F53",
+                  "bytes": "8B 44 24 0C",
+                  "text": "MOV EAX,dword ptr [ESP + 0xc]",
+                  "note": "id = FUN_006c3f50's first stack argument"
+                },
+                "push_site": {
+                  "va": "0x006C3F5A",
+                  "bytes": "50",
+                  "text": "PUSH EAX"
+                },
+                "provenance_note": "the argument's producer is outside this window; provenance UNKNOWN beyond window (never guessed)"
+              },
+              "returned_object_role": {
+                "class": "FORWARDED_TO_CALL_MULTIPLE",
+                "byte_anchors": [
+                  {
+                    "va": "0x006C3F67",
+                    "bytes": "8B F8",
+                    "text": "MOV EDI,EAX",
+                    "note": "template -> EDI"
+                  },
+                  {
+                    "va": "0x006C3F6E",
+                    "bytes": "8B CF",
+                    "text": "MOV ECX,EDI",
+                    "note": "template as this"
+                  },
+                  {
+                    "va": "0x006C3F74",
+                    "bytes": "E8 67 A2 10 00",
+                    "text": "CALL 0x007ce1e0",
+                    "note": "template method with arg 0x66 (102); body CLOSED this run"
+                  },
+                  {
+                    "va": "0x006C3F8D",
+                    "bytes": "89 19",
+                    "text": "MOV [ECX],EBX",
+                    "note": "pair element store (0x66) into vector slot of the container arg, not a template field"
+                  },
+                  {
+                    "va": "0x006C3F8F",
+                    "bytes": "89 41 04",
+                    "text": "MOV [ECX+0x4],EAX",
+                    "note": "pair element store (FUN_007ce1e0 result)"
+                  },
+                  {
+                    "va": "0x006C3FAE",
+                    "bytes": "8B CF",
+                    "text": "MOV ECX,EDI",
+                    "note": "template as this again"
+                  },
+                  {
+                    "va": "0x006C3FB5",
+                    "bytes": "E8 B6 70 D4 FF",
+                    "text": "CALL 0x0040b070",
+                    "note": "template method with arg 0x8BD720; body CLOSED this run"
+                  },
+                  {
+                    "va": "0x006C3FCD",
+                    "bytes": "E8 6E F6 FF FF",
+                    "text": "CALL 0x006c3640",
+                    "note": "result pair forwarded; body CLOSED this run"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "no direct field access on the template; template forwarded to FUN_007ce1e0(0x66) and FUN_0040b070(0x8BD720); recorded in-window reads [EAX+0x4] @0x006C3FBE ('8B 50 04') and [EAX] @0x006C3FC1 ('8B 00') target the FUN_0040b070 RESULT (object derived from the template by method call, identity UNKNOWN while the callee is CLOSED), forwarded as a pair into FUN_006c3640 @0x006C3FCD - transform relevance UNKNOWN"
+              }
+            }
+          },
+          {
+            "caller_entry": "0x00733490",
+            "name": "FUN_00733490",
+            "window_bounds": {
+              "start": "0x00733490",
+              "end": "0x00733565",
+              "size_bytes": 214,
+              "window_rule": "FULL_FUNCTION_FLOW_BODY (all 12 within the 64KB cap; none truncated); body-end rule satisfied: last instruction is RET-class, next bytes belong to the following function's prologue (body_end_context in each window file)",
+              "last_instruction": {
+                "bytes": "C3",
+                "text": "RET",
+                "addr": "0x00733565"
+              }
+            },
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x00733517",
+                "callsite_instruction_bytes": "E8 64 C0 FF FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00733510",
+                "callsite_instruction_bytes": "E8 3B 70 D0 FF"
+              }
+            ],
+            "classification": {
+              "id_source_class": "FUNCTION_RETURN_VALUE__PROVENANCE_LEAVES_WINDOW",
+              "id_source_detail": {
+                "persisted_static_source": null,
+                "producer": {
+                  "va": "0x0073350A",
+                  "bytes": "E8 91 41 00 00",
+                  "text": "CALL 0x007376a0",
+                  "note": "id = FUN_007376a0(local object); body CLOSED"
+                },
+                "push_site": {
+                  "va": "0x0073350F",
+                  "bytes": "50",
+                  "text": "PUSH EAX"
+                },
+                "provenance_note": "the ECX argument to FUN_007376a0 is a local filled by the FUN_00703b80 string-fetch chain; provenance UNKNOWN beyond window"
+              },
+              "returned_object_role": {
+                "class": "VALIDITY_CHECK_THEN_STORED_TO_FIELD",
+                "byte_anchors": [
+                  {
+                    "va": "0x0073351C",
+                    "bytes": "8B F0",
+                    "text": "MOV ESI,EAX",
+                    "note": "template -> ESI"
+                  },
+                  {
+                    "va": "0x00733520",
+                    "bytes": "E8 BB C7 FF FF",
+                    "text": "CALL 0x0072fce0",
+                    "note": "template method call (validity); body CLOSED this run"
+                  },
+                  {
+                    "va": "0x00733529",
+                    "bytes": "89 37",
+                    "text": "MOV [EDI],ESI",
+                    "note": "template pointer stored into per-record slot at this+0x14+i*0x18 (i in 0..2, stride 0x18 @0x00733542)"
+                  }
+                ],
+                "field_accesses_on_template": [],
+                "transform_relevant_access": false,
+                "note": "3-record loop (EBP=3) over 0x18-byte records; store target is a CALLER record field"
+              }
+            }
+          }
+        ],
+        "identified_not_analyzed": [
+          {
+            "caller_entry": "0x0043EAE0",
+            "name": "FUN_0043eae0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x0043EAF3",
+                "callsite_instruction_bytes": "E8 88 0A 2F 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0043EAEC",
+                "callsite_instruction_bytes": "E8 5F BA FF FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x00452490",
+            "name": "FUN_00452490",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00452490",
+                "callsite_instruction_bytes": "E8 BB 80 FE FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x00456770",
+            "name": "FUN_00456770",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x004567D4",
+                "callsite_instruction_bytes": "E8 77 3D FE FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x00457C00",
+            "name": "FUN_00457c00",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00457C41",
+                "callsite_instruction_bytes": "E8 0A 29 FE FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x00457E30",
+            "name": "FUN_00457e30",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00457E91",
+                "callsite_instruction_bytes": "E8 BA 26 FE FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x0046AA90",
+            "name": "FUN_0046aa90",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0046AB00",
+                "callsite_instruction_bytes": "E8 4B FA FC FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x004B9960",
+            "name": "FUN_004b9960",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x004B9A94",
+                "callsite_instruction_bytes": "E8 B7 0A F8 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x004C5580",
+            "name": "FUN_004c5580",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x004C55D2",
+                "callsite_instruction_bytes": "E8 79 4F F7 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x004E68A0",
+            "name": "FUN_004e68a0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x004E6979",
+                "callsite_instruction_bytes": "E8 02 8C 24 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x004E6972",
+                "callsite_instruction_bytes": "E8 D9 3B F5 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x0050CC70",
+            "name": "FUN_0050cc70",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0050D20F",
+                "callsite_instruction_bytes": "E8 3C D3 F2 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x0050E490",
+            "name": "FUN_0050e490",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0050F0B2",
+                "callsite_instruction_bytes": "E8 99 B4 F2 FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0050F5DE",
+                "callsite_instruction_bytes": "E8 6D AF F2 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x005B5F90",
+            "name": "FUN_005b5f90",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x005B5FEF",
+                "callsite_instruction_bytes": "E8 8C 95 17 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x005B5FE8",
+                "callsite_instruction_bytes": "E8 63 45 E8 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x0067B800",
+            "name": "FUN_0067b800",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x0067B915",
+                "callsite_instruction_bytes": "E8 66 3C 0B 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0067B90E",
+                "callsite_instruction_bytes": "E8 3D EC DB FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x0067C7C0",
+            "name": "FUN_0067c7c0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x0067C8D5",
+                "callsite_instruction_bytes": "E8 A6 2C 0B 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x0067C8CE",
+                "callsite_instruction_bytes": "E8 7D DC DB FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006A3930",
+            "name": "FUN_006a3930",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006A3994",
+                "callsite_instruction_bytes": "E8 E7 BB 08 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006A398D",
+                "callsite_instruction_bytes": "E8 BE 6B D9 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006B28E0",
+            "name": "FUN_006b28e0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006B2903",
+                "callsite_instruction_bytes": "E8 78 CC 07 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006B2931",
+                "callsite_instruction_bytes": "E8 4A CC 07 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006B28FC",
+                "callsite_instruction_bytes": "E8 4F 7C D8 FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006B292A",
+                "callsite_instruction_bytes": "E8 21 7C D8 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006C2350",
+            "name": "FUN_006c2350",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C236B",
+                "callsite_instruction_bytes": "E8 10 D2 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2364",
+                "callsite_instruction_bytes": "E8 E7 81 D7 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006C2BB0",
+            "name": "FUN_006c2bb0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C2BC2",
+                "callsite_instruction_bytes": "E8 B9 C9 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006C2C15",
+                "callsite_instruction_bytes": "E8 66 C9 06 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2BBB",
+                "callsite_instruction_bytes": "E8 90 79 D7 FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006C2C0E",
+                "callsite_instruction_bytes": "E8 3D 79 D7 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x006E2610",
+            "name": "FUN_006e2610",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x006E28E4",
+                "callsite_instruction_bytes": "E8 97 CC 04 00"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x006E28DD",
+                "callsite_instruction_bytes": "E8 6E 7C D5 FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          },
+          {
+            "caller_entry": "0x00848EA0",
+            "name": "FUN_00848ea0",
+            "callsites": [
+              {
+                "callsite_instruction_text": "CALL 0x0072f580",
+                "to_target": "FUN_0072F580_registry_lookup_hypothesis",
+                "callsite_va": "0x00848F26",
+                "callsite_instruction_bytes": "E8 55 66 EE FF"
+              },
+              {
+                "callsite_instruction_text": "CALL 0x0043a550",
+                "to_target": "FUN_0043A550_singleton_getter_hypothesis",
+                "callsite_va": "0x00848F1F",
+                "callsite_instruction_bytes": "E8 2C 16 BF FF"
+              }
+            ],
+            "status": "IDENTIFIED_NOT_ANALYZED"
+          }
+        ]
+      }
+    },
+    "DAT_00BA1824_registry_tree_hypothesis": {
+      "va": "0x00BA1824",
+      "reference_classes": {
+        "C1_direct_call_rel32": {
+          "result": "NOT_APPLICABLE (data address)"
+        },
+        "absolute_refs_dual_method": {
+          "raw_absolute_hits": [
+            "0x0043A572",
+            "0x0043A59C",
+            "0x0043A5B3"
+          ],
+          "ghidra_refs": [
+            "0x0043A571",
+            "0x0043A59B",
+            "0x0043A5B2"
+          ],
+          "operand_to_instruction_pairs": [
+            {
+              "operand_va": "0x0043A572",
+              "instruction_va": "0x0043A571"
+            },
+            {
+              "operand_va": "0x0043A59C",
+              "instruction_va": "0x0043A59B"
+            },
+            {
+              "operand_va": "0x0043A5B3",
+              "instruction_va": "0x0043A5B2"
+            }
+          ],
+          "all_hits_inside_FUN_0043A550": true,
+          "agreement": "3 raw operand hits correspond 1:1 to the 3 Ghidra instruction refs inside FUN_0043A550"
+        },
+        "result": "3 references total (1 READ @0x0043A571, 2 WRITE @0x0043A59B/0x0043A5B2), ALL inside FUN_0043A550"
+      },
+      "zero_initialized_tail": true
+    }
+  },
+  "budget": {
+    "max_caller_windows": 12,
+    "windows_analyzed": 12,
+    "unique_caller_functions_total": 32,
+    "identified_not_analyzed": 20,
+    "priority_rule": "pre-registered: FUN_0072F580 callers first (template-object consumers), then FUN_0043A550 callers not already covered; the 12 windows were exactly the first 12 FUN_0072F580 callers in reference order (all also call FUN_0043A550 - the consumer-pair pattern)"
+  },
+  "errors": [],
+  "question_answers": {
+    "a_static_or_persisted_id_source": {
+      "answer": "YES (STATIC_ONLY, BYTE_OBSERVATION)",
+      "detail": "9 of 12 in-budget windows feed the lookup key from static/persisted-in-binary sources: 7 windows from .rdata id tables (0x00A855D0, 0x00A85608, 0x00A85778, 0x00A857C8, 0x00A85804, 0x00A858B4, 0x00A858BC) indexed by object state, 2 windows from branch-selected immediate constants (0x2DF9/0x2DFA; 0x3BDB/0x3BD9/0x3BDA/0x3A40/0x3A47). 3 windows have UNKNOWN provenance honestly marked (caller-supplied arg 0x006C3F50; function return 0x00733490; object field 0x006BAA20). No in-window id equals 4057. No in-window VFS/file parse feeds the lookup (the registry POPULATION path was not investigated this run - out of scope)."
+    },
+    "b_transform_relevant_field_access": {
+      "answer": "NO transform-relevant access ESTABLISHED on the returned template object (within the 12 in-budget windows; STATIC_ONLY); one read pattern on an UNKNOWN-identity derived object recorded",
+      "detail": "ZERO direct field accesses (read or write) on the returned template object in ALL 12 windows. All template consumption is: pointer store into CALLER-owned structures (0x006BAA20 @0x006BAB60 '89 7E 0C' this+0xC; 0x00733490 @0x00733529 '89 37' record+0x00) or pointer forward (return-to-caller x8; method-call forwards to FUN_007ce1e0 / FUN_0072fce0 / FUN_0040b070 / FUN_005670a0 whose bodies are CLOSED this run). RECORDED in-window read pattern on a DERIVED object (FUN_006C3F50): after CALL FUN_0040b070(0x8BD720) @0x006C3FB5 (receiver = the template, body CLOSED), the window reads [EAX+0x4] @0x006C3FBE ('8B 50 04') and [EAX] @0x006C3FC1 ('8B 00') of the FUN_0040b070 result - an object derived from the template by method call, identity UNKNOWN while the callee is CLOSED - and forwards the pair into FUN_006c3640 @0x006C3FCD; no float evidence in-window, so the transform/position relevance of these reads is UNKNOWN and NO transform-relevant access is ESTABLISHED. The float operations present in FUN_00567170's window do NOT target the template.",
+      "closed_callee_note": "whether any closed callee (FUN_0072fce0, FUN_007ce1e0, FUN_0040b070, FUN_005670a0, FUN_006b22d0, FUN_0070ed80, FUN_007376a0, FUN_004926e0, FUN_00977780, ...) reads transform/position-relevant template fields is NOT established by this run and remains a candidate bounded follow-up question; FUN_0040b070 (whose in-window result is field-read in FUN_006C3F50) belongs on that follow-up list alongside FUN_0072fce0 and the FUN_007ce1e0 family"
+    },
+    "consumer_pair_pattern": "all 23 unique callers of FUN_0072F580 also call FUN_0043A550 (the getter immediately precedes the lookup in every measured window; the lookup takes the singleton as this)"
+  },
+  "gates_self_check": {
+    "G1_CENSUS_COMPLETE": "PASS - all 10 reference classes enumerated for both functions with method+result; the only NOT_CHECKED element is the statically non-enumerable register-computed-call sub-class (explicitly listed with reason in C3)",
+    "G2_CALLER_CLASSIFIED": "PASS - 12/12 in-budget callers have (VA, window bounds, id-source class, returned-object role class) with byte-anchored evidence; 3 windows carry explicit UNKNOWN provenance marks, none guessed",
+    "G3_IDENTITY": "verified before; re-verified after this script by the run's final identity check",
+    "G4_NO_PROMOTION": "all findings STATIC_ONLY with maturity labels; no XYZ/placement/runtime claims anywhere in this package"
+  }
+}
