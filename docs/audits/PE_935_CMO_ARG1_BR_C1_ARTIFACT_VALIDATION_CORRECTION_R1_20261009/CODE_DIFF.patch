@@ -1,0 +1,860 @@
+--- a/docs/audits/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/03_SCRIPTS/run_frame_bridge.py
++++ b/docs/audits/PE_935_CMO_ARG1_BR_C1_ARTIFACT_VALIDATION_CORRECTION_R1_20261009/03_SCRIPTS/run_frame_bridge.py
+@@ -1690,6 +1690,156 @@
+     return -v if (m.group(1) == "-") else v
+ 
+ 
++# ---------------- BR-C1 persisted-fact field helpers (correction
++# PE_935_CMO_ARG1_BR_C1_ARTIFACT_VALIDATION_CORRECTION_R1_20261009)
++#
++# Small, targeted field-reading/type/expression comparison helpers for the four
++# BR-C1 relations ONLY. Not a general schema engine; never eval. Every helper
++# returns (ok, diagnostic, value) and never raises for a missing field, a
++# wrong native JSON type, a malformed supported expression or a mismatch.
++
++def field_get(container, dotted):
++    """Read a dotted field path from nested dicts. Returns (present, value)."""
++    cur = container
++    for part in dotted.split("."):
++        if type(cur) is not dict or part not in cur:
++            return False, None
++        cur = cur[part]
++    return True, cur
++
++
++def _tname(v):
++    return type(v).__name__
++
++
++def check_str(container, dotted, expected):
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    if v != expected:
++        return False, ("VALUE_MISMATCH:%s:derived %r, got %r"
++                       % (dotted, expected, v)), v
++    return True, "OK", v
++
++
++def check_int(container, dotted, expected):
++    """Native JSON integer comparison. JSON booleans are NOT integers here
++    (type(True) is bool in Python), so a boolean is rejected as WRONG_TYPE."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not int:
++        return False, ("WRONG_TYPE:%s:expected JSON integer, got %s"
++                       % (dotted, _tname(v))), v
++    if v != expected:
++        return False, ("VALUE_MISMATCH:%s:derived %d, got %r"
++                       % (dotted, expected, v)), v
++    return True, "OK", v
++
++
++def check_bool(container, dotted, expected):
++    """Native JSON boolean comparison; no string->boolean coercion (JSON
++    false is not a valid positive bridge predicate)."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not bool:
++        return False, ("WRONG_TYPE:%s:expected JSON boolean, got %s"
++                       % (dotted, _tname(v))), v
++    if v is not expected:
++        return False, ("VALUE_MISMATCH:%s:derived %r, got %r"
++                       % (dotted, expected, v)), v
++    return True, "OK", v
++
++
++def check_va_str(container, dotted, derived_va):
++    """Persisted VA string form '0x%08X' compared to a derived VA."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    m = re.match(r"^0x([0-9a-fA-F]{8})$", v)
++    if not m:
++        return False, ("MALFORMED_EXPR:%s:not a supported 0xXXXXXXXX VA "
++                       "string" % dotted), v
++    if int(m.group(1), 16) != derived_va:
++        return False, ("VALUE_MISMATCH:%s:derived %s, got %r"
++                       % (dotted, va_str(derived_va), v)), v
++    return True, "OK", v
++
++
++def check_slot_expr(container, dotted, base, derived_delta):
++    """Persisted '[T-0x10]' style slot expression vs the derived delta."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    if not re.match(r"^\[%s(?:[+-]0x[0-9a-fA-F]+)?\]$" % re.escape(base), v):
++        return False, ("MALFORMED_EXPR:%s:not a supported [%s+0x..] slot "
++                       "expression" % (dotted, base)), v
++    if v != slot_expr(base, derived_delta):
++        return False, ("VALUE_MISMATCH:%s:derived %s, got %r"
++                       % (dotted, slot_expr(base, derived_delta), v)), v
++    return True, "OK", v
++
++
++def check_addr_expr(container, dotted, derived_delta):
++    """Persisted 'ADDRESS(T+0x8)' style pointer-value expression vs the
++    derived LEA result delta."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    m = re.match(r"^ADDRESS\(T(?:([+-])0x([0-9a-fA-F]+))?\)$", v)
++    if not m:
++        return False, ("MALFORMED_EXPR:%s:not a supported ADDRESS(T+0x..) "
++                       "expression" % dotted), v
++    got = 0
++    if m.group(1):
++        got = int(m.group(2), 16)
++        if m.group(1) == "-":
++            got = -got
++    if got != derived_delta:
++        return False, ("VALUE_MISMATCH:%s:derived ADDRESS(T%s0x%x), got %r"
++                       % (dotted, "+" if derived_delta >= 0 else "-",
++                          abs(derived_delta), v)), v
++    return True, "OK", v
++
++
++def check_arg_slot_expr(container, dotted, derived_delta):
++    """Persisted arg_slots documented finite form 'T0+0x8 (computed)' vs the
++    derived delta (the ' (computed)' suffix is explicitly normalized)."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    m = re.match(r"^T0(?:([+-])0x([0-9a-fA-F]+))?(?: \(computed\))?$", v)
++    if not m:
++        return False, ("MALFORMED_EXPR:%s:not a supported T0+0x.. "
++                       "(computed) expression" % dotted), v
++    got = 0
++    if m.group(1):
++        got = int(m.group(2), 16)
++        if m.group(1) == "-":
++            got = -got
++    if got != derived_delta:
++        return False, ("VALUE_MISMATCH:%s:derived T0%s0x%x, got %r"
++                       % (dotted, "+" if derived_delta >= 0 else "-",
++                          abs(derived_delta), v)), v
++    return True, "OK", v
++
++
+ def gate_artifacts(repo_out, prov_path_override=None):
+     """The ordinary final gate: re-read the persisted load-bearing artifacts
+     (WINDOW_IDENTITIES.json, ENTRY_FRAME_LEDGER.csv, CALLER_STACK_LEDGER.csv,
+@@ -1702,6 +1852,11 @@
+         checks.append({"check": cid, "fact": fact,
+                        "claimed": claimed, "actual": actual, "pass": ok})
+ 
++    def chk_d(cid, fact, claimed, actual, ok, diag):
++        """chk + a named diagnostic for the BR-C1 persisted-fact checks."""
++        chk(cid, fact, claimed, actual, ok)
++        checks[-1]["diagnostic"] = diag if not ok else "OK"
++
+     # 1) physical window identity vs WINDOW_IDENTITIES.json
+     with open(os.path.join(repo_out, "WINDOW_IDENTITIES.json")) as fh:
+         wids = json.load(fh)
+@@ -1839,12 +1994,13 @@
+         arg1_kind_claimed == kind_from_opcode == "ADDRESS")
+ 
+     # 6d) B arg1 expression: LEA disp 0x14 + ESP=T-0xC -> ADDRESS(T+8)
++    #     (BR-C1.3 correction: no OR-fallback to the parallel bridge summary
++    #      field; the exported arg1.value_expr is compared individually)
+     lea_disp = int.from_bytes(bytes(int(b, 16) for b in lea_ins.bytes_hex[3:4]),
+                              "little")
+     esp_at_lea = espB[LEA_VA]
+     lea_result_T = esp_at_lea + lea_disp - espB[PIVOT_T_VA]
+-    claimed_expr = nn.get("arg1", {}).get("value_expr") or br.get(
+-        "b_arg1_value_expr")
++    claimed_expr = nn.get("arg1", {}).get("value_expr")
+     rederived = "ADDRESS(T%s)" % ("" if lea_result_T == 0 else
+                                   ("+" if lea_result_T > 0 else "-")
+                                   + "0x%x" % abs(lea_result_T))
+@@ -1853,13 +2009,18 @@
+         claimed_expr == rederived)
+ 
+     # 6e) entry-slot identity: [E+4] == [T-0x10] under E=T-0x14
++    #     (BR-C1.2 correction: field-presence-safe read of the persisted
++    #      a_source_slot_from_T; no KeyError on a missing field)
+     e_join = espB[BRIDGE_CALL_VA] - 4 - espB[PIVOT_T_VA]   # E delta from T
+     joined = e_join + src_delta_rederived
+     b_slot = espB[BRIDGE_CALL_VA] - espB[PIVOT_T_VA]
++    present_asrc, claimed_asrc = field_get(prov,
++                                           "bridge.a_source_slot_from_T")
++    ok_asrc = (present_asrc and claimed_asrc == slot_expr("T", joined)
++               and joined == b_slot)
+     chk("PROV-BRIDGE-SLOT", "joined entry-slot identity [E+4]==[T-0x10]",
+-        br["a_source_slot_from_T"], slot_expr("T", joined),
+-        br["a_source_slot_from_T"] == slot_expr("T", joined)
+-        and joined == b_slot)
++        claimed_asrc if present_asrc else None, slot_expr("T", joined),
++        ok_asrc)
+ 
+     # 6f) call targets from provenance vs rel32 recompute from the raw bytes
+     expected_targets = {va_str(TAIL_CALL_VA): va_str(TAIL_CALLEE),
+@@ -1880,6 +2041,223 @@
+                 % va_str(ins.va),
+                 expected_targets.get(va_str(ins.va)), va_str(tgt), ok)
+ 
++    # 6f-bis) BR-C1.1 persisted CALL identity: the values ACTUALLY exported in
++    # phase_b.nonnull_path.call vs the rel32-derived target at the pinned
++    # callsite 0x004C47C1 and the derived bridge predicate. The pinned-role
++    # table above remains as an additional check but never replaces comparing
++    # the value actually read from the JSON to the evidence-derived result.
++    bridge_ins = by_va_b.get(BRIDGE_CALL_VA)
++    if bridge_ins is None or bridge_ins.mnemonic != "call":
++        raise Unresolved("pinned bridge callsite 0x004C47C1 missing from the "
++                         "decoded window-B stream")
++    rel32_b = int.from_bytes(bytes(int(b, 16)
++                                   for b in bridge_ins.bytes_hex[1:5]),
++                             "little", signed=True)
++    target_derived = BRIDGE_CALL_VA + 5 + rel32_b
++    bridge_valid_derived = (target_derived == WINDOWS["A"]["va_start"])
++    ok, dg, val = check_va_str(prov, "phase_b.nonnull_path.call.va",
++                               BRIDGE_CALL_VA)
++    chk_d("PROV-BR11-CALL-VA", "persisted bridge callsite VA (pinned "
++          "0x004C47C1)", val, va_str(BRIDGE_CALL_VA), ok, dg)
++    ok, dg, val = check_va_str(prov, "phase_b.nonnull_path.call.target",
++                               target_derived)
++    chk_d("PROV-BR11-CALL-TARGET", "persisted exported CALL target vs "
++          "rel32-derived target", val, va_str(target_derived), ok, dg)
++    ok, dg, val = check_va_str(prov,
++                               "phase_b.nonnull_path.call.target_recomputed",
++                               target_derived)
++    chk_d("PROV-BR11-TARGET-RECOMPUTED", "persisted recomputed CALL target vs "
++          "rel32-derived target", val, va_str(target_derived), ok, dg)
++    ok, dg, val = check_bool(prov, "phase_b.nonnull_path.call.bridge_valid",
++                             bridge_valid_derived)
++    chk_d("PROV-BR11-BRIDGE-VALID", "persisted bridge_valid (native JSON "
++          "boolean; false is not a valid positive predicate) vs derived "
++          "predicate target==window-A entry", val, bridge_valid_derived, ok,
++          dg)
++
++    # 6f-ter) BR-C1.2 persisted argument-slot identity vs the independent
++    # ESP walk (B slot -16 / E delta -20 / A entry [E+4]); the relation is
++    # DERIVED (E delta + A entry delta == B slot delta), not a comparison of
++    # duplicate claims to each other only.
++    slot_delta_derived = espB[BRIDGE_CALL_VA] - espB[PIVOT_T_VA]
++    e_delta_derived = espB[BRIDGE_CALL_VA] - 4 - espB[PIVOT_T_VA]
++    ok, dg, val = check_int(prov, "phase_b.nonnull_path.arg1.slot_delta_T0",
++                           slot_delta_derived)
++    chk_d("PROV-BR12-ARG1-SLOT-DELTA", "persisted arg1 slot delta (B slot) vs "
++          "walk-derived slot", val, slot_delta_derived, ok, dg)
++    ok, dg, val = check_int(prov, "phase_b.nonnull_path.arg_slot_deltas.arg1",
++                           slot_delta_derived)
++    chk_d("PROV-BR12-ARG-SLOT-DELTAS-ARG1", "persisted arg_slot_deltas.arg1 "
++          "vs walk-derived slot", val, slot_delta_derived, ok, dg)
++    ok, dg, val = check_slot_expr(prov, "bridge.b_arg1_slot", "T",
++                                  slot_delta_derived)
++    chk_d("PROV-BR12-B-ARG1-SLOT", "persisted bridge.b_arg1_slot expression "
++          "vs walk-derived slot", val, slot_expr("T", slot_delta_derived), ok,
++          dg)
++    ok, dg, val = check_int(prov, "bridge.E_delta_from_T", e_delta_derived)
++    chk_d("PROV-BR12-E-DELTA-FROM-T", "persisted E delta (callee-entry ESP "
++          "under the join) vs walk-derived delta", val, e_delta_derived, ok,
++          dg)
++    ok, dg, val = check_int(prov,
++                            "phase_b.nonnull_path.call."
++                            "esp_before_call_delta_T0", slot_delta_derived)
++    chk_d("PROV-BR12-ESP-BEFORE-CALL-DELTA", "persisted exported ESP-before-"
++          "call delta vs the same walk", val, slot_delta_derived, ok, dg)
++    ok, dg, val = check_int(prov,
++                            "phase_b.nonnull_path.call."
++                            "callee_entry_esp_delta_T0", e_delta_derived)
++    chk_d("PROV-BR12-CALLEE-ENTRY-DELTA", "persisted exported callee-entry "
++          "ESP delta vs the same walk", val, e_delta_derived, ok, dg)
++    present_ed, claimed_ed = field_get(prov, "bridge.E_delta_from_T")
++    present_sd, claimed_sd = field_get(prov,
++                                       "phase_b.nonnull_path.arg1."
++                                       "slot_delta_T0")
++    relation_ok = (e_delta_derived + src_delta_rederived == slot_delta_derived
++                   and present_ed and present_sd
++                   and type(claimed_ed) is int and type(claimed_sd) is int
++                   and claimed_ed + src_delta_rederived == claimed_sd)
++    chk_d("PROV-BR12-SLOT-RELATION", "derived entry-slot relation [E+4] == "
++          "[T-0x10] (E delta + A entry delta == B slot delta), persisted "
++          "claims consistent with it",
++          (claimed_ed, claimed_sd) if (present_ed and present_sd) else None,
++          (e_delta_derived, slot_delta_derived), relation_ok,
++          "VALUE_MISMATCH:derived relation E delta %d + A entry delta %d == "
++          "B slot %d not consistent with claimed values %r / %r"
++          % (e_delta_derived, src_delta_rederived, slot_delta_derived,
++             claimed_ed, claimed_sd))
++
++    # 6f-quater) BR-C1.3 persisted pointer value + duplicate bridge summary:
++    # every representation compared individually to the LEA/opcode-derived
++    # facts (no OR-fallback hides a contradictory parallel representation);
++    # the clean pointer is ADDRESS(T+8), never MEM(T+8). A's STACK_READ is the
++    # argument-slot load of the joined slot [E+4] (the transmitted pointer),
++    # not a B-side pointee read.
++    a_delivery_expr_derived = ("MEM(E%s0x%x)@%s"
++                               % ("+" if src_delta_rederived >= 0 else "-",
++                                  abs(src_delta_rederived),
++                                  va_str(SOURCE_LOAD_VA)))
++    ok, dg, val = check_int(prov, "phase_b.nonnull_path.arg1.value_delta",
++                            lea_result_T)
++    chk_d("PROV-BR13-ARG1-VALUE-DELTA", "persisted arg1 value delta vs "
++          "LEA-derived delta", val, lea_result_T, ok, dg)
++    ok, dg, val = check_str(prov, "phase_b.nonnull_path.arg_slots.arg1.kind",
++                            kind_from_opcode)
++    chk_d("PROV-BR13-ARGSLOT-ARG1-KIND", "persisted arg_slots.arg1.kind vs "
++          "LEA/MOV opcode-derived kind", val, kind_from_opcode, ok, dg)
++    ok, dg, val = check_arg_slot_expr(prov,
++                                      "phase_b.nonnull_path.arg_slots.arg1."
++                                      "expr", lea_result_T)
++    chk_d("PROV-BR13-ARGSLOT-ARG1-EXPR", "persisted arg_slots.arg1.expr "
++          "(documented 'T0+0x8 (computed)' form, suffix normalized) vs "
++          "LEA-derived delta", val, "T0%s0x%x"
++          % ("+" if lea_result_T >= 0 else "-", abs(lea_result_T)), ok, dg)
++    ok, dg, val = check_int(prov, "phase_b.nonnull_path.arg_slots.arg1.delta",
++                            lea_result_T)
++    chk_d("PROV-BR13-ARGSLOT-ARG1-DELTA", "persisted arg_slots.arg1.delta vs "
++          "LEA-derived delta", val, lea_result_T, ok, dg)
++    ok, dg, val = check_str(prov, "bridge.b_arg1_value_kind",
++                            kind_from_opcode)
++    chk_d("PROV-BR13-B-ARG1-VALUE-KIND", "persisted bridge.b_arg1_value_kind "
++          "vs LEA/MOV opcode-derived kind (individual, no fallback)", val,
++          kind_from_opcode, ok, dg)
++    ok, dg, val = check_addr_expr(prov, "bridge.b_arg1_value_expr",
++                                  lea_result_T)
++    chk_d("PROV-BR13-B-ARG1-VALUE-EXPR", "persisted bridge.b_arg1_value_expr "
++          "vs LEA-derived pointer value (individual, no fallback)", val,
++          rederived, ok, dg)
++    ok, dg, val = check_addr_expr(prov, "bridge.cross_call_value_expr",
++                                  lea_result_T)
++    chk_d("PROV-BR13-CROSSCALL-VALUE-EXPR", "persisted "
++          "bridge.cross_call_value_expr vs LEA-derived pointer value", val,
++          rederived, ok, dg)
++    ok, dg, val = check_str(prov, "bridge.a_delivered_value_kind",
++                            "STACK_READ")
++    chk_d("PROV-BR13-A-DELIVERED-KIND", "persisted A-side delivered kind = "
++          "STACK_READ of the joined argument slot [E+4] (the transmitted "
++          "pointer), not a B-side pointee read", val, "STACK_READ", ok, dg)
++    ok, dg, val = check_str(prov, "phase_a.delivery.arg1_value_kind",
++                            "STACK_READ")
++    chk_d("PROV-BR13-A-DELIVERY-KIND", "persisted A delivery arg1 value kind "
++          "(argument-slot load)", val, "STACK_READ", ok, dg)
++    ok, dg, val = check_str(prov, "phase_a.delivery.arg1_value_expr",
++                            a_delivery_expr_derived)
++    chk_d("PROV-BR13-A-DELIVERY-EXPR", "persisted A delivery arg1 expression "
++          "vs derived argument-slot load expression", val,
++          a_delivery_expr_derived, ok, dg)
++    present_vk, claimed_vk = field_get(prov,
++                                       "phase_b.nonnull_path.arg1."
++                                       "value_kind")
++    present_sk, claimed_sk = field_get(prov,
++                                       "phase_b.nonnull_path.arg_slots.arg1."
++                                       "kind")
++    present_bk, claimed_bk = field_get(prov, "bridge.b_arg1_value_kind")
++    present_be, claimed_be = field_get(prov, "bridge.b_arg1_value_expr")
++    present_ce, claimed_ce = field_get(prov, "bridge.cross_call_value_expr")
++    present_ae, claimed_ae = field_get(prov,
++                                       "phase_b.nonnull_path.arg1."
++                                       "value_expr")
++    parallel_ok = (present_vk and present_sk and present_bk
++                   and present_be and present_ce and present_ae
++                   and claimed_vk == claimed_sk == claimed_bk
++                   == kind_from_opcode
++                   and claimed_be == claimed_ce == claimed_ae == rederived)
++    chk_d("PROV-BR13-PARALLEL-CONSISTENCY", "the three parallel kind "
++          "representations and the three parallel value expressions agree "
++          "with each other AND with the derivation",
++          (claimed_vk, claimed_sk, claimed_bk, claimed_be, claimed_ce,
++           claimed_ae),
++          (kind_from_opcode, kind_from_opcode, kind_from_opcode, rederived,
++           rederived, rederived), parallel_ok,
++          "VALUE_MISMATCH:contradictory parallel bridge representations "
++          "(kinds %r/%r/%r, exprs %r/%r/%r vs derived %r/%r)"
++          % (claimed_vk, claimed_sk, claimed_bk, claimed_be, claimed_ce,
++             claimed_ae, kind_from_opcode, rederived))
++
++    # 6f-quinquies) BR-C1.4 persisted null-path facts vs the B-window branch
++    # derivation: for EAX==0 (TEST EAX,EAX -> ZF=1, no intervening flag
++    # writer), JE at 0x004C47AD is taken; the taken path transfers to
++    # 0x004C47C8 OUTSIDE window B before CALL 0x004C47C1, so the CALL is not
++    # reached on this path. 0x004C47C8 remains unopened; no claim about its
++    # later behavior.
++    je_ins = by_va_b.get(0x4C47AD)
++    if je_ins is None or je_ins.mnemonic != "je":
++        raise Unresolved("conditional branch at 0x004C47AD missing from the "
++                         "decoded window-B stream")
++    je_target_derived = int(je_ins.operands.strip(), 16)
++    win_b_end = WINDOWS["B"]["va_start"] + WINDOWS["B"]["size"]
++    exit_inside_derived = (WINDOWS["B"]["va_start"] <= je_target_derived
++                           < win_b_end)
++    je_conditional = (je_ins.bytes_hex[0] == "74")
++    ok, dg, val = check_va_str(prov, "phase_b.null_path.branch_va", 0x4C47AD)
++    chk_d("PROV-BR14-NULL-BRANCH-VA", "persisted null-path branch VA vs "
++          "decoded branch instruction", val, va_str(0x4C47AD), ok, dg)
++    ok, dg, val = check_str(prov, "phase_b.null_path.branch_mnemonic",
++                            je_ins.mnemonic)
++    chk_d("PROV-BR14-NULL-BRANCH-MNEMONIC", "persisted branch mnemonic vs "
++          "decoded instruction", val, je_ins.mnemonic, ok, dg)
++    ok, dg, val = check_va_str(prov, "phase_b.null_path.exit_va",
++                               je_target_derived)
++    chk_d("PROV-BR14-NULL-EXIT-VA", "persisted exit VA vs decoded JE target "
++          "(0x004C47C8; unopened, no later-behavior claim)", val,
++          va_str(je_target_derived), ok, dg)
++    ok, dg, val = check_bool(prov, "phase_b.null_path.exit_inside_window",
++                             exit_inside_derived)
++    chk_d("PROV-BR14-NULL-EXIT-INSIDE", "persisted exit_inside_window vs "
++          "derived window-interval fact", val, exit_inside_derived, ok, dg)
++    ok, dg, val = check_bool(prov, "phase_b.null_path.je_taken", True)
++    chk_d("PROV-BR14-NULL-JE-TAKEN", "persisted je_taken (native JSON "
++          "boolean) vs branch derivation: EAX==0 -> ZF=1 -> JE taken", val,
++          True, ok, dg)
++    ok, dg, val = check_bool(prov, "phase_b.null_path.unconditional_exit",
++                             not je_conditional)
++    chk_d("PROV-BR14-NULL-UNCONDITIONAL", "persisted unconditional_exit vs "
++          "opcode-derived conditionality (0x74 = conditional Jcc)", val,
++          not je_conditional, ok, dg)
++    ok, dg, val = check_bool(prov, "phase_b.null_path.call_reached", False)
++    chk_d("PROV-BR14-NULL-CALL-REACHED", "persisted call_reached (native JSON "
++          "boolean): taken branch exits the window before CALL 0x004C47C1",
++          val, False, ok, dg)
++
+     # 6g) flags survive TEST->JE (independent: MOV store writes no flags)
+     between = [ins for ins in instrs["B"]
+                if 0x4C47A3 < ins.va < 0x4C47AD and ins.mnemonic != "mov"]
+--- a/docs/audits/PE_935_CMO_ARG1_ENTRY_CALLER_BRIDGE_R1_20261009/03_SCRIPTS/qc_frame_bridge.py
++++ b/docs/audits/PE_935_CMO_ARG1_BR_C1_ARTIFACT_VALIDATION_CORRECTION_R1_20261009/03_SCRIPTS/qc_frame_bridge.py
+@@ -860,6 +860,157 @@
+     return per, boundary
+ 
+ 
++# ------------------------------------------------------------------ BR-C1 field
++# helpers (correction PE_935_CMO_ARG1_BR_C1_ARTIFACT_VALIDATION_CORRECTION_
++# R1_20261009). QC's OWN targeted field-reading/type/expression comparison
++# utilities for the four BR-C1 relations only. Not a general schema engine;
++# never eval; every helper returns (ok, diagnostic, value) and never raises
++# for a missing field, wrong native JSON type, malformed supported expression
++# or mismatch. The QC does NOT import or delegate to the production verdict;
++# all derivations below use this file's own parse/walk/opcode facts.
++
++def field_get(container, dotted):
++    cur = container
++    for part in dotted.split("."):
++        if type(cur) is not dict or part not in cur:
++            return False, None
++        cur = cur[part]
++    return True, cur
++
++
++def _tname(v):
++    return type(v).__name__
++
++
++def qc_check_str(container, dotted, expected):
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    if v != expected:
++        return False, ("VALUE_MISMATCH:%s:my derivation %r, got %r"
++                       % (dotted, expected, v)), v
++    return True, "OK", v
++
++
++def qc_check_int(container, dotted, expected):
++    """Native JSON integer; JSON booleans are NOT integers here (type(True)
++    is bool), so a boolean value is rejected as WRONG_TYPE."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not int:
++        return False, ("WRONG_TYPE:%s:expected JSON integer, got %s"
++                       % (dotted, _tname(v))), v
++    if v != expected:
++        return False, ("VALUE_MISMATCH:%s:my derivation %d, got %r"
++                       % (dotted, expected, v)), v
++    return True, "OK", v
++
++
++def qc_check_bool(container, dotted, expected):
++    """Native JSON boolean; no string->boolean coercion (JSON false is not a
++    valid positive bridge predicate)."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not bool:
++        return False, ("WRONG_TYPE:%s:expected JSON boolean, got %s"
++                       % (dotted, _tname(v))), v
++    if v is not expected:
++        return False, ("VALUE_MISMATCH:%s:my derivation %r, got %r"
++                       % (dotted, expected, v)), v
++    return True, "OK", v
++
++
++def qc_check_va_str(container, dotted, derived_va):
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    m = re.match(r"^0x([0-9a-fA-F]{8})$", v)
++    if not m:
++        return False, ("MALFORMED_EXPR:%s:not a supported 0xXXXXXXXX VA "
++                       "string" % dotted), v
++    if int(m.group(1), 16) != derived_va:
++        return False, ("VALUE_MISMATCH:%s:my derivation %s, got %r"
++                       % (dotted, va_s(derived_va), v)), v
++    return True, "OK", v
++
++
++def qc_slot_expr(delta):
++    """QC-local '[T-0x10]' formatter from fmt_off (no production import)."""
++    return "[%s%s]" % ("T", fmt_off(delta))
++
++
++def qc_check_slot_expr(container, dotted, derived_delta):
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    if not re.match(r"^\[T(?:[+-]0x[0-9a-fA-F]+)?\]$", v):
++        return False, ("MALFORMED_EXPR:%s:not a supported [T+0x..] slot "
++                       "expression" % dotted), v
++    if v != qc_slot_expr(derived_delta):
++        return False, ("VALUE_MISMATCH:%s:my derivation %s, got %r"
++                       % (dotted, qc_slot_expr(derived_delta), v)), v
++    return True, "OK", v
++
++
++def qc_check_addr_expr(container, dotted, derived_delta):
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    m = re.match(r"^ADDRESS\(T(?:([+-])0x([0-9a-fA-F]+))?\)$", v)
++    if not m:
++        return False, ("MALFORMED_EXPR:%s:not a supported ADDRESS(T+0x..) "
++                       "expression" % dotted), v
++    got = 0
++    if m.group(1):
++        got = int(m.group(2), 16)
++        if m.group(1) == "-":
++            got = -got
++    if got != derived_delta:
++        return False, ("VALUE_MISMATCH:%s:my derivation ADDRESS(T%s0x%x), "
++                       "got %r" % (dotted, "+" if derived_delta >= 0 else "-",
++                                   abs(derived_delta), v)), v
++    return True, "OK", v
++
++
++def qc_check_arg_slot_expr(container, dotted, derived_delta):
++    """Persisted arg_slots documented finite form 'T0+0x8 (computed)' vs my
++    derived delta (the ' (computed)' suffix is explicitly normalized)."""
++    present, v = field_get(container, dotted)
++    if not present:
++        return False, "MISSING_FIELD:" + dotted, None
++    if type(v) is not str:
++        return False, ("WRONG_TYPE:%s:expected JSON string, got %s"
++                       % (dotted, _tname(v))), v
++    m = re.match(r"^T0(?:([+-])0x([0-9a-fA-F]+))?(?: \(computed\))?$", v)
++    if not m:
++        return False, ("MALFORMED_EXPR:%s:not a supported T0+0x.. "
++                       "(computed) expression" % dotted), v
++    got = 0
++    if m.group(1):
++        got = int(m.group(2), 16)
++        if m.group(1) == "-":
++            got = -got
++    if got != derived_delta:
++        return False, ("VALUE_MISMATCH:%s:my derivation T0%s0x%x, got %r"
++                       % (dotted, "+" if derived_delta >= 0 else "-",
++                          abs(derived_delta), v)), v
++    return True, "OK", v
++
++
+ # ------------------------------------------------------------------ QC artifact gate
+ 
+ def gate(pkg, prov_override=None):
+@@ -874,6 +1025,11 @@
+         checks.append(dict(check=cid, fact=fact, claimed=claimed,
+                            actual=actual, ok=bool(ok)))
+ 
++    def chk_d(cid, fact, claimed, actual, ok, diag):
++        """chk + a named diagnostic for the QC's BR-C1 persisted-fact checks."""
++        chk(cid, fact, claimed, actual, ok)
++        checks[-1]["diagnostic"] = diag if not ok else "OK"
++
+     # 1) physical windows vs WINDOW_IDENTITIES.json
+     wids = json.load(open(os.path.join(pkg, "WINDOW_IDENTITIES.json")))
+     phys = {}
+@@ -989,19 +1145,21 @@
+         and pa["delivery"]["callee_entry_esp"] == "E-0x48")
+ 
+     # 6b) B arg1 kind: OPCODE BYTE at 0x4C47BA
++    #     (BR-C1.3 correction: no OR-fallback to the parallel bridge summary
++    #      field; the exported arg1.value_kind is compared individually)
+     lea_ins = by_va_b[0x4C47BA]
+     kind_from_op = "ADDRESS" if lea_ins.bytes[0] == "8d" else "STACK_READ"
+-    claimed_kind = (nn.get("arg1") or {}).get("value_kind") \
+-        or br.get("b_arg1_value_kind")
++    claimed_kind = (nn.get("arg1") or {}).get("value_kind")
+     chk("PROV-B-KIND", "arg1 kind vs opcode byte 0x%s at 0x4C47BA"
+         % lea_ins.bytes[0], claimed_kind, kind_from_op,
+         claimed_kind == kind_from_op == "ADDRESS")
+ 
+     # 6c) B LEA expr: disp byte + my walk
++    #     (BR-C1.3 correction: no OR-fallback to the parallel bridge summary
++    #      field; the exported arg1.value_expr is compared individually)
+     ldisp = int(lea_ins.bytes[3], 16)
+     lea_res_T = walkB[0x4C47BA] + ldisp - walkB[0x4C47AF]
+-    claimed_expr = (nn.get("arg1") or {}).get("value_expr") \
+-        or br.get("b_arg1_value_expr")
++    claimed_expr = (nn.get("arg1") or {}).get("value_expr")
+     my_expr = ("ADDRESS(T+0x%x)" % lea_res_T if lea_res_T > 0
+                else ("ADDRESS(T)" if lea_res_T == 0
+                      else "ADDRESS(T-0x%x)" % -lea_res_T))
+@@ -1009,13 +1167,17 @@
+         my_expr, claimed_expr == my_expr)
+ 
+     # 6d) joined entry-slot identity: my walk E + src vs [T-0x10]
++    #     (BR-C1.2 correction: field-presence-safe read of the persisted
++    #      a_source_slot_from_T; no KeyError on a missing field)
+     e_join = boundB[0x4C47C1] - 4 - walkB[0x4C47AF]
+     joined = e_join + my_src
+     b_slot = boundB[0x4C47C1] - walkB[0x4C47AF]
++    present_asrc, claimed_asrc = field_get(prov,
++                                           "bridge.a_source_slot_from_T")
++    ok_asrc = (present_asrc and claimed_asrc == qc_slot_expr(joined)
++               and joined == b_slot)
+     chk("PROV-BRIDGE-SLOT", "joined entry-slot identity [E+4]==[T-0x10]",
+-        br["a_source_slot_from_T"], "[T%+d]" % joined,
+-        br["a_source_slot_from_T"] == "[T-0x10]"
+-        and joined == b_slot == -0x10)
++        claimed_asrc if present_asrc else None, qc_slot_expr(joined), ok_asrc)
+ 
+     # 6e) call targets: my rel32 recompute vs pinned roles
+     for win in ("A", "B"):
+@@ -1032,6 +1194,207 @@
+                 "call target (my rel32 recompute) at %s" % va_s(i.va),
+                 pinned, va_s(tgt), tgt == printed == pinned)
+ 
++    # 6e-bis) BR-C1.1 persisted CALL identity (QC's OWN derivation): the
++    # values ACTUALLY exported in phase_b.nonnull_path.call vs my rel32
++    # recompute at the pinned callsite 0x4C47C1 and my derived bridge
++    # predicate. The pinned-role checks above stay as additional checks but
++    # never replace comparing the value actually read from the JSON.
++    bridge_ins = by_va_b[0x4C47C1]
++    if bridge_ins.mn != "call":
++        raise QCUnresolved("pinned bridge callsite 0x4C47C1 is not a call")
++    rel_mine = int.from_bytes(bytes(int(b, 16)
++                                    for b in bridge_ins.bytes[1:5]),
++                              "little", signed=True)
++    target_mine = 0x4C47C1 + 5 + rel_mine
++    bvalid_mine = (target_mine == BRIDGE_ENTRY)
++    ok, dg, val = qc_check_va_str(prov, "phase_b.nonnull_path.call.va",
++                                  0x4C47C1)
++    chk_d("QC-BR11-CALL-VA", "persisted bridge callsite VA (pinned 0x004C47C1)",
++          val, va_s(0x4C47C1), ok, dg)
++    ok, dg, val = qc_check_va_str(prov, "phase_b.nonnull_path.call.target",
++                                  target_mine)
++    chk_d("QC-BR11-CALL-TARGET", "persisted exported CALL target vs my "
++          "rel32-derived target", val, va_s(target_mine), ok, dg)
++    ok, dg, val = qc_check_va_str(prov,
++                                  "phase_b.nonnull_path.call."
++                                  "target_recomputed", target_mine)
++    chk_d("QC-BR11-TARGET-RECOMPUTED", "persisted recomputed CALL target vs "
++          "my rel32-derived target", val, va_s(target_mine), ok, dg)
++    ok, dg, val = qc_check_bool(prov, "phase_b.nonnull_path.call."
++                                "bridge_valid", bvalid_mine)
++    chk_d("QC-BR11-BRIDGE-VALID", "persisted bridge_valid (native JSON "
++          "boolean; false is not a valid positive predicate) vs my derived "
++          "predicate target==window-A entry", val, bvalid_mine, ok, dg)
++
++    # 6e-ter) BR-C1.2 persisted argument-slot identity vs MY walk (B slot -16
++    # / E delta -20 / A entry [E+4]); the relation is DERIVED (E delta + A
++    # entry delta == B slot delta), not duplicate-claims-only.
++    ok, dg, val = qc_check_int(prov, "phase_b.nonnull_path.arg1."
++                               "slot_delta_T0", b_slot)
++    chk_d("QC-BR12-ARG1-SLOT-DELTA", "persisted arg1 slot delta (B slot) vs "
++          "my walk-derived slot", val, b_slot, ok, dg)
++    ok, dg, val = qc_check_int(prov, "phase_b.nonnull_path."
++                               "arg_slot_deltas.arg1", b_slot)
++    chk_d("QC-BR12-ARG-SLOT-DELTAS-ARG1", "persisted arg_slot_deltas.arg1 vs "
++          "my walk-derived slot", val, b_slot, ok, dg)
++    ok, dg, val = qc_check_slot_expr(prov, "bridge.b_arg1_slot", b_slot)
++    chk_d("QC-BR12-B-ARG1-SLOT", "persisted bridge.b_arg1_slot expression vs "
++          "my walk-derived slot", val, qc_slot_expr(b_slot), ok, dg)
++    ok, dg, val = qc_check_int(prov, "bridge.E_delta_from_T", e_join)
++    chk_d("QC-BR12-E-DELTA-FROM-T", "persisted E delta (callee-entry ESP "
++          "under the join) vs my walk-derived delta", val, e_join, ok, dg)
++    ok, dg, val = qc_check_int(prov, "phase_b.nonnull_path.call."
++                               "esp_before_call_delta_T0", b_slot)
++    chk_d("QC-BR12-ESP-BEFORE-CALL-DELTA", "persisted exported ESP-before-"
++          "call delta vs my walk", val, b_slot, ok, dg)
++    ok, dg, val = qc_check_int(prov, "phase_b.nonnull_path.call."
++                               "callee_entry_esp_delta_T0", e_join)
++    chk_d("QC-BR12-CALLEE-ENTRY-DELTA", "persisted exported callee-entry ESP "
++          "delta vs my walk", val, e_join, ok, dg)
++    present_ed, claimed_ed = field_get(prov, "bridge.E_delta_from_T")
++    present_sd, claimed_sd = field_get(prov,
++                                       "phase_b.nonnull_path.arg1."
++                                       "slot_delta_T0")
++    relation_ok = (e_join + my_src == b_slot
++                   and present_ed and present_sd
++                   and type(claimed_ed) is int and type(claimed_sd) is int
++                   and claimed_ed + my_src == claimed_sd)
++    chk_d("QC-BR12-SLOT-RELATION", "derived entry-slot relation [E+4] == "
++          "[T-0x10] (E delta + A entry delta == B slot delta), persisted "
++          "claims consistent with it",
++          (claimed_ed, claimed_sd) if (present_ed and present_sd) else None,
++          (e_join, b_slot), relation_ok,
++          "VALUE_MISMATCH:my derived relation E delta %d + A entry delta %d "
++          "== B slot %d not consistent with claimed values %r / %r"
++          % (e_join, my_src, b_slot, claimed_ed, claimed_sd))
++
++    # 6e-quater) BR-C1.3 persisted pointer value + duplicate bridge summary
++    # (QC's OWN derivation): every representation compared individually to my
++    # LEA/opcode-derived facts (no OR-fallback hides a contradictory parallel
++    # representation); the clean pointer is ADDRESS(T+8), never MEM(T+8).
++    # A's STACK_READ is the argument-slot load of the joined slot [E+4] (the
++    # transmitted pointer), not a B-side pointee read.
++    a_delivery_expr_mine = "MEM(E%s)@%s" % (fmt_off(my_src), va_s(0x528E84))
++    ok, dg, val = qc_check_int(prov, "phase_b.nonnull_path.arg1."
++                               "value_delta", lea_res_T)
++    chk_d("QC-BR13-ARG1-VALUE-DELTA", "persisted arg1 value delta vs my "
++          "LEA-derived delta", val, lea_res_T, ok, dg)
++    ok, dg, val = qc_check_str(prov, "phase_b.nonnull_path.arg_slots.arg1."
++                              "kind", kind_from_op)
++    chk_d("QC-BR13-ARGSLOT-ARG1-KIND", "persisted arg_slots.arg1.kind vs my "
++          "opcode-derived kind", val, kind_from_op, ok, dg)
++    ok, dg, val = qc_check_arg_slot_expr(prov,
++                                         "phase_b.nonnull_path.arg_slots."
++                                         "arg1.expr", lea_res_T)
++    chk_d("QC-BR13-ARGSLOT-ARG1-EXPR", "persisted arg_slots.arg1.expr "
++          "(documented 'T0+0x8 (computed)' form, suffix normalized) vs my "
++          "LEA-derived delta", val, "T0%s0x%x"
++          % ("+" if lea_res_T >= 0 else "-", abs(lea_res_T)), ok, dg)
++    ok, dg, val = qc_check_int(prov, "phase_b.nonnull_path.arg_slots.arg1."
++                               "delta", lea_res_T)
++    chk_d("QC-BR13-ARGSLOT-ARG1-DELTA", "persisted arg_slots.arg1.delta vs my "
++          "LEA-derived delta", val, lea_res_T, ok, dg)
++    ok, dg, val = qc_check_str(prov, "bridge.b_arg1_value_kind", kind_from_op)
++    chk_d("QC-BR13-B-ARG1-VALUE-KIND", "persisted bridge.b_arg1_value_kind "
++          "vs my opcode-derived kind (individual, no fallback)", val,
++          kind_from_op, ok, dg)
++    ok, dg, val = qc_check_addr_expr(prov, "bridge.b_arg1_value_expr",
++                                     lea_res_T)
++    chk_d("QC-BR13-B-ARG1-VALUE-EXPR", "persisted bridge.b_arg1_value_expr "
++          "vs my LEA-derived pointer value (individual, no fallback)", val,
++          my_expr, ok, dg)
++    ok, dg, val = qc_check_addr_expr(prov, "bridge.cross_call_value_expr",
++                                     lea_res_T)
++    chk_d("QC-BR13-CROSSCALL-VALUE-EXPR", "persisted "
++          "bridge.cross_call_value_expr vs my LEA-derived pointer value",
++          val, my_expr, ok, dg)
++    ok, dg, val = qc_check_str(prov, "bridge.a_delivered_value_kind",
++                               "STACK_READ")
++    chk_d("QC-BR13-A-DELIVERED-KIND", "persisted A-side delivered kind = "
++          "STACK_READ of the joined argument slot [E+4] (the transmitted "
++          "pointer), not a B-side pointee read", val, "STACK_READ", ok, dg)
++    ok, dg, val = qc_check_str(prov, "phase_a.delivery.arg1_value_kind",
++                               "STACK_READ")
++    chk_d("QC-BR13-A-DELIVERY-KIND", "persisted A delivery arg1 value kind "
++          "(argument-slot load)", val, "STACK_READ", ok, dg)
++    ok, dg, val = qc_check_str(prov, "phase_a.delivery.arg1_value_expr",
++                               a_delivery_expr_mine)
++    chk_d("QC-BR13-A-DELIVERY-EXPR", "persisted A delivery arg1 expression "
++          "vs my derived argument-slot load expression", val,
++          a_delivery_expr_mine, ok, dg)
++    present_vk, claimed_vk = field_get(prov,
++                                       "phase_b.nonnull_path.arg1."
++                                       "value_kind")
++    present_sk, claimed_sk = field_get(prov,
++                                       "phase_b.nonnull_path.arg_slots.arg1."
++                                       "kind")
++    present_bk, claimed_bk = field_get(prov, "bridge.b_arg1_value_kind")
++    present_be, claimed_be = field_get(prov, "bridge.b_arg1_value_expr")
++    present_ce, claimed_ce = field_get(prov, "bridge.cross_call_value_expr")
++    present_ae, claimed_ae = field_get(prov,
++                                       "phase_b.nonnull_path.arg1."
++                                       "value_expr")
++    parallel_ok = (present_vk and present_sk and present_bk
++                   and present_be and present_ce and present_ae
++                   and claimed_vk == claimed_sk == claimed_bk
++                   == kind_from_op
++                   and claimed_be == claimed_ce == claimed_ae == my_expr)
++    chk_d("QC-BR13-PARALLEL-CONSISTENCY", "the three parallel kind "
++          "representations and the three parallel value expressions agree "
++          "with each other AND with my derivation",
++          (claimed_vk, claimed_sk, claimed_bk, claimed_be, claimed_ce,
++           claimed_ae),
++          (kind_from_op, kind_from_op, kind_from_op, my_expr, my_expr,
++           my_expr), parallel_ok,
++          "VALUE_MISMATCH:contradictory parallel bridge representations "
++          "(kinds %r/%r/%r, exprs %r/%r/%r vs my derived %r/%r)"
++          % (claimed_vk, claimed_sk, claimed_bk, claimed_be, claimed_ce,
++             claimed_ae, kind_from_op, my_expr))
++
++    # 6e-quinquies) BR-C1.4 persisted null-path facts vs MY B-window branch
++    # derivation: for EAX==0 (TEST EAX,EAX -> ZF=1, no intervening flag
++    # writer in my census), JE at 0x4C47AD is taken; the taken path transfers
++    # to 0x4C47C8 OUTSIDE window B before CALL 0x4C47C1, so the CALL is not
++    # reached on this path. 0x4C47C8 remains unopened; no later-behavior
++    # claim.
++    je_ins = by_va_b[0x4C47AD]
++    if je_ins.mn != "je":
++        raise QCUnresolved("conditional branch at 0x4C47AD is not a je")
++    je_target_mine = int(je_ins.ops.strip(), 16)
++    exit_inside_mine = (WIN["B"]["va"] <= je_target_mine
++                        < WIN["B"]["va"] + WIN["B"]["size"])
++    je_conditional = (je_ins.bytes[0] == "74")
++    ok, dg, val = qc_check_va_str(prov, "phase_b.null_path.branch_va",
++                                  0x4C47AD)
++    chk_d("QC-BR14-NULL-BRANCH-VA", "persisted null-path branch VA vs my "
++          "decoded branch instruction", val, va_s(0x4C47AD), ok, dg)
++    ok, dg, val = qc_check_str(prov, "phase_b.null_path.branch_mnemonic",
++                               je_ins.mn)
++    chk_d("QC-BR14-NULL-BRANCH-MNEMONIC", "persisted branch mnemonic vs my "
++          "decoded instruction", val, je_ins.mn, ok, dg)
++    ok, dg, val = qc_check_va_str(prov, "phase_b.null_path.exit_va",
++                                  je_target_mine)
++    chk_d("QC-BR14-NULL-EXIT-VA", "persisted exit VA vs my decoded JE target "
++          "(0x004C47C8; unopened, no later-behavior claim)", val,
++          va_s(je_target_mine), ok, dg)
++    ok, dg, val = qc_check_bool(prov, "phase_b.null_path.exit_inside_window",
++                                exit_inside_mine)
++    chk_d("QC-BR14-NULL-EXIT-INSIDE", "persisted exit_inside_window vs my "
++          "derived window-interval fact", val, exit_inside_mine, ok, dg)
++    ok, dg, val = qc_check_bool(prov, "phase_b.null_path.je_taken", True)
++    chk_d("QC-BR14-NULL-JE-TAKEN", "persisted je_taken (native JSON boolean) "
++          "vs my branch derivation: EAX==0 -> ZF=1 -> JE taken", val, True,
++          ok, dg)
++    ok, dg, val = qc_check_bool(prov, "phase_b.null_path.unconditional_exit",
++                                not je_conditional)
++    chk_d("QC-BR14-NULL-UNCONDITIONAL", "persisted unconditional_exit vs my "
++          "opcode-derived conditionality (0x74 = conditional Jcc)", val,
++          not je_conditional, ok, dg)
++    ok, dg, val = qc_check_bool(prov, "phase_b.null_path.call_reached", False)
++    chk_d("QC-BR14-NULL-CALL-REACHED", "persisted call_reached (native JSON "
++          "boolean): taken branch exits the window before CALL 0x4C47C1",
++          val, False, ok, dg)
++
+     # 6f) flags census TEST->JE (my mnemonic census)
+     between = [i for i in ins["B"]
+                if 0x4C47A3 < i.va < 0x4C47AD and i.mn in FLAG_MN]
