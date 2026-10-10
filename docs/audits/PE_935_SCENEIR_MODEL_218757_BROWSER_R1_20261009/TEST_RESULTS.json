@@ -1,0 +1,113 @@
+{
+  "run_id": "PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009",
+  "artifact": "TEST_RESULTS.json",
+  "phase": "PERSISTENCE_PUBLISH",
+  "purpose": "consolidated machine-readable gate results across all suites and all executors (executor, fresh internal QC, PE-MASTER), with measured values and evidence paths; no new measurements in this phase — every value carried from the cited phase artifacts",
+  "governing_contract": {
+    "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\OPENCODE_SCENEIR_218757_BROWSER_R1_20261009\\OPENCODE_SCENEIR_218757_BROWSER_R1.md",
+    "size_bytes": 18739,
+    "sha256": "1C7FC42F3023B9A2F37FE6E6F3830B217E35DF35D91A48F0455F57CD06D14DB3"
+  },
+  "unit_suite": {
+    "command": "node tests/pecompat/run_tests.mjs --models \"D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt\"",
+    "executor_result": { "pass": 24, "fail": 0, "not_performed": 0, "total": 24 },
+    "negative_control_no_models": {
+      "result": "17 PASS / 1 NOT_PERFORMED",
+      "detail": "T5 reports NOT_PERFORMED_CONTAINER_UNAVAILABLE loudly; never silently skipped",
+      "evidence": "TEST_RESULTS_UNIT.json negative_controls; QC_UNIT_RERUN_NEGCTRL_CONSOLE.txt (QC re-run 17/1 MATCH)"
+    },
+    "qc_reexecution": { "result": "24/0/0", "matches_executor": true, "machine_record": "00_CONTROL_INTERNAL_QC/QC_UNIT_RERUN_MACHINE.json" },
+    "pe_master_reexecution": { "result": "24/24 PASS with pinned container in the worktree + 17 PASS/1 loud NOT_PERFORMED negative control", "verdict": "CONFIRMED" },
+    "test_classes": {
+      "T1_native_vs_ir": { "tests": 2, "status": "PASS 2/2", "tolerance": 1e-4, "measured": { "irCompose_RSP": [96, 202, 306], "threeCompose_RSP": [96, 202, 306], "irCompose_TLS": [58, 221, 363], "threeCompose_TLS": [58, 221, 363] }, "source_of_truth": "native GB 1.2 SceneGraphPrinter probe world bound centers (CONTROLS_B.json; raw/CONTROL_B/*.stdout.txt verbatim)" },
+      "T2_transform_tests": { "tests": ["T2a_nonidentity_root", "T2b_parent_rotate_scale_translate", "T2c_reparent_no_compensation", "T2d_conversion_once"], "status": "PASS 4/4", "measured": { "T2a": [4, 3, 9], "T2b": [96, 202, 306], "T2c_after": [1, 202, 3], "T2d_converted": [0.96, 3.06, -2.02], "T2d_conversion_applications": 1, "T2d_double_conversion_differs": true, "T2d_ir_intact": true } },
+      "T3_instance_separation": { "tests": 1, "status": "PASS", "measured": { "meshAWorldInA": [101, 0, 0], "meshAWorldInB": [1, 200, 0], "sharedArrays": true, "afterMutation_A": [501, 0, 0], "afterMutation_B_unchanged": [1, 200, 0], "assetIntact": true, "uniqueInstanceIds": true } },
+      "T4_invalid_links_and_missing_texture": { "tests": 9, "status": "PASS 9/9", "rejected_classes": ["SCENE_GRAPH_CYCLE", "DANGLING_CHILD_REF", "DANGLING_MODEL_DATA_REF", "MULTI_PARENT_REPORT", "MISSING_MASTER", "DANGLING_SCENE_PARENT", "DUPLICATE_INSTANCE_ID", "INSTANCE_SCENE_CYCLE"], "texture_statuses": { "bound": "TEXTURE_NAME_BOUND", "noentry": "UNTEXTURED_NO_ARK_ENTRY", "noprop": "UNTEXTURED_NO_TEXPROP", "wrongref": "UNTEXTURED_NO_TEXPROP" } },
+      "T5_218757": {
+        "tests": 7, "status": "PASS 7/7",
+        "measured": {
+          "payload_sha256": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+          "container_sha256": "c950a8c26f2063f4dd748d88c95bd769aac77a2f5f76face7e969be0b3d3bee0",
+          "entry_ordinal": 781, "entry_offset": 116223520, "entry_size": 57316,
+          "blocks": 66, "supported": 62, "partially_understood": 2, "opaque": 2,
+          "associations": "14/14", "fingerprints": "14/14 vertex + 14/14 index = 28/28 vs predecessor MODEL_218757_RELATION_RESULTS.json",
+          "roots": [0], "root_name": "Scene Root", "real_child_edges": 27, "eof_exact": true,
+          "file_scene_bounds_min": [-1100, -1500, -100.00001525878906], "file_scene_bounds_max": [1400, 1850, 1150],
+          "texture_binding_census": "9 TEXTURE_NAME_BOUND + 5 UNTEXTURED_NO_TEXPROP; container NOT_ESTABLISHED; tail raw-only"
+        }
+      },
+      "T6_witness": { "tests": 1, "status": "PASS (WITNESS_UNTOUCHED)", "measured": { "working_tree_sha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359", "base_blob_sha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359", "git_blob_id": "7d926fb326339c4983f571cfa839bdefcdd155bb" } }
+    },
+    "in_phase_repair_disclosed": "T2d caught a z-row bug in PecRenderConvert.conversionMatrix (z'=-u*x instead of z'=-u*y) via its independent analytic value; fixed; full suite re-run green. The committed machine summary is the post-fix final run.",
+    "evidence_paths": ["TEST_RESULTS_UNIT.json", "raw/TESTS_MACHINE_SUMMARY.json", "raw/TESTS_CONSOLE_OUTPUT.txt", "raw/sceneir_dump_218757.json", "raw/FILE_SCENE_SPACE_TRANSFORMS_218757.json", "raw/controlB_compare_ROTATED_SCALED_PARENT.json", "raw/controlB_compare_THREE_LEVEL_SOCKET.json", "raw/extract_218757.stdout.txt", "raw/sceneir_dump.stdout.txt", "00_CONTROL_INTERNAL_QC/QC_UNIT_RERUN_MACHINE.json", "00_CONTROL_INTERNAL_QC/QC_UNIT_RERUN_CONSOLE.txt", "00_CONTROL_INTERNAL_QC/QC_UNIT_RERUN_NEGCTRL_CONSOLE.txt"]
+  },
+  "app_suite": {
+    "command": "node tests/pecompat/run_app_tests.mjs --models \"D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt\"",
+    "executor_result": { "pass": 13, "fail": 0, "not_performed": 0, "total": 13, "harness_elapsed_ms": 3524 },
+    "qc_reexecution": { "result": "13/0/0", "matches_executor": true, "note": "raw-dir redirected to 00_CONTROL_INTERNAL_QC/raw_qc/; executor raw/ untouched (mtimes verified)" },
+    "evidence_paths": ["TEST_RESULTS_APP.json", "raw/TESTS_APP_MACHINE_SUMMARY.json", "raw/APP_INTEGRATION_MEASURED.json", "00_CONTROL_INTERNAL_QC/QC_APP_RERUN_CONSOLE.txt", "00_CONTROL_INTERNAL_QC/raw_qc/"],
+    "repairs_disclosed": ["T8 authored2.asset crash (createAuthoredScene returns {registry,instances})", "missing boot() invocation (request-log-proven; honest PENDING intermediate preserved)", "Set-Content double-encoding of 4 compat/*.js files (reversed byte-accurately, normalized to ASCII)"],
+    "final_state_remeasured": "13/13 PASS"
+  },
+  "T7_api_and_path_denial": {
+    "executor": {
+      "server_lifecycle": { "port": 8140, "pid": 2340, "bind": "127.0.0.1", "startup_elapsed_ms": 624, "stopped": true, "lifetime_ms": 711, "port_freed_after_stop": true },
+      "positive_requests": 6,
+      "denials": { "count": 22, "explicit": true, "battery_split": "18 traversal/unconfigured-root/unknown + 4 malformed/method", "classes": ["STATIC_FILE_NOT_ALLOWEDLISTED", "ROUTE_NOT_FOUND", "PATH_TRAVERSAL_BLOCKED", "BACKSLASH_IN_URL", "MALFORMED_URL", "NULL_BYTE_IN_URL", "METHOD_NOT_ALLOWED_READ_ONLY", "UNKNOWN_ASSET_ID"], "payload_leak_markers": "none in any denial body (checked for NIF/BNT markers)" },
+      "evidence_paths": ["TEST_RESULTS_APP.json (T7 section + denial_battery)", "raw/HTTP_TRANSCRIPTS.json"]
+    },
+    "qc_own_requests": { "server": "port 8146, pid 13356 (plus 24128 for the playwright attempt; both stopped, ports freed)", "denials": "10/10 DENIED_EXPLICIT (subset: ../, %2e%2e, absolute /D:/..., /src/pesource, unknown asset 999999, %00 NUL, POST method, unknown route, three-jail ../ and encoded-backslash)", "positives": "3/3 (app HTML, /api/status, /api/sceneir/218757)", "verdict": "PASS", "evidence_path": "00_CONTROL_INTERNAL_QC/QC_t7_subset_output.txt" },
+    "pe_master_construction_review": "CONFIRMED by source read (loopback-only hardcoded bind; exact allowlist map keys — the request URL never becomes a filesystem path; jail-checked three prefix route; GET/HEAD only; malformed/NUL/backslash -> 400; unknown -> 404 ROUTE_NOT_FOUND; SceneIR regenerated fail-closed at startup)"
+  },
+  "T8_app_integration": {
+    "tests": 6, "status": "PASS 6/6 (executor; QC re-run MATCH; PE-MASTER audited)",
+    "measured": {
+      "asset_load": { "payload_sha256": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36", "blocks": 66, "meshes": 14, "elapsed_ms": 458 },
+      "wire_to_asset": { "blocks": 66, "meshes": 14, "composed": 28 },
+      "client_fail_closed_negatives": { "tampered_pin_refused": true, "corrupted_transform_refused": true },
+      "client_fingerprints": { "verified": 14, "status": "OK" },
+      "two_instances_independent": { "bUnchangedAuthored": true, "bUnchangedScene": true, "aMoved": true, "geometryShared": true, "wrappersIndependent": true, "conversionsOnce": true, "distinctWorlds": true, "meshesPerInstance": 14, "sharedGeometryCacheEntries": 14, "aAppliedTranslate": [55.5, 0, 0], "predicate": "trsDeepEqual (authored + composed TRS bit-identical before/after) + BufferGeometry object identity (===)" },
+      "diagnostics_ledger": { "pinVerified": true, "blocks": "62+4=66", "meshes": 14, "textureStatus": "9+5", "ledgerAllVisible": "14/14", "ledgerDpvsHidden": "14/9 (excluded 5)", "inspectorRows": 66, "dpvsHintRows": 5 }
+    },
+    "evidence_paths": ["TEST_RESULTS_APP.json (T8 section)", "raw/APP_INTEGRATION_MEASURED.json"]
+  },
+  "T9_and_headless_evidence": {
+    "executor_headless_runs": {
+      "formal_T9": { "browser": "msedge --headless=new --dump-dom --virtual-time-budget=30000 (dedicated temp profile)", "url": "http://127.0.0.1:8141/", "exit_code": 0, "data_load_status": "READY", "canvas": true, "dom_bytes_chars": 21064, "evidence": ["raw/HEADLESS_RUN.json", "raw/HEADLESS_DOM_DUMP.html"] },
+      "scene_deep_link": { "url": "http://127.0.0.1:8141/#scene", "result": "READY; scene panel visible; instance list populated (author-instance-A/B); scene ledger imported 28 (2x14); independence line populates only after an apply action (honestly not asserted at boot)" }
+    },
+    "pe_master_headless_runs": {
+      "asset_mode": { "dom_file": "PRIVATE_ROOT/pm_browser_audit/pm_asset_dom.html", "size_bytes": 21079, "data_load_status": "READY", "canvas": true, "payload_sha_in_dom": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36", "blocks": "66=62+2+2", "textures": "9+5", "ledger": "imported 14 / visible 14", "labels_present": ["AUTHOR_PLACED_LAB", "RENDER_ADAPTER_CHOICE", "PE_UNITS_NOT_CONFIRMED"] },
+      "scene_mode": { "dom_file": "PRIVATE_ROOT/pm_browser_audit/pm_scene_dom.html", "size_bytes": 9324, "data_load_status": "READY", "instances": ["author-instance-A (t(30,0,-10))", "author-instance-B (t(-30,0,10))"], "ledger_28": "imported 28 (2x14) / visible 28", "independence_line_at_boot": "empty (matches APP_AND_SERVER_NOTES §5; populates after an apply action)" },
+      "server": { "port": 8140, "pid": 21448, "api_status_verified": true, "log": "PRIVATE_ROOT/pm_server_run.log (701 B; the QC dispatch descriptor path was one directory too deep — F-QC-6, RESOLVED)", "stopped": true }
+    },
+    "qc_headless_run": { "url": "http://127.0.0.1:8146/", "data_load_status": "READY", "canvas": true, "payload_sha_in_dom": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36", "mesh_ledger": "imported 14 / visible 14", "diff_vs_executor_dump": "1 line (dynamic server adapter load timing)", "evidence_path": "00_CONTROL_INTERNAL_QC/QC_HEADLESS_DOM_8146.html" },
+    "interactive_verification": {
+      "status": "NOT_PERFORMED",
+      "reason": "automation daemon unavailable (playwright ECONNREFUSED ::1:9222 — QC's own retry attempt failed identically)",
+      "indirect_coverage": "Node app-integration suite (T8) through the app's own builder path + the exposed automation surface window.__pecApp",
+      "open_gate": "SMOKE_CHECKLIST.md",
+      "browser_rule_verdict": { "BROWSER_VERIFICATION": "REAL_BROWSER_LOAD_VERIFIED__INTERACTIVE_NOT_PERFORMED", "ACCEPTED_RUNNABLE_VERIFIED": "NO", "independent_real_browser_loads": 3 }
+    }
+  },
+  "fingerprint_third_implementation_spotcheck": {
+    "by": "fresh internal QC (own NiTriShapeData cursor parser over the SHA-verified pin-copy payload; script 00_CONTROL_INTERNAL_QC/QC_fingerprint_spotcheck.mjs)",
+    "blocks": [
+      { "dataBlock": 20, "mesh": "B_Outpost_me01_Ext_sign:0", "nV": 92, "nT": 56, "vertex_sha256": "3869b16b6ccb33f4d689dbf3e14b6eeb9695140f6d51e54e6cd458c2a4f68064", "index_sha256": "568540599fd86e8164dfb9f701df06549ddab85fa6d0549be2e0eae27c98bdfd", "matches_executor": true, "matches_predecessor": true },
+      { "dataBlock": 47, "mesh": "dPVS_occ04:0", "nV": 30, "nT": 10, "vertex_sha256": "f8848efe7a1f985bc5a7ae9e87f6dc011ebbd38f46f9ee427c72702f458b9ff8", "index_sha256": "c933b00a5ea7b3b09cf20ee0d233e7929fa16c91b109160e843b6f2960fa59c1", "matches_executor": true, "matches_predecessor": true }
+    ],
+    "verdict": "2/2 SPOTCHECK_PASS"
+  },
+  "file_scene_space_artifact": {
+    "qc_reexecution": { "sha256": "227B278397EDF1E59DF3EF1B40CE473C95F2B6465057B087DD7B52B9649BFCD3", "byte_identical_to_executor_artifact": true },
+    "scope": "66 bounded entries (transforms+names, no geometry arrays)"
+  },
+  "standing_limits": {
+    "HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+    "WORLD_XYZ_RECOVERED": "NO",
+    "CANONICAL_GATE_EFFECT": "NONE",
+    "DESKTOP_POST_AUDIT": "PENDING",
+    "NEXT_EXPERIMENT_AUTHORIZED": "NO",
+    "HARD_STOP": "YES"
+  }
+}

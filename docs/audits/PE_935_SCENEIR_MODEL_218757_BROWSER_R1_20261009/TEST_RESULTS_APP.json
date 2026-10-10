@@ -1,0 +1,573 @@
+{
+ "run_id": "PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009",
+ "artifact": "TEST_RESULTS_APP.json",
+ "phase": "APP_SERVER_TESTS",
+ "generated_from": [
+  "raw/TESTS_APP_MACHINE_SUMMARY.json (tests/pecompat/run_app_tests.mjs --models <pinned Models.bnt>)",
+  "raw/HTTP_TRANSCRIPTS.json (T7 transcript + lifecycle)",
+  "raw/HEADLESS_RUN.json (T9)",
+  "raw/HEADLESS_DOM_DUMP.html (T9 DOM evidence)",
+  "raw/APP_INTEGRATION_MEASURED.json (T8 detail dump)"
+ ],
+ "harness_command": "node tests/pecompat/run_app_tests.mjs --models \"D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt\" --raw-dir raw",
+ "numbering_note": "Dispatch T7 = API + path-denial (this file), T8 = app-integration (this file), T9 PREP = headless load (this file). Phase-2 unit gates T1..T6 remain in TEST_RESULTS_UNIT.json (untouched; 24/24 independently re-executed by PE-MASTER).",
+ "totals": {
+  "pass": 13,
+  "fail": 0,
+  "notPerformed": 0,
+  "total": 13
+ },
+ "harness_elapsed_ms": 3524,
+ "container_identity_verified_at_every_server_start": true,
+ "T7_API_AND_PATH_DENIAL": {
+  "class": "real local HTTP requests against the running compat/server-sceneir.mjs",
+  "server_lifecycle": {
+   "port": 8140,
+   "pid": 2340,
+   "startup_line": "sceneir server http://127.0.0.1:8140/ pid=2340",
+   "startup_elapsed_ms": 624,
+   "bind": "127.0.0.1 (loopback only; bind address not configurable)",
+   "port_verification_method": "bind/close probe BEFORE listen + LOUD exit(1) on EADDRINUSE; port-freed rebind probe AFTER kill",
+   "stopped": true,
+   "exit_code": null,
+   "lifetime_ms": 711,
+   "port_freed_after_stop": true
+  },
+  "positive_requests": [
+   {
+    "method": "GET",
+    "url": "/",
+    "status": 200,
+    "bytes": 5296
+   },
+   {
+    "method": "GET",
+    "url": "/compat/app.js",
+    "status": 200,
+    "bytes": 13389
+   },
+   {
+    "method": "GET",
+    "url": "/compat/compat.css",
+    "status": 200,
+    "bytes": 3477
+   },
+   {
+    "method": "GET",
+    "url": "/src/pecompat/PecRenderConvert.js",
+    "status": 200,
+    "bytes": 11878
+   },
+   {
+    "method": "GET",
+    "url": "/node_modules/three/build/three.module.js",
+    "status": 200,
+    "bytes": 650153
+   },
+   {
+    "method": "GET",
+    "url": "/api/sceneir/218757",
+    "status": 200,
+    "bytes": 209552
+   }
+  ],
+  "tests": [
+   {
+    "id": "T7_SERVER_START",
+    "name": "server starts on a verified-free loopback port with fail-closed regenerated SceneIR",
+    "status": "PASS",
+    "measuredQuantity": "startup line + /api/status fields (bind/port/pid/modelId/counts/three pin)",
+    "measured": {
+     "startupLine": "sceneir server http://127.0.0.1:8140/ pid=2340",
+     "statusBind": "127.0.0.1",
+     "statusPort": 8140,
+     "statusPid": 2340,
+     "sceneirModel": 218757,
+     "cacheKey": "218757:3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36:pec-nif101-adapter-v1:pec-sceneir-v1",
+     "counts": {
+      "blocks": 66,
+      "meshes": 14,
+      "supported": 62,
+      "partiallyUnderstood": 2,
+      "opaque": 2
+     },
+     "threeVersion": "0.185.0",
+     "startupElapsedMs": 624
+    },
+    "independentSourceOfTruth": "the child process stdout startup line and the live /api/status response — neither is produced by the test code",
+    "whyNonCircular": "the test only observes what the server itself prints and serves",
+    "failureCaseDetected": "bind not loopback / pid mismatch / SceneIR not regenerated / three pin broken"
+   },
+   {
+    "id": "T7_APP_STATIC_LOADS",
+    "name": "app static surface loads (index/app/css/pec module/pinned three)",
+    "status": "PASS",
+    "measuredQuantity": "HTTP statuses + body markers (canvas/diagnostics ids, module exports, three module size)",
+    "measured": {
+     "root": true,
+     "appJs": true,
+     "css": true,
+     "pecModule": true,
+     "three": true
+    },
+    "independentSourceOfTruth": "real local HTTP responses over the wire",
+    "whyNonCircular": "the served bytes are compared against expectations fixed before the request",
+    "failureCaseDetected": "any static file missing, wrong type, or the three pin route broken"
+   },
+   {
+    "id": "T7_SCENEIR_ENDPOINT",
+    "name": "SceneIR endpoint serves the bounded index-derived regenerated data (pins + 62+4=66 + 14 associations + 9/5 texture statuses)",
+    "status": "PASS",
+    "measuredQuantity": "served wire payload fields vs the run pins and the phase-2 measured accounting",
+    "measured": {
+     "status": 200,
+     "payloadSha256": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+     "containerSha256": "c950a8c26f2063f4dd748d88c95bd769aac77a2f5f76face7e969be0b3d3bee0",
+     "cacheKey": "218757:3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36:pec-nif101-adapter-v1:pec-sceneir-v1",
+     "blocks": 66,
+     "meshAssociations": 14,
+     "decodeCensus": {
+      "SUPPORTED": 62,
+      "PARTIALLY_UNDERSTOOD": 2,
+      "OPAQUE": 2
+     },
+     "textureBound": 9,
+     "textureUntextured": 5,
+     "geometryBlocks": 14,
+     "firstGeoSanity": {
+      "positionsLen": 276,
+      "expectedPos": 276,
+      "indicesLen": 168,
+      "expectedIdx": 168,
+      "vertexSha": "3869b16b6ccb33f4d689dbf3e14b6eeb9695140f6d51e54e6cd458c2a4f68064"
+     },
+     "headersPayloadSha": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+     "adapterLoadElapsedMs": 450
+    },
+    "independentSourceOfTruth": "the pinned SHA256 identities + the predecessor-measured 62+4=66 / 14 / 9+5 accounting",
+    "whyNonCircular": "the endpoint content is compared to externally pinned hashes and counts, not to its own claim",
+    "failureCaseDetected": "stale/unpinned data, wrong counts, wire geometry inconsistent with its own counts"
+   },
+   {
+    "id": "T7_PATH_DENIAL_BATTERY",
+    "name": "synthetic malicious paths (../, absolute, encoded traversal, unconfigured root, unknown route) all DENIED with explicit errors",
+    "status": "PASS",
+    "measuredQuantity": "per-request status + explicit error class + no NIF/BNT payload markers in the body",
+    "measured": {
+     "all_denied_explicit": true,
+     "denial_count": 18,
+     "ids": [
+      "TRAVERSAL_COMPAT",
+      "TRAVERSAL_COMPAT_DECODED",
+      "TRAVERSAL_COMPAT_ENCODED_SLASH",
+      "UNCONFIGURED_ROOT_PESOURCE",
+      "UNCONFIGURED_PEC_ESCAPE",
+      "UNALLOWLISTED_PEC_MODULE",
+      "THREE_ESCAPE_PARENT",
+      "THREE_ESCAPE_GRANDPARENT",
+      "THREE_ESCAPE_ENCODED_BACKSLASH",
+      "ABSOLUTE_DRIVE_PATH",
+      "ABSOLUTE_DRIVE_PATH_DBL",
+      "RAW_DOTDOT_ROOT",
+      "RAW_TRAVERSAL_UP",
+      "UNKNOWN_ASSET_ID",
+      "NONEXISTENT_ARCHIVE_ROUTE",
+      "UNCONFIGURED_DOCS_ROOT",
+      "UNCONFIGURED_TOOLS_ROOT",
+      "UNCONFIGURED_SERVER_FILE"
+     ]
+    },
+    "independentSourceOfTruth": "the wire responses themselves (raw paths sent un-normalized over real HTTP)",
+    "whyNonCircular": "the server code under test is exercised through its public socket; denial classes are read from its own JSON errors",
+    "failureCaseDetected": []
+   },
+   {
+    "id": "T7_MALFORMED_AND_METHOD_DENIAL",
+    "name": "malformed percent/null-byte URLs refused; non-GET methods refused (read-only API)",
+    "status": "PASS",
+    "measuredQuantity": "status + explicit error class per request",
+    "measured": [
+     {
+      "id": "MALFORMED_PERCENT",
+      "method": "GET",
+      "rawPath": "/compat/%zz",
+      "status": 400,
+      "errorClass": "MALFORMED_URL",
+      "verdict": "DENIED_EXPLICIT"
+     },
+     {
+      "id": "NULL_BYTE",
+      "method": "GET",
+      "rawPath": "/compat/%00index.html",
+      "status": 400,
+      "errorClass": "NULL_BYTE_IN_URL",
+      "verdict": "DENIED_EXPLICIT"
+     },
+     {
+      "id": "POST_METHOD",
+      "method": "POST",
+      "rawPath": "/api/sceneir/218757",
+      "status": 405,
+      "errorClass": "METHOD_NOT_ALLOWED_READ_ONLY",
+      "verdict": "DENIED_EXPLICIT"
+     },
+     {
+      "id": "PUT_METHOD",
+      "method": "PUT",
+      "rawPath": "/api/sceneir/218757",
+      "status": 405,
+      "errorClass": "METHOD_NOT_ALLOWED_READ_ONLY",
+      "verdict": "DENIED_EXPLICIT"
+     }
+    ],
+    "independentSourceOfTruth": "raw wire responses",
+    "whyNonCircular": "the requests exercise the server parser and method gate directly",
+    "failureCaseDetected": []
+   },
+   {
+    "id": "T7_SERVER_LIFECYCLE",
+    "name": "bounded server lifecycle: own PID/port recorded, process stopped, port FREED",
+    "status": "PASS",
+    "measuredQuantity": "exit code + port rebind probe after kill",
+    "measured": {
+     "pid": 2340,
+     "port": 8140,
+     "killed": true,
+     "exitCode": null,
+     "signal": "SIGTERM",
+     "lifetimeMs": 711,
+     "portFreed": true,
+     "freedAfterMs": 37
+    },
+    "independentSourceOfTruth": "child exit event + a fresh bind/close probe of the same port",
+    "whyNonCircular": "port freeness is measured by the OS accept path, not by trust in the kill call",
+    "failureCaseDetected": "none"
+   }
+  ],
+  "denial_battery": [
+   {
+    "method": "GET",
+    "path": "/compat/../server.mjs",
+    "status": 404,
+    "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/compat/%2e%2e/server.mjs",
+    "status": 404,
+    "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/compat/..%2f..%2fsrc%2fpesource%2fNifModelReader.js",
+    "status": 404,
+    "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/src/pesource/NifModelReader.js",
+    "status": 404,
+    "errorClass": "ROUTE_NOT_FOUND",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/src/pecompat/../pesource/Bnt2Archive.js",
+    "status": 404,
+    "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/src/pecompat/PecAssetAdapter.js",
+    "status": 404,
+    "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/node_modules/three/../package.json",
+    "status": 403,
+    "errorClass": "PATH_TRAVERSAL_BLOCKED",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/node_modules/three/../../server.mjs",
+    "status": 403,
+    "errorClass": "PATH_TRAVERSAL_BLOCKED",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/node_modules/three/build/..%5C..%5Cpackage.json",
+    "status": 400,
+    "errorClass": "BACKSLASH_IN_URL",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/D:/Eudoria_Reconstruction/pcg_install/Data/Models/Models.bnt",
+    "status": 404,
+    "errorClass": "ROUTE_NOT_FOUND",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "//D:/Eudoria_Reconstruction/pcg_install/Data/Models/Models.bnt",
+    "status": 404,
+    "errorClass": "ROUTE_NOT_FOUND",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/..",
+    "status": 404,
+    "errorClass": "ROUTE_NOT_FOUND",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/../",
+    "status": 404,
+    "errorClass": "ROUTE_NOT_FOUND",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/api/sceneir/999999",
+    "status": 404,
+    "errorClass": "UNKNOWN_ASSET_ID",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/api/archive/Models.bnt/entry/218757.nif",
+    "status": 404,
+    "errorClass": "ROUTE_NOT_FOUND",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/docs/audits/PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009/PLAN_AND_PATH_ALLOWLIST.md",
+    "status": 404,
+    "errorClass": "ROUTE_NOT_FOUND",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/tools/pecompat/sceneir_dump.mjs",
+    "status": 404,
+    "errorClass": "ROUTE_NOT_FOUND",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/compat/server-sceneir.mjs",
+    "status": 404,
+    "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": true
+   },
+   {
+    "method": "GET",
+    "path": "/compat/%zz",
+    "status": 400,
+    "errorClass": "MALFORMED_URL",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": null
+   },
+   {
+    "method": "GET",
+    "path": "/compat/%00index.html",
+    "status": 400,
+    "errorClass": "NULL_BYTE_IN_URL",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": null
+   },
+   {
+    "method": "POST",
+    "path": "/api/sceneir/218757",
+    "status": 405,
+    "errorClass": "METHOD_NOT_ALLOWED_READ_ONLY",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": null
+   },
+   {
+    "method": "PUT",
+    "path": "/api/sceneir/218757",
+    "status": 405,
+    "errorClass": "METHOD_NOT_ALLOWED_READ_ONLY",
+    "verdict": "DENIED_EXPLICIT",
+    "noPayloadLeak": null
+   }
+  ],
+  "denial_design_note": "Denial is BY CONSTRUCTION: static routes are exact allowlist maps (the request URL never becomes a filesystem path); the only prefixed route (the pinned three package) is jail-checked (no \"..\", no backslash, no %, resolve+startsWith the package root); unknown routes return 404 ROUTE_NOT_FOUND. Malformed percent / NUL byte -> 400; non-GET/HEAD -> 405 (read-only API). The whole BNT and the source trees are not reachable through any route."
+ },
+ "T8_APP_INTEGRATION": {
+  "class": "Node-side app-integration checks through the app's own builder path (compat/api.js wireToAsset + compat/scene-mode.js createAuthoredScene/buildInstanceRenderModels + compat/asset-mode.js ledger/inspector builders + compat/api.js buildDiagnosticsModel)",
+  "tests": [
+   {
+    "id": "T8_ASSET_LOAD",
+    "name": "pinned asset load through PecAssetAdapter (fail-closed SHA verified)",
+    "status": "PASS",
+    "measuredQuantity": "payloadSha256 vs pin + block/mesh accounting",
+    "measured": {
+     "payloadSha256": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+     "blocks": 66,
+     "meshes": 14,
+     "elapsedMs": 458
+    },
+    "independentSourceOfTruth": "the pinned SHA256 identities (contract §2)",
+    "whyNonCircular": "the load is refused by the adapter itself on any pin mismatch",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "T8_WIRE_TO_ASSET",
+    "name": "the app client path rebuilds the asset from the served wire (pin + composition cross-checks)",
+    "status": "PASS",
+    "measuredQuantity": "rebuilt IR accounting + client-composed world transforms vs the shipped FILE_SCENE_SPACE artifact",
+    "measured": {
+     "blocks": 66,
+     "meshes": 14,
+     "composed": 28
+    },
+    "independentSourceOfTruth": "the wire payload built by the server module + the phase-2 measured accounting",
+    "whyNonCircular": "the client recomposes transforms itself and cross-checks against the server-shipped artifact — two independent computations must agree",
+    "failureCaseDetected": "wire corruption, pin mismatch, composition mismatch"
+   },
+   {
+    "id": "T8_CLIENT_FAIL_CLOSED_NEGATIVES",
+    "name": "tampered wire (wrong pin / corrupted transform) is REFUSED by the app client path",
+    "status": "PASS",
+    "measuredQuantity": "exception raised by wireToAsset on each tampered input",
+    "measured": {
+     "pinRefused": true,
+     "pinMsg": "[SceneIRApi] PIN MISMATCH -- served payload SHA ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff / container SHA c950a8c26f2063f4dd748d88c95bd76",
+     "trsRefused": true,
+     "trsMsg": "[SceneIRApi] WIRE CROSS-CHECK FAILED at block 0 translate[0]: client 1.25 vs shipped 0 -- refusing"
+    },
+    "independentSourceOfTruth": "the fail-closed checks in compat/api.js (pin + FILE_SCENE cross-check)",
+    "whyNonCircular": "deliberately corrupted inputs must NOT render — the negative control proves the gate is real",
+    "failureCaseDetected": "none (both tampered inputs refused)"
+   },
+   {
+    "id": "T8_CLIENT_FINGERPRINTS",
+    "name": "client-side re-hash of all 14 mesh vertex+index arrays vs the recomputed fingerprints",
+    "status": "PASS",
+    "measuredQuantity": "crypto.subtle SHA256 of the rebuilt typed arrays vs meshAssociations fingerprints",
+    "measured": {
+     "status": "OK",
+     "verified": 14,
+     "elapsedMs": 3
+    },
+    "independentSourceOfTruth": "the predecessor-measured per-mesh fingerprints (phase-2 T7 pins)",
+    "whyNonCircular": "the client recomputes hashes from the arrays it would render and compares them to pinned values",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "T8_TWO_INSTANCES_INDEPENDENT",
+    "name": "two instances from the shared asset: change A leaves B bit-identical; geometry SHARED; wrappers/conversions independent",
+    "status": "PASS",
+    "measuredQuantity": "authored+composed TRS deep-equality before/after; BufferGeometry object identity across instances; conversion-application count",
+    "measured": {
+     "bUnchangedAuthored": true,
+     "bUnchangedScene": true,
+     "aMoved": true,
+     "geometryShared": true,
+     "wrappersIndependent": true,
+     "conversionsOnce": true,
+     "distinctWorlds": true,
+     "meshesPerInstance": 14,
+     "sharedGeometryCacheEntries": 14,
+     "aAppliedTranslate": [
+      55.5,
+      0,
+      0
+     ]
+    },
+    "independentSourceOfTruth": "trsDeepEqual (exact TRS comparison) + THREE object identity (===) of the geometry cache",
+    "whyNonCircular": "the app builder path is executed as the app uses it; the independence predicate compares B against its own pre-change snapshot",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "T8_DIAGNOSTICS_AND_LEDGER_HONEST",
+    "name": "diagnostics fields present and honest; dPVS heuristic ledger reports imported vs visible with reasons (9/5 preserved)",
+    "status": "PASS",
+    "measuredQuantity": "buildDiagnosticsModel + computeVisibilityLedger + buildInspectorRows outputs vs the measured IR accounting",
+    "measured": {
+     "pinVerified": true,
+     "blocks": "62+4=66",
+     "meshes": 14,
+     "textureStatus": "9+5",
+     "ledgerAllVisible": "14/14",
+     "ledgerDpvsHidden": "14/9 (excluded 5)",
+     "inspectorRows": 66,
+     "dpvsHintRows": 5
+    },
+    "independentSourceOfTruth": "the phase-2 measured accounting (62+4=66, 14 meshes, 9 TEXTURE_NAME_BOUND + 5 UNTEXTURED, 5 dPVS-named meshes)",
+    "whyNonCircular": "the diagnostics/ledger builders are fed the SAME asset and their outputs are compared against independently pinned counts — a hidden mesh MUST appear as an exclusion, never as a silent pass",
+    "failureCaseDetected": "none"
+   }
+  ]
+ },
+ "T9_HEADLESS_LOAD": {
+  "class": "T9 PREP — basic real-browser load check of the app URL",
+  "result": "PASS (DOM contains the canvas + diagnostics root; boot reached READY in the real browser)",
+  "browser_binary": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "browser_args": [
+   "--headless=new",
+   "--user-data-dir=<temp>",
+   "--virtual-time-budget=30000",
+   "--dump-dom",
+   "http://127.0.0.1:8141/"
+  ],
+  "url": "http://127.0.0.1:8141/",
+  "server": {
+   "port": 8141,
+   "pid": 7424,
+   "stopped_after": true,
+   "port_freed_after_stop": true
+  },
+  "exit_code": 0,
+  "dom_bytes": 21064,
+  "data_load_status": "READY",
+  "dom_evidence": "raw/HEADLESS_DOM_DUMP.html (the live DOM dump: canvas element, diagnostics root with data-load-status=\"READY\", the rendered asset identity incl. payload SHA256 3e8a22c2..., imported-14 mesh accounting)",
+  "dom_excerpt_note": "The diagnostics panel in the dump shows: era PCG_9_3_5 | container Models/Models.bnt | entry 218757.nif; payload SHA256 3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36; blocks 66 = 62 supported + 2 PARTIALLY_UNDERSTOOD + 2 OPAQUE; imported 14 / visible 14; 9 name-bound + 5 untextured-labeled.",
+  "scope_note": "This is the PREP-level basic load check (one-shot --dump-dom). FULL interactive verification (orbit, instance select, transform change, independence observation, reset/fit, wireframe, dPVS toggle) is additionally performed by PE-MASTER with a real automation browser AFTER this phase, per SMOKE_CHECKLIST.md."
+ },
+ "honest_notes": [
+  "One targeted repair pass was used during this phase (allowed): (a) T8 initially crashed on authored2.asset (the builder returns {registry,instances}) — fixed to read the shared asset record; (b) the app boot function was defined but NOT invoked (headless DOM stayed PENDING; request log proved the SceneIR fetch never happened) — boot() call added with a .catch that sets an honest ERROR data-load-status; (c) a PowerShell Set-Content round-trip double-encoded 4 compat/*.js files (CP1252 mojibake) — reversed by byte-accurate re-decode and normalized to pure ASCII; all three repairs preserved and re-measured green (13/13).",
+  "T7's recorded lifecycle belongs to the FINAL run (port 8140, pid 2340). The intermediate run used port 8264 (findFreePort skipped 8140 — a diagnostic server orphan was holding it at that moment; the orphan was stopped and 8140 re-verified free before the final run; no foreign port was ever touched).",
+  "The headless Edge stderr excerpt contains Edge identity-service noise (headless profile has no credentials) — unrelated to the app; no page errors occurred (module chain + /api/sceneir/218757 all 200 in the request log).",
+  "loadStatus READY means the real-browser boot COMPLETED: WebGLRenderer created (SwiftShader), SceneIR fetched, client pin checks + world-transform cross-checks + all 14 geometry fingerprint re-hashes passed, ASSET MODE mounted.",
+  "No proprietary payloads are committed: the served wire SceneIR (incl. geometry arrays) is regenerated at server startup from the pinned container and exists only in memory/loopback; raw/ contains only transcripts, machine summaries, the app's own DOM dump and bounded JSON artifacts."
+ ],
+ "negative_controls": {
+  "tampered_pin": "T8_CLIENT_FAIL_CLOSED_NEGATIVES: provenance.payloadSha256 replaced with 64x \"f\" -> wireToAsset REFUSED",
+  "corrupted_transform": "T8_CLIENT_FAIL_CLOSED_NEGATIVES: a root localTrs translate +1.25 in the wire -> WIRE CROSS-CHECK FAILED -> REFUSED",
+  "dpvs_ledger": "T8_DIAGNOSTICS_AND_LEDGER_HONEST: heuristic-hiding produces 5 EXPLICIT exclusions with reasons (imported 14 / visible 9) — never a silent pass",
+  "method_gate": "T7_MALFORMED_AND_METHOD_DENIAL: POST/PUT on the data API -> 405 METHOD_NOT_ALLOWED_READ_ONLY",
+  "no_payload_leak": "T7_PATH_DENIAL_BATTERY: every denial body checked for NIF/BNT payload markers (NetImmerse / Gamebryo File Format) — none present"
+ }
+}

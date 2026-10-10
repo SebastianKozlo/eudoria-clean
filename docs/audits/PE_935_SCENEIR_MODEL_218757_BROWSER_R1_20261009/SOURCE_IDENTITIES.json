@@ -1,0 +1,100 @@
+{
+  "run_id": "PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009",
+  "artifact": "SOURCE_IDENTITIES.json",
+  "phase": "SETUP_PREFLIGHT_AND_CONTROLS",
+  "method": "every file measured by this executor (Get-Item length + Get-FileHash SHA256, lowercase hex); 'what_was_read' records the ACTUAL functions/lines examined in this session",
+  "access_class": "READ_ONLY (no SDK-original file was modified; work copies for terrain.gsa/TerrainSample.pal/printer/fixtures are LOCAL_ONLY in PRIVATE_ROOT and byte-identical, SHA-verified)",
+  "role": "ARCHITECTURAL REFERENCES ONLY — these contracts are re-implemented independently; NO SDK source is copied into code that will be committed, and none of this is claimed as exact-build PE proof",
+
+  "gb12_source_files": [
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\Win32\\NiAVObject_Win32.cpp",
+      "size_bytes": 999,
+      "sha256": "75e452680d4b52d469ec69ef33c79cf94bf0f3e334250b8fab3892077bf23fd4",
+      "what_was_read": "FULL. NiAVObject::UpdateWorldData (L22-31): if (m_pkParent) m_kWorld = m_pkParent->m_kWorld * m_kLocal; else m_kWorld = m_kLocal. THE parentWorld*local composition law; root world == local when no parent. Also updates the collision object's world data.",
+      "contract_to_implement": "world = parentWorld * local; root world = local"
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\Win32\\NiTransform.inl",
+      "size_bytes": 1067,
+      "sha256": "92e8acf6d94940344adca654e3a3344656ca3cbb4ba0b4d19b028a08e6c56b7b",
+      "what_was_read": "FULL. NiTransform::operator*(const NiTransform&) (L15-24): res.scale = m_fScale * xform.m_fScale; res.rotate = m_Rotate * xform.m_Rotate; res.translate = m_Translate + m_fScale * (m_Rotate * xform.m_Translate). operator*(const NiPoint3&) (L26-29): (m_Rotate * kPoint) * m_fScale + m_Translate.",
+      "contract_to_implement": "compose(parent, local) = { scale: ps*ls, rotate: pr*lr, translate: pt + ps*(pr*lt) }; point p -> (R*p)*s + t; never flatten by summing positions"
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiAVObject.inl",
+      "size_bytes": 10672,
+      "sha256": "09e1a5a5c88af503d9566b487941305307cba5cb1513147fb49e5a4dbdc91c3b",
+      "what_was_read": "FULL. SetTranslate/SetRotate/SetScale (L82-143) write ONLY m_kLocal (lazy world; SetScale takes NiAbs — negative scales unsupported); GetWorldTranslate/GetWorldRotate/GetWorldScale/GetWorldTransform (L170-193) return m_kWorld — only valid AFTER an Update pass; SetRotateAboutCenter (L128): translate = kTrans + kCen - kRot*kCen; AttachProperty/property list (L210-224, one property per type asserted); UpdateWorldBound virtual stub (L226-230); IsVisualObject = world bound radius != 0 (L232-235); DoSelectedUpdate -> rigid/selected downward pass (L255-264); collision object attach (L276-289).",
+      "contract_to_implement": "serialized TRS is LOCAL state; world is derived; scale is non-negative; SetRotateAboutCenter algebra available for authored controls"
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiNode.cpp",
+      "size_bytes": 33897,
+      "sha256": "38c7a1de1e166345068d296f70f34b1adae27c694e19ead8fa0fbd8b62e0e016",
+      "what_was_read": "AttachChild/DetachChildAt/DetachChild/SetAt (L52-130): parent rebind with NO local-transform compensation (reparent can change world position at next update); function census L52-1046; UpdateDownwardPass (L226-276): optional controllers -> UpdateWorldData() -> children recursion -> merge children's WORLD bounds (visual objects only, radius-0 reset first); UpdateSelectedDownwardPass (L278-328) with GetSelectiveUpdateTransforms gate; UpdateRigidDownwardPass (L330-364) with m_kBound.Update(m_kBound, m_kWorld); UpdateControllers (L366-377); UpdateUpwardPass (L379-392): UpdateWorldBound then parent chain; UpdateWorldBound (L394-415): merge of visual children bounds; GetObjectByName (L749); LoadBinary/LinkObject (L861-918) hierarchy order (children links after parent data).",
+      "contract_to_implement": "node world bound = merged child world bounds; geometry contributes via its own bound; parent chain recomputes upward"
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiGeometry.cpp",
+      "size_bytes": 14679,
+      "sha256": "fde29a81fbd5b7f8df34320dcf9dc91fe32d7d9f2e6e5f70b30b976953eaf335",
+      "what_was_read": "Function census L51-456; SetModelData (L80-93): geometry HOLDS a shared NiGeometryData reference (m_spModelData) — the resource-geometry sharing basis; UpdateWorldBound (L100-110): m_kWorldBound.Update(modelBound, m_kWorld) — the model bound is transformed BY THE WORLD transform (skinned path via UpdateModelBound when present); ApplyTransform (L131+): bakes a transform into the model data on the spot (commuted through the local transform when bOnLeft).",
+      "contract_to_implement": "geometry world bound = model bound x world transform; resource geometry (NiGeometryData) may be shared between geometries while object transforms stay independent"
+    }
+  ],
+
+  "gb26_source_files": [
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\NiTransformationComponent.cpp",
+      "size_bytes": 44666,
+      "sha256": "9c3a1d95a6d83a112291dd1cbd44627a5e2ccfcc008bd4df5f8efb694a6488d3",
+      "what_was_read": "GetSourceTranslation (L222-241) / GetSourceRotation (L243-262) / GetSourceScale (L264-283): source transform from the ATTACHMENT POINT first (its WORLD translate/rotate/scale), else from the Source Entity's Translation/Rotation/Scale property; Clone (L287-311): inherit-clone keeps master + copies source entity; SetMasterComponent (L319-340): clearing the master makes all properties unique; Update (L396-433): ShouldResolveAttachmentPoint -> GetObjectByName(attachment point name) on the source entity's Scene Root Pointer; NOT FOUND -> ReportError(ms_kErrAttachmentPointNotFound) + FALLBACK m_pkAttachmentPoint = pkSceneRoot; GetPropertyData(NiPoint3&) (L1147-1187): property 'Translation' = sourceTranslation + sourceScale * (sourceRotation * localTranslation) WHEN InheritTranslation and all three source components retrieved (reentrancy guard m_bRetrievingTranslation); property 'Local Translation' returns the stored translation DIRECTLY.",
+      "contract_to_implement": "entity Translation (composed with source) is DISTINCT from Local Translation (raw); attachment/source-transform dependency is kept SEPARATE from scene-parent links so no transform is applied twice; a named-anchor miss is an explicit error with a documented fallback"
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\NiTransformationComponent.inl",
+      "size_bytes": 12933,
+      "sha256": "4ecde2ee954244b0d5ac41651b5697112f3b2ee1c87f186f44415efc2b649f6e",
+      "what_was_read": "Property name constants (L15-77); GetTranslation/GetRotation/GetScale (L78-148): inherit from the MASTER COMPONENT's value when the property is not Unique; Set* marks the property Unique (definition-vs-instance property inheritance); Get/SetSourceEntity (L150-163, ClearAttachmentPoint on change); Get/SetAttachmentPointName (L165+); Inherit flags (L189-253); ShouldResolveAttachmentPoint (L260-273) = attachment name set + source entity present + no resolved point + no earlier error.",
+      "contract_to_implement": "instance components inherit unset properties from their master (definition) component — the mechanism Control A reproduces on serialized data"
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\NiSceneGraphComponent.cpp",
+      "size_bytes": 23453,
+      "sha256": "f46dbb142c356774d81109ba10fee7dd1b397d0d9332ad57933dbe4fc264a931",
+      "what_was_read": "Error string constants (L26-42); Update (L233-355): ShouldReloadScene -> asset path RegisterAndResolve -> pkAssetManager->Retrieve(&kNIFParams) -> GetSceneRoot(pkAVObject) -> m_spSceneRoot = the RETRIEVED root (LoadErrorHit + ERR_FILE_LOAD_FAILED on resolve/retrieve failure); then the entity's Translation/Rotation/Scale dependent properties are applied to m_spSceneRoot via SetTranslate/SetRotate/SetScale (LOCAL writes) followed by Update(fTime); missing dependent properties are explicit errors (ERR_TRANSLATION/ROTATION/SCALE_NOT_FOUND); BuildVisibleSet (L357-367): culls m_spSceneRoot through the rendering context's culling process; GetPropertyNames (L369-374): NIF File Path + Scene Root Pointer; CanResetProperty (L376+): NIF path resettable when master present + path changed.",
+      "contract_to_implement": "an entity's scene-graph component owns a RETRIEVED ROOT whose LOCAL transform receives the entity TRS — this SDK root-replacement branch is documented as NOT fully reproduced by the viewer policy (the authored viewer keeps the imported asset hierarchy intact and wraps instances)"
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\NiSceneGraphComponent.inl",
+      "size_bytes": 3732,
+      "sha256": "51c356109a4513ad0ed850e3b85e92bfbd9d870d520424988cbfa6f04f4208c8",
+      "what_was_read": "FULL. GetNifFilePath (L31-41): if (!GetNifFilePathChanged() && m_spMasterComponent) return master's path — THE NIF path inheritance; SetNifFilePath (L43-53) clears the scene root + sets the changed bit; GetSceneRoot (L55-58); ShouldReloadScene (L60-74): path differs OR root null (and no load error) -> reload; flag accessors (L76-106).",
+      "contract_to_implement": "inherited asset path: instance components without their own NIF File Path use the master component's path (reproduced in Control A)"
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\NiExternalAssetNIFHandler.cpp",
+      "size_bytes": 12796,
+      "sha256": "38e13c8a46e491784e4f6679efb0601587e0cbd75d68498d86568dcc76130580",
+      "what_was_read": "Function census L28-409; LoadNIFFile (L155-200): one pristine NiAVObject root per asset path (top-level object 0, NiDynamicCast NiAVObject; ERR_NIF_ROOT_OBJECT otherwise) stored in m_kAVObjectMap + a clone set per asset; Retrieve (L202-256): bNeedToClone = GetCloneFromPristine() OR (existing refcount > 2, i.e. a clone already exists) -> NiCloningProcess COPY_EXACT Clone of the pristine root, recorded in the asset's clone set; else the pristine root itself is handed out. Unload/UnloadAll (L258+) drop clones/unused assets.",
+      "contract_to_implement": "ASSET identity (pristine root per path) is modeled SEPARATELY from runtime INSTANCE identity (clones); resource geometry may be shared while object transforms/instance IDs stay independent — the viewer's instance wrapper owns its scene transform and must not mutate the shared pristine hierarchy"
+    }
+  ],
+
+  "sdk_sample_assets_read": [
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\smallpillar.nif",
+      "size_bytes": 29422,
+      "sha256": "bcc97bf3d102f33188a771045aca198ee63b14db811404f5a178a55638f0f796",
+      "what_was_read": "HEADER LINE ONLY (first bytes): 'Gamebryo File Format, Version 20.5.0.4'. Recorded as a fact for Control A; NO NIF 20.5 reader attempted; the GB 1.2 stock tool does not support this version. No body bytes were decoded.",
+      "contract_to_implement": "none (version fact + explicit unsupported-feature surface)"
+    }
+  ],
+
+  "notes": [
+    "These files are ARCHITECTURAL references (NDL/Emergent proprietary source, read under the existing local SDK license for analysis); none of their code is copied into this run's committed implementation — only the documented behavioral contracts above are re-implemented independently and tested.",
+    "PE_AXES_AND_UNITS remain UNVERIFIED_FROM_ENGINE; any render-axis/unit conversion in the viewer is a labeled RENDER_ADAPTER_CHOICE applied exactly once, leaving serialized values intact.",
+    "The reader/writer difference: PE NIF files declare NiArk classes (4838/4838 10.1 files per the predecessor census); the GB 2.6 NiStream minimum accepted version is 10.1.0.114 while PE 10.1.0.0 files are older — SDK loaders are NOT assumed compatible with PE assets (see contract §1 standing limits)."
+  ]
+}

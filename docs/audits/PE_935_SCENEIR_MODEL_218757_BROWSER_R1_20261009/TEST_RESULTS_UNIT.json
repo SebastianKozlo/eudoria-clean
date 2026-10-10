@@ -1,0 +1,1058 @@
+{
+ "run_id": "PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009",
+ "artifact": "TEST_RESULTS_UNIT.json",
+ "phase": "IR_ADAPTER_UNIT_TESTS",
+ "generated_from": "raw/TESTS_MACHINE_SUMMARY.json (tests/pecompat/run_tests.mjs --models <pinned Models.bnt> --tol 1e-4)",
+ "harness_command": "node tests/pecompat/run_tests.mjs --models \"D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt\" --json-out raw/TESTS_MACHINE_SUMMARY.json --artifact-out raw/FILE_SCENE_SPACE_TRANSFORMS_218757.json",
+ "numbering_note": "Dispatch T1..T6 over the plan T1..T8 classes; plan-class names in parentheses",
+ "totals": {
+  "pass": 24,
+  "fail": 0,
+  "notPerformed": 0,
+  "total": 24
+ },
+ "tolerances": {
+  "default_per_component": 0.0001,
+  "synthetic_exact_arithmetic": 1e-9,
+  "conversion_analytic": 1e-12,
+  "bounds_cross_check": 0.001
+ },
+ "negative_controls": {
+  "without_models_flag": {
+   "result": "17 PASS / 1 NOT_PERFORMED (T5 reports NOT_PERFORMED_CONTAINER_UNAVAILABLE loudly; never silently skipped)",
+   "executed": true
+  },
+  "double_conversion": "T2d asserts double conversion differs from single",
+  "compensating_reparent": "T2c asserts a compensating reparent would fail the after-value check",
+  "fixture_identity": "T1 verifies fixture SHA256 vs phase-1 pins before comparing"
+ },
+ "T1_NATIVE_VS_IR": {
+  "class": "native Control B comparison (plan T1)",
+  "tests": [
+   {
+    "id": "T1_ROTATED_SCALED_PARENT",
+    "name": "native control comparison (ROTATED_SCALED_PARENT)",
+    "status": "PASS",
+    "measured": {
+     "irCompose": [
+      96,
+      202,
+      306
+     ],
+     "threeCompose": [
+      96,
+      202,
+      306
+     ],
+     "fixtureSha256": "56fe7fec78c229acc9919735078b4f48b1c44b74bce01bca7814db023f4d5a19",
+     "cameraBlock": 1
+    },
+    "expected": [
+     96,
+     202,
+     306
+    ],
+    "tolerance": 0.0001,
+    "sourceOfTruth": "native GB 1.2 SceneGraphPrinter probe world bound center (phase-1 CONTROLS_B.json): (96,202,306)",
+    "whyNonCircular": "IR math (PecTransform) and THREE.Matrix4 math are independent engines; both are compared to a NATIVE-captured value neither produced",
+    "failureCase": "none"
+   },
+   {
+    "id": "T1_THREE_LEVEL_SOCKET",
+    "name": "native control comparison (THREE_LEVEL_SOCKET)",
+    "status": "PASS",
+    "measured": {
+     "irCompose": [
+      58,
+      221,
+      363
+     ],
+     "threeCompose": [
+      58,
+      221,
+      363
+     ],
+     "fixtureSha256": "0c71d5fdd4a70dd17b38ee49c3279747c772a0f96fe02a02c90aac716b441873",
+     "cameraBlock": 2
+    },
+    "expected": [
+     58,
+     221,
+     363
+    ],
+    "tolerance": 0.0001,
+    "sourceOfTruth": "native GB 1.2 SceneGraphPrinter probe world bound center (phase-1 CONTROLS_B.json): (58,221,363)",
+    "whyNonCircular": "IR math (PecTransform) and THREE.Matrix4 math are independent engines; both are compared to a NATIVE-captured value neither produced",
+    "failureCase": "none"
+   }
+  ]
+ },
+ "T2_TRANSFORM_TESTS": {
+  "class": "authored synthetic IR tests (plan T2/T3)",
+  "tests": [
+   {
+    "id": "T2a_nonidentity_root",
+    "name": "non-identity asset root composition",
+    "status": "PASS",
+    "measured": [
+     4,
+     3,
+     9
+    ],
+    "expected": [
+     4,
+     3,
+     9
+    ],
+    "tolerance": 1e-9,
+    "sourceOfTruth": "literal in-test arithmetic: rootT + rootS*(Rz90*childT) = (10,0,0)+3*(-2,1,3) = (4,3,9)",
+    "whyNonCircular": "expected value computed by hand from the composition law, never by calling composeTrs",
+    "failureCase": "none"
+   },
+   {
+    "id": "T2b_parent_rotate_scale_translate",
+    "name": "parent rotation + uniform scale + translation",
+    "status": "PASS",
+    "measured": [
+     96,
+     202,
+     306
+    ],
+    "expected": [
+     96,
+     202,
+     306
+    ],
+    "tolerance": 1e-9,
+    "sourceOfTruth": "literal in-test arithmetic: (100,200,300)+2*(Rz90*(1,2,3))=(96,202,306)",
+    "whyNonCircular": "hand-computed expectation; also mirrors the native Control B value for an independent cross-anchor",
+    "failureCase": "none"
+   },
+   {
+    "id": "T2c_reparent_no_compensation",
+    "name": "reparenting changes world by composition, local TRS unchanged",
+    "status": "PASS",
+    "measured": {
+     "before": [
+      96,
+      202,
+      306
+     ],
+     "after": [
+      1,
+      202,
+      3
+     ],
+     "localUnchanged": true
+    },
+    "expected": {
+     "before": [
+      96,
+      202,
+      306
+     ],
+     "after": [
+      1,
+      202,
+      3
+     ],
+     "localUnchanged": true
+    },
+    "tolerance": 1e-9,
+    "sourceOfTruth": "literal arithmetic: under A (100,200,300)+2*(Rz90*(1,2,3))=(96,202,306); under B (0,200,0)+(1,2,3)=(1,202,3); GB SetAt performs NO local compensation",
+    "whyNonCircular": "expectations hand-computed; the no-compensation behavior is asserted directly (a compensating engine would fail the after-value check)",
+    "failureCase": "none"
+   },
+   {
+    "id": "T2d_conversion_once",
+    "name": "render-axis/unit conversion applied exactly once, originals intact",
+    "status": "PASS",
+    "measured": {
+     "converted": [
+      0.96,
+      3.06,
+      -2.02
+     ],
+     "doubleConversion": [
+      0.0096,
+      -0.0202,
+      -0.030600000000000002
+     ],
+     "conversionApplications": 1,
+     "appliedOnce": true,
+     "irIntact": true,
+     "threeWorldPos": [
+      0.04000000000000001,
+      0.09,
+      -0.03
+     ],
+     "irSceneThenConverted": [
+      0.04,
+      0.09,
+      -0.03
+     ],
+     "choice": {
+      "axisMap": "(x, z, -y)",
+      "unitScale": 0.01,
+      "labels": [
+       "RENDER_ADAPTER_CHOICE",
+       "PE_UNITS_NOT_CONFIRMED"
+      ]
+     }
+    },
+    "expected": {
+     "converted": [
+      0.96,
+      3.06,
+      -2.02
+     ],
+     "conversionApplications": 1,
+     "appliedOnce": true,
+     "irIntact": true,
+     "doubleConversionDiffers": true
+    },
+    "tolerance": 1e-12,
+    "sourceOfTruth": "analytic conversion (x,z,-y)*0.01; double conversion must differ; the serialized TRS must be unchanged by the render build",
+    "whyNonCircular": "the once-ness is asserted structurally (a counter hook counts actual applications) and by negative control (double conversion differs)",
+    "failureCase": "none"
+   }
+  ]
+ },
+ "T3_INSTANCE_SEPARATION": {
+  "class": "two instances of one asset (plan T4)",
+  "tests": [
+   {
+    "id": "T3_instance_separation",
+    "name": "two instances: shared geometry, independent transforms",
+    "status": "PASS",
+    "measured": {
+     "instanceSceneTransforms": {
+      "A": [
+       100,
+       0,
+       0
+      ],
+      "B": [
+       0,
+       200,
+       0
+      ]
+     },
+     "meshAWorldInA": [
+      101,
+      0,
+      0
+     ],
+     "meshAWorldInB": [
+      1,
+      200,
+      0
+     ],
+     "sharedGeometry": true,
+     "sharedArrays": true,
+     "wrapperSeparate": true,
+     "afterMutation": {
+      "A": [
+       501,
+       0,
+       0
+      ],
+      "B": [
+       1,
+       200,
+       0
+      ],
+      "aChanged": true,
+      "bUnchanged": true
+     },
+     "assetIntact": true,
+     "uniqueInstanceIds": true,
+     "viewerWrapperPolicy": "AUTHORED_VIEWER_INSTANCE_WRAPPER: the instance wrapper owns its scene transform; the imported asset hierarchy retains its serialized root/child transforms. NOT a reproduction of every SDK 2.6 NiSceneGraphComponent root-replacement branch or the original PE placement mechanism (HISTORICAL_WORLD_INSTANCE = NOT_ESTABLISHED)."
+    },
+    "expected": {
+     "meshAWorldInA": [
+      101,
+      0,
+      0
+     ],
+     "meshAWorldInB": [
+      1,
+      200,
+      0
+     ],
+     "sharedGeometry": true,
+     "sharedArrays": true,
+     "wrapperSeparate": true,
+     "afterMutation": {
+      "A": [
+       501,
+       0,
+       0
+      ],
+      "B": [
+       1,
+       200,
+       0
+      ],
+      "aChanged": true,
+      "bUnchanged": true
+     },
+     "assetIntact": true,
+     "uniqueInstanceIds": true
+    },
+    "tolerance": null,
+    "sourceOfTruth": "literal analytic transforms: A=(100,0,0)->meshA world (101,0,0); B=(0,200,0)->(1,200,0); after A->(500,0,0): A=(501,0,0), B UNCHANGED",
+    "whyNonCircular": "hand-computed expectations; separation asserted by exact before/after comparison of the untouched instance and by object identity for shared geometry",
+    "failureCase": "none"
+   }
+  ]
+ },
+ "T4_INVALID_LINKS": {
+  "class": "invalid/missing link controlled failures + missing texture (plan T5/T6)",
+  "tests": [
+   {
+    "id": "T4a_cycle_rejected",
+    "name": "scene-child cycle rejected loudly",
+    "status": "PASS",
+    "measured": {
+     "cycleReported": true,
+     "composedAnyway": false,
+     "errorClasses": [
+      "SCENE_GRAPH_CYCLE",
+      "NO_ROOT"
+     ]
+    },
+    "expected": {
+     "cycleReported": true,
+     "composedAnyway": false
+    },
+    "tolerance": null,
+    "sourceOfTruth": null,
+    "whyNonCircular": "a deliberately cyclic authored graph; success = correct rejection behavior",
+    "failureCase": "none (cycle correctly rejected)"
+   },
+   {
+    "id": "T4b_dangling_child_rejected",
+    "name": "dangling required child link rejected",
+    "status": "PASS",
+    "measured": {
+     "dangReported": true,
+     "composedAnyway": false,
+     "errorClasses": [
+      "DANGLING_CHILD_REF",
+      "CHILD_REF_OUT_OF_RANGE"
+     ]
+    },
+    "expected": {
+     "dangReported": true,
+     "composedAnyway": false
+    },
+    "tolerance": null,
+    "sourceOfTruth": null,
+    "whyNonCircular": "a deliberately dangling authored link; success = correct rejection",
+    "failureCase": "none (dangling child correctly rejected)"
+   },
+   {
+    "id": "T4c_dangling_data_ref",
+    "name": "dangling model-data ref diagnosed",
+    "status": "PASS",
+    "measured": {
+     "dataReported": true,
+     "errorClasses": [
+      "DANGLING_MODEL_DATA_REF"
+     ]
+    },
+    "expected": {
+     "dataReported": true
+    },
+    "tolerance": null,
+    "sourceOfTruth": null,
+    "whyNonCircular": "controlled invalid resource link; success = correct diagnosis",
+    "failureCase": "none"
+   },
+   {
+    "id": "T4d_multi_parent_reported",
+    "name": "multiple parents reported (never silently selected)",
+    "status": "PASS",
+    "measured": {
+     "multiReportedWithBothParents": true,
+     "composedAnyway": false,
+     "report": {
+      "class": "MULTI_PARENT_REPORT",
+      "multiParent": [
+       {
+        "child": 3,
+        "parents": [
+         1,
+         2
+        ]
+       }
+      ]
+     }
+    },
+    "expected": {
+     "multiReportedWithBothParents": true,
+     "composedAnyway": false
+    },
+    "tolerance": null,
+    "sourceOfTruth": null,
+    "whyNonCircular": "a deliberately conflicting authored graph; success = full report + refusal",
+    "failureCase": "none (both parents reported; no arbitrary selection)"
+   },
+   {
+    "id": "T4e_missing_master",
+    "name": "missing master (attachment source) rejected",
+    "status": "PASS",
+    "measured": "[PecInstanceBuilder] attachment source \"ghost-master\" does not exist (MISSING_MASTER — REJECTED)",
+    "expected": "loud rejection mentioning \"MISSING_MASTER\"",
+    "tolerance": null,
+    "sourceOfTruth": null,
+    "whyNonCircular": "a deliberately missing master reference; success = loud rejection (no silent identity instance)",
+    "failureCase": "none (invalid input correctly rejected)"
+   },
+   {
+    "id": "T4f_dangling_scene_parent",
+    "name": "dangling scene parent rejected",
+    "status": "PASS",
+    "measured": "[PecInstanceBuilder] sceneParentId \"ghost-parent\" does not exist (DANGLING_SCENE_PARENT — REJECTED; no silent identity transform)",
+    "expected": "loud rejection mentioning \"DANGLING_SCENE_PARENT\"",
+    "tolerance": null,
+    "sourceOfTruth": null,
+    "whyNonCircular": "a deliberately missing parent; success = loud rejection",
+    "failureCase": "none (invalid input correctly rejected)"
+   },
+   {
+    "id": "T4g_duplicate_instance_id",
+    "name": "duplicate instanceId rejected",
+    "status": "PASS",
+    "measured": "[PecInstanceBuilder] duplicate instanceId \"dup\" — REJECTED (instance identity must stay unique)",
+    "expected": "loud rejection mentioning \"duplicate instanceId\"",
+    "tolerance": null,
+    "sourceOfTruth": null,
+    "whyNonCircular": "instance identity must stay unique (contract §6)",
+    "failureCase": "none (invalid input correctly rejected)"
+   },
+   {
+    "id": "T4h_instance_scene_cycle",
+    "name": "instance scene-parent cycle rejected",
+    "status": "PASS",
+    "measured": {
+     "errors": [
+      {
+       "class": "INSTANCE_SCENE_CYCLE",
+       "path": [
+        "c1",
+        "c2",
+        "c1"
+       ]
+      }
+     ],
+     "composedAnyway": false
+    },
+    "expected": {
+     "cycleDetected": true,
+     "composedAnyway": false
+    },
+    "tolerance": null,
+    "sourceOfTruth": null,
+    "whyNonCircular": "a deliberately cyclic instance chain; success = detection + refusal",
+    "failureCase": "none (cycle detected and refused)"
+   },
+   {
+    "id": "T4b_missing_texture_diagnostic",
+    "name": "missing/unknown texture -> labeled untextured + diagnostic, no false binding",
+    "status": "PASS",
+    "measured": {
+     "statuses": {
+      "bound": "TEXTURE_NAME_BOUND",
+      "noentry": "UNTEXTURED_NO_ARK_ENTRY",
+      "noprop": "UNTEXTURED_NO_TEXPROP",
+      "wrongref": "UNTEXTURED_NO_TEXPROP"
+     },
+     "boundNames": [
+      "SYN_part_0_BASE"
+     ],
+     "boundContainerResolution": "NOT_ESTABLISHED (name/property bindings only; no texture bytes resolved in this run)",
+     "untexturedDiagnostics": [
+      {
+       "class": "UNTEXTURED_MESH",
+       "meshBlock": 2,
+       "meshName": "noentry",
+       "status": "UNTEXTURED_NO_ARK_ENTRY"
+      },
+      {
+       "class": "UNTEXTURED_MESH",
+       "meshBlock": 3,
+       "meshName": "noprop",
+       "status": "UNTEXTURED_NO_TEXPROP"
+      },
+      {
+       "class": "UNTEXTURED_MESH",
+       "meshBlock": 4,
+       "meshName": "wrongref",
+       "status": "UNTEXTURED_NO_TEXPROP"
+      }
+     ],
+     "materialLabels": {
+      "bound": {
+       "textureBindingStatus": "TEXTURE_NAME_BOUND",
+       "materialClass": "PLAIN_LABELED (texture names recorded; container resolution NOT_ESTABLISHED — no texture bytes bound in this run)"
+      },
+      "noentry": {
+       "textureBindingStatus": "UNTEXTURED_NO_ARK_ENTRY",
+       "materialClass": "UNTEXTURED_LABELED (diagnostic recorded; geometry viewable)"
+      },
+      "noprop": {
+       "textureBindingStatus": "UNTEXTURED_NO_TEXPROP",
+       "materialClass": "UNTEXTURED_LABELED (diagnostic recorded; geometry viewable)"
+      },
+      "wrongref": {
+       "textureBindingStatus": "UNTEXTURED_NO_TEXPROP",
+       "materialClass": "UNTEXTURED_LABELED (diagnostic recorded; geometry viewable)"
+      }
+     },
+     "checks": {
+      "boundStatus": true,
+      "boundNames": true,
+      "boundContainerUnresolved": true,
+      "noentryStatus": true,
+      "noentryNoFalseBinding": true,
+      "nopropStatus": true,
+      "wrongrefNotBound": true,
+      "diagnosticsRecorded": true
+     }
+    },
+    "expected": {
+     "bound": "TEXTURE_NAME_BOUND (names only; container NOT_ESTABLISHED)",
+     "noentry": "UNTEXTURED_NO_ARK_ENTRY",
+     "noprop": "UNTEXTURED_NO_TEXPROP",
+     "wrongref": "UNTEXTURED_NO_TEXPROP (material property NOT misread as texture)",
+     "diagnosticsRecorded": 3,
+     "geometryStillViewable": true
+    },
+    "tolerance": null,
+    "sourceOfTruth": "the authored synthetic binding design (only mesh \"bound\" carries an ArkTexture name entry; texprop 11 has none; mesh \"wrongref\" only references a MATERIAL property)",
+    "whyNonCircular": "any status other than the authored truth (including a false binding of \"wrongref\" to the material block) fails",
+    "failureCase": "none"
+   }
+  ]
+ },
+ "T5_218757": {
+  "class": "pinned extraction + 14 associations + fingerprints (plan T7)",
+  "tests": [
+   {
+    "id": "T5a_extraction_identity",
+    "name": "pinned extraction identity (container/payload/entry cross-checks)",
+    "status": "PASS",
+    "measured": {
+     "containerSha256": "c950a8c26f2063f4dd748d88c95bd769aac77a2f5f76face7e969be0b3d3bee0",
+     "payloadSha256": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+     "entryOrdinal": 781,
+     "entryOffset": 116223520,
+     "entrySize": 57316,
+     "entryCrc32": 3775534646
+    },
+    "expected": {
+     "containerSha256": "c950a8c26f2063f4dd748d88c95bd769aac77a2f5f76face7e969be0b3d3bee0",
+     "payloadSha256": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+     "entryOrdinal": 781,
+     "entryOffset": 116223520,
+     "entrySize": 57316
+    },
+    "tolerance": null,
+    "sourceOfTruth": "contract §2 pins (C950A8C2... container, 3E8A22C2... payload, 781/116223520/57316 cross-checks)",
+    "whyNonCircular": "pins fixed before the run; the adapter is fail-closed against them",
+    "failureCase": "none"
+   },
+   {
+    "id": "T5b_block_census_and_accounting",
+    "name": "66-block census; 62 supported + 4 Ark partially-understood/opaque",
+    "status": "PASS",
+    "measured": {
+     "census": {
+      "NiTriShape": 14,
+      "NiTriShapeData": 14,
+      "NiNode": 12,
+      "NiTexturingProperty": 9,
+      "NiMaterialProperty": 9,
+      "NiDirectionalLight": 2,
+      "NiArkAnimationExtraData": 1,
+      "NiArkImporterExtraData": 1,
+      "NiArkTextureExtraData": 1,
+      "NiArkViewportInfoExtraData": 1,
+      "NiStringExtraData": 1,
+      "NiZBufferProperty": 1
+     },
+     "decodeCensus": {
+      "SUPPORTED": 62,
+      "PARTIALLY_UNDERSTOOD": 2,
+      "OPAQUE": 2
+     },
+     "arkStatuses": [
+      "1:NiArkAnimationExtraData:OPAQUE",
+      "2:NiArkImporterExtraData:PARTIALLY_UNDERSTOOD",
+      "3:NiArkTextureExtraData:PARTIALLY_UNDERSTOOD",
+      "13:NiArkViewportInfoExtraData:OPAQUE"
+     ]
+    },
+    "expected": {
+     "census": {
+      "NiNode": 12,
+      "NiArkAnimationExtraData": 1,
+      "NiArkImporterExtraData": 1,
+      "NiArkTextureExtraData": 1,
+      "NiTexturingProperty": 9,
+      "NiArkViewportInfoExtraData": 1,
+      "NiStringExtraData": 1,
+      "NiMaterialProperty": 9,
+      "NiZBufferProperty": 1,
+      "NiTriShape": 14,
+      "NiTriShapeData": 14,
+      "NiDirectionalLight": 2
+     },
+     "total": 66,
+     "supported": 62,
+     "arkBlocks": 4
+    },
+    "tolerance": null,
+    "sourceOfTruth": "predecessor q5 census + contract §1 62/4 ceiling",
+    "whyNonCircular": "census counted from THIS reader over pinned bytes; compared to an independently measured reference",
+    "failureCase": "none"
+   },
+   {
+    "id": "T5c_14_associations_and_fingerprints",
+    "name": "14 mesh/data associations + 28 fingerprint comparison vs predecessor",
+    "status": "PASS",
+    "measured": {
+     "rows": [
+      {
+       "meshBlock": 18,
+       "meshName": "B_Outpost_me01_Ext_sign:0",
+       "dataBlock": 20,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 92,
+       "numTriangles": 56
+      },
+      {
+       "meshBlock": 23,
+       "meshName": "B_Outpost_me01_Ext_main:0",
+       "dataBlock": 24,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 42,
+       "numTriangles": 18
+      },
+      {
+       "meshBlock": 25,
+       "meshName": "B_Outpost_me01_Ext_main:1",
+       "dataBlock": 26,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 182,
+       "numTriangles": 120
+      },
+      {
+       "meshBlock": 27,
+       "meshName": "B_Outpost_me01_Ext_main:2",
+       "dataBlock": 28,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 58,
+       "numTriangles": 28
+      },
+      {
+       "meshBlock": 29,
+       "meshName": "B_Outpost_me01_Ext_main:3",
+       "dataBlock": 30,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 158,
+       "numTriangles": 76
+      },
+      {
+       "meshBlock": 31,
+       "meshName": "B_Outpost_me01_Ext_main:4",
+       "dataBlock": 32,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 13,
+       "numTriangles": 6
+      },
+      {
+       "meshBlock": 34,
+       "meshName": "B_Outpost_me01_Ext_vent03:0",
+       "dataBlock": 36,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 64,
+       "numTriangles": 38
+      },
+      {
+       "meshBlock": 38,
+       "meshName": "B_Outpost_me01_Ext_bigdoors:0",
+       "dataBlock": 40,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 208,
+       "numTriangles": 136
+      },
+      {
+       "meshBlock": 42,
+       "meshName": "B_Outpost_me01_Ext_smaldoor:0",
+       "dataBlock": 43,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 24,
+       "numTriangles": 12
+      },
+      {
+       "meshBlock": 45,
+       "meshName": "dPVS_occ04:0",
+       "dataBlock": 47,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 30,
+       "numTriangles": 10
+      },
+      {
+       "meshBlock": 49,
+       "meshName": "dPVS_occ02:0",
+       "dataBlock": 51,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 28,
+       "numTriangles": 10
+      },
+      {
+       "meshBlock": 53,
+       "meshName": "dPVS_occ03:0",
+       "dataBlock": 55,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 24,
+       "numTriangles": 8
+      },
+      {
+       "meshBlock": 57,
+       "meshName": "dPVS_occ01:0",
+       "dataBlock": 59,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 4,
+       "numTriangles": 2
+      },
+      {
+       "meshBlock": 61,
+       "meshName": "dPVS_occ05:0",
+       "dataBlock": 63,
+       "assocOk": true,
+       "vertexHashOk": true,
+       "indexHashOk": true,
+       "numVertices": 18,
+       "numTriangles": 6
+      }
+     ],
+     "assocPass": 14,
+     "fingerPass": 14,
+     "roundtripOk": true
+    },
+    "expected": {
+     "assocPass": 14,
+     "fingerPass": 14,
+     "roundtripOk": true
+    },
+    "tolerance": null,
+    "sourceOfTruth": "predecessor MODEL_218757_RELATION_RESULTS.json (independent Python s2-lineage parser, byte-identical payload)",
+    "whyNonCircular": "two independent parsers agreeing on exact serialized fingerprints over pinned bytes; a mismatch would be a BLOCKER to investigate, not papered over",
+    "failureCase": "none"
+   },
+   {
+    "id": "T5d_hierarchy_and_closure",
+    "name": "hierarchy (root/edges/validation) + closure decisions match the corpus attribution",
+    "status": "PASS",
+    "measured": {
+     "roots": [
+      0
+     ],
+     "rootName": "Scene Root",
+     "realChildEdges": 27,
+     "validationOk": true,
+     "errorCount": 0,
+     "eofExact": true,
+     "numBlocksDecoded": 66,
+     "decisions": [
+      {
+       "block": 1,
+       "type": "NiArkAnimationExtraData",
+       "extStart": 724,
+       "extEnd": 740,
+       "extLength": 16,
+       "method": "next_block_preamble"
+      },
+      {
+       "block": 2,
+       "type": "NiArkImporterExtraData",
+       "extStart": 779,
+       "extEnd": 820,
+       "extLength": 41,
+       "method": "documented_size_41B"
+      },
+      {
+       "block": 3,
+       "type": "NiArkTextureExtraData",
+       "variantLayout": "NOPREFIX",
+       "extStart": null,
+       "extEnd": null
+      },
+      {
+       "block": 13,
+       "type": "NiArkViewportInfoExtraData",
+       "extStart": 2577,
+       "extEnd": 2626,
+       "extLength": 49,
+       "method": "next_block_preamble"
+      }
+     ],
+     "nullChildSlotWarnings": 66
+    },
+    "expected": {
+     "roots": [
+      0
+     ],
+     "rootName": "Scene Root",
+     "realChildEdges": 27,
+     "validationOk": true,
+     "eofExact": true,
+     "numBlocksDecoded": 66,
+     "decisionsFour": true
+    },
+    "tolerance": null,
+    "sourceOfTruth": "predecessor SCENE_STRUCTURE_RESULTS.json (roots [0] \"Scene Root\", 27 scene-child edges) + s2 corpus attribution (16B/41B/NOPREFIX/49B)",
+    "whyNonCircular": "hierarchy re-derived from bytes by THIS reader; compared to an independently measured reference",
+    "failureCase": "none"
+   },
+   {
+    "id": "T5e_scene_bounds",
+    "name": "FILE_SCENE_SPACE bounds recomputed vs predecessor extents",
+    "status": "PASS",
+    "measured": {
+     "min": [
+      -1100,
+      -1500,
+      -100.00001525878906
+     ],
+     "max": [
+      1400,
+      1850,
+      1150
+     ],
+     "extents": [
+      2500,
+      3350,
+      1250.000015258789
+     ],
+     "meshCount": 14,
+     "space": "FILE_SCENE_SPACE"
+    },
+    "expected": {
+     "min": [
+      -1100,
+      -1500,
+      -100.00001525878906
+     ],
+     "max": [
+      1400,
+      1850,
+      1150
+     ],
+     "extents": [
+      2500,
+      3350,
+      1250.000015258789
+     ]
+    },
+    "tolerance": 0.001,
+    "sourceOfTruth": "predecessor model_extents_FILE_SCENE_SPACE min/max (independent parser + composition)",
+    "whyNonCircular": "bounds recomputed by THIS reader/transform engine from pinned bytes",
+    "failureCase": "none"
+   },
+   {
+    "id": "T5f_texture_bindings",
+    "name": "per-part texture NAME bindings re-derived; dPVS meshes untextured; container NOT_ESTABLISHED",
+    "status": "PASS",
+    "measured": {
+     "arkEntryCount": 18,
+     "arkEntriesOk": true,
+     "bindingCensus": [
+      [
+       18,
+       "B_Outpost_me01_Ext_sign:0",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       23,
+       "B_Outpost_me01_Ext_main:0",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       25,
+       "B_Outpost_me01_Ext_main:1",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       27,
+       "B_Outpost_me01_Ext_main:2",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       29,
+       "B_Outpost_me01_Ext_main:3",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       31,
+       "B_Outpost_me01_Ext_main:4",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       34,
+       "B_Outpost_me01_Ext_vent03:0",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       38,
+       "B_Outpost_me01_Ext_bigdoors:0",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       42,
+       "B_Outpost_me01_Ext_smaldoor:0",
+       "TEXTURE_NAME_BOUND",
+       2
+      ],
+      [
+       45,
+       "dPVS_occ04:0",
+       "UNTEXTURED_NO_TEXPROP",
+       0
+      ],
+      [
+       49,
+       "dPVS_occ02:0",
+       "UNTEXTURED_NO_TEXPROP",
+       0
+      ],
+      [
+       53,
+       "dPVS_occ03:0",
+       "UNTEXTURED_NO_TEXPROP",
+       0
+      ],
+      [
+       57,
+       "dPVS_occ01:0",
+       "UNTEXTURED_NO_TEXPROP",
+       0
+      ],
+      [
+       61,
+       "dPVS_occ05:0",
+       "UNTEXTURED_NO_TEXPROP",
+       0
+      ]
+     ],
+     "containerResolutionAll": [
+      "NOT_ESTABLISHED (name/property bindings only; no texture bytes resolved in this run)"
+     ]
+    },
+    "expected": {
+     "arkEntryCount": 18,
+     "nameBound": 9,
+     "untexturedNoTexprop": 5,
+     "container": "NOT_ESTABLISHED everywhere"
+    },
+    "tolerance": null,
+    "sourceOfTruth": "predecessor ni_ark_payload_analysis (independent parse; 18 entries; 9 texprop-bound meshes; dPVS occ planes carry material-only refs)",
+    "whyNonCircular": "names/refs re-derived from bytes in THIS reader; tails recorded RAW (no new 9-byte-tail semantics; no textureId interpretation)",
+    "failureCase": "none"
+   },
+   {
+    "id": "T5g_file_scene_space_artifact",
+    "name": "bounded FILE_SCENE_SPACE transform artifact (transforms+names, no raw arrays)",
+    "status": "PASS",
+    "measured": {
+     "blockCount": 66,
+     "writtenTo": "docs\\audits\\PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009\\raw\\FILE_SCENE_SPACE_TRANSFORMS_218757.json"
+    },
+    "expected": {
+     "blockCount": 66
+    },
+    "tolerance": null,
+    "sourceOfTruth": "internal consistency with T5d composition + non-payload discipline (no geometry arrays in the artifact)",
+    "whyNonCircular": "artifact derived from the same validated composition; payload arrays are never emitted",
+    "failureCase": "none"
+   }
+  ],
+  "headline": {
+   "extraction_sha_match": true,
+   "associations": "14/14",
+   "fingerprints": "14/14 vertex + 14/14 index = 28/28",
+   "roundtrip_exact": true
+  }
+ },
+ "T6_457485_WITNESS": {
+  "class": "witness guard (plan T8)",
+  "tests": [
+   {
+    "id": "T6_witness_457485_untouched",
+    "name": "457485 witness reader untouched (WITNESS_UNTOUCHED)",
+    "status": "PASS",
+    "measured": {
+     "witnessStatus": "WITNESS_UNTOUCHED",
+     "plannedOutcome": "NOT_APPLICABLE_UNTOUCHED (the adapter uses new code under src/pecompat/)",
+     "workingTreeSha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359",
+     "baseSha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359",
+     "gitHashObject": "7d926fb326339c4983f571cfa839bdefcdd155bb",
+     "pesourceStatusClean": true,
+     "pesourceStatus": "(clean)"
+    },
+    "expected": {
+     "witnessStatus": "WITNESS_UNTOUCHED",
+     "pesourceStatusClean": true
+    },
+    "tolerance": null,
+    "sourceOfTruth": "the pinned BASE commit blob (git HEAD:src/pesource/NifModelReader.js)",
+    "whyNonCircular": "git object comparison against the pinned base; no run-produced values involved",
+    "failureCase": "none — no witness regression battery required (its code path was never touched)"
+   }
+  ],
+  "witness_status": "UNTOUCHED"
+ },
+ "not_performed": [],
+ "honest_notes": [
+  "T2d conversion-once first FAILED (PecRenderConvert.conversionMatrix z-row bug: z'=-u*x instead of z'=-u*y), caught by the independent analytic value in the same test; fixed and the full suite re-run green. The committed machine summary is the post-fix final run (24 PASS / 0 FAIL / 0 NOT_PERFORMED).",
+  "All T1..T6 dispatch classes were executed and PASS; the without-models negative control reports the pinned-container class NOT_PERFORMED loudly by design."
+ ]
+}

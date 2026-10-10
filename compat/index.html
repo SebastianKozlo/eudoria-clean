@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!-- compat/index.html — PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009
+     The ONE local app (contract §7): ASSET MODE + AUTHORED SCENE MODE for the
+     pinned original PCG model 218757, served by compat/server-sceneir.mjs
+     (loopback-only; bounded allowlist statics; the SceneIR is regenerated at
+     server startup from the pinned Models.bnt — fail-closed SHA).
+     Three.js 0.185.0 from the pinned local package (no CDN). Zero-framework
+     vanilla JS + ES modules.
+     HONESTY LABELS in this UI: AUTHOR_PLACED_LAB (never historical Eudoria
+     positions), RENDER_ADAPTER_CHOICE / PE_UNITS_NOT_CONFIRMED (the (x,z,-y)
+     ×0.01 display conversion applied exactly once), and the
+     VIEWER_INSTANCE_WRAPPER_POLICY (the instance wrapper owns the scene
+     transform — NOT a reproduction of every SDK 2.6 root-replacement branch
+     or the original PE placement mechanism). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE SceneIR viewer — model 218757 (PE_935 SCENEIR BROWSER R1)</title>
+<link rel="stylesheet" href="/compat/compat.css">
+<script type="importmap">
+{ "imports": {
+    "three": "/node_modules/three/build/three.module.js",
+    "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header id="app-header">
+  <div class="brand">PE SceneIR viewer — model 218757 | run PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009</div>
+  <div class="labels">
+    <span class="lab">AUTHOR_PLACED_LAB — authored laboratory coordinates; NOT historical Eudoria positions</span>
+    <span class="lab">RENDER_ADAPTER_CHOICE (x,z,-y)×0.01 / PE_UNITS_NOT_CONFIRMED — applied once</span>
+  </div>
+  <nav>
+    <button id="btn-asset" class="mode-btn active" data-mode="asset">1 — Asset mode (218757)</button>
+    <button id="btn-scene" class="mode-btn" data-mode="scene">2 — Authored scene mode (two instances)</button>
+  </nav>
+</header>
+
+<div id="hud-line">boot…</div>
+<div id="error-banner" hidden></div>
+
+<main id="layout">
+  <section id="viewport-wrap">
+    <canvas id="view-canvas"></canvas>
+    <div id="action-bar">
+      <button id="btn-fit" title="fit camera to the current visible bounds (key F)">Fit bounds [F]</button>
+      <button id="btn-reset" title="reset camera to the lab default pose (key R)">Reset camera [R]</button>
+      <button id="btn-wire" title="toggle solid/wireframe (key W)">Wireframe [W]</button>
+      <button id="btn-dpvs" title="HEURISTIC: hide meshes whose names resemble dPVS/occluder (name hint only; runtime role NOT proven; meshes stay addressable in the inspector)">dPVS-name-hint: hide (heuristic)</button>
+    </div>
+  </section>
+
+  <aside id="side">
+    <details id="diagnostics" open data-load-status="PENDING">
+      <summary>DIAGNOSTICS (honest, field-complete)</summary>
+      <div class="diag-section"><h4>original asset identity (fail-closed pin check)</h4><div id="diag-identity" class="small mono">…</div></div>
+      <div class="diag-section"><h4>block coverage (62+4=66 ceiling preserved)</h4><div id="diag-blocks" class="small"></div></div>
+      <div class="diag-section"><h4>imported vs visible meshes</h4><div id="diag-meshes" class="small"></div><div id="ledger-body" class="small mono"></div></div>
+      <div class="diag-section"><h4>material / texture status (9 name-bound + 5 untextured-labeled)</h4>
+        <div id="diag-textures" class="small"></div>
+        <div id="diag-textures-per-mesh" class="small"></div>
+      </div>
+      <div class="diag-section"><h4>transforms — original vs computed; render conversion</h4><div id="diag-transforms" class="small"></div></div>
+      <div class="diag-section"><h4>load timings (measured)</h4><div id="diag-timing" class="small mono"></div></div>
+      <div class="diag-section"><h4>client-side fingerprint re-hash</h4><div id="diag-fingerprints" class="small mono"></div></div>
+    </details>
+
+    <section id="scene-panel" hidden>
+      <h3>Authored instances (AUTHOR_PLACED_LAB)</h3>
+      <div id="instance-list" class="small mono"></div>
+      <div id="instance-editor">
+        <h4>selected instance authored transform <span class="lab">AUTHOR_PLACED_LAB</span></h4>
+        <label>t.x <input id="in-tx" type="number" step="0.5"></label>
+        <label>t.y <input id="in-ty" type="number" step="0.5"></label>
+        <label>t.z <input id="in-tz" type="number" step="0.5"></label>
+        <label>uniform scale <input id="in-scale" type="number" step="0.1" min="0.05"></label>
+        <label>rotate-Z (deg) <input id="in-rz" type="number" step="15"></label>
+        <button id="btn-apply-trs">Apply to selected instance</button>
+        <button id="btn-instance-reset">Reset this instance to authored default</button>
+        <div id="independence" class="small mono"></div>
+      </div>
+    </section>
+
+    <section id="selection-panel">
+      <h3>Selection / inspection</h3>
+      <div id="selection-body" class="small"></div>
+      <div id="ledger-note" class="small mono"></div>
+    </section>
+
+    <details id="inspector-panel" open>
+      <summary>Hierarchy inspector (block tree)</summary>
+      <div id="inspector-body" class="small"></div>
+    </details>
+  </aside>
+</main>
+
+<script type="module" src="/compat/app.js"></script>
+</body>
+</html>
