@@ -1,0 +1,205 @@
+{
+  "run_id": "PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009",
+  "artifact": "00_RECORDS_CORRECTION/CORRECTED_CLAIM_MATRIX.json",
+  "work_package": "A — records correction of the f99febe package (docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009, commit f99febeca9498011fc49f3aef932ecfac4244475)",
+  "record_class": "RECORDS_CORRECTION; era PCG/EU 9.3.5; STATIC_ONLY — the client never ran; no new EXE body opened; closed bodies 0x008BD720 (beyond its published 16 B data dump), 0x006C2E00, 0x0085B1B0, 0x0095D3C4 remain CLOSED",
+  "evidence_taxonomy": "CONFIRMED / STRONGLY_SUPPORTED / PLAUSIBLE / UNVERIFIED / REJECTED (contract section 5); plus the correction-specific labels NOT_ESTABLISHED, NOT_ESTABLISHED_WITHIN_BOUND, UNRESOLVED, NARROWED, SUPERSEDED",
+
+  "physical_evidence_registry": {
+    "entropia_exe": {
+      "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe",
+      "size_bytes": 8015872,
+      "sha256": "e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31",
+      "verified_this_run": "whole-file hash MATCH; 5/5 published window slices re-hashed MATCH (W_SUBJ 53e37437…, W_CALLER 13ae9898…, W_DEP1 dd9fb9b7…, W_DEP2 916ae10a…, W_ANCHOR16B de298cd7…); 17/17 FC-relevant instruction bytes inside the two already-open windows MATCH"
+    },
+    "historical_package_files": {
+      "ARGUMENT_PROVENANCE.json": "6994 B / 8b2e5a33fee8fe9b95dce821967cdbf80069f41cca5ef0232a00fb1ca72519d8",
+      "FINAL_REPORT.md": "17307 B / 3071b30c1ca051483e1a36c5cebd2490005a5f7ff0b6c125134e0c61ca5e39b0",
+      "FALSIFIER_RESULTS.json": "12934 B / ec8a8a1b7d283a1ea6e3b036454ca7d9797d21a4bcce83a36f3c780fabd1bad0",
+      "VALUE_DISPOSITION.json": "6113 B / 35c10b12723231f7bca2edc74099f7c7d6b87912cfce1c2ffa98d2880ebd4b03",
+      "HANDOFF.md": "15197 B / 5558b870b5c9ae808e834174bba357ff6d229cbe7beb4c013aacad60c7b3145a",
+      "BODY_CFG_AND_ACCESS_CENSUS.json": "11128 B / 3d6903142d2c5e2cb75b744a2f5a11717b51c5216e9cccd30466acefd8bf4222",
+      "ANCHOR_008BD720_CLASSIFICATION.json": "4260 B / cb73b429a49c4832125e1aa663a3aed10a95318eeb1dadfeeede06404440ef53",
+      "01_RAW/ESP_SLOT_MAP.json": "20684 B / a807f4cf306027d60b9d94360de0ef1a594a22f1005f8241020489df6ded7453",
+      "01_RAW/OWN_DECODER_WINDOWS.json": "64133 B / a7176934dbb2ae064ed5f973b8e493f4099349893308c227892dd1504326f3a1",
+      "01_RAW/ANCHOR_008BD720_16B_DUMP.json": "811 B / c44e0c221acc961114d2f06484af347038322ae2a5496a1f36063a0c44382fbb",
+      "01_RAW/OBJDUMP_LISTINGS/objdump_W_CALLER_FUN_006C3F50.txt": "2950 B / 41b1f1548933a4e1978d76bcea5fd38fc302aed43169717d26caa7a54a08d0d5",
+      "package_manifest_state": "22/22 rows re-hashed MATCH (package byte-identical to its published post-AMEND_LOG state)"
+    },
+    "desktop_findings_sources": {
+      "REPORT.md (PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009)": "11037 B / 6160f2a9ca4f3755955b7dedce1ba6d7d217c549c6ab67ee3297dcce0e80d84d",
+      "CLAIM_SUFFICIENCY_COUNTERMODELS.json (same directory)": "2235 B / 0a203214fa48728a96603be007c7f21c9d7d9452a25f1e48e8f50121cea3c709"
+    },
+    "countermodel_scripts": {
+      "cm1_escaped_local.py": "5312 B / ac2d0af33f62586d3a12d174c53fc8ef319ca0575c336d5e0fbd2d5005e0ef84",
+      "cm2_alias_model.py": "4329 B / 5e5f4fbd162d33c950da695884b6561155bd086d20b7a356ba2ccf160e5bacc2",
+      "cm3_dword_float_copy.py": "3356 B / 0cfcd5c0356321a3def2ae377134009ecb208357cbc708eb8331f20bdbb7c293",
+      "cm4_escaped_subject_outslot.py": "4557 B / 8d8cdd5717f9cd8efaaf954c9937524884d657deb91a1b7cc983281b8eff8857",
+      "cm5_callback_return_alias.py": "4033 B / 1498fcec54a11fe65fb1b2aee0a9b1ab11fb1cbc3f02559f1aa0c3a6513b8c2f"
+    }
+  },
+
+  "corrected_claims": [
+    {
+      "claim_id": "FC-C1-1_ARG6_VALUE_PROVENANCE",
+      "old_claim": "arg6 = [P+8] (the getter return) on all paths (ARGUMENT_PROVENANCE.json:88 value/provenance; FINAL_REPORT section 3 slot table + section 5.3; HANDOFF:37/50/158; entrypoint row)",
+      "old_status": "CONFIRMED (as stated in f99febe)",
+      "desktop_finding": "FC-C1 / P2 — arg6 again identified with the original getter return on all paths",
+      "corrected_status": "SUPERSEDED — split: initial local content = getter return (VALID, BYTE_OBSERVATION); fast paths: later arg6 == initial getter value (VALID, BYTE_OBSERVATION); growth path: later arg6 = DWORD re-read from the ESCAPED local (pair address passed to CALL 0x006C2E00 @0x006C3FA9 before the reload @0x006C3FBA); growth-path equality to the initial [P+8] = NOT_ESTABLISHED_WITHIN_BOUND (nonvolatile-register preservation does NOT preserve escaped memory)",
+      "evidence_source": [
+        "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe (sha256 e7785430e81dffe648ce8f5312414b17bc9fce61389689a22f753765d5280f31) — bytes 89 44 24 10 @0x006C3F83, 74 0f @0x006C3F87, 89 19 @0x006C3F8D, 89 41 04 @0x006C3F8F, 8d 44 24 18 @0x006C3FA1, e8 52 ee ff ff @0x006C3FA9, 8b 4c 24 10 @0x006C3FBA, 51 @0x006C3FC3 — all re-verified MATCH this run inside the already-open caller window",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/01_RAW/OBJDUMP_LISTINGS/objdump_W_CALLER_FUN_006C3F50.txt (sha256 41b1f154...) — the full dual-verified caller listing",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/01_RAW/ESP_SLOT_MAP.json (sha256 a807f4cf...) W_CALLER — LOCAL_1 @entry_offset -4 (save @0x006C3F83 w, reload @0x006C3FBA r), &LOCAL_2 @entry_offset -8 (LEA @0x006C3FA1, passed to the growth call)",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) section 2 — the independent Desktop re-derivation of the same escape geometry (B+0x0C pair, B+0x10 second dword, ESP=B-12 at the LEA)",
+        "countermodel CM-1 (this package, 00_RECORDS_CORRECTION/countermodels/cm1_escaped_local.py, sha256 ac2d0af3...) — a stub helper preserving both observable ABI conditions can still mutate the escaped local"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (Entropia.exe e7785430...F31), STATIC_ONLY",
+      "why_non_circular": "the escape chain is byte-verified directly from the physical EXE inside the ALREADY-OPEN window (not inferred from any report); the geometry cross-checks against two independent published decoders (package own decoder + GNU objdump) AND against the Desktop auditor's independent re-derivation; the countermodel is an independently written logic demonstration whose expected values come from the Desktop JSON, while its implementation shares no code with any prior script",
+      "failure_case_detected": "YES — the historical flat identification failed on the growth path: the pair address escapes into the closed helper before the reload (CM-1 case GROWTH_MUTATES_ESCAPED_LOCAL: later_arg6 = 2271560481 != 305419896 with all ABI conditions preserved)"
+    },
+    {
+      "claim_id": "FC-C1-2_SUBJECT_ARG6_SLOT_NON_USE",
+      "old_claim": "arg6 is a DEAD ARGUMENT in this consumer: never read by FUN_006C3640 (0 of 17 census rows resolve to entry_offset 0x18)",
+      "old_status": "CONFIRMED (machine scan)",
+      "desktop_finding": "explicitly preserved by the Desktop audit ('Zachować poprawny, osobny wynik')",
+      "corrected_status": "RETAINED_VALID (unchanged) — recorded as a SEPARATE fact from the value-provenance correction: the subject's DIRECT arg6-slot non-use is independent of what value the slot carries",
+      "evidence_source": [
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/BODY_CFG_AND_ACCESS_CENSUS.json (sha256 3d690314...) — tracked_value_register_usage.arg6 + access census (17 rows, none at entry_offset 0x18)",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/01_RAW/ESP_SLOT_MAP.json (sha256 a807f4cf...) — W_SUBJ.arg6_slot_accesses = [], arg6_never_read = true",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) section 1 — the Desktop auditor's own census re-derivation (8 esp-relative ops, zero at entry offset 0x18)"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (Entropia.exe e7785430...F31), STATIC_ONLY",
+      "why_non_circular": "the census is a machine enumeration over the dual-verified decode, independently reproduced by the package's own decoder, by GNU objdump listings, by the QC auditor's third decoder and by the Desktop auditor's fourth census; the slot map is derived from the callee's own body, not from the caller's expectations",
+      "failure_case_detected": "NONE — this control detected no defect; the correction explicitly preserves it as valid"
+    },
+    {
+      "claim_id": "FC-C1-3_SUBJECT_ARG1_LATE_READ_VS_INITIAL_OUT_POINTER",
+      "old_claim": "*arg1 := container writes the container pointer back to the caller's param_2 slot (out-parameter pattern); BB_exit role 'EAX:=arg1; *arg1:=ESI'",
+      "old_status": "CONFIRMED (as stated, treating the late re-read @0x006C3691 as simply 'arg1')",
+      "desktop_finding": "FC-C1 addendum — the subject passes &arg1 to the helper (@0x006C367C) and later reads the slot's CURRENT contents (@0x006C3691); identity with the initial arg1 requires separate preservation",
+      "corrected_status": "NARROWED — the store @0x006C3695 is byte-correct for the RE-READ pointer (BYTE_OBSERVATION, valid); on the subject's growth path the arg1-slot address escapes into the closed helper (LEA @0x006C367C -> growth arg3 @0x006C3680), so the identity of the re-read value with the INITIAL arg1 (the caller's &param_2 out-slot) is NOT_ESTABLISHED on that path; the initial out-pointer's survival through the helper is NOT_ESTABLISHED. On paths without the growth call, no in-window instruction passes the arg1-slot address to any callee.",
+      "evidence_source": [
+        "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe (sha256 e7785430...F31) — bytes 8d 54 24 1c @0x006C367C, 52 @0x006C3680, e8 76 f7 ff ff @0x006C3685, 8b 44 24 14 @0x006C3691, 89 30 @0x006C3695 — re-verified MATCH this run inside the already-open subject window",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/01_RAW/ESP_SLOT_MAP.json (sha256 a807f4cf...) — W_SUBJ esp_access_map: LEA &arg1 @entry_offset 4 (addr), arg1 reads @0x006C3691/@0x006C369C",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) section 2 addendum",
+        "countermodel CM-4 (cm4_escaped_subject_outslot.py, sha256 8d8cdd57...)"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (Entropia.exe e7785430...F31), STATIC_ONLY",
+      "why_non_circular": "the late-read vs initial-value distinction is byte-structural (LEA + call ordering in the physical stream), not interpretive; the countermodel demonstrates the distinction with an independently written stub; no callee body was opened",
+      "failure_case_detected": "YES — the old phrasing conflated the re-read with the initial value (CM-4: stub rewrites the out-slot to 6291456; the late store then targets 6291456, initial_pointer_preservation = false, all ABI conditions preserved)"
+    },
+    {
+      "claim_id": "FC-C2-1_CONTAINER_VS_P_ADDRESS_RELATION",
+      "old_claim": "container != template object, machine-proven disjoint provenance (F8; FINAL_REPORT:127-128/200/239; VALUE_DISPOSITION:56; HANDOFF; entrypoint row)",
+      "old_status": "PASS-as-proof (address inequality of the objects)",
+      "desktop_finding": "FC-C2 / P2 — different provenance chains do not prove different addresses",
+      "corrected_status": "SUPERSEDED — the two PRODUCING CHAINS stay byte-proven distinct (0 shared producing instructions; VALID, STRONGLY_SUPPORTED as static provenance); the ADDRESS relation is withdrawn from proof: CONTAINER_VS_P_ALIAS_RELATION = UNRESOLVED (distinct SSA/provenance sources can resolve to the same runtime address; no in-window instruction establishes or excludes param_2 == P; the callers establishing param_2 were not reconstructed)",
+      "evidence_source": [
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/FALSIFIER_RESULTS.json (sha256 ec8a8a1b...) falsifiers[7] F8 measured content (chain enumeration, 0 shared nodes) — the measured content is retained; only the inequality inference is withdrawn",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/01_RAW/ESP_SLOT_MAP.json (sha256 a807f4cf...) W_CALLER touches — ESI only in-window writer @0x006C3F79 from entry_offset 8 (provenance leaves the window)",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) section 3",
+        "countermodel CM-2 (cm2_alias_model.py, sha256 5e5f4fbd...) — two distinct chains, same address, container-role fields (+4/+8) and range-role fields (+0x14/+0x18) compatible and disjoint on one object"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (Entropia.exe e7785430...F31), STATIC_ONLY",
+      "why_non_circular": "the correction is a logical sufficiency argument: the countermodel shows the EXAMINED WINDOW'S OWN field usage cannot distinguish aliasing from distinctness; it does not assert real aliasing (that would require the same kind of unproven runtime claim the correction removes)",
+      "failure_case_detected": "YES — the old proof failed the aliasing countermodel (distinct chains, same address, compatible disjoint field roles; ACTUAL_CONTAINER_P_ALIAS = NOT_ESTABLISHED, per the Desktop verdict block)"
+    },
+    {
+      "claim_id": "FC-C2-2_TRACKED_VALUES_DEREFERENCE_ABSOLUTE",
+      "old_claim": "the tracked template values are NEVER dereferenced / never reach memory as data (FINAL_REPORT sections 4-5; FALSIFIER F2 outcome; HANDOFF dispositions)",
+      "old_status": "CONFIRMED (absolute)",
+      "desktop_finding": "FC-C2 second half — no direct EDI-based memory operand does not prove the same address is never read through EAX (callback return may alias its receiver)",
+      "corrected_status": "NARROWED — 0 DIRECT memory operands with the tracked carriers (EDI/EBP/EBX) as base: RETAINED_VALID (census fact). The absolute is superseded by: no DIRECT dereference of the tracked values occurs in-window; INDIRECT dereference through the closed callback's return ([EAX]/[EAX+4] @0x006C3668/0x006C366C) is NOT EXCLUDED — a callback returning its receiver would make those reads touch element memory (an address derived from the tracked range chain)",
+      "evidence_source": [
+        "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe (sha256 e7785430...F31) — bytes ff d3 @0x006C365A (CALL EBX with ECX=element) and 8b 10 89 11 8b 40 04 89 @0x006C3668..0x006C366F (the [EAX]/[EAX+4] reads + stores) — re-verified MATCH this run",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/BODY_CFG_AND_ACCESS_CENSUS.json (sha256 3d690314...) access_census rows 0x006C3668/0x006C366C — base_provenance = callback return",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) section 3 (the hypothetical callback returning its receiver)",
+        "countermodel CM-5 (cm5_callback_return_alias.py, sha256 1498fcec...) — 0 direct EDI-based operands, yet the element's first two dwords ARE read through EAX"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (Entropia.exe e7785430...F31), STATIC_ONLY",
+      "why_non_circular": "the narrowing keeps the census (machine-derived) and removes only the inference step that had no byte support; the callback body remains CLOSED — no claim is made about what the real callback returns",
+      "failure_case_detected": "YES — the absolute failed the callback-alias countermodel (CM-5: alias_route_read_element = true with direct_edi_based_memory_operands = 0)"
+    },
+    {
+      "claim_id": "FC-C2-3_DEPENDENT_CONTROL_LABELS",
+      "old_claim": "F8 PASS (container != template object); F2 outcome clause 'tracked values never dereferenced'; G4 'container != template'; G5 '8/8 falsifiers executed PASS'",
+      "old_status": "PASS labels as published",
+      "desktop_finding": "FC-C2 + section 5 (P3) — correct dependent F2/F8 and gate conclusions; distinguish control kinds",
+      "corrected_status": "CORRECTED_WITH_INTERPRETATION_NARROWING — F8 re-classed NEGATIVE_CONTROL whose address-inequality interpretation is SUPERSEDED (retains value as a producing-chain-disjointness observation); F2 re-classed METHODOLOGICAL CENSUS with the dereference clause NARROWED (per FC-C2-2); G4 cell corrected to 'producing chains distinct; CONTAINER_VS_P_ALIAS_RELATION = UNRESOLVED' (other G4 cells unchanged); G5 aggregate re-classed to the honest per-control classes (see PREREGISTRATION table: F1/F5/F7 COUNTERCHECKS, F2/F3/F6 METHODOLOGICAL, F4 CONDITION RECORD, F8 corrected NEGATIVE CONTROL) — 0 of the 8 were mutation tests on actual helper bodies; no gate flips to FAIL",
+      "evidence_source": [
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/FALSIFIER_RESULTS.json (sha256 ec8a8a1b...) — the 8 control records as published",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) section 5",
+        "this run's countermodels CM-1..CM-5 (the mutation-class evidence for the corrections)"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (records layer); countermodels era-independent x86-32 ABI logic demonstrations",
+      "why_non_circular": "the re-classification is a taxonomy correction derived from what each control's own execution record says it measured (the records are quoted verbatim in SUPERSESSION.md section 4.3), not from new binary claims",
+      "failure_case_detected": "YES — the old aggregate label hid that none of the 8 controls was a mutation test; the corrections supply the mutation-class evidence as logical countermodels instead"
+    },
+    {
+      "claim_id": "FC-C3-1_PLACEMENT_EXCLUSION",
+      "old_claim": "FUN_006C3640 is NOT a world-placement consumer / a UTILITY (categorical); the world-placement question, if any, would live inside the CLOSED callee 0x008BD720 (FINAL_REPORT:37/169-173; HANDOFF:80-83/157; entrypoint row)",
+      "old_status": "CONFIRMED (categorical negative)",
+      "desktop_finding": "FC-C3 / P2 — too broad a placement negative derived from a local container operation",
+      "corrected_status": "SUPERSEDED — GENERIC_RANGE_CALLBACK_CONTAINER_MECHANISM = CONFIRMED_IN_EXAMINED_WINDOW (retained); DIRECT_TRANSFORM_OPERATION = NOT_ESTABLISHED (valid for the examined window: 0 FPU/SSE, pointer arithmetic only); ROLE_IN_PLACEMENT_PIPELINE = UNRESOLVED; PLACEMENT_BRANCH_EXCLUDED = NO. The categorical exclusion and the callback-confinement sentence are WITHDRAWN. Absence of FPU/SSE does not exclude float bit copies or participation in a placement pipeline. The element-producer context and the downstream container consumer are separate unknowns — the placement question is NOT established to live inside the callback. The justified maximum is the package's own section 7.6 wording ('Transform-relevant operation? NOT_ESTABLISHED').",
+      "evidence_source": [
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/FINAL_REPORT.md (sha256 3071b30c...) sections 1/7.6/8 — both the overclaim and the careful maximum, quoted",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/ANCHOR_008BD720_CLASSIFICATION.json (sha256 cb73b429...) quarantined_hypothesis_body_shape — the UNVERIFIED thunk-family illustration of a bit-copy mechanism (explicitly NOT promoted)",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) section 4",
+        "countermodel CM-3 (cm3_dword_float_copy.py, sha256 0cfcd5c0...) — two floats cross a pure-integer two-DWORD copy bit-identically (1234.5 -> 0x449a5000 -> 1234.5; -42.25 -> 0xc2290000 -> -42.25)"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (Entropia.exe e7785430...F31), STATIC_ONLY",
+      "why_non_circular": "the corrected statuses are strictly weaker than the old ones (no new positive claim); the retained CONFIRMED mechanism rests on the dual-verified byte stream; the float-bits argument is a sufficiency countermodel, not an assertion that floats exist in the original container",
+      "failure_case_detected": "YES — the categorical exclusion failed the bit-copy countermodel (CM-3) and the unknown-role argument (the examined window cannot decide pipeline participation)"
+    },
+    {
+      "claim_id": "P3-CALLEE_ARGUMENT_COUNT_SENTENCE",
+      "old_claim": "ARGUMENT_PROVENANCE.json calling_convention.register_arguments: 'NONE - the callee reads all six arguments from the stack (...)'",
+      "old_status": "published as part of the cdecl proof",
+      "desktop_finding": "P3 — direct slot usage is arg1-arg5, not arg6; correct in the records round",
+      "corrected_status": "SUPERSEDED — the callee's DIRECT stack-slot usage is arg1-arg5 (arg2 @0x006C3646, arg3 @0x006C3641, arg4 @0x006C3654/@0x006C36A0, arg5 @0x006C364F, arg1 @0x006C3691/@0x006C369C, + &arg1 LEA @0x006C367C); arg6's slot (entry_offset 0x18) has ZERO direct accesses. Six slots are pushed by the caller and cleaned by ADD ESP,0x18 (unchanged byte fact); what changed is only the 'all six' reading claim. The register part of the old sentence ('no this-register argument...') stays valid.",
+      "evidence_source": [
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/ARGUMENT_PROVENANCE.json (sha256 8b2e5a33...) line 20 (OLD wording, quoted) + its own argument_table (the per-slot read evidence)",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/01_RAW/ESP_SLOT_MAP.json (sha256 a807f4cf...) W_SUBJ — 8 esp-relative operations enumerated: arg3, arg2, arg5, arg4, &arg1(LEA), arg1(x2), arg4; arg6_slot_accesses = []",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) section 5"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (Entropia.exe e7785430...F31), STATIC_ONLY",
+      "why_non_circular": "the correction is internal-consistency: the package's own census already proved arg6 has 0 direct accesses; the sentence contradicted it; no new measurement was needed",
+      "failure_case_detected": "YES — internal contradiction between the published sentence and the package's own machine census (0 of 17 rows at entry_offset 0x18)"
+    },
+    {
+      "claim_id": "RETAINED-1_RANGE_MECHANISM_PINS",
+      "old_claim": "range begin/end role of arg2/arg3; stride 0x20; cdecl caller-cleans; anchor rel32 -> 0x006C3640; W-DEP1/W-DEP2 bytes; fast-path two-DWORD copy; growth delegation (edge CLOSED, derived cleanup 20); out-slot stores; 0 FPU/SSE in 105 instructions; sentinel condition",
+      "old_status": "CONFIRMED (dual-verified)",
+      "desktop_finding": "preserved ('Piny, składnia instrukcji, lokalny mechanizm range/callback/container ... pozostają zachowane')",
+      "corrected_status": "RETAINED_VALID — all physical pins and the local mechanism stand unchanged; the 0-FPU/SSE scan keeps its measurement value with the FC-C3 interpretation bound (does not exclude float bit copies)",
+      "evidence_source": [
+        "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe — 5/5 published slices re-hashed MATCH this run (W_SUBJ 53e37437..., W_CALLER 13ae9898..., W_DEP1 dd9fb9b7..., W_DEP2 916ae10a..., W_ANCHOR16B de298cd7...)",
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/ (22/22 manifest rows MATCH) + its 01_RAW listings"
+      ],
+      "era_build_label": "PCG/EU 9.3.5 (Entropia.exe e7785430...F31), STATIC_ONLY",
+      "why_non_circular": "re-verified this run directly from the physical EXE against the package-pinned slice hashes — three independent decoders (package own, objdump, QC) plus the Desktop auditor already agree on these bytes",
+      "failure_case_detected": "NONE this run (this is the retained-facts record)"
+    },
+    {
+      "claim_id": "STANDING-1_SCIENCE_LIMITS",
+      "old_claim": "MODEL_218757_TO_CMO_JOIN / WORLD_INSTANCE_IDENTITY / HISTORICAL_PLACEMENT = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO; P pointee UNRESOLVED_UPSTREAM; sids-4057 UNRECONCILED",
+      "old_status": "NOT_ESTABLISHED / NO (claim limits)",
+      "desktop_finding": "preserved (Desktop verdict block: MODEL_218757_TO_CMO_JOIN = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO)",
+      "corrected_status": "UNCHANGED — restated verbatim with the three new correction statuses added: CONTAINER_VS_P_ALIAS_RELATION = UNRESOLVED; ROLE_IN_PLACEMENT_PIPELINE = UNRESOLVED; PLACEMENT_BRANCH_EXCLUDED = NO; GROWTH_PATH_ARG6_EQUAL_INITIAL = NOT_ESTABLISHED_WITHIN_BOUND; SUBJECT_ARG1_INITIAL_OUT_POINTER_SURVIVAL = NOT_ESTABLISHED. No promotion of any kind; CANONICAL_GATE_EFFECT = NONE.",
+      "evidence_source": [
+        "docs/audits/PE_935_TEMPLATE_FIELD_FINAL_CONSUMER_R1_20261009/FINAL_REPORT.md (sha256 3071b30c...) section 10 claim limits",
+        "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\REPORT.md (sha256 6160f2a9...) verdict block"
+      ],
+      "era_build_label": "PCG/EU 9.3.5, STATIC_ONLY",
+      "why_non_circular": "claim limits are conservative by construction; this run adds only weaker (more limited) statuses",
+      "failure_case_detected": "NONE (standing-limit record)"
+    }
+  ],
+
+  "internal_consistency_check": {
+    "matrix_vs_supersession": "every corrected status above matches SUPERSESSION.md sections 1-6 verbatim in meaning; every retained fact appears in SUPERSESSION.md section 6",
+    "matrix_vs_countermodels": "every NOT_ESTABLISHED/UNRESOLVED correction cites its reproducing countermodel (CM-1 -> FC-C1-1; CM-4 -> FC-C1-3; CM-2 -> FC-C2-1; CM-5 -> FC-C2-2; CM-3 -> FC-C3-1); all 5 countermodels REPRODUCED (see COUNTERMODEL_RESULTS.json)",
+    "matrix_vs_evidence": "every binary-derived claim cites the physical EXE identity (sha256 e7785430...) and the already-open window containing its bytes; no closed body is cited as evidence",
+    "contradictions_found": "NONE — the corrected matrix is internally consistent; the only contradiction found (the P3 sentence vs the package's own census) is itself one of the corrected records"
+  }
+}

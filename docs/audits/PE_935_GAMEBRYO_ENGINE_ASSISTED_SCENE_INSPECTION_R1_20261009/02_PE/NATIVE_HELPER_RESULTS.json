@@ -1,0 +1,720 @@
+{
+  "run_id": "PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009",
+  "stage": "S14_optional_native_helper_qualification_and_use",
+  "helper": "gb12_oracle.exe (EXISTING custom SDK-source build; NOT newly built; NOT the unmodified vendor printer)",
+  "helper_identity": {
+    "path": "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+    "size_bytes": 594944,
+    "sha256": "DD7112A41D83557395C5D31F72C89BFEA3D7906AB28EF4DD3C4BD8E398EB046C",
+    "contract_pin_match": true
+  },
+  "helper_source_identity": {
+    "path": "D:\\gamebyroengine\\extracted\\gb12_build\\oracle\\oracle.cpp",
+    "sha256": "AD1F5DED06FA17AE77D9A5077CE2704404451FA0A751FA59F76EF9A24A9E591A",
+    "reverified_match": true,
+    "lines": 771
+  },
+  "why_this_helper": "the stock printer cannot expose the specific failing class (C11 specificity FAIL); this helper prints NiStream::GetLastErrorMessage() through the SAME stock factory registry (zero NiArk loaders, zero dummy factories) \u00e2\u20ac\u201d contract section 11 single-helper rule",
+  "disclosed_behavior_differences_vs_stock_printer": [
+    "custom executable built from the possessed GB 1.2.2 source (EU935_GB12_ORACLE_BUILD_R1); vendor binary untouched",
+    "OracleStream NiStream-subclass snapshot hook via the PUBLIC RegisterPostProcessFunction (zero engine changes; added observation capability the stock printer lacks)",
+    "prints the SPECIFIC NiStream last error (stock printer never calls GetLastErrorMessage)",
+    "tree dump uses Update(0.0f, false): controllers SKIPPED (rest pose); the stock printer runs controllers (Update(0.0f))",
+    "JSON output (stock: text); --dump blocks|tree|keyframes|skin",
+    "NO MSVCP71/MSVCR71 imports (child-PATH DLL exposure class kept for uniformity; no effect on this exe)"
+  ],
+  "qualification_controls": [
+    {
+      "case": "QC1_SDK_POSITIVE_OBJECT",
+      "kind": "CONTROL",
+      "input": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\Tutorials\\Data\\Win32\\OBJECT.NIF",
+      "input_identity": {
+        "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\Tutorials\\Data\\Win32\\OBJECT.NIF",
+        "size_bytes": 605001,
+        "sha256": "1EAEEF364CCB84A32A3CD53A91F7B301177E00B15381357CDD96A97C4AA89511"
+      },
+      "command": [
+        "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+        "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\Tutorials\\Data\\Win32\\OBJECT.NIF",
+        "--json",
+        "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC1_SDK_POSITIVE_OBJECT.oracle.json"
+      ],
+      "cwd": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures",
+      "child_env_delta": {
+        "PATH": "+D:\\gamebyroengine\\extracted\\Gb112_tools_setup;<inherited PATH>"
+      },
+      "child_env_delta_class": "CHILD_PROCESS_PATH_DLL_EXPOSURE (no effect on this exe: no VC71 DLL imports)",
+      "timeout_s": 60,
+      "oracle_json_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC1_SDK_POSITIVE_OBJECT.oracle.json",
+      "stderr_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC1_SDK_POSITIVE_OBJECT.oracle.stderr.txt",
+      "exit_code": 0,
+      "timeout": false,
+      "stderr_text": "",
+      "oracle_json": {
+        "oracle": "gb12_oracle 1.0 (Gamebryo 1.2.2 source build, EU935_GB12_ORACLE_BUILD_R1)",
+        "file": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\Tutorials\\Data\\Win32\\OBJECT.NIF",
+        "load": "OK",
+        "lastError": 0,
+        "lastErrorMessage": "",
+        "nifVersionRaw": "0x0A000112",
+        "nifVersion": "10.0.1.18",
+        "numBlocks": 60,
+        "numTopObjects": 2,
+        "blocks": [
+          {
+            "i": 0,
+            "rtti": "NiNode",
+            "name": "SceneNode",
+            "parent": -1
+          },
+          {
+            "i": 1,
+            "rtti": "NiStringExtraData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 2,
+            "rtti": "NiMaterialProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 3,
+            "rtti": "NiVertexColorProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 4,
+            "rtti": "NiShadeProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 5,
+            "rtti": "NiZBufferProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 6,
+            "rtti": "NiNode",
+            "name": "helicopter",
+            "parent": 0
+          },
+          {
+            "i": 7,
+            "rtti": "NiNode",
+            "name": "main_blades",
+            "parent": 6
+          },
+          {
+            "i": 8,
+            "rtti": "NiTransformController",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 9,
+            "rtti": "NiTransformData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 10,
+            "rtti": "NiNode",
+            "name": "main_blades_Pivot",
+            "parent": 7
+          },
+          {
+            "i": 11,
+            "rtti": "NiTriStrips",
+            "name": "main_rotor",
+            "parent": 10
+          },
+          {
+            "i": 12,
+            "rtti": "NiMaterialProperty",
+            "name": "rotor",
+            "parent": -1
+          },
+          {
+            "i": 13,
+            "rtti": "NiSpecularProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 14,
+            "rtti": "NiVertexColorProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 15,
+            "rtti": "NiTexturingProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 16,
+            "rtti": "NiSourceTexture",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 17,
+            "rtti": "NiPixelData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 18,
+            "rtti": "NiTriStripsData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 19,
+            "rtti": "NiTriStrips",
+            "name": "Mainblades",
+            "parent": 10
+          },
+          {
+            "i": 20,
+            "rtti": "NiMaterialProperty",
+            "name": "mainBlades",
+            "parent": -1
+          },
+          {
+            "i": 21,
+            "rtti": "NiTexturingProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 22,
+            "rtti": "NiSourceTexture",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 23,
+            "rtti": "NiPixelData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 24,
+            "rtti": "NiTriStripsData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 25,
+            "rtti": "NiNode",
+            "name": "rear_blades",
+            "parent": 6
+          },
+          {
+            "i": 26,
+            "rtti": "NiTransformController",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 27,
+            "rtti": "NiTransformData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 28,
+            "rtti": "NiTriStrips",
+            "name": "rear_blades_Pivot",
+            "parent": 25
+          },
+          {
+            "i": 29,
+            "rtti": "NiMaterialProperty",
+            "name": "rearBlades",
+            "parent": -1
+          },
+          {
+            "i": 30,
+            "rtti": "NiTexturingProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 31,
+            "rtti": "NiSourceTexture",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 32,
+            "rtti": "NiPixelData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 33,
+            "rtti": "NiTriStripsData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 34,
+            "rtti": "NiTriStrips",
+            "name": "landing_gear",
+            "parent": 6
+          },
+          {
+            "i": 35,
+            "rtti": "NiMaterialProperty",
+            "name": "landing_Gear",
+            "parent": -1
+          },
+          {
+            "i": 36,
+            "rtti": "NiTexturingProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 37,
+            "rtti": "NiSourceTexture",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 38,
+            "rtti": "NiPixelData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 39,
+            "rtti": "NiTriStripsData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 40,
+            "rtti": "NiTriStrips",
+            "name": "main_body",
+            "parent": 6
+          },
+          {
+            "i": 41,
+            "rtti": "NiMaterialProperty",
+            "name": "mainBody",
+            "parent": -1
+          },
+          {
+            "i": 42,
+            "rtti": "NiTexturingProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 43,
+            "rtti": "NiSourceTexture",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 44,
+            "rtti": "NiPixelData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 45,
+            "rtti": "NiTriStripsData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 46,
+            "rtti": "NiNode",
+            "name": "guns",
+            "parent": 6
+          },
+          {
+            "i": 47,
+            "rtti": "NiTriStrips",
+            "name": "MachineGuns1",
+            "parent": 46
+          },
+          {
+            "i": 48,
+            "rtti": "NiMaterialProperty",
+            "name": "MachineGuns",
+            "parent": -1
+          },
+          {
+            "i": 49,
+            "rtti": "NiTexturingProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 50,
+            "rtti": "NiSourceTexture",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 51,
+            "rtti": "NiPixelData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 52,
+            "rtti": "NiTriStripsData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 53,
+            "rtti": "NiTriStrips",
+            "name": "SideCannons",
+            "parent": 46
+          },
+          {
+            "i": 54,
+            "rtti": "NiMaterialProperty",
+            "name": "sideCannons",
+            "parent": -1
+          },
+          {
+            "i": 55,
+            "rtti": "NiTexturingProperty",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 56,
+            "rtti": "NiSourceTexture",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 57,
+            "rtti": "NiPixelData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 58,
+            "rtti": "NiTriStripsData",
+            "name": "",
+            "parent": -1
+          },
+          {
+            "i": 59,
+            "rtti": "NiCamera",
+            "name": "HeliCam",
+            "parent": 6
+          }
+        ],
+        "keyframes": null,
+        "controllers": null,
+        "textKeys": null,
+        "skins": null
+      },
+      "control": {
+        "expected": {
+          "exit": 0,
+          "load": "OK",
+          "numBlocks": 60,
+          "numTopObjects": 2
+        },
+        "checks": {
+          "exit_match": true,
+          "load_match": true,
+          "numblocks_match": true,
+          "numtop_match": true
+        },
+        "control_pass": true
+      }
+    },
+    {
+      "case": "QC2_MISSING_FACTORY_QZNODE",
+      "kind": "CONTROL",
+      "input": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures\\SYNTH_UNKNOWN_CLASS.nif",
+      "input_identity": {
+        "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures\\SYNTH_UNKNOWN_CLASS.nif",
+        "size_bytes": 605001,
+        "sha256": "DAE5E636F9BAC9ACEC78100D4124D6DC56DC704ED5D18DC811BF4C42C6078C2B"
+      },
+      "command": [
+        "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+        "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures\\SYNTH_UNKNOWN_CLASS.nif",
+        "--json",
+        "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC2_MISSING_FACTORY_QZNODE.oracle.json"
+      ],
+      "cwd": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures",
+      "child_env_delta": {
+        "PATH": "+D:\\gamebyroengine\\extracted\\Gb112_tools_setup;<inherited PATH>"
+      },
+      "child_env_delta_class": "CHILD_PROCESS_PATH_DLL_EXPOSURE (no effect on this exe: no VC71 DLL imports)",
+      "timeout_s": 60,
+      "oracle_json_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC2_MISSING_FACTORY_QZNODE.oracle.json",
+      "stderr_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC2_MISSING_FACTORY_QZNODE.oracle.stderr.txt",
+      "exit_code": 1,
+      "timeout": false,
+      "stderr_text": "",
+      "oracle_json": {
+        "oracle": "gb12_oracle 1.0 (Gamebryo 1.2.2 source build, EU935_GB12_ORACLE_BUILD_R1)",
+        "file": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures\\SYNTH_UNKNOWN_CLASS.nif",
+        "load": "FAIL",
+        "lastError": 5,
+        "lastErrorMessage": "QzNode: cannot find create function.",
+        "nifVersionRaw": "0x0A000112",
+        "nifVersion": "10.0.1.18",
+        "numBlocks": 0,
+        "numTopObjects": 0,
+        "blocks": []
+      },
+      "control": {
+        "expected": {
+          "exit": 1,
+          "load": "FAIL",
+          "lastErrorMessage_contains": "QzNode: cannot find create function."
+        },
+        "checks": {
+          "exit_match": true,
+          "load_match": true,
+          "specific_error_match": true
+        },
+        "control_pass": true
+      }
+    },
+    {
+      "case": "QC3_EMPTY_SCENE",
+      "kind": "CONTROL",
+      "input": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures\\SYNTH_EMPTY_SCENE.nif",
+      "input_identity": {
+        "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures\\SYNTH_EMPTY_SCENE.nif",
+        "size_bytes": 61,
+        "sha256": "86AE58AAFA24AF2D98DBEE4B8D80C378C91D1FA0FA5ACA3736B6968D8D0DEB34"
+      },
+      "command": [
+        "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+        "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures\\SYNTH_EMPTY_SCENE.nif",
+        "--json",
+        "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC3_EMPTY_SCENE.oracle.json"
+      ],
+      "cwd": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures",
+      "child_env_delta": {
+        "PATH": "+D:\\gamebyroengine\\extracted\\Gb112_tools_setup;<inherited PATH>"
+      },
+      "child_env_delta_class": "CHILD_PROCESS_PATH_DLL_EXPOSURE (no effect on this exe: no VC71 DLL imports)",
+      "timeout_s": 60,
+      "oracle_json_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC3_EMPTY_SCENE.oracle.json",
+      "stderr_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\QC3_EMPTY_SCENE.oracle.stderr.txt",
+      "exit_code": 0,
+      "timeout": false,
+      "stderr_text": "",
+      "oracle_json": {
+        "oracle": "gb12_oracle 1.0 (Gamebryo 1.2.2 source build, EU935_GB12_ORACLE_BUILD_R1)",
+        "file": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\01_SDK_fixtures\\SYNTH_EMPTY_SCENE.nif",
+        "load": "OK",
+        "lastError": 0,
+        "lastErrorMessage": "",
+        "nifVersionRaw": "0x0A010000",
+        "nifVersion": "10.1.0.0",
+        "numBlocks": 0,
+        "numTopObjects": 0,
+        "blocks": [],
+        "keyframes": null,
+        "controllers": null,
+        "textKeys": null,
+        "skins": null
+      },
+      "control": {
+        "expected": {
+          "exit": 0,
+          "load": "OK",
+          "numBlocks": 0,
+          "numTopObjects": 0
+        },
+        "checks": {
+          "exit_match": true,
+          "load_match": true,
+          "numblocks_match": true,
+          "numtop_match": true
+        },
+        "control_pass": true
+      }
+    }
+  ],
+  "controls_all_pass": true,
+  "pe_results": [
+    {
+      "case": "PE_218757_HELPER",
+      "kind": "PE",
+      "input": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\218757.nif",
+      "input_identity": {
+        "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\218757.nif",
+        "size_bytes": 57316,
+        "sha256": "3E8A22C2213202207E374B55CD65B2C3BE039CCDD1E8D01A07FCAF44DE12CF36"
+      },
+      "command": [
+        "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+        "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\218757.nif",
+        "--json",
+        "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_218757_HELPER.oracle.json"
+      ],
+      "cwd": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads",
+      "child_env_delta": {
+        "PATH": "+D:\\gamebyroengine\\extracted\\Gb112_tools_setup;<inherited PATH>"
+      },
+      "child_env_delta_class": "CHILD_PROCESS_PATH_DLL_EXPOSURE (no effect on this exe: no VC71 DLL imports)",
+      "timeout_s": 60,
+      "oracle_json_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_218757_HELPER.oracle.json",
+      "stderr_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_218757_HELPER.oracle.stderr.txt",
+      "exit_code": 1,
+      "timeout": false,
+      "stderr_text": "",
+      "oracle_json": {
+        "oracle": "gb12_oracle 1.0 (Gamebryo 1.2.2 source build, EU935_GB12_ORACLE_BUILD_R1)",
+        "file": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\218757.nif",
+        "load": "FAIL",
+        "lastError": 5,
+        "lastErrorMessage": "NiArkAnimationExtraData: cannot find create function.",
+        "nifVersionRaw": "0x0A010000",
+        "nifVersion": "10.1.0.0",
+        "numBlocks": 0,
+        "numTopObjects": 0,
+        "blocks": []
+      }
+    },
+    {
+      "case": "PE_496633_HELPER",
+      "kind": "PE",
+      "input": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\496633.nif",
+      "input_identity": {
+        "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\496633.nif",
+        "size_bytes": 2068670,
+        "sha256": "4DBCC7311884C453CBBB2255C1592994A225088D1D9BBB47D2D0C287580B7369"
+      },
+      "command": [
+        "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+        "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\496633.nif",
+        "--json",
+        "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_496633_HELPER.oracle.json"
+      ],
+      "cwd": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads",
+      "child_env_delta": {
+        "PATH": "+D:\\gamebyroengine\\extracted\\Gb112_tools_setup;<inherited PATH>"
+      },
+      "child_env_delta_class": "CHILD_PROCESS_PATH_DLL_EXPOSURE (no effect on this exe: no VC71 DLL imports)",
+      "timeout_s": 60,
+      "oracle_json_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_496633_HELPER.oracle.json",
+      "stderr_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_496633_HELPER.oracle.stderr.txt",
+      "exit_code": 1,
+      "timeout": false,
+      "stderr_text": "",
+      "oracle_json": {
+        "oracle": "gb12_oracle 1.0 (Gamebryo 1.2.2 source build, EU935_GB12_ORACLE_BUILD_R1)",
+        "file": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\496633.nif",
+        "load": "FAIL",
+        "lastError": 5,
+        "lastErrorMessage": "NiArkAnimationExtraData: cannot find create function.",
+        "nifVersionRaw": "0x0A010000",
+        "nifVersion": "10.1.0.0",
+        "numBlocks": 0,
+        "numTopObjects": 0,
+        "blocks": []
+      }
+    },
+    {
+      "case": "PE_512126_HELPER",
+      "kind": "PE",
+      "input": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\512126.nif",
+      "input_identity": {
+        "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\512126.nif",
+        "size_bytes": 673746,
+        "sha256": "E37C7D29478AED034133BFDDE43C37F40B56F06128A99C68B1B86FF24D0BB2BA"
+      },
+      "command": [
+        "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+        "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\512126.nif",
+        "--json",
+        "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_512126_HELPER.oracle.json"
+      ],
+      "cwd": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads",
+      "child_env_delta": {
+        "PATH": "+D:\\gamebyroengine\\extracted\\Gb112_tools_setup;<inherited PATH>"
+      },
+      "child_env_delta_class": "CHILD_PROCESS_PATH_DLL_EXPOSURE (no effect on this exe: no VC71 DLL imports)",
+      "timeout_s": 60,
+      "oracle_json_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_512126_HELPER.oracle.json",
+      "stderr_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_512126_HELPER.oracle.stderr.txt",
+      "exit_code": 1,
+      "timeout": false,
+      "stderr_text": "",
+      "oracle_json": {
+        "oracle": "gb12_oracle 1.0 (Gamebryo 1.2.2 source build, EU935_GB12_ORACLE_BUILD_R1)",
+        "file": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\512126.nif",
+        "load": "FAIL",
+        "lastError": 5,
+        "lastErrorMessage": "NiArkAnimationExtraData: cannot find create function.",
+        "nifVersionRaw": "0x0A010000",
+        "nifVersion": "10.1.0.0",
+        "numBlocks": 0,
+        "numTopObjects": 0,
+        "blocks": []
+      }
+    },
+    {
+      "case": "PE_423020_HELPER",
+      "kind": "PE",
+      "input": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\423020.nif",
+      "input_identity": {
+        "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\423020.nif",
+        "size_bytes": 882570,
+        "sha256": "C46D9DF241BADD489399D6C4DD514F30D998C08E32BB9E8093AF851A3F324917"
+      },
+      "command": [
+        "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+        "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\423020.nif",
+        "--json",
+        "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_423020_HELPER.oracle.json"
+      ],
+      "cwd": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads",
+      "child_env_delta": {
+        "PATH": "+D:\\gamebyroengine\\extracted\\Gb112_tools_setup;<inherited PATH>"
+      },
+      "child_env_delta_class": "CHILD_PROCESS_PATH_DLL_EXPOSURE (no effect on this exe: no VC71 DLL imports)",
+      "timeout_s": 60,
+      "oracle_json_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_423020_HELPER.oracle.json",
+      "stderr_path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE\\raw\\PE_423020_HELPER.oracle.stderr.txt",
+      "exit_code": 1,
+      "timeout": false,
+      "stderr_text": "",
+      "oracle_json": {
+        "oracle": "gb12_oracle 1.0 (Gamebryo 1.2.2 source build, EU935_GB12_ORACLE_BUILD_R1)",
+        "file": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009\\02_PE_payloads\\423020.nif",
+        "load": "FAIL",
+        "lastError": 5,
+        "lastErrorMessage": "NiArkAnimationExtraData: cannot find create function.",
+        "nifVersionRaw": "0x0A010000",
+        "nifVersion": "10.1.0.0",
+        "numBlocks": 0,
+        "numTopObjects": 0,
+        "blocks": []
+      }
+    }
+  ],
+  "client_executed": false,
+  "no_engine_changes": true,
+  "no_dummy_factories": true,
+  "no_guessed_niark_loaders": true
+}

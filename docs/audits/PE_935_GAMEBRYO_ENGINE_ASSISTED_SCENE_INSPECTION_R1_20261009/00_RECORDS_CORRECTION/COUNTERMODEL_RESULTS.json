@@ -1,0 +1,139 @@
+{
+  "run_id": "PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009",
+  "artifact": "00_RECORDS_CORRECTION/COUNTERMODEL_RESULTS.json",
+  "work_package": "A — reproduction of the supplied logical countermodels",
+  "global_label": "LOGICAL_COUNTERMODEL_REPRODUCTION — NOT actual execution of FUN_006C2E00; NO callback/helper body opened",
+  "method": "each countermodel supplied by the Desktop post-audit (C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009\\CLAIM_SUFFICIENCY_COUNTERMODELS.json, sha256 0a203214fa48728a96603be007c7f21c9d7d9452a25f1e48e8f50121cea3c709, and REPORT.md section 3, sha256 6160f2a9ca4f3755955b7dedce1ba6d7d217c549c6ab67ee3297dcce0e80d84d; attribution preserved) was reproduced with an INDEPENDENTLY WRITTEN short Python check authored fresh by this executor for this run — no Desktop script was executed, reused or adapted; expected values are the Desktop-supplied constants (CM-5's expected shape was pre-registered in PREREGISTRATION.md before execution because the Desktop supplies that case as prose, not numbers); scripts were run with python -B (3.12.10); raw stdout captured under countermodels/raw/; zero __pycache__ residue",
+  "execution_environment": "Windows PowerShell 5.1 host; python -B (Python 3.12.10); all 5 scripts exit_code=0; no network, no client execution, no binary instrumentation of any kind",
+
+  "countermodels": [
+    {
+      "countermodel_id": "CM-1_ESCAPED_LOCAL",
+      "correction_supported": "FC-C1",
+      "source": "Desktop CLAIM_SUFFICIENCY_COUNTERMODELS.json, group 'escaped_local' (attribution preserved)",
+      "implementation": {
+        "script_path": "00_RECORDS_CORRECTION/countermodels/cm1_escaped_local.py",
+        "size_bytes": 5312,
+        "sha256": "ac2d0af33f62586d3a12d174c53fc8ef319ca0575c336d5e0fbd2d5005e0ef84",
+        "raw_output": "00_RECORDS_CORRECTION/countermodels/raw/cm1_escaped_local_output.json (1262 B, sha256 1a609fb164cf3c92f984909ebcdda413d9328c429f66f9a1c95524b00ba6a099)",
+        "independence": "independently authored by this executor; models the caller frame (pair at 0x10000c, LOCAL_1 = pair+4), a stub closed helper honoring the observable ABI (callee-saved registers preserved; derived cleanup 20 preserved), and the three path cases"
+      },
+      "input": {
+        "initial_getter_value": 305419896,
+        "pair_pointer": "0x10000c",
+        "mutation_value": 2271560481,
+        "cases": ["FAST_PATH", "GROWTH_PRESERVES_LOCAL", "GROWTH_MUTATES_ESCAPED_LOCAL"]
+      },
+      "expected": {
+        "FAST_PATH": {"later_arg6": 305419896, "equal_initial": true, "stub_preserves_nonvolatile_registers": true, "stub_preserves_expected_stack_cleanup": true},
+        "GROWTH_PRESERVES_LOCAL": {"later_arg6": 305419896, "equal_initial": true, "stub_preserves_nonvolatile_registers": true, "stub_preserves_expected_stack_cleanup": true},
+        "GROWTH_MUTATES_ESCAPED_LOCAL": {"later_arg6": 2271560481, "equal_initial": false, "stub_preserves_nonvolatile_registers": true, "stub_preserves_expected_stack_cleanup": true}
+      },
+      "actual": {
+        "FAST_PATH": {"later_arg6": 305419896, "equal_initial": true, "stub_preserves_nonvolatile_registers": true, "stub_preserves_expected_stack_cleanup": true},
+        "GROWTH_PRESERVES_LOCAL": {"later_arg6": 305419896, "equal_initial": true, "stub_preserves_nonvolatile_registers": true, "stub_preserves_expected_stack_cleanup": true},
+        "GROWTH_MUTATES_ESCAPED_LOCAL": {"later_arg6": 2271560481, "equal_initial": false, "stub_preserves_nonvolatile_registers": true, "stub_preserves_expected_stack_cleanup": true},
+        "ALL_CASES_REPRODUCED": true
+      },
+      "result": "REPRODUCED (3/3 cases; every expected value matched; the ABI conditions hold in all three cases, proving they are NOT sufficient evidence for the escaped slot's contents)",
+      "demonstrates": "a growth helper may mutate an escaped local without violating the ABI — the growth-path equality of the later arg6 to the initial getter value is NOT_ESTABLISHED_WITHIN_BOUND (FC-C1)"
+    },
+    {
+      "countermodel_id": "CM-2_ALIAS_MODEL",
+      "correction_supported": "FC-C2",
+      "source": "Desktop CLAIM_SUFFICIENCY_COUNTERMODELS.json, group 'alias_model' (attribution preserved)",
+      "implementation": {
+        "script_path": "00_RECORDS_CORRECTION/countermodels/cm2_alias_model.py",
+        "size_bytes": 4329,
+        "sha256": "5e5f4fbd162d33c950da695884b6561155bd086d20b7a356ba2ccf160e5bacc2",
+        "raw_output": "00_RECORDS_CORRECTION/countermodels/raw/cm2_alias_model_output.json (844 B, sha256 dfe28dc1e1b686553d0b5a79eaabeead550ffb2c46c5cad7dd67243b2bc1c24e)",
+        "independence": "independently authored by this executor; models two statically distinct producing chains (incoming-argument load vs lookup-call return) resolving to one address, with container-role (+4/+8) and range-role (+0x14/+0x18) field accesses"
+      },
+      "input": {
+        "lookup_return": 2097152,
+        "incoming_container": 2097152,
+        "compatible_field_example": {"+4_cursor": 3145728, "+8_capacity_end": 3145984, "+14_range_begin": 4194304, "+18_range_end": 4194336}
+      },
+      "expected": {"same_address": true, "producing_chains_statically_distinct": true, "field_offset_sets_disjoint": true, "all_field_values_match_the_desktop_example": true},
+      "actual": {
+        "lookup_return": 2097152,
+        "incoming_container": 2097152,
+        "same_address": true,
+        "producing_chains_statically_distinct": true,
+        "compatible_field_example": {"+4_cursor": 3145728, "+8_capacity_end": 3145984, "+14_range_begin": 4194304, "+18_range_end": 4194336},
+        "field_offset_sets_disjoint": true,
+        "matches_desktop_expected": true
+      },
+      "result": "REPRODUCED (distinct provenance sources resolve to the same address; the examined window's disjoint field roles are compatible with one aliased object)",
+      "demonstrates": "different producing chains are not proof of different addresses — CONTAINER_VS_P_ALIAS_RELATION = UNRESOLVED (FC-C2); this is not evidence that real P equals container"
+    },
+    {
+      "countermodel_id": "CM-3_DWORD_FLOAT_COPY",
+      "correction_supported": "FC-C3",
+      "source": "Desktop CLAIM_SUFFICIENCY_COUNTERMODELS.json, group 'dword_float_copy' (attribution preserved)",
+      "implementation": {
+        "script_path": "00_RECORDS_CORRECTION/countermodels/cm3_dword_float_copy.py",
+        "size_bytes": 3356,
+        "sha256": "0cfcd5c0356321a3def2ae377134009ecb208357cbc708eb8331f20bdbb7c293",
+        "raw_output": "00_RECORDS_CORRECTION/countermodels/raw/cm3_dword_float_copy_output.json (921 B, sha256 2eb21d4f97c282f3993270c5c72188979c1711ff1f7fa2c992eafa1c517004dc)",
+        "independence": "independently authored by this executor; models the generic two-DWORD copy as a pure integer-width transfer (no floating-point operation in the copy mechanism) using struct bit reinterpretation only at the endpoints"
+      },
+      "input": {"source_floats": [1234.5, -42.25]},
+      "expected": [
+        {"source_float": 1234.5, "dword": "0x449a5000", "copied_float": 1234.5, "bit_identical": true},
+        {"source_float": -42.25, "dword": "0xc2290000", "copied_float": -42.25, "bit_identical": true}
+      ],
+      "actual": [
+        {"source_float": 1234.5, "dword": "0x449a5000", "copied_float": 1234.5, "bit_identical": true, "float_ops_in_copy_mechanism": 0, "matches_desktop_expected": true},
+        {"source_float": -42.25, "dword": "0xc2290000", "copied_float": -42.25, "bit_identical": true, "float_ops_in_copy_mechanism": 0, "matches_desktop_expected": true},
+        {"ALL_CASES_REPRODUCED": true}
+      ],
+      "result": "REPRODUCED (2/2 cases; both floats cross the integer-only copy bit-identically)",
+      "demonstrates": "absence of FPU/SSE does not exclude float bit copies through generic DWORD moves — and does not prove floats exist in the original container either (FC-C3: DIRECT_TRANSFORM_OPERATION = NOT_ESTABLISHED, ROLE_IN_PLACEMENT_PIPELINE = UNRESOLVED)"
+    },
+    {
+      "countermodel_id": "CM-4_ESCAPED_SUBJECT_OUTSLOT",
+      "correction_supported": "FC-C1 (subject-side precision)",
+      "source": "Desktop CLAIM_SUFFICIENCY_COUNTERMODELS.json, group 'escaped_subject_outslot' (attribution preserved)",
+      "implementation": {
+        "script_path": "00_RECORDS_CORRECTION/countermodels/cm4_escaped_subject_outslot.py",
+        "size_bytes": 4557,
+        "sha256": "8d8cdd5717f9cd8efaaf954c9937524884d657deb91a1b7cc983281b8eff8857",
+        "raw_output": "00_RECORDS_CORRECTION/countermodels/raw/cm4_escaped_subject_outslot_output.json (833 B, sha256 d1cf8977520f256a597ef8ba291f13616f41eed98cbf8fad316898bc44466aa4)",
+        "independence": "independently authored by this executor; models the subject's arg1 slot (entry_offset 4), the escaped &arg1 address, a stub helper rewriting the slot through the escaped pointer, and the subject's late read + store-through-re-read-pointer"
+      },
+      "input": {"initial_out_pointer": 5242880, "stub_rewritten_out_pointer": 6291456, "lea_entry_offset": 4},
+      "expected": {"subject_arg1_slot_escapes": true, "lea_006C367C_entry_offset": 4, "stub_rewritten_out_pointer": 6291456, "late_store_destination": 6291456, "initial_pointer_preservation": false, "abi_conditions_preserved": true},
+      "actual": {"subject_arg1_slot_escapes": true, "lea_006C367C_entry_offset": 4, "initial_out_pointer": 5242880, "stub_rewritten_out_pointer": 6291456, "late_store_destination": 6291456, "initial_pointer_preservation": false, "abi_conditions_preserved": true, "matches_desktop_expected": true},
+      "result": "REPRODUCED (all expected values matched)",
+      "demonstrates": "a closed helper receiving &arg1 can rewrite the out-slot without violating the ABI; the subject's late read is byte-correct for the CURRENT contents and does not establish that the initial out-pointer survived the helper (FC-C1-3)"
+    },
+    {
+      "countermodel_id": "CM-5_CALLBACK_RETURN_ALIASES_RECEIVER",
+      "correction_supported": "FC-C2 (narrowed dereference absolute)",
+      "source": "Desktop REPORT.md (PE_TEMPLATE_FINAL_CONSUMER_DESKTOP_POST_AUDIT_F99FEBE_20261009) section 3 prose shape — a hypothetical callback returning its receiver makes the later [EAX]/[EAX+4] reads touch the element previously addressed via EDI; the Desktop JSON supplies no numbers for this prose case, so the expected shape was pre-registered in this run's PREREGISTRATION.md before execution (attribution preserved)",
+      "implementation": {
+        "script_path": "00_RECORDS_CORRECTION/countermodels/cm5_callback_return_alias.py",
+        "size_bytes": 4033,
+        "sha256": "1498fcec54a11fe65fb1b2aee0a9b1ab11fb1cbc3f02559f1aa0c3a6513b8c2f",
+        "raw_output": "00_RECORDS_CORRECTION/countermodels/raw/cm5_callback_return_alias_output.json (1023 B, sha256 8250e8c6d6196180e4c09bf53167d754d07fd598dfa5a133ef3e121af9429b12)",
+        "independence": "independently authored by this executor; models the subject's loop body: element reaches the callback as ECX receiver; direct-EDI-based operand count is kept at the census value 0; a stub callback returns its receiver; the [EAX]/[EAX+4] pair reads then touch element memory"
+      },
+      "input": {"element_addr": "0x00300000", "element_first_two_dwords": ["0x11111111", "0x22222222"], "expected_direct_edi_based_memory_operands": 0},
+      "expected": {"direct_edi_based_memory_operands": 0, "alias_route_read_element": true, "copied_pair_equals_element_first_8_bytes": true},
+      "actual": {"direct_edi_based_memory_operands": 0, "callback_returned_receiver": true, "copied_pair_via_EAX_reads": ["0x11111111", "0x22222222"], "element_first_two_dwords": ["0x11111111", "0x22222222"], "alias_route_read_element": true, "matches_preregistered_expected": true},
+      "result": "REPRODUCED (the alias route reads the element while the direct-EDI-based operand count remains 0)",
+      "demonstrates": "no direct EDI-based memory operand does not prove that the same address is never read through EAX — the census stays valid as a DIRECT-operand count; the absolute 'never dereferenced' reading is not established (FC-C2-2)"
+    }
+  ],
+
+  "summary": {
+    "countermodels_supplied": 5,
+    "countermodels_supplied_note": "4 JSON groups from CLAIM_SUFFICIENCY_COUNTERMODELS.json + 1 prose case from REPORT.md section 3, pre-registered",
+    "countermodels_reproduced": "5/5 — REPRODUCED",
+    "failed_reproductions": "NONE",
+    "forced_results": "NONE (each script self-checks measured vs expected and prints the raw values; raw stdout captured; all exit_code=0)",
+    "interpretation_limits": "these are LOGICAL countermodels (sufficiency demonstrations for claim corrections). They are NOT actual execution of FUN_006C2E00, NOT execution of the callback 0x008BD720, NOT evidence about what the real helpers do at runtime, and NOT new RE of any closed body.",
+    "scientific_effect": "supports the FC-C1/FC-C2/FC-C3 corrections and the control-class re-labeling recorded in SUPERSESSION.md and CORRECTED_CLAIM_MATRIX.json; no science value added beyond the records correction; no milestone or gate effect (CANONICAL_GATE_EFFECT = NONE)"
+  }
+}

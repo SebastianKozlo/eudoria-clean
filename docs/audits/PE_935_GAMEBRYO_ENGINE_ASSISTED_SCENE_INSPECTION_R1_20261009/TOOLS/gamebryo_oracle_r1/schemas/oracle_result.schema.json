@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "gamebryo_oracle oracle_result",
+  "type": "object",
+  "required": ["schema", "adapter", "ORACLE_MODE", "era_category",
+               "decode_continued_after_rtti_gate", "input_identity", "oracle",
+               "load_result", "objects", "scene_graph", "type_histogram",
+               "controllers", "properties", "textures", "bounds", "warnings",
+               "unknowns"],
+  "properties": {
+    "schema": {"type": "string"},
+    "adapter": {"type": "string",
+                "enum": ["gb12", "gb26", "gb112", "gb23"]},
+    "ORACLE_MODE": {"type": "string",
+                    "enum": ["ORIGINAL_TOOL_EXECUTION",
+                             "SOURCE_DERIVED_REIMPLEMENTATION", "MIXED"]},
+    "era_category": {"type": "string",
+                     "enum": ["GB_1_1_2", "GB_1_2", "GB_2_3", "GB_2_6",
+                              "UNKNOWN_GAMEBRYO", "THIRD_PARTY", "OUR_TOOL"]},
+    "decode_continued_after_rtti_gate": {"type": "boolean"},
+    "input_identity": {
+      "type": "object",
+      "required": ["size", "sha256", "header", "nif_version"],
+      "properties": {
+        "path": {"type": ["string", "null"]},
+        "size": {"type": "integer"},
+        "sha256": {"type": "string"},
+        "header": {"type": ["string", "null"]},
+        "nif_version": {"type": ["string", "null"]},
+        "nif_version_u32": {"type": ["integer", "null"]},
+        "user_defined_version": {"type": ["string", "null"]},
+        "user_defined_version_u32": {"type": ["integer", "null"],
+          "description": "F2-C1: the measured user-defined version DWORD (present iff the era reads it, ver >= 10.0.1.8)"},
+        "num_blocks_from_header": {"type": ["integer", "null"]}
+      }
+    },
+    "oracle": {
+      "type": "object",
+      "required": ["gamebryo_version", "loader_identity",
+                   "loader_source_identity", "tool_version"],
+      "properties": {
+        "gamebryo_version": {"type": "string"},
+        "loader_identity": {"type": "string"},
+        "loader_source_identity": {"type": "object"},
+        "tool_version": {"type": "string"},
+        "version_range_claim": {"type": "string"}
+      }
+    },
+    "version_gate": {"type": "object"},
+    "user_version_gate": {
+        "type": "object",
+        "description": "F2-C1: the ORIGINAL user-defined NIF version gate [0.0.0.0, 0.0.0.0] (NiStream.cpp L46-50, L334-352); read_from_stream iff NIF file version >= 10.0.1.8; verdict REJECTED (source-proven propagated rejection -> TOOL_VERDICT=FAIL) or ACCEPTED (measured in gate) or NOT_APPLICABLE_ERA (below the read threshold: the original compares the constructor-initialized member 0 -- trivially satisfied)",
+        "properties": {
+            "min": {"type": "string"},
+            "max": {"type": "string"},
+            "read_from_stream": {"type": "boolean"},
+            "measured_user_defined_version": {"type": ["string", "null"]},
+            "verdict": {"type": ["string", "null"]},
+            "reason": {"type": ["string", "null"]}
+        }
+    },
+    "rtti_gate": {"type": "object"},
+    "rtti_table_validation": {"type": "object"},
+    "extension_halt": {"type": "string",
+                       "description": "F1-C1: set to STOP_AT_TABLE_FAILURE when the --full-decode extension halts at an incomplete RTTI table read (no object data read past the undetermined table boundary)"},
+    "object_reference_histogram": {"type": "object"},
+    "object_reference_census": {"type": "object"},
+    "SOURCE_PREDICTED_ORIGINAL_VERDICT": {
+        "type": "string", "enum": ["ACCEPTED", "REJECTED", "UNRESOLVED"],
+        "description": "F2: what the ORIGINAL GB 1.2 Load() would do, predicted only from pinned source evidence (never from adapter success/failure)"},
+    "source_predicted_reason": {"type": "string"},
+    "ADAPTER_DECODE_COVERAGE": {
+        "type": "string", "enum": ["COMPLETE", "INCOMPLETE", "NOT_MEASURED"],
+        "description": "F2: OUR adapter's semantic decode coverage; NOT_MEASURED after early RTTI halts (object-level counters are never derived from RTTI table names)"},
+    "adapter_decode_coverage_counters": {
+        "type": "object",
+        "description": "F2: every counter is an integer when actually measured, else null with an explicit not_measured_reasons entry (a measured ZERO is never a substitute for unknown)",
+        "properties": {
+            "header_num_blocks": {"type": ["integer", "null"]},
+            "semantically_decoded_blocks": {"type": ["integer", "null"]},
+            "boundary_only_blocks": {"type": ["integer", "null"]},
+            "registered_but_not_decoded_blocks": {"type": ["integer", "null"]},
+            "unregistered_blocks": {"type": ["integer", "null"]},
+            "unresolved_blocks": {"type": ["integer", "null"]},
+            "not_measured_reasons": {"type": "object"},
+            "registered_but_not_decoded_classes": {"type": "array"}
+        }
+    },
+    "ADAPTER_INTEGRITY": {
+        "type": "string", "enum": ["PASS", "FAIL", "UNRESOLVED", "NOT_MEASURED"],
+        "description": "F2: object-count consistency + structural closure + link integrity; FAIL unconditionally implies TOOL_VERDICT=FAIL"},
+    "adapter_integrity_checks": {
+        "type": "object",
+        "description": "F2: object_count_consistency + structural_closure + link_integrity (+ link_failure_count / link_measured_blocks when the link phase ran). F2-C2: for parsed footers it also carries top_level_root_link_integrity (PASS/FAIL), top_level_root_failure_count, top_level_root_checked_count, top_level_root_raw (raw provenance, signed i32 as read) and top_level_root_normalized_u32 (validation domain: NULL_LINKID 0xFFFFFFFF or < header_num_blocks); a top-level root failure makes aggregate link_integrity FAIL"
+    },
+    "TOOL_VERDICT": {
+        "type": "string", "enum": ["PASS", "FAIL", "UNRESOLVED"],
+        "description": "F2: PASS only if coverage=COMPLETE and integrity=PASS and no source-predicted REJECTED; the CLI inspect exit is 0 only on PASS"},
+    "tool_verdict_reason": {"type": "string"},
+    "load_result": {
+      "type": "object",
+      "required": ["accepted", "partial", "error"],
+      "properties": {
+        "accepted": {"type": "boolean"},
+        "partial": {"type": "boolean"},
+        "error": {"type": ["string", "null"]},
+        "error_code": {"type": ["string", "null"]}
+      }
+    },
+    "objects": {"type": "array", "items": {"type": ["object", "null"]}},
+    "scene_graph": {"type": "object"},
+    "type_histogram": {"type": "object"},
+    "controllers": {"type": "array"},
+    "properties": {"type": "array"},
+    "textures": {"type": "array"},
+    "bounds": {"type": "array"},
+    "warnings": {"type": "array"},
+    "unknowns": {"type": "array"},
+    "tool_reports": {"type": "array"}
+  }
+}

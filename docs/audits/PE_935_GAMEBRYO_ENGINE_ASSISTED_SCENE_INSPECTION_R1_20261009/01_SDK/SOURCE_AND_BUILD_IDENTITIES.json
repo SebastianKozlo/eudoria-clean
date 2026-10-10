@@ -1,0 +1,263 @@
+{
+  "run_id": "PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009",
+  "phase": "SDK_QUALIFICATION (Work Package B)",
+  "artifact": "SOURCE_AND_BUILD_IDENTITIES.json",
+  "method": "every file measured by this executor (Get-Item length + Get-FileHash SHA256, lowercase hex); 'what_was_read' records the actual functions/sections inspected in this session, not tool names",
+  "sdk_tree_access_class": "READ_ONLY (no SDK-original file was modified; verified post-run: 7/7 protected identities unchanged by an independent process)",
+
+  "executables_and_runtime_dlls": {
+    "scene_graph_printer": {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Tools\\DeveloperTools\\SceneGraphPrinter\\Win32\\VC71\\SceneGraphPrinter.exe",
+      "size_bytes": 663552,
+      "sha256": "fd693af2d713c021b959fc7506200173435307c8fccc24ccd5851dfceb241c7c",
+      "contract_pin_match": true,
+      "role": "mandatory original vendor printer; the only native binary executed this phase",
+      "post_run_sha256_unchanged": true
+    },
+    "msvcp71": {
+      "path": "D:\\gamebyroengine\\extracted\\Gb112_tools_setup\\MSVCP71.DLL",
+      "size_bytes": 499712,
+      "sha256": "df96156f6a548fd6fe5672918de5ae4509d3c810a57bffd2a91de45a3ed5b23b",
+      "role": "legacy VC7.1 C++ runtime; exposed to child processes via child-PATH only",
+      "system32_copy_present": false
+    },
+    "msvcr71": {
+      "path": "D:\\gamebyroengine\\extracted\\Gb112_tools_setup\\MSVCR71.DLL",
+      "size_bytes": 348160,
+      "sha256": "8094af5ee310714caebccaeee7769ffb08048503ba478b879edfef5f1a24fefe",
+      "role": "legacy VC7.1 C runtime; exposed to child processes via child-PATH only",
+      "system32_copy_present": false
+    },
+    "printer_import_evidence": "ASCII strings 'MSVCP71.dll' and 'MSVCR71.dll' present in the printer image (import names); neither DLL exists in System32/SysWOW64 -> the child-process PATH prepend is the effective resolution mechanism",
+    "optional_gb12_oracle_exe": {
+      "path": "D:\\gamebyroengine\\extracted\\gb12_build\\bin\\gb12_oracle.exe",
+      "size_bytes": 594944,
+      "sha256": "dd7112a41d83557395c5d31f72c89bfea3d7906ab28ef4dd3c4bd8e398eb046c",
+      "status_this_phase": "NOT_USED (custom executable, not the vendor printer; contract section 11 inspection is not part of this phase's scope)"
+    }
+  },
+
+  "sdk_sample_inputs_positive_controls": [
+    {"path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\ST_Applications\\MOUT\\Data\\DesertTown\\DT.NIF", "size_bytes": 7687050, "sha256": "924527945921a45eafc585ed517b66f2f1ff2e6297b2da55603cc95ec9994a48", "desktop_identity_match": true, "post_run_unchanged": true},
+    {"path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\ST_Applications\\MOUT\\Data\\DesertTown\\DT_Ground.NIF", "size_bytes": 172328, "sha256": "b91cd416e5b6c19f7a5529267c8a6fbf46d719ed3894a4733e25f0bf3dd66d15", "desktop_identity_match": true, "post_run_unchanged": true},
+    {"path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\Tutorials\\Data\\Win32\\WORLD.nif", "size_bytes": 4649346, "sha256": "7268f44b705515715405968f4d5875c3ccaf9fba04fe10bd8769609e6132a9f0", "desktop_identity_match": true, "post_run_unchanged": true},
+    {"path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\Tutorials\\Data\\Win32\\OBJECT.NIF", "size_bytes": 605001, "sha256": "1eaeef364ccb84a32a3cd53a91f7b301177e00b15381357cdd96a97c4aa89511", "desktop_identity_match": true, "post_run_unchanged": true, "note": "also the base for the four negative mutations, performed on fresh LOCAL_ONLY copies only"}
+  ],
+
+  "inspected_source_files": [
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Tools\\DeveloperTools\\SceneGraphPrinter\\SceneGraphPrinter.cpp",
+      "size_bytes": 4644, "sha256": "652cbbd208578f13d1bbab5a62d5d2f4f57f9668aface1d2484a8706e58ac2fc",
+      "what_was_read": "FULL. PrintUsage (CLI flags -in/-ts/-ac/-bs/-mem/-prop/-trans/-extra/-geom, lines 25-37); CheckArguments lowercases args, sets printer statics (39-108); Process: NiStream::Load -> 'Error loading stream.' + exit 1 on failure (127-131); GetObjectCount()<1 -> 'No top-level file objects.' + exit 0 (133-139); per top-level object: Update(0.0f) IF NiAVObject, then RecursivePrint (141-149); footer + SummaryPrint (151-160); main: NiInit/Process/Cleanup/NiShutdown (166-177)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Tools\\DeveloperTools\\SceneGraphPrinter\\NiSceneGraphPrinter.cpp",
+      "size_bytes": 14193, "sha256": "3d770a89520556cf895304aaeaa3e2a9af4bad6b963fd65dc85a5655d27a30e3",
+      "what_was_read": "FULL. PrintID prints level, RTTI name, ':<name>' ONLY for NiObjectNET, ' <0xaddress>' if -mem; ms_uiObjectCount++ per PrintID; ms_uiDepth=max indent (49-85); PrintTransforms = LOCAL getters GetRotate/GetTranslate/GetScale (100-125); PrintBoundingSpheres = GetWorldBound WORLD bound (127-138); PrintProperties = property RTTI names from GetPropertyList, no recursion (140-161); PrintExtraData = ExtraData CLASS NAMES ONLY, no values (163-178); PrintGeometryData = vertex/active/tri counts + N/C/UV flags + SKINNED marker, per-geometry (180-277); RecursivePrint: PrintID -> detail flags -> CONTROLLERS chain (GetControllers, NiObjectNET) -> NiNode CHILDREN recursion; ms_bDropAppCulled exists but NO CLI sets it (279-336); SummaryPrint 'Total Object Count: N, Tree Depth: D+1' = visit count/max indent+1 (338-347); OpenLog would write NiSceneGraph.txt but is NEVER CALLED by this main (395-414)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Tools\\DeveloperTools\\SceneGraphPrinter\\NiSceneGraphPrinter.h",
+      "size_bytes": 2532, "sha256": "56fb3763450c270a78336f7a45c21b3c4d804fd76f4d1819e2906296db0a45f7",
+      "what_was_read": "FULL. Static flag/counters declaration; ms_pkOstr defaults to std::cout (printed to stdout, not a log file, in this build's main)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Tools\\SceneViewer\\NifDoc.cpp",
+      "size_bytes": 46774, "sha256": "672f1fc4cdae5998d03d3e6f4129c35a2f2b6c5879065ce6932bfd0b4a0932ae",
+      "what_was_read": "Section 565-639 (AddNifFile). m_kFileStream.Load failure -> MessageBox WITH GetLastErrorMessage() (574-583) - SPECIFIC error exposure exists in SceneViewer source, unlike the stock printer; GetObjectCount()==0 -> 'no top-level objects' rejection (586-594); roots = NiAVObject-typed top-levels without parent (596-608); NiPixelData top-level warned; RunUpScene; RemoveAllObjects; AfxGetApp()->AddToRecentFileList (MRU/registry path, NOT executed). SOURCE_ONLY - GUI never run in this run."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Tools\\SceneViewer\\WorldTransformsDlg.cpp",
+      "size_bytes": 4512, "sha256": "e49c999d9c665878a2a867248b6a67cccb26ff9c2be554d6363009b57fee5cbf",
+      "what_was_read": "FULL. DoUpdate (64-118) displays GetWorldTranslate/GetWorldScale/GetWorldRotate = COMPOSED WORLD transforms. SOURCE_ONLY - GUI never run."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Tools\\SceneViewer\\ExtraDataDlg.cpp",
+      "size_bytes": 3408, "sha256": "643181de8104bbc7f27f7649d7abf6bf95e9a21a1a18e8c7b35af22661e4b44f",
+      "what_was_read": "FULL. DoUpdate (51-105): per ExtraData calls pkExtra->GetViewerStrings(&kArray) -> VALUES exposed (e.g. NiStringExtraData m_pString). Richer than the stock printer's -extra class-name-only output. SOURCE_ONLY."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Tools\\SceneViewer\\ViewerStringsDlg.cpp",
+      "size_bytes": 4155, "sha256": "07dd8e925badf021190ec784f4a70dddb9b151d7cca136ce57f03b9aff14f3bb",
+      "what_was_read": "Section 55-114. SetStrings (76-84): LIMITED -> AddViewerStrings, FULL -> GetViewerStrings on the object. SOURCE_ONLY."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.cpp",
+      "size_bytes": 38458, "sha256": "e955c36ebbb442029e00be8a154726741b8454a607f2dc043f1fd542b009dc25",
+      "what_was_read": "FULL. ms_uiNifMinVersion=GetVersion(3,3,0,11); ms_uiNifMaxVersion=GetVersion(NIF_* from NiVersion.h)=10.2.0.0; user version bounds BOTH GetVersion(0,0,0,0)=0 (42-51); LoadHeader: 'File Format' substring check -> NOT_NIF_FILE; version gates OLDER/LATER; user version read only if file >= 10.0.1.8 (303-360); LoadRTTI: type-table lookup in ms_pkLoaders; unknown class -> RTTIError: NiOutputDebugString(hints) + m_uiLastError=NO_CREATE_FUNCTION + m_acLastErrorMessage='<class>: cannot find create function.', returns false (387-449); LoadStream pipeline: header -> LoadRTTI (>=5.0.0.1) -> LoadObjectGroups (>=5.0.0.6) -> per-object LoadBinary -> LoadTopLevelObjects -> LinkObject loop -> PostLinkObject loop -> registered post-process functions -> SetSelectiveUpdateFlagsForOldVersions (<4.1.0.12) (506-635); Load(filename): NiFile open failure -> FILE_NOT_LOADED 'Cannot open file.' (637-660); RegisterLoader/UnregisterLoader (755-771); GetLastLoadedRTTI() returns m_acLastErrorMessage - SOURCE BUG noted (94-97 in .inl)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.h",
+      "size_bytes": 9921, "sha256": "0ef7f74f2119fed09e88c5047d11d4fe7204f020b5ccd988be7a1ae2881f82bd",
+      "what_was_read": "FULL. GetObjectCount/GetObjectAt = TOP-LEVEL object access (46-47); error enum STREAM_OKAY/FILE_NOT_LOADED/NOT_NIF_FILE/OLDER_VERSION/LATER_VERSION/NO_CREATE_FUNCTION (276-284); GetLastErrorMessage/GetLastError public API (95-97) - present but UNUSED by the stock printer main; loader registry ms_pkLoaders (298)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStream.inl",
+      "size_bytes": 7159, "sha256": "9b2c45db1268e47e9aa9cb0212c02039693ef62a1015289a0b24eb1ce1efaa2c",
+      "what_was_read": "FULL. GetObjectCount() = m_kTopObjects.GetSize() (58-61) - the printer's root loop is over TOP-LEVEL objects, not serialized blocks; GetObjectAt = m_kTopObjects.GetAt (63-66); GetVersion = (major<<24)|(minor<<16)|(patch<<8)|internal (169-178)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiSystem\\NiVersion.h",
+      "size_bytes": 2503, "sha256": "326d013616af74dd867147ed96efa702f5d9e5bd5c707dcfc0c282580547dd7a",
+      "what_was_read": "FULL. GAMEBRYO 1.2.2.6 (build date 2006-06-19); NIF_MAJOR_VERSION=CONCAT(1,0)=10, MINOR=2, PATCH=0, INTERNAL=0 -> ms_uiNifMaxVersion = 10.2.0.0 (0x0A020000)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiAVObject.cpp",
+      "size_bytes": 33215, "sha256": "72e0837149b03ccda171bdf5e68e1e1f8c2712b2f10e7957ac3ec26344ca5ea7",
+      "what_was_read": "Sections 55-94 (AttachParent: detaches from OLD parent before setting new - the last-link-wins mechanism, 62-69; GetProperty linear scan) and 100-229 (Update: UpdateDownwardPass then parent UpdateUpwardPass, 110-116; UpdateDownwardPass: bUpdateControllers -> UpdateObjectControllers then UpdateWorldData + UpdateWorldBound, 118-136; UpdateSelected/UpdateRigid variants gated by selective-update flags, 138-188; SetSelectiveUpdateFlags, 216-229)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiAVObject.h",
+      "size_bytes": 8506, "sha256": "a5b18264157cb1bb68d3da6021daee91581d5e03f157e8536b9fce5a79a985dd",
+      "what_was_read": "FULL. Update(float, bool bUpdateControllers = TRUE) - line 56: the printer's Update(0.0f) RUNS CONTROLLERS by default; local transform getters + GetWorldTranslate/GetWorldRotate/GetWorldScale (64-82); GetWorldBound (85); m_kLocal/m_kWorld NiTransform members + GetWorldTransform/GetLocalTransform (183-184, 230-232); flags enum incl. SELECTIVE_* (207-219)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiAVObject.inl",
+      "size_bytes": 10672, "sha256": "09e1a5a5c88af503d9566b487941305307cba5cb1513147fb49e5a4dbdc91c3b",
+      "what_was_read": "Section 200-290. GetPropertyList/AttachProperty/DetachProperty (200-224); UpdateWorldBound inline stub (226-230); IsVisualObject = radius != 0 (232-235); UpdateObjectControllers: property controllers (if bProperties) + GetControllers() chain each pkControl->Update(fTime) (237-253)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\Win32\\NiAVObject_Win32.cpp",
+      "size_bytes": 999, "sha256": "75e452680d4b52d469ec69ef33c79cf94bf0f3e334250b8fab3892077bf23fd4",
+      "what_was_read": "FULL. UpdateWorldData: m_kWorld = m_pkParent->m_kWorld * m_kLocal, else m_kWorld = m_kLocal; collision object update hook (22-31)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\Win32\\NiTransform.inl",
+      "size_bytes": 1067, "sha256": "92e8acf6d94940344adca654e3a3344656ca3cbb4ba0b4d19b028a08e6c56b7b",
+      "what_was_read": "FULL. operator*: scale multiplies, rotations compose, res.m_Translate = m_Translate + m_fScale*(m_Rotate*xform.m_Translate) (15-24); point transform = (R*p)*s + T (26-29). Basis of this run's synthetic-control expectations."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiTransform.h",
+      "size_bytes": 1275, "sha256": "ee758c5ba4130b8d8906011da6be08827f58b494da7d23fa4c47f524e86f9b72",
+      "what_was_read": "FULL. Members m_Rotate (NiMatrix3), m_Translate (NiPoint3), m_fScale (float); operator* and Invert declarations (20-43)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiCamera.cpp",
+      "size_bytes": 41617, "sha256": "752cdfa81db30e03bc95eaed86aa06e1972dd4709ef165ee0e9c49a029fe7fb1",
+      "what_was_read": "Section 245-294. UpdateWorldData: base + world dir/up/right from world rotate + culling planes + world-to-camera matrix (251-265); UpdateWorldBound: m_kWorldBound.SetCenter(m_kWorld.m_Translate) (267-270) - the camera probe equivalence (camera bound center == world translation) is a NiCamera-specific source fact."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiNode.cpp",
+      "size_bytes": 33897, "sha256": "38c7a1de1e166345068d296f70f34b1adae27c694e19ead8fa0fbd8b62e0e016",
+      "what_was_read": "Sections 40-160 (destructor detaches all children; AttachChild: IncRefCount + AttachParent + array add, 52-72; DetachChildAt/DetachChild, 74-106; SetAt replaces and re-parents, 108-130; SameTopology), 226-290 (UpdateDownwardPass recurses ALL children, world bound = merge of visual children bounds, 248-272), 861-918 (LoadBinary: base + children link IDs + EFFECT list link IDs; LinkObject: children via SetAt in link order, effects attached) - the two-parents case resolves by link order with SetAt->AttachParent auto-detach."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiGeometry.cpp",
+      "size_bytes": 14679, "sha256": "fde29a81fbd5b7f8df34320dcf9dc91fe32d7d9f2e6e5f70b30b976953eaf335",
+      "what_was_read": "Section 255-294. CopyMembers: pkDest->SetModelData(m_spModelData) - CLONES SHARE the model-data pointer (275-280); ProcessClone skin instance handling (282+). Same mesh data != same instance."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiStringExtraData.cpp",
+      "size_bytes": 4124, "sha256": "1646adfb51dc1d0ba40906f97b5b79a7a78860e14f3b79aea50d1501beda8b1e",
+      "what_was_read": "Section 100-133. SaveCString/IsEqual; GetViewerStrings (125-132): exposes 'm_pString' VALUE via NiGetViewerString - the value-exposure path SceneViewer's ExtraDataDlg uses; the stock printer's -extra does NOT call it."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiObjectNET.cpp",
+      "size_bytes": 23177, "sha256": "2adb8f89cdb40f8c114feaa6e4a32dd7a1cc73bce30d745f669458ee6f354190",
+      "what_was_read": "Section 1-80 (RTTI declaration; name + extra-data array members; CopyMembers: COPY_EXACT keeps names, COPY_UNIQUE appends character; extra data cloned per copy type, 45-80) AND section 656-683 (PostLinkObject: for file version < 5.0.0.11 converts the OLD-STYLE ExtraData linked list - whose next-link was stored in the ExtraData NAME POINTER - into the new-style array, clearing those names; then removes deprecated NiVertWeightsExtraData instances) - another legacy in-memory conversion at load."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiMain\\NiTimeController.h",
+      "size_bytes": 5541, "sha256": "7c48d01204cfddb3f58469ed535765e7519682596ed538f1d8170f73566318fc",
+      "what_was_read": "Line 26-27: 'class NIMAIN_ENTRY NiTimeController : public NiObject' - controllers are NOT NiObjectNET, so PrintID prints no ':<name>' for controllers (basis of the parser-miss defect class)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiAnimation\\NiAnimationSDM.cpp",
+      "size_bytes": 7662, "sha256": "752296175f66cb17092d7d2f1221ce622f50914e6653055e75bc111593602edb",
+      "what_was_read": "FULL. Loader registry: 'NiKeyframeController' -> NiTransformController::CreateObject (65-68); 'NiKeyframeData' -> NiTransformData::CreateObject (70-72); 'NiVisData' -> NiBoolData::CreateObject (100-103); RegisterPostProcessFunction(NiOldAnimationConverter::Convert) (105). Runtime-observed this phase: DT.NIF serialized 9x NiKeyframeController printed as 9x NiTransformController; OBJECT.NIF 2x -> 2x."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiAnimation\\NiTransformController.cpp",
+      "size_bytes": 7685, "sha256": "155a925799ced82a6f3ddcb9487718db3f31a7a7be2fb05d493c7985009cf5a5",
+      "what_was_read": "Section 120-209. LoadBinary: for file version < 10.1.0.104 reads m_spKeyframeData link (154-163); LinkObject: same condition, creates NiTransformInterpolator(pkKeyframeData) + Collapse (165-178) - legacy-file runtime reconstruction; GetViewerStrings (202-208)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\CoreLibs\\NiAnimation\\NiOldAnimationConverter.cpp",
+      "size_bytes": 10730, "sha256": "4614fd46580b94cf2805a7d4202a2044f5068a9196f330ba7fb6d8a3469359c9",
+      "what_was_read": "Function map via targeted search: Convert gated on version < 10.1.0.104 (line 20-23); creates NEW runtime objects (NiTransformController, NiLookAtInterpolator, NiPoint3Interpolator, NiFloatInterpolator, NiTransformInterpolator) converting LookAt/Roll/Path controllers; re-orders controller lists - IN-MEMORY post-load conversion, not a disk write."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\Tutorials\\04 - Scene Attachment\\SceneAttachment.cpp",
+      "size_bytes": 4140, "sha256": "8b2ec4feddff58f0a0a807e2fe20bf976b79539d590d283e46c5a93e071b9ee9",
+      "what_was_read": "Section 30-131. CreateScene (37-96): loads WORLD.NIF; m_spScene = GetObjectAt(0) cast to NiNode; GetObjectByName('AttachmentBox') as anchor node; separately loads OBJECT.NIF; pkAttachPt->AttachChild(pkHeli) (93) - the world file supplies the anchor transform, the object file supplies the visual asset; FindCamera recursion (111-130). Media path per platform (28-34)."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\Samples\\ST_Applications\\MOUT\\WorldManager.cpp",
+      "size_bytes": 27057, "sha256": "e9eb4f45b4036e0ed29afb63e9f9aabdfbf1dabb7dbc96589607c993abd60c59",
+      "what_was_read": "Sections 148-337 + loader locator (564-565). LoadWorld: creates 'SceneRoot' NiNode; OpenNif('DesertTown/DT.NIF') attached under it; GetObjectByName('buildings') -> explicit draw + AppCull; GetObjectByName('start') -> soldier placement from its LOCAL GetTranslate/GetRotate (302-311); 'lights'/'light_direction' nodes; Update(0)+UpdateNodeBound+UpdateProperties+UpdateEffects (226-234); DT_Ground.NIF loaded separately as TERRAIN via TerrainManager (294-299); 'collision' node root for CollisionManager (323-331). DT.NIF is a compound scene with named sub-trees; a named transform node carries placement."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\ToolLibs\\NiOptimization\\NiOptimize_HelpFunc.cpp",
+      "size_bytes": 72517, "sha256": "594b5ddc0c293b99eb72439cfcc0e96533116b59f643b9f6bff1963dff4f7eda",
+      "what_was_read": "Section 725-854. Shape merge: for each merged shape, moves its LOCAL transform INTO vertex data via TransformPoints with its TRS (737-757) and rotates normals (768-787); resets spShape0 transform to identity/ZERO (841-844) - transforms can be baked into vertices; zero local transform after optimization is not evidence of never having been placed."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb12_Source\\ToolLibs\\NiOptimization\\NiOptimize_OptFunc.cpp",
+      "size_bytes": 85938, "sha256": "319131c044843df65fb1ac62ae2337519e2776d7b2d6907f1d74e1d398dbffd8",
+      "what_was_read": "Section 410-499. RemoveSingleChildNodes: removes eligible exact-NiNode single-child nodes, propagating properties, TRANSFORMS (PropagateTransforms), extra data and names to the child (410-499) - a placement transform can move into a child node; absence of an NiNode is not evidence of no placement."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\NiSceneGraphComponent.cpp",
+      "size_bytes": 23453, "sha256": "f46dbb142c356774d81109ba10fee7dd1b397d0d9332ad57933dbe4fc264a931",
+      "what_was_read": "Section 233-352 (OPTIONAL architecture reference ONLY, Gamebryo 2.6; NOT a PCG layout, no GSA search, not the default reader for older NIFs). Update: retrieves NIF scene root from asset manager; reads Translation/Rotation/Scale ENTITY PROPERTIES and applies them to the exact retained root (SetTranslate/SetRotate/SetScale 328-342); Update(fTime) (348). Demonstrates a later engine-side property-to-root-transform mechanism as a hypothesis class for PE, not an inherited implementation fact."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\NiExternalAssetNIFHandler.cpp",
+      "size_bytes": 12796, "sha256": "38e13c8a46e491784e4f6679efb0601587e0cbd75d68498d86568dcc76130580",
+      "what_was_read": "Section 200-259 (OPTIONAL architecture reference ONLY). Retrieve: returns the original loaded AVObject OR a fresh Clone depending on GetCloneFromPristine and refcount policy (202-255) - asset retrieval need not imply a fresh instance."
+    },
+    {
+      "path": "D:\\gamebyroengine\\extracted\\Gb26_src\\NiEntityStreamingAscii.cpp",
+      "size_bytes": 76987, "sha256": "443fe4b341c3f0ac153f6515152293e495573d1af26ecbc7f32d6e1a4ab8e9e6",
+      "what_was_read": "NOT_READ_BEYOND_PRESENCE. Recorded PRESENT per contract's optional-reference clause. GSA/entity/layer/property serialization is explicitly OUT of this run's scope (no GSA search in PE; 2.6 layouts are not PCG layouts)."
+    }
+  ],
+
+  "copied_script_lineage_original_vs_copy": [
+    {
+      "original": {
+        "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_GAMEBRYO_SCENE_TOOLS_DEEP_CHECK_20261009\\probe_tools.py",
+        "size_bytes": 6551,
+        "sha256": "f475e0589f07576bb903af2eb8bfc5a794314dd811661b048b5dd403b600d2d6",
+        "reverified_this_phase": true,
+        "desktop_directory_touched": false
+      },
+      "copy": {
+        "path": "TOOLS/probe_sdk_tools_r1.py (this run's package)",
+        "size_bytes": 15002,
+        "sha256": "6e43ddbd75f6ed85afa89b8f66628b1727e782c3f881c26335315bcfee203ccf"
+      },
+      "classification": "REUSED CODE (adapted copy), NOT an independent implementation",
+      "adaptations": "output paths -> this run's 01_SDK (raw logs) and LOCAL_ONLY fixtures dir; visit-line parser fixed for BOTH PrintID forms (NiObjectNET with ':<name>' and controller without); per-run provenance (argv/cwd/env-delta/timeout); mutation records extended to original-vs-new BYTES; EMPTY_SCENE case added by this run (own minimal generator); tool/DLL/sample identities verified before AND after; desktop comparison block embedded per positive case"
+    },
+    {
+      "original": {
+        "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\PE_GAMEBRYO_PLACEMENT_MECHANISMS_LOCAL_RESEARCH_20261009\\native_transform_probe.py",
+        "size_bytes": 5945,
+        "sha256": "b003e3c4c49d16da534de8a230cbe7585086016e8bd2dcba7b1bff2d41db107b",
+        "reverified_this_phase": true,
+        "desktop_directory_touched": false
+      },
+      "copy": {
+        "path": "TOOLS/probe_native_transforms_r1.py (this run's package)",
+        "size_bytes": 11831,
+        "sha256": "093f5d19c6eb1964e3783dd90eb86b7d61fee7eea77cd7fc29a8c91fa814182c"
+      },
+      "classification": "REUSED CODE (adapted copy), NOT an independent implementation",
+      "adaptations": "NIF serialization logic kept BYTE-IDENTICAL to the validated Desktop generator; fixtures -> LOCAL_ONLY synthetic dir (with mkdir fix for a missing-subdirectory defect found on first execution); logs -> this run's 01_SDK/raw; expected values replaced by THIS run's preregistered derivations (with per-case derivation strings); camera visit block additionally parsed for the LOCAL Translate (-trans) to measure local-vs-world; per-run provenance; visit-count expectations added (incl. TWO_PARENTS=4); tool identity verified before AND after"
+    },
+    {
+      "original": null,
+      "copy": {
+        "path": "TOOLS/combine_controls_r1.py (this run's package)",
+        "size_bytes": 6858,
+        "sha256": "68dbd7b5eaa675a52c20595fbd667afc6b523acfcb02f978818278ad8e884d55"
+      },
+      "classification": "OWN CODE of this run (combiner merging the two internal result JSONs into the contract-required combined artifact); no Desktop lineage"
+    }
+  ],
+
+  "source_finding_of_note": {
+    "nistream_getlastloadedrtti_bug": "NiStream::GetLastLoadedRTTI() returns m_acLastErrorMessage instead of m_acLastLoadedRTTI (NiStream.inl:94-97) - source observation recorded for completeness; not load-bearing for this phase's conclusions.",
+    "printer_no_openlog_call": "NiSceneGraphPrinter::OpenLog/CloseLog exist but the stock main never calls them - all printer output goes to stdout/stderr only."
+  }
+}

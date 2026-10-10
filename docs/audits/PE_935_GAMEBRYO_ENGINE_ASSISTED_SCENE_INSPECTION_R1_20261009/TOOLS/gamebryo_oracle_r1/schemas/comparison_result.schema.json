@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "gamebryo_oracle comparison_result",
+  "type": "object",
+  "required": ["schema", "adapter", "ORACLE_MODE", "float_policy",
+               "oracle_identity", "our_decoder_identity",
+               "input_identity_check", "items", "summary"],
+  "properties": {
+    "schema": {"type": "string"},
+    "adapter": {"const": "compare"},
+    "ORACLE_MODE": {"type": "string",
+                    "enum": ["ORIGINAL_TOOL_EXECUTION",
+                             "SOURCE_DERIVED_REIMPLEMENTATION", "MIXED"]},
+    "era_category": {"const": "OUR_TOOL"},
+    "float_policy": {"type": "string"},
+    "oracle_identity": {"type": "object"},
+    "our_decoder_identity": {"type": "object"},
+    "input_identity_check": {"type": "object"},
+    "items": {
+      "type": "object",
+      "description": "the 19 order-s11 comparison items",
+      "required": ["block_count", "object_count", "type_histogram",
+                   "object_ordering", "names", "parent_child_edges",
+                   "local_transforms", "world_transforms", "geometry_count",
+                   "vertex_counts", "triangle_counts", "uv_sets", "normals",
+                   "bounding_volumes", "controllers", "properties",
+                   "texture_references", "unknown_blocks", "parse_failures"],
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {"type": "string",
+                     "enum": ["MATCH", "MISMATCH",
+                              "NOT_AVAILABLE_IN_ORACLE",
+                              "NOT_AVAILABLE_IN_OUR_DECODER",
+                              "SEMANTICALLY_UNRESOLVED"]},
+          "detail": {"type": ["string", "array", "null"]},
+          "note": {"type": "string"},
+          "compared": {"type": "integer"},
+          "oracle": {},
+          "our": {}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "counts": {
+          "type": "object",
+          "propertyNames": {"enum": ["MATCH", "MISMATCH",
+                                     "NOT_AVAILABLE_IN_ORACLE",
+                                     "NOT_AVAILABLE_IN_OUR_DECODER",
+                                     "SEMANTICALLY_UNRESOLVED"]},
+          "additionalProperties": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

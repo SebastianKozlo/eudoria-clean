@@ -1,0 +1,201 @@
+{
+  "run_id": "PE_935_GAMEBRYO_ENGINE_ASSISTED_SCENE_INSPECTION_R1_20261009",
+  "artifact": "QC_RESULTS.json",
+  "qc_origin": "FRESH_INTERNAL_QC (pe-master-auditor, fresh session; internal to PE-MASTER; NOT an independent Desktop post-audit; DESKTOP_POST_AUDIT remains PENDING)",
+  "qc_verdict": "PASS_WITH_FINDINGS",
+  "verdict_basis": "all 11 duties executed with independent re-measurements; every load-bearing measured claim reproduced exactly; findings are mechanical/provenance defects (5 SHA transcription errors in the draft evidence index, 1 JSON-syntax defect repaired in-run, 4 hygiene items); no P0/P1; no capability or phase ends",
+  "base_sha_at_qc_start": "f99febeca9498011fc49f3aef932ecfac4244475",
+  "base_sha_at_qc_end": "f99febeca9498011fc49f3aef932ecfac4244475",
+  "base_unchanged": true,
+  "staged_or_tracked_changes": "NONE at start and end",
+  "foreign_untracked_preserved": ["docs/audits/PE_935_FC1_P2_CLOSURE_EXTERNAL_QC_20261001/", "docs/audits/PE_935_MODEL_218757_PLACEMENT_SEARCH_R1_20261003/", "docs/audits/PE_935_NINODE_SLOT17_FIRSTCALL_R1_20260914/", "docs/audits/PE_935_P1_CLOSURE_EXTERNAL_QC_20260930/", "docs/audits/PE_935_PLACEMENT_INSTANCE_RESOURCE_JOIN_R1_20260928/", "experiments/"],
+
+  "duties": {
+    "1_re_adjudicate_FC_C1_C2_C3": {
+      "result": "PASS",
+      "corrected_semantics_match_contract_section_4": true,
+      "old_wording_verified_real_in_f99febe": true,
+      "countermodel_scripts_read_in_full": 5,
+      "countermodels_independently_rerun_by_qc": 5,
+      "rerun_results": "5/5 REPRODUCED, exit 0, every expected value exact",
+      "logical_not_actual_execution_labeling_present": true,
+      "retained_facts_actually_retained": true,
+      "evidence": ["00_CONTROL_INTERNAL_QC/qc_countermodel_rerun/*.json", "00_CONTROL_INTERNAL_QC/q1_hash_recompute.json"]
+    },
+    "2_recompute_hashes_and_extraction": {
+      "result": "PASS",
+      "identities_rehashed": 14,
+      "identities_match": 14,
+      "independent_bnt2_index_derivation": "UNIQUE_DERIVATION_OK",
+      "derivation_details": {
+        "num_entries": 5596,
+        "dir_offset": 395262727,
+        "winner": {"ordinal": 781, "name": "218757.nif", "size": 57316, "offset": 116223520, "name_file_offset": 395283797},
+        "crosschecks_matched": ["ordinal 781", "offset 116223520", "length 57316", "name offset 395283797"],
+        "ambiguity": {"entries_with_218757_in_name": 1, "entries_sharing_range": 1, "same_size_payloads_with_pin_sha": 1},
+        "fresh_extraction_byte_identical_to_pin": true
+      },
+      "evidence": ["00_CONTROL_INTERNAL_QC/qc2_218757_index_derivation.py", "00_CONTROL_INTERNAL_QC/q2_218757_relation.json"]
+    },
+    "3_rerun_native_sdk_controls": {
+      "result": "PASS",
+      "positive_controls_rerun": ["SDK_TUTORIAL_WORLD (WORLD.nif) exit 0, stdout 62912 B", "SDK_TUTORIAL_OBJECT (OBJECT.NIF) exit 0, stdout 6594 B"],
+      "byte_identity_vs_executor_raw_logs": "identical after normalizing per-run SDK heap addresses",
+      "synthetic_control_rerun": "TRANSLATED_PARENT exit 0, camera World Bound C (101,202,303) = preregistered expected",
+      "flag_difference_disclosed": "executor synthetic invocation used -trans -bs -mem (recorded); QC used all six flags; -trans/-bs sections match exactly",
+      "printer_identity_unchanged": true,
+      "evidence": ["00_CONTROL_INTERNAL_QC/qc3_sdk_rerun.ps1", "00_CONTROL_INTERNAL_QC/q3_sdk_rerun_summary.json", "00_CONTROL_INTERNAL_QC/qc3_*.stdout.txt"]
+    },
+    "4_reproduce_pe_native_outcomes": {
+      "result": "PASS",
+      "218757": "exit 1, stdout empty, stderr 'Error loading stream.\\r\\n' (23 B) — reproduced byte-for-byte",
+      "423020": "exit 1, same — reproduced",
+      "all_four_raw_logs_byte_identical": true
+    },
+    "5_namespaces_and_counts": {
+      "result": "PASS",
+      "ceiling_218757_preserved_in_artifact": "62+4/66 (PARSER_NATIVE_COMPARISON.prior_ceiling_preservation_218757)",
+      "independent_reproduction": {
+        "own_header_census": {"num_blocks": 66, "num_types": 12, "niark_blocks": 4, "niark_classes": ["NiArkAnimationExtraData", "NiArkImporterExtraData", "NiArkTextureExtraData", "NiArkViewportInfoExtraData"]},
+        "parser_output_recount": {"semantic": 62, "boundary_only_UNREGISTERED_IN_GB12_FACTORY": 4, "total": 66},
+        "layout_authority": "pinned NiStream.cpp (LoadHeader L303-360, LoadRTTI L412-449, LoadRTTIString L1142-1153); NiStream.cpp sha256 e955c36ebbb442029e00be8a154726741b8454a607f2dc043f1fd542b009dc25 verified"
+      },
+      "four_namespaces_distinct_per_input": true,
+      "visit_vs_block_vs_unique_separation": "verified (WORLD 131 visits / 396 blocks / 130 unique; PE 0 visits honestly recorded)",
+      "evidence": ["00_CONTROL_INTERNAL_QC/qc5_218757_block_census.py", "00_CONTROL_INTERNAL_QC/q5_218757_block_census.json"]
+    },
+    "6_adversarial_checks": {
+      "result": "PASS (10/10 honestly handled)",
+      "checks": [
+        {"check": "growth helper may mutate an escaped local without violating the ABI", "handled_by": "CM-1 + SUPERSESSION 1.3.3 + NOT_ESTABLISHED_WITHIN_BOUND", "qc_verified": "CM-1 re-executed 3/3"},
+        {"check": "distinct provenance sources can alias", "handled_by": "CM-2 + CONTAINER_VS_P_ALIAS_RELATION=UNRESOLVED", "qc_verified": "CM-2 re-executed"},
+        {"check": "DWORD copies can carry float bits without FPU/SSE", "handled_by": "CM-3 + FC-C3 wording", "qc_verified": "CM-3 re-executed 2/2"},
+        {"check": "empty output + exit 0 is not a populated scene", "handled_by": "preregistered populated-scene rule + N6 classification", "qc_verified": "rule present in NATIVE_EXECUTION_RESULTS.json"},
+        {"check": "native traversal counts can differ from block counts and unique pointers", "handled_by": "C7 three count namespaces; measured 131/396/130 etc.", "qc_verified": "my re-runs reproduce visit counts"},
+        {"check": "source-derived predicted rejection is not actual native execution", "handled_by": "separate namespaces + 'NEVER an observed native report'", "qc_verified": "per-input in PARSER_NATIVE_COMPARISON"},
+        {"check": "opaque blocks are not semantic decodes", "handled_by": "4 NiArk boundary-only, coverage INCOMPLETE, no promotion", "qc_verified": "own recount 62+4"},
+        {"check": "bounds center is not a building position", "handled_by": "-bs bounding-sphere scope; bounds recorded as separate measurement; no location derived", "qc_verified": "preregistration + artifacts"},
+        {"check": "same mesh/asset is not same instance", "handled_by": "fingerprint_method discipline + explicit non-exclusions", "qc_verified": "MODEL_218757_RELATION_RESULTS"},
+        {"check": "an unqualified root cannot confer historical global XYZ", "handled_by": "FILE_SCENE_SPACE + unmodified placement ceiling", "qc_verified": "all five defaults byte-consistent with contract s14"}
+      ]
+    },
+    "7_census_audit": {
+      "result": "PASS",
+      "csv_rows_parsed": 5596,
+      "denominators_from_csv_columns": {"10.1.0.0": 4838, "4.1.0.12": 757, "4.0.0.2": 1, "failures": 0},
+      "plus_one_unit_identified": "entry 799 '52555.nif', version 4.0.0.2, histogram_status HEADER_UNSUPPORTED, num_blocks EMPTY (NOT_MEASURED not zero)",
+      "header_unsupported_total": 758,
+      "histogram_sum_consistency": "4838/4838 sum==num_blocks, 0 mismatches",
+      "stock_only_rule": {"result": "NO_STOCK_ONLY_CANDIDATE corpus-proven", "stock_only_candidates": 0, "all_files_declare": ["NiArkAnimationExtraData 4838", "NiArkImporterExtraData 4838", "NiArkTextureExtraData 4838"], "sdk_corelibs_niark_references": 0},
+      "compound_selection": {"pool": 1135, "ranking_rule_reimplemented_by_qc": true, "top3": ["496633.nif 166/163", "512126.nif 122/129", "423020.nif 119/102"], "dedup_218757": true, "distinct_selected": 4, "hard_max": 5, "frozen_before_inspection": true},
+      "nonstock_census_reproduced_7_of_7": true,
+      "evidence": ["00_CONTROL_INTERNAL_QC/qc7_census_audit.py", "00_CONTROL_INTERNAL_QC/q7_census_audit.json"]
+    },
+    "8_budget_stop_audit": {
+      "result": "PASS",
+      "closure_budgets_preregistered": "pre-existing constants of the unmodified canonical tool (gb12core.py MAX_SEARCH_ATTEMPTS=250000, MAX_RUN_SKIP=65536; 18/18 oracle copy files byte-identical to canonical — not invented post-hoc)",
+      "496633": "internal closure-search budget exhausted, measured (exit 0, 1011 s elapsed under 2100 s operational bound; preceding 300 s runner timeout retained as measured event)",
+      "512126": "CLOSURE_SEARCH_FAILED — no boundary assignment closes the file",
+      "failed_outcomes_retained": true,
+      "candidate_replacement": "NONE (no next-ranked candidate was run)",
+      "success_chasing": "NONE"
+    },
+    "9_helper_audit": {
+      "result": "PASS",
+      "identity_pin_verified": "gb12_oracle.exe DD7112A41D83557395C5D31F72C89BFEA3D7906AB28EF4DD3C4BD8E398EB046C, 594944 B",
+      "source_verified": "oracle.cpp AD1F5DED06FA17AE77D9A5077CE2704404451FA0A751FA59F76EF9A24A9E591A (771 lines)",
+      "source_inspection_by_qc": "only GetLastErrorMessage reference; zero NiArk / dummy factories / guessed loaders / SDK-tree modification",
+      "behavior_differences_disclosed": 6,
+      "controls_3_of_3": "PASS (QC independently re-ran the QC2 missing-factory control: 'QzNode: cannot find create function.' exit 1 reproduced)",
+      "specific_error_classified_as": "HELPER-OBSERVED under CUSTOM_SDK_SOURCE_HELPER_EXECUTION (namespace 'ORIGINAL_NATIVE_EXECUTION (OBSERVED VIA THE ONE DISCLOSED HELPER)'), never stock output",
+      "qc_own_helper_rerun_218757": "exit 1, lastError 5, 'NiArkAnimationExtraData: cannot find create function.' reproduced exactly"
+    },
+    "10_final_report_draft_audit": {
+      "result": "PASS_WITH_FINDINGS",
+      "labeled_FINAL_REPORT_DRAFT_QC_PENDING": true,
+      "measured_fields_recomputed": {
+        "PE_METADATA_CENSUS_COUNT": "MATCH (5596/4838/757/758/+1 identified)",
+        "PE_DEEP_INPUT_COUNT": "MATCH (4/5, all four SHAs verified on disk)",
+        "MODEL_218757_NATIVE_RESULT": "MATCH (reproduced by QC)",
+        "MODEL_218757_CUSTOM_PARSE_COVERAGE": "MATCH (62+4/66 independently reproduced)",
+        "COMPOUND_SCENE_CANDIDATES_INSPECTED": "MATCH (1/3 + 2/3)",
+        "MODEL_GEOMETRY_MATCHES": "MATCH (0; NO_MATCH_IN_SELECTED_INPUTS; 14 vs 102; 116 EXTRACTED_VALIDATED recount)"
+      },
+      "human_first_ordering": true,
+      "denominators_everywhere": true,
+      "honest_not_checked": true,
+      "proprietary_payload_census": "0 files with nif/bnt/dll/exe/dtx/dgc/dat/bin/ark/vfs/pak extensions",
+      "placement_ceiling_defaults_unmodified": true,
+      "draft_package_files_132_verified": true,
+      "findings": "P2-1..P2-5 (section 9 index SHA transcription defects)"
+    },
+    "11_package_hygiene": {
+      "result": "PASS_WITH_FINDINGS",
+      "section15_files_phases_ABC": "all present and non-vacuous (EVIDENCE_INDEX standalone + MANIFEST explicitly persistence-phase; PE_MASTER_REVIEW is PE-MASTER's own)",
+      "json_validation": "post-repair all package JSONs parse strictly as UTF-8 except 5 BOM-pinned raw captures (documented P3)",
+      "intervention_ledger_covers_all_native_executions": "27/27 (16 SDK + 4 PE stock + 7 helper) with classes",
+      "raw_logs_referenced_exist": "139/139 real paths (13 regex false-positives = prose citations + intentional MISSING_INPUT)",
+      "pycache_residue": "0 at QC end (executor zero; QC's own transient residue removed and disclosed)",
+      "oracle_copy_byte_identity": "18/18 vs canonical",
+      "base_and_foreign_state": "unchanged and preserved at QC start and end",
+      "evidence": ["00_CONTROL_INTERNAL_QC/qc11_index_bijection.py", "00_CONTROL_INTERNAL_QC/q11_index_bijection.json", "00_CONTROL_INTERNAL_QC/q11c_sha_transcription_test.json", "00_CONTROL_INTERNAL_QC/qc11d_raw_path_existence.py"]
+    }
+  },
+
+  "findings": [
+    {"id": "P2-1", "severity": "P2 CORRECTNESS", "location": "FINAL_REPORT.md s9 row cm1_escaped_local_output.json", "claim_contradicted": "index SHA identity (65 chars; spurious '9' inserted)", "true_sha256": "1a609fb164cf3c92f984909ebcdda413d9328c429f66f9a1c95524b00ba6a099", "disk_file_unchanged": true, "disposition": "REPORTED (no silent fix; second repair would exceed the one in-run repair round)", "required_correction": "replace index SHA with true value", "revalidation_gate": "persistence-phase manifest regenerated from disk hashes; corrected row matches"},
+    {"id": "P2-2", "severity": "P2 CORRECTNESS", "location": "FINAL_REPORT.md s9 row cm2_alias_model_output.json", "claim_contradicted": "index SHA identity (pos 21 'b' vs true 'a')", "true_sha256": "dfe28dc1e1b686553d0b5a79eaabeead550ffb2c46c5cad7dd67243b2bc1c24e", "disk_file_unchanged": true, "disposition": "REPORTED", "required_correction": "replace index SHA", "revalidation_gate": "as P2-1"},
+    {"id": "P2-3", "severity": "P2 CORRECTNESS", "location": "FINAL_REPORT.md s9 row cm3_dword_float_copy_output.json", "claim_contradicted": "index SHA identity (63 chars, dropped '0')", "true_sha256": "2eb21d4f97c282f3993270c5c72188979c1711ff1f7fa2c992eafa1c517004dc", "disk_file_unchanged": true, "disposition": "REPORTED", "required_correction": "replace index SHA", "revalidation_gate": "as P2-1"},
+    {"id": "P2-4", "severity": "P2 CORRECTNESS", "location": "FINAL_REPORT.md s9 row cm4_escaped_subject_outslot_output.json", "claim_contradicted": "index SHA identity (63 chars, dropped '0')", "true_sha256": "d1cf8977520f256a597ef8ba291f13616f41eed98cbf8fad316898bc44466aa4", "disk_file_unchanged": true, "disposition": "REPORTED", "required_correction": "replace index SHA", "revalidation_gate": "as P2-1"},
+    {"id": "P2-5", "severity": "P2 CORRECTNESS", "location": "FINAL_REPORT.md s9 row TOOLS\\gamebryo_oracle_r1\\adapters\\gb23\\adapter.py", "claim_contradicted": "index SHA identity (63 chars, dropped '5')", "true_sha256": "3bcda25764deaa6d33677e41c1a5242b5006b0410b5dbd29b7bb9def11069453", "disk_file_unchanged": true, "disposition": "REPORTED", "required_correction": "replace index SHA", "revalidation_gate": "as P2-1"},
+    {"id": "P2-6", "severity": "P2 CORRECTNESS (REPAIRED IN-RUN)", "location": "00_RECORDS_CORRECTION/COUNTERMODEL_RESULTS.json line 131", "claim_contradicted": "machine-parseability of a required records artifact (invalid JSON: bare number + unquoted annotation)", "repair": "split value into countermodels_supplied: 5 + countermodels_supplied_note string (content preserved verbatim)", "pre_repair": {"size": 13234, "sha256": "e687c8f393740ef62271a16fce0fce5d6720bb52f99099d7584fb093be6b690c"}, "post_repair": {"size": 13269, "sha256": "2e159900137c14faefcbf910d0025769891cef8cc6f739573a6996fdf3346ed1"}, "disposition": "REPAIRED under the ONE targeted in-run repair round (QC-scoped mechanical defect); semantic content unchanged and independently verified (5/5 countermodels re-executed by QC)", "revalidation_gate": "strict json.loads passes (executed); PE-MASTER must independently audit this change; persistence manifest uses post-repair hash"},
+    {"id": "P3-1", "severity": "P3 HYGIENE", "location": "00_RECORDS_CORRECTION/countermodels/raw/cm*_output.json (5 files)", "claim_contradicted": "none (RFC 8259 strict-parse compatibility)", "detail": "UTF-8 BOM at capture; content valid after BOM; SHA-pinned records all correct", "disposition": "REPORTED, NOT modified (executor evidence with pinned hashes)", "required_correction": "document in persistence manifest or re-capture BOM-less in a future authorized round", "revalidation_gate": "utf-8-sig parse passes (verified)"},
+    {"id": "P3-2", "severity": "P3 HYGIENE", "location": "LOCAL_ONLY_ROOT README.md", "detail": "private manifest omits 01_SDK_fixtures section (fixtures exist and are repo-side documented with SHAs)", "disposition": "REPORTED", "required_correction": "append fixtures section in a future authorized local-only manifest update", "revalidation_gate": "fixture SHAs match SDK_EXECUTION_RESULTS records (spot-verified)"},
+    {"id": "P3-3", "severity": "P3 HYGIENE", "location": "package root", "detail": "standalone EVIDENCE_INDEX.md not yet present; content embedded as FINAL_REPORT s9 draft; explicitly assigned to persistence phase in HANDOFF", "disposition": "REPORTED (staging decision, disclosed)", "required_correction": "generate from fresh full-package re-hash at persistence", "revalidation_gate": "contract s18 bijection"},
+    {"id": "P3-4", "severity": "P3 HYGIENE", "location": "TOOLS/gamebryo_oracle_r1/adapters/gb12/__pycache__ (transient)", "detail": "created by THIS QC session's registry import at 23:27:50 (SourceFileLoader bytecode cache without -B), removed immediately; executor's zero-residue claim stands", "disposition": "RESOLVED by QC (own residue)", "revalidation_gate": "package pycache/pyc scan = 0 (verified at QC end)"}
+  ],
+
+  "re_measurements_summary": [
+    {"what": "14 pinned identities re-hashed", "result": "14/14 MATCH", "artifact": "00_CONTROL_INTERNAL_QC/q1_hash_recompute.json"},
+    {"what": "independent BNT2 index derivation + fresh extraction", "result": "UNIQUE_DERIVATION_OK; byte-identical to pin; 1-of-1 uniqueness across 5596 entries", "artifact": "00_CONTROL_INTERNAL_QC/q2_218757_relation.json"},
+    {"what": "5 countermodels independently re-executed", "result": "5/5 REPRODUCED (exceeds required minimum 2)", "artifact": "00_CONTROL_INTERNAL_QC/qc_countermodel_rerun/"},
+    {"what": "2 positive SDK controls re-run (WORLD/OBJECT)", "result": "byte-identical to executor raw logs modulo heap addresses", "artifact": "00_CONTROL_INTERNAL_QC/q3_sdk_rerun_summary.json + qc3_*.stdout.txt"},
+    {"what": "1 synthetic transform control re-run (TRANSLATED_PARENT)", "result": "World Bound C (101,202,303) reproduced; exit 0; 2 visits", "artifact": "00_CONTROL_INTERNAL_QC/qc3_QC_SYNTH_TRANSLATED_PARENT.stdout.txt"},
+    {"what": "2 PE native outcomes reproduced (218757, 423020)", "result": "exit 1 + 'Error loading stream.' byte-for-byte", "artifact": "console log in QC_REPORT s4"},
+    {"what": "2 helper runs reproduced (218757 + QC2 control)", "result": "specific NO_CREATE_FUNCTION errors reproduced exactly", "artifact": "00_CONTROL_INTERNAL_QC/qc9_*.json"},
+    {"what": "own NIF 10.1 header census of 218757 + parser recount", "result": "66 blocks / 12 types / 4 NiArk; 62+4 ceiling reproduced", "artifact": "00_CONTROL_INTERNAL_QC/q5_218757_block_census.json"},
+    {"what": "full census CSV recomputation (5596 rows)", "result": "all denominators + selection rules + non-stock census 7/7 reproduced; +1 = entry 799 52555.nif", "artifact": "00_CONTROL_INTERNAL_QC/q7_census_audit.json"},
+    {"what": "SDK CoreLibs NiArk-absence + NiStream.cpp/oracle.cpp identities", "result": "0 NiArk refs; e955c36e/ad1f5ded MATCH", "artifact": "QC_REPORT s4"},
+    {"what": "oracle copy byte-identity vs canonical", "result": "18/18", "artifact": "QC_REPORT s4"},
+    {"what": "JSON validation (54 files) + package payload census + raw-path existence", "result": "1 syntax defect repaired; 5 BOM captures; 0 proprietary payloads; 139/139 real paths exist", "artifact": "QC_REPORT s2/s4"},
+    {"what": "EVIDENCE_INDEX bijection re-hash (130 rows)", "result": "124 match + 5 transcription defects + 1 post-repair supersession", "artifact": "00_CONTROL_INTERNAL_QC/q11_index_bijection.json + q11c_sha_transcription_test.json"},
+    {"what": "EXTRACTED_VALIDATED recount in SCENE_STRUCTURE_RESULTS", "result": "116 = 14 + 102", "artifact": "QC_REPORT s2 duty 10"}
+  ],
+
+  "repairs_performed": [
+    {
+      "id": "QC-REPAIR-1",
+      "scope": "executor-evidence mechanical defect (the ONE targeted in-run repair round)",
+      "target": "00_RECORDS_CORRECTION/COUNTERMODEL_RESULTS.json",
+      "change": "line 131 invalid JSON value '5 (4 JSON groups ...)' split into countermodels_supplied: 5 + countermodels_supplied_note string",
+      "pre_sha256": "e687c8f393740ef62271a16fce0fce5d6720bb52f99099d7584fb093be6b690c (13234 B)",
+      "post_sha256": "2e159900137c14faefcbf910d0025769891cef8cc6f739573a6996fdf3346ed1 (13269 B)",
+      "self_check_disclosure": "this QC authored the change; PE-MASTER must independently audit it (see AMEND_LOG.md)"
+    },
+    {
+      "id": "QC-CLEANUP-1..3",
+      "scope": "QC-owned files only (not executor evidence)",
+      "changes": [
+        "transient __pycache__ residue created by QC's registry import removed (0 residue at end)",
+        "QC's own q1/q3 capture files normalized to strict UTF-8 JSON",
+        "QC's 5 countermodel rerun captures normalized BOM-less UTF-8"
+      ]
+    }
+  ],
+
+  "final_package_state": {
+    "package_file_count_at_qc_end": "recorded in QC handoff (132 executor draft files + QC additions under 00_CONTROL_INTERNAL_QC + QC_REPORT.md/QC_RESULTS.json/AMEND_LOG.md)",
+    "proprietary_payload_census": "ZERO proprietary payloads in the repo package (extension census: 0 nif/bnt/dll/exe/...; all payloads LOCAL_ONLY per the LOCAL_ONLY_ROOT manifest)",
+    "base_sha": "f99febeca9498011fc49f3aef932ecfac4244475 (unchanged; no commit/push by QC)"
+  }
+}
