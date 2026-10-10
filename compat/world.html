@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!-- world.html — PE_WORLD_LAUNCHER_R1_20261010, ETAP C (contract §4 + §7)
+     THE /world view: terrain region rendering from ORIGINAL u16 samples of
+     the pinned PCG_9_3_5 terrain.bnt (via the bounded world API), with
+     exploration controls (orbit/fly/walk), toggles and the honest census
+     panels. Three.js 0.185.0 from the pinned local package (no CDN).
+     Zero-framework vanilla JS + ES modules.
+
+      HONESTY LABELS (never removed):
+        - terrain heights = RAW uint16 from the original TDF payload offset
+          64..2111, decoded by the production chain; NO normalization, NO
+          smoothing, NO seam hiding, NO tile rewriting;
+        - the CURRENT_RUNTIME_CALIBRATION preset (u16/128 → meters, 2
+          jednostki adaptera/próbkę, identity min/max) is applied EXACTLY ONCE
+          (inside PETerrainRegion.buildGeometry) and is reversible; it is a
+          runtime preset with provenance, NOT a proven historical engine fact;
+        - position readouts are adapter units + tile key — NEVER „original XYZ”;
+        - spawn is chosen on AVAILABLE DATA (launcher selection / measured
+          default), never from city-name guesses;
+        - inter-tile triangles are derived from ADJACENT ORIGINAL samples
+          (PETerrainRegion.buildGeometry quads across the 32-sample block
+          borders; no vertex sharing, no height changes for jump masking) —
+          the documented RENDERER TOPOLOGY CHOICE;
+        - normals + the height-preview palette are renderer-side
+          RECONSTRUCTION_PREVIEW aids; the source bytes and scene transforms
+          stay separate from viewer fit/centering;
+        - terrain textures (ETAP D) = ORIGINAL payloads from the pinned
+          PCG_9_3_5 Textures.bnt through the proven chain (TDF material
+          record → id@+16 → „<id>.dat” → decodeTga2 → GPU splat with RAW
+          weights); the blend form is era-evidenced, the ALBEDO ROLE, the UV
+          repeat and the cell sampling are the labeled RENDER_RECONSTRUCTION
+          preset; unresolved bindings are explicit diagnostics (never a
+          fallback texture);
+        - vegetation (ETAP E) = RECONSTRUCTION_PREVIEW: ORIGINAL_CLIMATE_
+          RECORDS (strict .vcl decode; 25.vcl stays UNSUPPORTED — comma
+          tokens never converted) + the RECOVERED byte-locked RNG chain
+          (PEFoliageCore, untouched) + the DOCUMENTED LAB_SEED wrapper
+          (PEFoliageLabSeed — the [P-CELLSTREAM] reconstruction stand-in);
+          models = ORIGINAL same-era NIF payloads through the EXISTING
+          qualified importer with their original textures where the binding
+          resolves (unresolved → honest untextured + diagnostic, never a
+          stock pine under the same id); the INSTANCE DISTRIBUTION is
+          reconstruction-only — no historical seed/count/biome/placement
+          claims; the 5000 visible-instance cap is a HARD display limit with
+          honest requested/rendered/limited counts;
+        - water = NOT_RECOVERED. -->
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE Eudoria — podgląd świata (teren z oryginalnych próbek u16)</title>
+<link rel="stylesheet" href="/compat/compat.css">
+<link rel="stylesheet" href="/compat/world.css">
+<script type="importmap">
+{ "imports": {
+    "three": "/node_modules/three/build/three.module.js",
+    "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header id="app-header">
+  <div class="brand">PE Eudoria — podgląd świata | run PE_WORLD_LAUNCHER_R1_20261010 (Etap C+D, kontrakt §4/§5/§7)</div>
+  <div class="labels">
+    <span class="lab">teren = SUROWE uint16 z terrain.bnt (offset 64..2111; era PCG_9_3_5) — bez normalizacji/wygładzania/maskowania szwów</span>
+    <span class="lab">jednostki = adaptera (CURRENT_RUNTIME_CALIBRATION: u16/128 → m, 2 jedn./próbkę, identity min/max) — NIE „oryginalne XYZ”</span>
+  </div>
+  <div class="labels">
+    <span class="lab">konwersja u16→metry zastosowana DOKŁADNIE RAZ (PETerrainRegion.buildGeometry); odwracalna (×128)</span>
+    <span class="lab">tekstury terenu = ORYGINALNE (Etap D: materiał TDF → id@+16 → „&lt;id&gt;.dat” z Textures.bnt → TGA2 → GPU; preset RENDER_RECONSTRUCTION) · roślinność = RECONSTRUCTION_PREVIEW (Etap E: profile .vcl strict + LAB_SEED wrapper + oryginalne modele NIF; rozkład = rekonstrukcja, NIE historyczny) · woda = NOT_RECOVERED</span>
+  </div>
+</header>
+
+<div id="hud-line">boot…</div>
+<div id="error-banner" hidden></div>
+<div id="boundary-banner" hidden>granica danych rekonstrukcji — dalszy ruch wstrzymany (brak danych poza tym punktem; NIE zrzucamy w pustkę)</div>
+
+<div id="action-bar">
+  <button id="btn-mode-orbit" class="active" title="tryb orbity (klawisz 1)">Orbita [1]</button>
+  <button id="btn-mode-fly" title="tryb lotu (klawisz 2) — WASD + Q/E">Lot [2]</button>
+  <button id="btn-mode-walk" title="tryb spaceru (klawisz 3) — WASD po terenie; kliknij canvas, aby przechwycić mysz; ESC uwalnia">Spacer [3]</button>
+  <button id="btn-fit" title="dopasuj widok do okna danych (klawisz F)">Dopasuj [F]</button>
+  <button id="btn-reset" title="reset kamery na spawn (klawisz R)">Reset [R]</button>
+  <button id="btn-launcher" title="powrót do launchera">← Launcher</button>
+  <label class="tog"><input type="checkbox" id="tog-wireframe"> siatka (wireframe)</label>
+  <label class="tog"><input type="checkbox" id="tog-tilebounds" checked> granice kafli</label>
+  <label class="tog" title="Etap D: łańcuch materiał→tekstura (oryginalne payloady z Textures.bnt; preset RENDER_RECONSTRUCTION dla UV/roli albedo)"><input type="checkbox" id="tog-textures" checked> tekstury terenu (oryginalne — Etap D)</label>
+  <label class="tog" title="Etap E: podgląd roślinności (RECONSTRUCTION_PREVIEW) — profile .vcl (strict; 25 UNSUPPORTED), LAB_SEED przez udokumentowany wrapper PEFoliageLabSeed, byte-locked łańcuch PEFoliageCore NIETKNIĘTY, oryginalne modele z Models.bnt przez istniejący kwalifikowany importer + oryginalne tekstury gdy binding się rozwiąże; twardy limit 5000 widocznych instancji"><input type="checkbox" id="tog-vegetation" checked> roślinność (RECONSTRUCTION_PREVIEW — Etap E)</label>
+</div>
+
+<main id="world-layout">
+  <div id="viewport-wrap">
+    <canvas id="view-canvas"></canvas>
+    <div id="pos-hud" class="small mono">pozycja: …</div>
+    <div id="lock-hint" class="small">tryb Lot/Spacer: kliknij canvas, aby przechwycić mysz (świadome kliknięcie); ESC uwalnia kursor</div>
+  </div>
+  <aside id="world-side">
+    <section class="diag-section">
+      <h4>Ładowanie i błędy (uczciwie)</h4>
+      <div id="world-loading" class="small mono">…</div>
+    </section>
+    <section class="diag-section">
+      <h4>Profil / seed (ustawienia rekonstrukcji)</h4>
+      <div id="world-veg" class="small mono">…</div>
+    </section>
+    <section class="diag-section">
+      <h4>Census pamięci / instancji</h4>
+      <div id="world-census" class="small mono">…</div>
+    </section>
+    <section class="diag-section">
+      <h4>Sterowanie</h4>
+      <div class="small">
+        <b>Orbita</b>: LMB obrót · RMB/scroll przybliżenie · PPM przesuwanie.<br>
+        <b>Lot</b>: WASD + Q (w dół) / E (w górę) · Shift ×3 · mysz po kliknięciu.<br>
+        <b>Spacer</b>: WASD po terenie (wysokość próbkowana z TEGO SAMEGO terenu; offset oka 1,7 m = ustawienie podglądu) · Shift ×3 · mysz po kliknięciu.<br>
+        <b>1/2/3</b> tryby · <b>F</b> dopasuj · <b>R</b> reset · <b>ESC</b> uwolnij kursor.
+      </div>
+    </section>
+    <details id="evidence">
+      <summary>Panel dowodów — provenance, kalibracja, topologia (dane techniczne)</summary>
+      <div id="world-evidence" class="small mono">…</div>
+    </details>
+    <details id="diagnostics" open data-load-status="PENDING">
+      <summary>DIAGNOSTICS (boot + render)</summary>
+      <div id="world-diag" class="small mono">…</div>
+    </details>
+  </aside>
+</main>
+
+<script type="module" src="/compat/world-app.js"></script>
+</body>
+</html>

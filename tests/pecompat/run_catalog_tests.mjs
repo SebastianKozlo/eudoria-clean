@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 // run_catalog_tests.mjs — CATALOG_TESTS harness — PE_CITY_ASSET_MAP_R1_20261010, phase 4 (W6).
+// PE_WORLD_LAUNCHER_R1_20261010 Etap A: the battery gains the Focused QC A
+// suite (catalog_cam_fixes.test.mjs — CAM-C1 fresh GLB comparison execution,
+// CAM-C2 shared status model + 1572 baseline control, CAM-C3 three mutants +
+// clean + no-envelope refusal through the REAL production build). The prior
+// 33 gates are UNCHANGED (no assertion weakened).
 // Runs the phase-4 /catalog gate battery (contract §7):
 //   CAT_ARCHIVE_SAFETY   — bounded archive reads, CRC/tamper, truncation,
 //                          wrong magic, duplicate-ID era separation, pin re-verify
@@ -7,6 +12,7 @@
 //   CAT_TEXTURE_GATES    — wrong-ID / wrong-era / missing-image controlled dispositions
 //   CAT_UNKNOWN_SORT     — UNKNOWN sort/filter/badge correctness (never 0)
 //   CAT_PREVIEW_MATH     — no-accidental-centering / no-double-conversion
+//   CAM_C1/C2/C3         — Etap A focused QC (PE_WORLD_LAUNCHER_R1_20261010)
 //   CAT_T7 (api_denial)  — catalog server positives + synthetic denial battery
 //   CAT_T9 (headless)    — real-browser LOAD of /catalog through the FIXED gate
 // REUSE LABEL: the harness follows tests/pecompat/run_app_tests.mjs (the
@@ -60,6 +66,7 @@ const suites = [
   ['catalog_texture_gates.test.mjs', (await import('./catalog_texture_gates.test.mjs')).run],
   ['catalog_unknown_sort.test.mjs', (await import('./catalog_unknown_sort.test.mjs')).run],
   ['catalog_preview_math.test.mjs', (await import('./catalog_preview_math.test.mjs')).run],
+  ['catalog_cam_fixes.test.mjs', (await import('./catalog_cam_fixes.test.mjs')).run],
   ['catalog_api_denial.test.mjs', (await import('./catalog_api_denial.test.mjs')).run],
   ['catalog_headless_load.test.mjs', (await import('./catalog_headless_load.test.mjs')).run],
 ];

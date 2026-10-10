@@ -1,0 +1,202 @@
+{
+ "run": "PE_CITY_ASSET_MAP_R1_20261010",
+ "suite": "tests/pecompat/catalog_api_denial.test.mjs",
+ "port": 8876,
+ "pid": 16716,
+ "transcript": [
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/api/catalog/status",
+   "status": 200,
+   "bytes": 5935
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/catalog",
+   "status": 200,
+   "bytes": 7894
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/compat/catalog-app.js",
+   "status": 200,
+   "bytes": 22853
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/compat/catalog-preview.js",
+   "status": 200,
+   "bytes": 24995
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/compat/catalog-table.js",
+   "status": 200,
+   "bytes": 4236
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/compat/catalog.css",
+   "status": 200,
+   "bytes": 4710
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/src/pecompat/PecSceneIR.js",
+   "status": 200,
+   "bytes": 19777
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/node_modules/three/build/three.module.js",
+   "status": 200,
+   "bytes": 650153
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/api/catalog/rows?era=CD_2003&pageSize=5&sort=size",
+   "status": 200
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/api/catalog/rows?era=BOGUS",
+   "status": 400,
+   "error": "DENIED_EXPLICIT"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/api/catalog/rows?sort=bogus",
+   "status": 400,
+   "error": "DENIED_EXPLICIT"
+  },
+  {
+   "kind": "positive",
+   "method": "GET",
+   "url": "/api/catalog/model/CD_2003/193313",
+   "status": 200,
+   "bytes": 156353
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/compat/../server-catalog.mjs",
+   "status": 404,
+   "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+   "messageExcerpt": "\"../server-catalog.mjs\" is not in the catalog allowlist (fixed file set: index.html, catalog-app.js, catalog-table.js, catalog-preview.js, catalog.css, compat.c"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/C:/Windows/system32/drivers/etc/hosts",
+   "status": 404,
+   "error": "ROUTE_NOT_FOUND",
+   "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/status, /api/catalog/rows and /api/catalog/"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/compat/%2e%2e/%2e%2e/src/pesource/ArkArchive.js",
+   "status": 404,
+   "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+   "messageExcerpt": "\"../../src/pesource/ArkArchive.js\" is not in the catalog allowlist (fixed file set: index.html, catalog-app.js, catalog-table.js, catalog-preview.js, catalog.cs"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/src/pecompat/../../../package.json",
+   "status": 404,
+   "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+   "messageExcerpt": "\"../../../package.json\" is not in the client module allowlist (PecTransform.js, PecSceneIR.js); the server-side extraction chain (ArkArchive/Bnt2Archive/nif41_d"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/compat/..\\..\\package.json",
+   "status": 400,
+   "error": "BACKSLASH_IN_URL",
+   "messageExcerpt": "backslash in URL refused (no Windows path semantics in routes)"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/pcg/Models.bnt",
+   "status": 404,
+   "error": "ROUTE_NOT_FOUND",
+   "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/status, /api/catalog/rows and /api/catalog/"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/Models.bnt",
+   "status": 404,
+   "error": "ROUTE_NOT_FOUND",
+   "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/status, /api/catalog/rows and /api/catalog/"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/api/catalog/model/CD_2003/999999999",
+   "status": 404,
+   "error": "PREVIEW_NOT_ESTABLISHED",
+   "messageExcerpt": "no safe import established for CD_2003 999999999.nif in this run — preview is available ONLY for the four pinned primaries (192374, 193207, 193313, 193684). Hon"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/api/catalog/model/CD_2003/65678",
+   "status": 404,
+   "error": "PREVIEW_NOT_ESTABLISHED",
+   "messageExcerpt": "no safe import established for CD_2003 65678.nif in this run — preview is available ONLY for the four pinned primaries (192374, 193207, 193313, 193684). Honest "
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/api/catalog/model/PCG_9_3_5/218757",
+   "status": 404,
+   "error": "UNKNOWN_ASSET_ROUTE",
+   "messageExcerpt": "the model route serves ONLY /api/catalog/model/CD_2003/<primary-id> (the four pinned primaries); got \"PCG_9_3_5/218757\""
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/api/sceneir/218757",
+   "status": 404,
+   "error": "ROUTE_NOT_FOUND",
+   "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/status, /api/catalog/rows and /api/catalog/"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/definitely/not/a/route",
+   "status": 404,
+   "error": "ROUTE_NOT_FOUND",
+   "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/status, /api/catalog/rows and /api/catalog/"
+  },
+  {
+   "kind": "negative",
+   "method": "GET",
+   "url": "/compat/app.js",
+   "status": 404,
+   "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+   "messageExcerpt": "\"app.js\" is not in the catalog allowlist (fixed file set: index.html, catalog-app.js, catalog-table.js, catalog-preview.js, catalog.css, compat.css)"
+  },
+  {
+   "kind": "negative",
+   "method": "POST",
+   "url": "/api/catalog/rows",
+   "status": 405,
+   "error": "METHOD_NOT_ALLOWED_READ_ONLY"
+  }
+ ]
+}

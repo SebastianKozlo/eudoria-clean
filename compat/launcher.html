@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- launcher.html — PE_WORLD_LAUNCHER_R1_20261010, ETAP C (contract §4)
+     THE /launcher entry point of the world preview — served by
+     compat/server-world.mjs (loopback-only; exact-allowlist statics; bounded
+     index-derived world APIs). Zero-framework vanilla JS.
+
+     PANELS (contract §4):
+       1. ORYGINALNE DANE — connection state, era, loading stages (the four
+          pinned containers, SHA-verified)
+       2. MAPA WYSOKOŚCI — from the REAL terrain.bnt index (per-regular-tile
+          stats, downsampled to 1 px/tile — explicitly labeled), legend,
+          coverage (measured/total/NODATA with denominators), selection +
+          highlight, hover = raw uint16
+       3. USTAWIENIA REKONSTRUKCJI — vegetation profile (.vcl 0..31),
+          LAB_SEED, preview density, entry button „Uruchom podgląd świata”
+       4. KATALOG MODELI + braki/niewspierane (honest NOT loaded panel)
+       5. separation ORYGINALNE DANE vs USTAWIENIA REKONSTRUKCJI; simple
+          labels in the main flow; hashes/offsets in the collapsible
+          evidence panel
+
+     HONESTY LABELS (never removed):
+       - era świata = PCG_9_3_5 (installed client); source-layer CD era label
+         = CD_JAN_2003 (explicit mapping; never identified with JUL_2003);
+       - overview is EXPLICITLY DOWNSAMPLED (1 px = 1 tile, mean of the raw
+         u16 samples); hover/selected point shows the RAW uint16 values;
+         raw u16 = 0 is DATA (not NODATA); NODATA (missing/failed tiles) is
+         visible as NODATA, never as height 0;
+        - sentinel 7ffe7ffe.tdf and the 6,530 special rows (gridY
+          0xff5a..0xffff) are NOT regular tiles (excluded, loudly);
+       - heights are RAW uint16 — no 8-bit normalization, no smoothing, no
+         seam hiding, no tile rewriting;
+       - meters readouts use the CURRENT_RUNTIME_CALIBRATION preset
+         (u16/128, 2 jednostki/sample, identity min/max) — a runtime preset
+         with provenance, NOT a proven historical engine fact;
+       - vegetation: VEGETATION_MODE = RECONSTRUCTION_PREVIEW — profile
+         content + LAB_SEED effects are Etap E (honest placeholders now). -->
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE Eudoria — uruchamianie podglądu świata (PE_WORLD_LAUNCHER_R1_20261010)</title>
+<link rel="stylesheet" href="/compat/compat.css">
+<link rel="stylesheet" href="/compat/launcher.css">
+</head>
+<body>
+<header id="app-header">
+  <div class="brand">PE Eudoria — launcher podglądu świata | run PE_WORLD_LAUNCHER_R1_20261010 (Etap C, kontrakt §4)</div>
+  <div class="labels">
+    <span class="lab">era świata = <b>PCG_9_3_5</b> (installed client; era CD w warstwie źródeł = CD_JAN_2003 — jawne mapowanie, nigdy JUL_2003)</span>
+    <span class="lab">wysokości = surowe uint16 z terrain.bnt (offset 64..2111) — bez normalizacji / wygładzania / maskowania szwów</span>
+    <span class="lab">kalibracja = CURRENT_RUNTIME_CALIBRATION (preset: u16/128, 2 jedn./próbkę, identity min/max) — nie twierdzenie historyczne</span>
+  </div>
+  <div class="labels">
+    <span class="lab">przegląd mapy = JAWNY DOWNSAMPLE (1 px = 1 kafel, średnia surowych u16); hover/punkt = surowa wartość uint16</span>
+    <span class="lab">NODATA (brakujące/niezdekodowane) ≠ wysokość 0 — widoczne jako NODATA</span>
+    <span class="lab">sentinel 7ffe7ffe.tdf + 6 530 wierszy specjalnych (0xff5a..0xffff) — NIE są zwykłymi kafelmi</span>
+  </div>
+</header>
+
+<div id="hud-line">boot…</div>
+<div id="error-banner" hidden></div>
+
+<main id="launcher-layout">
+
+  <!-- PANEL 1 — ORYGINALNE DANE: connection state + loading stages -->
+  <section id="panel-data" class="panel">
+    <h3>1 · Oryginalne dane — połączenie i etapy ładowania</h3>
+    <div id="data-era" class="small mono">era: …</div>
+    <table class="insp" id="data-containers">
+      <thead><tr><th>kontener (oryginalny)</th><th>rozmiar B</th><th>SHA256 (pin)</th><th>stan</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="small" id="data-stages">etapy ładowania: …</div>
+    <div class="stagebar"><div id="census-bar"></div></div>
+    <div class="small mono" id="census-progress">przegląd wysokości (census): …</div>
+  </section>
+
+  <!-- PANEL 2 — MAPA WYSOKOŚCI z rzeczywistego indeksu terrain.bnt -->
+  <section id="panel-map" class="panel" data-overview-status="PENDING">
+    <h3>2 · Mapa wysokości — z rzeczywistego indeksu terrain.bnt (220×236 kafli)</h3>
+    <div id="map-toolbar">
+      <button id="btn-refresh-overview" title="asynchroniczne odświeżenie przeglądu z postępem">Odśwież przegląd (async)</button>
+      <span class="small mono" id="map-refresh-state">…</span>
+    </div>
+    <div id="map-wrap">
+      <canvas id="view-canvas" width="220" height="236"></canvas>
+      <div id="map-selection-box" hidden></div>
+    </div>
+    <div id="map-legend">
+      <canvas id="legend-canvas" width="24" height="180"></canvas>
+      <div class="small mono" id="legend-labels"></div>
+      <div class="small" id="legend-nodata">
+        <span class="sw sw-nodata"></span> NODATA (brak/wpis uszkodzony) ·
+        <span class="sw sw-pending"></span> oczekuje ·
+        <span class="sw sw-failed"></span> błąd dekodowania ·
+        <span class="sw sw-zero"></span> surowe 0 (to DANE, nie NODATA)
+      </div>
+    </div>
+    <div class="small mono" id="map-coverage">pokrycie: …</div>
+    <div class="small mono" id="map-hover">hover: najedź na mapę (surowe uint16 kafla)</div>
+    <div id="tile-detail" hidden>
+      <div id="tile-detail-head" class="small mono"></div>
+      <canvas id="tile-canvas" width="32" height="32"></canvas>
+      <div class="small mono" id="tile-hover">hover wewnątrz kafla: surowa wartość uint16 próbki</div>
+      <div class="small mono" id="tile-meta"></div>
+    </div>
+    <div class="policy">mapa = przegląd z prawdziwych kafli, jawnie zdownsamplowany do ekranu (1 px = 1 kafel = średnia 1024 surowych u16). Pełna mapa przeglądowa NIE wymaga meshy w GPU.</div>
+  </section>
+
+  <!-- PANEL 3 — USTAWIENIA REKONSTRUKCJI: vegetation profile + seed + density + entry -->
+  <section id="panel-veg" class="panel recon">
+    <h3>3 · Ustawienia rekonstrukcji — roślinność (profil klimatu .vcl)</h3>
+    <label class="small">Profil roślinności (indeks 0..31)
+      <select id="veg-profile"></select>
+    </label>
+    <div class="small mono" id="veg-profile-status">…</div>
+    <div class="small mono" id="veg-models">…</div>
+    <label class="small">Seed podglądu (LAB_SEED)
+      <input id="veg-seed" type="number" value="0" min="0" max="999999" step="1">
+    </label>
+    <label class="small">Gęstość podglądu
+      <input id="veg-density" type="range" min="0" max="100" value="50">
+      <span id="veg-density-value" class="mono">50%</span>
+    </label>
+    <div class="policy" id="veg-note">VEGETATION_MODE = RECONSTRUCTION_PREVIEW — trójstopniowy rozdział (kontrakt §6): ORIGINAL_CLIMATE_RECORDS = profile .vcl ze strict decoder (25.vcl pozostaje UNSUPPORTED — bez konwersji przecinków); RECOVERED_RNG_ARITHMETIC = byte-locked łańcuch PEFoliageCore NIETKNIĘTY; INSTANCE_DISTRIBUTION = udokumentowany wrapper PEFoliageLabSeed (LAB_SEED) — rekonstrukcja (źródło cell stream nieustalone). Oryginalne modele z Models.bnt przez istniejący kwalifikowany importer. Nigdy historyczny seed/liczba drzew/biom; twardy limit 5000 widocznych instancji z uczciwym census żądane/wyrenderowane/ograniczone.</div>
+    <button id="btn-launch" class="launch" title="otwiera /world z wybranym fragmentem terenu">Uruchom podgląd świata</button>
+    <div class="small mono" id="launch-target">cel: /world#…</div>
+  </section>
+
+  <!-- PANEL 4 — katalog modeli + braki/niewspierane -->
+  <section id="panel-catalog" class="panel">
+    <h3>4 · Katalog modeli + braki / niewspierane (uczciwie)</h3>
+    <div class="small">Przeglądarka kataloga modeli (192374, 193207, 193313, 193684, 218757):
+      <a id="catalog-link" href="http://127.0.0.1:8161/catalog" target="_blank" rel="noopener">/catalog — osobny serwer (8161)</a>
+      <span id="catalog-note" class="small"></span>
+    </div>
+    <div id="gaps-list" class="small">…</div>
+  </section>
+
+  <!-- PANEL 5 — rozdział + panel dowodów (collapsible) -->
+  <section id="panel-separation" class="panel">
+    <h3>5 · Oryginalne dane vs ustawienia rekonstrukcji</h3>
+    <div class="sep-grid small">
+      <div class="sep-box orig">
+        <b>ORYGINALNE DANE</b> — kontenery + indeks + surowe kafle: era PCG_9_3_5, SHA-256 piny, indeks BNT2 (58 451 wpisów), surowe uint16 (offset 64..2111), sentinel/wiersze specjalne wykluczone. Tego NIE zmieniają ustawienia.
+      </div>
+      <div class="sep-box recon">
+        <b>USTAWIENIA REKONSTRUKCJI</b> — wybór kafla/regionu, profil roślinności, LAB_SEED, gęstość podglądu, paleta podglądu wysokości, kamerka trybów. Wpływają tylko na to, CO i JAK jest wyświetlane — nigdy na bajty źródłowe.
+      </div>
+    </div>
+    <details id="evidence">
+      <summary>Panel dowodów — hashe, offsety, dekodery, kalibracja (dane techniczne)</summary>
+      <pre id="evidence-content" class="small mono">…</pre>
+    </details>
+  </section>
+
+</main>
+
+<details id="diagnostics" data-load-status="PENDING">
+  <summary>DIAGNOSTICS (boot)</summary>
+  <div class="diag-section"><div id="diag-boot" class="small mono">…</div></div>
+</details>
+
+<script type="module" src="/compat/launcher.js"></script>
+</body>
+</html>

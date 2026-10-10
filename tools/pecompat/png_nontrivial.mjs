@@ -5,7 +5,77 @@
 // unfilter (filters 0..4) + per-region unique-color census + luminance
 // statistics. HONEST LABEL: this is a bounded pixel-content heuristic, not a
 // perceptual/semantic render check.
+// ETAP D addition: decodePngRaw(buffer) — the SAME bounded decoder, exposing
+// the unfiltered RGB(A) image for the world PIXEL on/off toggle comparison
+// (analyzePng's statistics behavior unchanged).
 import { inflateSync } from 'node:zlib';
+
+/** Bounded PNG decode: signature + IHDR + IDAT inflate + scanline unfilter
+ * (filters 0..4). Returns { decodeOk, width, height, channels, img } (img =
+ * Buffer, row-major, width*channels bytes/row) or { decodeOk: false, error }.
+ * Same constraints as analyzePng (8-bit depth, colorType 2/6, non-interlaced). */
+export function decodePngRaw(buffer) {
+  const out = { decodeOk: false, width: null, height: null, channels: null, img: null, error: null };
+  const SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  if (!buffer.subarray(0, 8).equals(SIG)) { out.error = 'PNG signature mismatch'; return out; }
+  let off = 8;
+  const idat = [];
+  let width = null, height = null, bitDepth = null, colorType = null, interlace = null;
+  while (off + 8 <= buffer.length) {
+    const len = buffer.readUInt32BE(off);
+    const type = buffer.subarray(off + 4, off + 8).toString('ascii');
+    const data = buffer.subarray(off + 8, off + 8 + len);
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0); height = data.readUInt32BE(4);
+      bitDepth = data[8]; colorType = data[9]; interlace = data[12];
+    } else if (type === 'IDAT') {
+      idat.push(data);
+    } else if (type === 'IEND') {
+      break;
+    }
+    off += 12 + len;
+  }
+  if (width === null) { out.error = 'no IHDR'; return out; }
+  if (bitDepth !== 8) { out.error = `unsupported bit depth ${bitDepth}`; return out; }
+  if (colorType !== 6 && colorType !== 2) { out.error = `unsupported color type ${colorType}`; return out; }
+  if (interlace !== 0) { out.error = 'interlaced PNG unsupported'; return out; }
+  const channels = colorType === 6 ? 4 : 3;
+  const stride = width * channels;
+  let raw;
+  try { raw = inflateSync(Buffer.concat(idat)); } catch (e) { out.error = `IDAT inflate failed: ${e.message}`; return out; }
+  if (raw.length !== height * (stride + 1)) { out.error = `unfiltered length mismatch: ${raw.length} != ${height * (stride + 1)}`; return out; }
+  const img = Buffer.alloc(height * stride);
+  const bpp = channels;
+  let p = 0;
+  for (let y = 0; y < height; y++) {
+    const filter = raw[p++];
+    const rowStart = y * stride;
+    const prevStart = (y - 1) * stride;
+    for (let x = 0; x < stride; x++) {
+      const b = raw[p + x];
+      const a = x >= bpp ? img[rowStart + x - bpp] : 0;
+      const c = y > 0 ? img[prevStart + x] : 0;
+      const d = y > 0 && x >= bpp ? img[prevStart + x - bpp] : 0;
+      let v;
+      switch (filter) {
+        case 0: v = b; break;
+        case 1: v = (b + a) & 0xff; break;
+        case 2: v = (b + c) & 0xff; break;
+        case 3: v = (b + ((a + c) >> 1)) & 0xff; break;
+        case 4: {
+          const pa = Math.abs(c - d), pb = Math.abs(a - d), pc = Math.abs(a + c - 2 * d);
+          const pred = (pa <= pb && pa <= pc) ? a : (pb <= pc ? c : d);
+          v = (b + pred) & 0xff; break;
+        }
+        default: out.error = `unknown filter ${filter} at row ${y}`; return out;
+      }
+      img[rowStart + x] = v;
+    }
+    p += stride;
+  }
+  out.decodeOk = true; out.width = width; out.height = height; out.channels = channels; out.img = img;
+  return out;
+}
 
 export function analyzePng(buffer, { regions = {} } = {}) {
   const out = { signatureOk: false, chunks: [], dimensions: null, colorType: null, bitDepth: null, interlace: null, rows: null, stride: null, channels: null, decodeOk: false, stats: null, error: null };

@@ -1,0 +1,1628 @@
+{
+ "run": "PE_CITY_ASSET_MAP_R1_20261010",
+ "harnessInheritedFrom": "tests/pecompat/run_app_tests.mjs (pattern; the 218757 suites stay separate)",
+ "phase": "CATALOG_MODE_SERVER_TESTS",
+ "harness": "tests/pecompat/run_catalog_tests.mjs",
+ "ctx": {
+  "modelsPath": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+  "modelsArkPath": "D:\\Eudoria_Reconstruction\\pcg2003_install\\Data\\Models\\Models.ark",
+  "texturesBntPath": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Textures\\Textures.bnt",
+  "texturesArkPath": "D:\\Eudoria_Reconstruction\\pcg2003_install\\Data\\Textures\\Textures.ark",
+  "batchStatePath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_CITY_ASSET_MAP_R1_20261010\\PHASE2_EXTENT\\PCG935_NIF10_BATCH_STATE.jsonl",
+  "nameEdgesPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_CITY_ASSET_MAP_R1_20261010\\PHASE3_PCG935_BATCH\\PCG935_NAME_EDGES.jsonl",
+  "rawDir": "D:\\Eudoria_Reconstruction\\12_WebGame\\pe-world-launcher-r1\\docs\\audits\\PE_WORLD_LAUNCHER_R1_20261010\\00_CONTROL_INTERNAL_QC\\raw\\CAM"
+ },
+ "totals": {
+  "pass": 41,
+  "fail": 0,
+  "notPerformed": 0,
+  "total": 41
+ },
+ "elapsedMs": 29063,
+ "serverLeftRunning": false,
+ "note": "the T7/T9-style suites start and stop their own bounded catalog server; the port-freed proof is asserted in each lifecycle record; the foreign 8140 reference server is never touched",
+ "tests": [
+  {
+   "suite": "catalog_archive_safety.test.mjs",
+   "id": "CAT_ARC_WRONG_MAGIC",
+   "name": "wrong-magic synthetic inputs are rejected LOUDLY by the reused readers (named error, controlled)",
+   "status": "PASS",
+   "measuredQuantity": "reader exceptions on wrong-magic inputs",
+   "measured": {
+    "bnt2": "[Bnt2Archive] bad footer magic XXXX (expected BNT2)",
+    "ark": "[ArkArchive] EOCD AK\\x05\\x06 not found"
+   },
+   "failureCaseDetected": "none — both refused loudly"
+  },
+  {
+   "suite": "catalog_archive_safety.test.mjs",
+   "id": "CAT_ARC_TRUNCATED",
+   "name": "truncated / boundary-violating synthetic inputs are rejected LOUDLY (never silently parsed)",
+   "status": "PASS",
+   "measuredQuantity": "reader exceptions on truncated/boundary-violating inputs",
+   "measured": {
+    "bnt2Truncated": "[Bnt2Archive] bad footer magic f\n\u0012\u0000 (expected BNT2)",
+    "bnt2BeyondEof": "[Bnt2Archive] entry 1.nif beyond EOF",
+    "arkEocdMismatch": "[ArkArchive] EOCD total 7 != local scan 1"
+   },
+   "failureCaseDetected": "none — all refused loudly"
+  },
+  {
+   "suite": "catalog_archive_safety.test.mjs",
+   "id": "CAT_ARC_CRC_TAMPER",
+   "name": "per-entry CRC32 verify: clean baseline PASS; a tampered payload byte -> the entry CRC check FAILS (named)",
+   "status": "PASS",
+   "measuredQuantity": "stored vs computed CRC32 per entry (clean + tampered copies)",
+   "measured": {
+    "baseline": [
+     {
+      "name": "a.nif",
+      "stored": 3375921385,
+      "computed": 3375921385,
+      "match": true
+     },
+     {
+      "name": "b.nif",
+      "stored": 3104351131,
+      "computed": 3104351131,
+      "match": true
+     }
+    ],
+    "tampered": [
+     {
+      "name": "a.nif",
+      "stored": 3375921385,
+      "computed": 1480896072,
+      "match": false
+     },
+     {
+      "name": "b.nif",
+      "stored": 3104351131,
+      "computed": 3104351131,
+      "match": true
+     }
+    ],
+    "detectedTamperedEntry": {
+     "name": "a.nif",
+     "stored": 3375921385,
+     "computed": 1480896072,
+     "match": false
+    }
+   },
+   "independentSourceOfTruth": "the stored CRC32 in the archive headers vs a fresh computation over the payload bytes",
+   "whyNonCircular": "the check compares archive-declared integrity data with an independent CRC32 implementation",
+   "failureCaseDetected": "none — the tampered entry was detected by the CRC mismatch"
+  },
+  {
+   "suite": "catalog_archive_safety.test.mjs",
+   "id": "CAT_ARC_MODELSBNT_PIN",
+   "name": "the REQUIRED PCG_9_3_5 Models.bnt pin (395412868 B / c950a8c2…) is re-verified at load; a wrong-pin input is refused fail-closed (named message)",
+   "status": "PASS",
+   "measuredQuantity": "fail-closed refusal of a wrong-pin input + real-container pin re-hash",
+   "measured": {
+    "wrongPinRefusal": "[catalog_data] PCG_9_3_5 Models.bnt REQUIRED PIN MISMATCH (size 52/395412868, sha b2abde9f6bdc1c22948a7adb5019c031b071533b028415b9638f0001a772609a) — BLOCKED for this input",
+    "wrongPinRefusalNamesRequiredPin": true,
+    "validArkProvided": true,
+    "realContainerPinMatch": true,
+    "realContainerError": null
+   },
+   "failureCaseDetected": "none — wrong pin refused with the required message; real pin verified when provided"
+  },
+  {
+   "suite": "catalog_archive_safety.test.mjs",
+   "id": "CAT_ARC_BOUNDED_READ_BNT2",
+   "name": "BNT2 bounded index read: NEVER loads payloads (byte budget) and agrees entry-by-entry with the reused whole-file reader (dual-index)",
+   "status": "PASS",
+   "measuredQuantity": "bytes read by the bounded reader + entry-by-entry agreement vs Bnt2Archive",
+   "measured": {
+    "fileSize": 395412868,
+    "bytesRead": 150141,
+    "byteFraction": 0.000379706914343516,
+    "entriesBounded": 5596,
+    "entriesReused": 5596,
+    "mismatches": 0,
+    "firstMismatches": [],
+    "elapsedMs": 8
+   },
+   "independentSourceOfTruth": "two independent index walks of the SAME real container (bounded directory read vs the reused sequential reader)",
+   "whyNonCircular": "different code paths over the same bytes; agreement cannot come from sharing an implementation",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_archive_safety.test.mjs",
+   "id": "CAT_ARC_BOUNDED_READ_ARK",
+   "name": ".ark central-directory bounded read: byte-budgeted and agrees with the reused sequential local-header scan (dual-index, 2,492 entries)",
+   "status": "PASS",
+   "measuredQuantity": "bytes read by the bounded CD reader + per-entry agreement vs ArkArchive",
+   "measured": {
+    "fileSize": 128742137,
+    "bytesRead": 204137,
+    "byteFraction": 0.0015856269342491962,
+    "entriesCD": 2492,
+    "entriesScan": 2492,
+    "mismatches": 0,
+    "firstMismatches": [],
+    "elapsedMs": 4
+   },
+   "independentSourceOfTruth": "two independent index walks of the SAME real container (central directory vs sequential local headers)",
+   "whyNonCircular": "different structures, different code paths; the phase-2 dual-index verification proved this CD layout exact for this file",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_archive_safety.test.mjs",
+   "id": "CAT_ARC_DUP_ID_ERA_SEPARATION",
+   "name": "duplicate entry names BETWEEN eras are LEGAL and stay era-separated (identity key; never conflated); 2,177 real overlaps measured",
+   "status": "PASS",
+   "measuredQuantity": "per-era rows for an overlapping name + era-filtered search results",
+   "measured": {
+    "overlapCount": 2177,
+    "sampleName": "266865.nif",
+    "cdRow": {
+     "era": "CD_2003",
+     "payloadSha256": "ef48d4a3a3e8b8af9731937413ad60457ac6dcdd235775aabe81296ce132ff7b"
+    },
+    "pcgRow": {
+     "era": "PCG_9_3_5",
+     "payloadSha256": "ef48d4a3a3e8b8af9731937413ad60457ac6dcdd235775aabe81296ce132ff7b"
+    },
+    "filterCDEraOnly": 1,
+    "filterPCGEraOnly": 1,
+    "primariesInPCG935": 0,
+    "note": "same name in both eras = TWO DISTINCT rows with different container+payload SHAs (never conflated); the 4 primary ids have NO PCG_9_3_5 row (cross-era literal-ID negative preserved)"
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_bounds_countercheck.test.mjs",
+   "id": "CAT_BOUNDS_COUNTERCHECK",
+   "name": "hierarchy->bounds INDEPENDENT countercheck: raw-byte vertex scan (own minimal code) vs the LIVE viewer-path composed bounds vs the FROZEN phase-3 values, for all four primaries",
+   "status": "PASS",
+   "measuredQuantity": "per-primary AABB agreement (min/max/maxAxisExtent/footprints) across three sources",
+   "measured": {
+    "tolerance": "absTol 0.01 ORIGINAL file units (the independent scan reads the same f32 bytes; exact equality expected, tolerance stated)",
+    "identityPrecondition": "all local TRS identity measured FROM THE WIRE for every AVObject (the raw-vertex union equals the composed FILE_SCENE_SPACE bounds exactly when TRS are identity — verified, not assumed)",
+    "independentPath": "minimal length-prefixed \"NiTriShapeData\" scan + raw f32 vertex reads (this suite OWN code; imports neither nif41_deep nor PecSceneIR for the bounds)",
+    "recordedThirdLayer": "phase-3 PYTHON DUAL-DECODE agreement (nif_parser_v2.py) is recorded evidence in DEEP_ANALYSIS.md §1.4 — not re-run here",
+    "results": [
+     {
+      "id": "192374",
+      "dataBlocksScanned": 4,
+      "meshesInWire": 4,
+      "allLocalTrsIdentity": true,
+      "independent": {
+       "min": [
+        -10230.580078125,
+        -9733.57421875,
+        0
+       ],
+       "max": [
+        22558.568359375,
+        16306.2705078125,
+        5952.57373046875
+       ],
+       "extents": [
+        32789.1484375,
+        26039.8447265625,
+        5952.57373046875
+       ],
+       "maxAxisExtent": 32789.1484375,
+       "footprintX": 32789.1484375,
+       "footprintZ": 5952.57373046875
+      },
+      "liveViewerBounds": {
+       "min": [
+        -10230.580078125,
+        -9733.57421875,
+        0
+       ],
+       "max": [
+        22558.568359375,
+        16306.2705078125,
+        5952.57373046875
+       ],
+       "extents": [
+        32789.1484375,
+        26039.8447265625,
+        5952.57373046875
+       ],
+       "maxAxisExtent": 32789.1484375,
+       "footprintX": 32789.1484375,
+       "footprintZ": 5952.57373046875,
+       "meshCount": 4
+      },
+      "frozenPhase3Bounds": {
+       "space": "FILE_SCENE_SPACE",
+       "units": "ORIGINAL file units (unit semantics NOT established — never meters)",
+       "min": [
+        -10230.580078125,
+        -9733.57421875,
+        0
+       ],
+       "max": [
+        22558.568359375,
+        16306.2705078125,
+        5952.57373046875
+       ],
+       "extents": [
+        32789.1484375,
+        26039.8447265625,
+        5952.57373046875
+       ],
+       "maxAxisExtent": 32789.1484375,
+       "footprintX": 32789.1484375,
+       "footprintZ": 5952.57373046875,
+       "meshCount": 4,
+       "measuredIn": "phase 3 (FOUR_MODELS_DEEP_ANALYSIS); see DEEP_ANALYSIS.md and PRIMARY_MODEL_ROWS.json"
+      },
+      "delta": {
+       "min": [
+        0,
+        0,
+        0
+       ],
+       "max": [
+        0,
+        0,
+        0
+       ],
+       "maxAxisExtent": 0,
+       "footprintX": 0,
+       "footprintZ": 0
+      },
+      "frozenDeltaMax": 0,
+      "agreeLive": true,
+      "agreeFrozen": true,
+      "entryOk": true
+     },
+     {
+      "id": "193207",
+      "dataBlocksScanned": 2,
+      "meshesInWire": 2,
+      "allLocalTrsIdentity": true,
+      "independent": {
+       "min": [
+        -8620.0927734375,
+        -9269.01171875,
+        0
+       ],
+       "max": [
+        18320.814453125,
+        7643.0546875,
+        1570.0653076171875
+       ],
+       "extents": [
+        26940.9072265625,
+        16912.06640625,
+        1570.0653076171875
+       ],
+       "maxAxisExtent": 26940.9072265625,
+       "footprintX": 26940.9072265625,
+       "footprintZ": 1570.0653076171875
+      },
+      "liveViewerBounds": {
+       "min": [
+        -8620.0927734375,
+        -9269.01171875,
+        0
+       ],
+       "max": [
+        18320.814453125,
+        7643.0546875,
+        1570.0653076171875
+       ],
+       "extents": [
+        26940.9072265625,
+        16912.06640625,
+        1570.0653076171875
+       ],
+       "maxAxisExtent": 26940.9072265625,
+       "footprintX": 26940.9072265625,
+       "footprintZ": 1570.0653076171875,
+       "meshCount": 2
+      },
+      "frozenPhase3Bounds": {
+       "space": "FILE_SCENE_SPACE",
+       "units": "ORIGINAL file units (unit semantics NOT established — never meters)",
+       "min": [
+        -8620.0927734375,
+        -9269.01171875,
+        0
+       ],
+       "max": [
+        18320.814453125,
+        7643.0546875,
+        1570.0653076171875
+       ],
+       "extents": [
+        26940.9072265625,
+        16912.06640625,
+        1570.0653076171875
+       ],
+       "maxAxisExtent": 26940.9072265625,
+       "footprintX": 26940.9072265625,
+       "footprintZ": 1570.0653076171875,
+       "meshCount": 2,
+       "measuredIn": "phase 3 (FOUR_MODELS_DEEP_ANALYSIS); see DEEP_ANALYSIS.md and PRIMARY_MODEL_ROWS.json"
+      },
+      "delta": {
+       "min": [
+        0,
+        0,
+        0
+       ],
+       "max": [
+        0,
+        0,
+        0
+       ],
+       "maxAxisExtent": 0,
+       "footprintX": 0,
+       "footprintZ": 0
+      },
+      "frozenDeltaMax": 0,
+      "agreeLive": true,
+      "agreeFrozen": true,
+      "entryOk": true
+     },
+     {
+      "id": "193313",
+      "dataBlocksScanned": 5,
+      "meshesInWire": 5,
+      "allLocalTrsIdentity": true,
+      "independent": {
+       "min": [
+        -12508.279296875,
+        -11570.408203125,
+        0
+       ],
+       "max": [
+        19257.572265625,
+        16369.3955078125,
+        5308.8837890625
+       ],
+       "extents": [
+        31765.8515625,
+        27939.8037109375,
+        5308.8837890625
+       ],
+       "maxAxisExtent": 31765.8515625,
+       "footprintX": 31765.8515625,
+       "footprintZ": 5308.8837890625
+      },
+      "liveViewerBounds": {
+       "min": [
+        -12508.279296875,
+        -11570.408203125,
+        0
+       ],
+       "max": [
+        19257.572265625,
+        16369.3955078125,
+        5308.8837890625
+       ],
+       "extents": [
+        31765.8515625,
+        27939.8037109375,
+        5308.8837890625
+       ],
+       "maxAxisExtent": 31765.8515625,
+       "footprintX": 31765.8515625,
+       "footprintZ": 5308.8837890625,
+       "meshCount": 5
+      },
+      "frozenPhase3Bounds": {
+       "space": "FILE_SCENE_SPACE",
+       "units": "ORIGINAL file units (unit semantics NOT established — never meters)",
+       "min": [
+        -12508.279296875,
+        -11570.408203125,
+        0
+       ],
+       "max": [
+        19257.572265625,
+        16369.3955078125,
+        5308.8837890625
+       ],
+       "extents": [
+        31765.8515625,
+        27939.8037109375,
+        5308.8837890625
+       ],
+       "maxAxisExtent": 31765.8515625,
+       "footprintX": 31765.8515625,
+       "footprintZ": 5308.8837890625,
+       "meshCount": 5,
+       "measuredIn": "phase 3 (FOUR_MODELS_DEEP_ANALYSIS); see DEEP_ANALYSIS.md and PRIMARY_MODEL_ROWS.json"
+      },
+      "delta": {
+       "min": [
+        0,
+        0,
+        0
+       ],
+       "max": [
+        0,
+        0,
+        0
+       ],
+       "maxAxisExtent": 0,
+       "footprintX": 0,
+       "footprintZ": 0
+      },
+      "frozenDeltaMax": 0,
+      "agreeLive": true,
+      "agreeFrozen": true,
+      "entryOk": true
+     },
+     {
+      "id": "193684",
+      "dataBlocksScanned": 8,
+      "meshesInWire": 8,
+      "allLocalTrsIdentity": true,
+      "independent": {
+       "min": [
+        -12830.900390625,
+        -15486.041015625,
+        -74.66654968261719
+       ],
+       "max": [
+        19238.373046875,
+        18253.1640625,
+        3687.6083984375
+       ],
+       "extents": [
+        32069.2734375,
+        33739.205078125,
+        3762.274948120117
+       ],
+       "maxAxisExtent": 33739.205078125,
+       "footprintX": 32069.2734375,
+       "footprintZ": 3762.274948120117
+      },
+      "liveViewerBounds": {
+       "min": [
+        -12830.900390625,
+        -15486.041015625,
+        -74.66654968261719
+       ],
+       "max": [
+        19238.373046875,
+        18253.1640625,
+        3687.6083984375
+       ],
+       "extents": [
+        32069.2734375,
+        33739.205078125,
+        3762.274948120117
+       ],
+       "maxAxisExtent": 33739.205078125,
+       "footprintX": 32069.2734375,
+       "footprintZ": 3762.274948120117,
+       "meshCount": 8
+      },
+      "frozenPhase3Bounds": {
+       "space": "FILE_SCENE_SPACE",
+       "units": "ORIGINAL file units (unit semantics NOT established — never meters)",
+       "min": [
+        -12830.900390625,
+        -15486.041015625,
+        -74.66654968261719
+       ],
+       "max": [
+        19238.373046875,
+        18253.1640625,
+        3687.6083984375
+       ],
+       "extents": [
+        32069.2734375,
+        33739.205078125,
+        3762.274948120117
+       ],
+       "maxAxisExtent": 33739.205078125,
+       "footprintX": 32069.2734375,
+       "footprintZ": 3762.274948120117,
+       "meshCount": 8,
+       "measuredIn": "phase 3 (FOUR_MODELS_DEEP_ANALYSIS); see DEEP_ANALYSIS.md and PRIMARY_MODEL_ROWS.json"
+      },
+      "delta": {
+       "min": [
+        0,
+        0,
+        0
+       ],
+       "max": [
+        0,
+        0,
+        0
+       ],
+       "maxAxisExtent": 0,
+       "footprintX": 0,
+       "footprintZ": 0
+      },
+      "frozenDeltaMax": 0,
+      "agreeLive": true,
+      "agreeFrozen": true,
+      "entryOk": true
+     }
+    ]
+   },
+   "independentSourceOfTruth": "raw payload bytes scanned by this suite own minimal scanner vs the product reader+composer vs the frozen checkpoint values",
+   "whyNonCircular": "the scanner shares no code with the reader/composer; the wire is read only as the comparison target",
+   "failureCaseDetected": "none — all four agree within the stated tolerance on min/max/maxAxisExtent/footprintX/footprintZ"
+  },
+  {
+   "suite": "catalog_texture_gates.test.mjs",
+   "id": "CAT_TEX_PREREQ",
+   "name": "bounded index reads of the real same-era texture containers (index-only; payload bytes NOT loaded)",
+   "status": "PASS",
+   "measuredQuantity": "entry counts of both era texture containers via the bounded index readers",
+   "measured": {
+    "CD_2003_Textures_ark_entries": 4833,
+    "PCG_9_3_5_Textures_bnt_entries": 8381,
+    "expected": {
+     "CD_2003": 4833,
+     "PCG_9_3_5": 8381
+    },
+    "identity": "container SHAs are pinned in the report package (INPUT_IDENTITIES.json); the bounded index readers verify structure; whole-file hashing stays a phase-2 measured record"
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_texture_gates.test.mjs",
+   "id": "CAT_TEX_WRONG_ID",
+   "name": "wrong-ID: a nonexistent texture name resolves to the CONTROLLED NAME_NOT_FOUND disposition in BOTH eras (named, no crash, no false PASS)",
+   "status": "PASS",
+   "measuredQuantity": "resolveNameInEra dispositions for a synthetic nonexistent name",
+   "measured": {
+    "cd2003": {
+     "disposition": "NAME_NOT_FOUND",
+     "era": "CD_2003",
+     "container": "Textures/Textures.ark",
+     "entry": null,
+     "note": "no exact entry \"Definitely_Not_A_Real_Texture_Name_0123456789\" in the CD_2003 Textures/Textures.ark index (exact-name matching only; NOT resolved by similar name, adjacent ID, color, or the other era's version)"
+    },
+    "pcg935": {
+     "disposition": "NAME_NOT_FOUND",
+     "era": "PCG_9_3_5",
+     "container": "Textures/Textures.bnt",
+     "entry": null,
+     "note": "no exact entry \"Definitely_Not_A_Real_Texture_Name_0123456789\" in the PCG_9_3_5 Textures/Textures.bnt index (exact-name matching only; NOT resolved by similar name, adjacent ID, color, or the other era's version)"
+    }
+   },
+   "failureCaseDetected": "none — controlled NAME_NOT_FOUND in both eras"
+  },
+  {
+   "suite": "catalog_texture_gates.test.mjs",
+   "id": "CAT_TEX_WRONG_ERA",
+   "name": "wrong-era: a REAL texture name found in its own era resolves ONLY there; resolving it in the OTHER era is a CONTROLLED WRONG_ERA refusal (never a cross-era resolution)",
+   "status": "PASS",
+   "measuredQuantity": "resolveCrossEra dispositions with real era-specific names",
+   "measured": {
+    "cdNameInPcg": {
+     "name": "101370.DDS",
+     "disposition": "NAME_NOT_FOUND",
+     "crossEraRefused": true,
+     "source": {
+      "era": "CD_2003",
+      "disposition": "NAME_FOUND_EXACT"
+     },
+     "target": {
+      "era": "PCG_9_3_5",
+      "disposition": "NAME_NOT_FOUND"
+     },
+     "note": "cross-era resolution is REFUSED by construction (era-scoped catalogs); a name found in one era is NEVER resolved in the other era by this logic"
+    },
+    "pcgNameInCd": {
+     "name": "515179.dat",
+     "disposition": "NAME_NOT_FOUND",
+     "crossEraRefused": true,
+     "source": {
+      "era": "PCG_9_3_5",
+      "disposition": "NAME_FOUND_EXACT"
+     },
+     "target": {
+      "era": "CD_2003",
+      "disposition": "NAME_NOT_FOUND"
+     },
+     "note": "cross-era resolution is REFUSED by construction (era-scoped catalogs); a name found in one era is NEVER resolved in the other era by this logic"
+    }
+   },
+   "independentSourceOfTruth": "the real container indexes of both eras (name sets are disjoint by construction: .tga/.DDS vs .dat naming)",
+   "whyNonCircular": "the resolver is era-scoped by construction; the gate proves the refusal behavior on real names",
+   "failureCaseDetected": "none — both wrong-era attempts were refused (crossEraRefused=true, NAME_NOT_FOUND in the target era)"
+  },
+  {
+   "suite": "catalog_texture_gates.test.mjs",
+   "id": "CAT_TEX_MISSING_IMAGE",
+   "name": "missing-image: a real stub entry (no image header) resolves NAME_FOUND_EXACT but its image disposition is the CONTROLLED IMAGE_NOT_DECODED (never a fake IMAGE_DECODED); a real DDS entry is IMAGE_SNIFFED_DDS (header classification ONLY)",
+   "status": "PASS",
+   "measuredQuantity": "imageDispositionOf on real payload bytes (bounded single-entry reads)",
+   "measured": {
+    "stub": {
+     "name": "109881.tga",
+     "size": 92,
+     "image": {
+      "imageDisposition": "IMAGE_NOT_DECODED",
+      "sniff": {
+       "sniffClass": "OTHER",
+       "first8Hex": "414b030414000000",
+       "nifVersion": null,
+       "tgaWidth": null,
+       "tgaHeight": null,
+       "tgaBpp": null,
+       "note": "no NIF/DDS/TGA header pattern in first bytes — NOT decoded in this phase"
+      },
+      "note": "no NIF/DDS/TGA header pattern in first bytes — NOT decoded in this phase — content UNKNOWN, kept visible (never a fake IMAGE_DECODED)"
+     }
+    },
+    "dds": null,
+    "policy": "IMAGE_DECODED requires a real pixel decode and is claimed NOWHERE in this run (PREREGISTRATION §3 disposition order)"
+   },
+   "independentSourceOfTruth": "the actual payload bytes of real entries (bounded reads at index-derived offsets)",
+   "whyNonCircular": "the sniff reads real bytes; the disposition classes were frozen in PREREGISTRATION §3 before this phase",
+   "failureCaseDetected": "none — stub controlled as IMAGE_NOT_DECODED; DDS as a header sniff only"
+  },
+  {
+   "suite": "catalog_texture_gates.test.mjs",
+   "id": "CAT_TEX_REAL_NEGATIVE",
+   "name": "honest negative re-verified LIVE: a real phase-3 model texture name stays NAME_NOT_FOUND in its own era (no invented resolution after the fact)",
+   "status": "PASS",
+   "measuredQuantity": "live resolution of a real recorded model texture name against the regenerated same-era index",
+   "measured": {
+    "name": "Geo_keyboard_0_BASE",
+    "liveDisposition": "NAME_NOT_FOUND",
+    "numericEntryCount": 8381,
+    "phase3MeasuredDisposition": "NAME_NOT_FOUND (all 3,357 name edges; 0 exact matches — DEEP_ANALYSIS §6)",
+    "agreement": "LIVE == RECORDED"
+   },
+   "failureCaseDetected": "none — live resolution agrees with the recorded phase-3 honest negative"
+  },
+  {
+   "suite": "catalog_texture_gates.test.mjs",
+   "id": "CAT_TEX_ERA_FIELDS",
+   "name": "every resolution result carries its era + container (era-label integrity on the dispositions)",
+   "status": "PASS",
+   "measuredQuantity": "era/container fields of a resolution result",
+   "measured": {
+    "sample": {
+     "disposition": "NAME_FOUND_EXACT",
+     "era": "CD_2003",
+     "container": "Textures/Textures.ark",
+     "entry": {
+      "entryIndex": 0,
+      "name": "101370.DDS",
+      "sizeBytes": 43832,
+      "duplicateNameCount": 1
+     },
+     "note": "exact entry in the SAME era (CD_2003) container index; identity = era + container SHA + entry name + payload SHA"
+    }
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_unknown_sort.test.mjs",
+   "id": "CAT_UNK_SORT_EXTENT",
+   "name": "extent sort: measured values LARGEST->smallest; UNKNOWN rows ALWAYS LAST (never sorted as 0)",
+   "status": "PASS",
+   "measuredQuantity": "order of sortRows(metric=extent) on the synthetic distribution",
+   "measured": {
+    "order": [
+     "CD_2003/193313.nif/31765.85",
+     "PCG_9_3_5/508854.nif/100",
+     "CD_2003/9001.nif/UNKNOWN",
+     "PCG_9_3_5/65678.nif/UNKNOWN",
+     "CD_2003/65678.nif/UNKNOWN",
+     "PCG_9_3_5/533021.nif/UNKNOWN"
+    ],
+    "rule": "measured descending, UNKNOWN last (stated in the UI: never 0)"
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_unknown_sort.test.mjs",
+   "id": "CAT_UNK_SORT_COMPLEXITY",
+   "name": "complexity sort: measured descending; a REAL measured 0 (DECODED_NO_MESH) stays measured (before UNKNOWN rows — 0-measured is NOT UNKNOWN); unknown metric rejected loudly",
+   "status": "PASS",
+   "measuredQuantity": "order of sortRows(metric=triangles) + rejection of a bogus metric",
+   "measured": {
+    "order": [
+     "193313.nif/1192",
+     "508854.nif/344",
+     "533021.nif/0",
+     "9001.nif/UNKNOWN",
+     "65678.nif/UNKNOWN",
+     "65678.nif/UNKNOWN"
+    ],
+    "zeroMeasuredRowPosition": 2,
+    "firstUnknownPosition": 3,
+    "bogusMetricRejection": "[sortRows] unknown metric \"bogus\""
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_unknown_sort.test.mjs",
+   "id": "CAT_UNK_FILTERS",
+   "name": "era/status filters are explicit; ID/name search matches BOTH eras (same-name rows stay distinct); unknown filter values are rejected loudly (never a silent empty result)",
+   "status": "PASS",
+   "measuredQuantity": "filterRows results + rejection of unknown filter values",
+   "measured": {
+    "cdOnly": 3,
+    "failedOnly": 1,
+    "search65678": [
+     "PCG_9_3_5/65678.nif",
+     "CD_2003/65678.nif"
+    ],
+    "searchName": [
+     "193313.nif"
+    ],
+    "bogusEraRejection": "[filterRows] unknown era filter \"BOGUS_ERA\"",
+    "bogusStatusRejection": "[filterRows] unknown status filter \"BOGUS_STATUS\""
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_unknown_sort.test.mjs",
+   "id": "CAT_UNK_BADGE_RENDER",
+   "name": "UNKNOWN badge present in the rendered table for every unmeasured field; era badge on every row; REAL measured zeros (DECODED_NO_MESH) render as 0 — UNKNOWN never as 0",
+   "status": "PASS",
+   "measuredQuantity": "rowsTableHtml output markers (badge counts, era badges, real-zero rendering)",
+   "measured": {
+    "unknownBadgeCount": 7,
+    "unknownRowHasBadge": true,
+    "eraBadges": {
+     "CD_2003": true,
+     "PCG_9_3_5": true
+    },
+    "decodedNoMeshRendersRealZeros": true
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_unknown_sort.test.mjs",
+   "id": "CAT_UNK_LIVE_SPOTCHECK",
+   "name": "live spot-check on the real rows: CD_2003 largest payload = 212124.nif 936544 B (frozen phase-2 rank 1); overall largest is a PCG_9_3_5 row (era-separated, never conflated); PCG935 top extent is a measured row",
+   "status": "PASS",
+   "measuredQuantity": "live sortRows results vs the frozen phase-2 ranking values",
+   "measured": {
+    "topCdSize": {
+     "entryName": "212124.nif",
+     "sizeBytes": 936544
+    },
+    "topOverallSize": {
+     "era": "PCG_9_3_5",
+     "entryName": "225492.nif",
+     "sizeBytes": 10029720
+    },
+    "topPcg935Extent": {
+     "entryName": "545598.nif",
+     "maxAxisExtent": 277609.33122735634
+    },
+    "coverageBoxExcerpt": "rows TOTAL 8088 = CD_2003 2492 + PCG_9_3_5 5596 | decode coverage: CATALOG_ONLY=2488 | DECODED_FULL_CLOSURE=4 | FAILED=3270 | DECODED=1551 | VERSION_GATED=758 | DECODED_NO_MESH=17"
+   },
+   "independentSourceOfTruth": "the frozen phase-2 CATALOG_COVERAGE.json PAYLOAD_SIZE rank 1 row",
+   "whyNonCircular": "the live build never reads the frozen JSON; agreement is a real cross-check",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_preview_math.test.mjs",
+   "id": "CAT_PREVIEW_WRAPPER_MATH",
+   "name": "wrapper math: CENTERED applies centering EXACTLY ONCE (v - center, never twice); ORIGINAL mode is wrapper identity; the inverse restores the file value exactly",
+   "status": "PASS",
+   "measuredQuantity": "fileSpaceToRendered/applyWrapperToFileSpace on a synthetic bounds + vertex",
+   "measured": {
+    "center": [
+     0,
+     0,
+     2000
+    ],
+    "offCentered": [
+     0,
+     0,
+     -2000
+    ],
+    "offOriginal": [
+     0,
+     0,
+     0
+    ],
+    "v": [
+     123.5,
+     -67.25,
+     3.75
+    ],
+    "renderedCentered": [
+     123.5,
+     -67.25,
+     -1996.25
+    ],
+    "renderedOriginal": [
+     123.5,
+     -67.25,
+     3.75
+    ],
+    "backToFile": [
+     123.5,
+     -67.25,
+     3.75
+    ],
+    "centeredAppliedOnce": true,
+    "notAppliedTwice": true,
+    "originalModeIdentity": true,
+    "inverseExact": true
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_preview_math.test.mjs",
+   "id": "CAT_PREVIEW_ROTATION_CONVERSION",
+   "name": "row-major NIF rotation -> renderer basis columns conversion verified on a synthetic asymmetric 90° rotation (translate/scale pass through untouched)",
+   "status": "PASS",
+   "measuredQuantity": "localTrsToColumns output on a synthetic asymmetric rotation",
+   "measured": {
+    "input": {
+     "translate": [
+      1,
+      2,
+      3
+     ],
+     "rotate": [
+      [
+       0,
+       -1,
+       0
+      ],
+      [
+       1,
+       0,
+       0
+      ],
+      [
+       0,
+       0,
+       1
+      ]
+     ],
+     "scale": 2
+    },
+    "output": {
+     "basisX": [
+      0,
+      1,
+      0
+     ],
+     "basisY": [
+      -1,
+      0,
+      0
+     ],
+     "basisZ": [
+      0,
+      0,
+      1
+     ],
+     "translate": [
+      1,
+      2,
+      3
+     ],
+     "scale": 2
+    }
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_preview_math.test.mjs",
+   "id": "CAT_PREVIEW_KNOWN_VERTEX",
+   "name": "REAL known vertex (193313 first mesh position) maps to its FILE-SPACE value in original-coords mode; centered mode offsets EXACTLY ONCE; no axis swap, no unit conversion (unlike the 218757 app adapter which stays in its own app)",
+   "status": "PASS",
+   "measuredQuantity": "fileSpaceToRendered of a live-wire vertex vs the wire-shipped bounds",
+   "measured": {
+    "knownVertex": [
+     5818.171875,
+     -10477.2509765625,
+     0
+    ],
+    "bounds": {
+     "min": [
+      -12508.279296875,
+      -11570.408203125,
+      0
+     ],
+     "max": [
+      19257.572265625,
+      16369.3955078125,
+      5308.8837890625
+     ]
+    },
+    "renderedOriginal": [
+     5818.171875,
+     -10477.2509765625,
+     0
+    ],
+    "renderedCentered": [
+     2443.525390625,
+     -12876.74462890625,
+     -2654.44189453125
+    ],
+    "restored": [
+     5818.171875,
+     -10477.2509765625,
+     0
+    ],
+    "noSwapNoScale": true,
+    "insideBounds": true,
+    "centeredOnce": true,
+    "restoredExact": true
+   },
+   "independentSourceOfTruth": "the live wire geometry arrays (regenerated from the pinned Models.ark)",
+   "whyNonCircular": "the vertex is taken from the production wire and mapped through the production wrapper math; expectations derive from arithmetic, not from the implementation output",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_preview_math.test.mjs",
+   "id": "CAT_PREVIEW_TRS_PRECONDITION",
+   "name": "all local TRS identity in the live 193313 wire (measured — the preview applies local transforms per node; the composition cross-check in verifyWireClientSide uses this fact)",
+   "status": "PASS",
+   "measuredQuantity": "identity check of every localTrs in the live wire + boundsEqualWithin sanity",
+   "measured": {
+    "avObjectsWithTrs": 11,
+    "allIdentity": true,
+    "boundsEq": true
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_cam_fixes.test.mjs",
+   "id": "CAM_C1_GLB_COMPARISON",
+   "name": "CAM-C1: the four GLB comparison inputs exist (RETRACTION of NO_GLB_PRESENT_FOR_THESE_IDS) — the comparison tool executes fresh on the pinned inputs; 4/4 bit-exact position multisets + unoriented triangle multisets after the EXPLICIT (x,z,-y) conversion; UNTEXTURED_PROXY limits recorded",
+   "status": "PASS",
+   "measuredQuantity": "fresh tool execution: per-model converted-position multiset + unoriented-triangle multiset equality (bit-exact float32), counts, UV/images census",
+   "measured": {
+    "toolExit": 0,
+    "models": 4,
+    "positionsExact": 4,
+    "trianglesUnorientedExact": 4,
+    "countsAgree": true,
+    "originalUvSetsTotal": 0,
+    "glbImagesTotal": 0,
+    "perModel": [
+     {
+      "id": "192374",
+      "verdict": "EXACT_AGREEMENT (multiset positions + unoriented triangles, after the explicit (x,z,-y) conversion)",
+      "nif": {
+       "geoms": 4,
+       "verts": 2400,
+       "tris": 1200
+      },
+      "glb": {
+       "prims": 4,
+       "verts": 2400,
+       "tris": 1200
+      }
+     },
+     {
+      "id": "193207",
+      "verdict": "EXACT_AGREEMENT (multiset positions + unoriented triangles, after the explicit (x,z,-y) conversion)",
+      "nif": {
+       "geoms": 2,
+       "verts": 1698,
+       "tris": 864
+      },
+      "glb": {
+       "prims": 2,
+       "verts": 1698,
+       "tris": 864
+      }
+     },
+     {
+      "id": "193313",
+      "verdict": "EXACT_AGREEMENT (multiset positions + unoriented triangles, after the explicit (x,z,-y) conversion)",
+      "nif": {
+       "geoms": 5,
+       "verts": 2384,
+       "tris": 1192
+      },
+      "glb": {
+       "prims": 5,
+       "verts": 2384,
+       "tris": 1192
+      }
+     },
+     {
+      "id": "193684",
+      "verdict": "EXACT_AGREEMENT (multiset positions + unoriented triangles, after the explicit (x,z,-y) conversion)",
+      "nif": {
+       "geoms": 8,
+       "verts": 2680,
+       "tris": 1340
+      },
+      "glb": {
+       "prims": 8,
+       "verts": 2680,
+       "tris": 1340
+      }
+     }
+    ]
+   },
+   "independentSourceOfTruth": "my own re-decode from the pinned Models.ark payloads (phase-3 production reader) vs an independent bounded GLB binary parse — two independent readers of the same assets",
+   "whyNonCircular": "the GLB parser shares no code with the NIF reader; agreement cannot come from a shared implementation",
+   "failureCaseDetected": "none",
+   "limits": [
+    "Unoriented triangle agreement does NOT confirm winding, materials, or the converter execution lineage.",
+    "The _textured.glb filename is NOT proof of textures; the ORIGINAL NIFs have 0 UV sets; the four models remain UNTEXTURED_PROXY.",
+    "GLB TEXCOORD_0/NORMAL are exporter-side artifacts; GLB images total 0 (measured)."
+   ]
+  },
+  {
+   "suite": "catalog_cam_fixes.test.mjs",
+   "id": "CAM_C2_SHARED_STATUS_MODEL",
+   "name": "CAM-C2 unit: complexityFromBatchRow/isComplexityMeasured — FAILED → UNKNOWN with reason; incomplete numerics → UNKNOWN (no promotion); DECODED_NO_MESH real zeros → measured; DECODED complete → measured; no row → UNKNOWN",
+   "status": "PASS",
+   "measuredQuantity": "complexityFromBatchRow outputs on synthetic cache rows + isComplexityMeasured verdicts",
+   "measured": {
+    "cFailed": {
+     "unknown": true,
+     "note": "decode FAILED — not a measurement (never counted as measured); reason: unregistered block type \"NiTextureEffect\" (bounded reader surface — loud failure preserved verbatim)"
+    },
+    "cIncomplete": {
+     "unknown": true,
+     "note": "cache row status \"DECODED\" lacks complete numeric metrics (triangles/vertices/shapes/nodes/blocks must all be real numbers) — metrics UNKNOWN (defensive; no promotion)"
+    },
+    "cNoMesh": {
+     "unknown": false,
+     "triangles": 0,
+     "vertices": 0,
+     "shapes": 0,
+     "nodes": 1,
+     "blocks": 5,
+     "units": "triangles=NiTriShapeData triangle count; vertices=vertex count; shapes=NiTriShape blocks; nodes=NiNode blocks"
+    },
+    "cDecoded": {
+     "unknown": false,
+     "triangles": 120,
+     "vertices": 240,
+     "shapes": 2,
+     "nodes": 3,
+     "blocks": 12,
+     "units": "triangles=NiTriShapeData triangle count; vertices=vertex count; shapes=NiTriShape blocks; nodes=NiNode blocks"
+    },
+    "cGated": {
+     "unknown": true,
+     "note": "not decoded in this run"
+    }
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_cam_fixes.test.mjs",
+   "id": "CAM_C2_C3_CLEAN_BASELINE",
+   "name": "CAM-C2/CAM-C3 clean gate: the REAL production build with the declared envelope — measured complexity 1572 (BASELINE CONTROL: PCG 1568 + CD 4; recomputed from records via the shared predicate, NOT hardcoded in production code); FAILED 3270 rows are UNKNOWN-complexity with honest texture wording; caches attach with the known-good counts and zero identity drops",
+   "status": "PASS",
+   "measuredQuantity": "coverage counts + cache attach counters + FAILED row schema on the unchanged pinned inputs",
+   "measured": {
+    "totalRows": 8088,
+    "complexityMeasured": 1572,
+    "complexityUnknown": 6516,
+    "complexityByStatus": {
+     "DECODED_FULL_CLOSURE": 4,
+     "DECODED": 1551,
+     "DECODED_NO_MESH": 17
+    },
+    "baselineControl": {
+     "measured": 1572,
+     "pCG": 1568,
+     "cD": 4
+    },
+    "byDecodeCoverage": {
+     "CATALOG_ONLY": 2488,
+     "DECODED_FULL_CLOSURE": 4,
+     "FAILED": 3270,
+     "DECODED": 1551,
+     "VERSION_GATED": 758,
+     "DECODED_NO_MESH": 17
+    },
+    "batchState": {
+     "state": "VERIFIED",
+     "attached": 4838,
+     "dropped": 0
+    },
+    "nameEdges": {
+     "state": "VERIFIED",
+     "attached": 1545,
+     "dropped": 0
+    },
+    "failedRows": 3270,
+    "failedUnknownComplexity": true,
+    "failedTextureCoverageSample": "UNKNOWN (decode FAILED — texture edges were never produced; not decoded)",
+    "subject": {
+     "name": "508854.nif",
+     "decodeCoverage": "DECODED",
+     "extentUnknown": false,
+     "complexityMeasured": true
+    }
+   },
+   "independentSourceOfTruth": "the Desktop post-audit RUNTIME_CHECKS.json baseline numbers (4842→1572, 3270 FAILED) as a CONTROL",
+   "whyNonCircular": "the baseline is an independent prior measurement; my build recomputes the counts from the records without reading the Desktop numbers",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_cam_fixes.test.mjs",
+   "id": "CAM_C3_M1_WRONG_BATCH_ERA",
+   "name": "CAM-C3 mutant 1: subject batch row era → CD_2003 — REFUSED by the production gate (named drop, counted; the subject falls back to VERSION_GATED/UNKNOWN; no crash)",
+   "status": "PASS",
+   "measuredQuantity": "per-row identity drop reason + affected row state + counters",
+   "measured": {
+    "attached": 4837,
+    "dropped": 1,
+    "droppedByReason": {
+     "ROW_ERA_MISMATCH (row CD_2003, envelope PCG_9_3_5)": 1
+    },
+    "subjectAfter": {
+     "decodeCoverage": "VERSION_GATED",
+     "extentUnknown": true,
+     "complexityUnknown": true
+    },
+    "complexityMeasured": 1571
+   },
+   "failureCaseDetected": "none — the gate refused the mutant row"
+  },
+  {
+   "suite": "catalog_cam_fixes.test.mjs",
+   "id": "CAM_C3_M2_WRONG_BATCH_CONTAINER_SHA",
+   "name": "CAM-C3 mutant 2: subject batch row containerSha256 → 64 zeros — REFUSED by the production gate (named drop, counted)",
+   "status": "PASS",
+   "measuredQuantity": "per-row identity drop reason + affected row state + counters",
+   "measured": {
+    "attached": 4837,
+    "dropped": 1,
+    "droppedByReason": {
+     "ROW_CONTAINER_SHA_MISMATCH (row 0000000000000000000000000000000000000000000000000000000000000000)": 1
+    },
+    "subjectAfter": {
+     "decodeCoverage": "VERSION_GATED",
+     "extentUnknown": true
+    }
+   },
+   "failureCaseDetected": "none — the gate refused the mutant row"
+  },
+  {
+   "suite": "catalog_cam_fixes.test.mjs",
+   "id": "CAM_C3_M3_WRONG_EDGES_ERA",
+   "name": "CAM-C3 mutant 3: all texture edges of the subject → CD_2003 — the per-model aggregate is REFUSED (all-or-nothing; the model reads EDGE_AGGREGATE_REFUSED, never a name-edge census; the DECODED extent/complexity stay attached — only the contaminated aggregate is refused)",
+   "status": "PASS",
+   "measuredQuantity": "per-model edge-aggregate refusal + row texture coverage + unaffected batch state",
+   "measured": {
+    "modelsAttached": 1544,
+    "modelsDropped": 1,
+    "droppedByReason": {
+     "EDGE_ERA_MISMATCH (row era CD_2003, envelope PCG_9_3_5)": 1
+    },
+    "subjectTextureCoverage": "EDGE_AGGREGATE_REFUSED (identity mismatch in the phase-3 edge cache: EDGE_ERA_MISMATCH (row era CD_2003, envelope PCG_9_3_5)) — texture coverage UNKNOWN",
+    "subjectDecodeUnaffected": {
+     "decodeCoverage": "DECODED",
+     "extentUnknown": false,
+     "complexityMeasured": true
+    },
+    "batchAttachedUnaffected": 4838
+   },
+   "failureCaseDetected": "none — the gate refused the contaminated aggregate"
+  },
+  {
+   "suite": "catalog_cam_fixes.test.mjs",
+   "id": "CAM_C3_NO_ENVELOPE_REFUSED",
+   "name": "CAM-C3 fail-closed default: cache paths WITHOUT a declared identity envelope are REFUSED whole (named reason, disclosed in the status; the catalog still regenerates from the pinned originals — complexity coverage falls to the four live-decoded primaries; never a crash, never a silent attach)",
+   "status": "PASS",
+   "measuredQuantity": "cache refusal states + fallback coverage",
+   "measured": {
+    "batchState": "REFUSED: CACHE_IDENTITY_ENVELOPE_MISSING",
+    "nameEdgesState": "REFUSED: CACHE_IDENTITY_ENVELOPE_MISSING",
+    "batchAttached": 0,
+    "edgesAttached": 0,
+    "complexityMeasuredFallback": 4
+   },
+   "failureCaseDetected": "none — the undeclared cache was refused loudly"
+  },
+  {
+   "suite": "catalog_cam_fixes.test.mjs",
+   "id": "CAM_C3_PHYSICAL_CACHES_UNCHANGED",
+   "name": "CAM-C3 mutants are IN-MEMORY metadata mutations ONLY — the physical cache files are byte-identical before/after (hash witness). These synthetic counterexamples are NOT proof of historical contamination of the f71eb30 run.",
+   "status": "PASS",
+   "measuredQuantity": "SHA256 of both physical cache files before/after the whole suite",
+   "measured": {
+    "batchBefore": "e078ecb5d856c41c3450ade10bb36935b4f185b273f25d941f0186bfc3a55b30",
+    "batchAfter": "e078ecb5d856c41c3450ade10bb36935b4f185b273f25d941f0186bfc3a55b30",
+    "edgesBefore": "eda6ea4d0996dfc356096255da2f89f85e4275d27c285dbbd90e50e5cad5059c",
+    "edgesAfter": "eda6ea4d0996dfc356096255da2f89f85e4275d27c285dbbd90e50e5cad5059c"
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_api_denial.test.mjs",
+   "id": "CAT_T7_SERVER_START",
+   "name": "catalog server starts on a verified-free loopback port with fail-closed regenerated catalogs (both container pins + per-entry CRC verified)",
+   "status": "PASS",
+   "measuredQuantity": "startup line + /api/catalog/status fields (bind/port/pid/rows/coverage/pins/CRC)",
+   "measured": {
+    "startupLine": "catalog server http://127.0.0.1:8840/ pid=21356",
+    "startupElapsedMs": 2032,
+    "bind": "127.0.0.1",
+    "port": 8840,
+    "pid": 21356,
+    "readOnly": true,
+    "threeVersion": "0.185.0",
+    "rows": 8088,
+    "byEra": {
+     "CD_2003": 2492,
+     "PCG_9_3_5": 5596
+    },
+    "byDecode": {
+     "CATALOG_ONLY": 2488,
+     "DECODED_FULL_CLOSURE": 4,
+     "FAILED": 3270,
+     "DECODED": 1551,
+     "VERSION_GATED": 758,
+     "DECODED_NO_MESH": 17
+    },
+    "extentMeasured": 1555,
+    "overlapSameNameBothEras": 2177,
+    "modelsBntPin": "MATCH (REQUIRED pin — contract §1 — verified fail-closed at load)",
+    "modelsBntSha": "c950a8c26f2063f4dd748d88c95bd769aac77a2f5f76face7e969be0b3d3bee0",
+    "modelsArkSha": "f660d055b4b9471b3b6e16b07f5368dbd6f2208dab6b51bb9bdb9942bd73ea62",
+    "crc32": {
+     "cd": [
+      2492,
+      0
+     ],
+     "pcg": [
+      5596,
+      0
+     ]
+    }
+   },
+   "independentSourceOfTruth": "the child process stdout startup line and the live /api/catalog/status response",
+   "whyNonCircular": "the test only observes what the server itself prints and serves",
+   "failureCaseDetected": "bind not loopback / pin mismatch / coverage wrong / CRC mismatch present"
+  },
+  {
+   "suite": "catalog_api_denial.test.mjs",
+   "id": "CAT_T7_APP_STATICS",
+   "name": "catalog app static surface loads (catalog.html with the T9 gate markers, app/preview/table modules, css, the client composition module, pinned three)",
+   "status": "PASS",
+   "measuredQuantity": "HTTP statuses + body markers",
+   "measured": {
+    "catalogHtml": true,
+    "catalogApp": true,
+    "catalogPreview": true,
+    "catalogTable": true,
+    "css": true,
+    "pecModule": true,
+    "three": true
+   },
+   "failureCaseDetected": "any catalog static missing or a marker absent"
+  },
+  {
+   "suite": "catalog_api_denial.test.mjs",
+   "id": "CAT_T7_ROWS_API",
+   "name": "rows API: totals + frozen-phase-2 cross-check (212124.nif rank 1), UNKNOWN-last sort rule, era separation of the overlapping 65678 rows, previewable primary with frozen bounds, bogus filter/sort rejected 400",
+   "status": "PASS",
+   "measuredQuantity": "rows API responses (order, coverage, search, filters) + denial statuses",
+   "measured": {
+    "cdTotal": 2492,
+    "topCdSize": {
+     "name": "212124.nif",
+     "sizeBytes": 936544
+    },
+    "sortRule": "Sort: MEASURED values largest->smallest; UNKNOWN rows are always LAST with an UNKNOWN badge — UNKNOWN is never treated as 0 (never invented, never silently zeroed)",
+    "unknownLast": true,
+    "measuredDesc": true,
+    "primarySearchRow": {
+     "era": "CD_2003",
+     "decodeCoverage": "DECODED_FULL_CLOSURE",
+     "previewable": true,
+     "maxAxisExtent": 31765.8515625
+    },
+    "overlap65678": [
+     "CD_2003",
+     "PCG_9_3_5"
+    ],
+    "badFilter": {
+     "status": 400,
+     "error": "DENIED_EXPLICIT"
+    },
+    "badSort": {
+     "status": 400,
+     "error": "DENIED_EXPLICIT"
+    }
+   },
+   "independentSourceOfTruth": "the frozen phase-2 PAYLOAD_SIZE rank 1 + the frozen phase-3 primary bounds (values fixed before this phase)",
+   "whyNonCircular": "the live server never reads those frozen artifacts; agreement is a real cross-check",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_api_denial.test.mjs",
+   "id": "CAT_T7_MODEL_WIRE",
+   "name": "the bounded preview wire for 193313 serves via the index-derived route (pins in headers+body, frozen bounds, UNTEXTURED_PROXY_MESH diagnostics, 5 verified material edges)",
+   "status": "PASS",
+   "measuredQuantity": "wire pins/bounds/diagnostics/materials + response headers",
+   "measured": {
+    "status200": true,
+    "pins": true,
+    "bounds": true,
+    "untextured": true,
+    "materials": true,
+    "meshes": true,
+    "headerPayloadSha": true
+   },
+   "independentSourceOfTruth": "the phase-3 frozen primary measurements (payload SHA + bounds) and the live re-decode",
+   "whyNonCircular": "expected values were frozen in the phase-3 checkpoint before this phase",
+   "failureCaseDetected": "wire identity or measured values deviate from the checkpoint"
+  },
+  {
+   "suite": "catalog_api_denial.test.mjs",
+   "id": "CAT_T7_DENIALS",
+   "name": "synthetic denial battery: traversal/absolute/encoded/backslash/unconfigured-root/whole-corpus/unknown-asset/non-previewable/SceneIR-route/unknown-route/unallowlisted-static all DENIED_EXPLICIT; POST refused 405",
+   "status": "PASS",
+   "measuredQuantity": "raw HTTP statuses + named error bodies for every negative request",
+   "measured": {
+    "negatives": [
+     {
+      "label": "TRAVERSAL_RELATIVE",
+      "rawPath": "/compat/../server-catalog.mjs",
+      "status": 404,
+      "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+      "messageExcerpt": "\"../server-catalog.mjs\" is not in the catalog allowlist (fixed file set: index.html, catalog-app.js, catalog-table.js, c",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "TRAVERSAL_ABSOLUTE",
+      "rawPath": "/C:/Windows/system32/drivers/etc/hosts",
+      "status": 404,
+      "error": "ROUTE_NOT_FOUND",
+      "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/sta",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "TRAVERSAL_ENCODED",
+      "rawPath": "/compat/%2e%2e/%2e%2e/src/pesource/ArkArchive.js",
+      "status": 404,
+      "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+      "messageExcerpt": "\"../../src/pesource/ArkArchive.js\" is not in the catalog allowlist (fixed file set: index.html, catalog-app.js, catalog-",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "TRAVERSAL_SRC",
+      "rawPath": "/src/pecompat/../../../package.json",
+      "status": 404,
+      "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+      "messageExcerpt": "\"../../../package.json\" is not in the client module allowlist (PecTransform.js, PecSceneIR.js); the server-side extracti",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "BACKSLASH",
+      "rawPath": "/compat/..\\..\\package.json",
+      "status": 400,
+      "error": "BACKSLASH_IN_URL",
+      "messageExcerpt": "backslash in URL refused (no Windows path semantics in routes)",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "UNCONFIGURED_ROOT",
+      "rawPath": "/pcg/Models.bnt",
+      "status": 404,
+      "error": "ROUTE_NOT_FOUND",
+      "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/sta",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "WHOLE_CORPUS_ATTEMPT",
+      "rawPath": "/Models.bnt",
+      "status": 404,
+      "error": "ROUTE_NOT_FOUND",
+      "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/sta",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "UNKNOWN_ASSET_ID",
+      "rawPath": "/api/catalog/model/CD_2003/999999999",
+      "status": 404,
+      "error": "PREVIEW_NOT_ESTABLISHED",
+      "messageExcerpt": "no safe import established for CD_2003 999999999.nif in this run — preview is available ONLY for the four pinned primari",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "NOT_PREVIEWABLE_REAL_ENTRY",
+      "rawPath": "/api/catalog/model/CD_2003/65678",
+      "status": 404,
+      "error": "PREVIEW_NOT_ESTABLISHED",
+      "messageExcerpt": "no safe import established for CD_2003 65678.nif in this run — preview is available ONLY for the four pinned primaries (",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "PCG_NO_PREVIEW_ROUTE",
+      "rawPath": "/api/catalog/model/PCG_9_3_5/218757",
+      "status": 404,
+      "error": "UNKNOWN_ASSET_ROUTE",
+      "messageExcerpt": "the model route serves ONLY /api/catalog/model/CD_2003/<primary-id> (the four pinned primaries); got \"PCG_9_3_5/218757\"",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "SCENEIR_ROUTE_NOT_SERVED",
+      "rawPath": "/api/sceneir/218757",
+      "status": 404,
+      "error": "ROUTE_NOT_FOUND",
+      "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/sta",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "UNKNOWN_ROUTE",
+      "rawPath": "/definitely/not/a/route",
+      "status": 404,
+      "error": "ROUTE_NOT_FOUND",
+      "messageExcerpt": "no route matches; this server exposes ONLY the catalog app allowlist, the pinned three package subtree, /api/catalog/sta",
+      "denied": true,
+      "expectationMet": true
+     },
+     {
+      "label": "UNALLOWLISTED_COMPAT",
+      "rawPath": "/compat/app.js",
+      "status": 404,
+      "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+      "messageExcerpt": "\"app.js\" is not in the catalog allowlist (fixed file set: index.html, catalog-app.js, catalog-table.js, catalog-preview.",
+      "denied": true,
+      "expectationMet": true
+     }
+    ],
+    "post": {
+     "status": 405,
+     "error": "METHOD_NOT_ALLOWED_READ_ONLY"
+    }
+   },
+   "independentSourceOfTruth": "raw sockets over the wire (no client-side URL normalization)",
+   "whyNonCircular": "the paths go on the wire verbatim; the server must refuse them by construction",
+   "failureCaseDetected": "none — every negative was refused with a named error"
+  },
+  {
+   "suite": "catalog_api_denial.test.mjs",
+   "id": "CAT_T7_SERVER_LIFECYCLE",
+   "name": "suite-owned bounded catalog server lifecycle (pid 21356, port 8840; stop + port-freed proof)",
+   "status": "PASS",
+   "measuredQuantity": "start/stop/PID/lifetime/port-freed proof",
+   "measured": {
+    "pid": 21356,
+    "port": 8840,
+    "lifetimeMs": 2198,
+    "killed": true,
+    "exitCode": null,
+    "signal": "SIGTERM",
+    "portFreed": true,
+    "freedAfterMs": 29
+   },
+   "failureCaseDetected": "none — server stopped, port freed, nothing left running"
+  },
+  {
+   "suite": "catalog_headless_load.test.mjs",
+   "id": "CAT_T9_LOAD_CATALOG",
+   "name": "real headless-browser load — catalog table page (both eras, rows rendered) — 5-conjunct gate (per-conjunct records) + page content markers",
+   "status": "PASS",
+   "resultClass": "REAL_BROWSER_HEADLESS_DOM",
+   "measuredQuantity": "captured DOM markers + browser exit code through the production evaluateLoadGate (imported from the fixed T9 suite) + page content markers",
+   "measured": {
+    "browserBinary": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "knownBrowserBinary": true,
+    "url": "http://127.0.0.1:8555/catalog",
+    "attemptCount": 1,
+    "conjuncts": {
+     "EXIT_CODE_ZERO": true,
+     "DOM_NONEMPTY": true,
+     "CANVAS_PRESENT": true,
+     "DIAGNOSTICS_PRESENT": true,
+     "STATUS_READY": true
+    },
+    "missingConjuncts": [],
+    "loadStatus": "READY",
+    "domBytes": 89651,
+    "exitCode": 0,
+    "elapsedMs": 1538,
+    "timedOut": false,
+    "pageContentMarkers": {
+     "catalogTable": true,
+     "eraBadges": true,
+     "unknownBadge": true
+    }
+   },
+   "missingConjuncts": [],
+   "independentSourceOfTruth": "the real browser DOM dump (Edge headless=new) — not an HTTP status or a unit test",
+   "whyNonCircular": "a real browser engine parsed and executed the catalog page; the markers come from the live document",
+   "failureCaseDetected": "none — all five conjuncts hold and the page content markers are present"
+  },
+  {
+   "suite": "catalog_headless_load.test.mjs",
+   "id": "CAT_T9_LOAD_PREVIEW",
+   "name": "real headless-browser load — preview deep link #model=193313 (wire fetched, preview mounted) — 5-conjunct gate (per-conjunct records) + page content markers",
+   "status": "PASS",
+   "resultClass": "REAL_BROWSER_HEADLESS_DOM",
+   "measuredQuantity": "captured DOM markers + browser exit code through the production evaluateLoadGate (imported from the fixed T9 suite) + page content markers",
+   "measured": {
+    "browserBinary": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "knownBrowserBinary": true,
+    "url": "http://127.0.0.1:8555/catalog#model=193313",
+    "attemptCount": 1,
+    "conjuncts": {
+     "EXIT_CODE_ZERO": true,
+     "DOM_NONEMPTY": true,
+     "CANVAS_PRESENT": true,
+     "DIAGNOSTICS_PRESENT": true,
+     "STATUS_READY": true
+    },
+    "missingConjuncts": [],
+    "loadStatus": "READY",
+    "domBytes": 93751,
+    "exitCode": 0,
+    "elapsedMs": 1207,
+    "timedOut": false,
+    "pageContentMarkers": {
+     "previewTitle": true,
+     "untexturedDiag": true,
+     "materialsApplied": true,
+     "boundsDiag": true
+    }
+   },
+   "missingConjuncts": [],
+   "independentSourceOfTruth": "the real browser DOM dump (Edge headless=new) — not an HTTP status or a unit test",
+   "whyNonCircular": "a real browser engine parsed and executed the catalog page; the markers come from the live document",
+   "failureCaseDetected": "none — all five conjuncts hold and the page content markers are present"
+  },
+  {
+   "suite": "catalog_headless_load.test.mjs",
+   "id": "CAT_T9_RAW_PERSISTENCE",
+   "name": "raw capture persistence (SIDE-ERROR class — the browser-gate statuses above were computed independently of this record)",
+   "status": "PASS",
+   "measuredQuantity": "writeFile of the DOM dumps + CATALOG_HEADLESS_RUN.json",
+   "measured": {
+    "persisted": [
+     {
+      "file": "CATALOG_DOM_DUMP_TABLE.html",
+      "bytes": 89651
+     },
+     {
+      "file": "CATALOG_DOM_DUMP_PREVIEW.html",
+      "bytes": 93751
+     },
+     {
+      "file": "CATALOG_HEADLESS_RUN.json"
+     }
+    ]
+   },
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "catalog_headless_load.test.mjs",
+   "id": "CAT_T9_SERVER_LIFECYCLE",
+   "name": "suite-owned bounded catalog server lifecycle (pid 7308, port 8555; stop + port-freed proof)",
+   "status": "PASS",
+   "measuredQuantity": "start/stop/PID/lifetime/port-freed proof",
+   "measured": {
+    "pid": 7308,
+    "port": 8555,
+    "lifetimeMs": 4928,
+    "killed": true,
+    "exitCode": null,
+    "signal": "SIGTERM",
+    "portFreed": true,
+    "freedAfterMs": 9
+   },
+   "failureCaseDetected": "none — server stopped, port freed"
+  }
+ ]
+}

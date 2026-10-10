@@ -1,0 +1,434 @@
+{
+ "RUN_ID": "PE_WORLD_LAUNCHER_R1_20261010",
+ "PHASE": "ETAP_C_LAUNCHER_TERRAIN + ETAP_D_TERRAIN_TEXTURES + ETAP_E_VEGETATION",
+ "ARTIFACT": "WORLD_DATA_PROVENANCE + the Etap E vegetation provenance (the three-way separation, the LAB_SEED determinism chain, the per-model support census).",
+ "GENERATED_AT": "2026-10-10",
+ "ERA": "PCG_9_3_5",
+ "ERA_NOTE": "era swiata tego uruchomienia = PCG_9_3_5 (installed client). CD-era label in the source layer = CD_JAN_2003 (explicit mapping; never identified with JUL_2003). No cross-era mixing; the historical JUL_2003/Terrain/50.bnt corpus is NOT used by this world.",
+ "TERRAIN_CONTAINER": {
+  "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Terrain\\terrain.bnt",
+  "sizeBytes": 125064817,
+  "sha256": "95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990",
+  "pinSource": "contract §1 input table (PE_WORLD_LAUNCHER_R1_20261010)",
+  "mountVerification": "FAIL-CLOSED at startup (PESourceMount.mountEra, KNOWN_HASHES['PCG_9_3_5:Terrain/terrain.bnt']); a mismatch refuses to serve anything",
+  "framing": "BNT2 footer (Bnt2TerrainArchive; variable 0x0A-terminated directory; record framing 02 00 00 FF + u32 decompressedSize + zlib)",
+  "hashWitness": "measured before AND after the full world battery by WORLD_TERRAIN_HASH_WITNESS — both equal to the pin (originals READ_ONLY, never rewritten)"
+ },
+ "INDEX_CENSUS": {
+  "measuredBy": "full enumeration of the BNT2 directory of the physical container (Bnt2TerrainArchive.entries(); independently re-enumerated by the test-local minimal reader in world_terrain.test.mjs)",
+  "totalEntries": 58451,
+  "regularTiles": 51920,
+  "regularGrid": {
+   "width": 220,
+   "height": 236,
+   "addressing": "FILENAME-XY (XXXXXXXX.tdf: first 4 hex = grid_x, next 4 hex = grid_y; entry-index ordering REJECTED — superseded 2026-07-28)"
+  },
+  "specialRows": 6530,
+  "specialRowYRange": {
+   "minHex": "0xff5a",
+   "maxHex": "0xffff",
+   "decimal": [
+    65370,
+    65535
+   ]
+  },
+  "specialRowSemantics": "UNRESOLVED — excluded LOUDLY from regular addressing (getTerrainTile range 0..219/0..235 refuses these addresses; never silently rendered, never treated as NODATA)",
+  "specialRowRangeCorrection": "MEASURED CORRECTION vs the phase-2 IMPLEMENTATION_MAP/GAMEBRYO_MECHANISM_MAP note 'y=0xff1a..0xffff': the measured minimum special-row gridY in this container is 0xff5a (65370), not 0xff1a (65306) — the server prints and this census carry the MEASURED range. The 6,530 count is confirmed by two independent enumerations.",
+  "sentinel": {
+   "count": 1,
+   "name": "7ffe7ffe.tdf",
+   "measuredHeader": {
+    "entryOffset": 122788965,
+    "packedSize": 11947,
+    "payloadBytes": 56233,
+    "dataSize": 56221,
+    "tileDim": 237
+   },
+   "semantics": "OVERVIEW/SENTINEL — NOT a regular grid tile; production decodeTdfPayload REFUSES it (not a standard 32x32 tile — WORLD_TERRAIN_SENTINEL_HANDLING gate); regular-address range check refuses its coordinates (32766,32766); PESourceMount.getSentinelInfo is Terrain/50.bnt-bound (JUL-only) and is NOT used for PCG — the launcher/server handles the PCG sentinel as index metadata only"
+  },
+  "otherEntries": 0
+ },
+ "REGULAR_TILE_CENSUS": {
+  "method": "every regular tile decoded from the ORIGINAL bytes through the PRODUCTION path (PESourceMount.getTerrainTile -> Bnt2TerrainArchive.readEntry strict inflate -> TdfDecoder.decodeTdfPayload, heights at payload offset 64..2111) by the world server background census; per-tile min/max/mean of the RAW uint16 values + status byte; async with progress (/api/world/overview/progress)",
+  "total": 51920,
+  "measured": 51920,
+  "nodataMissingEntry": 0,
+  "nodataDecodeFailed": 0,
+  "coveragePercent": 100,
+  "coverageDenominator": 51920,
+  "zeroTiles": 22481,
+  "nonzeroTiles": 29439,
+  "zeroTileNote": "raw uint16 value 0 is DATA (MEASURED, status=1) — NOT NODATA. NODATA is reserved for missing entries and decode failures (measured 0 in this corpus). 22,481 all-zero tiles (43.3%) is the same magnitude as the historical JUL 50.bnt census (44.28% zeros) — reported as a measured observation, not an identification.",
+  "globalMinRawU16": 0,
+  "globalMaxRawU16": 65535,
+  "maxMeanTile": {
+   "gridX": 53,
+   "gridY": 114,
+   "name": "00350072.tdf",
+   "meanRawU16": 56925
+  },
+  "maxMeanTileUse": "the launcher's DEFAULT selection/spawn — a DATA-DERIVED choice (highest measured mean), never a city-name guess",
+  "censusElapsedMsMeasured": [
+   1932,
+   1911
+  ],
+  "overviewApiLayout": {
+   "route": "/api/world/overview",
+   "bytesPerTile": 7,
+   "layout": "[u16 LE mean][u16 LE min][u16 LE max][u8 status], row-major t = gridY*220 + gridX",
+   "statusValues": {
+    "0": "PENDING",
+    "1": "MEASURED",
+    "2": "NODATA_MISSING_ENTRY",
+    "3": "NODATA_DECODE_FAILED"
+   },
+   "partialResponses": "allowed while the census runs (PENDING bytes visible — the launcher's async refresh with progress)",
+   "totalBytes": 363440
+  }
+ },
+ "SAMPLING_PROVENANCE": {
+  "tileWire": {
+   "route": "/api/world/tile/<gx>/<gy>",
+   "payload": "2048 B = 1024 raw uint16 LE heights (payload offset 64..2111 of the TDF, EXPLICIT LE writes)",
+   "provenanceHeaders": [
+    "X-PE-Era",
+    "X-PE-Container",
+    "X-PE-Entry",
+    "X-PE-Container-Sha256",
+    "X-PE-Offset",
+    "X-PE-Decoder-Version",
+    "X-PE-Evidence-Status",
+    "X-PE-Height-Data-Offset",
+    "X-PE-Cache-Key",
+    "X-PE-Cache-State"
+   ],
+   "crossChecks": "WORLD_T7_TILE_WIRE (wire == fresh in-process production decode, bit-exact, 4 sampled tiles incl. corners); WORLD_TERRAIN_INDEPENDENT_BYTES (test-local minimal reader, independent of the production modules, bit-exact on 6 tiles)"
+  },
+  "sentinelSampling": "the sentinel tile is NEVER served as a tile (route refuses; it is only counted in the index census)"
+ },
+ "ETAP_D_MATERIAL_CHAIN": {
+  "summary": "the proven chain (contract §5) per used layer: TDF entry+record -> material identifier/name -> the actually-confirmed relation to a texture entry -> the PCG Textures.bnt payload -> the proper decoder -> RGBA -> GPU sampler -> visible material",
+  "chainSteps": [
+   {
+    "step": "1. TDF entry + named material record",
+    "evidence": "PESourceMount.getTerrainMaterials -> the ACTIVE TdfMaterialTailDecoder (record = [u32 size][u32 dim][size-4 bytes], stride size+4, EXACT tail consumption; named dim=16 records carry id@+16, name@+24 (28 B NUL-terminated), extra4@+52..55 (NOT mask), mask@+56..size+3 as RAW u8[256] or RLE (count,value) with exact consumption)",
+    "verified": "WORLD_MAT_MASK56_NEGATIVE: every sampled named record decodes at record+56; the wrong offset 52 REFUSES on RAW records (260-byte region, measured 100% of RAW records); RLE records with extra4=[0,0,0,0] (measured) are value-degenerate at 52 — documented measured boundary (the structural region LENGTHS differ; exact consumption holds only at 56); WORLD_MAT_WIRE_BITEXACT: served base64 masks bit-exact the independent tail-region reads"
+   },
+   {
+    "step": "2. material identifier/name -> texture entry relation",
+    "evidence": "id@+16 -> Textures.bnt entry '<id>.dat'. NOT an assumption: engine-RE CONFIRMED (the 9.3.5 record parse/dispatch reads sub@+16 as the material TEXTURE id — M1_TSFS_BINARY_FORENSICS_20260906 iter015e/iter015f decompiles, consolidated iter030 spec; EU935_WORLD_DATA_CENSUS_R1_20260912 GROUND_TEXTURES §3 'Material-id -> texture chain CONFIRMED' with probe05) + re-measured on THIS RUN's sampled tiles (WORLD_MAT_CHAIN_RESOLVE: server-resolved entry metadata == the independent lazy index parse; every sampled id resolved)",
+    "era": "PCG_9_3_5 ONLY (the pinned Textures.bnt 973,942,771 B / SHA 61ACD13B...; the relation is era-scoped; a wrong-era label (?era=CD_JAN_2003/CD_2003/JUL_2003) is REFUSED 403 before any data access — WORLD_MAT_ERA_REFUSAL)",
+    "idNameNote": "MEASURED: the id<->name relation is MANY-TO-MANY (id 37944 = 'Test3' in most sampled tiles, 'Snow' in others — the NAME is display metadata; the TEXTURE binding is by ID, so the chain is unaffected; names never drive resolution)"
+   },
+   {
+    "step": "3. PCG Textures.bnt payload",
+    "evidence": "LAZY bounded reads (LazyTextureArchive: footer + directory parse ONCE after the fail-closed stream-hash pin verifies; per-entry single reads with an 8 MiB size guard; NEVER the whole container in memory; NO whole-container route BY CONSTRUCTION). 8,381 entries parsed (== the probe05-measured census); the 12 B Data/Textures/Terrain.bnt is NOT an atlas (measured 12 B: 8 zero bytes + 'BNT2' — honest gap row)",
+    "verified": "WORLD_MAT_CHAIN_RESOLVE: wire bytes bit-exact the independent file reads at [offset, offset+size); payload SHA headers == recomputed SHA; cache double-fetch = HIT with identical bytes"
+   },
+   {
+    "step": "4. the proper decoder -> RGBA",
+    "evidence": "decodeTga2 (src/pesource/TgaDecoder.js) — the strict TGA 2.0 24bpp uncompressed bottom-up subset with the TRUEVISION-XFILE footer (the iter011 corpus-confirmed terrain-texture subset); served to the BROWSER as a client module so the SAME production decoder runs client-side (no second decoder)",
+    "verified": "WORLD_MAT_CHAIN_RESOLVE: every sampled payload decodes OK 256x256x24; WORLD_MAT_MALFORMED_CONTROLLED: 32bpp / missing-footer / truncated inputs FAIL LOUDLY (no fallback); WORLD_MAT_UV_FLIP_CONTROL: decodeTga2 IMAGE order (row 0 = visual TOP) distinguished from the A32 climate-palette FILE-row convention (decodeTga2A32) on the SAME synthetic payload shape"
+   },
+   {
+    "step": "5. RGBA -> GPU sampler",
+    "evidence": "THREE.DataArrayTexture (256x256xdepth, RGBA u8, LinearFilter, RepeatWrapping, NoColorSpace) built per window from the decoded payloads; per-cell layer slots in 4 idx + 4 weight DataTextures (128x128, NearestFilter) with the RAW u8 weights BIT-EXACT from the served masks",
+    "verified": "WORLD_MAT_SPLAT_RAW_WEIGHTS: an independent re-walk proves the GPU-bound weight bytes == the served mask weights per (cell, slot) with slot order = RECORD ORDER per cell; slot indices reference resolved textures only; active-layers histogram agrees"
+   },
+   {
+    "step": "6. visible material",
+    "evidence": "the splat ShaderMaterial (sequential lerp per layer by RAW mask/255 in RECORD ORDER) rendered on the SAME region mesh; the texture toggle ACTUALLY swaps the terrain material",
+    "verified": "browser-observed: WORLD_T9_LOAD_WORLD with the toggle ON (the DOM census line: 615/615 layers resolved, 28 textures decoded, 114019 slots applied across 2 window rebuilds) + PIXEL_RENDER ETAP_D_TEXTURE_TOGGLE_CHANGES_PIXELS: PASS — 58.77% of the canvas pixels differ between #textures=1 and #textures=0 (meanAbsDelta 90.71, meanLumaDelta 55.10)"
+   }
+  ],
+  "perLayerCounters": {
+   "separateCounters": "resolved / decoded / applied / browser-observed (contract §5 — never merged)",
+   "spawnWindowProbe_origin50_111": {
+    "denominators": {
+     "tiles": 64,
+     "namedLayers": 583,
+     "distinctMaterialIds": 23,
+     "cells": 16384
+    },
+    "resolved": "583/583 named layers (23/23 distinct ids resolved '<id>.dat'; 0 unresolved — measured)",
+    "decoded": "23/23 distinct texture payloads fetched + decoded through decodeTga2 (TGA2 24bpp 256x256)",
+    "applied": "the pure builder census measured on the same window: applied layer-slots = the active layers per cell (histogram 3..12 active layers/cell: {3:23, 4:231, 5:2456, 6:4295, 7:3683, 8:3467, 9:1476, 10:596, 11:144, 12:13}); duplicates 0; cappedCells 0 (cap 16 > measured max 12); cellsWithNoActiveLayers 0",
+    "browserObserved": "the real-browser final window (origin 53,114 after the camera reset re-center): 615/615 resolved, 28 decoded, 114019 applied slots, 0 unresolved, 2 window rebuilds (raw/WORLD/WORLD_DOM_DUMP_WORLD.html)"
+   },
+   "gatesSampledTiles": {
+    "tiles": [
+     "00350072.tdf (53,114)",
+     "0032006f.tdf (50,111)",
+     "00390076.tdf (57,118)",
+     "006e0076.tdf (110,118)",
+     "00000000.tdf (0,0)",
+     "00dbeb.tdf-equivalent (219,235)"
+    ],
+    "distinctMaterialIdsAcrossSamples": 29,
+    "allResolved": true,
+    "wireBitExact": true
+   }
+  },
+  "mappingRelationProvenance": {
+   "claim": "material record id@+16 == the Textures.bnt texture resource id ('<id>.dat')",
+   "provenance": [
+    "ENGINE RE (primary, era-matched): M1_TSFS_BINARY_FORENSICS_20260906 (iter015e_record_parse.c / iter015f_record_dispatch.c decompiles of the 9.3.5 client) — the record parse reads the sub-header id at +16 as the material's TEXTURE id; consolidated in the iter030 spec; recorded as 'layer TYPE census {2: per-material masks (sub@+16 = the material's TEXTURE id; Stone04=13382)}' in docs/audits/PE_M1_GATE_V4_CORRECTION_R2_20260905_101327/00_CONTROL/v4_rows_b.py (committed evidence row)",
+    "CORPUS: EU935_WORLD_DATA_CENSUS_R1_20260912 probe05 — 13382.dat (Stone04), 20281.dat (Grass01) etc. exist as TGA2 24bpp 256x256 payloads in the pinned PCG Textures.bnt; GROUND_TEXTURES §3 'Material-id -> texture chain' CONFIRMED; §5 load-bearing claim #4 re-verified against raw files",
+    "THIS RUN: re-measured per sample (WORLD_MAT_CHAIN_RESOLVE — server resolution == independent index parse; wire bytes bit-exact; every sampled id resolved; the historical extract_material_textures_from_textures_bnt_v1.py used the SAME id==entry-space relation, recorded for lineage)",
+    "NAME-MATCH IS NOT THE EVIDENCE: resolution is BY ID; the id<->name relation is measured MANY-TO-MANY (37944 = Test3|Snow) and names are display metadata only"
+   ],
+   "status": "CONFIRMED (engine RE + corpus + per-sample re-measurement) for every material id present in the sampled windows; an id with NO '<id>.dat' entry would be an explicit UNRESOLVED binding (loud diagnostic, never a fallback texture; the missing-id control 999999999 measured 404)"
+  },
+  "renderPreset": {
+   "label": "RENDER_RECONSTRUCTION",
+   "singleSourceOfTruth": "compat/world-splat.js RENDER_RECONSTRUCTION_PRESET (surfaced verbatim in the /world evidence panel + the server status payload)",
+   "blendForm": "sequential lerp per layer by RAW mask/255 in RECORD ORDER (base first) — the ERA-EVIDENCED form (9.3.5 LOD vertex-color bake lerp(vertexColor, materialTexture(u,v), mask/255), FUN_00940de0 per iter030); applied here to albedo",
+   "reconstructionChoices": [
+    "ALBEDO ROLE: the 9.3.5 engine used these masks for the LOD vertex tint bake + zone shadow paint (the 838/838 consumer census — the ground ALBEDO was the climate palette pipeline whose per-location inputs 432502/459344 are MISSING locally); rendering the material textures as terrain albedo is a RECONSTRUCTION",
+    "UV REPEAT: 32 m per texture repeat (world-space GLOBAL uv, u=+X, v=+Z/south, no per-tile reset) — the era-evidenced DETAIL density (32/32/16 world units, iter024) applied BY ANALOGY; no PE evidence pins the material-texture repeat",
+    "CELL SAMPLING: nearest 16x16 cell per tile (2x2 samples = 4x4 m); the 9.3.5 'edge-extended at load' mask semantics are NOT pinned — nearest is the documented choice",
+    "COLOR SPACE: SRGB_PASSTHROUGH — raw TGA bytes blended without decode (historical fixed-function D3D8 framebuffer-space blending), no output colorspace chunk",
+    "CAPS: 16 layers/cell + 48 texture slots with counted overflow (measured window max: 12 active layers/cell, 28 distinct textures — no overflow observed)"
+   ],
+   "rawWeightsPreserved": "the served masks are the RAW tail bytes bit-exact (WORLD_MAT_WIRE_BITEXACT); layer sums > 255 are ORIGINAL DATA and are NEVER normalized (measured per-cell sums in the sampled windows range far above 255; the shader consumes weight/255 per layer WITHOUT any sum normalization)"
+  }
+ },
+ "STAGES": [
+  {
+   "stage": "MOUNT",
+   "method": "PESourceMount.mountEra {era:PCG_9_3_5, container:Terrain/terrain.bnt, format:BNT2_TERRAIN} + VegetationClimates.bnt {format:BNT2}",
+   "result": "PASS (fail-closed pins verified; measured in WORLD_T7_STATUS)"
+  },
+  {
+   "stage": "INDEX",
+   "method": "Bnt2TerrainArchive.entries() full enumeration + filename-xy classification",
+   "result": "58,451 = 51,920 regular + 6,530 special + 1 sentinel + 0 other (two independent enumerations agree)"
+  },
+  {
+   "stage": "CENSUS",
+   "method": "per-regular-tile production decode; min/max/mean of raw u16 + status",
+   "result": "51,920/51,920 measured; 0 missing; 0 failed (async with progress; ~1.9 s)"
+  },
+  {
+   "stage": "CONTAINER_IDENTITY_STREAM_VERIFY",
+   "method": "stream-hash of Models.bnt + Textures.bnt (8 MiB chunks; never mounted/decoded/served)",
+   "result": "Models C950A8C2... and Textures 61ACD13B... both VERIFIED against the contract §1 pins (bounded memory)"
+  },
+  {
+   "stage": "CLIMATE_CENSUS",
+   "method": "PESourceMount.getVegetationClimate 0..31 (strict VegetationClimateDecoder)",
+   "result": "31 DECODED, 1 UNSUPPORTED (25.vcl comma tokens — controlled UNSUPPORTED, never comma-converted)"
+  },
+  {
+   "stage": "TILE_CACHE",
+   "method": "server-side decoded-tile cache keyed (era|container|containerSha256|entryName) + CAM-C3 identity re-verification on every hit (era, container, container SHA, entry name, payload SHA recomputed over the cached heights bytes, decoder version)",
+   "result": "mutants REFUSED with named reasons through the production verifyTileCacheIdentity (WORLD_T7_CACHE_IDENTITY_CAM_C3); clean double-fetch = HIT with identical bytes"
+  },
+  {
+   "stage": "TEXTURE_PIN_AND_LAZY_INDEX (Etap D)",
+   "method": "stream-hash verification of the pinned Textures.bnt (973,942,771 B) -> LAZY bounded index mount (footer 8 B + directory 225,602 B parse; LazyTextureArchive)",
+   "result": "pin VERIFIED fail-closed; index READY with 8,381/8,381 entries parsed exactly (count field == parsed; consumed exactly); NO texture byte is served before READY (the routes 503-refuse)"
+  },
+  {
+   "stage": "MATERIAL_TAIL_SERVE (Etap D)",
+   "method": "/api/world/tile/<gx>/<gy>/materials through PESourceMount.getTerrainMaterials (the ACTIVE decoder; mask@record+56) + per-material '<id>.dat' resolution against the parsed index + the identity-checked materials cache (payload SHA over the cached TAIL bytes)",
+   "result": "served masks bit-exact the independent tail reads (WORLD_MAT_WIRE_BITEXACT); every sampled id resolved; the era gate REFUSES wrong-era labels 403"
+  },
+  {
+   "stage": "TEXTURE_SERVE (Etap D)",
+   "method": "/api/world/texture/<id> — ONE bounded entry read from the pinned container + the identity-checked texture cache (payload SHA recomputed over the cached bytes on every HIT)",
+   "result": "wire bytes bit-exact the independent file reads; decodeTga2 subset holds on every sampled payload; missing id = loud 404; double-fetch = HIT; the first cache-identity bug (entry envelope overwritten) was caught by the preregistered HIT expectation and fixed (recorded in the ledger)"
+  }
+ ],
+ "CALIBRATION_PRESET": {
+  "label": "CURRENT_RUNTIME_CALIBRATION",
+  "u16PerMeter": 128,
+  "meterPerSample": 2,
+  "minMax": "identity lerp (min=0, max=65535 in u16 space) — per-tile min/max source UNRESOLVED",
+  "application": "applied EXACTLY ONCE inside PETerrainRegion.buildGeometry (worldHeightMeters); reversible: meters × 128 == raw u16 exactly (WORLD_TERRAIN_BOUNDS_CALIBRATION_ONCE)",
+  "documentedIn": "CALIBRATION_AND_UNKNOWNS.md"
+ },
+ "HONESTY_STATEMENTS": {
+  "rawHeights": "RAW uint16 preserved — no 8-bit normalization, no smoothing, no automatic seam hiding, no tile rewriting (WORLD_TERRAIN_HASH_WITNESS: container byte-identical before/after)",
+  "nodata": "NODATA ≠ height 0; missing/failed tiles are visible as NODATA in the launcher overview and stop movement / show the boundary in the world view (never void-drop)",
+  "historicalClaims": {
+   "HISTORICAL_WORLD_PLACEMENT": "NOT_ESTABLISHED",
+   "HISTORICAL_TREE_DISTRIBUTION": "NOT_ESTABLISHED",
+   "WORLD_XYZ_RECOVERED": "NO",
+   "PE_AXES_AND_UNITS": "UNVERIFIED — the adapter axes/units are the CURRENT_RUNTIME_CALIBRATION preset with provenance, never a historical engine fact"
+  }
+ },
+ "GATE_REFERENCES": {
+  "worldBattery": "docs/audits/PE_WORLD_LAUNCHER_R1_20261010/raw/WORLD/WORLD_TESTS_SUMMARY.json (33 PASS / 0 FAIL / 0 NOT_PERFORMED — the 24 Etap C gates re-run green + 9 Etap D materials gates)",
+  "terrainGates": [
+   "WORLD_TERRAIN_OFFSET_64_NEGATIVE",
+   "WORLD_TERRAIN_HEIGHTS_1024",
+   "WORLD_TERRAIN_INDEPENDENT_BYTES",
+   "WORLD_TERRAIN_SENTINEL_HANDLING",
+   "WORLD_TERRAIN_NODATA_CENSUS",
+   "WORLD_TERRAIN_REVERSE_ORDER",
+   "WORLD_TERRAIN_BOUNDS_CALIBRATION_ONCE",
+   "WORLD_TERRAIN_HASH_WITNESS"
+  ],
+  "serverGates": [
+   "WORLD_T7_ROUTES_STATICS",
+   "WORLD_T7_STATUS",
+   "WORLD_T7_TILE_WIRE",
+   "WORLD_T7_TILE_META",
+   "WORLD_T7_DENIAL_SUBSET",
+   "WORLD_T7_NO_WHOLE_CONTAINER",
+   "WORLD_T7_OVERVIEW_BINARY",
+   "WORLD_T7_CLIMATES_HONESTY",
+   "WORLD_T7_GAPS_HONESTY",
+   "WORLD_T7_CACHE_IDENTITY_CAM_C3",
+   "WORLD_T7_SERVER_LIFECYCLE"
+  ],
+  "materialsGates": [
+   "WORLD_MAT_MASK56_NEGATIVE",
+   "WORLD_MAT_WIRE_BITEXACT",
+   "WORLD_MAT_CHAIN_RESOLVE",
+   "WORLD_MAT_ERA_REFUSAL",
+   "WORLD_MAT_SPLAT_RAW_WEIGHTS",
+   "WORLD_MAT_SERVER_LIFECYCLE",
+   "WORLD_MAT_MALFORMED_CONTROLLED",
+   "WORLD_MAT_UNRESOLVED_BINDING",
+   "WORLD_MAT_UV_FLIP_CONTROL"
+  ],
+  "browserGates": [
+   "WORLD_T9_LOAD_LAUNCHER",
+   "WORLD_T9_LOAD_WORLD",
+   "PIXEL_RENDER (raw/WORLD/PIXEL_RENDER_ETAPD.json; launcher + world-on + world-off + the TOGGLE pixel gate; PNGs private-root only)"
+  ]
+ },
+ "ETAP_E_VEGETATION": {
+  "summary": "the deterministic RECONSTRUCTION_PREVIEW vegetation over the live terrain: ORIGINAL_CLIMATE_RECORDS (the strict .vcl decode of the pinned VegetationClimates.bnt) + the RECOVERED byte-locked RNG chain (PEFoliageCore, imported UNTOUCHED — verified byte-identical to HEAD) + the DOCUMENTED LAB_SEED wrapper (src/peworld/PEFoliageLabSeed.js — the [P-CELLSTREAM] reconstruction stand-in, LAB_SEED-keyed, per-tile deterministic) + the ORIGINAL same-era models (PCG_9_3_5 Models.bnt through the LAZY bounded pinned-container read) parsed by the EXISTING qualified importer with their original textures where the binding resolves; the 5000 visible-instance cap with honest requested/rendered/limited counts",
+  "threeWaySeparation": {
+   "ORIGINAL_CLIMATE_RECORDS": "the 12-value records decoded from the pinned .vcl payloads (VegetationClimates.bnt SHA256 7B858401C3EEBDA574DF4B4517E7FB2A8149C283885F27187682AA1239C745F4, verified fail-closed at mount); consumed READ-ONLY; 25.vcl stays UNSUPPORTED (comma tokens at record 9 col 1 — never converted, never record-fabricated; measured by WORLD_VEG_VCL_STRICT_25)",
+   "RECOVERED_RNG_ARITHMETIC": "the EXISTING PEFoliageCore chain: the seed hash FUN_0098cdf0, the MSVC rand() LCG FUN_0098ce30 (/32767.0 f64), the f32 lerp sampler FUN_0095ac30, the node positions (/65535.0 f32, P3/P4) with the FLOAT64 operand lock (iter035) — imported AS-IS by the wrapper; the module file verified byte-identical to HEAD and its outputs reproduced against an INDEPENDENT formula reimplementation (WORLD_VEG_CORE_UNTOUCHED)",
+   "INSTANCE_DISTRIBUTION": "RECONSTRUCTION-ONLY: the per-cell record CONTENT is the LAB_SEED-keyed deterministic stand-in in PEFoliageLabSeed.generateTileInstances (the historical cell-stream origin is NOT closed — iter032 bound 3); placement 1:1 NOT claimed; no historical seed/count/biome claims anywhere"
+  },
+  "profileSelection": {
+   "availableIndices": "0..31 (the .vcl entry space); 31 DECODED + 1 UNSUPPORTED (25) — the census measured per profile",
+   "perProfileModelSummaries": "the /api/world/climates response carries the per-record MODEL SUMMARY for every DECODED profile (id + density(col1, role PLAUSIBLE) + scaleMin/Max(col2/col3, census-measured); col4/col5 carried RAW — UNVERIFIED, no semantics assigned); UNSUPPORTED profiles carry NO model summary (measured by WORLD_T7_CLIMATES_HONESTY)",
+   "defaultProfile": {
+    "index": 0,
+    "recordCount": 12,
+    "distinctModels": 10,
+    "justification": "MEASURED CHOICE (never \"the historical biome of this place\"): profile 0 is DECODED by the strict decoder with 12 non-empty records, and its model set contains 457485 — the NIF whose parse chain the EXISTING qualified importer (NifModelReader) was cross-validated BIT-EXACTLY against the R61 oracle (iter037) — plus 9 further same-era models measured through the same importer (WORLD_VEG_DEFAULT_PROFILE_MEASURED)",
+    "serverMeasuredSupport": "the bounded support census runs at server boot once BOTH lazy indexes are READY (the profile-0 distinct models lazily read + parsed + texture-resolved); exposed in /api/world/status .vegetation"
+   }
+  },
+  "labSeedDeterminismChain": {
+   "wrapper": "src/peworld/PEFoliageLabSeed.js (LABSEED_WRAPPER_VERSION peworld-foliage-labseed-v1): generateTileInstances({records, labSeed, gx, gy, level=1, viewBand=10, p3=0, densityPercent, tileWorldMeters=64, u16PerWorldMeter=2.0}) — the LAB_SEED keys the [P-CELLSTREAM] stand-in hash (the same splitmix shape as PEFoliageCore.placementHash with the seed mixed into the first xor stage); the byte-locked chain is called VERBATIM per generated record",
+   "labSeedNote": "LAB_SEED = the preview seed over the RECONSTRUCTION cell-stream stand-in; it is NEVER equated with the unestablished original p3 (p3 stays 0, shown separately in the UI/census — [P-RNG-P3]) and NEVER claimed to be a historical seed",
+   "windowCalibration": "[P-WINDOW] CURRENT_RUNTIME_CALIBRATION: tile (gx,gy) -> u16 box [gx*128,(gx+1)*128) x [gy*128,(gy+1)*128) (u16 = world meters x 2.0 — the SAME documented page calibration family as the deployed foliage page); tile world box [gx*64,(gx+1)*64) m (the launcher adapter meters); edge ownership BY CONSTRUCTION (positions strictly inside the half-open tile box)",
+   "determinismGates": {
+    "repeatSeed": "the SAME (records+LAB_SEED+tile+density+calibration) -> the IDENTICAL instance-set SHA-256 (key-sorted canonical serialization; WORLD_VEG_REPEAT_SEED_DETERMINISM); a CHANGED seed -> a DIFFERENT hash (a real placement change)",
+    "streamingOrder": "16 tiles generated in two different orders -> identical per-tile sets + identical union (WORLD_VEG_STREAMING_ORDER_INVARIANCE)",
+    "edgeOwnership": "unique instance keys; all positions strictly in-tile; a drop-and-regenerate cycle (the camera-return proof) reproduces the same set (WORLD_VEG_EDGE_OWNERSHIP_NO_DUPLICATES)",
+    "p3": "p3 = 0 ([P-RNG-P3] UNVERIFIED) — a fixed documented input, shown separately"
+   }
+  },
+  "modelChainProvenance": {
+   "route": "/api/world/model/<id> — the ORIGINAL \"<id>.nif\" payload from the pinned PCG_9_3_5 Models.bnt (SHA256 C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0, stream-hash verified fail-closed BEFORE the LAZY bounded index mounts; 5,596 entries parsed — the measured corpus census; per-entry single reads with a 32 MiB guard; NEVER the whole 395 MB container; no whole-container route BY CONSTRUCTION; the CAM-C3 identity cache verifies era+container+containerSha+entryName+payloadSha+wireVersion on every HIT — WORLD_VEG_MODEL_CACHE_IDENTITY)",
+   "importer": "NifModelReader.parseWitnessModel — the EXISTING QUALIFIED single-witness importer (v10.1.0.0 + the KNOWN_V10_TYPES set, loud failures); NEVER widened in this run (byte-identical to HEAD — WORLD_VEG_CORE_UNTOUCHED + the unit battery witness_457485_regression gate); a loud refusal is an honest UNSUPPORTED count (never a substitute model under the same id)",
+   "textureChain": "per visual shape: shape -> its NiTexturingProperty (via the shape properties refs) -> the NiArkTextureExtraData entry referencing that texprop (the Ark 9-byte tail consumed by the READER canon rule [0x00][0xFFFFFFFF][u32 LE textureId]; the tail stays RAW-ONLY — never re-interpreted) -> textureId -> \"<id>.dat\" in the pinned Textures.bnt -> decodeModelTextureStrict (32bpp decodeTga2A32Image IMAGE order / 24bpp decodeTga2 — the PRODUCTION decoders; anything else fails LOUDLY)",
+   "perModelSupport": {
+    "counts": {
+     "distinctModels": 10,
+     "supported": 8,
+     "supportedUntextured": 2,
+     "unsupported": 0,
+     "atLeastOneSupportedModel": true
+    },
+    "supported_textured": [
+     {
+      "modelId": 436293,
+      "shapes": "1/1",
+      "textureId": 436225,
+      "decode": "TGA2 A32 256x256x32"
+     },
+     {
+      "modelId": 457485,
+      "shapes": "1/1",
+      "textureId": 457490,
+      "decode": "TGA2 A32 256x256x32",
+      "note": "THE WITNESS (16v/8t/2 UV sets; parseWitnessModel cross-validated BIT-EXACTLY vs the R61 oracle)"
+     },
+     {
+      "modelId": 436300,
+      "shapes": "1/1",
+      "textureId": 436225,
+      "decode": "TGA2 A32"
+     },
+     {
+      "modelId": 436223,
+      "shapes": "1/1",
+      "textureId": 436225,
+      "decode": "TGA2 A32"
+     },
+     {
+      "modelId": 457699,
+      "shapes": "1/1",
+      "textureId": 457700,
+      "decode": "TGA2 A32"
+     },
+     {
+      "modelId": 457579,
+      "shapes": "1/1",
+      "textureId": 436225,
+      "decode": "TGA2 A32"
+     },
+     {
+      "modelId": 457523,
+      "shapes": "1/2 visual (the 2nd shape is an untextured Bip01/Box collision candidate — NON_VISUAL, counted, never rendered)",
+      "textureId": 457525,
+      "decode": "TGA2 24bpp 256x256"
+     },
+     {
+      "modelId": 457532,
+      "shapes": "1/1",
+      "textureId": 457525,
+      "decode": "TGA2 24bpp"
+     }
+    ],
+    "supported_honestUntextured": [
+     {
+      "modelId": 166878,
+      "shapes": "3/12 visual (the 9 Bip01 shapes are untextured collision candidates — NON_VISUAL)",
+      "textureId": 166881,
+      "reason": "166881.dat is a DDS payload (measured header 44 44 53 …) — OUTSIDE the strict {24,32}bpp subset; the strict decode refuses LOUDLY; the model renders in the honest-untextured class (geometry + neutral gray + the diagnostic label — NEVER a fallback texture, never a stock pine under the same id)"
+     },
+     {
+      "modelId": 166897,
+      "shapes": "1/4 visual",
+      "textureId": 166881,
+      "reason": "same DDS payload — same honest untextured class"
+     }
+    ],
+    "parseUnsupported": []
+   },
+   "renderCalibration": {
+    "P-UNITS": "cm -> m x0.01 applied EXACTLY ONCE (in the per-shape geometry); a SECOND 0.01 in the instance matrices was measured and REMOVED (the trees rendered at 1/50 size — caught by the ETAP_E pixel toggle gate; recorded in failedFirstRuns)",
+    "P-AXIS": "NIF Z-up -> Three Y-up (x, z, -y) — the deployed legacy exporter + model_witness.js mapping; the engine's own transform NOT decompiled (iter032 bound 5)",
+    "P-UV": "NIF uv set 0 RAW (no V flip) + decodeTga2A32Image IMAGE order (row 0 = visual TOP) + DataTexture flipY=false -> v=0 samples the image TOP (the model-witness convention)",
+    "P-SCALE": "instance scale = the BINARY node scale (f32, carried bit-exact on every instance) x (2.0 / NODE_SCALE_MUL) = lerpValue x 2.0 — the EXACT deployed foliage-page ratio (CURRENT_RUNTIME_CALIBRATION; the visualizer node-scale->world-size transform NOT decompiled)",
+    "P-PLACE": "instances stand on the terrain height sampled from the SAME active window region (bilinear over the raw u16 -> adapter meters — the deployed foliage-page rule); placement described as RECONSTRUCTION",
+    "P-MATERIAL": "fixed MeshBasicMaterial (vertex-shaded: texture x vertex colors — the era technique FX 0x3EC Vegetation is vertex-shaded, iter032 stage 9); DoubleSide (CullMethod 2 mapping UNVERIFIED); alpha from the shape's own NiAlphaProperty (flags/threshold); no wind animation",
+    "instancing": "THREE.InstancedMesh per (model, shape) — shared geometry + shared material per (model, shape) with REAL per-instance transforms (position + scale; rotation IDENTITY — RE-faithful: the spawn loop sets position + scale + model id only); geometry sharing is NOT instance sharing (the proven SceneIR instance discipline)",
+    "nonVisualShapes": "shapes without a texprop->Ark chain (the untextured Bip01/Box 24v/12t candidates) are counted as NON_VISUAL (collision/bounds role UNVERIFIED — the BVI local-collision corpus finding) and NEVER rendered as visual geometry",
+    "cap": "MAX_VISIBLE_INSTANCES = 5000 — a HARD display limit; census requested/rendered/limited in the UI (never fake full coverage); the limited subset is a deterministic prefix of the generation order"
+   }
+  },
+  "resourceDiscipline": "per-window InstancedMeshes disposed on EVERY rebuild; the per-model cache (geometry+material) and the SHARED texture cache (one fetch+decode per textureId across model entries) survive window moves (no re-fetch, no duplication — object-identity measured); a profile/seed change prunes unreferenced models+textures (dispose counters measured) while still-referenced shared resources survive; WORLD_VEG_RESOURCE_DISCIPLINE",
+  "openFindings": [
+   "the historical CELL-STREAM SOURCE, the CLIMATE->REGION mapping and the original p3 REMAIN UNKNOWN (U-1/U-2/U-12 restated below); the INSTANCE_DISTRIBUTION stays reconstruction-only",
+   "SPLAT TERRAIN NEAR-BLACK IN HEADLESS CAPTURES (pre-existing Etap D condition, OUT of Etap E scope, reported honestly): see TEST_RESULTS.json etapE_vegetation.openFindings — the Etap D toggle gate remains valid (it measures CHANGE), the interactive-browser appearance remains UNVERIFIED (INTERACTION NOT_PERFORMED)"
+  ],
+  "gateReferences": {
+   "vegetationBattery": "raw/WORLD/WORLD_TESTS_SUMMARY.json (the WORLD_VEG_* gates inside the 44-gate world battery)",
+   "determinismHashes": "WORLD_VEG_REPEAT_SEED_DETERMINISM / WORLD_VEG_STREAMING_ORDER_INVARIANCE / WORLD_VEG_EDGE_OWNERSHIP_NO_DUPLICATES (the measured SHA-256 values are in the raw gate records)",
+   "pixelEvidence": "raw/WORLD/PIXEL_RENDER_ETAPE.json (the CDP captures + the ETAP_E_VEGETATION_TOGGLE_CHANGES_PIXELS gate: 19,621/313,900 canvas pixels differ between #veg=1 and #veg=0, meanAbsDelta 31.72 over the differing — the trees measurably render)"
+  }
+ }
+}

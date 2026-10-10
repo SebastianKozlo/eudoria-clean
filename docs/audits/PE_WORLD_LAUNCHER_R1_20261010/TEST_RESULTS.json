@@ -1,0 +1,5993 @@
+{
+ "RUN_ID": "PE_WORLD_LAUNCHER_R1_20261010",
+ "PHASE": "ETAP_C_D_E + U19_SPLAT_LAYER_COORDINATE_AND_BLEND_FACTOR_FIX (post-QC correction round)",
+ "GENERATED_BY": "tools/pecompat/world_collect_test_results.mjs (reproducible from raw summaries)",
+ "classes": {
+  "DATA_VALIDATED": "terrain + material + vegetation gates through production paths + independent byte reads (world_terrain + world_materials + world_vegetation suites)",
+  "APP_LOAD": "world server routes/statics/API + real-browser LOAD gates (world_server + world_headless_load suites)",
+  "PIXEL_RENDER": "real rendered pixel images of /launcher + /world with the texture toggle ON and OFF + the vegetation toggle ON and OFF + the measured on/off pixel differences (private output; metadata here)",
+  "INTERACTION_VERIFIED": "NOT_PERFORMED — the automation daemon (port 9222) is DOWN (re-measured once in the Etap E phase); honest NOT_PERFORMED, never PASS-by-default"
+ },
+ "worldBattery": {
+  "harness": "tests/pecompat/run_world_tests.mjs",
+  "totals": {
+   "pass": 44,
+   "fail": 0,
+   "notPerformed": 0,
+   "total": 44
+  },
+  "elapsedMs": 24988,
+  "gates": [
+   {
+    "id": "WORLD_TERRAIN_OFFSET_64_NEGATIVE",
+    "suite": "world_terrain.test.mjs",
+    "name": "offset-64 canonical vs the KNOWN-WRONG offset-52 read (negative control on 6 physical tiles)",
+    "status": "PASS",
+    "measured": {
+     "perTile": [
+      {
+       "name": "00000000.tdf",
+       "dataSize": 2100,
+       "tileDim": 32,
+       "payloadBytes": 3652,
+       "rawMin": 0,
+       "rawMax": 0,
+       "wrong52First6": [
+        60908,
+        61422,
+        61936,
+        62450,
+        63221,
+        63479
+       ],
+       "trueFirst6": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "wrong52DifferingPositions": 6,
+       "discriminating": true,
+       "degenerateBothZero": false
+      },
+      {
+       "name": "00db00eb.tdf",
+       "dataSize": 2100,
+       "tileDim": 32,
+       "payloadBytes": 3652,
+       "rawMin": 0,
+       "rawMax": 0,
+       "wrong52First6": [
+        0,
+        63993,
+        0,
+        0,
+        63736,
+        63736
+       ],
+       "trueFirst6": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "wrong52DifferingPositions": 3,
+       "discriminating": true,
+       "degenerateBothZero": false
+      },
+      {
+       "name": "00350072.tdf",
+       "dataSize": 2100,
+       "tileDim": 32,
+       "payloadBytes": 5292,
+       "rawMin": 40877,
+       "rawMax": 63325,
+       "wrong52First6": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "trueFirst6": [
+        40877,
+        43099,
+        45221,
+        46271,
+        47244,
+        48286
+       ],
+       "wrong52DifferingPositions": 6,
+       "discriminating": true,
+       "degenerateBothZero": false
+      },
+      {
+       "name": "000a0014.tdf",
+       "dataSize": 2100,
+       "tileDim": 32,
+       "payloadBytes": 3652,
+       "rawMin": 0,
+       "rawMax": 0,
+       "wrong52First6": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "trueFirst6": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "wrong52DifferingPositions": 0,
+       "discriminating": false,
+       "degenerateBothZero": true
+      },
+      {
+       "name": "006e0076.tdf",
+       "dataSize": 2100,
+       "tileDim": 32,
+       "payloadBytes": 6926,
+       "rawMin": 5888,
+       "rawMax": 9799,
+       "wrong52First6": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "trueFirst6": [
+        6144,
+        6142,
+        6141,
+        6137,
+        6133,
+        6127
+       ],
+       "wrong52DifferingPositions": 6,
+       "discriminating": true,
+       "degenerateBothZero": false
+      },
+      {
+       "name": "00c80064.tdf",
+       "dataSize": 2100,
+       "tileDim": 32,
+       "payloadBytes": 6236,
+       "rawMin": 12459,
+       "rawMax": 23963,
+       "wrong52First6": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       "trueFirst6": [
+        21540,
+        21767,
+        21417,
+        21428,
+        21234,
+        21272
+       ],
+       "wrong52DifferingPositions": 6,
+       "discriminating": true,
+       "degenerateBothZero": false
+      }
+     ],
+     "discriminatingTiles": 5,
+     "expectation": "every sampled tile DISCRIMINATING (>=1 of first 6 differs) or DEGENERATE (sub-header and first heights both all-zero — measured on 000a0014.tdf in the first run); >=4 of 6 must be discriminating",
+     "firstRunFinding": "the original preregistration required >=1 difference on EVERY tile; the first run measured tile 000a0014.tdf (all-zero data tile with an all-zero sub-header) as non-discriminating — the refinement documents this boundary case honestly, it does not remove the control"
+    },
+    "independentSourceOfTruth": "test-local minimal BNT2+TDF byte reader (own inflate + DataView at payload offsets 52 and 64)",
+    "whyNonCircular": "the wrong-52 values come from the physical file bytes via an independent reader — a production bug in offsets would show as a mismatch",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_TERRAIN_HEIGHTS_1024",
+    "suite": "world_terrain.test.mjs",
+    "name": "exact 1024 raw uint16 heights per tile on sampled physical tiles (production PESourceMount.getTerrainTile)",
+    "status": "PASS",
+    "measured": {
+     "sampledTiles": 6,
+     "perTile": [
+      {
+       "name": "00000000.tdf",
+       "rawMin": 0,
+       "rawMax": 0,
+       "payloadBytes": 3652,
+       "dataSize": 2100,
+       "tileDim": 32
+      },
+      {
+       "name": "00db00eb.tdf",
+       "rawMin": 0,
+       "rawMax": 0,
+       "payloadBytes": 3652,
+       "dataSize": 2100,
+       "tileDim": 32
+      },
+      {
+       "name": "00350072.tdf",
+       "rawMin": 40877,
+       "rawMax": 63325,
+       "payloadBytes": 5292,
+       "dataSize": 2100,
+       "tileDim": 32
+      },
+      {
+       "name": "000a0014.tdf",
+       "rawMin": 0,
+       "rawMax": 0,
+       "payloadBytes": 3652,
+       "dataSize": 2100,
+       "tileDim": 32
+      },
+      {
+       "name": "006e0076.tdf",
+       "rawMin": 5888,
+       "rawMax": 9799,
+       "payloadBytes": 6926,
+       "dataSize": 2100,
+       "tileDim": 32
+      },
+      {
+       "name": "00c80064.tdf",
+       "rawMin": 12459,
+       "rawMax": 23963,
+       "payloadBytes": 6236,
+       "dataSize": 2100,
+       "tileDim": 32
+      }
+     ]
+    },
+    "independentSourceOfTruth": "Uint16Array contract + value range check",
+    "whyNonCircular": "structural assertion on the production decode output",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_TERRAIN_INDEPENDENT_BYTES",
+    "suite": "world_terrain.test.mjs",
+    "name": "INDEPENDENT byte-level read of physical tiles cross-checked against the production decoder",
+    "status": "PASS",
+    "measured": {
+     "tilesChecked": 6,
+     "mismatches": 0,
+     "expectation": "0 mismatches"
+    },
+    "independentSourceOfTruth": "test-local BNT2 footer/dir walk + zlib.inflateSync + DataView (zero production imports in that path)",
+    "whyNonCircular": "two independent decoders of the same physical bytes must agree bit-exactly; agreement proves both, disagreement localizes the defect",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_TERRAIN_SENTINEL_HANDLING",
+    "suite": "world_terrain.test.mjs",
+    "name": "sentinel 7ffe7ffe.tdf is NOT a regular tile: classified, payload decode refused LOUDLY, address refused by range",
+    "status": "PASS",
+    "measured": {
+     "isSentinelName": true,
+     "sentinelEntryInIndex": true,
+     "gridFromName": {
+      "gridX": 32766,
+      "gridY": 32766
+     },
+     "productionDecodeRefusesSentinel": true,
+     "refusalMessage": "[TdfDecoder] 7ffe7ffe.tdf: not a standard 32x32 tile (data_size=56221, tile_dim=237)",
+     "outOfRangeRefusal": "[PESourceMount] grid out of range 0..219/0..235: 32766,32766"
+    },
+    "independentSourceOfTruth": "production TdfDecoder.isSentinelName + decodeTdfPayload + PESourceMount range check + archive index",
+    "whyNonCircular": "each refusal is an observed exception with its message (not an assumed code path)",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_TERRAIN_NODATA_CENSUS",
+    "suite": "world_terrain.test.mjs",
+    "name": "regular-grid NODATA census: every regular name present; missing names refused loudly; raw-0 tiles are DATA",
+    "status": "PASS",
+    "measured": {
+     "totalEntries": 58451,
+     "regular": 51920,
+     "specialRows": 6530,
+     "sentinel": 1,
+     "other": 0,
+     "specialRowYRangeHex": [
+      "ff5a",
+      "ffff"
+     ],
+     "missingRegular": 0,
+     "missingSample": [],
+     "missingNameRefused": true,
+     "missingNameRefusalMessage": "[BuntArchive] bad footer magic: 0x32544e42 (expected BUNT)",
+     "fakeName": "deadbeef.tdf",
+     "fakeInIndex": false,
+     "rawZeroTileIsData": true,
+     "note": "raw u16 = 0 is DATA (MEASURED); NODATA would be a missing/failed entry — measured 0 in this corpus"
+    },
+    "independentSourceOfTruth": "archive index enumeration + per-name Set membership + a real decode of the all-zero tile",
+    "whyNonCircular": "presence is measured name-by-name from the physical index, not assumed from the format docs",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_TERRAIN_REVERSE_ORDER",
+    "suite": "world_terrain.test.mjs",
+    "name": "reverse tile-load order assembles a byte-identical region geometry (load order invariance) + deterministic re-decode",
+    "status": "PASS",
+    "measured": {
+     "positionsBytes": 196608,
+     "indicesBytes": 387096,
+     "byteIdentical": true,
+     "freshReDecodeIdentical": true,
+     "seamDiagnostic": {
+      "east": {
+       "pairs": 384,
+       "diffs": 316,
+       "maxAbs": 686
+      },
+      "south": {
+       "pairs": 384,
+       "diffs": 349,
+       "maxAbs": 732
+      },
+      "interpretation": "ORIGINAL_DATA (disjoint tiles, no repair applied)"
+     }
+    },
+    "independentSourceOfTruth": "byte comparison of two independent builds through the production PETerrainRegion",
+    "whyNonCircular": "the comparison is over the actual emitted arrays, not internal state",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_TERRAIN_BOUNDS_CALIBRATION_ONCE",
+    "suite": "world_terrain.test.mjs",
+    "name": "bounds/calibration: 2 m/sample steps, no tile overlap, conversion u16→meters applied EXACTLY ONCE, reversible (×128), identity min/max preset",
+    "status": "PASS",
+    "measured": {
+     "sampleStep": 2,
+     "u16PerMeter": 128,
+     "label": "CURRENT_RUNTIME_CALIBRATION",
+     "heightQuery": "min + (max - min) * u16 * (1/65535)",
+     "sampleGrid": [
+      128,
+      128
+     ],
+     "indexCount": 96774,
+     "stepExact": true,
+     "extentsExact": true,
+     "maxLocalX": 254,
+     "maxLocalZ": 254,
+     "expectedLocalMax": 254,
+     "conversionExactlyOnce": true,
+     "roundtripMetersToU16": true,
+     "roundtripBadSamples": [],
+     "identityLerpForm": true,
+     "note": "conversion applied once inside buildGeometry via worldHeightMeters; meters×128 recovers raw u16 exactly; CURRENT_RUNTIME_CALIBRATION is a preset, not a historical claim"
+    },
+    "independentSourceOfTruth": "direct arithmetic comparison of positions[] against rawSample()/128 for every vertex",
+    "whyNonCircular": "a double conversion or a wrong scale would break the exact float equality at every vertex",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_TERRAIN_HASH_WITNESS",
+    "suite": "world_terrain.test.mjs",
+    "name": "terrain.bnt byte-identity witness: pinned SHA256 before AND after the whole suite (originals never rewritten)",
+    "status": "PASS",
+    "measured": {
+     "shaBefore": "95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990",
+     "shaAfter": "95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990",
+     "pin": "95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990",
+     "sizeBytes": 125064817,
+     "pinSize": 125064817
+    },
+    "independentSourceOfTruth": "node:crypto stream hash of the physical file (not a cache)",
+    "whyNonCircular": "any write to the original container would change the hash — measured twice, both equal to the pin",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_TERRAIN_SUITE_META",
+    "suite": "world_terrain.test.mjs",
+    "name": "suite metadata (SIDE record — elapsed + module identities)",
+    "status": "PASS",
+    "measured": {
+     "elapsedMs": 1359,
+     "tdfLayout": {
+      "HEIGHTS": {
+       "start": 64,
+       "end": 2112
+      },
+      "SUBHEADER": {
+       "start": 52,
+       "end": 64
+      }
+     },
+     "tdfStandard": {
+      "DATA_SIZE_FIELD": 2100,
+      "TILE_DIM_FIELD": 32,
+      "HEIGHT_SAMPLES": 1024
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_ROUTES_STATICS",
+    "suite": "world_server.test.mjs",
+    "name": "/launcher + /world + allowlisted statics + client world modules + pinned three (200); / -> 302 /launcher",
+    "status": "PASS",
+    "measured": {
+     "/launcher": {
+      "status": 200,
+      "bytes": 9625,
+      "contentType": "text/html"
+     },
+     "/world": {
+      "status": 200,
+      "bytes": 8193,
+      "contentType": "text/html"
+     },
+     "/": {
+      "status": 302,
+      "bytes": 0,
+      "contentType": ""
+     },
+     "/compat/launcher.js": {
+      "status": 200,
+      "bytes": 26920,
+      "contentType": "text/javascript"
+     },
+     "/compat/launcher.css": {
+      "status": 200,
+      "bytes": 3973,
+      "contentType": "text/css"
+     },
+     "/compat/world-app.js": {
+      "status": 200,
+      "bytes": 67532,
+      "contentType": "text/javascript"
+     },
+     "/compat/world.css": {
+      "status": 200,
+      "bytes": 1390,
+      "contentType": "text/css"
+     },
+     "/compat/world-splat.js": {
+      "status": 200,
+      "bytes": 13045,
+      "contentType": "text/javascript"
+     },
+     "/compat/world-vegetation.js": {
+      "status": 200,
+      "bytes": 33933,
+      "contentType": "text/javascript"
+     },
+     "/compat/compat.css": {
+      "status": 200,
+      "bytes": 3479,
+      "contentType": "text/css"
+     },
+     "/compat/launcher.html": {
+      "status": 200,
+      "bytes": 9625,
+      "contentType": "text/html"
+     },
+     "/src/peworld/PETerrainCore.js": {
+      "status": 200,
+      "bytes": 8202,
+      "contentType": "text/javascript"
+     },
+     "/src/peworld/PEFoliageCore.js": {
+      "status": 200,
+      "bytes": 23649,
+      "contentType": "text/javascript"
+     },
+     "/src/peworld/PEFoliageLabSeed.js": {
+      "status": 200,
+      "bytes": 17385,
+      "contentType": "text/javascript"
+     },
+     "/src/pesource/TerrainTile.js": {
+      "status": 200,
+      "bytes": 1581,
+      "contentType": "text/javascript"
+     },
+     "/src/pesource/PEProvenance.js": {
+      "status": 200,
+      "bytes": 3944,
+      "contentType": "text/javascript"
+     },
+     "/src/pesource/TgaDecoder.js": {
+      "status": 200,
+      "bytes": 9067,
+      "contentType": "text/javascript"
+     },
+     "/src/pesource/NifModelReader.js": {
+      "status": 200,
+      "bytes": 29910,
+      "contentType": "text/javascript"
+     },
+     "/node_modules/three/build/three.module.js": {
+      "status": 200,
+      "bytes": 650153,
+      "contentType": "text/javascript"
+     },
+     "rootRedirectLocation": "/launcher"
+    },
+    "independentSourceOfTruth": "raw sockets against the running server",
+    "whyNonCircular": "the browser-facing surface is exercised as the browser would",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_STATUS",
+    "suite": "world_server.test.mjs",
+    "name": "/api/world/status: era PCG_9_3_5, four pinned containers VERIFIED (terrain+veg mounted; models+textures hash-verified with BOTH lazy indexes READY), the material-chain section (mask@56, id@+16 relation, wire versions), the ETAP E vegetation section (the THREE-WAY SEPARATION + the measured default profile + the support census + p3 shown separately + the 5000 cap), index + census + calibration snapshot",
+    "status": "PASS",
+    "measured": {
+     "era": "PCG_9_3_5",
+     "containers": {
+      "terrain": "VERIFIED",
+      "veg": "VERIFIED",
+      "models": "VERIFIED",
+      "textures": "VERIFIED",
+      "textureIndexState": "READY",
+      "textureIndexEntries": 8381,
+      "modelIndexState": "READY",
+      "modelIndexEntries": 5596
+     },
+     "vegetation": {
+      "mode": "RECONSTRUCTION_PREVIEW",
+      "defaultProfileIndex": 0,
+      "supportCensusState": "READY",
+      "supportCounts": {
+       "distinctModels": 10,
+       "supported": 8,
+       "supportedUntextured": 2,
+       "unsupported": 0,
+       "atLeastOneSupportedModel": true
+      },
+      "p3": 0,
+      "cap": 5000,
+      "threeWaySeparationKeys": [
+       "ORIGINAL_CLIMATE_RECORDS",
+       "RECOVERED_RNG_ARITHMETIC",
+       "INSTANCE_DISTRIBUTION"
+      ]
+     },
+     "terrainMaterials": {
+      "maskOffset": 56,
+      "chainRelation": "material record id@+16 -> Textures.bnt entry \"<id>.dat\" (engine-RE CONFIRMED: the 9.3.5 record parse/dispatch reads sub@"
+     },
+     "index": {
+      "totalEntries": 58451,
+      "regular": 51920,
+      "specialRows": 6530,
+      "sentinel": 1,
+      "other": 0,
+      "specialRowYValues": [
+       65370,
+       65371,
+       65372,
+       65373,
+       65374,
+       65375,
+       65376,
+       65377,
+       65378,
+       65379,
+       65380,
+       65381,
+       65382,
+       65383,
+       65384,
+       65385,
+       65386,
+       65387,
+       65388,
+       65389,
+       65390,
+       65391,
+       65392,
+       65393,
+       65394,
+       65395,
+       65396,
+       65397,
+       65398,
+       65399,
+       65400,
+       65401,
+       65402,
+       65403,
+       65404,
+       65405,
+       65406,
+       65407,
+       65408,
+       65409,
+       65410,
+       65411,
+       65412,
+       65413,
+       65414,
+       65415,
+       65416,
+       65417,
+       65418,
+       65419,
+       65420,
+       65421,
+       65422,
+       65423,
+       65424,
+       65425,
+       65426,
+       65427,
+       65428,
+       65429,
+       65430,
+       65431,
+       65432,
+       65433,
+       65434,
+       65435,
+       65436,
+       65437,
+       65438,
+       65439,
+       65440,
+       65441,
+       65442,
+       65443,
+       65444,
+       65445,
+       65446,
+       65447,
+       65448,
+       65449,
+       65450,
+       65451,
+       65452,
+       65453,
+       65454,
+       65455,
+       65456,
+       65457,
+       65458,
+       65459,
+       65460,
+       65461,
+       65462,
+       65463,
+       65464,
+       65465,
+       65466,
+       65467,
+       65468,
+       65469,
+       65470,
+       65471,
+       65472,
+       65473,
+       65474,
+       65475,
+       65476,
+       65477,
+       65478,
+       65479,
+       65480,
+       65481,
+       65482,
+       65483,
+       65484,
+       65485,
+       65486,
+       65487,
+       65488,
+       65489,
+       65490,
+       65491,
+       65492,
+       65493,
+       65494,
+       65495,
+       65496,
+       65497,
+       65498,
+       65499,
+       65500,
+       65501,
+       65502,
+       65503,
+       65504,
+       65505,
+       65506,
+       65507,
+       65508,
+       65509,
+       65510,
+       65511,
+       65512,
+       65513,
+       65514,
+       65515,
+       65516,
+       65517,
+       65518,
+       65519,
+       65520,
+       65521,
+       65522,
+       65523,
+       65524,
+       65525,
+       65526,
+       65527,
+       65528,
+       65529,
+       65530,
+       65531,
+       65532,
+       65533,
+       65534,
+       65535
+      ]
+     },
+     "census": {
+      "total": 51920,
+      "measured": 51920,
+      "ready": true,
+      "zeroTiles": 22481
+     },
+     "calibration": "CURRENT_RUNTIME_CALIBRATION",
+     "maxMeanTile": {
+      "gridX": 53,
+      "gridY": 114,
+      "mean": 56925
+     }
+    },
+    "independentSourceOfTruth": "the running server + the contract §1 pinned SHA/size table + the probe05-measured 8,381-entry index census + the measured 5,596-entry Models.bnt index census",
+    "whyNonCircular": "the pins are external constants (contract / prior corpus census), not values echoed from the server",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_TILE_WIRE",
+    "suite": "world_server.test.mjs",
+    "name": "tile API: 2048 B uint16 LE == production in-process decode (bit-exact); provenance headers; double-fetch = HIT with identical bytes",
+    "status": "PASS",
+    "measured": {
+     "tileChecks": [
+      {
+       "gx": 0,
+       "gy": 0,
+       "status": 200,
+       "bytes": 2048,
+       "equal": true,
+       "headers": {
+        "era": "PCG_9_3_5",
+        "container": "Terrain/terrain.bnt",
+        "entry": "00000000.tdf",
+        "offset": "0",
+        "cache": "MISS",
+        "containerSha": "95841761ce4ea074c97930ec1cef3fb57aac7f7f4f3d9b751a9ee60510299990",
+        "heightOffset": "64..2111 (payload-relative; bytes 52..63 are a separate sub-header, NOT heights)"
+       }
+      },
+      {
+       "gx": 219,
+       "gy": 235,
+       "status": 200,
+       "bytes": 2048,
+       "equal": true,
+       "headers": {
+        "era": "PCG_9_3_5",
+        "container": "Terrain/terrain.bnt",
+        "entry": "00db00eb.tdf",
+        "offset": "122788789",
+        "cache": "MISS",
+        "containerSha": "95841761ce4ea074c97930ec1cef3fb57aac7f7f4f3d9b751a9ee60510299990",
+        "heightOffset": "64..2111 (payload-relative; bytes 52..63 are a separate sub-header, NOT heights)"
+       }
+      },
+      {
+       "gx": 53,
+       "gy": 114,
+       "status": 200,
+       "bytes": 2048,
+       "equal": true,
+       "headers": {
+        "era": "PCG_9_3_5",
+        "container": "Terrain/terrain.bnt",
+        "entry": "00350072.tdf",
+        "offset": "17539282",
+        "cache": "MISS",
+        "containerSha": "95841761ce4ea074c97930ec1cef3fb57aac7f7f4f3d9b751a9ee60510299990",
+        "heightOffset": "64..2111 (payload-relative; bytes 52..63 are a separate sub-header, NOT heights)"
+       }
+      },
+      {
+       "gx": 110,
+       "gy": 118,
+       "status": 200,
+       "bytes": 2048,
+       "equal": true,
+       "headers": {
+        "era": "PCG_9_3_5",
+        "container": "Terrain/terrain.bnt",
+        "entry": "006e0076.tdf",
+        "offset": "58449879",
+        "cache": "MISS",
+        "containerSha": "95841761ce4ea074c97930ec1cef3fb57aac7f7f4f3d9b751a9ee60510299990",
+        "heightOffset": "64..2111 (payload-relative; bytes 52..63 are a separate sub-header, NOT heights)"
+       }
+      }
+     ],
+     "doubleFetch": {
+      "first": "HIT",
+      "second": "HIT",
+      "identical": true
+     }
+    },
+    "independentSourceOfTruth": "a second production decode in the TEST process (fresh PESourceMount, not the server cache)",
+    "whyNonCircular": "the server and the test decode the same original bytes independently; equality proves the wire, difference localizes the defect",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_TILE_META",
+    "suite": "world_server.test.mjs",
+    "name": "tile meta route: provenance + stats + calibration preset (JSON)",
+    "status": "PASS",
+    "measured": {
+     "name": "00350072.tdf",
+     "stats": {
+      "min": 40877,
+      "max": 63325,
+      "mean": 56925,
+      "zeroSamples": 0,
+      "note": "raw uint16 values — raw 0 is DATA, not NODATA"
+     },
+     "provenance": {
+      "era": "PCG_9_3_5",
+      "container": "Terrain/terrain.bnt",
+      "entry": "00350072.tdf",
+      "physicalSource": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Terrain\\terrain.bnt",
+      "offset": 17539282,
+      "decoderVersion": "pesource-m1-v1",
+      "evidenceStatus": "CONFIRMED",
+      "extra": {
+       "packedSize": 4265,
+       "decompressedSize": 5292,
+       "heightDataOffsetPayloadRelative": 64,
+       "mask16OffsetRecordRelative": 52,
+       "offsetSpacesSeparated": true,
+       "containerFormat": "BNT2_TERRAIN",
+       "hashVerified": true
+      }
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_DENIAL_SUBSET",
+    "suite": "world_server.test.mjs",
+    "name": "denial subset (T7 pattern reuse, raw sockets): out-of-range/sentinel coords, shape violations, NUL/backslash, traversal, method, non-allowlisted statics",
+    "status": "PASS",
+    "measured": {
+     "denialResults": [
+      {
+       "id": "OUT_OF_RANGE_X",
+       "path": "/api/world/tile/220/0",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "GRID_OUT_OF_RANGE",
+       "expectedError": "GRID_OUT_OF_RANGE",
+       "ok": true
+      },
+      {
+       "id": "OUT_OF_RANGE_Y",
+       "path": "/api/world/tile/0/236",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "GRID_OUT_OF_RANGE",
+       "expectedError": "GRID_OUT_OF_RANGE",
+       "ok": true
+      },
+      {
+       "id": "NEGATIVE",
+       "path": "/api/world/tile/-1/0",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "GRID_INVALID",
+       "expectedError": "GRID_INVALID",
+       "ok": true
+      },
+      {
+       "id": "NON_NUMERIC",
+       "path": "/api/world/tile/abc/0",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "GRID_INVALID",
+       "expectedError": "GRID_INVALID",
+       "ok": true
+      },
+      {
+       "id": "SENTINEL_COORDS",
+       "path": "/api/world/tile/32766/32766",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "GRID_OUT_OF_RANGE",
+       "expectedError": "GRID_OUT_OF_RANGE",
+       "ok": true
+      },
+      {
+       "id": "SHAPE_1PART",
+       "path": "/api/world/tile/10",
+       "status": 404,
+       "expectedStatus": 404,
+       "error": "UNKNOWN_TILE_ROUTE",
+       "expectedError": "UNKNOWN_TILE_ROUTE",
+       "ok": true
+      },
+      {
+       "id": "SHAPE_4PART",
+       "path": "/api/world/tile/10/20/33/44",
+       "status": 404,
+       "expectedStatus": 404,
+       "error": "UNKNOWN_TILE_ROUTE",
+       "expectedError": "UNKNOWN_TILE_ROUTE",
+       "ok": true
+      },
+      {
+       "id": "CLIMATE_OOR",
+       "path": "/api/world/climate/32",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "CLIMATE_INDEX_OUT_OF_RANGE",
+       "expectedError": "CLIMATE_INDEX_OUT_OF_RANGE",
+       "ok": true
+      },
+      {
+       "id": "CLIMATE_NONNUM",
+       "path": "/api/world/climate/xx",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "CLIMATE_INDEX_INVALID",
+       "expectedError": "CLIMATE_INDEX_INVALID",
+       "ok": true
+      },
+      {
+       "id": "NUL_BYTE",
+       "path": "/api/world/tile/10%0020",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "NULL_BYTE_IN_URL",
+       "expectedError": null,
+       "ok": true
+      },
+      {
+       "id": "BACKSLASH",
+       "path": "/api/world/tile/10%5C20",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "BACKSLASH_IN_URL",
+       "expectedError": "BACKSLASH_IN_URL",
+       "ok": true
+      },
+      {
+       "id": "TRAVERSAL_ROOT",
+       "path": "/../server-world.mjs",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "PATH_TRAVERSAL_BLOCKED",
+       "expectedError": "PATH_TRAVERSAL_BLOCKED",
+       "ok": true
+      },
+      {
+       "id": "TRAVERSAL_COMPAT",
+       "path": "/compat/../package.json",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "PATH_TRAVERSAL_BLOCKED",
+       "expectedError": "PATH_TRAVERSAL_BLOCKED",
+       "ok": true
+      },
+      {
+       "id": "TRAVERSAL_API",
+       "path": "/api/world/../../../etc/passwd",
+       "status": 400,
+       "expectedStatus": 400,
+       "error": "PATH_TRAVERSAL_BLOCKED",
+       "expectedError": "PATH_TRAVERSAL_BLOCKED",
+       "ok": true
+      },
+      {
+       "id": "STATIC_NOT_ALLOWLISTED",
+       "path": "/compat/server-world.mjs",
+       "status": 404,
+       "expectedStatus": 404,
+       "error": "STATIC_FILE_NOT_ALLOWEDLISTED",
+       "expectedError": "STATIC_FILE_NOT_ALLOWEDLISTED",
+       "ok": true
+      },
+      {
+       "id": "MODULE_NOT_ALLOWLISTED",
+       "path": "/src/pesource/PESourceMount.js",
+       "status": 404,
+       "expectedStatus": 404,
+       "error": "STATIC_FILE_NOT_ALLOWLISTED",
+       "expectedError": "STATIC_FILE_NOT_ALLOWLISTED",
+       "ok": true
+      },
+      {
+       "id": "POST_405",
+       "path": "/api/world/status",
+       "status": 405,
+       "expectedStatus": 405,
+       "ok": true
+      },
+      {
+       "id": "LEADING_ZERO_CANONICAL",
+       "path": "/api/world/tile/010/020",
+       "status": 200,
+       "expectedStatus": 200,
+       "ok": true,
+       "note": "registered expectation: parseInt canonicalization (bounded, path-safe)"
+      }
+     ]
+    },
+    "independentSourceOfTruth": "raw sockets (no client URL normalization) against the running server",
+    "whyNonCircular": "each probe carries a preregistered expected status/error; the server cannot see the expectation",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_NO_WHOLE_CONTAINER",
+    "suite": "world_server.test.mjs",
+    "name": "NO whole-container route exists (terrain.bnt/Models.bnt/Textures.bnt are never exposed to the browser)",
+    "status": "PASS",
+    "measured": {
+     "wholeResults": [
+      {
+       "path": "/api/world/terrain.bnt",
+       "status": 404,
+       "ok": true
+      },
+      {
+       "path": "/api/world/container",
+       "status": 404,
+       "ok": true
+      },
+      {
+       "path": "/api/world/raw",
+       "status": 404,
+       "ok": true
+      },
+      {
+       "path": "/api/world/entries",
+       "status": 404,
+       "ok": true
+      },
+      {
+       "path": "/pcg/Data/Terrain/terrain.bnt",
+       "status": 404,
+       "ok": true
+      },
+      {
+       "path": "/terrain.bnt",
+       "status": 404,
+       "ok": true
+      },
+      {
+       "path": "/api/world/models.bnt",
+       "status": 404,
+       "ok": true
+      },
+      {
+       "path": "/api/world/textures.bnt",
+       "status": 404,
+       "ok": true
+      }
+     ]
+    },
+    "independentSourceOfTruth": "route table of the running server (probed, not read from source)",
+    "whyNonCircular": "a 200 on any container-shaped path would be a FAIL — measured directly",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_OVERVIEW_BINARY",
+    "suite": "world_server.test.mjs",
+    "name": "overview binary: 363,440 B (51,920×7 layout), all regular tiles MEASURED (status=1), per-tile stats == tile wire recompute",
+    "status": "PASS",
+    "measured": {
+     "bytes": 363440,
+     "statuses": {
+      "0": 0,
+      "1": 51920,
+      "2": 0,
+      "3": 0
+     },
+     "totalHeader": "51920",
+     "tile_53_114": {
+      "overview": {
+       "mean": 56925,
+       "min": 40877,
+       "max": 63325
+      },
+      "recomputed": {
+       "mean": 56925,
+       "min": 40877,
+       "max": 63325
+      },
+      "match": true
+     },
+     "progress": {
+      "ok": true,
+      "total": 51920,
+      "measured": 51920,
+      "missing": 0,
+      "failed": 0,
+      "pending": 0,
+      "ready": true,
+      "startedAt": "2026-10-10T16:07:54.960Z",
+      "finishedAt": "2026-10-10T16:07:56.935Z",
+      "elapsedMs": 1975
+     }
+    },
+    "independentSourceOfTruth": "the tile wire bytes (already cross-checked against the in-process production decode)",
+    "whyNonCircular": "overview stats are recomputed from the wire in the test, not trusted from the server",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_CLIMATES_HONESTY",
+    "suite": "world_server.test.mjs",
+    "name": "climates: 32 profiles, 31 DECODED, 25 UNSUPPORTED (strict decoder — never comma-converted); decoded profiles expose records + the ETAP E per-record MODEL SUMMARY (the REAL model ids/scales); UNSUPPORTED exposes the honest error and NO model summary",
+    "status": "PASS",
+    "measured": {
+     "total": 32,
+     "decoded": 31,
+     "unsupported": [
+      25
+     ],
+     "profile0": {
+      "status": "DECODED",
+      "recordCount": 12,
+      "firstRecord": [
+       436293,
+       2,
+       0.5,
+       1.5,
+       30,
+       1000,
+       1,
+       10,
+       0.02,
+       0.02,
+       0,
+       0.05
+      ],
+      "firstModelSummary": {
+       "recIndex": 0,
+       "id": 436293,
+       "density": 2,
+       "scaleMin": 0.5,
+       "scaleMax": 1.5,
+       "colSemantics": "col0 model id (GetModel 0x66 id space); col1 density (role PLAUSIBLE, iter032); col2/col3 per-model scale min/max (census-measured); col4/col5 carried raw (UNVERIFIED — no semantics assigned)"
+      },
+      "modelSummaryCount": 12
+     },
+     "profile25": {
+      "status": "UNSUPPORTED",
+      "ok": false,
+      "records": null,
+      "error": "[VegetationClimateDecoder] non-numeric token \"0,2\" at record 9 col 1 — LOUD (the engine stream would fail here too)",
+      "profileRowModels": null
+     }
+    },
+    "independentSourceOfTruth": "the strict VegetationClimateDecoder through the production mount",
+    "whyNonCircular": "UNSUPPORTED must NOT fabricate records — asserted by absence, not by message; the model summaries are asserted against the KNOWN profile-0 first record (436293, scale 0.5..1.5) measured from the decoded records",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_GAPS_HONESTY",
+    "suite": "world_server.test.mjs",
+    "name": "gaps panel: every NOT-loaded/unsupported item is listed with its honest state; BOTH delivered items (terrain_textures Etap D, vegetation Etap E) carry their honest scope (RENDER_RECONSTRUCTION / the THREE-WAY SEPARATION + the UNSUPPORTED-25 + the untextured policy + the 5000 cap)",
+    "status": "PASS",
+    "measured": {
+     "have": [
+      "terrain_textures|ETAP_D_DELIVERED (z jawnym zakresem)",
+      "vegetation|ETAP_E_DELIVERED (z jawnym zakresem)",
+      "water|NOT_RECOVERED",
+      "special_rows|EXCLUDED — UNRESOLVED",
+      "sentinel|NOT A REGULAR TILE",
+      "models_world_placement|NOT_ESTABLISHED",
+      "historical_axes|UNVERIFIED",
+      "historical_tree_distribution|NOT_ESTABLISHED",
+      "material_texture_atlas_dir|NOT A COMPLETE ATLAS — MEASURED"
+     ],
+     "catalog": {
+      "url": "http://127.0.0.1:8161/catalog",
+      "note": "model catalog viewer (192374, 193207, 193313, 193684, 218757) — separate server"
+     },
+     "terrainTexturesState": "ETAP_D_DELIVERED (z jawnym zakresem)",
+     "texturesGapScopeOk": true,
+     "vegetationState": "ETAP_E_DELIVERED (z jawnym zakresem)",
+     "vegetationScopeOk": true
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_CACHE_IDENTITY_CAM_C3",
+    "suite": "world_server.test.mjs",
+    "name": "CAM-C3 cache-identity gates for world tile payloads: wrong era / wrong container SHA / wrong entry name / tampered heights all REFUSED with named reasons; clean PASSES (through the PRODUCTION verifyTileCacheIdentity)",
+    "status": "PASS",
+    "measured": {
+     "mutantResults": [
+      {
+       "id": "M1_WRONG_ERA",
+       "gate": false,
+       "refused": true,
+       "reasons": [
+        "ERA_MISMATCH"
+       ],
+       "expectedReasons": [
+        "ERA_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M2_WRONG_CONTAINER_SHA",
+       "gate": false,
+       "refused": true,
+       "reasons": [
+        "CONTAINER_SHA_MISMATCH"
+       ],
+       "expectedReasons": [
+        "CONTAINER_SHA_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M3_WRONG_ENTRY_NAME",
+       "gate": false,
+       "refused": true,
+       "reasons": [
+        "ENTRY_NAME_MISMATCH"
+       ],
+       "expectedReasons": [
+        "ENTRY_NAME_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M4_TAMPERED_HEIGHTS",
+       "gate": false,
+       "refused": true,
+       "reasons": [
+        "PAYLOAD_SHA_MISMATCH"
+       ],
+       "expectedReasons": [
+        "PAYLOAD_SHA_MISMATCH"
+       ],
+       "ok": true
+      }
+     ],
+     "clean": {
+      "ok": true,
+      "reasons": []
+     },
+     "malformed": {
+      "ok": false,
+      "reasons": [
+       "CACHE_ENTRY_MALFORMED"
+      ]
+     },
+     "realHttpDoubleFetchHit": true
+    },
+    "independentSourceOfTruth": "the production gate function + the real-HTTP HIT/MISS observation above",
+    "whyNonCircular": "each mutant flips exactly one identity component; the gate must name it (never a silent attach)",
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T7_SERVER_LIFECYCLE",
+    "suite": "world_server.test.mjs",
+    "name": "suite-owned world server lifecycle (pid 14792, port 8865; stop + port-freed proof; standing 8140/8161 untouched)",
+    "status": "PASS",
+    "measured": {
+     "startupLine": "world server http://127.0.0.1:8865/ pid=14792 READY",
+     "pid": 14792,
+     "port": 8865,
+     "startedMs": 468,
+     "stop": {
+      "killed": true,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "portFreed": true,
+      "freedAfterMs": 17,
+      "lifetimeMs": 2781
+     },
+     "standingServersBusyBefore": {
+      "8140": false,
+      "8161": false
+     },
+     "stdoutExcerpt": "[server-world] era PCG_9_3_5 — terrain index: 58451 entries = 51920 regular (220x236) + 6530 special rows (gridY 0xff5a..0xffff) + 1 sentinel + 0 other\n[server-world] container pins verified (fail-closed): terrain.bnt + VegetationClimates.bnt MOUNTED; Models.bnt + Textures.bnt stream-hash verification running in background\nworld server http://127.0.0.1:8865/ pid=14792 READY\n[server-world] ready in 365 ms — routes: /launcher /world /api/world/* (bounded; ETAP E: tile/<g>/<g>/materials + texture/<id> + model/<id> + climates with per-profile model summaries); / redirects to /launcher; census of 51920 regular tiles running in background (progress on /api/world/overview/progress)\n[server-world] STOP = terminate pid 14792 (only this process; standing servers 8140/8161 are never touched)\n"
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_MAT_MASK56_NEGATIVE",
+    "suite": "world_materials.test.mjs",
+    "name": "named material record mask@record+56 verified on physical samples (production + independent walk); the wrong offset 52 as the negative control",
+    "status": "PASS",
+    "measured": {
+     "sampledTiles": 6,
+     "rawRecords": {
+      "total": 25,
+      "refusedAtWrong52": 25
+     },
+     "rleRecords": {
+      "total": 17,
+      "maskEqualsWrong52WithZeroExtra4": 13,
+      "differing": 0
+     },
+     "productionIndependentAgreement": true,
+     "note": "RAW records: region@52 = 260B -> production decodeMaskRegion REFUSES (not 256; RLE fails on raw content) — DISCRIMINATING. RLE records with extra4=[0,0,0,0] (measured): region@52 = region56+4 leading zero-count pairs -> the expanded mask equals mask56 (degenerate for VALUE; the region LENGTHS differ: measured). Structure: a 256-B mask ending at p+4+size can only start at p+56 (exact consumption fails at 52).",
+     "perTile": [
+      {
+       "name": "00350072.tdf",
+       "namedRecords": 9,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 20281,
+         "name": "Grass01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15877,
+         "name": "Rock03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 36740,
+         "name": "Rock03d",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 14014,
+         "name": "Rock03b",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 34587,
+         "name": "Rock06",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 37944,
+         "name": "Test3",
+         "enc": "raw",
+         "extra4": [
+          42,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 22673,
+         "name": "Rock01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 215829,
+         "name": "Lavagore01",
+         "enc": "rle",
+         "extra4": [
+          136,
+          79,
+          206,
+          13
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "0032006f.tdf",
+       "namedRecords": 12,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 20281,
+         "name": "Grass01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15877,
+         "name": "Rock03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 14014,
+         "name": "Rock03b",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15858,
+         "name": "Grass16",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 34587,
+         "name": "Rock06",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 37944,
+         "name": "Test3",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 22673,
+         "name": "Rock01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 214869,
+         "name": "Lava01",
+         "enc": "raw",
+         "extra4": [
+          70,
+          218,
+          0,
+          62
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 215829,
+         "name": "Lavagore01",
+         "enc": "rle",
+         "extra4": [
+          255,
+          255,
+          255,
+          255
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 214875,
+         "name": "Lava05",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 215830,
+         "name": "Lavagore02",
+         "enc": "raw",
+         "extra4": [
+          90,
+          140,
+          62,
+          62
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "00390076.tdf",
+       "namedRecords": 8,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 20281,
+         "name": "Grass01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15877,
+         "name": "Rock03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 14014,
+         "name": "Rock03b",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 18084,
+         "name": "Grass28",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 36676,
+         "name": "Grass27",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 214869,
+         "name": "Lava01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 215830,
+         "name": "Lavagore02",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "006e0076.tdf",
+       "namedRecords": 11,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 20281,
+         "name": "Grass01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15877,
+         "name": "Rock03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 45001,
+         "name": "test 2",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 25591,
+         "name": "Grasssh_2",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 23622,
+         "name": "Grass05",
+         "enc": "raw",
+         "extra4": [
+          80,
+          73,
+          73,
+          76
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 20943,
+         "name": "Sand01",
+         "enc": "rle",
+         "extra4": [
+          248,
+          248,
+          248,
+          248
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 25568,
+         "name": "Alien03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 88103,
+         "name": "Grassmix13",
+         "enc": "rle",
+         "extra4": [
+          21,
+          7,
+          223,
+          6
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 160350,
+         "name": "ShieldT",
+         "enc": "raw",
+         "extra4": [
+          1,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 203773,
+         "name": "Groundneedle_01",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "00000000.tdf",
+       "namedRecords": 1,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "00db00eb.tdf",
+       "namedRecords": 1,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      }
+     ]
+    },
+    "independentSourceOfTruth": "test-local minimal tail walker (own DataView, own RLE expansion, own stride walk)",
+    "whyNonCircular": "the masks and refusals are recomputed from the physical file bytes by code that does not import the production decoder",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_WIRE_BITEXACT",
+    "suite": "world_materials.test.mjs",
+    "name": "the served RAW 16x16 masks are bit-exact the physical tail bytes (independent reader); sums > 255 preserved UNNORMALIZED",
+    "status": "PASS",
+    "measured": {
+     "sampledTiles": 6,
+     "recordsChecked": 42,
+     "weightBytesChecked": 10752,
+     "perCellLayerSums": {
+      "min": 255,
+      "max": 1431,
+      "cellsAbove255": 1024,
+      "totalCells": 1536
+     },
+     "note": "layer sums > 255 are ORIGINAL DATA (never normalized — measured, not asserted)",
+     "perTile": [
+      {
+       "name": "00350072.tdf",
+       "servedMaterials": 9,
+       "independentNamed": 9,
+       "tileOk": true
+      },
+      {
+       "name": "0032006f.tdf",
+       "servedMaterials": 12,
+       "independentNamed": 12,
+       "tileOk": true
+      },
+      {
+       "name": "00390076.tdf",
+       "servedMaterials": 8,
+       "independentNamed": 8,
+       "tileOk": true
+      },
+      {
+       "name": "006e0076.tdf",
+       "servedMaterials": 11,
+       "independentNamed": 11,
+       "tileOk": true
+      },
+      {
+       "name": "00000000.tdf",
+       "servedMaterials": 1,
+       "independentNamed": 1,
+       "tileOk": true
+      },
+      {
+       "name": "00db00eb.tdf",
+       "servedMaterials": 1,
+       "independentNamed": 1,
+       "tileOk": true
+      }
+     ]
+    },
+    "independentSourceOfTruth": "test-local minimal reader + own RLE expansion",
+    "whyNonCircular": "the wire payload is compared to the physical container bytes read by independent code",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_CHAIN_RESOLVE",
+    "suite": "world_materials.test.mjs",
+    "name": "every sampled material id resolves \"<id>.dat\" (server == independent index parse); texture wire bytes bit-exact the independent file reads; strict decodeTga2 subset holds; missing id = loud 404; double-fetch = HIT",
+    "status": "PASS",
+    "measured": {
+     "distinctMaterialIds": 23,
+     "allResolved": true,
+     "wireBitExact": true,
+     "decodeSubsetOk": true,
+     "missingIdRefused404": true,
+     "doubleFetchCacheHit": true,
+     "independentIndex": {
+      "parsedEntries": 8381,
+      "countField": 8381
+     },
+     "chainSamples": [
+      {
+       "id": 13382,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 20281,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 15877,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 36740,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 14014,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 34587,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 37944,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 22673,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 215829,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 15858,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 214869,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 214875,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 215830,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 18084,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 36676,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 45001,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 25591,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 23622,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 20943,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 25568,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 88103,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 160350,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 203773,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      }
+     ],
+     "relationEvidence": "id@+16 -> \"<id>.dat\" (engine RE: 9.3.5 record parse reads sub@+16 as the material TEXTURE id — M1_TSFS iter015e/f, iter030, EU935 census GROUND_TEXTURES §3 CONFIRMED; re-measured per sample HERE)"
+    },
+    "independentSourceOfTruth": "test-local lazy Textures.bnt index parse + raw file reads",
+    "whyNonCircular": "the wire payloads/metadata are compared to the physical container read by independent code",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_ERA_REFUSAL",
+    "suite": "world_materials.test.mjs",
+    "name": "wrong-era labels REFUSED through the REAL routes (CD_JAN_2003/CD_2003/JUL_2003 -> 403); CAM-C3 identity mutants REFUSED through the PRODUCTION verify functions; clean passes the same gate",
+    "status": "PASS",
+    "measured": {
+     "eraChecks": [
+      {
+       "era": "CD_JAN_2003",
+       "textureStatus": 403,
+       "textureError": "ERA_REFUSED_WRONG_ERA",
+       "materialsStatus": 403,
+       "materialsError": "ERA_REFUSED_WRONG_ERA"
+      },
+      {
+       "era": "CD_2003",
+       "textureStatus": 403,
+       "textureError": "ERA_REFUSED_WRONG_ERA",
+       "materialsStatus": 403,
+       "materialsError": "ERA_REFUSED_WRONG_ERA"
+      },
+      {
+       "era": "JUL_2003",
+       "textureStatus": 403,
+       "textureError": "ERA_REFUSED_WRONG_ERA",
+       "materialsStatus": 403,
+       "materialsError": "ERA_REFUSED_WRONG_ERA"
+      }
+     ],
+     "noEraDefaultStatus": 200,
+     "mutants": {
+      "texWrongEra": {
+       "ok": false,
+       "reasons": [
+        "ERA_MISMATCH"
+       ]
+      },
+      "texWrongContainerSha": {
+       "ok": false,
+       "reasons": [
+        "CONTAINER_SHA_MISMATCH"
+       ]
+      },
+      "texWrongEntryName": {
+       "ok": false,
+       "reasons": [
+        "ENTRY_NAME_MISMATCH"
+       ]
+      },
+      "texTamperedPayload": {
+       "ok": false,
+       "reasons": [
+        "PAYLOAD_SHA_MISMATCH"
+       ]
+      },
+      "texWrongWireVersion": {
+       "ok": false,
+       "reasons": [
+        "WIRE_VERSION_MISMATCH"
+       ]
+      },
+      "texClean": {
+       "ok": true,
+       "reasons": []
+      },
+      "matWrongEra": {
+       "ok": false,
+       "reasons": [
+        "ERA_MISMATCH"
+       ]
+      },
+      "matWrongContainerSha": {
+       "ok": false,
+       "reasons": [
+        "CONTAINER_SHA_MISMATCH"
+       ]
+      },
+      "matWrongEntryName": {
+       "ok": false,
+       "reasons": [
+        "ENTRY_NAME_MISMATCH"
+       ]
+      },
+      "matTamperedTail": {
+       "ok": false,
+       "reasons": [
+        "PAYLOAD_SHA_MISMATCH"
+       ]
+      },
+      "matWrongWireVersion": {
+       "ok": false,
+       "reasons": [
+        "WIRE_VERSION_MISMATCH"
+       ]
+      },
+      "matClean": {
+       "ok": true,
+       "reasons": []
+      }
+     }
+    },
+    "independentSourceOfTruth": "raw sockets against the running server + the exported production verify functions",
+    "whyNonCircular": "the mutants are constructed in-test and the refusal reasons are asserted by name",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_SPLAT_RAW_WEIGHTS",
+    "suite": "world_materials.test.mjs",
+    "name": "the REAL spawn-window materials through the pure splat builder: RAW served weights bit-exact in the GPU-bound textures (slot order = record order per cell), slots reference resolved textures only, active-layer histogram agrees with an independent count",
+    "status": "PASS",
+    "measured": {
+     "windowOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "tilesFetched": 64,
+     "cellsChecked": 16384,
+     "weightSlotsChecked": 113544,
+     "weightsBitExact": true,
+     "slotsConsistent": true,
+     "histogramAgrees": true,
+     "builderCensus": {
+      "layersTotal": 583,
+      "resolvedLayers": 583,
+      "appliedLayers": 113544,
+      "distinctTextures": 23,
+      "unresolved": 0,
+      "duplicates": 0,
+      "cappedCells": 0,
+      "cellsWithNoActiveLayers": 0,
+      "activeLayersHist": {
+       "3": 23,
+       "4": 231,
+       "5": 2456,
+       "6": 4295,
+       "7": 3683,
+       "8": 3467,
+       "9": 1476,
+       "10": 596,
+       "11": 144,
+       "12": 13
+      }
+     },
+     "preset": {
+      "label": "RENDER_RECONSTRUCTION",
+      "schemaVersion": "world-splat-v1",
+      "blendForm": "sequential lerp per layer by RAW mask/255 in RECORD ORDER (base first) — era-evidenced FORM (9.3.5 LOD vertex-color bake lerp(vertexColor, materialTexture(u,v), mask/255), iter030); applied here to albedo",
+      "albedoRole": "RECONSTRUCTION: the 9.3.5 ground albedo was the climate palette pipeline (base+factor+detail; its per-location inputs 432502/459344 are MISSING locally) — the engine used the material textures for the vertex tint bake, NOT the base albedo",
+      "uv": "world-space GLOBAL uv = worldPos.xz / 32 m (u along +X, v along +Z/south; no per-tile or per-window reset); the repeat value is a RECONSTRUCTION choice (the era-evidenced detail-texture density is 32/32/16 world units — iter024 — applied to material textures BY ANALOGY, not as a pinned material repeat)",
+      "rowOrder": "decodeTga2 IMAGE order (row 0 = visual TOP; the TGA bottom-up storage is flipped ONCE by the decoder) + THREE.DataTexture flipY=false — v=0 samples the image TOP; the A32 climate-palette FILE-row convention (decodeTga2A32) is a DIFFERENT decoder/convention and is not used here",
+      "cellSampling": "nearest 16x16 material cell per tile (2x2 samples = 4x4 m per cell; mask row = grid-y, col = grid-x, the same axes as the height grid); flat within a cell (the 9.3.5 \"edge-extended at load\" mask semantics are NOT pinned — nearest is the documented choice)",
+      "colorSpace": "SRGB_PASSTHROUGH — the original TGA bytes are display-referred; the GPU blend happens on the raw values (no sRGB decode), matching the historical fixed-function D3D8 framebuffer-space blending; the shader outputs sRGB directly (no output colorspace chunk)",
+      "caps": "MAX_LAYERS_PER_CELL=16 / MAX_TEXTURE_SLOTS=48 — cells/tiles exceeding a cap keep the FIRST layers in record order and the dropped count is REPORTED (a render approximation, labeled; the served raw weights are unchanged)",
+      "unresolved": "a material id without a resolved <id>.dat entry (or a failed strict decode) is SKIPPED with an explicit diagnostic — never a fallback texture, never cross-era substitution"
+     }
+    },
+    "independentSourceOfTruth": "test-local grid walk over the SERVED masks (the same wire payload the browser consumes)",
+    "whyNonCircular": "the re-walk recomputes the expected slot weights from the wire JSON, independently of the builder",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_SERVER_LIFECYCLE",
+    "suite": "world_materials.test.mjs",
+    "name": "suite-owned world server lifecycle (pid 28992, port 8569; stop + port-freed proof)",
+    "status": "PASS",
+    "measured": {
+     "startupLine": "world server http://127.0.0.1:8569/ pid=28992 READY",
+     "pid": 28992,
+     "port": 8569,
+     "stop": {
+      "killed": true,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "lifetimeMs": 2877,
+      "portFreed": true,
+      "freedAfterMs": 22
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none — the suite cleaned up its OWN process only"
+   },
+   {
+    "id": "WORLD_MAT_MALFORMED_CONTROLLED",
+    "suite": "world_materials.test.mjs",
+    "name": "malformed material tails and out-of-subset TGA payloads FAIL LOUDLY through the production decoders (no mask, no rgba, no fallback)",
+    "status": "PASS",
+    "measured": {
+     "tailCases": [
+      {
+       "case": "rle_overrun_named_record",
+       "threw": true,
+       "message": "[TdfMaterialTail] named dim=16 record \"Stone04\" mask region not RAW/RLE (len 6)"
+      },
+      {
+       "case": "odd_region_named_record",
+       "threw": true,
+       "message": "[TdfMaterialTail] named dim=16 record \"Stone04\" mask region not RAW/RLE (len 3)"
+      },
+      {
+       "case": "implausible_size",
+       "threw": true,
+       "message": "[TdfMaterialTail] implausible size 4294967280 at tail+0 (remaining 64)"
+      },
+      {
+       "case": "residual_bytes",
+       "threw": true,
+       "message": "[TdfMaterialTail] residual 3B at tail+0 (< 4B size field)"
+      }
+     ],
+     "cleanNamedRecordDecodes": true,
+     "tgaCases": [
+      {
+       "case": "tga_32bpp_out_of_subset",
+       "threw": true,
+       "message": "[TgaDecoder] bpp 32 unsupported (CONFIRMED subset: 24)"
+      },
+      {
+       "case": "tga_footer_missing",
+       "threw": true,
+       "message": "[TgaDecoder] TGA2 footer signature missing (TRUEVISION-XFILE.\\0)"
+      },
+      {
+       "case": "tga_truncated",
+       "threw": true,
+       "message": "[TgaDecoder] payload too small for TGA2 (40)"
+      }
+     ],
+     "cleanPatternDecodes": true
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none — every malformed case threw, every clean case decoded"
+   },
+   {
+    "id": "WORLD_MAT_UNRESOLVED_BINDING",
+    "suite": "world_materials.test.mjs",
+    "name": "synthetic unresolved material->texture bindings: layers SKIPPED + listed (explicit diagnostic), no texture slot, resolved layers still applied; all-resolved grid has NO diagnostic",
+    "status": "PASS",
+    "measured": {
+     "unresolvedListed": true,
+     "noSlotForUnresolved": true,
+     "resolvedStillApplied": true,
+     "diagMode": true,
+     "allResolvedGridClean": true,
+     "decodeFailureSkipped": true,
+     "unresolvedSample": [
+      {
+       "tile": "0/0",
+       "id": 999999,
+       "name": "GhostMat",
+       "reason": "SYNTHETIC missing relation (no <id>.dat entry) — diagnostic"
+      }
+     ],
+     "badGridCensus": {
+      "layersTotal": 129,
+      "resolvedLayers": 128,
+      "appliedLayers": 32768
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_UV_FLIP_CONTROL",
+    "suite": "world_materials.test.mjs",
+    "name": "UV/flip controlled with a PATTERN and a REAL texture: decodeTga2 IMAGE order (row 0 = visual top) distinguished from the A32 FILE-row convention; the documented GPU sampling (flipY=false, v=0 -> top) consistent on both; the world-uv formula recorded",
+    "status": "PASS",
+    "measured": {
+     "patternImageRow0": [
+      150,
+      160,
+      130
+     ],
+     "patternFileRow0A32": [
+      90,
+      250,
+      10
+     ],
+     "conventionsDistinguished": true,
+     "gpuSamplingConsistent": true,
+     "realTexture": {
+      "id": 13382,
+      "topLeft": [
+       101,
+       90,
+       73
+      ],
+      "bottomRight": [
+       101,
+       90,
+       73
+      ],
+      "expected": {
+       "tl": [
+        101,
+        90,
+        73
+       ],
+       "br": [
+        101,
+        90,
+        73
+       ]
+      },
+      "consistent": true
+     },
+     "worldUv": {
+      "input": [
+       64,
+       128,
+       32
+      ],
+      "output": [
+       2,
+       4
+      ],
+      "ok": true
+     },
+     "preset": {
+      "rowOrder": "decodeTga2 IMAGE order (row 0 = visual TOP; the TGA bottom-up storage is flipped ONCE by the decoder) + THREE.DataTexture flipY=false — v=0 samples the image TOP; the A32 climate-palette FILE-row convention (decodeTga2A32) is a DIFFERENT decoder/convention and is not used here",
+      "uv": "world-space GLOBAL uv = worldPos.xz / 32 m (u along +X, v along +Z/south; no per-tile or per-window reset); the repeat value is a RECONSTRUCTION choice (the era-evidenced detail-texture density is 32/32/16 world units — iter024 — applied to material textures BY ANALOGY, not as a pinned material repeat)",
+      "colorSpace": "SRGB_PASSTHROUGH — the original TGA bytes are display-referred; the GPU blend happens on the raw values (no sRGB decode), matching the historical fixed-function D3D8 framebuffer-space blending; the shader outputs sRGB directly (no output colorspace chunk)"
+     }
+    },
+    "independentSourceOfTruth": "the synthetic pattern payload (distinct per-row colors, built in-test) + the real Stone04 payload read independently",
+    "whyNonCircular": "the expected row/texel values come from the constructed storage order, not from the decoder output",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_VEG_VCL_STRICT_25",
+    "suite": "world_vegetation.test.mjs",
+    "name": "25.vcl stays controlled UNSUPPORTED through the REAL route (strict decoder — comma tokens never converted; records asserted NULL by absence)",
+    "status": "PASS",
+    "measured": {
+     "profile25": {
+      "ok": false,
+      "status": "UNSUPPORTED",
+      "recordCount": 0,
+      "recordsNull": true,
+      "errorExcerpt": "[VegetationClimateDecoder] non-numeric token \"0,2\" at record 9 col 1 — LOUD (the engine stream would fail here too)",
+      "provenanceNote": "the strict VegetationClimateDecoder refuses this profile (comma tokens at record 9 col 1); controlled UNSUPPORTED — never comma-converted"
+     },
+     "profile0": {
+      "ok": true,
+      "status": "DECODED",
+      "recordCount": 12,
+      "allRecords12Value": true
+     }
+    },
+    "independentSourceOfTruth": "the raw HTTP payloads (no client normalization)",
+    "whyNonCircular": "UNSUPPORTED is asserted BY ABSENCE (records === null) — a fabricated-records regression would fail the null check",
+    "failureCaseDetected": "none — the strict refusal is intact and profile 0 decodes 12x12-value records"
+   },
+   {
+    "id": "WORLD_VEG_DEFAULT_PROFILE_MEASURED",
+    "suite": "world_vegetation.test.mjs",
+    "name": "the default profile (0) is chosen MEASURABLY: DECODED + non-empty records + >=1 supported same-era model (the witness 457485 SUPPORTED with its texture chain resolved); never a historical-biome claim",
+    "status": "PASS",
+    "measured": {
+     "defaultProfile": {
+      "index": 0,
+      "status": "DECODED",
+      "recordCount": 12,
+      "recordsNonEmpty": true,
+      "distinctModels": 10,
+      "measuredJustification": "MEASURED CHOICE (never \"the historical biome of this place\"): profile 0 is DECODED by the strict VegetationClimateDecoder with 12 non-empty records, and its model set contains 457485 — the NIF whose parse chain the EXISTING qualified importer (NifModelReader) was cross-validated BIT-EXACTLY against the R61 oracle (iter037) — plus 9 further same-era PCG_9_3_5 Models.bnt models measured below through the same importer without widening any guard",
+      "climateProvenance": {
+       "era": "PCG_9_3_5",
+       "container": "VegetationClimates/VegetationClimates.bnt",
+       "entry": "0.vcl",
+       "physicalSource": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\VegetationClimates\\VegetationClimates.bnt",
+       "offset": 0,
+       "decoderVersion": "pesource-m1-v1+vcl-v1",
+       "evidenceStatus": "CONFIRMED",
+       "extra": {
+        "containerFormat": "BNT2",
+        "packedSize": 583,
+        "decompressedSize": 583,
+        "recordCount": 12,
+        "hashVerified": true,
+        "jul2003ByteIdentity": "VegetationClimates.bnt byte-identical in all 3 corpus copies (iter032_vcl_columns.json source census); the 2003 PE2 binary has NO vegetation loader (iter017 negative) — the loader is 9.3.5-era, era-labeled"
+       }
+      }
+     },
+     "supportCounts": {
+      "distinctModels": 10,
+      "supported": 8,
+      "supportedUntextured": 2,
+      "unsupported": 0,
+      "atLeastOneSupportedModel": true
+     },
+     "witness457485": {
+      "status": "SUPPORTED",
+      "textureId": 457490,
+      "textures": [
+       {
+        "textureId": 457490,
+        "resolved": true,
+        "bytes": 262188,
+        "width": 256,
+        "height": 256,
+        "bpp": 32,
+        "decoder": "decodeTga2A32Image (TGA2 A32 IMAGE order — the model-witness UV convention, row 0 = visual TOP)"
+       }
+      ]
+     },
+     "perModelStatuses": [
+      {
+       "modelId": 436293,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 457485,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 436300,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 436223,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 457699,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 457579,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 457523,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 2
+      },
+      {
+       "modelId": 457532,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 166878,
+       "status": "SUPPORTED_UNTEXTURED",
+       "visualShapes": 3,
+       "shapesTotal": 12
+      },
+      {
+       "modelId": 166897,
+       "status": "SUPPORTED_UNTEXTURED",
+       "visualShapes": 1,
+       "shapesTotal": 4
+      }
+     ],
+     "p3": 0,
+     "p3Note": "[P-RNG-P3] the p3 seed input is UNVERIFIED and stays 0 — shown SEPARATELY; it is NEVER the LAB_SEED and never claimed historical",
+     "cap": 5000
+    },
+    "independentSourceOfTruth": "the server-side census through LazyModelArchive/LazyTextureArchive + parseWitnessModel + decodeModelTextureStrict (the same production modules the browser uses)",
+    "whyNonCircular": "the justification is a MEASURED outcome (per-model parse + strict decode), not a profile label; the justification text forbids the historical-biome claim",
+    "failureCaseDetected": "none — profile 0 satisfies every preregistered criterion with measured evidence"
+   },
+   {
+    "id": "WORLD_VEG_CORE_UNTOUCHED",
+    "suite": "world_vegetation.test.mjs",
+    "name": "PEFoliageCore + NifModelReader + VegetationClimateDecoder + TgaDecoder are byte-identical to HEAD and the byte-locked arithmetic matches an INDEPENDENT formula reimplementation (seed hash / LCG / f32 lerp / f32 scale on measured vectors)",
+    "status": "PASS",
+    "measured": {
+     "files": [
+      {
+       "file": "src/peworld/PEFoliageCore.js",
+       "workingTreeSha256": "300be9137cc1d52c095a0ebecc3741c60041f77ab11eeb0dc100121bea62692f",
+       "headSha256": "300be9137cc1d52c095a0ebecc3741c60041f77ab11eeb0dc100121bea62692f",
+       "identical": true
+      },
+      {
+       "file": "src/pesource/NifModelReader.js",
+       "workingTreeSha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359",
+       "headSha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359",
+       "identical": true
+      },
+      {
+       "file": "src/pesource/VegetationClimateDecoder.js",
+       "workingTreeSha256": "8dbce904f7d9a2edf72af70c3854a4a24f50b1dc198d22654fdc7a6f9daa6015",
+       "headSha256": "8dbce904f7d9a2edf72af70c3854a4a24f50b1dc198d22654fdc7a6f9daa6015",
+       "identical": true
+      },
+      {
+       "file": "src/pesource/TgaDecoder.js",
+       "workingTreeSha256": "4b6b4baa0fd1529bc876cf915a4078e7b0bae951411b572f78686d788caf6760",
+       "headSha256": "4b6b4baa0fd1529bc876cf915a4078e7b0bae951411b572f78686d788caf6760",
+       "identical": true
+      }
+     ],
+     "arithmeticVectors": [
+      {
+       "p4": 100,
+       "p5": 200,
+       "state0": 1416524993,
+       "value": 0.9385204315185547,
+       "scale": 0.00007332190580200404,
+       "expState0": 1416524993,
+       "expValue": 0.9385204315185547,
+       "expScale": 0.00007332190580200404,
+       "ok": true
+      },
+      {
+       "p4": 4096,
+       "p5": 8191,
+       "state0": 3895538769,
+       "value": 1.447618007659912,
+       "scale": 0.00011309515684843063,
+       "expState0": 3895538769,
+       "expValue": 1.447618007659912,
+       "expScale": 0.00011309515684843063,
+       "ok": true
+      },
+      {
+       "p4": 30000,
+       "p5": 60000,
+       "state0": 2718003009,
+       "value": 0.823809027671814,
+       "scale": 0.00006436007970478386,
+       "expState0": 2718003009,
+       "expValue": 0.823809027671814,
+       "expScale": 0.00006436007970478386,
+       "ok": true
+      },
+      {
+       "p4": 7,
+       "p5": 13,
+       "state0": 1123758705,
+       "value": 0.5929288864135742,
+       "scale": 0.00004632256968761794,
+       "expState0": 1123758705,
+       "expValue": 0.5929288864135742,
+       "expScale": 0.00004632256968761794,
+       "ok": true
+      }
+     ],
+     "nodeDivisorOk": true,
+     "nodePosDivisor": 65535
+    },
+    "independentSourceOfTruth": "git HEAD blobs + the documented formulas re-implemented in THIS test (not the module under test)",
+    "whyNonCircular": "a byte edit would break the blob comparison; an arithmetic regression would break the independent-formula vectors",
+    "failureCaseDetected": "none — the recovered chain is untouched and reproduces its documented formulas"
+   },
+   {
+    "id": "WORLD_VEG_REPEAT_SEED_DETERMINISM",
+    "suite": "world_vegetation.test.mjs",
+    "name": "repeat-seed determinism: the SAME (records+LAB_SEED+tile+density+calibration) -> the IDENTICAL instance-set hash; a CHANGED seed -> a DIFFERENT hash (a real placement change)",
+    "status": "PASS",
+    "measured": {
+     "labSeed0": {
+      "hash": "5c0dc551300494e1d6587f065c5f973b466713a79b9187697eecd61e143bfd55",
+      "instances": 36
+     },
+     "labSeed0Repeat": {
+      "hash": "5c0dc551300494e1d6587f065c5f973b466713a79b9187697eecd61e143bfd55"
+     },
+     "labSeed1": {
+      "hash": "25c5a9b87280a90fc1512725b38edcb60bce3a9d8a5d6f475c748eabddf50d4f",
+      "instances": 36
+     },
+     "hashesIdentical": true,
+     "seedsDiffer": true,
+     "scalesInLerpBand": true
+    },
+    "independentSourceOfTruth": "the canonical serialization of every instance (no sampling, no subset)",
+    "whyNonCircular": "identical hashes across two INDEPENDENT calls prove the generator is pure; a different seed changing the hash proves LAB_SEED influences the actual placement (not a UI label)",
+    "failureCaseDetected": "none — repeat-seed identical, changed-seed different"
+   },
+   {
+    "id": "WORLD_VEG_STREAMING_ORDER_INVARIANCE",
+    "suite": "world_vegetation.test.mjs",
+    "name": "streaming-order invariance: 16 tiles generated in TWO different orders -> identical per-tile sets AND identical union (the load order cannot change any instance)",
+    "status": "PASS",
+    "measured": {
+     "tiles": 16,
+     "perTileCompare": [
+      {
+       "tile": "50,111",
+       "forwardHash": "2d69490d2862",
+       "shuffledHash": "2d69490d2862",
+       "identical": true
+      },
+      {
+       "tile": "51,111",
+       "forwardHash": "f891c96802c7",
+       "shuffledHash": "f891c96802c7",
+       "identical": true
+      },
+      {
+       "tile": "52,111",
+       "forwardHash": "7ef7cc6ea41e",
+       "shuffledHash": "7ef7cc6ea41e",
+       "identical": true
+      },
+      {
+       "tile": "53,111",
+       "forwardHash": "3c894f7bab51",
+       "shuffledHash": "3c894f7bab51",
+       "identical": true
+      },
+      {
+       "tile": "50,112",
+       "forwardHash": "9c74f280487f",
+       "shuffledHash": "9c74f280487f",
+       "identical": true
+      },
+      {
+       "tile": "51,112",
+       "forwardHash": "89e27a5c6034",
+       "shuffledHash": "89e27a5c6034",
+       "identical": true
+      },
+      {
+       "tile": "52,112",
+       "forwardHash": "0499d2bb294f",
+       "shuffledHash": "0499d2bb294f",
+       "identical": true
+      },
+      {
+       "tile": "53,112",
+       "forwardHash": "75dc0154991c",
+       "shuffledHash": "75dc0154991c",
+       "identical": true
+      },
+      {
+       "tile": "50,113",
+       "forwardHash": "53536e449c9e",
+       "shuffledHash": "53536e449c9e",
+       "identical": true
+      },
+      {
+       "tile": "51,113",
+       "forwardHash": "3fe8d515eaca",
+       "shuffledHash": "3fe8d515eaca",
+       "identical": true
+      },
+      {
+       "tile": "52,113",
+       "forwardHash": "981490e3b084",
+       "shuffledHash": "981490e3b084",
+       "identical": true
+      },
+      {
+       "tile": "53,113",
+       "forwardHash": "95fcc8d76fc3",
+       "shuffledHash": "95fcc8d76fc3",
+       "identical": true
+      },
+      {
+       "tile": "50,114",
+       "forwardHash": "fc535c60bad9",
+       "shuffledHash": "fc535c60bad9",
+       "identical": true
+      },
+      {
+       "tile": "51,114",
+       "forwardHash": "82743795c574",
+       "shuffledHash": "82743795c574",
+       "identical": true
+      },
+      {
+       "tile": "52,114",
+       "forwardHash": "446a63f1770a",
+       "shuffledHash": "446a63f1770a",
+       "identical": true
+      },
+      {
+       "tile": "53,114",
+       "forwardHash": "0ff30c525e86",
+       "shuffledHash": "0ff30c525e86",
+       "identical": true
+      }
+     ],
+     "unionForwardHash": "941213d694f022facff79f304a39752547c512ee3c2afe4a8b6ce36838c7fe7d",
+     "unionShuffledHash": "941213d694f022facff79f304a39752547c512ee3c2afe4a8b6ce36838c7fe7d",
+     "unionIdentical": true
+    },
+    "independentSourceOfTruth": "the canonical serialization per tile + the union",
+    "whyNonCircular": "each tile is generated independently keyed on its tileKey; comparing both orders through the same serializer exposes any order dependence",
+    "failureCaseDetected": "none — order cannot change the result"
+   },
+   {
+    "id": "WORLD_VEG_EDGE_OWNERSHIP_NO_DUPLICATES",
+    "suite": "world_vegetation.test.mjs",
+    "name": "edge ownership: keys unique across the window, every u16 position STRICTLY inside its tile half-open box (no position claimable by two tiles), and a drop-and-regenerate cycle (the camera-return proof) reproduces the SAME set",
+    "status": "PASS",
+    "measured": {
+     "instances": 576,
+     "uniqueKeys": 576,
+     "keysUnique": true,
+     "allInsideTileBox": true,
+     "tileU16Span": 128,
+     "cameraReturn": {
+      "tile": "53,112",
+      "hashBefore": "75dc0154991ca207",
+      "hashAfterDropAndRegen": "75dc0154991ca207",
+      "identical": true
+     }
+    },
+    "independentSourceOfTruth": "the canonical serialization + the arithmetic bounds",
+    "whyNonCircular": "the half-open box check recomputes the tile bounds from the tile key; the duplicate check is a Set-vs-count comparison",
+    "failureCaseDetected": "none — ownership is by construction and survives unload/reload"
+   },
+   {
+    "id": "WORLD_VEG_CAP_5000",
+    "suite": "world_vegetation.test.mjs",
+    "name": "the 5000 visible-instance cap respected on a measured high-density case (profile 1 @100% over the 8x8 window): requested > cap -> rendered EXACTLY 5000, limited counted honestly; the requested count is stable (deterministic)",
+    "status": "PASS",
+    "measured": {
+     "requested": 6144,
+     "rendered": 5000,
+     "limited": 1144,
+     "cap": 5000,
+     "requestedRepeatStable": 6144,
+     "perTileCounts": [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+     ]
+    },
+    "independentSourceOfTruth": "the pure generator over the served profile-1 records",
+    "whyNonCircular": "the counts are recomputed tile-by-tile; the cap rule is min(requested, 5000) applied to the deterministic order",
+    "failureCaseDetected": "none — the cap limits the high-density case exactly"
+   },
+   {
+    "id": "WORLD_VEG_MODEL_IMPORT_SUPPORT",
+    "suite": "world_vegetation.test.mjs",
+    "name": "the model route payloads are bit-exact the physical container reads; the witness 457485 parses through the EXISTING qualified importer (16v/8t/texId 457490); the profile-0 support census: 8 textured + 2 honest-untextured (DDS outside the strict subset) + 0 parse-unsupported; a missing id is a loud 404 (never a substitute model)",
+    "status": "PASS",
+    "measured": {
+     "perModelWireChecks": [
+      {
+       "id": 436293,
+       "httpStatus": 200,
+       "servedBytes": 6640,
+       "physicalBytes": 6640,
+       "bitExact": true,
+       "entryName": "436293.nif",
+       "payloadSha": "031740c89c7cf6c3"
+      },
+      {
+       "id": 457485,
+       "httpStatus": 200,
+       "servedBytes": 2547,
+       "physicalBytes": 2547,
+       "bitExact": true,
+       "entryName": "457485.nif",
+       "payloadSha": "72479a7f4eebe934"
+      },
+      {
+       "id": 436300,
+       "httpStatus": 200,
+       "servedBytes": 83903,
+       "physicalBytes": 83903,
+       "bitExact": true,
+       "entryName": "436300.nif",
+       "payloadSha": "5ce680b408336514"
+      },
+      {
+       "id": 436223,
+       "httpStatus": 200,
+       "servedBytes": 71279,
+       "physicalBytes": 71279,
+       "bitExact": true,
+       "entryName": "436223.nif",
+       "payloadSha": "7d7d8d5f64e23bcd"
+      },
+      {
+       "id": 457699,
+       "httpStatus": 200,
+       "servedBytes": 142644,
+       "physicalBytes": 142644,
+       "bitExact": true,
+       "entryName": "457699.nif",
+       "payloadSha": "f1950f6c55848252"
+      },
+      {
+       "id": 457579,
+       "httpStatus": 200,
+       "servedBytes": 51831,
+       "physicalBytes": 51831,
+       "bitExact": true,
+       "entryName": "457579.nif",
+       "payloadSha": "d5ea4f85e732942d"
+      },
+      {
+       "id": 457523,
+       "httpStatus": 200,
+       "servedBytes": 12301,
+       "physicalBytes": 12301,
+       "bitExact": true,
+       "entryName": "457523.nif",
+       "payloadSha": "047fef1c728a8580"
+      },
+      {
+       "id": 457532,
+       "httpStatus": 200,
+       "servedBytes": 26611,
+       "physicalBytes": 26611,
+       "bitExact": true,
+       "entryName": "457532.nif",
+       "payloadSha": "f44eb1980585d30c"
+      },
+      {
+       "id": 166878,
+       "httpStatus": 200,
+       "servedBytes": 19474,
+       "physicalBytes": 19474,
+       "bitExact": true,
+       "entryName": "166878.nif",
+       "payloadSha": "2601df91d256ac85"
+      },
+      {
+       "id": 166897,
+       "httpStatus": 200,
+       "servedBytes": 7044,
+       "physicalBytes": 7044,
+       "bitExact": true,
+       "entryName": "166897.nif",
+       "payloadSha": "423d87f593ae236f"
+      }
+     ],
+     "wireBitExact": true,
+     "witness": {
+      "nifVersion": "10.1.0.0",
+      "blocks": 16,
+      "numVertices": 16,
+      "numTriangles": 8,
+      "textureId": 457490
+     },
+     "missing999999": {
+      "status": 404,
+      "error": "MODEL_ENTRY_NOT_FOUND"
+     },
+     "supportCounts": {
+      "distinctModels": 10,
+      "supported": 8,
+      "supportedUntextured": 2,
+      "unsupported": 0,
+      "atLeastOneSupportedModel": true
+     },
+     "untexturedReasons": [
+      {
+       "id": 166878,
+       "reason": "STRICT decode refused: [decodeModelTextureStrict] bpp 0 outside the strict model-texture subset {24, 32} — the payload f"
+      },
+      {
+       "id": 166897,
+       "reason": "STRICT decode refused: [decodeModelTextureStrict] bpp 0 outside the strict model-texture subset {24, 32} — the payload f"
+      }
+     ]
+    },
+    "independentSourceOfTruth": "the test-local lazy Models.bnt reader (own footer/dir walk + raw file reads) + the strict importer run in THIS process",
+    "whyNonCircular": "the wire payloads are compared against the physical container by code that imports NOTHING from the server; the witness numbers are the reader's own measured output",
+    "failureCaseDetected": "none — the chain holds bit-exactly with honest per-model statuses"
+   },
+   {
+    "id": "WORLD_VEG_MODEL_CACHE_IDENTITY",
+    "suite": "world_vegetation.test.mjs",
+    "name": "CAM-C3 model-cache mutants (wrong era / containerSha / entryName / tampered payload / wireVersion) REFUSED with named reasons through the PRODUCTION verifyModelCacheIdentity; clean PASSES; the REAL route double-fetch = HIT with identical bytes",
+    "status": "PASS",
+    "measured": {
+     "mutants": [
+      {
+       "id": "M1_WRONG_ERA",
+       "refused": true,
+       "reasons": [
+        "ERA_MISMATCH"
+       ],
+       "expected": [
+        "ERA_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M2_WRONG_CONTAINER_SHA",
+       "refused": true,
+       "reasons": [
+        "CONTAINER_SHA_MISMATCH"
+       ],
+       "expected": [
+        "CONTAINER_SHA_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M3_WRONG_ENTRY_NAME",
+       "refused": true,
+       "reasons": [
+        "ENTRY_NAME_MISMATCH"
+       ],
+       "expected": [
+        "ENTRY_NAME_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M5_WRONG_WIRE_VERSION",
+       "refused": true,
+       "reasons": [
+        "WIRE_VERSION_MISMATCH"
+       ],
+       "expected": [
+        "WIRE_VERSION_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M4_TAMPERED_PAYLOAD",
+       "refused": true,
+       "reasons": [
+        "PAYLOAD_SHA_MISMATCH"
+       ],
+       "expected": [
+        "PAYLOAD_SHA_MISMATCH"
+       ],
+       "ok": true
+      }
+     ],
+     "clean": {
+      "ok": true,
+      "reasons": []
+     },
+     "malformed": {
+      "ok": false,
+      "reasons": [
+       "CACHE_ENTRY_MALFORMED"
+      ]
+     },
+     "realRoute": {
+      "note": "a fresh model id (218757 — NOT fetched earlier in this suite) proves the MISS -> HIT cycle on the shared server",
+      "first": "MISS",
+      "second": "HIT",
+      "identicalBytes": true
+     }
+    },
+    "independentSourceOfTruth": "the exported production gate + the real HTTP route",
+    "whyNonCircular": "the mutants are constructed in-test and asserted BY NAMED REASON; a silent attach would fail",
+    "failureCaseDetected": "none — every identity violation is refused by name"
+   },
+   {
+    "id": "WORLD_VEG_RESOURCE_DISCIPLINE",
+    "suite": "world_vegetation.test.mjs",
+    "name": "unload/reload without resource duplication or loss (headless THREE census through the REAL routes): window A->B->A reuses payloads (no refetch) + the SAME texture object (identity), a profile change releases unreferenced models/textures (disposals measured) while referenced shared resources survive, counts return on profile return, toggle OFF->ON re-renders without refetch, per-instance transforms are REAL and distinct, dispose() empties the caches",
+    "status": "PASS",
+    "measured": {
+     "windowA": {
+      "requested": 4864,
+      "rendered": 4864,
+      "limited": 0,
+      "models": {
+       "withInstances": 4,
+       "supported": [
+        436293,
+        457485,
+        457579
+       ],
+       "untextured": [
+        {
+         "id": 166878,
+         "reason": "[world-vegetation] bpp 0 outside the strict model-texture subset {24, 32} — the payload fails LOUDLY (honest untextured; never a fallback texture)"
+        }
+       ],
+       "unsupported": [],
+       "nonVisualShapes": 9
+      }
+     },
+     "windowB": {
+      "requested": 4864,
+      "rendered": 4864
+     },
+     "windowAReturn": {
+      "requested": 4864,
+      "returnStable": true,
+      "noRefetchOnReturn": true,
+      "texIdentityReused": true
+     },
+     "profile5": {
+      "requested": 768,
+      "modelsWithInstances": [
+       166878,
+       166897,
+       457796
+      ],
+      "cacheOnlyReferenced": true,
+      "disposalsHappened": true,
+      "disposeCountersAfterProfileChange": {
+       "meshes": 35,
+       "geometries": 11,
+       "materials": 11,
+       "textures": 5,
+       "cacheEntries": 9
+      }
+     },
+     "profile0Return": {
+      "requested": 4864,
+      "countsRestored": true
+     },
+     "toggleCycle": {
+      "noRefetch": true,
+      "requested": 4864
+     },
+     "instancing": {
+      "meshesAreInstanced": true,
+      "instanceDistinct": true,
+      "meshCount": 0
+     },
+     "teardown": {
+      "beforeDispose": {
+       "cache": 4,
+       "textures": 3
+      },
+      "afterDispose": {
+       "cache": 0,
+       "textures": 0
+      }
+     },
+     "fetchCountersFinal": {
+      "modelPayloads": 9,
+      "texturePayloads": 6,
+      "climate": 2
+     }
+    },
+    "independentSourceOfTruth": "the fetch/identity/counter observations of the REAL module against the REAL routes (no synthetic payloads)",
+    "whyNonCircular": "object identity (===) for the shared texture cannot be faked by re-decoding; fetch counters measure the REAL HTTP surface; the disposal counters measure the actual THREE .dispose() calls",
+    "failureCaseDetected": "none — the discipline holds through every cycle"
+   },
+   {
+    "id": "WORLD_VEG_SERVER_LIFECYCLE",
+    "suite": "world_vegetation.test.mjs",
+    "name": "suite-owned world server lifecycle (pid 3768, port 8249; stop + port-freed proof; standing 8140/8161 never touched)",
+    "status": "PASS",
+    "measured": {
+     "startupLine": "world server http://127.0.0.1:8249/ pid=3768 READY",
+     "pid": 3768,
+     "port": 8249,
+     "stop": {
+      "killed": true,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "lifetimeMs": 3365,
+      "portFreed": true,
+      "freedAfterMs": 20
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none — the suite cleaned up its OWN process only"
+   },
+   {
+    "id": "WORLD_T9_GATE_PREDICATIVE_NEGATIVES",
+    "suite": "world_headless_load.test.mjs",
+    "name": "the imported FIXED gate rejects defective captures (spot negatives through the same production evaluateLoadGate)",
+    "status": "PASS",
+    "measured": [
+     {
+      "id": "WORLD_T9_GATE_NEG_STATUS_ERROR",
+      "gateResult": false,
+      "missing": [
+       "STATUS_READY"
+      ],
+      "expected": [
+       "STATUS_READY"
+      ],
+      "ok": true
+     },
+     {
+      "id": "WORLD_T9_GATE_NEG_NO_CANVAS",
+      "gateResult": false,
+      "missing": [
+       "CANVAS_PRESENT"
+      ],
+      "expected": [
+       "CANVAS_PRESENT"
+      ],
+      "ok": true
+     }
+    ],
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": null
+   },
+   {
+    "id": "WORLD_T9_LOAD_LAUNCHER",
+    "suite": "world_headless_load.test.mjs",
+    "name": "real headless-browser load — launcher page (5 panels, overview from the real index, entry button) — 5-conjunct gate (per-conjunct records) + page content markers",
+    "status": "PASS",
+    "measured": {
+     "url": "http://127.0.0.1:8207/launcher",
+     "exitCode": 0,
+     "elapsedMs": 2390,
+     "domBytes": 219691,
+     "gate": {
+      "passed": true,
+      "missing": [],
+      "conjuncts": {
+       "EXIT_CODE_ZERO": true,
+       "DOM_NONEMPTY": true,
+       "CANVAS_PRESENT": true,
+       "DIAGNOSTICS_PRESENT": true,
+       "STATUS_READY": true
+      },
+      "loadStatus": "READY"
+     },
+     "pageContentMarkers": {
+      "entryButtonLabelExact": true,
+      "eraLabel": true,
+      "denominator": true,
+      "coverageLine": true
+     },
+     "stderrExcerpt": ""
+    },
+    "independentSourceOfTruth": "the real browser DOM dump (Edge headless=new) — not an HTTP status or a unit test",
+    "whyNonCircular": "the dump is what the browser actually rendered/executed at capture time; markers are page-behavior facts (census line, adapter-units labels), not static HTML echoes",
+    "failureCaseDetected": "none — all five conjuncts hold and the page content markers are present"
+   },
+   {
+    "id": "WORLD_T9_LOAD_WORLD",
+    "suite": "world_headless_load.test.mjs",
+    "name": "real headless-browser load — world view (terrain from original u16 samples, 64-tile window, vegetation ON) — 5-conjunct gate (per-conjunct records) + page content markers",
+    "status": "PASS",
+    "measured": {
+     "url": "http://127.0.0.1:8207/world#tile=53,114&profile=0&seed=0&density=50&veg=1",
+     "exitCode": 0,
+     "elapsedMs": 9175,
+     "domBytes": 13116,
+     "gate": {
+      "passed": true,
+      "missing": [],
+      "conjuncts": {
+       "EXIT_CODE_ZERO": true,
+       "DOM_NONEMPTY": true,
+       "CANVAS_PRESENT": true,
+       "DIAGNOSTICS_PRESENT": true,
+       "STATUS_READY": true
+      },
+      "loadStatus": "READY"
+     },
+     "pageContentMarkers": {
+      "activeWindow64": true,
+      "adapterUnitsPosition": true,
+      "noOriginalXyzPositionClaim": true,
+      "rawU16Readout": true,
+      "vegetationCensus": true,
+      "vegetationMode": true,
+      "vegetationProfileSeed": true,
+      "vegetationP3Separate": true,
+      "vegetationThreeWaySeparation": true
+     },
+     "stderrExcerpt": "[34264:34268:1010/090809.213:ERROR:components\\edge_auth\\edge_auth_errors.cc:553] EDGE_IDENTITY: Image Fetch FAILED: Error: Primary Error: kTokenRequestFailed, Secondary Error: kOneAuthMessageOnly, Platform error: 1200, hex:4b0, Error string: InteractionRequired {\"Description\":\"(pii)\",\"Domain\":\"com.microsoft.oneauth\",\"ErrorCode\":\"1200\",\"Message\":\"The credential is invalid. The credential is invalid"
+    },
+    "independentSourceOfTruth": "the real browser DOM dump (Edge headless=new) — not an HTTP status or a unit test",
+    "whyNonCircular": "the dump is what the browser actually rendered/executed at capture time; markers are page-behavior facts (census line, adapter-units labels), not static HTML echoes",
+    "failureCaseDetected": "none — all five conjuncts hold and the page content markers are present"
+   },
+   {
+    "id": "WORLD_T9_SERVER_LIFECYCLE",
+    "suite": "world_headless_load.test.mjs",
+    "name": "suite-owned world server lifecycle (pid 22560, port 8207; stop + port-freed proof)",
+    "status": "PASS",
+    "measured": {
+     "startupLine": "world server http://127.0.0.1:8207/ pid=22560 READY",
+     "pid": 22560,
+     "port": 8207,
+     "stop": {
+      "killed": true,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "lifetimeMs": 14114,
+      "portFreed": true,
+      "freedAfterMs": 20
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none — the suite cleaned up its OWN process only"
+   }
+  ]
+ },
+ "etapD_materialsChain": {
+  "summary": "the proven chain TDF material record -> material id/name -> \"<id>.dat\" Textures.bnt entry -> the strict TGA2 decoder -> RGBA -> GPU splat -> visible terrain; the separate resolved/decoded/applied counters + the browser-observed state",
+  "relationEvidence": "id@+16 -> \"<id>.dat\" (engine-RE CONFIRMED: the 9.3.5 record parse/dispatch reads sub@+16 as the material TEXTURE id — M1_TSFS_BINARY_FORENSICS_20260906 iter015e/iter015f, consolidated iter030; EU935_WORLD_DATA_CENSUS_R1 GROUND_TEXTURES §3 \"Material-id -> texture chain CONFIRMED\" (probe05); re-verified on THIS RUN's sampled tiles: WORLD_MAT_CHAIN_RESOLVE measured every sampled material id resolved + wire bit-exact + decode subset OK)",
+  "gates": [
+   {
+    "id": "WORLD_MAT_MASK56_NEGATIVE",
+    "name": "named material record mask@record+56 verified on physical samples (production + independent walk); the wrong offset 52 as the negative control",
+    "status": "PASS",
+    "measured": {
+     "sampledTiles": 6,
+     "rawRecords": {
+      "total": 25,
+      "refusedAtWrong52": 25
+     },
+     "rleRecords": {
+      "total": 17,
+      "maskEqualsWrong52WithZeroExtra4": 13,
+      "differing": 0
+     },
+     "productionIndependentAgreement": true,
+     "note": "RAW records: region@52 = 260B -> production decodeMaskRegion REFUSES (not 256; RLE fails on raw content) — DISCRIMINATING. RLE records with extra4=[0,0,0,0] (measured): region@52 = region56+4 leading zero-count pairs -> the expanded mask equals mask56 (degenerate for VALUE; the region LENGTHS differ: measured). Structure: a 256-B mask ending at p+4+size can only start at p+56 (exact consumption fails at 52).",
+     "perTile": [
+      {
+       "name": "00350072.tdf",
+       "namedRecords": 9,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 20281,
+         "name": "Grass01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15877,
+         "name": "Rock03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 36740,
+         "name": "Rock03d",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 14014,
+         "name": "Rock03b",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 34587,
+         "name": "Rock06",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 37944,
+         "name": "Test3",
+         "enc": "raw",
+         "extra4": [
+          42,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 22673,
+         "name": "Rock01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 215829,
+         "name": "Lavagore01",
+         "enc": "rle",
+         "extra4": [
+          136,
+          79,
+          206,
+          13
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "0032006f.tdf",
+       "namedRecords": 12,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 20281,
+         "name": "Grass01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15877,
+         "name": "Rock03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 14014,
+         "name": "Rock03b",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15858,
+         "name": "Grass16",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 34587,
+         "name": "Rock06",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 37944,
+         "name": "Test3",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 22673,
+         "name": "Rock01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 214869,
+         "name": "Lava01",
+         "enc": "raw",
+         "extra4": [
+          70,
+          218,
+          0,
+          62
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 215829,
+         "name": "Lavagore01",
+         "enc": "rle",
+         "extra4": [
+          255,
+          255,
+          255,
+          255
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 214875,
+         "name": "Lava05",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 215830,
+         "name": "Lavagore02",
+         "enc": "raw",
+         "extra4": [
+          90,
+          140,
+          62,
+          62
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "00390076.tdf",
+       "namedRecords": 8,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 20281,
+         "name": "Grass01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15877,
+         "name": "Rock03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 14014,
+         "name": "Rock03b",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 18084,
+         "name": "Grass28",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 36676,
+         "name": "Grass27",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 214869,
+         "name": "Lava01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 215830,
+         "name": "Lavagore02",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "006e0076.tdf",
+       "namedRecords": 11,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 20281,
+         "name": "Grass01",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 15877,
+         "name": "Rock03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 45001,
+         "name": "test 2",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 25591,
+         "name": "Grasssh_2",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 23622,
+         "name": "Grass05",
+         "enc": "raw",
+         "extra4": [
+          80,
+          73,
+          73,
+          76
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 20943,
+         "name": "Sand01",
+         "enc": "rle",
+         "extra4": [
+          248,
+          248,
+          248,
+          248
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 25568,
+         "name": "Alien03",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        },
+        {
+         "id": 88103,
+         "name": "Grassmix13",
+         "enc": "rle",
+         "extra4": [
+          21,
+          7,
+          223,
+          6
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 160350,
+         "name": "ShieldT",
+         "enc": "raw",
+         "extra4": [
+          1,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        },
+        {
+         "id": 203773,
+         "name": "Groundneedle_01",
+         "enc": "rle",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": true
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "00000000.tdf",
+       "namedRecords": 1,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      },
+      {
+       "name": "00db00eb.tdf",
+       "namedRecords": 1,
+       "masks": [
+        {
+         "id": 13382,
+         "name": "Stone04",
+         "enc": "raw",
+         "extra4": [
+          0,
+          0,
+          0,
+          0
+         ],
+         "mask52Equal": null
+        }
+       ],
+       "prodAgrees": true
+      }
+     ]
+    },
+    "independentSourceOfTruth": "test-local minimal tail walker (own DataView, own RLE expansion, own stride walk)",
+    "whyNonCircular": "the masks and refusals are recomputed from the physical file bytes by code that does not import the production decoder",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_WIRE_BITEXACT",
+    "name": "the served RAW 16x16 masks are bit-exact the physical tail bytes (independent reader); sums > 255 preserved UNNORMALIZED",
+    "status": "PASS",
+    "measured": {
+     "sampledTiles": 6,
+     "recordsChecked": 42,
+     "weightBytesChecked": 10752,
+     "perCellLayerSums": {
+      "min": 255,
+      "max": 1431,
+      "cellsAbove255": 1024,
+      "totalCells": 1536
+     },
+     "note": "layer sums > 255 are ORIGINAL DATA (never normalized — measured, not asserted)",
+     "perTile": [
+      {
+       "name": "00350072.tdf",
+       "servedMaterials": 9,
+       "independentNamed": 9,
+       "tileOk": true
+      },
+      {
+       "name": "0032006f.tdf",
+       "servedMaterials": 12,
+       "independentNamed": 12,
+       "tileOk": true
+      },
+      {
+       "name": "00390076.tdf",
+       "servedMaterials": 8,
+       "independentNamed": 8,
+       "tileOk": true
+      },
+      {
+       "name": "006e0076.tdf",
+       "servedMaterials": 11,
+       "independentNamed": 11,
+       "tileOk": true
+      },
+      {
+       "name": "00000000.tdf",
+       "servedMaterials": 1,
+       "independentNamed": 1,
+       "tileOk": true
+      },
+      {
+       "name": "00db00eb.tdf",
+       "servedMaterials": 1,
+       "independentNamed": 1,
+       "tileOk": true
+      }
+     ]
+    },
+    "independentSourceOfTruth": "test-local minimal reader + own RLE expansion",
+    "whyNonCircular": "the wire payload is compared to the physical container bytes read by independent code",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_CHAIN_RESOLVE",
+    "name": "every sampled material id resolves \"<id>.dat\" (server == independent index parse); texture wire bytes bit-exact the independent file reads; strict decodeTga2 subset holds; missing id = loud 404; double-fetch = HIT",
+    "status": "PASS",
+    "measured": {
+     "distinctMaterialIds": 23,
+     "allResolved": true,
+     "wireBitExact": true,
+     "decodeSubsetOk": true,
+     "missingIdRefused404": true,
+     "doubleFetchCacheHit": true,
+     "independentIndex": {
+      "parsedEntries": 8381,
+      "countField": 8381
+     },
+     "chainSamples": [
+      {
+       "id": 13382,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 20281,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 15877,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 36740,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 14014,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 34587,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 37944,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 22673,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 215829,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 15858,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 214869,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 214875,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 215830,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 18084,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 36676,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 45001,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 25591,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 23622,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 20943,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 25568,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 88103,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 160350,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      },
+      {
+       "id": 203773,
+       "bytes": 196652,
+       "wireBitExact": true,
+       "decode": "OK 256x256x24"
+      }
+     ],
+     "relationEvidence": "id@+16 -> \"<id>.dat\" (engine RE: 9.3.5 record parse reads sub@+16 as the material TEXTURE id — M1_TSFS iter015e/f, iter030, EU935 census GROUND_TEXTURES §3 CONFIRMED; re-measured per sample HERE)"
+    },
+    "independentSourceOfTruth": "test-local lazy Textures.bnt index parse + raw file reads",
+    "whyNonCircular": "the wire payloads/metadata are compared to the physical container read by independent code",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_ERA_REFUSAL",
+    "name": "wrong-era labels REFUSED through the REAL routes (CD_JAN_2003/CD_2003/JUL_2003 -> 403); CAM-C3 identity mutants REFUSED through the PRODUCTION verify functions; clean passes the same gate",
+    "status": "PASS",
+    "measured": {
+     "eraChecks": [
+      {
+       "era": "CD_JAN_2003",
+       "textureStatus": 403,
+       "textureError": "ERA_REFUSED_WRONG_ERA",
+       "materialsStatus": 403,
+       "materialsError": "ERA_REFUSED_WRONG_ERA"
+      },
+      {
+       "era": "CD_2003",
+       "textureStatus": 403,
+       "textureError": "ERA_REFUSED_WRONG_ERA",
+       "materialsStatus": 403,
+       "materialsError": "ERA_REFUSED_WRONG_ERA"
+      },
+      {
+       "era": "JUL_2003",
+       "textureStatus": 403,
+       "textureError": "ERA_REFUSED_WRONG_ERA",
+       "materialsStatus": 403,
+       "materialsError": "ERA_REFUSED_WRONG_ERA"
+      }
+     ],
+     "noEraDefaultStatus": 200,
+     "mutants": {
+      "texWrongEra": {
+       "ok": false,
+       "reasons": [
+        "ERA_MISMATCH"
+       ]
+      },
+      "texWrongContainerSha": {
+       "ok": false,
+       "reasons": [
+        "CONTAINER_SHA_MISMATCH"
+       ]
+      },
+      "texWrongEntryName": {
+       "ok": false,
+       "reasons": [
+        "ENTRY_NAME_MISMATCH"
+       ]
+      },
+      "texTamperedPayload": {
+       "ok": false,
+       "reasons": [
+        "PAYLOAD_SHA_MISMATCH"
+       ]
+      },
+      "texWrongWireVersion": {
+       "ok": false,
+       "reasons": [
+        "WIRE_VERSION_MISMATCH"
+       ]
+      },
+      "texClean": {
+       "ok": true,
+       "reasons": []
+      },
+      "matWrongEra": {
+       "ok": false,
+       "reasons": [
+        "ERA_MISMATCH"
+       ]
+      },
+      "matWrongContainerSha": {
+       "ok": false,
+       "reasons": [
+        "CONTAINER_SHA_MISMATCH"
+       ]
+      },
+      "matWrongEntryName": {
+       "ok": false,
+       "reasons": [
+        "ENTRY_NAME_MISMATCH"
+       ]
+      },
+      "matTamperedTail": {
+       "ok": false,
+       "reasons": [
+        "PAYLOAD_SHA_MISMATCH"
+       ]
+      },
+      "matWrongWireVersion": {
+       "ok": false,
+       "reasons": [
+        "WIRE_VERSION_MISMATCH"
+       ]
+      },
+      "matClean": {
+       "ok": true,
+       "reasons": []
+      }
+     }
+    },
+    "independentSourceOfTruth": "raw sockets against the running server + the exported production verify functions",
+    "whyNonCircular": "the mutants are constructed in-test and the refusal reasons are asserted by name",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_SPLAT_RAW_WEIGHTS",
+    "name": "the REAL spawn-window materials through the pure splat builder: RAW served weights bit-exact in the GPU-bound textures (slot order = record order per cell), slots reference resolved textures only, active-layer histogram agrees with an independent count",
+    "status": "PASS",
+    "measured": {
+     "windowOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "tilesFetched": 64,
+     "cellsChecked": 16384,
+     "weightSlotsChecked": 113544,
+     "weightsBitExact": true,
+     "slotsConsistent": true,
+     "histogramAgrees": true,
+     "builderCensus": {
+      "layersTotal": 583,
+      "resolvedLayers": 583,
+      "appliedLayers": 113544,
+      "distinctTextures": 23,
+      "unresolved": 0,
+      "duplicates": 0,
+      "cappedCells": 0,
+      "cellsWithNoActiveLayers": 0,
+      "activeLayersHist": {
+       "3": 23,
+       "4": 231,
+       "5": 2456,
+       "6": 4295,
+       "7": 3683,
+       "8": 3467,
+       "9": 1476,
+       "10": 596,
+       "11": 144,
+       "12": 13
+      }
+     },
+     "preset": {
+      "label": "RENDER_RECONSTRUCTION",
+      "schemaVersion": "world-splat-v1",
+      "blendForm": "sequential lerp per layer by RAW mask/255 in RECORD ORDER (base first) — era-evidenced FORM (9.3.5 LOD vertex-color bake lerp(vertexColor, materialTexture(u,v), mask/255), iter030); applied here to albedo",
+      "albedoRole": "RECONSTRUCTION: the 9.3.5 ground albedo was the climate palette pipeline (base+factor+detail; its per-location inputs 432502/459344 are MISSING locally) — the engine used the material textures for the vertex tint bake, NOT the base albedo",
+      "uv": "world-space GLOBAL uv = worldPos.xz / 32 m (u along +X, v along +Z/south; no per-tile or per-window reset); the repeat value is a RECONSTRUCTION choice (the era-evidenced detail-texture density is 32/32/16 world units — iter024 — applied to material textures BY ANALOGY, not as a pinned material repeat)",
+      "rowOrder": "decodeTga2 IMAGE order (row 0 = visual TOP; the TGA bottom-up storage is flipped ONCE by the decoder) + THREE.DataTexture flipY=false — v=0 samples the image TOP; the A32 climate-palette FILE-row convention (decodeTga2A32) is a DIFFERENT decoder/convention and is not used here",
+      "cellSampling": "nearest 16x16 material cell per tile (2x2 samples = 4x4 m per cell; mask row = grid-y, col = grid-x, the same axes as the height grid); flat within a cell (the 9.3.5 \"edge-extended at load\" mask semantics are NOT pinned — nearest is the documented choice)",
+      "colorSpace": "SRGB_PASSTHROUGH — the original TGA bytes are display-referred; the GPU blend happens on the raw values (no sRGB decode), matching the historical fixed-function D3D8 framebuffer-space blending; the shader outputs sRGB directly (no output colorspace chunk)",
+      "caps": "MAX_LAYERS_PER_CELL=16 / MAX_TEXTURE_SLOTS=48 — cells/tiles exceeding a cap keep the FIRST layers in record order and the dropped count is REPORTED (a render approximation, labeled; the served raw weights are unchanged)",
+      "unresolved": "a material id without a resolved <id>.dat entry (or a failed strict decode) is SKIPPED with an explicit diagnostic — never a fallback texture, never cross-era substitution"
+     }
+    },
+    "independentSourceOfTruth": "test-local grid walk over the SERVED masks (the same wire payload the browser consumes)",
+    "whyNonCircular": "the re-walk recomputes the expected slot weights from the wire JSON, independently of the builder",
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_SERVER_LIFECYCLE",
+    "name": "suite-owned world server lifecycle (pid 28992, port 8569; stop + port-freed proof)",
+    "status": "PASS",
+    "measured": {
+     "startupLine": "world server http://127.0.0.1:8569/ pid=28992 READY",
+     "pid": 28992,
+     "port": 8569,
+     "stop": {
+      "killed": true,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "lifetimeMs": 2877,
+      "portFreed": true,
+      "freedAfterMs": 22
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none — the suite cleaned up its OWN process only"
+   },
+   {
+    "id": "WORLD_MAT_MALFORMED_CONTROLLED",
+    "name": "malformed material tails and out-of-subset TGA payloads FAIL LOUDLY through the production decoders (no mask, no rgba, no fallback)",
+    "status": "PASS",
+    "measured": {
+     "tailCases": [
+      {
+       "case": "rle_overrun_named_record",
+       "threw": true,
+       "message": "[TdfMaterialTail] named dim=16 record \"Stone04\" mask region not RAW/RLE (len 6)"
+      },
+      {
+       "case": "odd_region_named_record",
+       "threw": true,
+       "message": "[TdfMaterialTail] named dim=16 record \"Stone04\" mask region not RAW/RLE (len 3)"
+      },
+      {
+       "case": "implausible_size",
+       "threw": true,
+       "message": "[TdfMaterialTail] implausible size 4294967280 at tail+0 (remaining 64)"
+      },
+      {
+       "case": "residual_bytes",
+       "threw": true,
+       "message": "[TdfMaterialTail] residual 3B at tail+0 (< 4B size field)"
+      }
+     ],
+     "cleanNamedRecordDecodes": true,
+     "tgaCases": [
+      {
+       "case": "tga_32bpp_out_of_subset",
+       "threw": true,
+       "message": "[TgaDecoder] bpp 32 unsupported (CONFIRMED subset: 24)"
+      },
+      {
+       "case": "tga_footer_missing",
+       "threw": true,
+       "message": "[TgaDecoder] TGA2 footer signature missing (TRUEVISION-XFILE.\\0)"
+      },
+      {
+       "case": "tga_truncated",
+       "threw": true,
+       "message": "[TgaDecoder] payload too small for TGA2 (40)"
+      }
+     ],
+     "cleanPatternDecodes": true
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none — every malformed case threw, every clean case decoded"
+   },
+   {
+    "id": "WORLD_MAT_UNRESOLVED_BINDING",
+    "name": "synthetic unresolved material->texture bindings: layers SKIPPED + listed (explicit diagnostic), no texture slot, resolved layers still applied; all-resolved grid has NO diagnostic",
+    "status": "PASS",
+    "measured": {
+     "unresolvedListed": true,
+     "noSlotForUnresolved": true,
+     "resolvedStillApplied": true,
+     "diagMode": true,
+     "allResolvedGridClean": true,
+     "decodeFailureSkipped": true,
+     "unresolvedSample": [
+      {
+       "tile": "0/0",
+       "id": 999999,
+       "name": "GhostMat",
+       "reason": "SYNTHETIC missing relation (no <id>.dat entry) — diagnostic"
+      }
+     ],
+     "badGridCensus": {
+      "layersTotal": 129,
+      "resolvedLayers": 128,
+      "appliedLayers": 32768
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none"
+   },
+   {
+    "id": "WORLD_MAT_UV_FLIP_CONTROL",
+    "name": "UV/flip controlled with a PATTERN and a REAL texture: decodeTga2 IMAGE order (row 0 = visual top) distinguished from the A32 FILE-row convention; the documented GPU sampling (flipY=false, v=0 -> top) consistent on both; the world-uv formula recorded",
+    "status": "PASS",
+    "measured": {
+     "patternImageRow0": [
+      150,
+      160,
+      130
+     ],
+     "patternFileRow0A32": [
+      90,
+      250,
+      10
+     ],
+     "conventionsDistinguished": true,
+     "gpuSamplingConsistent": true,
+     "realTexture": {
+      "id": 13382,
+      "topLeft": [
+       101,
+       90,
+       73
+      ],
+      "bottomRight": [
+       101,
+       90,
+       73
+      ],
+      "expected": {
+       "tl": [
+        101,
+        90,
+        73
+       ],
+       "br": [
+        101,
+        90,
+        73
+       ]
+      },
+      "consistent": true
+     },
+     "worldUv": {
+      "input": [
+       64,
+       128,
+       32
+      ],
+      "output": [
+       2,
+       4
+      ],
+      "ok": true
+     },
+     "preset": {
+      "rowOrder": "decodeTga2 IMAGE order (row 0 = visual TOP; the TGA bottom-up storage is flipped ONCE by the decoder) + THREE.DataTexture flipY=false — v=0 samples the image TOP; the A32 climate-palette FILE-row convention (decodeTga2A32) is a DIFFERENT decoder/convention and is not used here",
+      "uv": "world-space GLOBAL uv = worldPos.xz / 32 m (u along +X, v along +Z/south; no per-tile or per-window reset); the repeat value is a RECONSTRUCTION choice (the era-evidenced detail-texture density is 32/32/16 world units — iter024 — applied to material textures BY ANALOGY, not as a pinned material repeat)",
+      "colorSpace": "SRGB_PASSTHROUGH — the original TGA bytes are display-referred; the GPU blend happens on the raw values (no sRGB decode), matching the historical fixed-function D3D8 framebuffer-space blending; the shader outputs sRGB directly (no output colorspace chunk)"
+     }
+    },
+    "independentSourceOfTruth": "the synthetic pattern payload (distinct per-row colors, built in-test) + the real Stone04 payload read independently",
+    "whyNonCircular": "the expected row/texel values come from the constructed storage order, not from the decoder output",
+    "failureCaseDetected": "none"
+   }
+  ],
+  "counters": {
+   "note": "resolved = named material layers whose id resolved a \"<id>.dat\" entry; decoded = distinct texture payloads fetched + decoded through the strict decodeTga2; applied = per-cell layer slots actually blended in the GPU splat; browser-observed = the real-browser DOM census + the PIXEL on/off toggle gate",
+   "spawnWindowProbe": {
+    "origin": [
+     50,
+     111
+    ],
+    "tiles": 64,
+    "namedLayers": 583,
+    "distinctMaterialIds": 23,
+    "activeLayersPerCellHistogram": {
+     "3": 23,
+     "4": 231,
+     "5": 2456,
+     "6": 4295,
+     "7": 3683,
+     "8": 3467,
+     "9": 1476,
+     "10": 596,
+     "11": 144,
+     "12": 13
+    }
+   },
+   "browserFinalWindow": {
+    "origin": [
+     53,
+     114
+    ],
+    "source": "raw/WORLD/WORLD_DOM_DUMP_WORLD.html (real headless Edge DOM)",
+    "resolvedLayers": 615,
+    "layersTotal": 615,
+    "texturesDecoded": 28,
+    "layerSlotsApplied": 114019,
+    "unresolvedBindings": 0,
+    "windowRebuildsObserved": 2
+   },
+   "unresolvedBindings": "NONE measured in the sampled windows (WORLD_MAT_CHAIN_RESOLVE allResolved=true; the missing-id control 999999999 measured 404 TEXTURE_ENTRY_NOT_FOUND — the diagnostic path is proven synthetic in WORLD_MAT_UNRESOLVED_BINDING)"
+  },
+  "renderPreset": "RENDER_RECONSTRUCTION (compat/world-splat.js RENDER_RECONSTRUCTION_PRESET — the single source of truth, surfaced verbatim in the /world evidence panel): sequential lerp per layer by RAW mask/255 in RECORD ORDER (era-evidenced blend FORM — the 9.3.5 LOD vertex-color bake lerp(vertexColor, materialTexture(u,v), mask/255), iter030); the ALBEDO ROLE, the 32 m UV repeat and the nearest-cell sampling are labeled reconstruction choices; SRGB passthrough; caps 16 layers/cell + 48 texture slots with counted overflow; raw weights NEVER normalized"
+ },
+ "etapE_vegetation": {
+  "summary": "the deterministic RECONSTRUCTION_PREVIEW vegetation: ORIGINAL_CLIMATE_RECORDS (the strict .vcl decode) + the RECOVERED byte-locked PEFoliageCore chain (imported UNTOUCHED) + the DOCUMENTED LAB_SEED wrapper (PEFoliageLabSeed — the [P-CELLSTREAM] reconstruction stand-in) + the ORIGINAL same-era models through the EXISTING qualified importer with their original textures where the binding resolves; the 5000 visible-instance cap with honest requested/rendered/limited counts; VEGETATION_MODE = RECONSTRUCTION_PREVIEW",
+  "threeWaySeparation": "ORIGINAL_CLIMATE_RECORDS (strict .vcl decode; 25.vcl UNSUPPORTED — never comma-converted) | RECOVERED_RNG_ARITHMETIC (the untouched byte-locked PEFoliageCore chain) | INSTANCE_DISTRIBUTION (the documented PEFoliageLabSeed wrapper — LAB_SEED-keyed [P-CELLSTREAM] stand-in, reconstruction-only)",
+  "gates": [
+   {
+    "id": "WORLD_VEG_VCL_STRICT_25",
+    "name": "25.vcl stays controlled UNSUPPORTED through the REAL route (strict decoder — comma tokens never converted; records asserted NULL by absence)",
+    "status": "PASS",
+    "measured": {
+     "profile25": {
+      "ok": false,
+      "status": "UNSUPPORTED",
+      "recordCount": 0,
+      "recordsNull": true,
+      "errorExcerpt": "[VegetationClimateDecoder] non-numeric token \"0,2\" at record 9 col 1 — LOUD (the engine stream would fail here too)",
+      "provenanceNote": "the strict VegetationClimateDecoder refuses this profile (comma tokens at record 9 col 1); controlled UNSUPPORTED — never comma-converted"
+     },
+     "profile0": {
+      "ok": true,
+      "status": "DECODED",
+      "recordCount": 12,
+      "allRecords12Value": true
+     }
+    },
+    "independentSourceOfTruth": "the raw HTTP payloads (no client normalization)",
+    "whyNonCircular": "UNSUPPORTED is asserted BY ABSENCE (records === null) — a fabricated-records regression would fail the null check",
+    "failureCaseDetected": "none — the strict refusal is intact and profile 0 decodes 12x12-value records"
+   },
+   {
+    "id": "WORLD_VEG_DEFAULT_PROFILE_MEASURED",
+    "name": "the default profile (0) is chosen MEASURABLY: DECODED + non-empty records + >=1 supported same-era model (the witness 457485 SUPPORTED with its texture chain resolved); never a historical-biome claim",
+    "status": "PASS",
+    "measured": {
+     "defaultProfile": {
+      "index": 0,
+      "status": "DECODED",
+      "recordCount": 12,
+      "recordsNonEmpty": true,
+      "distinctModels": 10,
+      "measuredJustification": "MEASURED CHOICE (never \"the historical biome of this place\"): profile 0 is DECODED by the strict VegetationClimateDecoder with 12 non-empty records, and its model set contains 457485 — the NIF whose parse chain the EXISTING qualified importer (NifModelReader) was cross-validated BIT-EXACTLY against the R61 oracle (iter037) — plus 9 further same-era PCG_9_3_5 Models.bnt models measured below through the same importer without widening any guard",
+      "climateProvenance": {
+       "era": "PCG_9_3_5",
+       "container": "VegetationClimates/VegetationClimates.bnt",
+       "entry": "0.vcl",
+       "physicalSource": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\VegetationClimates\\VegetationClimates.bnt",
+       "offset": 0,
+       "decoderVersion": "pesource-m1-v1+vcl-v1",
+       "evidenceStatus": "CONFIRMED",
+       "extra": {
+        "containerFormat": "BNT2",
+        "packedSize": 583,
+        "decompressedSize": 583,
+        "recordCount": 12,
+        "hashVerified": true,
+        "jul2003ByteIdentity": "VegetationClimates.bnt byte-identical in all 3 corpus copies (iter032_vcl_columns.json source census); the 2003 PE2 binary has NO vegetation loader (iter017 negative) — the loader is 9.3.5-era, era-labeled"
+       }
+      }
+     },
+     "supportCounts": {
+      "distinctModels": 10,
+      "supported": 8,
+      "supportedUntextured": 2,
+      "unsupported": 0,
+      "atLeastOneSupportedModel": true
+     },
+     "witness457485": {
+      "status": "SUPPORTED",
+      "textureId": 457490,
+      "textures": [
+       {
+        "textureId": 457490,
+        "resolved": true,
+        "bytes": 262188,
+        "width": 256,
+        "height": 256,
+        "bpp": 32,
+        "decoder": "decodeTga2A32Image (TGA2 A32 IMAGE order — the model-witness UV convention, row 0 = visual TOP)"
+       }
+      ]
+     },
+     "perModelStatuses": [
+      {
+       "modelId": 436293,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 457485,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 436300,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 436223,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 457699,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 457579,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 457523,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 2
+      },
+      {
+       "modelId": 457532,
+       "status": "SUPPORTED",
+       "visualShapes": 1,
+       "shapesTotal": 1
+      },
+      {
+       "modelId": 166878,
+       "status": "SUPPORTED_UNTEXTURED",
+       "visualShapes": 3,
+       "shapesTotal": 12
+      },
+      {
+       "modelId": 166897,
+       "status": "SUPPORTED_UNTEXTURED",
+       "visualShapes": 1,
+       "shapesTotal": 4
+      }
+     ],
+     "p3": 0,
+     "p3Note": "[P-RNG-P3] the p3 seed input is UNVERIFIED and stays 0 — shown SEPARATELY; it is NEVER the LAB_SEED and never claimed historical",
+     "cap": 5000
+    },
+    "independentSourceOfTruth": "the server-side census through LazyModelArchive/LazyTextureArchive + parseWitnessModel + decodeModelTextureStrict (the same production modules the browser uses)",
+    "whyNonCircular": "the justification is a MEASURED outcome (per-model parse + strict decode), not a profile label; the justification text forbids the historical-biome claim",
+    "failureCaseDetected": "none — profile 0 satisfies every preregistered criterion with measured evidence"
+   },
+   {
+    "id": "WORLD_VEG_CORE_UNTOUCHED",
+    "name": "PEFoliageCore + NifModelReader + VegetationClimateDecoder + TgaDecoder are byte-identical to HEAD and the byte-locked arithmetic matches an INDEPENDENT formula reimplementation (seed hash / LCG / f32 lerp / f32 scale on measured vectors)",
+    "status": "PASS",
+    "measured": {
+     "files": [
+      {
+       "file": "src/peworld/PEFoliageCore.js",
+       "workingTreeSha256": "300be9137cc1d52c095a0ebecc3741c60041f77ab11eeb0dc100121bea62692f",
+       "headSha256": "300be9137cc1d52c095a0ebecc3741c60041f77ab11eeb0dc100121bea62692f",
+       "identical": true
+      },
+      {
+       "file": "src/pesource/NifModelReader.js",
+       "workingTreeSha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359",
+       "headSha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359",
+       "identical": true
+      },
+      {
+       "file": "src/pesource/VegetationClimateDecoder.js",
+       "workingTreeSha256": "8dbce904f7d9a2edf72af70c3854a4a24f50b1dc198d22654fdc7a6f9daa6015",
+       "headSha256": "8dbce904f7d9a2edf72af70c3854a4a24f50b1dc198d22654fdc7a6f9daa6015",
+       "identical": true
+      },
+      {
+       "file": "src/pesource/TgaDecoder.js",
+       "workingTreeSha256": "4b6b4baa0fd1529bc876cf915a4078e7b0bae951411b572f78686d788caf6760",
+       "headSha256": "4b6b4baa0fd1529bc876cf915a4078e7b0bae951411b572f78686d788caf6760",
+       "identical": true
+      }
+     ],
+     "arithmeticVectors": [
+      {
+       "p4": 100,
+       "p5": 200,
+       "state0": 1416524993,
+       "value": 0.9385204315185547,
+       "scale": 0.00007332190580200404,
+       "expState0": 1416524993,
+       "expValue": 0.9385204315185547,
+       "expScale": 0.00007332190580200404,
+       "ok": true
+      },
+      {
+       "p4": 4096,
+       "p5": 8191,
+       "state0": 3895538769,
+       "value": 1.447618007659912,
+       "scale": 0.00011309515684843063,
+       "expState0": 3895538769,
+       "expValue": 1.447618007659912,
+       "expScale": 0.00011309515684843063,
+       "ok": true
+      },
+      {
+       "p4": 30000,
+       "p5": 60000,
+       "state0": 2718003009,
+       "value": 0.823809027671814,
+       "scale": 0.00006436007970478386,
+       "expState0": 2718003009,
+       "expValue": 0.823809027671814,
+       "expScale": 0.00006436007970478386,
+       "ok": true
+      },
+      {
+       "p4": 7,
+       "p5": 13,
+       "state0": 1123758705,
+       "value": 0.5929288864135742,
+       "scale": 0.00004632256968761794,
+       "expState0": 1123758705,
+       "expValue": 0.5929288864135742,
+       "expScale": 0.00004632256968761794,
+       "ok": true
+      }
+     ],
+     "nodeDivisorOk": true,
+     "nodePosDivisor": 65535
+    },
+    "independentSourceOfTruth": "git HEAD blobs + the documented formulas re-implemented in THIS test (not the module under test)",
+    "whyNonCircular": "a byte edit would break the blob comparison; an arithmetic regression would break the independent-formula vectors",
+    "failureCaseDetected": "none — the recovered chain is untouched and reproduces its documented formulas"
+   },
+   {
+    "id": "WORLD_VEG_REPEAT_SEED_DETERMINISM",
+    "name": "repeat-seed determinism: the SAME (records+LAB_SEED+tile+density+calibration) -> the IDENTICAL instance-set hash; a CHANGED seed -> a DIFFERENT hash (a real placement change)",
+    "status": "PASS",
+    "measured": {
+     "labSeed0": {
+      "hash": "5c0dc551300494e1d6587f065c5f973b466713a79b9187697eecd61e143bfd55",
+      "instances": 36
+     },
+     "labSeed0Repeat": {
+      "hash": "5c0dc551300494e1d6587f065c5f973b466713a79b9187697eecd61e143bfd55"
+     },
+     "labSeed1": {
+      "hash": "25c5a9b87280a90fc1512725b38edcb60bce3a9d8a5d6f475c748eabddf50d4f",
+      "instances": 36
+     },
+     "hashesIdentical": true,
+     "seedsDiffer": true,
+     "scalesInLerpBand": true
+    },
+    "independentSourceOfTruth": "the canonical serialization of every instance (no sampling, no subset)",
+    "whyNonCircular": "identical hashes across two INDEPENDENT calls prove the generator is pure; a different seed changing the hash proves LAB_SEED influences the actual placement (not a UI label)",
+    "failureCaseDetected": "none — repeat-seed identical, changed-seed different"
+   },
+   {
+    "id": "WORLD_VEG_STREAMING_ORDER_INVARIANCE",
+    "name": "streaming-order invariance: 16 tiles generated in TWO different orders -> identical per-tile sets AND identical union (the load order cannot change any instance)",
+    "status": "PASS",
+    "measured": {
+     "tiles": 16,
+     "perTileCompare": [
+      {
+       "tile": "50,111",
+       "forwardHash": "2d69490d2862",
+       "shuffledHash": "2d69490d2862",
+       "identical": true
+      },
+      {
+       "tile": "51,111",
+       "forwardHash": "f891c96802c7",
+       "shuffledHash": "f891c96802c7",
+       "identical": true
+      },
+      {
+       "tile": "52,111",
+       "forwardHash": "7ef7cc6ea41e",
+       "shuffledHash": "7ef7cc6ea41e",
+       "identical": true
+      },
+      {
+       "tile": "53,111",
+       "forwardHash": "3c894f7bab51",
+       "shuffledHash": "3c894f7bab51",
+       "identical": true
+      },
+      {
+       "tile": "50,112",
+       "forwardHash": "9c74f280487f",
+       "shuffledHash": "9c74f280487f",
+       "identical": true
+      },
+      {
+       "tile": "51,112",
+       "forwardHash": "89e27a5c6034",
+       "shuffledHash": "89e27a5c6034",
+       "identical": true
+      },
+      {
+       "tile": "52,112",
+       "forwardHash": "0499d2bb294f",
+       "shuffledHash": "0499d2bb294f",
+       "identical": true
+      },
+      {
+       "tile": "53,112",
+       "forwardHash": "75dc0154991c",
+       "shuffledHash": "75dc0154991c",
+       "identical": true
+      },
+      {
+       "tile": "50,113",
+       "forwardHash": "53536e449c9e",
+       "shuffledHash": "53536e449c9e",
+       "identical": true
+      },
+      {
+       "tile": "51,113",
+       "forwardHash": "3fe8d515eaca",
+       "shuffledHash": "3fe8d515eaca",
+       "identical": true
+      },
+      {
+       "tile": "52,113",
+       "forwardHash": "981490e3b084",
+       "shuffledHash": "981490e3b084",
+       "identical": true
+      },
+      {
+       "tile": "53,113",
+       "forwardHash": "95fcc8d76fc3",
+       "shuffledHash": "95fcc8d76fc3",
+       "identical": true
+      },
+      {
+       "tile": "50,114",
+       "forwardHash": "fc535c60bad9",
+       "shuffledHash": "fc535c60bad9",
+       "identical": true
+      },
+      {
+       "tile": "51,114",
+       "forwardHash": "82743795c574",
+       "shuffledHash": "82743795c574",
+       "identical": true
+      },
+      {
+       "tile": "52,114",
+       "forwardHash": "446a63f1770a",
+       "shuffledHash": "446a63f1770a",
+       "identical": true
+      },
+      {
+       "tile": "53,114",
+       "forwardHash": "0ff30c525e86",
+       "shuffledHash": "0ff30c525e86",
+       "identical": true
+      }
+     ],
+     "unionForwardHash": "941213d694f022facff79f304a39752547c512ee3c2afe4a8b6ce36838c7fe7d",
+     "unionShuffledHash": "941213d694f022facff79f304a39752547c512ee3c2afe4a8b6ce36838c7fe7d",
+     "unionIdentical": true
+    },
+    "independentSourceOfTruth": "the canonical serialization per tile + the union",
+    "whyNonCircular": "each tile is generated independently keyed on its tileKey; comparing both orders through the same serializer exposes any order dependence",
+    "failureCaseDetected": "none — order cannot change the result"
+   },
+   {
+    "id": "WORLD_VEG_EDGE_OWNERSHIP_NO_DUPLICATES",
+    "name": "edge ownership: keys unique across the window, every u16 position STRICTLY inside its tile half-open box (no position claimable by two tiles), and a drop-and-regenerate cycle (the camera-return proof) reproduces the SAME set",
+    "status": "PASS",
+    "measured": {
+     "instances": 576,
+     "uniqueKeys": 576,
+     "keysUnique": true,
+     "allInsideTileBox": true,
+     "tileU16Span": 128,
+     "cameraReturn": {
+      "tile": "53,112",
+      "hashBefore": "75dc0154991ca207",
+      "hashAfterDropAndRegen": "75dc0154991ca207",
+      "identical": true
+     }
+    },
+    "independentSourceOfTruth": "the canonical serialization + the arithmetic bounds",
+    "whyNonCircular": "the half-open box check recomputes the tile bounds from the tile key; the duplicate check is a Set-vs-count comparison",
+    "failureCaseDetected": "none — ownership is by construction and survives unload/reload"
+   },
+   {
+    "id": "WORLD_VEG_CAP_5000",
+    "name": "the 5000 visible-instance cap respected on a measured high-density case (profile 1 @100% over the 8x8 window): requested > cap -> rendered EXACTLY 5000, limited counted honestly; the requested count is stable (deterministic)",
+    "status": "PASS",
+    "measured": {
+     "requested": 6144,
+     "rendered": 5000,
+     "limited": 1144,
+     "cap": 5000,
+     "requestedRepeatStable": 6144,
+     "perTileCounts": [
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96
+     ]
+    },
+    "independentSourceOfTruth": "the pure generator over the served profile-1 records",
+    "whyNonCircular": "the counts are recomputed tile-by-tile; the cap rule is min(requested, 5000) applied to the deterministic order",
+    "failureCaseDetected": "none — the cap limits the high-density case exactly"
+   },
+   {
+    "id": "WORLD_VEG_MODEL_IMPORT_SUPPORT",
+    "name": "the model route payloads are bit-exact the physical container reads; the witness 457485 parses through the EXISTING qualified importer (16v/8t/texId 457490); the profile-0 support census: 8 textured + 2 honest-untextured (DDS outside the strict subset) + 0 parse-unsupported; a missing id is a loud 404 (never a substitute model)",
+    "status": "PASS",
+    "measured": {
+     "perModelWireChecks": [
+      {
+       "id": 436293,
+       "httpStatus": 200,
+       "servedBytes": 6640,
+       "physicalBytes": 6640,
+       "bitExact": true,
+       "entryName": "436293.nif",
+       "payloadSha": "031740c89c7cf6c3"
+      },
+      {
+       "id": 457485,
+       "httpStatus": 200,
+       "servedBytes": 2547,
+       "physicalBytes": 2547,
+       "bitExact": true,
+       "entryName": "457485.nif",
+       "payloadSha": "72479a7f4eebe934"
+      },
+      {
+       "id": 436300,
+       "httpStatus": 200,
+       "servedBytes": 83903,
+       "physicalBytes": 83903,
+       "bitExact": true,
+       "entryName": "436300.nif",
+       "payloadSha": "5ce680b408336514"
+      },
+      {
+       "id": 436223,
+       "httpStatus": 200,
+       "servedBytes": 71279,
+       "physicalBytes": 71279,
+       "bitExact": true,
+       "entryName": "436223.nif",
+       "payloadSha": "7d7d8d5f64e23bcd"
+      },
+      {
+       "id": 457699,
+       "httpStatus": 200,
+       "servedBytes": 142644,
+       "physicalBytes": 142644,
+       "bitExact": true,
+       "entryName": "457699.nif",
+       "payloadSha": "f1950f6c55848252"
+      },
+      {
+       "id": 457579,
+       "httpStatus": 200,
+       "servedBytes": 51831,
+       "physicalBytes": 51831,
+       "bitExact": true,
+       "entryName": "457579.nif",
+       "payloadSha": "d5ea4f85e732942d"
+      },
+      {
+       "id": 457523,
+       "httpStatus": 200,
+       "servedBytes": 12301,
+       "physicalBytes": 12301,
+       "bitExact": true,
+       "entryName": "457523.nif",
+       "payloadSha": "047fef1c728a8580"
+      },
+      {
+       "id": 457532,
+       "httpStatus": 200,
+       "servedBytes": 26611,
+       "physicalBytes": 26611,
+       "bitExact": true,
+       "entryName": "457532.nif",
+       "payloadSha": "f44eb1980585d30c"
+      },
+      {
+       "id": 166878,
+       "httpStatus": 200,
+       "servedBytes": 19474,
+       "physicalBytes": 19474,
+       "bitExact": true,
+       "entryName": "166878.nif",
+       "payloadSha": "2601df91d256ac85"
+      },
+      {
+       "id": 166897,
+       "httpStatus": 200,
+       "servedBytes": 7044,
+       "physicalBytes": 7044,
+       "bitExact": true,
+       "entryName": "166897.nif",
+       "payloadSha": "423d87f593ae236f"
+      }
+     ],
+     "wireBitExact": true,
+     "witness": {
+      "nifVersion": "10.1.0.0",
+      "blocks": 16,
+      "numVertices": 16,
+      "numTriangles": 8,
+      "textureId": 457490
+     },
+     "missing999999": {
+      "status": 404,
+      "error": "MODEL_ENTRY_NOT_FOUND"
+     },
+     "supportCounts": {
+      "distinctModels": 10,
+      "supported": 8,
+      "supportedUntextured": 2,
+      "unsupported": 0,
+      "atLeastOneSupportedModel": true
+     },
+     "untexturedReasons": [
+      {
+       "id": 166878,
+       "reason": "STRICT decode refused: [decodeModelTextureStrict] bpp 0 outside the strict model-texture subset {24, 32} — the payload f"
+      },
+      {
+       "id": 166897,
+       "reason": "STRICT decode refused: [decodeModelTextureStrict] bpp 0 outside the strict model-texture subset {24, 32} — the payload f"
+      }
+     ]
+    },
+    "independentSourceOfTruth": "the test-local lazy Models.bnt reader (own footer/dir walk + raw file reads) + the strict importer run in THIS process",
+    "whyNonCircular": "the wire payloads are compared against the physical container by code that imports NOTHING from the server; the witness numbers are the reader's own measured output",
+    "failureCaseDetected": "none — the chain holds bit-exactly with honest per-model statuses"
+   },
+   {
+    "id": "WORLD_VEG_MODEL_CACHE_IDENTITY",
+    "name": "CAM-C3 model-cache mutants (wrong era / containerSha / entryName / tampered payload / wireVersion) REFUSED with named reasons through the PRODUCTION verifyModelCacheIdentity; clean PASSES; the REAL route double-fetch = HIT with identical bytes",
+    "status": "PASS",
+    "measured": {
+     "mutants": [
+      {
+       "id": "M1_WRONG_ERA",
+       "refused": true,
+       "reasons": [
+        "ERA_MISMATCH"
+       ],
+       "expected": [
+        "ERA_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M2_WRONG_CONTAINER_SHA",
+       "refused": true,
+       "reasons": [
+        "CONTAINER_SHA_MISMATCH"
+       ],
+       "expected": [
+        "CONTAINER_SHA_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M3_WRONG_ENTRY_NAME",
+       "refused": true,
+       "reasons": [
+        "ENTRY_NAME_MISMATCH"
+       ],
+       "expected": [
+        "ENTRY_NAME_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M5_WRONG_WIRE_VERSION",
+       "refused": true,
+       "reasons": [
+        "WIRE_VERSION_MISMATCH"
+       ],
+       "expected": [
+        "WIRE_VERSION_MISMATCH"
+       ],
+       "ok": true
+      },
+      {
+       "id": "M4_TAMPERED_PAYLOAD",
+       "refused": true,
+       "reasons": [
+        "PAYLOAD_SHA_MISMATCH"
+       ],
+       "expected": [
+        "PAYLOAD_SHA_MISMATCH"
+       ],
+       "ok": true
+      }
+     ],
+     "clean": {
+      "ok": true,
+      "reasons": []
+     },
+     "malformed": {
+      "ok": false,
+      "reasons": [
+       "CACHE_ENTRY_MALFORMED"
+      ]
+     },
+     "realRoute": {
+      "note": "a fresh model id (218757 — NOT fetched earlier in this suite) proves the MISS -> HIT cycle on the shared server",
+      "first": "MISS",
+      "second": "HIT",
+      "identicalBytes": true
+     }
+    },
+    "independentSourceOfTruth": "the exported production gate + the real HTTP route",
+    "whyNonCircular": "the mutants are constructed in-test and asserted BY NAMED REASON; a silent attach would fail",
+    "failureCaseDetected": "none — every identity violation is refused by name"
+   },
+   {
+    "id": "WORLD_VEG_RESOURCE_DISCIPLINE",
+    "name": "unload/reload without resource duplication or loss (headless THREE census through the REAL routes): window A->B->A reuses payloads (no refetch) + the SAME texture object (identity), a profile change releases unreferenced models/textures (disposals measured) while referenced shared resources survive, counts return on profile return, toggle OFF->ON re-renders without refetch, per-instance transforms are REAL and distinct, dispose() empties the caches",
+    "status": "PASS",
+    "measured": {
+     "windowA": {
+      "requested": 4864,
+      "rendered": 4864,
+      "limited": 0,
+      "models": {
+       "withInstances": 4,
+       "supported": [
+        436293,
+        457485,
+        457579
+       ],
+       "untextured": [
+        {
+         "id": 166878,
+         "reason": "[world-vegetation] bpp 0 outside the strict model-texture subset {24, 32} — the payload fails LOUDLY (honest untextured; never a fallback texture)"
+        }
+       ],
+       "unsupported": [],
+       "nonVisualShapes": 9
+      }
+     },
+     "windowB": {
+      "requested": 4864,
+      "rendered": 4864
+     },
+     "windowAReturn": {
+      "requested": 4864,
+      "returnStable": true,
+      "noRefetchOnReturn": true,
+      "texIdentityReused": true
+     },
+     "profile5": {
+      "requested": 768,
+      "modelsWithInstances": [
+       166878,
+       166897,
+       457796
+      ],
+      "cacheOnlyReferenced": true,
+      "disposalsHappened": true,
+      "disposeCountersAfterProfileChange": {
+       "meshes": 35,
+       "geometries": 11,
+       "materials": 11,
+       "textures": 5,
+       "cacheEntries": 9
+      }
+     },
+     "profile0Return": {
+      "requested": 4864,
+      "countsRestored": true
+     },
+     "toggleCycle": {
+      "noRefetch": true,
+      "requested": 4864
+     },
+     "instancing": {
+      "meshesAreInstanced": true,
+      "instanceDistinct": true,
+      "meshCount": 0
+     },
+     "teardown": {
+      "beforeDispose": {
+       "cache": 4,
+       "textures": 3
+      },
+      "afterDispose": {
+       "cache": 0,
+       "textures": 0
+      }
+     },
+     "fetchCountersFinal": {
+      "modelPayloads": 9,
+      "texturePayloads": 6,
+      "climate": 2
+     }
+    },
+    "independentSourceOfTruth": "the fetch/identity/counter observations of the REAL module against the REAL routes (no synthetic payloads)",
+    "whyNonCircular": "object identity (===) for the shared texture cannot be faked by re-decoding; fetch counters measure the REAL HTTP surface; the disposal counters measure the actual THREE .dispose() calls",
+    "failureCaseDetected": "none — the discipline holds through every cycle"
+   },
+   {
+    "id": "WORLD_VEG_SERVER_LIFECYCLE",
+    "name": "suite-owned world server lifecycle (pid 3768, port 8249; stop + port-freed proof; standing 8140/8161 never touched)",
+    "status": "PASS",
+    "measured": {
+     "startupLine": "world server http://127.0.0.1:8249/ pid=3768 READY",
+     "pid": 3768,
+     "port": 8249,
+     "stop": {
+      "killed": true,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "lifetimeMs": 3365,
+      "portFreed": true,
+      "freedAfterMs": 20
+     }
+    },
+    "independentSourceOfTruth": null,
+    "whyNonCircular": null,
+    "failureCaseDetected": "none — the suite cleaned up its OWN process only"
+   }
+  ],
+  "defaultProfile": {
+   "index": 0,
+   "justificationClass": "MEASURED CHOICE (never \"the historical biome of this place\")",
+   "justification": "profile 0 is DECODED by the strict VegetationClimateDecoder with 12 non-empty records and its model set contains 457485 — the NIF whose parse chain the EXISTING qualified importer (NifModelReader) was cross-validated BIT-EXACTLY against the R61 oracle — plus 9 further same-era PCG_9_3_5 Models.bnt models measured through the same importer without widening any guard",
+   "supportCensus": {
+    "counts": {
+     "distinctModels": 10,
+     "supported": 8,
+     "supportedUntextured": 2,
+     "unsupported": 0,
+     "atLeastOneSupportedModel": true
+    },
+    "perModel": [
+     {
+      "modelId": 436293,
+      "status": "SUPPORTED",
+      "visualShapes": 1,
+      "shapesTotal": 1
+     },
+     {
+      "modelId": 457485,
+      "status": "SUPPORTED",
+      "visualShapes": 1,
+      "shapesTotal": 1
+     },
+     {
+      "modelId": 436300,
+      "status": "SUPPORTED",
+      "visualShapes": 1,
+      "shapesTotal": 1
+     },
+     {
+      "modelId": 436223,
+      "status": "SUPPORTED",
+      "visualShapes": 1,
+      "shapesTotal": 1
+     },
+     {
+      "modelId": 457699,
+      "status": "SUPPORTED",
+      "visualShapes": 1,
+      "shapesTotal": 1
+     },
+     {
+      "modelId": 457579,
+      "status": "SUPPORTED",
+      "visualShapes": 1,
+      "shapesTotal": 1
+     },
+     {
+      "modelId": 457523,
+      "status": "SUPPORTED",
+      "visualShapes": 1,
+      "shapesTotal": 2
+     },
+     {
+      "modelId": 457532,
+      "status": "SUPPORTED",
+      "visualShapes": 1,
+      "shapesTotal": 1
+     },
+     {
+      "modelId": 166878,
+      "status": "SUPPORTED_UNTEXTURED",
+      "visualShapes": 3,
+      "shapesTotal": 12
+     },
+     {
+      "modelId": 166897,
+      "status": "SUPPORTED_UNTEXTURED",
+      "visualShapes": 1,
+      "shapesTotal": 4
+     }
+    ]
+   }
+  },
+  "modelChain": {
+   "witness457485": {
+    "nifVersion": "10.1.0.0",
+    "blocks": 16,
+    "numVertices": 16,
+    "numTriangles": 8,
+    "textureId": 457490
+   },
+   "chain": "model id -> same-era PCG_9_3_5 Models.bnt \"<id>.nif\" (the LAZY bounded pinned-container read; the 404 for a missing id is the honest UNSUPPORTED) -> parseWitnessModel (the EXISTING qualified single-witness importer; guards NEVER widened; a loud refusal is an honest UNSUPPORTED count) -> per-shape renderables (shape -> NiTexturingProperty via the shape properties refs -> the NiArkTextureExtraData entry referencing that texprop -> textureId; the Ark 9-byte tail consumed by the READER canon rule, RAW-ONLY here) -> \"<id>.dat\" in the pinned Textures.bnt -> decodeModelTextureStrict (decodeTga2A32Image 32bpp IMAGE order / decodeTga2 24bpp; anything else — e.g. the measured DDS 166881 — renders the model honestly untextured, never a fallback texture, never a stock pine) -> THREE InstancedMesh with REAL per-instance transforms",
+   "measuredPerModel": {
+    "textured": [
+     "436293",
+     "457485",
+     "436300",
+     "436223",
+     "457699",
+     "457579",
+     "457523",
+     "457532"
+    ],
+    "honestUntextured": [
+     {
+      "id": "166878",
+      "reason": "166881.dat is a DDS payload — outside the strict {24,32}bpp subset"
+     },
+     {
+      "id": "166897",
+      "reason": "166881.dat is a DDS payload — outside the strict {24,32}bpp subset"
+     }
+    ],
+    "parseUnsupported": []
+   },
+   "calibration": "[P-UNITS] cm->m x0.01 applied EXACTLY ONCE (in the per-shape geometry; a DOUBLE 0.01 was measured and removed — the trees rendered at 1/50 size, caught by the pixel toggle gate) | [P-AXIS] NIF Z-up -> Three Y-up (x, z, -y) | [P-UV] raw v + flipY=false | [P-SCALE] the instance scale = the binary node scale x (2.0/NODE_SCALE_MUL) = lerpValue x 2.0 (the deployed foliage-page ratio — CURRENT_RUNTIME_CALIBRATION, NOT historical) | [P-PLACE] instances stand on the terrain height sampled from the SAME window region (bilinear over the raw u16 -> adapter meters)",
+   "nonVisualShapes": "shapes without a texprop->Ark chain (the untextured Bip01/Box 24v/12t candidates) are counted as NON_VISUAL (collision/bounds role UNVERIFIED) and never rendered as visual geometry"
+  },
+  "determinism": {
+   "repeatSeed": {
+    "labSeed0Hash": "5c0dc551300494e1d6587f065c5f973b466713a79b9187697eecd61e143bfd55",
+    "repeatIdentical": true,
+    "changedSeedHash": "25c5a9b87280a90fc1512725b38edcb60bce3a9d8a5d6f475c748eabddf50d4f",
+    "seedsDiffer": true,
+    "scalesInLerpBand": true
+   },
+   "streamingOrderInvariance": {
+    "tiles": 16,
+    "perTileIdentical": true,
+    "unionIdentical": true
+   },
+   "edgeOwnership": {
+    "instances": 576,
+    "uniqueKeys": 576,
+    "keysUnique": true,
+    "allInsideTileBox": true,
+    "cameraReturnRegenIdentical": true
+   },
+   "cap5000": {
+    "requested": 6144,
+    "rendered": 5000,
+    "limited": 1144,
+    "cap": 5000,
+    "requestedRepeatStable": 6144
+   }
+  },
+  "resourceDiscipline": {
+   "windowReturnStable": true,
+   "noRefetchOnWindowReturn": true,
+   "textureObjectIdentityReused": true,
+   "profileChangeReleasesUnused": true,
+   "countsRestoredOnProfileReturn": true,
+   "toggleCycleNoRefetch": true,
+   "instancing": {
+    "meshesAreInstanced": true,
+    "instanceDistinct": true,
+    "meshCount": 0
+   },
+   "teardownEmptiesCaches": true
+  },
+  "openFindings": [
+   "SPLAT TERRAIN NEAR-BLACK IN HEADLESS CAPTURES (pre-existing, OUT OF ETAP E SCOPE, reported honestly): the Etap D splat terrain renders near-black in the headless captures (canvas uniqueColors ~370 for #textures=1&veg=0 vs ~21,593 for the palette preview) while the palette material, the vegetation meshes and ALL DOM-side census data render/verify correctly; the phase-4 pixel profile (272 unique colors) shows the same condition existed then — the Etap D toggle gate remains valid (it measures CHANGE), but the headless \"textured terrain looks right\" claim was never pixel-verified per-color. Root-cause candidates (NOT fixed in this phase — an Etap D+ follow-up): the sampler2DArray layer coordinate uses the NORMALIZED idx byte (i0.x in [0,1]) rather than the LAYER NUMBER in compat/world-splat.js's shader consumers, and/or the DataArrayTexture upload in the headless GPU (SwiftShader) path. The interactive-browser appearance remains UNVERIFIED (INTERACTION NOT_PERFORMED)."
+  ],
+  "u19Resolution": "RESOLVED post-QC in the U-19 correction round (see u19SplatLayerFix): BOTH root causes found and fixed in compat/world-app.js SPLAT_FRAG — (a) the layer coordinate (the QC P2-1 root cause) decoded EXACTLY via floor(b*255+0.5), and (b) the double-divided blend factor (w0.x/255.0 on the ALREADY-normalized RAW mask — the DOMINANT cause of the near-black symptom) corrected to the as-fetched mask/255; proven per-color by the new WORLD_U19_PER_COLOR_EXACT gate (36/36 samples within the independent recomputation, mean delta 0.55/255) + the pre-fix behavior rejected (mean delta 65.95 over 34 discriminating samples) + the headless census 370 -> 65,240 unique colors. The interactive appearance stays UNVERIFIED (INTERACTION NOT_PERFORMED)."
+ },
+ "browser": {
+  "LOAD": {
+   "status": "PASS",
+   "detail": "WORLD_T9_LOAD_LAUNCHER + WORLD_T9_LOAD_WORLD through the FIXED 5-conjunct gate (evaluateLoadGate imported from the fixed T9 suite) on real headless Edge (dedicated temp profile); per-conjunct records in the raw summary; DOM dumps in raw/WORLD/; the Etap E world LOAD ran with the vegetation ON (#veg=1) — the DOM dump carries the vegetation census (requested/rendered/limited), the VEGETATION_MODE label, the profile/seed labels, p3 shown separately and the three-way separation lines",
+   "standingServerProbe": {
+    "url": "http://127.0.0.1:8162/ (the user-facing dev server)",
+    "launcher": {
+     "gatePassed": true,
+     "entryButtonLabelPresent": true,
+     "coverageLinePresent": true
+    },
+    "world": {
+     "gatePassed": true,
+     "activeWindow64Present": true,
+     "rawU16ReadoutPresent": true
+    }
+   }
+  },
+  "PIXEL_RENDER": {
+   "status": "PASS",
+   "honestLabel": "pixel-content heuristic (not a semantic render check); PNGs in PRIVATE OUTPUT ONLY (metadata here)",
+   "captureMethod": "CDP (Etap E correction): headless Edge + --remote-debugging-port + a Runtime.evaluate readiness poll (the page's OWN honest census markers) + Page.captureScreenshot after a real-time settle — the LEGACY --screenshot + --virtual-time-budget compositor capture starved late-boot WebGL frames (measured: the vegetation meshes rendered in the live buffer but were absent from the compositor capture; see failedFirstRuns)",
+   "shots": [
+    {
+     "kind": "launcher",
+     "url": "http://127.0.0.1:8878/launcher",
+     "bytes": 144355,
+     "sha256": "c5e3814993b8f6fc4be086d0e29e1a5ebf5f4acf8783364d51aa40695fac158f",
+     "captureMethod": "CDP (remote-debugging + Runtime.evaluate readiness poll + Page.captureScreenshot)",
+     "pngUniqueColorsFull": 863,
+     "pngUniqueColorsCanvasRegion": 187,
+     "checks": {
+      "bytes": true,
+      "decodeOk": true,
+      "fullUniqueColors": true,
+      "fullMostCommon": true,
+      "fullLumaStdDev": true,
+      "canvasUniqueColors": true,
+      "canvasMostCommon": true
+     },
+     "ok": true,
+     "privatePngPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_WORLD_LAUNCHER_R1_20261010\\BROWSER\\U19FIX\\pixel_launcher.png",
+     "note": "PNG files live in the PRIVATE OUTPUT ROOT only (no proprietary rendered payloads in the repo)"
+    },
+    {
+     "kind": "world-on",
+     "url": "http://127.0.0.1:8878/world#tile=53,114&profile=0&seed=0&density=50&textures=1",
+     "bytes": 684884,
+     "sha256": "1d228c44adba67d7fe98257e54a5429190a6e5b16d2aad42f1a2803b9171bb3d",
+     "captureMethod": "CDP (remote-debugging + Runtime.evaluate readiness poll + Page.captureScreenshot)",
+     "pngUniqueColorsFull": 46908,
+     "pngUniqueColorsCanvasRegion": 73223,
+     "checks": {
+      "bytes": true,
+      "decodeOk": true,
+      "fullUniqueColors": true,
+      "fullMostCommon": true,
+      "fullLumaStdDev": true,
+      "canvasUniqueColors": true,
+      "canvasMostCommon": true
+     },
+     "ok": true,
+     "privatePngPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_WORLD_LAUNCHER_R1_20261010\\BROWSER\\U19FIX\\pixel_world-on.png",
+     "note": "PNG files live in the PRIVATE OUTPUT ROOT only (no proprietary rendered payloads in the repo)"
+    },
+    {
+     "kind": "world-off",
+     "url": "http://127.0.0.1:8878/world#tile=53,114&profile=0&seed=0&density=50&textures=0",
+     "bytes": 422209,
+     "sha256": "1b4a80283282e045a00b7700bec0cdf5f71b2b577503f8ad1f5575c55f252cb5",
+     "captureMethod": "CDP (remote-debugging + Runtime.evaluate readiness poll + Page.captureScreenshot)",
+     "pngUniqueColorsFull": 16028,
+     "pngUniqueColorsCanvasRegion": 21593,
+     "checks": {
+      "bytes": true,
+      "decodeOk": true,
+      "fullUniqueColors": true,
+      "fullMostCommon": true,
+      "fullLumaStdDev": true,
+      "canvasUniqueColors": true,
+      "canvasMostCommon": true
+     },
+     "ok": true,
+     "privatePngPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_WORLD_LAUNCHER_R1_20261010\\BROWSER\\U19FIX\\pixel_world-off.png",
+     "note": "PNG files live in the PRIVATE OUTPUT ROOT only (no proprietary rendered payloads in the repo)"
+    },
+    {
+     "kind": "world-veg-on",
+     "url": "http://127.0.0.1:8878/world#tile=53,114&profile=0&seed=0&density=50&textures=1&veg=1",
+     "bytes": 684884,
+     "sha256": "1d228c44adba67d7fe98257e54a5429190a6e5b16d2aad42f1a2803b9171bb3d",
+     "captureMethod": "CDP (remote-debugging + Runtime.evaluate readiness poll + Page.captureScreenshot)",
+     "pngUniqueColorsFull": 46908,
+     "pngUniqueColorsCanvasRegion": 73223,
+     "checks": {
+      "bytes": true,
+      "decodeOk": true,
+      "fullUniqueColors": true,
+      "fullMostCommon": true,
+      "fullLumaStdDev": true,
+      "canvasUniqueColors": true,
+      "canvasMostCommon": true
+     },
+     "ok": true,
+     "privatePngPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_WORLD_LAUNCHER_R1_20261010\\BROWSER\\U19FIX\\pixel_world-veg-on.png",
+     "note": "PNG files live in the PRIVATE OUTPUT ROOT only (no proprietary rendered payloads in the repo)"
+    },
+    {
+     "kind": "world-veg-off",
+     "url": "http://127.0.0.1:8878/world#tile=53,114&profile=0&seed=0&density=50&textures=1&veg=0",
+     "bytes": 612263,
+     "sha256": "2f3c0f78f939cb2a37db41998ffbce3580eb9b71060d0365b44eb8822479f9ba",
+     "captureMethod": "CDP (remote-debugging + Runtime.evaluate readiness poll + Page.captureScreenshot)",
+     "pngUniqueColorsFull": 44446,
+     "pngUniqueColorsCanvasRegion": 65240,
+     "checks": {
+      "bytes": true,
+      "decodeOk": true,
+      "fullUniqueColors": true,
+      "fullMostCommon": true,
+      "fullLumaStdDev": true,
+      "canvasUniqueColors": true,
+      "canvasMostCommon": true
+     },
+     "ok": true,
+     "privatePngPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_WORLD_LAUNCHER_R1_20261010\\BROWSER\\U19FIX\\pixel_world-veg-off.png",
+     "note": "PNG files live in the PRIVATE OUTPUT ROOT only (no proprietary rendered payloads in the repo)"
+    }
+   ],
+   "toggleGates": {
+    "textureToggle": {
+     "gate": "ETAP_D_TEXTURE_TOGGLE_CHANGES_PIXELS",
+     "status": "PASS",
+     "region": [
+      10,
+      110,
+      740,
+      540
+     ],
+     "samples": 313900,
+     "differingPixels": 153375,
+     "differingFraction": 0.4886,
+     "meanAbsChannelDeltaOverDiffering": 62.43,
+     "meanLumaDelta": 29.03,
+     "thresholds": {
+      "minDifferingFraction": 0.02,
+      "minMeanAbsDeltaOverDiffering": 2,
+      "perPixelDiff": 8
+     },
+     "note": "the REAL terrain-texture toggle proof: #textures=1 (original-texture splat) vs #textures=0 (height-palette preview) — the canvas pixels must differ measurably; a no-op toggle FAILS",
+     "proof": "the terrain-texture toggle ACTUALLY changes the rendered pixels: #textures=1 vs #textures=0 — measured over the canvas region of the two PRIVATE PNGs"
+    },
+    "vegetationToggle": {
+     "gate": "ETAP_E_VEGETATION_TOGGLE_CHANGES_PIXELS",
+     "status": "PASS",
+     "region": [
+      10,
+      110,
+      740,
+      540
+     ],
+     "samples": 313900,
+     "differingPixels": 19646,
+     "differingFraction": 0.0626,
+     "meanAbsChannelDeltaOverDiffering": 58.86,
+     "meanLumaDelta": 3.07,
+     "thresholds": {
+      "minDifferingFraction": 0.02,
+      "minMeanAbsDeltaOverDiffering": 2,
+      "perPixelDiff": 8
+     },
+     "note": "the REAL vegetation toggle proof: #veg=1 (deterministic RECONSTRUCTION_PREVIEW instances — original same-era models through the qualified importer, LAB_SEED-keyed distribution) vs #veg=0 — the canvas pixels must differ measurably; a no-op toggle FAILS",
+     "proof": "the vegetation toggle ACTUALLY changes the rendered pixels: #veg=1 (the deterministic RECONSTRUCTION_PREVIEW instances — original same-era models through the qualified importer) vs #veg=0 — measured over the canvas region of the two PRIVATE PNGs; the trees are visible in the veg-on capture (canvas uniqueColors 73223 vs 65240 for veg-off)"
+    }
+   },
+   "etapCRecord": {
+    "status": "PASS",
+    "shotsKinds": [
+     "launcher",
+     "world"
+    ],
+    "note": "the phase-3 captures (launcher + world palette) remain in the PRIVATE root + raw/WORLD/PIXEL_RENDER.json"
+   },
+   "etapDRecord": {
+    "status": "PASS",
+    "note": "the phase-4 pixel metadata (PIXEL_RENDER_ETAPD.json) remains for provenance; the Etap D toggle gate was RE-MEASURED with the CDP capture in the Etap E run (the legacy phase-4 captures carried the compositor-frame starvation defect — see failedFirstRuns)"
+   },
+   "etapERecord": {
+    "status": "PASS",
+    "note": "the Etap E CDP captures are the PRE-FIX splat evidence (the near-black profile measured by U-19): pixel_world-on / pixel_world-off / pixel_world-veg-on / pixel_world-veg-off remain in the PRIVATE root under their original names; superseded as the CURRENT state by the U-19 fix captures below"
+   },
+   "u19FixRecord": {
+    "status": "PASS",
+    "shotsKinds": [
+     "launcher",
+     "world-on",
+     "world-off",
+     "world-veg-on",
+     "world-veg-off"
+    ],
+    "canvasCensusPreFixVegOff": {
+     "region": [
+      10,
+      110,
+      740,
+      540
+     ],
+     "samples": 313900,
+     "uniqueColors": 370,
+     "mostCommonColorFraction": 0.33448869066581716,
+     "lumaMean": 12.2,
+     "lumaStdDev": 18.55,
+     "lumaMin": 0,
+     "lumaMax": 168,
+     "alphaNon255Fraction": 0
+    },
+    "canvasCensusPostFixVegOff": {
+     "region": [
+      10,
+      110,
+      740,
+      540
+     ],
+     "samples": 313900,
+     "uniqueColors": 65240,
+     "mostCommonColorFraction": 0.33448869066581716,
+     "lumaMean": 90.67,
+     "lumaStdDev": 78.53,
+     "lumaMin": 14,
+     "lumaMax": 253,
+     "alphaNon255Fraction": 0
+    },
+    "uniqueColorsGain": 64870,
+    "lumaMeanGain": 78.47,
+    "perColorGate": "WORLD_U19_PER_COLOR_EXACT (raw/WORLD/WORLD_SPLAT_PER_COLOR_U19FIX.json — 36/36 valid samples within the independently recomputed exact shader-math span, mean max-channel delta 0.55/255; the pre-fix behavior rejected at mean 65.95 over 34 discriminating samples)",
+    "privatePngRoot": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_WORLD_LAUNCHER_R1_20261010\\BROWSER\\U19FIX (the pre-fix Etap E captures remain one directory up under their original names)"
+   },
+   "server": {
+    "pid": 29804,
+    "port": 8878,
+    "startupLine": "world server http://127.0.0.1:8878/ pid=29804 READY",
+    "stop": {
+     "exitCode": null,
+     "portFreed": true
+    }
+   }
+  },
+  "INTERACTION": {
+   "status": "NOT_PERFORMED",
+   "reason": "automation daemon (port 9222) measured DOWN during this phase (re-checked once in Etap E); the full interaction smoke (launcher -> map -> selection -> enter -> move -> toggles -> profile/seed change -> return -> re-enter) is deferred honestly — INTERACTION is NOT_PERFORMED, never PASS-by-default"
+  }
+ },
+ "u19SplatLayerFix": {
+  "phase": "U19_SPLAT_LAYER_COORDINATE_AND_BLEND_FACTOR_FIX (the QC P2-1 correction round, post internal QC PASS_WITH_FINDINGS)",
+  "defect": "TWO defects in the Etap D splat shader (compat/world-app.js SPLAT_FRAG), both fixed in this round: (a) the sampler2DArray layer coordinate used the NORMALIZED idx byte — texelFetch on the RGBA8 idx DataTextures returns byte/255 in [0,1], so every layer sampled array layer ~0 (the QC P2-1 root cause, confirmed at code level); (b) the sequential-lerp blend factor was DOUBLE-DIVIDED: `w0.x / 255.0` where the texelFetched weight is ALREADY the normalized RAW mask/255 — a factor 1/255x too small, collapsing every blend to ~tex*0.004 (the DOMINANT cause of the observed near-black headless render; defect (a) alone would have produced wrong-but-visible layer-0 colors on a healthy GPU).",
+  "fix": "compat/world-app.js SPLAT_FRAG ONLY: (a) decode the slot byte EXACTLY — vec4 s0..s3 = floor(i*255.0+0.5) — byte k maps to array layer k (the idx bytes ARE the texture slot numbers; the DataArrayTexture is filled in textureIds order); the empty-slot guard (< 254.5) now evaluates the DECODED value (pre-fix it compared the normalized byte against 254.5 and was always-true); (b) the blend factor is the RAW weight AS FETCHED (w0.x = mask/255 — bit-exact the served byte; the pre-fix /255.0 removed).",
+  "unchanged": "the RAW weights bit-exact the served masks; the RECORD-ORDER sequential lerp; NO weight normalization; the RENDER_RECONSTRUCTION preset labels; the DataArrayTexture/idx/w texture construction; every data path (tiles/materials/textures wire, PEFoliageCore, the decoders, world-splat.js builder) untouched.",
+  "perColorGate": {
+   "gate": "WORLD_U19_PER_COLOR_EXACT (+ WORLD_U19_LAYER_MAPPING_CONTROL + WORLD_U19_PRE_FIX_BEHAVIOR_REJECTED + WORLD_U19_HEADLESS_NOT_NEAR_BLACK)",
+   "tool": "tools/pecompat/world_splat_per_color.mjs (NEW in this round — the QC-required per-color revalidation gate)",
+   "raw": "raw/WORLD/WORLD_SPLAT_PER_COLOR_U19FIX.json",
+   "method": "the rendered #textures=1&veg=0 page (real headless GPU session, ANGLE/Microsoft Basic Render Driver) captured via CDP; the EXPECTED color of each sampled capture pixel recomputed INDEPENDENTLY in Node from the SAME wire payloads (PETerrainRegion/buildRegionSplatData/decodeTga2) replicating the EXACT shader math (cell lookup, GLOBAL world uv/32 m, GL bilinear+repeat sampling, the sequential RAW mask/255 lerp in slot order) at the ray-hit world position of that pixel (the deterministic boot camera pose, cross-checked against the page's live position HUD + census lines; the page's applied-splat chain census cross-checked against the independent build)",
+   "measured": {
+    "validSamples": 36,
+    "distinctCells": 36,
+    "inSpan": 36,
+    "meanDeltaFixed": 0.55,
+    "maxDeltaFixed": 1.3914074417233735,
+    "discriminatingSamples": 34,
+    "meanDeltaPreFix": 65.95,
+    "everyDiscriminatingCloserToFixed": true,
+    "badSlotBytes": 0,
+    "canvasCensusPreFix": {
+     "region": [
+      10,
+      110,
+      740,
+      540
+     ],
+     "samples": 313900,
+     "uniqueColors": 370,
+     "mostCommonColorFraction": 0.33448869066581716,
+     "lumaMean": 12.2,
+     "lumaStdDev": 18.55,
+     "lumaMin": 0,
+     "lumaMax": 168,
+     "alphaNon255Fraction": 0
+    },
+    "canvasCensusPostFix": {
+     "region": [
+      10,
+      110,
+      740,
+      540
+     ],
+     "samples": 313900,
+     "uniqueColors": 65240,
+     "mostCommonColorFraction": 0.33448869066581716,
+     "lumaMean": 90.67,
+     "lumaStdDev": 78.53,
+     "lumaMin": 14,
+     "lumaMax": 253,
+     "alphaNon255Fraction": 0
+    }
+   },
+   "allGatesPass": true,
+   "honestLimits": "HEADLESS GPU verification of the per-color output — NOT interactive verification (INTERACTION stays NOT_PERFORMED; the interactive appearance stays UNVERIFIED)"
+  },
+  "pixelReRun": {
+   "raw": "raw/WORLD/PIXEL_RENDER_U19FIX.json",
+   "note": "all 5 shots re-captured with the fixed shader (PRIVATE root ...\\BROWSER\\U19FIX); the ON captures now show the REAL texture colors (world-veg-off canvas uniqueColors 65,240 vs 370 pre-fix; world-on 73,224 vs 10,824 pre-fix); both toggle gates re-measured PASS",
+   "textureToggle": {
+    "gate": "ETAP_D_TEXTURE_TOGGLE_CHANGES_PIXELS",
+    "status": "PASS",
+    "region": [
+     10,
+     110,
+     740,
+     540
+    ],
+    "samples": 313900,
+    "step": 1,
+    "differingPixels": 153375,
+    "differingFraction": 0.4886,
+    "meanAbsChannelDeltaOverDiffering": 62.43,
+    "meanLumaDelta": 29.03,
+    "thresholds": {
+     "minDifferingFraction": 0.02,
+     "minMeanAbsDeltaOverDiffering": 2,
+     "perPixelDiff": 8
+    },
+    "note": "the REAL terrain-texture toggle proof: #textures=1 (original-texture splat) vs #textures=0 (height-palette preview) — the canvas pixels must differ measurably; a no-op toggle FAILS"
+   },
+   "vegetationToggle": {
+    "gate": "ETAP_E_VEGETATION_TOGGLE_CHANGES_PIXELS",
+    "status": "PASS",
+    "region": [
+     10,
+     110,
+     740,
+     540
+    ],
+    "samples": 313900,
+    "step": 1,
+    "differingPixels": 19646,
+    "differingFraction": 0.0626,
+    "meanAbsChannelDeltaOverDiffering": 58.86,
+    "meanLumaDelta": 3.07,
+    "thresholds": {
+     "minDifferingFraction": 0.02,
+     "minMeanAbsDeltaOverDiffering": 2,
+     "perPixelDiff": 8
+    },
+    "note": "the REAL vegetation toggle proof: #veg=1 (deterministic RECONSTRUCTION_PREVIEW instances — original same-era models through the qualified importer, LAB_SEED-keyed distribution) vs #veg=0 — the canvas pixels must differ measurably; a no-op toggle FAILS"
+   }
+  },
+  "regression": {
+   "world": {
+    "pass": 44,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 44
+   },
+   "unit": {
+    "pass": 24,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 24
+   },
+   "app": {
+    "pass": 22,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 22
+   },
+   "catalog": {
+    "pass": 41,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 41
+   },
+   "note": "ALL GREEN with the fixed shader — the U19FIX re-runs (raw/U19FIX/*); the Etap E raw summaries remain on disk as the pre-fix provenance"
+  },
+  "honestLimits": "the per-color proof is a HEADLESS GPU verification (ANGLE/WARP Microsoft Basic Render Driver) of the per-color output — it is NOT interactive verification (INTERACTION stays NOT_PERFORMED; the interactive appearance stays UNVERIFIED); a real-GPU (non-WARP) session is separate future evidence"
+ },
+ "regression": {
+  "unit": {
+   "battery": "tests/pecompat/run_tests.mjs",
+   "totals": {
+    "pass": 24,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 24
+   },
+   "note": "218757-sceneir unit battery (incl. the witness-457485 UNTOUCHED guard) — U-19 correction-round re-run with --models (24 gates); raw/U19FIX/UNIT_TESTS_SUMMARY_U19FIX.json"
+  },
+  "app": {
+   "battery": "tests/pecompat/run_app_tests.mjs",
+   "totals": {
+    "pass": 22,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 22
+   },
+   "note": "218757 app battery (T7/T8/T9 fixed gate) — U-19 correction-round re-run with --models (22 gates); raw/U19FIX/APP/"
+  },
+  "catalog": {
+   "battery": "tests/pecompat/run_catalog_tests.mjs",
+   "totals": {
+    "pass": 41,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 41
+   },
+   "note": "catalog battery incl. the CAM gates (Etap A corrections) — U-19 correction-round re-run with the phase-1 arg set (41 gates); raw/U19FIX/CATALOG/CATALOG_TESTS_SUMMARY_U19FIX.json"
+  },
+  "viewer218757": {
+   "status": "PASS",
+   "measured": "git diff HEAD vs the 218757 app files (compat/index.html, app.js, asset-mode.js, scene-mode.js, api.js, server-sceneir.mjs, src/pecompat/, src/pesource/, src/peworld/ minus the NEW PEFoliageLabSeed.js) — the 218757 app files byte-identical; src/pesource gained NO modification in Etap E (the NIF reader + decoders were imported, never edited; verified by WORLD_VEG_CORE_UNTOUCHED)"
+  },
+  "etapCGatesStayGreen": {
+   "worldGates": "the Etap C world gates re-ran inside the final battery — all PASS (terrain, server, browser LOAD; the gaps gate tracks the ETAP_E delivered state)",
+   "note": "phase-3/4 raw evidence preserved: raw/UNIT_TESTS_SUMMARY_ETAPC.json, raw/APP_TESTS_SUMMARY_ETAPC.json, raw/CATALOG/CATALOG_TESTS_SUMMARY_ETAPC.json, raw/WORLD/PIXEL_RENDER.json, raw/WORLD/PIXEL_RENDER_ETAPD.json"
+  }
+ },
+ "failedFirstRuns": [
+  {
+   "run": "U-19 correction round (post-QC), the first per-color gate execution (GATE FAIL — the fix was incomplete)",
+   "findings": [
+    "The first WORLD_U19_PER_COLOR_EXACT execution FAILED honestly: 36 valid samples but meanDeltaFixed 140.91 — the read pixels were still near-black. The layer-coordinate decode (the QC-confirmed P2-1 defect) had been fixed FIRST, but the render was unchanged — proving a SECOND, INDEPENDENT defect that the QC's root-cause list had anticipated as a candidate (\"and/or the DataArrayTexture upload in the headless GPU path\").",
+    "A 20-variant in-page GPU bisection (temp-dir probes against the standing server; every probe recorded) isolated the real cause: the blend factor was DOUBLE-DIVIDED — texelFetch on the RGBA8 weight texture returns the RAW mask already NORMALIZED (mask/255), and the shader divided by 255 AGAIN (w0.x / 255.0 = mask/65025), collapsing every blend to ~tex*0.004 = the observed near-black [0..3] pixels. Along the way the bisection ALSO ruled out: the texture uploads (texStorage3D/texSubImage3D measured 256x256x23/28 with the real Stone04 bytes), the texture-unit bindings (unit 0 = array, units 1-8 = idx/w, uniform1i sequence correct), the sampler2DArray sampling itself (a fixed-layer sample renders the exact layer-3 Rock03d colors), texelFetch on the idx/w textures (reads 255/0 as expected), the browser-side decodeTga2 (identical to Node), the floor/decode arithmetic, the `any` variable name, the wrap/large-uv handling and the implicit-LOD derivative question (textureLod also black). Several probe-side defects were found and fixed during the bisection (a y-flipped readback, an unsubstituted template-literal extraction, a mislabeled spy field mapping) — all recorded in the session evidence, none left the temp dir.",
+    "After the factor fix, the EXACT original shader (9 samplers, texelFetch, DataArrayTexture, both fixes) renders the real colors — the shader architecture was NEVER the problem; the near-black was the double-division plus the wrong layer coordinate."
+   ],
+   "discipline": "the failed-first gate execution is the honest negative control working: the per-color gate detected the incomplete fix BEFORE any green claim; the second defect was found by measurement (the gate deltas), not by guessing"
+  },
+  {
+   "run": "world battery (Etap C), attempt 1 (6 FAIL / 18 PASS)",
+   "findings": [
+    "WORLD_TERRAIN_OFFSET_64_NEGATIVE: the original preregistration required >=1 differing position on EVERY sampled tile; tile 000a0014.tdf measured NON-discriminating (all-zero data tile whose sub-header range is also all-zero — the two byte ranges coincide). REFINED (documented in the suite header + this file): discriminating OR degenerate-both-zero, >=4 of 6 discriminating. Measured after refinement: 5/6 discriminating (3-6 differing positions), 1 degenerate documented. The control was NOT removed.",
+    "WORLD_TERRAIN_BOUNDS_CALIBRATION_ONCE: MY test indexing typo (maxLocalX read positions[(sy-1)*sx + (sx-1)*3] — missing *3 on the first term); fixed to positions[((sy-1)*sx + (sx-1))*3]. Production code was correct; the gate now measures extentsExact=true.",
+    "WORLD_T7_ROUTES_STATICS: MY harness marked \"/\" as FAIL-expected-200 while separately asserting the 302 redirect; fixed to check the redirect separately. Server behavior was correct all along.",
+    "WORLD_T7_STATUS: MY comparison was case-strict on the SHA (the server emits lowercase hex; the mount itself compares case-insensitively — same discipline as production mountEra); fixed with case-insensitive comparison.",
+    "WORLD_T7_DENIAL_SUBSET: /src/pesource/PESourceMount.js measured ROUTE_NOT_FOUND instead of the catalog-design STATIC_FILE_NOT_ALLOWLISTED message — a real server deny-message gap; FIXED IN THE SERVER (non-allowlisted /src/peworld|/src/pesource routes now name the client-module allowlist).",
+    "WORLD_T9_LOAD_WORLD: MY marker was a naive substring check (\"oryginalne xyz\" anywhere) that tripped on the REQUIRED honest negation labels (\"NIE „oryginalne XYZ”\"); refined to target the position-readout claim only (no \"pozycja (oryginalne...\" label). The page never claimed original XYZ."
+   ],
+   "discipline": "all corrections are recorded; none weakens a production assertion; the refined offset-52 control keeps its discriminating power (5/6 tiles) and documents the degenerate case as a measured boundary"
+  },
+  {
+   "run": "app battery (Etap C), first invocation without --models/--raw-dir",
+   "findings": [
+    "16 PASS / 1 NOT_PERFORMED with honest skips (no container args) AND the harness default wrote 4 raw dumps into the HISTORICAL PE_CITY_ASSET_MAP_R1_20261010 package (the exact trap phase 1 documented). My own accidental untracked writes — DELETED, historical package re-verified clean (0 tracked modifications, 0 untracked residue); re-run with the correct args into THIS run's raw/APP_ETAPC."
+   ]
+  },
+  {
+   "run": "materials suite (Etap D), attempt 1 (2 FAIL of 9 gates — the QC working as designed)",
+   "findings": [
+    "WORLD_MAT_HTTP_GATES ECONNRESET: MY server bug — the ETAP D provenance HEADERS carried non-ASCII characters (em-dash in X-PE-Texture-Chain-Relation / X-PE-Texture-Decode-Scope); Node throws ERR_INVALID_CHAR on non-ASCII header values, killing the route. FIXED: ASCII-safe header constants (the full provenance text stays in the JSON bodies).",
+    "ENCODING INCIDENT (my tooling mistake, fully recorded): the header fix was first applied with a PowerShell 5.1 Get-Content/-replace round-trip which MISREAD the UTF-8 file as ANSI and corrupted every non-ASCII string in compat/server-world.mjs (Polish diacritics + dashes) — REPAIRED deterministically with a CP1252-reversal script (validated round-trip; all strings restored, verified by samples + the full battery re-run). LESSON: file edits go through the edit tool ONLY.",
+    "WORLD_MAT_MALFORMED_CONTROLLED first FAIL: MY synthetic named-record builder wrote the size field 4 bytes off (test bug; the production decoder refused the bogus record with \"implausible size 0\"); fixed the builder (size at record offset 0; size = 52 + region.length).",
+    "WORLD_MAT_CHAIN_RESOLVE first FAIL (doubleFetchCacheHit=false): REAL production bug caught by the preregistered HIT expectation — IdentityCache.set OVERWROTE the entry's identity envelope (wireVersion + payloadSha256) with the bare key identity, so every cache HIT failed verification (WIRE_VERSION_MISMATCH) and was refused/regenerated. FIXED: the entry identity envelope takes precedence + entryName enforced. The CAM-C3 discipline proved itself: a broken cache identity gate is REFUSED, never silently used.",
+    "unit/app batteries: first Etap D invocations WITHOUT --models measured honest NOT_PERFORMED container gates (17+16 PASS); re-run with the phase-3 arg set = 24 + 22 PASS / 0 FAIL / 0 NOT_PERFORMED (same pattern the phase-3 ledger recorded)."
+   ],
+   "discipline": "every failed-first attempt is recorded with its root cause; the two production defects (header encoding, cache identity merge) were FIXED in the server and re-measured green through the same gates"
+  },
+  {
+   "run": "vegetation suite (Etap E), attempt 1 (3 FAIL of 11 — test defects + a REAL production double-conversion, all recorded)",
+   "findings": [
+    "WORLD_VEG_REPEAT_SEED first FAIL (scalesInLerpBand=false): MY test asserted every instance lerp value against ONE band [0.5,1.5] — profile 0 records carry PER-RECORD bands (0.25..2.0); fixed the gate to check each instance against ITS OWN record col2/col3.",
+    "WORLD_VEG_STREAMING_ORDER first FAIL (unionIdentical=false): MY union hash serialized in MAP-INSERTION order (the shuffled run inserted tiles in a different order); fixed with a key-SORTED canonical serialization (an order-independent SET hash) — the per-tile hashes were identical all along.",
+    "WORLD_VEG_MODEL_CACHE first FAIL (first=HIT,second=MISS): MY variable-name transposition (the exact failure class the ledger records — secondFetch was fetched FIRST); the underlying behavior was correct (MISS -> HIT with identical bytes).",
+    "THE REAL PRODUCTION DEFECT (caught by the ETAP_E pixel toggle gate): the instance matrices applied the cm->m 0.01 bridge a SECOND time on top of the per-shape geometry bridge — the trees rendered at 1/50 size (a 1.79 m card -> ~5 cm, invisible in the captures; the pixel gate measured 3/313,900 differing pixels = a no-op toggle). FIXED: the unit bridge is applied EXACTLY ONCE (in the geometry); the instance scale carries ONLY the node-scale bridge. The contract's conversion-once invariant did its job.",
+    "THE PIXEL CAPTURE METHOD DEFECT (pre-existing, fixed in the tool): the LEGACY --screenshot + --virtual-time-budget compositor capture starved late-boot WebGL frames — measured with an in-page toDataURL probe: the vegetation meshes + the splat terrain rendered in the LIVE buffer but the compositor capture showed them absent/near-black (the phase-4 world-on pixel profile — 272 unique colors vs the palette's 7,247 — carries the same signature). FIXED in tools/pecompat/world_pixel_render.mjs: a CDP capture (remote-debugging + a Runtime.evaluate readiness poll on the page's OWN census markers + Page.captureScreenshot after a real-time settle) — both the Etap D texture toggle gate and the Etap E vegetation toggle gate re-measured PASS with the corrected method (the trees visible: 10,824 canvas colors veg-on vs 370 veg-off).",
+    "THE VEG-OFF MID-REBUILD CAPTURE (first CDP run): the readiness marker fired at boot (before the streaming window's second rebuild settled) and caught the palette/splat swap in flight; fixed by polling for the SETTLED state (the window census line 'origin okna: 53,114' + the vegetation census line) + a 3 s real-time settle."
+   ],
+   "discipline": "every failed-first attempt is recorded with its root cause; the double-conversion production defect was fixed in the vegetation module and re-measured green through the same gates; the capture-method correction is fully documented (the phase-4 pixel evidence interpretation note is in etapE_vegetation.openFindings)"
+  }
+ ],
+ "hashWitnesses": {
+  "terrainBnt": {
+   "pin": "95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990",
+   "beforeAndAfterWorldBattery": "PIN (WORLD_TERRAIN_HASH_WITNESS — originals READ_ONLY)"
+  },
+  "texturesBnt": {
+   "pin": "61ACD13B140E130647EEE24C1E2669D3734990B76CF74897DDD3BA0F4EA61393",
+   "verification": "stream-hash VERIFIED at server startup (fail-closed; WORLD_T7_STATUS + WORLD_MAT gates) BEFORE any texture byte is served; the LAZY index mount (footer + directory, 8,381 entries parsed) runs ONLY after the pin verifies; no whole-container route exists BY CONSTRUCTION"
+  },
+  "modelsBnt": {
+   "pin": "C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0",
+   "verification": "stream-hash VERIFIED at server startup (fail-closed; WORLD_T7_STATUS + the WORLD_VEG gates) BEFORE any model byte is served; the LAZY index mount (footer + directory, 5,596 entries parsed — the measured corpus census) runs ONLY after the pin verifies; the model payloads are served per-entry ONLY through /api/world/model/<id>; no whole-container route exists BY CONSTRUCTION"
+  },
+  "vegetationClimatesBnt": {
+   "pin": "7B858401C3EEBDA574DF4B4517E7FB2A8149C283885F27187682AA1239C745F4",
+   "verification": "MOUNTED + SHA-verified fail-closed at startup (the strict .vcl decode path); 25.vcl stays UNSUPPORTED (comma tokens — never converted)"
+  }
+ },
+ "notes": [
+  "The world battery T7/T9/MAT/VEG suites start and stop their OWN bounded server on suite-owned free ports; the port-freed proof is asserted in each lifecycle record; the foreign standing servers (8140 sceneir, 8161 catalog) were never touched (verified busy before/after).",
+  "The standing user-facing world server runs on 127.0.0.1:8162 (my own process; the Etap E restart is recorded in the INTERVENTION_LEDGER) with the FINAL code (the model route + the vegetation support census + the climates model summaries live).",
+  "THE THREE-WAY SEPARATION (contract §6, binding): ORIGINAL_CLIMATE_RECORDS = data from the pinned .vcl files (strict decode); RECOVERED_RNG_ARITHMETIC = the existing, scope-documented PE code (PEFoliageCore byte-locked — verified byte-identical to HEAD by WORLD_VEG_CORE_UNTOUCHED); INSTANCE_DISTRIBUTION = reconstruction-only until the cell-stream source is proven. No historical seed, exact tree counts or historical biomes are claimed anywhere. VEGETATION_MODE = RECONSTRUCTION_PREVIEW."
+ ]
+}

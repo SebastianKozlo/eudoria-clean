@@ -23,6 +23,21 @@ primary sources and existing client modules. Preserve SDK generation, PE era
 and file identities separately. Do not load the whole SDK into context; follow
 the mechanism currently needed.
 
+## Terrain / materials / foliage (world launcher lineage, 2026-10)
+
+For ANY terrain, terrain-texture or vegetation launcher work read
+[terrain-foliage-integration](references/terrain-foliage-integration.md)
+BEFORE writing code: it carries the Etap-B-verified SDK source identities
+(paths + SHA256), the reuse-first module map (PESourceMount getTerrainTile/
+getTerrainMaterials/resolveTexture/getVegetationClimate, the ACTIVE
+TdfMaterialTailDecoder mask@56 convention — the TdfDecoder MASK16@52 constant
+is STALE —, PETerrainRegion inside PETerrainCore, PEFoliageCore with NO
+LAB_SEED input), the CURRENT_RUNTIME_CALIBRATION facts (u16/128, 2
+units/sample, identity min/max — never historical meters/axes), the explicit
+UNKNOWNs (cell-stream source, climate→region mapping, p3, materialId==
+textureId NOT established, PCG special rows, 25.vcl) and the era discipline.
+`serve:world` is DELIVERED (Etap C/D/E of PE_WORLD_LAUNCHER_R1_20261010; `npm run serve:world` — bounded loopback server on port 8162 with /launcher + /world and the full terrain/materials/vegetation API; the launcher and world apps are built and gate-tested in that run's package).
+
 ## Apply a mechanism
 
 1. State the behavior to reproduce and its input/output identities.

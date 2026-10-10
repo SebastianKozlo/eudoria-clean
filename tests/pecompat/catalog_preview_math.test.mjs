@@ -20,7 +20,7 @@ import {
   applyWrapperToFileSpace, localTrsToColumns, boundsEqualWithin,
 } from '../../compat/catalog-preview.js';
 import {
-  buildCatalogData, buildPrimaryWire, CATALOG_PINS,
+  buildCatalogData, buildPrimaryWire, CATALOG_PINS, productionCacheIdentity,
 } from '../../tools/pecompat/catalog_data.mjs';
 
 function rec(id, name, status, extra = {}) {
@@ -92,6 +92,7 @@ export async function run(ctx) {
         modelsBntPath: ctx.modelsPath ?? CATALOG_PINS.modelsBnt.path,
         batchStatePath: ctx.batchStatePath ?? null,
         nameEdgesPath: ctx.nameEdgesPath ?? null,
+        cacheIdentity: productionCacheIdentity(), // CAM-C3: declare the production envelope (same gate as the server)
       });
       const wire = buildPrimaryWire(data.primaries['193313'], '193313');
       // a KNOWN vertex: the first position of the first mesh's data block

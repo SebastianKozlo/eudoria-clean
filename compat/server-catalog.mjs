@@ -48,11 +48,12 @@ import { fileURLToPath } from 'node:url';
 import {
   buildCatalogData, sortRows, filterRows, buildPrimaryWire,
   CATALOG_PINS, PRIMARY_IDS, PRIMARY_PINS, SORT_RULE_LABEL, CATALOG_DATA_VERSION,
+  productionCacheIdentity, primaryWireCacheKey,
 } from '../tools/pecompat/catalog_data.mjs';
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url))); // repo root
 const RUN_ID = 'PE_CITY_ASSET_MAP_R1_20261010';
-const SERVER_VERSION = 'catalog-server-r1 (loopback, allowlist statics, regenerated catalog API; extends the sceneir server design)';
+const SERVER_VERSION = 'catalog-server-r2 (loopback, allowlist statics, regenerated catalog API; extends the sceneir server design; PE_WORLD_LAUNCHER_R1_20261010 Etap A CAM-C2/CAM-C3 corrections: measured-complexity shared status model + full cache-identity envelope)';
 
 // ---- configured roots (the ONLY filesystem roots this server may read) ----
 const FOREIGN_REFERENCE_PORT = 8140; // the standing sceneir reference server — NEVER bound over
@@ -284,12 +285,13 @@ export function createCatalogApp(state) {
           `no safe import established for CD_2003 ${id}.nif in this run — preview is available ONLY for the four pinned primaries (${PRIMARY_IDS.join(', ')}). Honest state: ${row ? row.decodeCoverage : 'entry not found in the CD_2003 catalog'} (${row ? row.decodeReason : 'the entry does not exist in the regenerated index'}). CATALOG_ONLY/UNSUPPORTED/VERSION_GATED states are shown, never faked.`, rawUrl);
         return;
       }
-      const cacheKey = `catalog-wire-v1|CD_2003|${PRIMARY_PINS[id].sha256}`;
-      let wire = wireCache.get(cacheKey);
+      // CAM-C3: the wire-cache key is the wire's OWN full identity key
+      // (era | container SHA | entry name | payload SHA | reader | wire version).
+      let wire = wireCache.get(primaryWireCacheKey(id));
       if (!wire) {
         const primary = data.primaries[id];
         wire = buildPrimaryWire(primary, id);
-        wireCache.set(cacheKey, wire); // identity-keyed lazy cache (era+container+entry+payload+reader+wire version)
+        wireCache.set(wire.cacheKey, wire); // identity-keyed lazy cache (full identity — never a partial key)
       }
       const body = Buffer.from(JSON.stringify(wire) + '\n');
       serveBytes(res, 200, body, 'application/json', {
@@ -384,12 +386,18 @@ async function main() {
   });
 
   // 2. REGENERATE the catalog data from the pinned originals (fail-closed
-  //    container identity incl. the REQUIRED Models.bnt pin).
+  //    container identity incl. the REQUIRED Models.bnt pin). CAM-C3: the
+  //    production path DECLARES the cache-identity envelope (era + container
+  //    SHA + reader/schema version), verified against the regenerated catalog
+  //    inside buildCatalogData; a wrong/missing declaration is a CONTROLLED
+  //    cache refusal, disclosed in /api/catalog/status (never a silent attach,
+  //    never a crash).
   let data;
   try {
     data = await buildCatalogData({
       batchStatePath: process.env.PECATALOG_BATCH_STATE ?? `${PRIV_DEFAULT}\\PHASE2_EXTENT\\PCG935_NIF10_BATCH_STATE.jsonl`,
       nameEdgesPath: process.env.PECATALOG_NAME_EDGES ?? `${PRIV_DEFAULT}\\PHASE3_PCG935_BATCH\\PCG935_NAME_EDGES.jsonl`,
+      cacheIdentity: productionCacheIdentity(),
     });
   } catch (e) {
     console.error(`[server-catalog] CATALOG REGENERATION FAILED_FAIL_CLOSED: ${e.message}`);
@@ -421,7 +429,9 @@ async function main() {
     const startupMs = Date.now() - t0;
     console.log(`catalog server http://127.0.0.1:${CONFIG.port}/ pid=${process.pid}`);
     console.log(`[server-catalog] ready in ${startupMs} ms — catalog regenerated from the pinned originals (fail-closed SHAs; rows ${data.coverage.totalRows} = CD_2003 ${data.coverage.byEra.CD_2003} + PCG_9_3_5 ${data.coverage.byEra.PCG_9_3_5})`);
-    console.log(`[server-catalog] coverage: extent measured ${data.coverage.sceneExtent.measured}/${data.coverage.totalRows}; decode ${JSON.stringify(data.coverage.byDecodeCoverage)}`);
+    console.log(`[server-catalog] coverage: extent measured ${data.coverage.sceneExtent.measured}/${data.coverage.totalRows}; complexity measured ${data.coverage.complexity.measured}/${data.coverage.totalRows} (CAM-C2 shared status model; FAILED never counted); decode ${JSON.stringify(data.coverage.byDecodeCoverage)}`);
+    const bs = data.cache.batchState, ne = data.cache.nameEdges;
+    console.log(`[server-catalog] cache identity (CAM-C3): batchState envelope ${bs?.envelope?.state} attached=${bs?.attached} dropped=${bs?.droppedIdentityMismatch}; nameEdges envelope ${ne?.envelope?.state} attached=${ne?.modelsAttached} dropped=${ne?.modelsDroppedIdentityMismatch}${bs?.envelope?.state?.startsWith('REFUSED') || ne?.envelope?.state?.startsWith('REFUSED') ? ' — CACHE REFUSED (see /api/catalog/status for the named reason)' : ''}`);
     console.log(`[server-catalog] same-name-both-eras census: ${data.overlap.count} names (era-separated by construction)`);
     console.log(`[server-catalog] four primaries DECODED_FULL_CLOSURE + previewable; three ${threeVersion} from the configured private root; STOP = terminate pid ${process.pid}`);
   });

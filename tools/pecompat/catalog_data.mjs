@@ -1,4 +1,23 @@
 // catalog_data.mjs — PE_CITY_ASSET_MAP_R1_20261010, phase 4 (W5, contract §5)
+// PE_WORLD_LAUNCHER_R1_20261010 Etap A: CAM-C2 + CAM-C3 corrections
+// (Desktop post-audit CITY_ASSET_MAP_F71_POST_AUDIT §4/§5, OPEN_P2 ×2).
+//   CAM-C2: FAILED is not a measurement — a batch cache row with status FAILED
+//   no longer yields complexity.unknown=false; metrics require a genuinely
+//   successful proper decode with real values through ONE shared status model
+//   (complexityFromBatchRow/isComplexityMeasured) used by the rows, the
+//   coverage counts, the API and the tests. FAILED rows keep their honest
+//   FAILED decode status and reason; their metrics/texture coverage become
+//   UNKNOWN (never counted as measured, never "decoded but…").
+//   CAM-C3: full cache identity — the batch-state and name-edge caches attach
+//   ONLY under a caller-DECLARED, catalog-VERIFIED identity envelope
+//   (era + container SHA + reader version + schema version); per-row/per-model
+//   identity violations (era, container SHA, reader/schema version, name+payload
+//   SHA vs the regenerated catalog) are DROPPED with counted, named reasons.
+//   A cache path without a declared envelope, or a failing envelope, is a
+//   CONTROLLED REFUSAL (attached=0, state=REFUSED, disclosed reason) — never
+//   a crash, never a silent attach. The historical contamination question is
+//   NOT settled by these gates (synthetic mutants are negative controls).
+//
 // THE CATALOG DATA MODEL shared by compat/server-catalog.mjs (the product path)
 // and the tests/pecompat/* gates. REGENERATION-FIRST: at every buildCatalogData()
 // call the entry catalogs are re-derived from the pinned READ_ONLY originals
@@ -6,9 +25,9 @@
 // SHA256 recomputed) — there is NO stale hand-edited JSON in the product path.
 // The ONLY cached inputs are the phase-2/phase-3 MEASURED artifacts
 // (batch extent state, PCG935 name-edge batch), attached STRICTLY BY IDENTITY
-// KEY (era + container SHA + entry name + payload SHA — the phase-2 schema);
-// a cache row whose identity does not match the regenerated catalog is DROPPED
-// and counted (never silently used).
+// KEY (era + container SHA + entry name + payload SHA + reader/schema version
+// — verified against the REGENERATED catalog; a cache row whose identity does
+// not match is DROPPED and counted with a named reason (never silently used).
 //
 // REUSE LABELS (contract §8 discipline):
 //   - src/pesource/ArkArchive.js + src/pesource/Bnt2Archive.js — the
@@ -39,6 +58,8 @@ import crypto from 'node:crypto';
 import { promises as fsp } from 'node:fs';
 import { ArkArchive } from '../../src/pesource/ArkArchive.js';
 import { Bnt2Archive } from '../../src/pesource/Bnt2Archive.js';
+import { PEC_NIF10_READER_VERSION } from '../../src/pecompat/PecNif10Reader.js';
+import { PEC_SCENEIR_SCHEMA_VERSION } from '../../src/pecompat/PecSceneIR.js';
 import { sniffPayload } from './catalog_sniff.mjs';
 import {
   readNif41, analyzeNif41Model, placementAnalysis, PEC_NIF41_READER_VERSION,
@@ -57,7 +78,124 @@ async function positionalRead(filePath, opts) {
   }
 }
 
-export const CATALOG_DATA_VERSION = 'pec-catalog-data-v1-phase4';
+export const CATALOG_DATA_VERSION = 'pec-catalog-data-v2-camfixes';
+
+// ---------------------------------------------------------------------------
+// CAM-C2: the SHARED decode-status model. ONE definition of "measured
+// complexity" used by buildCatalogData rows, the coverage counts, the API and
+// the tests. A FAILED decode is NOT a measurement: its metrics are UNKNOWN
+// (with the failure reason), never counted as measured, never described as
+// "decoded". A genuinely successful decode (DECODED with complete numerics, or
+// DECODED_NO_MESH_GEOMETRY with REAL measured zeros) is measured. Any status
+// whose numeric fields are missing/null is UNKNOWN (no promotion, defensive).
+// ---------------------------------------------------------------------------
+export const MEASURED_COMPLEXITY_BATCH_STATUSES = Object.freeze(['DECODED', 'DECODED_NO_MESH_GEOMETRY']);
+
+const COMPLEXITY_UNITS =
+  'triangles=NiTriShapeData triangle count; vertices=vertex count; shapes=NiTriShape blocks; nodes=NiNode blocks';
+
+/** Canonical complexity object from an identity-verified batch cache row.
+ *  `b` may be null (VERSION_GATED / no cache row) — then UNKNOWN. */
+export function complexityFromBatchRow(b) {
+  if (!b) return { unknown: true, note: 'not decoded in this run' };
+  if (b.status === 'FAILED') {
+    return {
+      unknown: true,
+      note: `decode FAILED — not a measurement (never counted as measured); reason: ${decodeReasonForFailed(b.error)}`,
+    };
+  }
+  if (!MEASURED_COMPLEXITY_BATCH_STATUSES.includes(b.status)) {
+    return {
+      unknown: true,
+      note: `cache row status "${b.status}" is not a measured-decode status in this data model — metrics UNKNOWN (defensive; no promotion)`,
+    };
+  }
+  const nums = {
+    triangles: b.triangles ?? null, vertices: b.vertices ?? null,
+    shapes: b.shapeCount ?? null, nodes: b.nodeCount ?? null, blocks: b.blockCount ?? null,
+  };
+  const complete = Object.values(nums).every((v) => typeof v === 'number' && Number.isFinite(v));
+  if (!complete) {
+    return {
+      unknown: true,
+      note: `cache row status "${b.status}" lacks complete numeric metrics (triangles/vertices/shapes/nodes/blocks must all be real numbers) — metrics UNKNOWN (defensive; no promotion)`,
+    };
+  }
+  return { unknown: false, ...nums, units: COMPLEXITY_UNITS };
+}
+
+/** The SHARED "is this row's complexity a measurement?" predicate — used by
+ *  the coverage count and exported for the API/UI/tests so no consumer invents
+ *  its own definition. A row is measured iff complexity is present, marked
+ *  known, AND carries complete numeric values. */
+export function isComplexityMeasured(complexity) {
+  if (!complexity || complexity.unknown) return false;
+  return ['triangles', 'vertices', 'shapes', 'nodes', 'blocks'].every(
+    (k) => typeof complexity[k] === 'number' && Number.isFinite(complexity[k]),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CAM-C3: the cache identity envelope. The pinned phase-2/phase-3 caches are
+// PCG_9_3_5 artifacts of the Models.bnt batch decode (era PCG_9_3_5, container
+// SHA = the REQUIRED Models.bnt pin, reader pec-nif10-reader-v1, schema
+// pec-sceneir-v1). The PRODUCTION caller declares this envelope at the build
+// call; buildCatalogData VERIFIES the declaration against the regenerated
+// catalog (which itself re-verified the container pin fail-closed at load) and
+// enforces it per row / per model. Missing declaration or failed verification
+// → controlled refusal of the whole cache (state=REFUSED + named reason).
+// ---------------------------------------------------------------------------
+export function productionCacheIdentity() {
+  return {
+    batchState: {
+      era: 'PCG_9_3_5',
+      container: CATALOG_PINS.modelsBnt.container,
+      containerSha256: CATALOG_PINS.modelsBnt.sha256,
+      readerVersion: PEC_NIF10_READER_VERSION,
+      schemaVersion: PEC_SCENEIR_SCHEMA_VERSION,
+    },
+    nameEdges: {
+      era: 'PCG_9_3_5',
+      container: CATALOG_PINS.modelsBnt.container,
+      containerSha256: CATALOG_PINS.modelsBnt.sha256,
+      readerVersion: PEC_NIF10_READER_VERSION,
+      schemaVersion: PEC_SCENEIR_SCHEMA_VERSION,
+    },
+  };
+}
+
+/** Verify a declared cache envelope against the expected identity (the
+ *  regenerated catalog's pinned container + the active reader/schema
+ *  constants). Returns { ok: true } | { ok: false, reason }. */
+export function verifyCacheIdentityEnvelope(declared, expected) {
+  if (!declared || typeof declared !== 'object') return { ok: false, reason: 'CACHE_IDENTITY_ENVELOPE_MISSING' };
+  if (declared.era !== expected.era) return { ok: false, reason: `CACHE_ENVELOPE_ERA_MISMATCH (declared ${declared.era}, expected ${expected.era})` };
+  if (declared.containerSha256 !== expected.containerSha256) {
+    return { ok: false, reason: `CACHE_ENVELOPE_CONTAINER_MISMATCH (declared ${declared.containerSha256}, expected ${expected.containerSha256})` };
+  }
+  if (declared.readerVersion !== expected.readerVersion) {
+    return { ok: false, reason: `CACHE_ENVELOPE_READER_VERSION_MISMATCH (declared ${declared.readerVersion}, expected ${expected.readerVersion})` };
+  }
+  if (declared.schemaVersion !== expected.schemaVersion) {
+    return { ok: false, reason: `CACHE_ENVELOPE_SCHEMA_VERSION_MISMATCH (declared ${declared.schemaVersion}, expected ${expected.schemaVersion})` };
+  }
+  return { ok: true };
+}
+
+/** CAM-C3 per-row identity check for a batch-state cache row against the
+ *  verified envelope. Returns null (ok) or a named drop reason. */
+function batchRowIdentityReason(row, env) {
+  for (const f of ['era', 'name', 'payloadSha256', 'readerVersion', 'schemaVersion']) {
+    if (row[f] == null) return `ROW_IDENTITY_FIELD_MISSING:${f}`;
+  }
+  if (row.era !== env.era) return `ROW_ERA_MISMATCH (row ${row.era}, envelope ${env.era})`;
+  if (row.readerVersion !== env.readerVersion) return `ROW_READER_VERSION_MISMATCH (row ${row.readerVersion})`;
+  if (row.schemaVersion !== env.schemaVersion) return `ROW_SCHEMA_VERSION_MISMATCH (row ${row.schemaVersion})`;
+  if (row.containerSha256 != null && row.containerSha256 !== env.containerSha256) {
+    return `ROW_CONTAINER_SHA_MISMATCH (row ${row.containerSha256})`;
+  }
+  return null; // name+payloadSha agreement with the regenerated catalog is checked by the caller
+}
 
 // ---- pinned identities (INPUT_IDENTITIES.json, re-measured phase 1; fail-closed) ----
 export const CATALOG_PINS = Object.freeze({
@@ -388,57 +526,144 @@ export async function buildCatalogData(opts = {}) {
   };
 
   // ---- identity-keyed measured caches (phase-2 batch extent state) ----
+  // CAM-C3: the cache attaches ONLY under a caller-DECLARED, catalog-VERIFIED
+  // identity envelope; every row is identity-checked (era + container SHA if
+  // present + reader/schema version + name+payload SHA vs the REGENERATED
+  // catalog). Refusal/mismatch = controlled drop with a named, counted reason.
+  const expectedCacheIdentity = {
+    era: 'PCG_9_3_5',
+    container: bntPin.container,
+    containerSha256: bntPin.sha256, // fail-closed-verified against the regenerated catalog above
+    readerVersion: PEC_NIF10_READER_VERSION,
+    schemaVersion: PEC_SCENEIR_SCHEMA_VERSION,
+  };
   const byKeyPcg = new Map();
   for (const r of bntRows) byKeyPcg.set(`${r.entryName}|${r.payloadSha256 ?? '?'}`, r);
   let batchAttached = 0, batchDropped = 0;
+  const batchDroppedByReason = {};
+  const batchRowDrops = []; // bounded sample (first 12) of per-row named drops
+  const batchDrop = (reason, row) => {
+    batchDropped++;
+    batchDroppedByReason[reason] = (batchDroppedByReason[reason] ?? 0) + 1;
+    if (batchRowDrops.length < 12) batchRowDrops.push({ name: row?.name ?? null, reason });
+  };
+  let batchEnvelopeState = 'NOT_PROVIDED';
   if (batchStatePath) {
-    const raw = await io.readFile(batchStatePath);
-    const text = new TextDecoder().decode(raw);
-    for (const line of text.split('\n')) {
-      if (!line.trim()) continue;
-      const row = JSON.parse(line);
-      const key = `${row.name}|${row.payloadSha256}`;
-      const target = byKeyPcg.get(key);
-      if (!target) { batchDropped++; continue; } // identity mismatch → dropped, counted
-      target._batch = row;
-      batchAttached++;
+    const env = opts.cacheIdentity?.batchState ?? null;
+    const envCheck = verifyCacheIdentityEnvelope(env, expectedCacheIdentity);
+    if (!envCheck.ok) {
+      batchEnvelopeState = `REFUSED: ${envCheck.reason}`;
+    } else {
+      batchEnvelopeState = 'VERIFIED';
+      const raw = await io.readFile(batchStatePath);
+      const text = new TextDecoder().decode(raw);
+      let lineNo = 0;
+      for (const line of text.split('\n')) {
+        lineNo++;
+        if (!line.trim()) continue;
+        let row;
+        try {
+          row = JSON.parse(line);
+        } catch (e) {
+          batchDrop(`ROW_UNPARSEABLE_JSON (line ${lineNo})`, null);
+          continue;
+        }
+        const reason = batchRowIdentityReason(row, env);
+        if (reason) { batchDrop(reason, row); continue; }
+        const key = `${row.name}|${row.payloadSha256}`;
+        const target = byKeyPcg.get(key);
+        if (!target) { batchDrop('ROW_NOT_IN_REGENERATED_CATALOG (name+payloadSha256 identity miss)', row); continue; }
+        target._batch = row;
+        batchAttached++;
+      }
     }
   }
   out.cache.batchState = {
     path: batchStatePath, attached: batchAttached, droppedIdentityMismatch: batchDropped,
-    policy: 'identity-keyed cache: era + container SHA + entry name + payload SHA must match the REGENERATED catalog; mismatches are DROPPED and counted (never used)',
+    droppedByReason: batchDroppedByReason, dropSample: batchRowDrops,
+    envelope: {
+      state: batchEnvelopeState,
+      declared: opts.cacheIdentity?.batchState ?? null,
+      expected: expectedCacheIdentity,
+    },
+    policy: 'identity-keyed cache (CAM-C3): a caller-declared envelope (era + container SHA + reader/schema version) is VERIFIED against the regenerated catalog; every row must additionally match entryName + payloadSHA256 and its own era/reader/schema (and containerSha256 if present). Mismatch or a missing mandatory field → controlled DROP with a named, counted reason; a cache without a verified envelope is REFUSED whole. The historical contamination question is NOT settled by these gates.',
   };
 
   // ---- identity-keyed measured caches (phase-3 PCG935 name edges → texture coverage) ----
+  // CAM-C3: same envelope discipline; per-model ALL-OR-NOTHING — a single
+  // identity-violating edge row refuses that model's whole aggregate (a
+  // partial aggregate would be a contaminated measurement). Edges attach only
+  // to models whose batch row passed identity with status DECODED (only a
+  // genuinely decoded model can have shape-bound ArkTexture edges).
   const edgesByModel = new Map();
   let edgesAttached = 0, edgesDropped = 0;
+  const edgesDroppedByReason = {};
+  const edgeModelDrops = []; // bounded sample (first 12)
+  const edgeDropModel = (model, reason) => {
+    edgesDropped++;
+    edgesDroppedByReason[reason] = (edgesDroppedByReason[reason] ?? 0) + 1;
+    if (edgeModelDrops.length < 12) edgeModelDrops.push({ model, reason });
+  };
+  let edgesEnvelopeState = 'NOT_PROVIDED';
   if (nameEdgesPath) {
-    const raw = await io.readFile(nameEdgesPath);
-    const text = new TextDecoder().decode(raw);
-    for (const line of text.split('\n')) {
-      if (!line.trim()) continue;
-      const e = JSON.parse(line);
-      // the JSONL carries model names only; per-model identity goes through
-      // the batch state rows (name + payload SHA) identity-verified below.
-      const agg = edgesByModel.get(e.model) ?? { nameEdges: 0, nameFound: 0, nameBase: 0, nameNotFound: 0, matEdges: 0 };
-      if (e.edge === 'SHAPE->NIMATERIALPROPERTY') agg.matEdges++;
-      else {
-        agg.nameEdges++;
-        if (e.disposition === 'NAME_FOUND_EXACT') agg.nameFound++;
-        else if (e.disposition === 'NAME_BASE_MATCH_EXTENSION_DIFF') agg.nameBase++;
-        else if (e.disposition === 'NAME_NOT_FOUND') agg.nameNotFound++;
+    const env = opts.cacheIdentity?.nameEdges ?? null;
+    const envCheck = verifyCacheIdentityEnvelope(env, expectedCacheIdentity);
+    if (!envCheck.ok) {
+      edgesEnvelopeState = `REFUSED: ${envCheck.reason}`;
+    } else {
+      edgesEnvelopeState = 'VERIFIED';
+      const raw = await io.readFile(nameEdgesPath);
+      const text = new TextDecoder().decode(raw);
+      for (const line of text.split('\n')) {
+        if (!line.trim()) continue;
+        let e;
+        try {
+          e = JSON.parse(line);
+        } catch {
+          continue; // unparseable edge line: no model identity to charge
+        }
+        if (e.model == null) { edgeDropModel(null, 'EDGE_MODEL_FIELD_MISSING'); continue; }
+        const agg = edgesByModel.get(e.model) ?? { nameEdges: 0, nameFound: 0, nameBase: 0, nameNotFound: 0, matEdges: 0, refusedReason: null };
+        // per-row identity (era mandatory; containerSha256/reader/schema if present must match)
+        if (e.era !== env.era) agg.refusedReason = `EDGE_ERA_MISMATCH (row era ${e.era}, envelope ${env.era})`;
+        else if (e.containerSha256 != null && e.containerSha256 !== env.containerSha256) agg.refusedReason = `EDGE_CONTAINER_SHA_MISMATCH (row ${e.containerSha256})`;
+        else if (e.readerVersion != null && e.readerVersion !== env.readerVersion) agg.refusedReason = `EDGE_READER_VERSION_MISMATCH (row ${e.readerVersion})`;
+        else if (e.schemaVersion != null && e.schemaVersion !== env.schemaVersion) agg.refusedReason = `EDGE_SCHEMA_VERSION_MISMATCH (row ${e.schemaVersion})`;
+        if (e.edge === 'SHAPE->NIMATERIALPROPERTY') agg.matEdges++;
+        else {
+          agg.nameEdges++;
+          if (e.disposition === 'NAME_FOUND_EXACT') agg.nameFound++;
+          else if (e.disposition === 'NAME_BASE_MATCH_EXTENSION_DIFF') agg.nameBase++;
+          else if (e.disposition === 'NAME_NOT_FOUND') agg.nameNotFound++;
+        }
+        edgesByModel.set(e.model, agg);
       }
-      edgesByModel.set(e.model, agg);
-    }
-    // identity gate: only models whose batch row was identity-attached keep edges
-    for (const r of bntRows) {
-      if (edgesByModel.has(r.entryName) && r._batch) { r._edges = edgesByModel.get(r.entryName); edgesAttached++; }
-      else if (edgesByModel.has(r.entryName)) { edgesDropped++; }
+      // identity gate: only models whose batch row was identity-attached with
+      // status DECODED keep their (unrefused) edge aggregate
+      for (const r of bntRows) {
+        if (!edgesByModel.has(r.entryName)) continue;
+        const agg = edgesByModel.get(r.entryName);
+        if (agg.refusedReason) {
+          r._edgesRefusedReason = agg.refusedReason; // surfaced in the row's textureCoverage
+          edgeDropModel(r.entryName, agg.refusedReason);
+          continue;
+        }
+        if (!r._batch) { edgeDropModel(r.entryName, 'EDGE_MODEL_BATCH_ROW_MISSING (no identity-verified phase-2 batch row in the regenerated catalog)'); continue; }
+        if (r._batch.status !== 'DECODED') { edgeDropModel(r.entryName, `EDGE_MODEL_NOT_DECODED (batch status ${r._batch.status} — shape-bound edges require a genuinely decoded model)`); continue; }
+        r._edges = agg;
+        edgesAttached++;
+      }
     }
   }
   out.cache.nameEdges = {
     path: nameEdgesPath, modelsAttached: edgesAttached, modelsDroppedIdentityMismatch: edgesDropped,
-    policy: 'per-model aggregates attached ONLY where the model has an identity-verified phase-2 batch row (name + payload SHA) in the regenerated catalog',
+    droppedByReason: edgesDroppedByReason, dropSample: edgeModelDrops,
+    envelope: {
+      state: edgesEnvelopeState,
+      declared: opts.cacheIdentity?.nameEdges ?? null,
+      expected: expectedCacheIdentity,
+    },
+    policy: 'per-model aggregates attached ONLY where the model has an identity-verified phase-2 batch row (status DECODED) in the regenerated catalog AND every edge row of that model matches the verified envelope (era mandatory; container/reader/schema if present). A single violating edge row refuses the model\'s whole aggregate (all-or-nothing) with a named, counted reason.',
   };
 
   // ---- the four primaries: LIVE decode (phase-3 reader, pins re-verified) ----
@@ -505,14 +730,37 @@ export async function buildCatalogData(opts = {}) {
   for (const r of bntRows) {
     const b = r._batch ?? null;
     const edges = r._edges ?? null;
+    // CAM-C2: one shared status model — FAILED never promotes to measured
+    // metrics or "decoded" wording; DECODED/DECODED_NO_MESH keep their real
+    // values (a measured zero stays a measured zero).
+    const complexity = complexityFromBatchRow(b);
     let decodeCoverage, decodeReason;
     if (b) {
-      if (b.status === 'DECODED') { decodeCoverage = 'DECODED'; decodeReason = 'phase-2 batch decode through the era-validated PecNif10Reader chain (identity-keyed cache row verified)'; }
+      if (b.status === 'DECODED') { decodeCoverage = 'DECODED'; decodeReason = 'phase-2 batch decode through the era-validated PecNif10Reader chain (identity-keyed cache row verified: era + container envelope + reader/schema version + name + payload SHA)'; }
       else if (b.status === 'DECODED_NO_MESH_GEOMETRY') { decodeCoverage = 'DECODED_NO_MESH'; decodeReason = 'decoded; no mesh geometry blocks (measured zero triangle/vertex counts are REAL; scene extent UNKNOWN — never 0)'; }
       else { decodeCoverage = 'FAILED'; decodeReason = `decode attempted (phase-2 batch): ${decodeReasonForFailed(b.error)}`; }
     } else {
       decodeCoverage = 'VERSION_GATED';
       decodeReason = 'NIF 4.x outside the active reader gates (PecNif10Reader gates Gamebryo 10.1.0.0 exactly) — never attempted in this run';
+    }
+    // CAM-C2: texture coverage follows the SAME shared status model — FAILED
+    // never reads as "decoded but …" (the f71eb30 defect); an identity-refused
+    // edge aggregate reads as refused, never as a name-edge census.
+    let textureCoverage;
+    if (edges) {
+      textureCoverage = `NAME_FOUND_EXACT=${edges.nameFound}; NAME_BASE_MATCH_EXTENSION_DIFF=${edges.nameBase}; NAME_NOT_FOUND=${edges.nameNotFound}; MATERIAL_REFERENCE_CONFIRMED=${edges.matEdges} (ArkTexture descriptive names vs the same-era Textures.bnt numeric-name catalog; container resolution NOT established — no IMAGE_DECODED, no MATERIAL_APPLIED)`;
+    } else if (!b) {
+      textureCoverage = 'UNKNOWN (not decoded in this run)';
+    } else if (b.status === 'FAILED') {
+      textureCoverage = 'UNKNOWN (decode FAILED — texture edges were never produced; not decoded)';
+    } else if (r._edgesRefusedReason) {
+      textureCoverage = `EDGE_AGGREGATE_REFUSED (identity mismatch in the phase-3 edge cache: ${r._edgesRefusedReason}) — texture coverage UNKNOWN`;
+    } else if (b.status === 'DECODED') {
+      textureCoverage = 'NO_RECORDED_EDGES (decoded; no shape-bound ArkTexture entries recorded in the phase-3 batch)';
+    } else if (b.status === 'DECODED_NO_MESH_GEOMETRY') {
+      textureCoverage = 'NO_RECORDED_EDGES (decoded, no mesh geometry blocks — no shape-bound ArkTexture entries possible)';
+    } else {
+      textureCoverage = 'UNKNOWN (not decoded in this run)';
     }
     const row = {
       era: r.era, id: r.id, entryName: r.entryName, entryIndex: r.entryIndex,
@@ -525,19 +773,8 @@ export async function buildCatalogData(opts = {}) {
       sceneExtent: (b && b.status === 'DECODED' && b.bounds)
         ? { unknown: false, ...b.bounds, ...SPACE_LABEL }
         : { unknown: true, note: 'not measured (undecoded or no mesh geometry) — UNKNOWN (never 0); SOURCE_FILE_SCENE_SPACE != WORLD_PLACEMENT' },
-      complexity: b
-        ? {
-          unknown: false,
-          triangles: b.triangles ?? null, vertices: b.vertices ?? null,
-          shapes: b.shapeCount ?? null, nodes: b.nodeCount ?? null, blocks: b.blockCount ?? null,
-          units: 'triangles=NiTriShapeData triangle count; vertices=vertex count; shapes=NiTriShape blocks; nodes=NiNode blocks',
-        }
-        : { unknown: true, note: 'not decoded in this run' },
-      textureCoverage: edges
-        ? `NAME_FOUND_EXACT=${edges.nameFound}; NAME_BASE_MATCH_EXTENSION_DIFF=${edges.nameBase}; NAME_NOT_FOUND=${edges.nameNotFound}; MATERIAL_REFERENCE_CONFIRMED=${edges.matEdges} (ArkTexture descriptive names vs the same-era Textures.bnt numeric-name catalog; container resolution NOT established — no IMAGE_DECODED, no MATERIAL_APPLIED)`
-        : (b
-          ? 'NO_RECORDED_EDGES (decoded but no shape-bound ArkTexture entries recorded in the phase-3 batch)'
-          : 'UNKNOWN (not decoded in this run)'),
+      complexity,
+      textureCoverage,
       roleHypothesis: null,
       roleEvidence: null,
     };
@@ -549,7 +786,15 @@ export async function buildCatalogData(opts = {}) {
   const byDecode = {};
   for (const row of rows) byDecode[row.decodeCoverage] = (byDecode[row.decodeCoverage] ?? 0) + 1;
   const extentMeasured = rows.filter((r) => !r.sceneExtent.unknown).length;
-  const complexityMeasured = rows.filter((r) => !r.complexity.unknown).length;
+  // CAM-C2: counted through the SHARED isComplexityMeasured predicate (same
+  // definition as the rows/API/UI/tests) — FAILED rows are never counted.
+  const complexityMeasured = rows.filter((r) => isComplexityMeasured(r.complexity)).length;
+  const complexityByStatus = {};
+  for (const row of rows) {
+    if (isComplexityMeasured(row.complexity)) {
+      complexityByStatus[row.decodeCoverage] = (complexityByStatus[row.decodeCoverage] ?? 0) + 1;
+    }
+  }
   out.coverage = {
     totalRows: rows.length,
     byEra: {
@@ -562,8 +807,13 @@ export async function buildCatalogData(opts = {}) {
       unknown: rows.length - extentMeasured,
       coverageLine: `SCENE_EXTENT measured ${extentMeasured} of ${rows.length} (CD_2003: 4 of ${out.containers.CD_2003_Models_ark.entries}; PCG_9_3_5: ${bntRows.filter((r) => r._batch?.status === 'DECODED').length} of ${out.containers.PCG_9_3_5_Models_bnt.entries}) — every table is LARGEST-MEASURED, never "largest of all"`,
     },
-    complexity: { measured: complexityMeasured, unknown: rows.length - complexityMeasured },
-    claimDiscipline: 'ALL rankings are largest-MEASURED (coverage incomplete); "largest city"-style claims are FORBIDDEN and NOT made; big file != biggest extent != most complex (separate tables, never merged into one verdict)',
+    complexity: {
+      measured: complexityMeasured,
+      unknown: rows.length - complexityMeasured,
+      measuredByStatus: complexityByStatus,
+      definition: 'CAM-C2 shared status model: complexityFromBatchRow/isComplexityMeasured — measured requires a genuinely successful decode (DECODED or DECODED_NO_MESH_GEOMETRY) with COMPLETE numeric metrics; FAILED (and any incomplete row) is UNKNOWN, never counted; recomputed from the records at every build (no hardcoded count)',
+    },
+    claimDiscipline: 'ALL rankings are largest-MEASURED (coverage incomplete); "largest city"-style claims are FORBIDDEN and NOT made; big file != biggest extent != most complex (separate tables, never merged into one verdict); entries/models/textures/extent/complexity are SEPARATE censuses (21,302 archive entries vs 8,088 model rows are different counts)',
   };
 
   // ---- duplicate-ID-across-eras census (legal; must NOT be conflated) ----
@@ -634,7 +884,17 @@ export function filterRows(rows, { era = 'ALL', status = 'ALL', q = '' } = {}) {
 // wire — NEVER a committed fixture). The client re-composes transforms itself
 // (three.js) and cross-checks against the shipped bounds — fail-closed.
 // ---------------------------------------------------------------------------
-export const CATALOG_WIRE_VERSION = 'pec-catalog-wire-v1';
+export const CATALOG_WIRE_VERSION = 'pec-catalog-wire-v2';
+
+/** CAM-C3: the single source of truth for the primary wire cache identity —
+ *  era | container SHA | entry name | payload SHA | reader version | wire
+ *  version. The server's lazy wire cache keys on THIS (never a partial key);
+ *  buildPrimaryWire stamps the same value into the wire. */
+export function primaryWireCacheKey(id) {
+  const pin = PRIMARY_PINS[id];
+  if (!pin) throw new Error(`[primaryWireCacheKey] unknown primary id "${id}"`);
+  return `catalog-wire-v2|CD_2003|${CATALOG_PINS.modelsArk.sha256}|${id}.nif|${pin.sha256}|${PEC_NIF41_READER_VERSION}|${CATALOG_WIRE_VERSION}`;
+}
 
 export function buildPrimaryWire(primaryEntry, id) {
   const { analysis } = primaryEntry;
@@ -694,7 +954,11 @@ export function buildPrimaryWire(primaryEntry, id) {
     wireVersion: CATALOG_WIRE_VERSION,
     run: 'PE_CITY_ASSET_MAP_R1_20261010',
     phase: 'CATALOG_MODE (phase 4)',
-    cacheKey: `catalog-wire-v1|${analysis.asset.era}|${analysis.asset.payloadSha256}|${PEC_NIF41_READER_VERSION}|${CATALOG_WIRE_VERSION}`,
+    // CAM-C3: the model-wire cache identity now carries the FULL four-part
+    // identity + reader/wire versions (era | container SHA | entry name |
+    // payload SHA | reader version | wire version) — a mismatched wire is
+    // never reused under a partial key. Same value as primaryWireCacheKey(id).
+    cacheKey: primaryWireCacheKey(id),
     wireContract:
       'runtime loopback-only data regenerated from the pinned READ_ONLY Models.ark through the phase-3 bounded NIF-4.1 reader — never a committed fixture; no whole-corpus route',
     provenance: {

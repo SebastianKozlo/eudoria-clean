@@ -1,0 +1,736 @@
+{
+ "run": "PE_CITY_ASSET_MAP_R1_20261010",
+ "harnessInheritedFrom": "PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009",
+ "phase": "APP_SERVER_TESTS",
+ "harness": "tests/pecompat/run_app_tests.mjs",
+ "ctx": {
+  "modelsPath": "D:\\Eudoria_Reconstruction\\pcg_install\\Data\\Models\\Models.bnt",
+  "rawDir": "docs\\audits\\PE_WORLD_LAUNCHER_R1_20261010\\raw\\U19FIX\\APP",
+  "threeRoot": null
+ },
+ "totals": {
+  "pass": 22,
+  "fail": 0,
+  "notPerformed": 0,
+  "total": 22
+ },
+ "elapsedMs": 6028,
+ "serverLeftRunning": false,
+ "note": "T7/T9 suites start and stop their own bounded server processes; the port-freed proof is asserted inside each lifecycle record",
+ "tests": [
+  {
+   "suite": "api_path_denial.test.mjs",
+   "id": "T7_SERVER_START",
+   "name": "server starts on a verified-free loopback port with fail-closed regenerated SceneIR",
+   "status": "PASS",
+   "measuredQuantity": "startup line + /api/status fields (bind/port/pid/modelId/counts/three pin)",
+   "measured": {
+    "startupLine": "sceneir server http://127.0.0.1:8798/ pid=28760",
+    "statusBind": "127.0.0.1",
+    "statusPort": 8798,
+    "statusPid": 28760,
+    "sceneirModel": 218757,
+    "cacheKey": "218757:3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36:pec-nif101-adapter-v1:pec-sceneir-v1",
+    "counts": {
+     "blocks": 66,
+     "meshes": 14,
+     "supported": 62,
+     "partiallyUnderstood": 2,
+     "opaque": 2
+    },
+    "threeVersion": "0.185.0",
+    "startupElapsedMs": 634
+   },
+   "independentSourceOfTruth": "the child process stdout startup line and the live /api/status response — neither is produced by the test code",
+   "whyNonCircular": "the test only observes what the server itself prints and serves",
+   "failureCaseDetected": "bind not loopback / pid mismatch / SceneIR not regenerated / three pin broken"
+  },
+  {
+   "suite": "api_path_denial.test.mjs",
+   "id": "T7_APP_STATIC_LOADS",
+   "name": "app static surface loads (index/app/css/pec module/pinned three)",
+   "status": "PASS",
+   "measuredQuantity": "HTTP statuses + body markers (canvas/diagnostics ids, module exports, three module size)",
+   "measured": {
+    "root": true,
+    "appJs": true,
+    "css": true,
+    "pecModule": true,
+    "three": true
+   },
+   "independentSourceOfTruth": "real local HTTP responses over the wire",
+   "whyNonCircular": "the served bytes are compared against expectations fixed before the request",
+   "failureCaseDetected": "any static file missing, wrong type, or the three pin route broken"
+  },
+  {
+   "suite": "api_path_denial.test.mjs",
+   "id": "T7_SCENEIR_ENDPOINT",
+   "name": "SceneIR endpoint serves the bounded index-derived regenerated data (pins + 62+4=66 + 14 associations + 9/5 texture statuses)",
+   "status": "PASS",
+   "measuredQuantity": "served wire payload fields vs the run pins and the phase-2 measured accounting",
+   "measured": {
+    "status": 200,
+    "payloadSha256": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+    "containerSha256": "c950a8c26f2063f4dd748d88c95bd769aac77a2f5f76face7e969be0b3d3bee0",
+    "cacheKey": "218757:3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36:pec-nif101-adapter-v1:pec-sceneir-v1",
+    "blocks": 66,
+    "meshAssociations": 14,
+    "decodeCensus": {
+     "SUPPORTED": 62,
+     "PARTIALLY_UNDERSTOOD": 2,
+     "OPAQUE": 2
+    },
+    "textureBound": 9,
+    "textureUntextured": 5,
+    "geometryBlocks": 14,
+    "firstGeoSanity": {
+     "positionsLen": 276,
+     "expectedPos": 276,
+     "indicesLen": 168,
+     "expectedIdx": 168,
+     "vertexSha": "3869b16b6ccb33f4d689dbf3e14b6eeb9695140f6d51e54e6cd458c2a4f68064"
+    },
+    "headersPayloadSha": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+    "adapterLoadElapsedMs": 464
+   },
+   "independentSourceOfTruth": "the pinned SHA256 identities + the predecessor-measured 62+4=66 / 14 / 9+5 accounting",
+   "whyNonCircular": "the endpoint content is compared to externally pinned hashes and counts, not to its own claim",
+   "failureCaseDetected": "stale/unpinned data, wrong counts, wire geometry inconsistent with its own counts"
+  },
+  {
+   "suite": "api_path_denial.test.mjs",
+   "id": "T7_PATH_DENIAL_BATTERY",
+   "name": "synthetic malicious paths (../, absolute, encoded traversal, unconfigured root, unknown route) all DENIED with explicit errors",
+   "status": "PASS",
+   "measuredQuantity": "per-request status + explicit error class + no NIF/BNT payload markers in the body",
+   "measured": [
+    {
+     "id": "TRAVERSAL_COMPAT",
+     "rawPath": "/compat/../server.mjs",
+     "status": 404,
+     "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+     "message": "\"../server.mjs\" is not in the compat allowlist (fixed file set: index.html, app.js, api.js, asset-mode.js, scene-mode.js, compat.css)",
+     "bytes": 238,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "TRAVERSAL_COMPAT_DECODED",
+     "rawPath": "/compat/%2e%2e/server.mjs",
+     "status": 404,
+     "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+     "message": "\"../server.mjs\" is not in the compat allowlist (fixed file set: index.html, app.js, api.js, asset-mode.js, scene-mode.js, compat.css)",
+     "bytes": 242,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "TRAVERSAL_COMPAT_ENCODED_SLASH",
+     "rawPath": "/compat/..%2f..%2fsrc%2fpesource%2fNifModelReader.js",
+     "status": 404,
+     "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+     "message": "\"../../src/pesource/NifModelReader.js\" is not in the compat allowlist (fixed file set: index.html, app.js, api.js, asset-mode.js, scene-mode.js, compat.css)",
+     "bytes": 292,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "UNCONFIGURED_ROOT_PESOURCE",
+     "rawPath": "/src/pesource/NifModelReader.js",
+     "status": 404,
+     "errorClass": "ROUTE_NOT_FOUND",
+     "message": "no route matches; the server exposes ONLY the compat app allowlist, the pinned three package subtree, /api/status and /api/sceneir/218757 -- arbitrary filesystem paths are not servable BY CONSTRUCTION",
+     "bytes": 299,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "UNCONFIGURED_PEC_ESCAPE",
+     "rawPath": "/src/pecompat/../pesource/Bnt2Archive.js",
+     "status": 404,
+     "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+     "message": "\"../pesource/Bnt2Archive.js\" is not in the client module allowlist (PecTransform.js, PecSceneIR.js, PecInstanceBuilder.js, PecRenderConvert.js); the server-side extraction chain (PecNif10Reader/PecAss",
+     "bytes": 357,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "UNALLOWLISTED_PEC_MODULE",
+     "rawPath": "/src/pecompat/PecAssetAdapter.js",
+     "status": 404,
+     "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+     "message": "\"PecAssetAdapter.js\" is not in the client module allowlist (PecTransform.js, PecSceneIR.js, PecInstanceBuilder.js, PecRenderConvert.js); the server-side extraction chain (PecNif10Reader/PecAssetAdapte",
+     "bytes": 341,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "THREE_ESCAPE_PARENT",
+     "rawPath": "/node_modules/three/../package.json",
+     "status": 403,
+     "errorClass": "PATH_TRAVERSAL_BLOCKED",
+     "message": "three-package route refuses traversal/encoded/absolute escape attempts (allowlist-jailed subtree)",
+     "bytes": 207,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "THREE_ESCAPE_GRANDPARENT",
+     "rawPath": "/node_modules/three/../../server.mjs",
+     "status": 403,
+     "errorClass": "PATH_TRAVERSAL_BLOCKED",
+     "message": "three-package route refuses traversal/encoded/absolute escape attempts (allowlist-jailed subtree)",
+     "bytes": 208,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "THREE_ESCAPE_ENCODED_BACKSLASH",
+     "rawPath": "/node_modules/three/build/..%5C..%5Cpackage.json",
+     "status": 400,
+     "errorClass": "BACKSLASH_IN_URL",
+     "message": "backslash in URL refused (no Windows path semantics in routes)",
+     "bytes": 179,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "ABSOLUTE_DRIVE_PATH",
+     "rawPath": "/D:/Eudoria_Reconstruction/pcg_install/Data/Models/Models.bnt",
+     "status": 404,
+     "errorClass": "ROUTE_NOT_FOUND",
+     "message": "no route matches; the server exposes ONLY the compat app allowlist, the pinned three package subtree, /api/status and /api/sceneir/218757 -- arbitrary filesystem paths are not servable BY CONSTRUCTION",
+     "bytes": 329,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "ABSOLUTE_DRIVE_PATH_DBL",
+     "rawPath": "//D:/Eudoria_Reconstruction/pcg_install/Data/Models/Models.bnt",
+     "status": 404,
+     "errorClass": "ROUTE_NOT_FOUND",
+     "message": "no route matches; the server exposes ONLY the compat app allowlist, the pinned three package subtree, /api/status and /api/sceneir/218757 -- arbitrary filesystem paths are not servable BY CONSTRUCTION",
+     "bytes": 330,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "RAW_DOTDOT_ROOT",
+     "rawPath": "/..",
+     "status": 404,
+     "errorClass": "ROUTE_NOT_FOUND",
+     "message": "no route matches; the server exposes ONLY the compat app allowlist, the pinned three package subtree, /api/status and /api/sceneir/218757 -- arbitrary filesystem paths are not servable BY CONSTRUCTION",
+     "bytes": 271,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "RAW_TRAVERSAL_UP",
+     "rawPath": "/../",
+     "status": 404,
+     "errorClass": "ROUTE_NOT_FOUND",
+     "message": "no route matches; the server exposes ONLY the compat app allowlist, the pinned three package subtree, /api/status and /api/sceneir/218757 -- arbitrary filesystem paths are not servable BY CONSTRUCTION",
+     "bytes": 272,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "UNKNOWN_ASSET_ID",
+     "rawPath": "/api/sceneir/999999",
+     "status": 404,
+     "errorClass": "UNKNOWN_ASSET_ID",
+     "message": "asset \"999999\" is not served: this server exposes ONLY the bounded index-derived SceneIR of model 218757 (no whole-BNT or arbitrary-entry route exists)",
+     "bytes": 241,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "NONEXISTENT_ARCHIVE_ROUTE",
+     "rawPath": "/api/archive/Models.bnt/entry/218757.nif",
+     "status": 404,
+     "errorClass": "ROUTE_NOT_FOUND",
+     "message": "no route matches; the server exposes ONLY the compat app allowlist, the pinned three package subtree, /api/status and /api/sceneir/218757 -- arbitrary filesystem paths are not servable BY CONSTRUCTION",
+     "bytes": 308,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "UNCONFIGURED_DOCS_ROOT",
+     "rawPath": "/docs/audits/PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009/PLAN_AND_PATH_ALLOWLIST.md",
+     "status": 404,
+     "errorClass": "ROUTE_NOT_FOUND",
+     "message": "no route matches; the server exposes ONLY the compat app allowlist, the pinned three package subtree, /api/status and /api/sceneir/218757 -- arbitrary filesystem paths are not servable BY CONSTRUCTION",
+     "bytes": 355,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "UNCONFIGURED_TOOLS_ROOT",
+     "rawPath": "/tools/pecompat/sceneir_dump.mjs",
+     "status": 404,
+     "errorClass": "ROUTE_NOT_FOUND",
+     "message": "no route matches; the server exposes ONLY the compat app allowlist, the pinned three package subtree, /api/status and /api/sceneir/218757 -- arbitrary filesystem paths are not servable BY CONSTRUCTION",
+     "bytes": 300,
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "UNCONFIGURED_SERVER_FILE",
+     "rawPath": "/compat/server-sceneir.mjs",
+     "status": 404,
+     "errorClass": "STATIC_FILE_NOT_ALLOWEDLISTED",
+     "message": "\"server-sceneir.mjs\" is not in the compat allowlist (fixed file set: index.html, app.js, api.js, asset-mode.js, scene-mode.js, compat.css)",
+     "bytes": 248,
+     "verdict": "DENIED_EXPLICIT"
+    }
+   ],
+   "independentSourceOfTruth": "the wire responses themselves (raw paths sent un-normalized over real HTTP)",
+   "whyNonCircular": "the server code under test is exercised through its public socket; denial classes are read from its own JSON errors",
+   "failureCaseDetected": []
+  },
+  {
+   "suite": "api_path_denial.test.mjs",
+   "id": "T7_MALFORMED_AND_METHOD_DENIAL",
+   "name": "malformed percent/null-byte URLs refused; non-GET methods refused (read-only API)",
+   "status": "PASS",
+   "measuredQuantity": "status + explicit error class per request",
+   "measured": [
+    {
+     "id": "MALFORMED_PERCENT",
+     "method": "GET",
+     "rawPath": "/compat/%zz",
+     "status": 400,
+     "errorClass": "MALFORMED_URL",
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "NULL_BYTE",
+     "method": "GET",
+     "rawPath": "/compat/%00index.html",
+     "status": 400,
+     "errorClass": "NULL_BYTE_IN_URL",
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "POST_METHOD",
+     "method": "POST",
+     "rawPath": "/api/sceneir/218757",
+     "status": 405,
+     "errorClass": "METHOD_NOT_ALLOWED_READ_ONLY",
+     "verdict": "DENIED_EXPLICIT"
+    },
+    {
+     "id": "PUT_METHOD",
+     "method": "PUT",
+     "rawPath": "/api/sceneir/218757",
+     "status": 405,
+     "errorClass": "METHOD_NOT_ALLOWED_READ_ONLY",
+     "verdict": "DENIED_EXPLICIT"
+    }
+   ],
+   "independentSourceOfTruth": "raw wire responses",
+   "whyNonCircular": "the requests exercise the server parser and method gate directly",
+   "failureCaseDetected": []
+  },
+  {
+   "suite": "api_path_denial.test.mjs",
+   "id": "T7_SERVER_LIFECYCLE",
+   "name": "bounded server lifecycle: own PID/port recorded, process stopped, port FREED",
+   "status": "PASS",
+   "measuredQuantity": "exit code + port rebind probe after kill",
+   "measured": {
+    "pid": 28760,
+    "port": 8798,
+    "killed": true,
+    "exitCode": null,
+    "signal": "SIGTERM",
+    "lifetimeMs": 749,
+    "portFreed": true,
+    "freedAfterMs": 44
+   },
+   "independentSourceOfTruth": "child exit event + a fresh bind/close probe of the same port",
+   "whyNonCircular": "port freeness is measured by the OS accept path, not by trust in the kill call",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "app_integration.test.mjs",
+   "id": "T8_ASSET_LOAD",
+   "name": "pinned asset load through PecAssetAdapter (fail-closed SHA verified)",
+   "status": "PASS",
+   "measuredQuantity": "payloadSha256 vs pin + block/mesh accounting",
+   "measured": {
+    "payloadSha256": "3e8a22c2213202207e374b55cd65b2c3be039ccdd1e8d01a07fcaf44de12cf36",
+    "blocks": 66,
+    "meshes": 14,
+    "elapsedMs": 571
+   },
+   "independentSourceOfTruth": "the pinned SHA256 identities (contract §2)",
+   "whyNonCircular": "the load is refused by the adapter itself on any pin mismatch",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "app_integration.test.mjs",
+   "id": "T8_WIRE_TO_ASSET",
+   "name": "the app client path rebuilds the asset from the served wire (pin + composition cross-checks)",
+   "status": "PASS",
+   "measuredQuantity": "rebuilt IR accounting + client-composed world transforms vs the shipped FILE_SCENE_SPACE artifact",
+   "measured": {
+    "blocks": 66,
+    "meshes": 14,
+    "composed": 28
+   },
+   "independentSourceOfTruth": "the wire payload built by the server module + the phase-2 measured accounting",
+   "whyNonCircular": "the client recomposes transforms itself and cross-checks against the server-shipped artifact — two independent computations must agree",
+   "failureCaseDetected": "wire corruption, pin mismatch, composition mismatch"
+  },
+  {
+   "suite": "app_integration.test.mjs",
+   "id": "T8_CLIENT_FAIL_CLOSED_NEGATIVES",
+   "name": "tampered wire (wrong pin / corrupted transform) is REFUSED by the app client path",
+   "status": "PASS",
+   "measuredQuantity": "exception raised by wireToAsset on each tampered input",
+   "measured": {
+    "pinRefused": true,
+    "pinMsg": "[SceneIRApi] PIN MISMATCH -- served payload SHA ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff / container SHA c950a8c26f2063f4dd748d88c95bd76",
+    "trsRefused": true,
+    "trsMsg": "[SceneIRApi] WIRE CROSS-CHECK FAILED at block 0 translate[0]: client 1.25 vs shipped 0 -- refusing"
+   },
+   "independentSourceOfTruth": "the fail-closed checks in compat/api.js (pin + FILE_SCENE cross-check)",
+   "whyNonCircular": "deliberately corrupted inputs must NOT render — the negative control proves the gate is real",
+   "failureCaseDetected": "none (both tampered inputs refused)"
+  },
+  {
+   "suite": "app_integration.test.mjs",
+   "id": "T8_CLIENT_FINGERPRINTS",
+   "name": "client-side re-hash of all 14 mesh vertex+index arrays vs the recomputed fingerprints",
+   "status": "PASS",
+   "measuredQuantity": "crypto.subtle SHA256 of the rebuilt typed arrays vs meshAssociations fingerprints",
+   "measured": {
+    "status": "OK",
+    "verified": 14,
+    "elapsedMs": 5
+   },
+   "independentSourceOfTruth": "the predecessor-measured per-mesh fingerprints (phase-2 T7 pins)",
+   "whyNonCircular": "the client recomputes hashes from the arrays it would render and compares them to pinned values",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "app_integration.test.mjs",
+   "id": "T8_TWO_INSTANCES_INDEPENDENT",
+   "name": "two instances from the shared asset: change A leaves B bit-identical; geometry SHARED; wrappers/conversions independent",
+   "status": "PASS",
+   "measuredQuantity": "authored+composed TRS deep-equality before/after; BufferGeometry object identity across instances; conversion-application count",
+   "measured": {
+    "bUnchangedAuthored": true,
+    "bUnchangedScene": true,
+    "aMoved": true,
+    "geometryShared": true,
+    "wrappersIndependent": true,
+    "conversionsOnce": true,
+    "distinctWorlds": true,
+    "meshesPerInstance": 14,
+    "sharedGeometryCacheEntries": 14,
+    "aAppliedTranslate": [
+     55.5,
+     0,
+     0
+    ]
+   },
+   "independentSourceOfTruth": "trsDeepEqual (exact TRS comparison) + THREE object identity (===) of the geometry cache",
+   "whyNonCircular": "the app builder path is executed as the app uses it; the independence predicate compares B against its own pre-change snapshot",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "app_integration.test.mjs",
+   "id": "T8_DIAGNOSTICS_AND_LEDGER_HONEST",
+   "name": "diagnostics fields present and honest; dPVS heuristic ledger reports imported vs visible with reasons (9/5 preserved)",
+   "status": "PASS",
+   "measuredQuantity": "buildDiagnosticsModel + computeVisibilityLedger + buildInspectorRows outputs vs the measured IR accounting",
+   "measured": {
+    "pinVerified": true,
+    "blocks": "62+4=66",
+    "meshes": 14,
+    "textureStatus": "9+5",
+    "ledgerAllVisible": "14/14",
+    "ledgerDpvsHidden": "14/9 (excluded 5)",
+    "inspectorRows": 66,
+    "dpvsHintRows": 5
+   },
+   "independentSourceOfTruth": "the phase-2 measured accounting (62+4=66, 14 meshes, 9 TEXTURE_NAME_BOUND + 5 UNTEXTURED, 5 dPVS-named meshes)",
+   "whyNonCircular": "the diagnostics/ledger builders are fed the SAME asset and their outputs are compared against independently pinned counts — a hidden mesh MUST appear as an exclusion, never as a silent pass",
+   "failureCaseDetected": "none"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_GATE_NEG_EXIT_CODE",
+   "name": "controlled per-conjunct gate negative — remove ONLY the good exit code (exitCode=1, otherwise-good DOM) — the gate MUST FAIL it and name exactly EXIT_CODE_ZERO",
+   "status": "PASS",
+   "resultClass": "SYNTHETIC_GATE_NEGATIVE_CONTROL (defective input fed through the same production evaluateLoadGate; NOT a browser execution)",
+   "controlExpectation": "gate FAIL + exact missing-conjunct naming",
+   "measuredQuantity": "evaluateLoadGate() on a synthetic defective input",
+   "measured": {
+    "input": {
+     "exitCode": 1,
+     "domBytes": 186
+    },
+    "gateResult": "FAIL",
+    "gateMissingConjuncts": [
+     "EXIT_CODE_ZERO"
+    ],
+    "expectedMissingConjuncts": [
+     "EXIT_CODE_ZERO"
+    ]
+   },
+   "failureCaseDetected": "none — the gate failed the defective input naming exactly the expected conjunct(s)"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_GATE_NEG_EMPTY_DOM",
+   "name": "controlled per-conjunct gate negative — remove ONLY the DOM (empty capture, exitCode=0) — the gate MUST FAIL it and name exactly DOM_NONEMPTY+CANVAS_PRESENT+DIAGNOSTICS_PRESENT+STATUS_READY",
+   "status": "PASS",
+   "resultClass": "SYNTHETIC_GATE_NEGATIVE_CONTROL (defective input fed through the same production evaluateLoadGate; NOT a browser execution)",
+   "controlExpectation": "gate FAIL + exact missing-conjunct naming",
+   "measuredQuantity": "evaluateLoadGate() on a synthetic defective input",
+   "measured": {
+    "input": {
+     "exitCode": 0,
+     "domBytes": 0
+    },
+    "gateResult": "FAIL",
+    "gateMissingConjuncts": [
+     "DOM_NONEMPTY",
+     "CANVAS_PRESENT",
+     "DIAGNOSTICS_PRESENT",
+     "STATUS_READY"
+    ],
+    "expectedMissingConjuncts": [
+     "DOM_NONEMPTY",
+     "CANVAS_PRESENT",
+     "DIAGNOSTICS_PRESENT",
+     "STATUS_READY"
+    ]
+   },
+   "failureCaseDetected": "none — the gate failed the defective input naming exactly the expected conjunct(s)"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_GATE_NEG_NO_CANVAS",
+   "name": "controlled per-conjunct gate negative — remove ONLY the canvas marker — the gate MUST FAIL it and name exactly CANVAS_PRESENT",
+   "status": "PASS",
+   "resultClass": "SYNTHETIC_GATE_NEGATIVE_CONTROL (defective input fed through the same production evaluateLoadGate; NOT a browser execution)",
+   "controlExpectation": "gate FAIL + exact missing-conjunct naming",
+   "measuredQuantity": "evaluateLoadGate() on a synthetic defective input",
+   "measured": {
+    "input": {
+     "exitCode": 0,
+     "domBytes": 152
+    },
+    "gateResult": "FAIL",
+    "gateMissingConjuncts": [
+     "CANVAS_PRESENT"
+    ],
+    "expectedMissingConjuncts": [
+     "CANVAS_PRESENT"
+    ]
+   },
+   "failureCaseDetected": "none — the gate failed the defective input naming exactly the expected conjunct(s)"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_GATE_NEG_NO_DIAGNOSTICS",
+   "name": "controlled per-conjunct gate negative — remove ONLY the diagnostics marker — the gate MUST FAIL it and name exactly DIAGNOSTICS_PRESENT",
+   "status": "PASS",
+   "resultClass": "SYNTHETIC_GATE_NEGATIVE_CONTROL (defective input fed through the same production evaluateLoadGate; NOT a browser execution)",
+   "controlExpectation": "gate FAIL + exact missing-conjunct naming",
+   "measuredQuantity": "evaluateLoadGate() on a synthetic defective input",
+   "measured": {
+    "input": {
+     "exitCode": 0,
+     "domBytes": 158
+    },
+    "gateResult": "FAIL",
+    "gateMissingConjuncts": [
+     "DIAGNOSTICS_PRESENT"
+    ],
+    "expectedMissingConjuncts": [
+     "DIAGNOSTICS_PRESENT"
+    ]
+   },
+   "failureCaseDetected": "none — the gate failed the defective input naming exactly the expected conjunct(s)"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_GATE_NEG_STATUS_ERROR",
+   "name": "controlled per-conjunct gate negative — replace ONLY the status with ERROR — the gate MUST FAIL it and name exactly STATUS_READY",
+   "status": "PASS",
+   "resultClass": "SYNTHETIC_GATE_NEGATIVE_CONTROL (defective input fed through the same production evaluateLoadGate; NOT a browser execution)",
+   "controlExpectation": "gate FAIL + exact missing-conjunct naming",
+   "measuredQuantity": "evaluateLoadGate() on a synthetic defective input",
+   "measured": {
+    "input": {
+     "exitCode": 0,
+     "domBytes": 208
+    },
+    "gateResult": "FAIL",
+    "gateMissingConjuncts": [
+     "STATUS_READY"
+    ],
+    "expectedMissingConjuncts": [
+     "STATUS_READY"
+    ]
+   },
+   "failureCaseDetected": "none — the gate failed the defective input naming exactly the expected conjunct(s)"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_GATE_NEG_STATUS_LOADING",
+   "name": "controlled per-conjunct gate negative — replace ONLY the status with LOADING — the gate MUST FAIL it and name exactly STATUS_READY",
+   "status": "PASS",
+   "resultClass": "SYNTHETIC_GATE_NEGATIVE_CONTROL (defective input fed through the same production evaluateLoadGate; NOT a browser execution)",
+   "controlExpectation": "gate FAIL + exact missing-conjunct naming",
+   "measuredQuantity": "evaluateLoadGate() on a synthetic defective input",
+   "measured": {
+    "input": {
+     "exitCode": 0,
+     "domBytes": 188
+    },
+    "gateResult": "FAIL",
+    "gateMissingConjuncts": [
+     "STATUS_READY"
+    ],
+    "expectedMissingConjuncts": [
+     "STATUS_READY"
+    ]
+   },
+   "failureCaseDetected": "none — the gate failed the defective input naming exactly the expected conjunct(s)"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_LOAD_ASSET_MODE",
+   "name": "real headless-browser load — asset mode (default URL — model 218757) — 5-conjunct gate: exitCode===0 AND nonempty DOM AND canvas AND diagnostics AND data-load-status==='READY'",
+   "status": "PASS",
+   "resultClass": "REAL_BROWSER_HEADLESS_DOM",
+   "measuredQuantity": "captured DOM markers + browser exit code through the production evaluateLoadGate",
+   "measured": {
+    "browserBinary": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "binaryProvenance": "first existing default browser candidate",
+    "knownBrowserBinary": true,
+    "url": "http://127.0.0.1:8160/",
+    "attemptCount": 1,
+    "attempts": [
+     {
+      "attempt": 1,
+      "exitCode": 0,
+      "domBytes": 21064,
+      "loadStatus": "READY",
+      "conjuncts": {
+       "EXIT_CODE_ZERO": true,
+       "DOM_NONEMPTY": true,
+       "CANVAS_PRESENT": true,
+       "DIAGNOSTICS_PRESENT": true,
+       "STATUS_READY": true
+      },
+      "missingConjuncts": [],
+      "elapsedMs": 2315,
+      "timedOut": false,
+      "executionError": null
+     }
+    ],
+    "exitCode": 0,
+    "domBytes": 21064,
+    "conjuncts": {
+     "EXIT_CODE_ZERO": true,
+     "DOM_NONEMPTY": true,
+     "CANVAS_PRESENT": true,
+     "DIAGNOSTICS_PRESENT": true,
+     "STATUS_READY": true
+    },
+    "loadStatus": "READY",
+    "elapsedMs": 2315,
+    "timedOut": false,
+    "executionError": null
+   },
+   "missingConjuncts": [],
+   "independentSourceOfTruth": "the real browser DOM dump (Edge/Chromium headless=new) — not an HTTP status or a unit test",
+   "whyNonCircular": "a real browser engine parsed and executed the app page; the DOM markers come from the live document",
+   "failureCaseDetected": "none — every conjunct holds (exit code 0, non-empty captured DOM, canvas, diagnostics, data-load-status READY)"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_LOAD_SCENE_MODE",
+   "name": "real headless-browser load — authored scene mode (#scene deep link — two instances) — 5-conjunct gate: exitCode===0 AND nonempty DOM AND canvas AND diagnostics AND data-load-status==='READY'",
+   "status": "PASS",
+   "resultClass": "REAL_BROWSER_HEADLESS_DOM",
+   "measuredQuantity": "captured DOM markers + browser exit code through the production evaluateLoadGate",
+   "measured": {
+    "browserBinary": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "binaryProvenance": "first existing default browser candidate",
+    "knownBrowserBinary": true,
+    "url": "http://127.0.0.1:8160/#scene",
+    "attemptCount": 1,
+    "attempts": [
+     {
+      "attempt": 1,
+      "exitCode": 0,
+      "domBytes": 9309,
+      "loadStatus": "READY",
+      "conjuncts": {
+       "EXIT_CODE_ZERO": true,
+       "DOM_NONEMPTY": true,
+       "CANVAS_PRESENT": true,
+       "DIAGNOSTICS_PRESENT": true,
+       "STATUS_READY": true
+      },
+      "missingConjuncts": [],
+      "elapsedMs": 1291,
+      "timedOut": false,
+      "executionError": null
+     }
+    ],
+    "exitCode": 0,
+    "domBytes": 9309,
+    "conjuncts": {
+     "EXIT_CODE_ZERO": true,
+     "DOM_NONEMPTY": true,
+     "CANVAS_PRESENT": true,
+     "DIAGNOSTICS_PRESENT": true,
+     "STATUS_READY": true
+    },
+    "loadStatus": "READY",
+    "elapsedMs": 1291,
+    "timedOut": false,
+    "executionError": null
+   },
+   "missingConjuncts": [],
+   "independentSourceOfTruth": "the real browser DOM dump (Edge/Chromium headless=new) — not an HTTP status or a unit test",
+   "whyNonCircular": "a real browser engine parsed and executed the app page; the DOM markers come from the live document",
+   "failureCaseDetected": "none — every conjunct holds (exit code 0, non-empty captured DOM, canvas, diagnostics, data-load-status READY)"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_RAW_PERSISTENCE",
+   "name": "raw capture persistence (SIDE-ERROR class — the browser-gate statuses above were computed independently of this record)",
+   "status": "PASS",
+   "measuredQuantity": "writeFile of the DOM dumps + HEADLESS_RUN.json (report raw dir)",
+   "measured": {
+    "persisted": [
+     {
+      "file": "HEADLESS_DOM_DUMP_ASSET.html",
+      "bytes": 21064
+     },
+     {
+      "file": "HEADLESS_DOM_DUMP_SCENE.html",
+      "bytes": 9309
+     },
+     {
+      "file": "HEADLESS_RUN.json",
+      "bytes": null
+     }
+    ]
+   },
+   "failureCaseDetected": "none — raw DOM dumps + run JSON written to the report raw dir"
+  },
+  {
+   "suite": "headless_load.test.mjs",
+   "id": "T9_SERVER_LIFECYCLE",
+   "name": "suite-owned bounded server lifecycle (pid 34812, port 8160; stop + port-freed proof)",
+   "status": "PASS",
+   "measuredQuantity": "start/stop/PID/lifetime/port-freed proof of the suite-owned server",
+   "measured": {
+    "pid": 34812,
+    "port": 8160,
+    "startedAtMs": 1791648506683,
+    "lifetimeMs": 4592,
+    "killed": true,
+    "exitCode": null,
+    "signal": "SIGTERM",
+    "portFreed": true,
+    "freedAfterMs": 75
+   },
+   "failureCaseDetected": "none — server stopped, port freed, nothing left running"
+  }
+ ]
+}

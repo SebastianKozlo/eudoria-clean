@@ -9,7 +9,7 @@
 // needing the containers; real rows are used when available for a live spot
 // check against the frozen phase-2 ranking order.
 import {
-  sortRows, filterRows, CATALOG_PINS,
+  sortRows, filterRows, CATALOG_PINS, productionCacheIdentity,
 } from '../../tools/pecompat/catalog_data.mjs';
 import { rowsTableHtml, UNKNOWN_BADGE, coverageBoxHtml } from '../../compat/catalog-table.js';
 
@@ -157,6 +157,7 @@ export async function run(ctx) {
         modelsBntPath: ctx.modelsPath,
         batchStatePath: ctx.batchStatePath ?? null,
         nameEdgesPath: ctx.nameEdgesPath ?? null,
+        cacheIdentity: productionCacheIdentity(), // CAM-C3: declare the production envelope (same gate as the server)
       });
       const topExtent = sortRows(filterRows(data.rows, { era: 'PCG_9_3_5' }), { metric: 'extent' })[0];
       const topCdSize = sortRows(filterRows(data.rows, { era: 'CD_2003' }), { metric: 'size' })[0];

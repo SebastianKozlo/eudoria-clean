@@ -32,7 +32,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { ArkArchive } from '../../src/pesource/ArkArchive.js';
 import {
-  buildCatalogData, buildPrimaryWire, PRIMARY_PINS, PRIMARY_IDS, CATALOG_PINS,
+  buildCatalogData, buildPrimaryWire, PRIMARY_PINS, PRIMARY_IDS, CATALOG_PINS, productionCacheIdentity,
 } from '../../tools/pecompat/catalog_data.mjs';
 
 const RUN_ID = 'PE_CITY_ASSET_MAP_R1_20261010';
@@ -113,6 +113,7 @@ export async function run(ctx) {
       modelsBntPath: ctx.modelsPath ?? CATALOG_PINS.modelsBnt.path,
       batchStatePath: ctx.batchStatePath ?? null,
       nameEdgesPath: ctx.nameEdgesPath ?? null,
+      cacheIdentity: productionCacheIdentity(), // CAM-C3: declare the production envelope (same gate as the server)
     });
   } catch (e) {
     records.push(rec('CAT_BOUNDS_PRECHECK', 'catalog data build (prerequisites for the countercheck)', 'FAIL', {

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE Eudoria — podgląd świata (teren z oryginalnych próbek u16)</title>
+<link rel="stylesheet" href="/compat/compat.css">
+<link rel="stylesheet" href="/compat/world.css">
+<script type="importmap">
+{ "imports": {
+    "three": "/node_modules/three/build/three.module.js",
+    "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header id="app-header">
+  <div class="brand">PE Eudoria — podgląd świata | run PE_WORLD_LAUNCHER_R1_20261010 (Etap C+D, kontrakt §4/§5/§7)</div>
+  <div class="labels">
+    <span class="lab">teren = SUROWE uint16 z terrain.bnt (offset 64..2111; era PCG_9_3_5) — bez normalizacji/wygładzania/maskowania szwów</span>
+    <span class="lab">jednostki = adaptera (CURRENT_RUNTIME_CALIBRATION: u16/128 → m, 2 jedn./próbkę, identity min/max) — NIE „oryginalne XYZ”</span>
+  </div>
+  <div class="labels">
+    <span class="lab">konwersja u16→metry zastosowana DOKŁADNIE RAZ (PETerrainRegion.buildGeometry); odwracalna (×128)</span>
+    <span class="lab">tekstury terenu = ORYGINALNE (Etap D: materiał TDF → id@+16 → „&lt;id&gt;.dat” z Textures.bnt → TGA2 → GPU; preset RENDER_RECONSTRUCTION) · roślinność = RECONSTRUCTION_PREVIEW (Etap E: profile .vcl strict + LAB_SEED wrapper + oryginalne modele NIF; rozkład = rekonstrukcja, NIE historyczny) · woda = NOT_RECOVERED</span>
+  </div>
+</header>
+
+<div id="hud-line">reset kamery na spawn (R)</div>
+<div id="error-banner" hidden=""></div>
+<div id="boundary-banner" hidden="">granica danych rekonstrukcji — dalszy ruch wstrzymany (brak danych poza tym punktem; NIE zrzucamy w pustkę)</div>
+
+<div id="action-bar">
+  <button id="btn-mode-orbit" class="active" title="tryb orbity (klawisz 1)">Orbita [1]</button>
+  <button id="btn-mode-fly" title="tryb lotu (klawisz 2) — WASD + Q/E">Lot [2]</button>
+  <button id="btn-mode-walk" title="tryb spaceru (klawisz 3) — WASD po terenie; kliknij canvas, aby przechwycić mysz; ESC uwalnia">Spacer [3]</button>
+  <button id="btn-fit" title="dopasuj widok do okna danych (klawisz F)">Dopasuj [F]</button>
+  <button id="btn-reset" title="reset kamery na spawn (klawisz R)">Reset [R]</button>
+  <button id="btn-launcher" title="powrót do launchera">← Launcher</button>
+  <label class="tog"><input type="checkbox" id="tog-wireframe"> siatka (wireframe)</label>
+  <label class="tog"><input type="checkbox" id="tog-tilebounds" checked=""> granice kafli</label>
+  <label class="tog" title="Etap D: łańcuch materiał→tekstura (oryginalne payloady z Textures.bnt; preset RENDER_RECONSTRUCTION dla UV/roli albedo)"><input type="checkbox" id="tog-textures" checked=""> tekstury terenu (oryginalne — Etap D)</label>
+  <label class="tog" title="Etap E: podgląd roślinności (RECONSTRUCTION_PREVIEW) — profile .vcl (strict; 25 UNSUPPORTED), LAB_SEED przez udokumentowany wrapper PEFoliageLabSeed, byte-locked łańcuch PEFoliageCore NIETKNIĘTY, oryginalne modele z Models.bnt przez istniejący kwalifikowany importer + oryginalne tekstury gdy binding się rozwiąże; twardy limit 5000 widocznych instancji"><input type="checkbox" id="tog-vegetation" checked=""> roślinność (RECONSTRUCTION_PREVIEW — Etap E)</label>
+</div>
+
+<main id="world-layout">
+  <div id="viewport-wrap">
+    <canvas id="view-canvas" data-engine="three.js r185" width="422" height="301" style="touch-action: none;"></canvas>
+    <div id="pos-hud" class="small mono">pozycja (jednostki adaptera — NIE „oryginalne XYZ”): X=3700.0 Y=458.7 Z=7604.0 m | kafel 57:118 (00390076.tdf) | próbka (x=25, y=25) | surowe u16=10393 | tryb: ORBITA</div>
+    <div id="lock-hint" class="small">tryb Lot/Spacer: kliknij canvas, aby przechwycić mysz (świadome kliknięcie); ESC uwalnia kursor</div>
+  </div>
+  <aside id="world-side">
+    <section class="diag-section">
+      <h4>Ładowanie i błędy (uczciwie)</h4>
+      <div id="world-loading" class="small mono">materiały okna 8×8: 64/64 kafli…</div>
+    </section>
+    <section class="diag-section">
+      <h4>Profil / seed (ustawienia rekonstrukcji)</h4>
+      <div id="world-veg" class="small mono">Profil roślinności: 0 | Seed podglądu (LAB_SEED): 0 | gęstość podglądu: 50% | p3 = 0 [P-RNG-P3] (pokazane OSOBNO — nigdy LAB_SEED)
+VEGETATION_MODE = RECONSTRUCTION_PREVIEW — reconstruction-only until the cell-stream source is proven (iter032 bound 3): the LAB_SEED-keyed deterministic cell-stream stand-in in this wrapper + the [P-WINDOW] per-tile calibration — NEVER claimed historical; placement 1:1 NOT claimed
+domyślny profil serwera: 0 (pomiarowe uzasadnienie: MEASURED CHOICE (never "the historical biome of this place"): profile 0 is DECODED by the strict VegetationClimateDecoder with 12 non-empty records, and its model set contains 457485 — the NIF whose parse chain the EXISTING qualified importer (NifModelReader) was cross-validated BIT-EXACTLY against the R61 oracle (iter037) — plus 9 further same-era PCG_9_3_5 Models.bnt models measured below through the same importer without widening any guard)
+census wsparcia profilu 0: modele 10 (wsparte z teksturami 8, geometryjnie-bez-tekstur 2, UNSUPPORTED 0)
+instancje okna: żądane 2304 / wyrenderowane 2304 / ograniczone 0 (twardy limit 5000)
+umiejscowienie: wysokość terenu z TEGO SAMEGO okna (próbkowanie dwuliniowe po surowych u16) — REKONSTRUKCJA (nigdy historyczny placement)
+rozdział (kontrakt §6): ORIGINAL_CLIMATE_RECORDS = dane z przypiętych .vcl (strict); RECOVERED_RNG_ARITHMETIC = nietknięty łańcuch byte-locked PEFoliageCore; INSTANCE_DISTRIBUTION = wrapper PEFoliageLabSeed (LAB_SEED) — rekonstrukcja</div>
+    </section>
+    <section class="diag-section">
+      <h4>Census pamięci / instancji</h4>
+      <div id="world-census" class="small mono">kafle aktywne (okno 8×8): 64 / limit 64
+cache klienta: 103 kafli (206 KiB; limit 512)
+pobrania: 128 | błędy: 0
+geometria: 65536 wierzchołków, 130050 trójkątów (1 mesh regionu) | przebudowań okna: 2
+tekstury terenu: WŁĄCZONE — materiały resolved 615/615 warstw, zdekodowane tekstury 28, zastosowane warstwy 114019
+roślinność: żądane 2304 / wyrenderowane 2304 / ograniczone 0 (twardy limit widocznych 5000) | modele: 3 z instancjami (wsparte 3, bez tekstur 0, UNSUPPORTED 0)
+cache tekstur RGBA: 34 (8.5 MiB; limit 64) | fetch materiałów: 128 (błędy 0) | fetch tekstur: 34 (błędy 0)
+cache modeli roślinności: 3 (współdzielony; limit 16) | fetch modeli: 3 | fetch tekstur modeli: 2
+origin okna: 53,114</div>
+    </section>
+    <section class="diag-section">
+      <h4>Sterowanie</h4>
+      <div class="small">
+        <b>Orbita</b>: LMB obrót · RMB/scroll przybliżenie · PPM przesuwanie.<br>
+        <b>Lot</b>: WASD + Q (w dół) / E (w górę) · Shift ×3 · mysz po kliknięciu.<br>
+        <b>Spacer</b>: WASD po terenie (wysokość próbkowana z TEGO SAMEGO terenu; offset oka 1,7 m = ustawienie podglądu) · Shift ×3 · mysz po kliknięciu.<br>
+        <b>1/2/3</b> tryby · <b>F</b> dopasuj · <b>R</b> reset · <b>ESC</b> uwolnij kursor.
+      </div>
+    </section>
+    <details id="evidence">
+      <summary>Panel dowodów — provenance, kalibracja, topologia (dane techniczne)</summary>
+      <div id="world-evidence" class="small mono">era: PCG_9_3_5 | terrain.bnt SHA256: 95841761ce4ea074c97930ec1cef3fb57aac7f7f4f3d9b751a9ee60510299990 (pin zweryfikowany fail-closed)
+kalibracja (CURRENT_RUNTIME_CALIBRATION — preset z provenance, NIE fakt historyczny):
+  u16PerMeter=128; meterPerSample=2; min/max=identity lerp (min=0, max=65535 in u16 space) — per-tile min/max source UNRESOLVED
+  konwersja u16→metry zastosowana DOKŁADNIE RAZ w PETerrainRegion.buildGeometry (worldHeightMeters); odwracalna: ×128
+topologia inter-tile (wybór renderera, udokumentowany): quady przez granice kafli z SASIEDNICH ORYGINALNYCH próbek;
+  kafle = rozłączne bloki 32×32 (bez nakładania, bez napraw szwów — różnice na granicach to DANE ORYGINALNE);
+  brak zmian wysokości dla maskowania skoku.
+---- ETAP D: łańcuch tekstur terenu (oryginalne) ----
+materiały: rekordy nazwane TDF, maska@record+56 (pola 52..55 = extra4, NIE maska); wagi RAW u8 — sumy &gt;255 to DANE ORYGINALNE (bez normalizacji)
+relacja: id@+16 → "&lt;id&gt;.dat" w Textures.bnt (era PCG_9_3_5; potwierdzona silnikowo — 9.3.5 czyta sub@+16 jako id TEKSTURY materiału; ponownie zweryfikowana na próbkach tego uruchomienia)
+kontener tekstur: Textures.bnt SHA256 61ACD13B140E130647EEE24C1E2669D3734990B76CF74897DDD3BA0F4EA61393 (pin fail-closed; LAZY indeks 8381 wpisów; pojedyncze odczyty plików, bez ładowania całego kontenera)
+dekoder: decodeTga2 (TGA 2.0, 24bpp, 256×256, stopka TRUEVISION-XFILE) — TEN SAM moduł produkcyjny po stronie serwera i przeglądarki
+okno: warstwy resolved 583/583 | tekstury zdekodowane 23 | warstwy zastosowane 113544
+preset renderowania: RENDER_RECONSTRUCTION — sequential lerp per layer by RAW mask/255 in RECORD ORDER (base first) — era-evidenced FORM (9.3.5 LOD vertex-color bake lerp(vertexColor, materialTexture(u,v), mask/255), iter030); applied here to albedo;
+  UV: world-space GLOBAL uv = worldPos.xz / 32 m (u along +X, v along +Z/south; no per-tile or per-window reset); the repeat value is a RECONSTRUCTION choice (the era-evidenced detail-texture density is 32/32/16 world units — iter024 — applied to material textures BY ANALOGY, not as a pinned material repeat)
+  kolejność wierszy: decodeTga2 IMAGE order (row 0 = visual TOP; the TGA bottom-up storage is flipped ONCE by the decoder) + THREE.DataTexture flipY=false — v=0 samples the image TOP; the A32 climate-palette FILE-row convention (decodeTga2A32) is a DIFFERENT decoder/convention and is not used here
+  próbki komórek: nearest 16x16 material cell per tile (2x2 samples = 4x4 m per cell; mask row = grid-y, col = grid-x, the same axes as the height grid); flat within a cell (the 9.3.5 "edge-extended at load" mask semantics are NOT pinned — nearest is the documented choice)
+  przestrzeń barw: SRGB_PASSTHROUGH — the original TGA bytes are display-referred; the GPU blend happens on the raw values (no sRGB decode), matching the historical fixed-function D3D8 framebuffer-space blending; the shader outputs sRGB directly (no output colorspace chunk)
+  limity: MAX_LAYERS_PER_CELL=16 / MAX_TEXTURE_SLOTS=48 — cells/tiles exceeding a cap keep the FIRST layers in record order and the dropped count is REPORTED (a render approximation, labeled; the served raw weights are unchanged)
+normale + paleta kolorów (tryb OFF) = RECONSTRUCTION_PREVIEW (renderer); bajty źródłowe i transformacje sceny (mesh.position = origin×64 m)
+  są oddzielne od dopasowania kamery (fit/centering tylko w kontrolerze kamery).
+---- ETAP E: podgląd roślinności (RECONSTRUCTION_PREVIEW) ----
+trójstopniowy rozdział (kontrakt §6):
+  ORIGINAL_CLIMATE_RECORDS = dane z przypniętych .vcl (strict VegetationClimateDecoder; 7b858401c3eebda5…); 25.vcl = UNSUPPORTED (bez konwersji)
+  RECOVERED_RNG_ARITHMETIC = PEFoliageCore (byte-locked; seed FUN_0098cdf0, LCG FUN_0098ce30, lerp FUN_0095ac30, node01=/65535.0 f32; operand lock iter035) — NIETKNIĘTY
+  INSTANCE_DISTRIBUTION = wrapper PEFoliageLabSeed (LAB_SEED-keyed [P-CELLSTREAM] stand-in) — rekonstrukcja (źródło cell stream NIEUSTALENE)
+LAB_SEED = 0 (wpływa TYLKO na rekonstrukcyjny cell stream; NIE oryginalny p3; NIE historyczny seed) | p3 = 0 [P-RNG-P3] | viewBand = 10 (STRONGLY_SUPPORTED)
+modele: &lt;id&gt;.nif z przypiętego PCG_9_3_5 Models.bnt (C950A8C26F2063F4…) → parseWitnessModel (ISTNIEJĄCY kwalifikowany importer; głośne odmowy = uczciwe UNSUPPORTED) → NiTriShape → NiTexturingProperty → NiArkTextureExtraData id → &lt;id&gt;.dat z Textures.bnt → decodeModelTextureStrict (A32 32bpp IMAGE order / TGA2 24bpp) → GPU
+  granice uczciwe: [P-UNITS] cm→m ×0.01 RAZ; [P-AXIS] (x,z,-y); [P-UV] surowe v + flipY=false; [P-SCALE] mostek 2.0/NODE_SCALE_MUL×0.01 (CURRENT_RUNTIME_CALIBRATION — rozmiar NIE historyczny);
+  kształty bez łańcucha texprop→Ark ( Bip01/Box ) = NIE-wizualne (kandydaci kolizji — rola UNVERIFIED; liczone, nie renderowane);
+  łańcuch tekstury nierozwiązywalny (np. DDS poza strict subset) → model renderowany uczciwie BEZ tekstur (diagnostyka; nigdy tekstura zastępcza)
+limit: 5000 widocznych instancji (twardy) — census żądane/wyrenderowane/ograniczone; determinizm: (era+profil+LAB_SEED+gęstość+kalibracja+tileKey) → TEN SAM zestaw niezależnie od kolejności ładowania
+spawn: kafel 53,114 (środek zaznaczenia 4×4 z launchera; domyślnie = najwyższa zmierzona średnia — wybór z DANYCH, bez zgadywania nazw miast).
+census terenu: 51920/51920 zwykłych kafli zmierzonych; NODATA: 0+0; sentinel/wiersze specjalne wykluczone.</div>
+    </details>
+    <details id="diagnostics" open="" data-load-status="READY">
+      <summary>DIAGNOSTICS (boot + render)</summary>
+      <div id="world-diag" class="small mono">2026-10-10T15:02:39.585Z data-load-status = LOADING
+2026-10-10T15:02:39.898Z data-load-status = READY</div>
+    </details>
+  </aside>
+</main>
+
+<script type="module" src="/compat/world-app.js"></script>
+
+
+</body></html>

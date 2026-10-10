@@ -25,7 +25,7 @@ import crypto from 'node:crypto';
 import { ArkArchive } from '../../src/pesource/ArkArchive.js';
 import { Bnt2Archive } from '../../src/pesource/Bnt2Archive.js';
 import {
-  buildCatalogData, readBnt2Index, readArkCentralDirectory, crc32, CATALOG_PINS,
+  buildCatalogData, readBnt2Index, readArkCentralDirectory, crc32, CATALOG_PINS, productionCacheIdentity,
 } from '../../tools/pecompat/catalog_data.mjs';
 
 const RUN_ID = 'PE_CITY_ASSET_MAP_R1_20261010';
@@ -369,6 +369,7 @@ export async function run(ctx) {
           modelsBntPath: ctx.modelsPath,
           batchStatePath: ctx.batchStatePath ?? null,
           nameEdgesPath: ctx.nameEdgesPath ?? null,
+          cacheIdentity: productionCacheIdentity(), // CAM-C3: declare the production envelope (same gate as the server)
         });
         const cd = data.rows.filter((r) => r.era === 'CD_2003');
         const pcg = data.rows.filter((r) => r.era === 'PCG_9_3_5');
