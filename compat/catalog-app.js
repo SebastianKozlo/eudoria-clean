@@ -100,16 +100,53 @@ async function boot() {
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
 
+  // CAMERA ERGONOMICS (measured, CAMERA_UX_FIX of this run): the preview canvas
+  // is much smaller than the previous 218757 viewer's canvas (measured at the
+  // same 1600x1000 window: 699x489 vs 1080x898). OrbitControls normalizes
+  // rotation to the element height (2*pi*dx/clientHeight) and panning to the
+  // element width, so at the same default speeds the preview responds
+  // ~1.84x more per mouse pixel — twitchy, "uncomfortable rotation". We
+  // equalize the PREVIOUS VIEWER'S measured response instead (rotate: 0.699
+  // rad per 100 px at its 898 px canvas; pan: 9.26% of visible width per
+  // 100 px at its 1080 px canvas) by scaling the speeds with the live canvas
+  // size. Damping (0.08), zoom (multiplicative dolly) and all other
+  // parameters stay IDENTICAL to the previous viewer.
+  const REF_VIEWER_CANVAS_H = 900;   // measured previous-viewer canvas height (898 px @1600x1000)
+  const REF_VIEWER_CANVAS_W = 1080;  // measured previous-viewer canvas width
+  const applyControlSpeeds = () => {
+    const h = canvas.clientHeight || 1;
+    const w = canvas.clientWidth || 1;
+    controls.rotateSpeed = Math.min(1.25, Math.max(0.35, h / REF_VIEWER_CANVAS_H));
+    controls.panSpeed = Math.min(1.25, Math.max(0.35, w / REF_VIEWER_CANVAS_W));
+  };
+  applyControlSpeeds();
+
   const hemi = new THREE.HemisphereLight(0xbfd4ff, 0x22303f, 1.1);
   const dir = new THREE.DirectionalLight(0xffffff, 0.9);
   dir.position.set(40, 80, 30);
   scene.add(hemi, dir);
 
-  window.addEventListener('resize', () => {
+  // one sync for canvas-driven size changes: the window resize listener alone
+  // misses CONTENT-driven layout changes (the catalog table rendering changes
+  // the grid row heights without any window resize — the canvas once shrank
+  // 507->489 px leaving a stale 507-tall WebGL buffer squashed into a 489-tall
+  // CSS box and stale response speeds). ResizeObserver fires on the ACTUAL
+  // layout box (also once on observe); the window listener stays for engines
+  // without ResizeObserver.
+  const syncCanvasSize = () => {
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
-  });
+    applyControlSpeeds();
+    // keep the honest measured layout panel current (it is the debugging
+    // record for the pixel-render verification; it used to show the stale
+    // open-time buffer size after content-driven canvas resizes)
+    renderLayoutDiagnostics();
+  };
+  window.addEventListener('resize', syncCanvasSize);
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncCanvasSize).observe(canvas);
+  }
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
@@ -139,6 +176,12 @@ async function boot() {
     btnOrigcoords: $('btn-origcoords'), btnWire: $('btn-wire'),
   };
 
+  // the catalog.html button ships with class="active" as a static default, but
+  // no view mode exists until a preview is mounted (the default mount mode is
+  // CENTERED); remove the stale highlight until then (applyViewMode manages it
+  // from mount on).
+  ui.btnOrigcoords.classList.remove('active');
+
   function renderLayoutDiagnostics() {
     // honest measured layout + camera state (also the debugging record for the
     // pixel-render verification: proves WHAT the canvas actually sees)
@@ -155,6 +198,12 @@ async function boot() {
   function resetCamera() {
     controls.target.set(0, 0, 0);
     camera.position.set(0, 30, 70);
+    // reset restores the ORIGINAL camera defaults too: the fit may have set a
+    // scene-proportional near/far pair (see catalog-preview.js fitToBounds);
+    // the lab default pose uses the original 0.1/500000 frustum.
+    camera.near = 0.1;
+    camera.far = 500000;
+    camera.updateProjectionMatrix();
     controls.update();
     hud('camera reset (lab default pose)');
   }

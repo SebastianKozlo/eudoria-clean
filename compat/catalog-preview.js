@@ -2,6 +2,22 @@
 // THE /catalog PREVIEW for the FOUR pinned CD_2003 primaries (safe import
 // established by the phase-3 bounded NIF-4.1 reader; DECODED_FULL_CLOSURE).
 //
+// CAMERA_UX_FIX (this run, human request "make rotation comfortable like the
+// previous viewer"): (1) fitToBounds updates the preview subtree's world
+// matrices before measuring (three r185 Box3.setFromObject does NOT refresh
+// ancestors — the open-time fit used to measure FILE-space bounds and pivot
+// the orbit at +fileCenter away from the rendered model); (2) the fit uses
+// the AABB's projected half-extents against both frustum half-angles with a
+// 1.12 margin instead of the bounding sphere (the flat 27k-34k-unit proxy
+// footprints rendered at ~44% of the canvas from ~53k units out — distant,
+// "floating"); (3) scene-proportional near/far so large models don't
+// z-fight; (4) the CENTERED<->ORIGINAL switch translates camera+target with
+// the wrapper offset delta (view-preserving; ORIGINAL keeps the wrapper at
+// identity and moves the camera — unchanged policy, no snap); (5) selection
+// is click-only (pointerup within 5 px, left button) — never mid-drag.
+// Response-speed normalization vs the previous 218757 viewer lives in
+// catalog-app.js (see applyControlSpeeds there).
+//
 // REUSE LABEL: the preview follows the SceneIR app's proven patterns
 // (compat/asset-mode.js + compat/api.js) — THREE INJECTED via ctx (this
 // module imports NO renderer dependency at module level, so Node tests can
@@ -294,7 +310,10 @@ export function mountCatalogPreview(ctx) {
     wireframe: false,
     selectedShape: null,
     hiddenShapes: [],
-    wrapperOffset: [0, 0, 0],
+    // starts at the mount-mode offset so the FIRST applyViewMode computes a
+    // zero view-mode shift (no camera motion at mount; shifts are for MODE
+    // CHANGES only — see applyViewMode)
+    wrapperOffset: wrapperOffsetFor(PREVIEW_VIEW_MODES.CENTERED, sb),
     wire, meshObjects, materialApplications,
   };
 
@@ -316,12 +335,23 @@ export function mountCatalogPreview(ctx) {
 
   function applyViewMode() {
     const off = wrapperOffsetFor(state.viewMode, sb);
+    const prevOff = state.wrapperOffset;
     state.wrapperOffset = [...off];
     wrapper.position.fromArray(off); // centering applied EXACTLY ONCE here
-    if (state.viewMode === PREVIEW_VIEW_MODES.ORIGINAL && controls) {
-      // camera looks at the ORIGINAL bounds center (geometry untouched)
-      const c = wrapperCenter(sb);
-      controls.target.set(c[0], c[1], c[2]);
+    if (controls && ctx.camera &&
+        (off[0] !== prevOff[0] || off[1] !== prevOff[1] || off[2] !== prevOff[2])) {
+      // CAMERA_UX_FIX (mode switch): the wrapper offset change moves the model
+      // in world space by (off - prevOff). Translating the camera AND the
+      // orbit target by the same delta keeps the view pixel-identical across
+      // the CENTERED <-> ORIGINAL switch, so orbiting continues naturally
+      // around the model center in BOTH modes. In ORIGINAL mode this IS the
+      // "camera moves instead of the model" policy (wrapper identity; the
+      // camera translates by +center). The previous code only re-aimed
+      // controls.target in ORIGINAL mode, which snapped the view to a
+      // different direction and dropped the user's framing.
+      const shift = new T.Vector3(off[0] - prevOff[0], off[1] - prevOff[1], off[2] - prevOff[2]);
+      controls.target.add(shift);
+      ctx.camera.position.add(shift);
     }
     if (ui?.btnOrigcoords) ui.btnOrigcoords.classList.toggle('active', state.viewMode === PREVIEW_VIEW_MODES.ORIGINAL);
     if (observable?.previewState) {
@@ -332,6 +362,15 @@ export function mountCatalogPreview(ctx) {
   }
 
   function fitToBounds() {
+    // CAMERA_UX_FIX (fit measurement): Box3.setFromObject reads the parent
+    // chain's matrixWorld AS-IS (three r185 expandByObject calls
+    // updateWorldMatrix(false, false) — ancestors are NOT refreshed). At open
+    // time the wrapper position was set in this same synchronous block, so
+    // without this update the fit measured FILE-space bounds and put the
+    // orbit pivot at +fileCenter while the model renders centered at the
+    // origin — every rotation then swung the model around the wrong pivot.
+    // Update the preview subtree first so the fit measures what is rendered.
+    wrapper.updateWorldMatrix(true, true);
     const box = new T.Box3();
     const tmp = new T.Box3();
     let any = false;
@@ -344,13 +383,60 @@ export function mountCatalogPreview(ctx) {
     if (!any) return;
     const camera = ctx.camera;
     const center = box.getCenter(new T.Vector3());
-    const sphere = box.getBoundingSphere(new T.Sphere());
-    const fovRad = (camera.fov * Math.PI) / 180;
-    const dist = (sphere.radius / Math.sin(fovRad / 2)) * 1.15;
+    const half = box.getSize(new T.Vector3()).multiplyScalar(0.5);
+    const sphereR = box.getBoundingSphere(new T.Sphere()).radius;
     const dirV = camera.position.clone().sub(controls.target).normalize();
     if (dirV.lengthSq() < 1e-8) dirV.set(0, 0.5, 1).normalize();
+    // CAMERA_UX_FIX (framing distance): the previous bounding-sphere rule
+    // ((radius / sin(fov/2)) * 1.15) is correct for sphere-like assets, but
+    // the four pinned primaries are FLAT footprints (e.g. 193313:
+    // 31766 x 27940 x 5309 file units): its bounding sphere put the camera
+    // 53094 units out while the projected box needs ~56% of that — the model
+    // rendered at ~44% of the canvas and orbiting felt like steering a
+    // distant sheet. Fit the AABB's projected half-extents (support along the
+    // view basis) against BOTH frustum half-angles with a comfortable margin,
+    // along the CURRENT view direction (same as the previous viewer's fit).
+    const fovRad = (camera.fov * Math.PI) / 180;
+    const tanV = Math.tan(fovRad / 2);
+    const cw = ctx.canvas?.clientWidth || 2;
+    const ch = ctx.canvas?.clientHeight || 1;
+    const tanH = tanV * (cw / ch);
+    const MARGIN = 1.12;
+    let dist;
+    let frontHalf;
+    const fwd = dirV.clone().negate(); // camera -> target view direction
+    const right = new T.Vector3().crossVectors(fwd, camera.up).normalize();
+    if (right.lengthSq() < 1e-12) {
+      // degenerate view (looking straight along the up axis): the projected
+      // support is rotation-symmetric — fall back to the sphere rule
+      dist = (sphereR / Math.sin(fovRad / 2)) * MARGIN;
+      frontHalf = sphereR;
+    } else {
+      const upv = new T.Vector3().crossVectors(right, fwd).normalize();
+      const sR = Math.abs(right.x) * half.x + Math.abs(right.y) * half.y + Math.abs(right.z) * half.z;
+      const sU = Math.abs(upv.x) * half.x + Math.abs(upv.y) * half.y + Math.abs(upv.z) * half.z;
+      const sF = Math.abs(fwd.x) * half.x + Math.abs(fwd.y) * half.y + Math.abs(fwd.z) * half.z;
+      // Perspective-exact: the box's NEAR half projects larger than the
+      // center-plane estimate (the near face is closest to the camera), so
+      // the whole-box condition is atan(sU/(dist-sF)) <= fov/2, i.e.
+      // dist >= sF + sU/tanV (and the horizontal analogue). A center-plane
+      // fit alone left the near-top corner touching the canvas edge.
+      dist = sF + MARGIN * Math.max(sR / tanH, sU / tanV);
+      frontHalf = sF;
+    }
     controls.target.copy(center);
     camera.position.copy(center).addScaledVector(dirV, dist);
+    // CAMERA_UX_FIX (depth range): the app's default near=0.1 was tuned for
+    // the small render-converted 218757 scene; at tens of thousands of file
+    // units it wastes the depth buffer (far/near = 5e6 -> z-fighting while
+    // orbiting). Keep roughly the effective depth ratio the comfortable
+    // previous viewer had (0.1/2000 at a ~75-unit scene => ~2e4; here
+    // near=(dist-frontHalf)/100, far=(dist+frontHalf)*12 => ~2e3 at the fit
+    // pose — comfortably conservative in ORIGINAL file units, no unit
+    // conversion of the data).
+    camera.near = Math.max(0.1, (dist - frontHalf) * 0.01);
+    camera.far = (dist + frontHalf) * 12 + 1;
+    camera.updateProjectionMatrix();
     controls.update();
   }
 
@@ -381,10 +467,30 @@ export function mountCatalogPreview(ctx) {
   }
 
   if (ctx.canvas && ctx.pickHandler) {
-    ctx.canvas.addEventListener('pointerdown', (ev) => ctx.pickHandler(ev, meshObjects, (mesh) => {
-      state.selectedShape = mesh.userData.meshBlock;
-      if (observable?.previewState) observable.previewState.selectedShape = mesh.userData.meshBlock;
-    }));
+    // CAMERA_UX_FIX (click-only selection): the previous wiring raycast on
+    // EVERY pointerdown, so starting an orbit drag over the model changed the
+    // selection mid-drag. Selection happens on pointerup ONLY when the left
+    // button was pressed and the pointer barely moved (<= 5 px) — a genuine
+    // click; orbit drags never touch the selection. Nothing here consumes,
+    // stops or re-aims the event: OrbitControls keeps full ownership of the
+    // drag (verified: rotation delta matches 2*pi*dx/clientHeight exactly).
+    let downX = null, downY = null, downButton = null;
+    ctx.canvas.addEventListener('pointerdown', (ev) => {
+      downX = ev.clientX; downY = ev.clientY; downButton = ev.button;
+    });
+    ctx.canvas.addEventListener('pointerup', (ev) => {
+      if (downX === null || ev.button !== downButton || ev.button !== 0) {
+        downX = downY = downButton = null;
+        return;
+      }
+      const moved = Math.hypot(ev.clientX - downX, ev.clientY - downY);
+      downX = downY = downButton = null;
+      if (moved > 5) return; // a drag, not a click — never select mid-drag
+      ctx.pickHandler(ev, meshObjects, (mesh) => {
+        state.selectedShape = mesh.userData.meshBlock;
+        if (observable?.previewState) observable.previewState.selectedShape = mesh.userData.meshBlock;
+      });
+    });
   }
 
   applyViewMode();
