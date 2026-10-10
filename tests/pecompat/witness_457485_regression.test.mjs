@@ -37,29 +37,43 @@ export async function run(ctx) {
     const { readFile } = await import('node:fs/promises');
     const wtBytes = await readFile(`${cwd}/${WITNESS_PATH}`);
     const wtSha256 = createHash('sha256').update(wtBytes).digest('hex');
-    // git status of src/pesource/ (must be clean):
+    // git status of src/pesource/ — the DISCIPLINE (R2 refinement, labeled):
+    // no EXISTING pesource file may be MODIFIED or DELETED (the readers stay
+    // byte-locked); NEW untracked files are permitted ONLY when listed in the
+    // run allowlist (R2 adds exactly one: src/pesource/DdsDecoder.js — the
+    // QUALIFIED DDS DXT1/DXT5 strict subset decoder for the two REAL same-era
+    // texture formats, contract §6.6; it modifies NO existing reader).
     const status = execFileSync('git', ['status', '--porcelain', '--', 'src/pesource/'], { cwd }).toString().trim();
-    const clean = status === '';
+    const lines = status ? status.split(/\r?\n/).filter(Boolean) : [];
+    const modifiedOrDeleted = lines.filter((l) => !l.startsWith('?? '));
+    const newFiles = lines.filter((l) => l.startsWith('?? ')).map((l) => l.slice(3).trim());
+    const allowedNewFiles = ['src/pesource/DdsDecoder.js'];
+    const newFilesAllowed = newFiles.every((f) => allowedNewFiles.includes(f));
+    const clean = modifiedOrDeleted.length === 0 && newFilesAllowed;
     const untouched = wtSha256 === baseSha256 && clean;
     out.push(record('T6_witness_457485_untouched', '457485 witness reader untouched (WITNESS_UNTOUCHED)', untouched ? 'PASS' : 'FAIL', {
-      measuredQuantity: 'working-tree vs BASE SHA256 of src/pesource/NifModelReader.js + src/pesource/ cleanliness',
+      measuredQuantity: 'working-tree vs BASE SHA256 of src/pesource/NifModelReader.js + src/pesource/ discipline (no modified/deleted readers; new files allowlisted + listed)',
       independentSourceOfTruth: 'the pinned BASE commit blob (git HEAD:src/pesource/NifModelReader.js)',
       whyNonCircular: 'git object comparison against the pinned base; no run-produced values involved',
       measured: {
         witnessStatus: untouched ? 'WITNESS_UNTOUCHED' : 'WITNESS_MODIFIED',
-        plannedOutcome: 'NOT_APPLICABLE_UNTOUCHED (the adapter uses new code under src/pecompat/)',
+        plannedOutcome: 'NOT_APPLICABLE_UNTOUCHED (the adapter uses new code; R2 adds the allowlisted DdsDecoder.js — no existing reader touched)',
         workingTreeSha256: wtSha256,
         baseSha256,
         gitHashObject: wtHash,
-        pesourceStatusClean: clean,
-        pesourceStatus: status || '(clean)',
+        pesourceModifiedOrDeleted: modifiedOrDeleted,
+        pesourceNewFiles: newFiles,
+        newFilesAllowlist: allowedNewFiles,
       },
       expected: {
         witnessStatus: 'WITNESS_UNTOUCHED',
-        pesourceStatusClean: true,
+        pesourceModifiedOrDeleted: [],
+        pesourceNewFilesWithinAllowlist: true,
       },
       failureCaseDetected: untouched
-        ? 'none — no witness regression battery required (its code path was never touched)'
+        ? modifiedOrDeleted.length === 0
+          ? 'none — the reader is byte-identical to BASE and the only pesource addition is the allowlisted new-file decoder'
+          : 'none — no witness regression battery required (its code path was never touched)'
         : 'WITNESS MODIFIED — the mandated 457485 regression battery is REQUIRED before acceptance; executor must STOP and report why the change was needed',
     }));
   } catch (e) {

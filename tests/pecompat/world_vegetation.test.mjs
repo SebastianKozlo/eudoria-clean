@@ -532,7 +532,7 @@ export async function run(ctx) {
         }
         return { payload: new Uint8Array(r.body), headers: { era: r.headers['x-pe-era'], container: r.headers['x-pe-container'], containerSha256: r.headers['x-pe-container-sha256'], entryName: r.headers['x-pe-entry'], payloadSha256: r.headers['x-pe-payload-sha256'] } };
       },
-      heightSampler: () => 42.0, // a FIXED reconstruction height (the placement knob is not under test here)
+      heightField: { triangleHeightAtWorld: () => 42.0 }, // the SHARED query fixture (R2 API — the placement knob is not under test here)
     });
     await veg.setConfig({ profile: 0, labSeed: 0, densityPercent: 100 });
     const originA = { gx: 50, gy: 111 };
@@ -541,15 +541,20 @@ export async function run(ctx) {
     const fetchesAfterA = veg.fetchCounters.modelPayloads;
     const texA = veg.textureCache.get(436225);
     const cB = await veg.rebuild(originB, 8);
+    // R2: the fair cap may legitimately release A's least-represented model
+    // during B (a different referenced set) — the no-refetch property is
+    // measured across the RETURN leg only (A's payloads are reused; a fetch
+    // needed by B's own referenced set is not an A-return refetch)
+    const fetchesAfterB = veg.fetchCounters.modelPayloads;
     const cA2 = await veg.rebuild(originA, 8);
+    const noRefetchOnReturn = veg.fetchCounters.modelPayloads === fetchesAfterB;
     const returnStable = cA2.counts.requested === cA1.counts.requested
-      && cA2.counts.rendered === cA1.counts.rendered && instanceSetHashByCensus(cA1) === instanceSetHashByCensus(cA2);
-    const noRefetchOnReturn = veg.fetchCounters.modelPayloads === fetchesAfterA;
+      && cA2.counts.placed === cA1.counts.placed && instanceSetHashByCensus(cA1) === instanceSetHashByCensus(cA2);
     const texIdentityReused = veg.textureCache.get(436225) === texA; // SAME object — no duplication
     // profile change: unreferenced models released, shared/referenced survive
     await veg.setConfig({ profile: 5, labSeed: 0, densityPercent: 100 });
     const cP5 = await veg.rebuild(originA, 8);
-    const p5ids = new Set(Object.keys(cP5.perModelRendered ?? {}).map(Number));
+    const p5ids = new Set([...Object.keys(cP5.perModelRendered ?? {}), ...Object.keys(cP5.perModelMarkers ?? {})].map(Number));
     const cacheIds = new Set([...veg.modelCache.keys()]);
     const cacheOnlyReferenced = [...cacheIds].every((id) => p5ids.has(id));
     const disposalsHappened = veg.disposeCounters.cacheEntries > 0 && veg.disposeCounters.textures > 0;
@@ -585,8 +590,8 @@ export async function run(ctx) {
       resultClass: 'HEADLESS_THREE_RESOURCE_CENSUS (the REAL WorldVegetation against the REAL server routes)',
       measuredQuantity: 'fetch counters + texture object identity + cache/dispose counters + instance counts across the cycles',
       measured: {
-        windowA: { requested: cA1.counts.requested, rendered: cA1.counts.rendered, limited: cA1.counts.limited, models: cA1.models },
-        windowB: { requested: cB.counts.requested, rendered: cB.counts.rendered },
+        windowA: { requested: cA1.counts.requested, placed: cA1.counts.placed, limited: cA1.counts.limited, statusCounts: cA1.statusCounts, models: cA1.models },
+        windowB: { requested: cB.counts.requested, placed: cB.counts.placed },
         windowAReturn: { requested: cA2.counts.requested, returnStable, noRefetchOnReturn, texIdentityReused },
         profile5: { requested: cP5.counts.requested, modelsWithInstances: [...p5ids], cacheOnlyReferenced, disposalsHappened, disposeCountersAfterProfileChange: { ...veg.disposeCounters } },
         profile0Return: { requested: cA3.counts.requested, countsRestored },
@@ -619,5 +624,5 @@ export async function run(ctx) {
 function instanceSetHashByCensus(census) {
   const pm = census.perModelRendered ?? {};
   const keys = Object.keys(pm).sort();
-  return keys.map((k) => `${k}:${pm[k]}`).join('|') + `#${census.counts.requested}.${census.counts.rendered}.${census.counts.limited}`;
+  return keys.map((k) => `${k}:${pm[k]}`).join('|') + `#${census.counts.requested}.${census.counts.placed}.${census.counts.limited}`;
 }

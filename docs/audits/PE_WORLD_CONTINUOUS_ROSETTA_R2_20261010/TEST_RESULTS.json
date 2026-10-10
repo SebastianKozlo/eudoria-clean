@@ -1,0 +1,381 @@
+{
+ "run": "PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010",
+ "collectedAt": "2026-10-10T19:02:49.673Z",
+ "batteries": {
+  "world": {
+   "harness": "node tests/pecompat/run_world_tests.mjs",
+   "totals": {
+    "pass": 52,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 52
+   },
+   "suites": [
+    "world_terrain.test.mjs",
+    "world_server.test.mjs",
+    "world_materials.test.mjs",
+    "world_vegetation.test.mjs",
+    "world_headless_load.test.mjs",
+    "world_r2_gates.test.mjs"
+   ]
+  },
+  "unit": {
+   "harness": "node tests/pecompat/run_tests.mjs --models <pinned Models.bnt>",
+   "totals": {
+    "pass": 24,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 24
+   }
+  },
+  "app": {
+   "harness": "node tests/pecompat/run_app_tests.mjs --models <pinned Models.bnt>",
+   "totals": {
+    "pass": 22,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 22
+   }
+  },
+  "catalog": {
+   "harness": "node tests/pecompat/run_catalog_tests.mjs --models ... --models-ark ... --textures-bnt ...",
+   "totals": {
+    "pass": 41,
+    "fail": 0,
+    "notPerformed": 0,
+    "total": 41
+   }
+  }
+ },
+ "totalsAcrossBatteries": {
+  "pass": 139,
+  "fail": 0,
+  "notPerformed": 0,
+  "total": 139
+ },
+ "counterchecks": {
+  "pre": {
+   "findings": [
+    "WL_1",
+    "WL_2",
+    "WL_3",
+    "WL_4",
+    "WL_5",
+    "WL_6"
+   ],
+   "summary": "all WL-1..WL-5 REPRODUCED on the BASE production functions (see PRE_COUNTERCHECKS.json)"
+  },
+  "post": {
+   "WL_1_latestRequest": {
+    "name": "latest vegetation request can be lost while a rebuild is busy (busy must queue latest-wins)",
+    "requestedOrigins": [
+     {
+      "gx": 0,
+      "gy": 0
+     },
+     {
+      "gx": 1,
+      "gy": 0
+     }
+    ],
+    "secondReturnWhileBusy": null,
+    "finalCommittedOrigin": {
+     "gx": 1,
+     "gy": 0
+    },
+    "latestRequestApplied": true,
+    "expectedPre": "REPRODUCED (latest request LOST: final origin stays A=(0,0); second return null/previous)",
+    "expectedPost": "FIXED (the newest request is queued and runs after A: final origin B=(1,0))",
+    "fixed": true
+   },
+   "WL_2_height": {
+    "instances": 2486,
+    "sharedQueryNullNoSurface": 0,
+    "maxDifferenceVsRenderedTriangle": 0,
+    "y0FallbackInProductionApply": false
+   },
+   "WL_3_movement": {
+    "name": "declared walk stop must stop X/Z (candidate-first; no commit without surface data)",
+    "fixture": "production updateFlyWalk, W held, dt=1, null ground (no heightField)",
+    "before": {
+     "x": 100,
+     "y": 10,
+     "z": 100
+    },
+    "after": {
+     "x": 100,
+     "y": 10,
+     "z": 100
+    },
+    "boundaryBannerShown": true,
+    "correctlyStopped": true,
+    "expectedPre": "REPRODUCED ((100,10,100) → (100,10,88) despite the boundary banner — the BASE evidence is saved in PRE_COUNTERCHECKS.json)",
+    "expectedPost": "FIXED (the position stays (100,10,100) — the move is refused before any commit)",
+    "fixed": true
+   },
+   "WL_4_fit": {
+    "steps": 3,
+    "stable": true
+   },
+   "WL_5_selection": {
+    "capSelection": {
+     "profile": 1,
+     "density": 100,
+     "requested": 6049,
+     "cap": 5000,
+     "nonEmptyCandidateTiles": 64,
+     "prefixSliceEmptiedTiles": 11,
+     "fairQuotaEmptiedTiles": 0,
+     "fairQuotaOrderInvariant": true,
+     "fairQuotaPerTile": {
+      "53,114": 78,
+      "54,114": 83,
+      "55,114": 80,
+      "56,114": 77,
+      "57,114": 78,
+      "58,114": 82,
+      "59,114": 78,
+      "60,114": 76,
+      "53,115": 79,
+      "54,115": 78,
+      "55,115": 78,
+      "56,115": 76,
+      "57,115": 79,
+      "58,115": 78,
+      "59,115": 78,
+      "60,115": 80,
+      "53,116": 77,
+      "54,116": 80,
+      "55,116": 76,
+      "56,116": 80,
+      "57,116": 77,
+      "58,116": 76,
+      "59,116": 81,
+      "60,116": 79,
+      "53,117": 79,
+      "54,117": 77,
+      "55,117": 77,
+      "56,117": 77,
+      "57,117": 81,
+      "58,117": 78,
+      "59,117": 78,
+      "60,117": 79,
+      "53,118": 79,
+      "54,118": 82,
+      "55,118": 78,
+      "56,118": 79,
+      "57,118": 77,
+      "58,118": 75,
+      "59,118": 78,
+      "60,118": 78,
+      "53,119": 78,
+      "54,119": 78,
+      "55,119": 76,
+      "56,119": 78,
+      "57,119": 80,
+      "58,119": 78,
+      "59,119": 77,
+      "60,119": 74,
+      "53,120": 76,
+      "54,120": 78,
+      "55,120": 75,
+      "56,120": 74,
+      "57,120": 79,
+      "58,120": 78,
+      "59,120": 81,
+      "60,120": 80,
+      "53,121": 80,
+      "54,121": 75,
+      "55,121": 81,
+      "56,121": 77,
+      "57,121": 81,
+      "58,121": 77,
+      "59,121": 75,
+      "60,121": 78
+     }
+    },
+    "coincidentGroups": 0,
+    "density": {
+     "profile": 0,
+     "density": 50,
+     "tile": "53,114",
+     "records": 12,
+     "uniqueProfileModelIds": 10,
+     "instantiatedModelIds": [
+      436293,
+      457485,
+      457579,
+      166878,
+      166897
+     ],
+     "zeroCountRecordIndices": [
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      10,
+      11,
+      9
+     ],
+     "monotonicity": {
+      "d0": 0,
+      "d25": 22,
+      "d50": 38,
+      "d100": 76,
+      "ids25subset50": true,
+      "ids50subset100": true,
+      "pass": true
+     }
+    }
+   },
+   "WL_6_records": "LITERAL_ORIGINAL_BASE_GATE_COMPLIANCE=FAIL preserved; see R1_RECORD_SUPERSESSION.md"
+  }
+ },
+ "browserInteraction": {
+  "pageErrors": 0,
+  "scenarios": [
+   {
+    "scenario": "S1_WORLD_LOAD",
+    "ready": true,
+    "canvas85x80": true
+   },
+   {
+    "scenario": "S2_FIT_STABILITY_X3",
+    "stable": true
+   },
+   {
+    "scenario": "S3_MODE_TRANSITIONS",
+    "noJump": true
+   },
+   {
+    "scenario": "S4_WALK_REAL_INPUT",
+    "moved": true,
+    "yOnSharedSurface": true
+   },
+   {
+    "scenario": "S5_TELEPORT_DISTANT_AND_RETURN",
+    "windowFollowed": true,
+    "sameConfigSameCounts": true
+   },
+   {
+    "scenario": "S6_DRAWER_KEY_CAPTURE",
+    "drawerKeyCapture": true
+   },
+   {
+    "scenario": "S7_VEG_TOGGLE_PIXELS"
+   },
+   {
+    "scenario": "S8_TEXTURE_TOGGLE_PIXELS"
+   },
+   {
+    "scenario": "S9_RESIZE",
+    "resizeOk": true
+   },
+   {
+    "scenario": "S10_ASSET_LAB"
+   }
+  ],
+  "pixelDiffs": {
+   "vegToggle": {
+    "a": "world_veg_on.png",
+    "b": "world_veg_off.png",
+    "comparable": true,
+    "region": [
+     0,
+     70,
+     750,
+     650
+    ],
+    "sampledPixels": 27260,
+    "differing": 1652,
+    "differingFraction": 0.06060161408657373,
+    "meanAbsDeltaOverDiffering": 44.7154963680388,
+    "threshold": {
+     "minDifferingFraction": 0.02,
+     "perPixelDiff": 8
+    },
+    "passes": true
+   },
+   "textureToggle": {
+    "a": "world_textures_on.png",
+    "b": "world_textures_off.png",
+    "comparable": true,
+    "region": [
+     0,
+     70,
+     750,
+     650
+    ],
+    "sampledPixels": 27260,
+    "differing": 24440,
+    "differingFraction": 0.896551724137931,
+    "meanAbsDeltaOverDiffering": 34.83424713584378,
+    "threshold": {
+     "minDifferingFraction": 0.02,
+     "perPixelDiff": 8
+    },
+    "passes": true
+   },
+   "teleportFarVsHome": {
+    "a": "world_ready.png",
+    "b": "world_teleport_far.png",
+    "comparable": true,
+    "region": "full",
+    "sampledPixels": 57600,
+    "differing": 48121,
+    "differingFraction": 0.8354340277777778,
+    "meanAbsDeltaOverDiffering": 44.7078060167666,
+    "threshold": {
+     "minDifferingFraction": 0.02,
+     "perPixelDiff": 8
+    },
+    "passes": true
+   }
+  }
+ },
+ "performance": {
+  "verdict": "MEASURED_WITH_LIMITS",
+  "checks": {
+   "tileCacheWithinBudget": true,
+   "textureCacheWithinBudget": true,
+   "modelCacheWithinBudget": true,
+   "heapStabilized": true,
+   "resourcesStableOnReturn": true,
+   "sameVegCountsOnReturn": true
+  },
+  "budgets": {
+   "clientTileCacheMax": 512,
+   "textureRgbaCacheMax": 64,
+   "modelCacheMax": 16,
+   "lod8BlockCacheMaxServer": 128,
+   "heapLastRouteDeltaMaxMB": 8,
+   "resourcesNonIncreasingOnReturn": true
+  },
+  "heap": {
+   "afterFirstRouteMB": 70,
+   "afterLastRouteMB": 73,
+   "lastRouteDeltaMB": 1,
+   "firstToLastDeltaMB": 3
+  },
+  "routeTimings": [
+   {
+    "label": "R1_far_east",
+    "readyMs": 1408
+   },
+   {
+    "label": "R2_home",
+    "readyMs": 1001
+   },
+   {
+    "label": "R3_far_north",
+    "readyMs": 969
+   },
+   {
+    "label": "R4_home_return",
+    "readyMs": 1077
+   }
+  ]
+ }
+}

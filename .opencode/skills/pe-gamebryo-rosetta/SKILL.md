@@ -38,6 +38,65 @@ UNKNOWNs (cell-stream source, climate→region mapping, p3, materialId==
 textureId NOT established, PCG special rows, 25.vcl) and the era discipline.
 `serve:world` is DELIVERED (Etap C/D/E of PE_WORLD_LAUNCHER_R1_20261010; `npm run serve:world` — bounded loopback server on port 8162 with /launcher + /world and the full terrain/materials/vegetation API; the launcher and world apps are built and gate-tested in that run's package).
 
+## Continuous world + shared height (R2 lineage, 2026-10-10, PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010)
+
+The R2 run FIXED the WORLD LAUNCHER R1 Desktop findings (WL-1..WL-5) and
+delivered the continuous world on the `codex/pe-world-continuous-r2-20261010`
+branch. Reuse the R2 modules before writing new code (all gate-tested in that
+run's package; per-use SDK records with SHAs in
+docs/audits/PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010/GAMEBRYO_IMPLEMENTATION_LINKS.md):
+
+- **SHARED HEIGHT QUERY** (contract §3.2): `src/peworld/PEHeightQuery.js` —
+  PEHeightField reproduces EXACTLY the rendered-triangle planes of
+  PETerrainRegion.buildGeometry (quad split (a,c,b),(b,c,d)); the 1-tile
+  REAL-sample HALO resolves the 256-samples/0..510 vs generator-0..512
+  boundary; missing tiles → null (never y=0, never a duplicated height);
+  instance status vocabulary PLACED_ON_AVAILABLE_SURFACE /
+  DEFERRED_NO_SURFACE / UNSUPPORTED_MODEL / LOD_LIMITED.
+- **LATEST-REQUEST SCENE IDENTITY** (contract §3.1, the BackgroundLoad
+  poll-then-attach adaptation): requestScene(origin, {forceNew}) with
+  generation ids; a same-origin repeat request does NOT invalidate the
+  running build (dedupe — otherwise the ~400 ms streaming tick perpetually
+  supersedes in-flight rebuilds, measured); stale results abort BEFORE
+  apply with disposal; coherence (terrain+textures+vegetation of the SAME
+  request) is what the page calls READY.
+- **FAIR CAP + FRACTIONAL DENSITY** (contract §6.2/§6.3):
+  compat/world-vegetation.js fairCapQuota (largest remainder + ≥1 guarantee
+  for every non-empty tile; a PURE function of per-tile counts) +
+  PEFoliageLabSeed v2 (recIndex MIXED INTO the placement hash — duplicate
+  model rows are SEPARATE records; fractional density floor+stable-hash
+  keyed on tile/cell/record/model — NEVER the LAB_SEED, so the seed moves
+  positions only while density controls counts; density=0 → exactly 0;
+  monotone growth). PEFoliageCore stays byte-locked (verified per run).
+- **DISTANT LOD** (contract §4, the MOUT-pattern GAP case — our own policy):
+  compat/world-lod.js — mid ring (8×8-decimated REAL samples per tile over
+  /api/world/lod8/<bx>/<by> blocks) + far whole-world mesh (4×4-decimated,
+  census-gated /api/world/far, collected by the server's OWN census pass);
+  boundary grid lines MATCH across levels (the same ORIGINAL samples on the
+  cut lines — no cracks, no skirts); missing tiles are explicit holes
+  (status bytes, never zero surface); preallocated index buffers + drawRange
+  (no per-move allocation churn; far normals computed once — positions are
+  static).
+- **QUALIFIED DDS DXT1/DXT5** (contract §6.6 — the two real same-era
+  formats measured on this run's inputs: 518860/518862/516807 DXT1 +
+  166881 DXT5): src/pesource/DdsDecoder.js (strict magic/size/fourcc gates,
+  TOP-LEVEL mip only, loud refusals; negative controls in
+  world_r2_gates.test.mjs). The default profile is now FULLY textured
+  (166878/166897 were the R1-untextured DDS models).
+- **ASSET LAB** (contract §7): /assetlab — the PCG witness 519316 through
+  the live chain (parseWitnessModel → shape→texprop→Ark slot order →
+  decodeModelTextureStrict; the SIX texture names resolve to REAL same-era
+  entries 518860/518862/516807/519227) + the four CD_JAN_2003 proxies
+  (192374/193207/193313/193684) as CONTROLS from the PINNED Models.ark
+  (SEPARATE era/cache identity; SOURCE-UNTEXTURED per the established
+  catalog finding; the bounded nif41 reader runs SERVER-side — it imports
+  node:fs — the browser renders the served wire).
+- **REGional preview** (contract §6.4): REGIONAL_PREVIEW in
+  compat/world-vegetation.js — OUR deterministic map (region = tile >> 5,
+  profiles 0/2/7/19, all DECODED; version regional-preview-v1) —
+  RECONSTRUCTION_PREVIEW, never a historical biome
+  (ORIGINAL_REGION_TO_CLIMATE_JOIN = NOT_ESTABLISHED).
+
 ## Apply a mechanism
 
 1. State the behavior to reproduce and its input/output identities.

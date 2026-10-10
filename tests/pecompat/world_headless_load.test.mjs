@@ -175,11 +175,12 @@ export async function run(ctx) {
           && !/pozycja: oryginalne/i.test(out.domText);
         const hasRawU16 = out.domText.includes('surowe u16=');
         // ETAP E vegetation markers (contract §6.7/§8): the DOM census carries
-        // the requested/rendered/limited counts + the VEGETATION_MODE label +
-        // the profile/seed labels + the p3-shown-separately line.
-        const vegCensus = /ro\u015blinno\u015b\u0107: \u017c\u0105dane \d+ \/ wyrenderowane \d+ \/ ograniczone \d+/.test(out.domText);
+        // the R2 status-vocabulary counts (requested/selected/placed/limited —
+        // the fair-cap census) + the VEGETATION_MODE label + the profile-mode/
+        // seed labels + the p3-shown-separately line.
+        const vegCensus = /ro\u015blinno\u015b\u0107: \u017c\u0105dane \d+ \/ wybrane \d+ \/ umieszczone \d+ \/ ograniczone \d+/.test(out.domText);
         const vegMode = out.domText.includes('VEGETATION_MODE = RECONSTRUCTION_PREVIEW');
-        const vegProfileSeed = out.domText.includes('Profil ro\u015blinno\u015bci:') && out.domText.includes('Seed podgl\u0105du (LAB_SEED):');
+        const vegProfileSeed = out.domText.includes('Tryb profilu:') && out.domText.includes('LAB_SEED');
         const vegP3Separate = /p3 = 0/.test(out.domText);
         const vegThreeWay = out.domText.includes('ORIGINAL_CLIMATE_RECORDS') && out.domText.includes('RECOVERED_RNG_ARITHMETIC') && out.domText.includes('INSTANCE_DISTRIBUTION');
         extra = { activeWindow64: hasCensus, adapterUnitsPosition: hasPos, noOriginalXyzPositionClaim, rawU16Readout: hasRawU16, vegetationCensus: vegCensus, vegetationMode: vegMode, vegetationProfileSeed: vegProfileSeed, vegetationP3Separate: vegP3Separate, vegetationThreeWaySeparation: vegThreeWay };

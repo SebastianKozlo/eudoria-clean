@@ -1,54 +1,62 @@
-// world-app.js — PE_WORLD_LAUNCHER_R1_20261010, ETAP C (contract §4 + §7) + ETAP D (§5)
-// THE /world view: terrain region rendering from ORIGINAL u16 samples.
+// world-app.js — PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010 (contract §3–§7)
+// THE /world view: the WHOLE AVAILABLE MAP as a continuous world.
 //
-// DATA PATH (production modules, no parallel decoder):
+// THE R2 DESIGN (binding — each item cites the contract):
+//   §3.1 LATEST-REQUEST SCENE IDENTITY: one explicit requested-scene identity
+//     (era + container identities + focus/region + profile mode + seed/
+//     density + adapter versions); terrain/textures/vegetation rebuilds carry
+//     a generation/request id; a STALE result never replaces the newer scene
+//     or the READY state (abort before apply + dispose); busy never loses the
+//     newest request (latest-wins queues: terrain pendingOrigin, vegetation
+//     pendingRequest, texture generation gate). The previous coherent scene
+//     stays until the new one is ready (honest LOADING/PARTIAL — never
+//     terrain A with trees B as READY; the coherence line shows all three
+//     window origins).
+//   §3.2 ONE SHARED HEIGHT QUERY: PEHeightField (triangle-exact on EXACTLY
+//     the near layer's rendered triangles; raw u16 preserved; the decode
+//     offset/calibration applied EXACTLY ONCE; NO smoothing) serves the
+//     render layer, the trees and the walker. The 256-samples/0..510 vs
+//     0..512 boundary is resolved with a 1-tile HALO of REAL neighboring
+//     samples (10x10 fetch for an 8x8 window); positions without real
+//     surface data return null (never the last height duplicated, never
+//     interpolation through an unknown tile, never y=0). Movement computes
+//     the candidate position FIRST, checks the surface, and only then
+//     commits X/Y/Z; no data = stop at the last safe position + prefetch
+//     (the streaming window follows); LOADING is distinguished from the
+//     actual corpus boundary in the banner.
+//   §4 CONTINUOUS WORLD: near 8x8 window (RAW payloads, PETerrainRegion) +
+//     WorldLod mid ring (8x8-decimated REAL samples) + far whole-world mesh
+//     (4x4-decimated REAL samples, census-gated) — decimation of ORIGINAL
+//     SAMPLES (renderer LOD policy with explicit coverage/seams; missing
+//     tiles are NAMED holes, never zero surface; no skirts needed — the
+//     boundary grid lines MATCH across levels). The regular-tile
+//     denominator comes from the server's MEASURED index census (never a
+//     hardcoded 51920).
+//   §5 CAMERA/UI: reference preset FOV 45, damping 0.08, minDistance 10,
+//     maxDistance 50000, far 200000 (near 0.5 + logarithmicDepthBuffer —
+//     the justified world-scale choice; never a claimed historical unit);
+//     streaming follows the VIEWED FOCUS (controls.target in orbit), not an
+//     arbitrary camera position; F/Reset frame the same focus stably (3x);
+//     canvas >=85%/80% of the viewport with the collapsible „Szczegóły”
+//     drawer; drawer preferences remembered; inputs never capture movement
+//     keys; resize updates the drawing buffer/aspect WITHOUT a camera reset.
+//   §6 VEGETATION: WorldVegetation r2 (recIndex identity + fractional
+//     density + spatially-fair cap + explicit instance statuses + optional
+//     regional RECONSTRUCTION_PREVIEW) — see compat/world-vegetation.js.
+//   §7 ROSETTA DEBUG POINT: click terrain/model -> era + container SHA +
+//     entry/payload SHA -> decoder/schema -> scene object/material ->
+//     applied display/LOD/reconstruction policy (the drawer shows it).
+//
+// DATA PATH (production modules, no parallel decoder — unchanged from R1):
 //   /api/world/tile/<gx>/<gy> (2048 B uint16 LE, raw heights offset 64..2111,
-//   provenance headers) → canonical TerrainTile (client-side, provenance via
-//   makeProvenance) → PETerrainRegion (NxN contiguous block, disjoint 32x32
-//   sample blocks, NO seam repair) → buildGeometry() (positions + indices;
-//   the u16→meters conversion is applied EXACTLY ONCE here, inside
-//   worldHeightMeters, CURRENT_RUNTIME_CALIBRATION u16/128) → THREE
-//   BufferGeometry (normals + preview palette are renderer-side
-//   reconstruction aids — never source-data claims).
-//
-// ETAP D — ORIGINAL TERRAIN TEXTURES (contract §5, the proven chain):
-//   per window tile: /api/world/tile/<gx>/<gy>/materials (named material
-//   records in RECORD ORDER, RAW 16x16 masks at record+56 — base64, bit-exact,
-//   NEVER normalized; per-material resolved "<id>.dat" texture entry per the
-//   engine-RE-CONFIRMED id@+16 relation) → buildRegionSplatData (pure module,
-//   compat/world-splat.js: per-cell layer slots in record order, EXACT-
-//   duplicate dedupe, unresolved bindings SKIPPED with an explicit
-//   diagnostic — never a fallback texture) → /api/world/texture/<id> (the
-//   ORIGINAL bounded payload, provenance headers) → decodeTga2 (the SAME
-//   PRODUCTION decoder as the server gates — strict TGA2 24bpp subset, LOUD
-//   failure) → RGBA → THREE.DataArrayTexture + per-cell idx/weight
-//   DataTextures (NearestFilter; RAW u8 weights bit-exact) → the splat
-//   shader (sequential lerp per layer by RAW mask/255 in RECORD ORDER — the
-//   era-evidenced blend FORM; the albedo role, the 32 m UV repeat and the
-//   nearest-cell sampling are the labeled RENDER_RECONSTRUCTION preset) →
-//   the visible terrain. The texture toggle ACTUALLY swaps the terrain
-//   material (measured by the PIXEL on/off gates).
-//
-// INTER-TILE TOPOLOGY (documented choice, contract §4):
-//   the active window is ONE 8x8-tile PETerrainRegion; buildGeometry emits
-//   quads across tile borders derived from the ADJACENT ORIGINAL samples of
-//   the two neighboring tiles (no shared/overlapping vertices, no height
-//   changes for jump masking — tile-border differences are ORIGINAL DATA).
-//   One region mesh per window → no inter-region cracks inside the active
-//   set; the window edge is the visible streaming boundary.
-//
-// STREAMING: window = 8x8 tiles = AT MOST 64 ACTIVE TILES, clamped at the
-//   map edges; rebuild when the camera tile leaves the current window's
-//   interior. Missing data (NODATA / fetch error) never builds a mesh over
-//   void: movement is stopped at the boundary and the honest banner shows.
-//   TEXTURES (ETAP D): the window's splat resources are rebuilt per window
-//   and DISPOSED on window move (bounded client memory: the raw-height LRU +
-//   the decoded-texture LRU keep only what the active window needs).
+//   provenance headers) -> canonical TerrainTile -> PETerrainRegion (8x8
+//   render window) + PEHeightField (10x10 halo sampling field) -> Three.js.
 'use strict';
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PETerrainRegion, worldHeightMeters, PE_TERRAIN_METER_PER_SAMPLE } from '/src/peworld/PETerrainCore.js';
+import { PEHeightField, SURFACE_STATUS } from '/src/peworld/PEHeightQuery.js';
 import { TerrainTile } from '/src/pesource/TerrainTile.js';
 import { makeProvenance } from '/src/pesource/PEProvenance.js';
 import { decodeTga2 } from '/src/pesource/TgaDecoder.js';
@@ -58,25 +66,31 @@ import {
 } from '/compat/world-splat.js';
 import {
   WorldVegetation, MAX_VISIBLE_INSTANCES, MODEL_CACHE_MAX, VEGETATION_SCHEMA_VERSION,
+  REGIONAL_PREVIEW, regionalProfileFor,
 } from '/compat/world-vegetation.js';
+import { WorldLod, WORLD_LOD_VERSION } from '/compat/world-lod.js';
 
 const $ = (id) => document.getElementById(id);
-const GRID_W = 220, GRID_H = 236;          // regular filename-xy tile grid
+const RUN_ID = 'PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010';
+const GRID_W = 220, GRID_H = 236;          // regular filename-xy tile grid (capacity)
 const TILE_M = 64;                          // 32 samples × 2 m (CURRENT_RUNTIME_CALIBRATION)
-const WINDOW_T = 8;                          // 8×8 tiles = 64 active tiles max
-const CLIENT_CACHE_MAX = 512;                // bounded LRU of raw tile payloads
-const TEXTURE_CACHE_MAX = 64;                // bounded LRU of decoded texture RGBA (active window needs ~23)
-const EYE_OFFSET_M = 1.7;                    // walk-mode viewer eye offset (VIEWER SETTING, not PE data)
-const UV_REPEAT_M = 32;                      // RENDER_RECONSTRUCTION: world meters per texture repeat (see world-splat.js)
-const MATERIAL_CELL_M = 4;                   // 2×2 samples per 16x16 material cell = 4 m
+const WINDOW_T = 8;                         // 8×8 near window (64 active tiles)
+const HALO_T = 1;                           // the 1-tile REAL-sample halo ring (§3.2)
+const FIELD_T = WINDOW_T + HALO_T * 2;      // the height sampling field: 10×10 tiles
+const CLIENT_CACHE_MAX = 512;               // bounded LRU of raw tile payloads
+const TEXTURE_CACHE_MAX = 64;               // bounded LRU of decoded texture RGBA
+const EYE_OFFSET_M = 1.7;                   // walk-mode viewer eye offset (VIEWER SETTING, not PE data)
+const UV_REPEAT_M = 32;                     // RENDER_RECONSTRUCTION: world meters per texture repeat
+const MATERIAL_CELL_M = 4;                  // 2×2 samples per 16x16 material cell = 4 m
 
 const params = parseHash();
 const state = {
   status: null,
-  anchor: null,                 // selected 4x4 patch anchor {gx,gy}
+  anchor: null,                 // selected patch anchor {gx,gy}
   spawn: null,                  // {x, z} world meters
-  windowOrigin: null,           // {gx,gy} current 8x8 window origin
-  region: null, mesh: null, boundsLines: null,
+  windowOrigin: null,           // {gx,gy} current 8x8 near window origin
+  region: null, mesh: null, boundsLines: null, lastGeo: null,
+  heightField: null,            // THE SHARED height query (PEHeightField over the 10×10 field)
   cache: new Map(),             // "gx,gy" -> {heights, identity, tile}
   cacheOrder: [],
   fetchCount: 0, fetchErrors: 0, lastError: null,
@@ -84,12 +98,18 @@ const state = {
   mode: 'orbit',
   firstFrameDone: false,
   boundaryHit: false,
+  boundaryReason: null,         // 'LOADING' | 'CORPUS_EDGE' | null (the honest distinction)
   diag: [],
+  // ---- §3.1: the scene request identity + coherence ----
+  sceneSeq: 0,
+  sceneRequest: null,           // { id, origin, era, containers, profileMode, profile, labSeed, density, calibration, versions }
+  coherence: { terrain: null, splat: null, veg: null },
+  readyShown: false,
   // ---- ETAP D: the material->texture chain state ----
-  texturesOn: params.textures !== '0',     // default ON (#textures=0 forces the palette preview)
-  splat: null,          // { material, arrayTexture, idxTex[], wTex[], data, origin } — the CURRENT window's GPU resources
-  materialsByOrigin: new Map(), // "gx,gy" -> the materials grid JSON (bounded: the current window only)
-  textureRgbaCache: new Map(),  // id -> {rgba,width,height,identity} (bounded LRU)
+  texturesOn: params.textures !== '0',
+  splat: null,
+  materialsByOrigin: new Map(),
+  textureRgbaCache: new Map(),
   textureRgbaOrder: [],
   mat: {
     materialsFetches: 0, materialsErrors: 0,
@@ -97,11 +117,18 @@ const state = {
     lastDiag: null,
     busy: false,
   },
-  // ---- ETAP E: the vegetation subsystem state ----
-  vegOn: params.veg !== '0',           // default ON (#veg=0 forces the no-vegetation view)
-  veg: null,                           // the WorldVegetation instance (created in boot)
-  vegCensus: null,                     // the last census (rendered by updateHud)
+  // ---- vegetation ----
+  vegOn: params.veg !== '0',
+  veg: null,
+  vegCensus: null,
   vegBusy: false,
+  vegConfig: { profileMode: params.region === '1' ? 'regional' : 'global', profile: params.profile, labSeed: params.seed, densityPercent: params.density },
+  // ---- the distant LOD ----
+  lod: null,
+  lodFarReadyShown: false,
+  // ---- §7 debug point ----
+  debugPoint: null,
+  teleportCount: 0,
 };
 
 function parseHash() {
@@ -116,8 +143,9 @@ function parseHash() {
     profile: Math.min(Math.max(parseInt(h.get('profile') ?? '0', 10) || 0, 0), 31),
     seed: Math.max(0, Math.floor(Number(h.get('seed') ?? '0') || 0)),
     density: Math.min(Math.max(parseInt(h.get('density') ?? '50', 10) || 0, 0), 100),
-    textures: h.get('textures'), // undefined = default ON; '0' = palette preview; '1' = textures
-    veg: h.get('veg'),           // undefined = default ON; '0' = vegetation OFF; '1' = ON (ETAP E)
+    textures: h.get('textures'),
+    veg: h.get('veg'),
+    region: h.get('region'),
   };
 }
 
@@ -154,7 +182,7 @@ function cacheGet(gx, gy) {
   const key = `${gx},${gy}`;
   const e = state.cache.get(key);
   if (!e) return null;
-  const id = state.status.identityOf; // live mount identity from /api/world/status
+  const id = state.status.identityOf;
   if (!id || e.identity.era !== id.era || e.identity.container !== id.container ||
       String(e.identity.containerSha256) !== String(id.containerSha256) || e.identity.entryName !== tileName(gx, gy)) {
     state.cache.delete(key); // controlled refusal — refetch from the original bytes
@@ -199,21 +227,16 @@ async function fetchTile(gx, gy) {
   return tile;
 }
 
-// ---- ETAP D: the material->texture chain (client side, contract §5) ----
+// ---- ETAP D: the material->texture chain (client side; gen-gated §3.1) ----
 
-/** Bounded LRU of DECODED texture RGBA (identity-checked — CAM-C3 discipline:
- * the entry carries era|container|containerSha256|id from the response
- * headers; a hit against a different container identity is REFUSED and
- * re-fetched from the ORIGINAL payloads). */
 function textureRgbaGet(id, identity) {
   const e = state.textureRgbaCache.get(id);
   if (!e) return null;
   if (e.identity.era !== identity.era || e.identity.container !== identity.container ||
       String(e.identity.containerSha256) !== String(identity.containerSha256)) {
-    state.textureRgbaCache.delete(id); // controlled refusal — refetch
+    state.textureRgbaCache.delete(id);
     return null;
   }
-  // LRU refresh
   state.textureRgbaCache.delete(id);
   state.textureRgbaCache.set(id, e);
   return e;
@@ -224,15 +247,12 @@ function textureRgbaPut(id, identity, decoded) {
   state.textureRgbaOrder.push(id);
   while (state.textureRgbaOrder.length > TEXTURE_CACHE_MAX) {
     const old = state.textureRgbaOrder.shift();
-    state.textureRgbaCache.delete(old); // bounded: unload what the window no longer needs
+    state.textureRgbaCache.delete(old);
   }
 }
 
-/** The materials grid of ONE 8x8 window (bounded parallel fetch; the served
- * objects carry the RAW masks + the per-material resolved texture entries). */
 async function fetchMaterialsGrid(origin) {
   const grid = [];
-  let done = 0;
   for (let dy = 0; dy < WINDOW_T; dy++) {
     const row = [];
     for (let dx = 0; dx < WINDOW_T; dx++) row.push(null);
@@ -257,16 +277,10 @@ async function fetchMaterialsGrid(origin) {
       const r = results[k];
       grid[gy - origin.gy][gx - origin.gx] = r.err ? null : r.tile;
     }
-    done += chunk.length;
-    setLoading(`materiały okna 8×8: ${done}/64 kafli…`);
   }
   return grid;
 }
 
-/** Fetch + decode ONE original texture payload through the PRODUCTION
- * decoder (decodeTga2 — strict TGA2 24bpp subset; LOUD failure). The
- * response identity headers are verified against the live status identity
- * (era + container + containerSha256) BEFORE the bytes enter the cache. */
 async function fetchTextureDecoded(id) {
   const liveIdentity = {
     era: 'PCG_9_3_5',
@@ -291,10 +305,10 @@ async function fetchTextureDecoded(id) {
   };
   if (hdr.era !== liveIdentity.era || hdr.container !== liveIdentity.container ||
       String(hdr.containerSha256 ?? '').toUpperCase() !== String(liveIdentity.containerSha256 ?? '').toUpperCase()) {
-    throw new Error(`tekstura ${id}.dat: tożsamość kontenera z odpowiedzi nie zgadza się z live statusem (era/kontener/SHA) — kontrolowana odmowa`);
+    throw new Error(`tekstura ${id}.dat: tożsamość kontenera z odpowiedzi nie zgadza się z live statusem — kontrolowana odmowa`);
   }
   const buf = new Uint8Array(await r.arrayBuffer());
-  const decoded = decodeTga2(buf); // LOUD on anything outside the confirmed subset
+  const decoded = decodeTga2(buf); // LOUD on anything outside the confirmed terrain subset
   if (decoded.width !== 256 || decoded.height !== 256) {
     throw new Error(`tekstura ${id}.dat: ${decoded.width}x${decoded.height} != 256x256 (spoza zbioru tekstur terenu — warstwa pominięta, jawnie)`);
   }
@@ -303,10 +317,6 @@ async function fetchTextureDecoded(id) {
   return entry;
 }
 
-// The splat shader — the RENDER_RECONSTRUCTION preset (world-splat.js is the
-// single source of truth for the preset text). Sequential lerp per layer by
-// RAW mask/255 in SLOT ORDER (= record order per cell); idx=255 marks an
-// empty slot; the material textures are sampled at GLOBAL world uv.
 const SPLAT_VERT = /* glsl */`
 varying vec3 vWorldPos;
 void main() {
@@ -332,30 +342,10 @@ void main() {
   vec4 i2 = texelFetch(uIdx2, cell, 0); vec4 i3 = texelFetch(uIdx3, cell, 0);
   vec4 w0 = texelFetch(uW0, cell, 0);   vec4 w1 = texelFetch(uW1, cell, 0);
   vec4 w2 = texelFetch(uW2, cell, 0);   vec4 w3 = texelFetch(uW3, cell, 0);
-  // U-19 FIX (a) — the LAYER COORDINATE (QC P2-1, confirmed at code level):
-  // the idx DataTextures are RGBA8 (UnsignedByteType), so texelFetch returns
-  // the slot bytes NORMALIZED (byte/255 in [0,1]) — NOT the layer number.
-  // The sampler2DArray layer coordinate must be the LAYER NUMBER: array layer
-  // k is the window's texture slot k (buildRegionSplatData writes layer.slot
-  // into the idx bytes and the DataArrayTexture is filled in the SAME
-  // textureIds order). EXACT decode floor(b*255.0+0.5): byte k -> layer k, no
-  // off-by-one (byte 255 = the EMPTY slot marker). The empty-slot guard
-  // (< 254.5) now runs on the DECODED value — pre-fix it compared the
-  // normalized byte against 254.5 and was always-true (harmless only because
-  // empty slots also carry w=0).
-  // U-19 FIX (b) — THE BLEND FACTOR (found in the correction round; the
-  // DOMINANT cause of the near-black headless render): texelFetch on the RGBA8
-  // weight texture ALREADY returns the RAW mask NORMALIZED (mask/255 — the
-  // preset's documented lerp factor). The pre-fix shader divided by 255 AGAIN
-  // (w0.x / 255.0 = mask/255/255 — a factor 1/255x too small), so every
-  // blend collapsed to ~tex*0.004 ≈ black. The factor below is the normalized
-  // weight AS FETCHED (w0.x = mask/255 — bit-exact the RAW served byte).
   vec4 s0 = floor(i0 * 255.0 + 0.5); vec4 s1 = floor(i1 * 255.0 + 0.5);
   vec4 s2 = floor(i2 * 255.0 + 0.5); vec4 s3 = floor(i3 * 255.0 + 0.5);
   vec3 col = vec3(0.0);
   bool any = false;
-  // slot k: idx from i(k/4)[k%4], weight from w(k/4)[k%4]; RAW mask/255 lerp
-  // (sequential mix in SLOT ORDER = the tile's RECORD ORDER)
   if (w0.x > 0.0 && s0.x < 254.5) { col = mix(col, texture(uMats, vec3(uv, s0.x)).rgb, w0.x); any = true; }
   if (w0.y > 0.0 && s0.y < 254.5) { col = mix(col, texture(uMats, vec3(uv, s0.y)).rgb, w0.y); any = true; }
   if (w0.z > 0.0 && s0.z < 254.5) { col = mix(col, texture(uMats, vec3(uv, s0.z)).rgb, w0.z); any = true; }
@@ -372,14 +362,11 @@ void main() {
   if (w3.y > 0.0 && s3.y < 254.5) { col = mix(col, texture(uMats, vec3(uv, s3.y)).rgb, w3.y); any = true; }
   if (w3.z > 0.0 && s3.z < 254.5) { col = mix(col, texture(uMats, vec3(uv, s3.z)).rgb, w3.z); any = true; }
   if (w3.w > 0.0 && s3.w < 254.5) { col = mix(col, texture(uMats, vec3(uv, s3.w)).rgb, w3.w); any = true; }
-  if (!any) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; } // no active layers in this cell (counted client-side; honest void, NOT a fallback color)
+  if (!any) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; } // no active layers in this cell (counted; honest void, NOT a fallback color)
   gl_FragColor = vec4(col, 1.0); // SRGB_PASSTHROUGH — no output colorspace chunk (documented preset)
 }
 `;
 
-/** Dispose the current window's splat GPU resources (bounded memory — called
- * on EVERY window move and on toggle-off). The decoded-texture RGBA LRU
- * survives (bounded) so a window move reuses payloads without re-fetching. */
 function disposeSplat() {
   if (!state.splat) return;
   try {
@@ -391,29 +378,28 @@ function disposeSplat() {
   state.splat = null;
 }
 
-/** Build + apply the textured terrain material for the CURRENT window (the
- * proven chain end-to-end). Returns the honest diagnostic object. On ANY
- * fetch/decode failure the affected layers are SKIPPED with explicit
- * diagnostics (never a fallback texture); if the window cannot be textured
- * at all, the terrain KEEPS the height-palette preview and the banner
- * explains why (loud, honest). */
-async function applyTexturesForWindow(origin) {
+/** Build + apply the textured terrain material for the window (§3.1: the
+ *  generation gate — a STALE result never applies; the fetched-but-unapplied
+ *  GPU resources of an aborted build are disposed, never leaked into the
+ *  newer scene). */
+async function applyTexturesForWindow(origin, requestId) {
   if (!state.texturesOn) return null;
   state.mat.busy = true;
+  let builtSplat = null; // owned here until committed
   try {
+    const stale = () => state.sceneRequest?.id !== requestId;
     const t0 = performance.now();
     let grid = state.materialsByOrigin.get(`${origin.gx},${origin.gy}`);
     if (!grid) {
       grid = await fetchMaterialsGrid(origin);
+      if (stale()) return { aborted: true };
       state.materialsByOrigin.set(`${origin.gx},${origin.gy}`, grid);
-      // bounded: keep only the current window's materials grid
       while (state.materialsByOrigin.size > 2) {
         const first = state.materialsByOrigin.keys().next().value;
         if (first === `${origin.gx},${origin.gy}`) break;
         state.materialsByOrigin.delete(first);
       }
     }
-    // a null tile row (materials fetch failed) is LOUD: no silent texturing
     const failedTiles = [];
     for (let dy = 0; dy < WINDOW_T; dy++) for (let dx = 0; dx < WINDOW_T; dx++) {
       if (!grid[dy][dx]) failedTiles.push(tileName(origin.gx + dx, origin.gy + dy));
@@ -421,14 +407,11 @@ async function applyTexturesForWindow(origin) {
     if (failedTiles.length === WINDOW_T * WINDOW_T) {
       throw new Error(`pobranie materiałów nie udało się dla CAŁEGO okna (${failedTiles.length} kafli) — teren zostaje z paletą wysokości (uczciwie; bez fałszywych tekstur)`);
     }
-    // fill failed tiles with EMPTY materials payloads (their layers are
-    // skipped + counted — the diagnostic shows which tiles failed)
     const safeGrid = grid.map((row, dy) => row.map((m, dx) => m ?? {
       ok: false, materials: [], fetchFailedTile: tileName(origin.gx + dx, origin.gy + dy),
       _failed: true,
     }));
     const data = buildRegionSplatData(safeGrid);
-    // fetch + decode every distinct texture of the window (bounded parallel 4)
     const texRgba = new Array(data.textureIds.length);
     const decodeFailures = [];
     for (let i = 0; i < data.textureIds.length; i += 4) {
@@ -439,9 +422,7 @@ async function applyTexturesForWindow(origin) {
       }));
       for (let k = 0; k < ids.length; k++) texRgba[i + k] = res[k];
     }
-    // textures that failed fetch/decode: their layers become unresolved —
-    // REBUILD the splat data with those ids marked unresolved (explicit
-    // diagnostic, layers SKIPPED, never a fallback)
+    if (stale()) return { aborted: true };
     const failedIdSet = new Set(decodeFailures.map((f) => f.id));
     let splatData = data;
     if (failedIdSet.size > 0) {
@@ -453,7 +434,6 @@ async function applyTexturesForWindow(origin) {
       })));
       splatData = buildRegionSplatData(markedGrid);
     }
-    // GPU build (only if at least one texture decoded)
     const usable = splatData.textureIds.filter((id) => !failedIdSet.has(id));
     if (usable.length === 0) {
       throw new Error(`ŻADNA tekstura okna nie zdekodowała się (${decodeFailures.length} błędów) — teren zostaje z paletą wysokości (uczciwie; bez fałszywych tekstur)`);
@@ -478,7 +458,7 @@ async function applyTexturesForWindow(origin) {
     arrayTexture.needsUpdate = true;
     const mkCell = (arr) => {
       const t = new THREE.DataTexture(arr, REGION_CELLS, REGION_CELLS, THREE.RGBAFormat, THREE.UnsignedByteType);
-      t.magFilter = THREE.NearestFilter; // DISCRETE cells (idx) + RAW per-cell weights (documented choice)
+      t.magFilter = THREE.NearestFilter;
       t.minFilter = THREE.NearestFilter;
       t.generateMipmaps = false;
       t.colorSpace = THREE.NoColorSpace;
@@ -500,8 +480,17 @@ async function applyTexturesForWindow(origin) {
       side: THREE.DoubleSide,
     });
     material.wireframe = $('tog-wireframe').checked;
-    disposeSplat();
-    state.splat = { material, arrayTexture, idxTex, wTex, data: splatData, origin, textureIds: usable, decodeFailures, failedTiles };
+    builtSplat = { material, arrayTexture, idxTex, wTex, data: splatData, origin, textureIds: usable, decodeFailures, failedTiles };
+    if (stale()) {
+      // ABORT: dispose the fetched-but-unapplied GPU resources (never leak into the newer scene)
+      material.dispose(); arrayTexture.dispose();
+      for (const t of idxTex) t.dispose();
+      for (const t of wTex) t.dispose();
+      return { aborted: true };
+    }
+    disposeSplat(); // the previous window's resources (owned by the state, disposed HERE — not by a stale instance)
+    state.splat = builtSplat;
+    state.coherence.splat = origin; // §3.1: the texture chain now matches THIS request's window
     applyTerrainMaterial();
     state.mat.lastDiag = {
       ok: splatData.diagnostic.mode === 'NONE' && failedTiles.length === 0,
@@ -526,7 +515,7 @@ async function applyTexturesForWindow(origin) {
     return state.mat.lastDiag;
   } catch (e) {
     state.mat.lastDiag = { ok: false, error: String(e?.message ?? e), unresolvedBindings: [], decodeFailures: [] };
-    if (state.texturesOn) {
+    if (state.texturesOn && state.sceneRequest?.id === requestId) {
       banner(`TEKSTURY TERENU: BŁĄD — ${e.message}. Teren renderowany paletą wysokości (bez fałszywych tekstur).`);
     }
     return state.mat.lastDiag;
@@ -535,9 +524,6 @@ async function applyTexturesForWindow(origin) {
   }
 }
 
-/** Swap the terrain mesh material between the ORIGINAL-TEXTURE splat (toggle
- * ON) and the height-palette preview (toggle OFF) — the REAL toggle (the
- * PIXEL on/off gates measure the difference). */
 function applyTerrainMaterial() {
   if (!state.mesh) return;
   const wantSplat = state.texturesOn && state.splat && state.splat.origin.gx === state.windowOrigin?.gx && state.splat.origin.gy === state.windowOrigin?.gy;
@@ -548,14 +534,8 @@ function applyTerrainMaterial() {
   }
 }
 
-// ---- ETAP E: the vegetation subsystem (contract §6 — RECONSTRUCTION_PREVIEW) ----
-// The three-way separation labels live in world-vegetation.js /
-// PEFoliageLabSeed.js (the single sources of truth, surfaced in the panels).
+// ---- the vegetation subsystem (contract §6) ----
 
-/** Identity-checked binary fetch for the vegetation chains (CAM-C3 client
- * discipline): the response must carry the expected container identity
- * (era + container + containerSha256 from the LIVE server status) — a
- * mismatch is a controlled refusal (never silently used). */
 async function fetchVegBinary(url, { container, containerSha256 }) {
   const r = await fetch(url, { cache: 'no-store' });
   if (!r.ok) {
@@ -573,119 +553,167 @@ async function fetchVegBinary(url, { container, containerSha256 }) {
   };
   if (hdr.era !== state.status.era || hdr.container !== container ||
       String(hdr.containerSha256 ?? '').toUpperCase() !== String(containerSha256 ?? '').toUpperCase()) {
-    throw new Error(`${url}: tożsamość kontenera z odpowiedzi nie zgadza się z live statusem (era/kontener/SHA) — kontrolowana odmowa`);
+    throw new Error(`${url}: tożsamość kontenera z odpowiedzi nie zgadza się z live statusem — kontrolowana odmowa`);
   }
   const payload = new Uint8Array(await r.arrayBuffer());
   return { payload, headers: hdr };
 }
 
-/** The vegetation terrain-height sampler (RECONSTRUCTION placement — the
- * deployed foliage-page rule): BILINEAR over the raw u16 samples of the
- * SAME active window region the terrain renders, -> adapter meters
- * (worldHeightMeters — the SAME conversion as the terrain mesh). null
- * outside the active data window (the census shows it; never a fake
- * height). */
-function vegHeightSampler(worldX, worldZ) {
-  if (!state.region || !state.windowOrigin) return null;
-  const lx = (worldX - state.windowOrigin.gx * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE;
-  const lz = (worldZ - state.windowOrigin.gy * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE;
-  const S = WINDOW_T * 32;
-  if (lx < 0 || lz < 0 || lx > S - 1 || lz > S - 1) return null;
-  const x0 = Math.min(S - 2, Math.floor(lx)), z0 = Math.min(S - 2, Math.floor(lz));
-  const fx = lx - x0, fz = lz - z0;
-  const h00 = state.region.rawSample(x0, z0), h10 = state.region.rawSample(x0 + 1, z0);
-  const h01 = state.region.rawSample(x0, z0 + 1), h11 = state.region.rawSample(x0 + 1, z0 + 1);
-  const raw = h00 * (1 - fx) * (1 - fz) + h10 * fx * (1 - fz) + h01 * (1 - fx) * fz + h11 * fx * fz;
-  return worldHeightMeters(raw);
-}
-
-/** Build + apply the vegetation for the CURRENT window (async; the initial
- * boot awaits it so READY means the vegetation census is real or honestly
- * diagnosed; window moves rebuild without blocking the terrain). */
-async function rebuildVegetation(origin, { awaited = false } = {}) {
+async function rebuildVegetation(origin, requestId, { awaited = false } = {}) {
   if (!state.vegOn || !state.veg) { state.vegCensus = state.veg ? state.veg.lastCensus : null; return null; }
-  if (state.vegBusy) return null;
+  if (state.vegBusy) return null; // WorldVegetation queues the LATEST request internally (WL-1 fix)
   state.vegBusy = true;
   try {
     const c = await state.veg.rebuild(origin, WINDOW_T);
+    if (c && c.aborted) return c; // superseded — the newer request is queued inside
+    if (state.sceneRequest?.id !== requestId) return c; // stale census: do NOT mark coherence for it
     state.vegCensus = c;
-    if (c && !c.ok) {
-      banner(`ROŚLINNOŚĆ: ${c.error ?? 'błąd łańcucha'} — podgląd roślinności wyłączony uczciwie dla tego profilu (teren działa); wybierz profil zdekodowany.`);
+    state.coherence.veg = c && c.ok ? c.window.origin : null;
+    if (c && !c.ok && !c.unsupportedProfile) {
+      banner(`ROŚLINNOŚĆ: ${c.error ?? 'błąd łańcucha'} — podgląd roślinności niedostępny dla tej konfiguracji (teren działa); wybierz profil zdekodowany.`);
     }
-    // NOTE: a successful vegetation build NEVER clears the banner — a terrain
-    // error must stay visible (a component success cannot mask another error).
     updateVegPanel();
     updateEvidencePanel();
     return c;
   } finally {
     state.vegBusy = false;
-    if (awaited) { /* the caller completes the boot */ }
   }
 }
 
-// ---- window management (streaming; ≤64 active tiles) ----
-function desiredOrigin(camGx, camGy) {
+// ---- window management (streaming; the FOCUS-following near window) ----
+
+/** §5/WL-4: streaming follows the VIEWED FOCUS (orbit: controls.target;
+ *  fly/walk: the camera position) with the near window kept centered on it. */
+function focusPoint() {
+  return state.mode === 'orbit' && controls ? controls.target : camera.position;
+}
+function desiredOrigin(focusGx, focusGy) {
   return {
-    gx: Math.min(Math.max(camGx - (WINDOW_T >> 1), 0), GRID_W - WINDOW_T),
-    gy: Math.min(Math.max(camGy - (WINDOW_T >> 1), 0), GRID_H - WINDOW_T),
+    gx: Math.min(Math.max(focusGx - (WINDOW_T >> 1), 0), GRID_W - WINDOW_T),
+    gy: Math.min(Math.max(focusGy - (WINDOW_T >> 1), 0), GRID_H - WINDOW_T),
   };
 }
-function cameraTile() {
+function focusTile() {
+  const p = focusPoint();
   return {
-    gx: Math.min(Math.max(Math.floor(camera.position.x / TILE_M), 0), GRID_W - 1),
-    gy: Math.min(Math.max(Math.floor(camera.position.z / TILE_M), 0), GRID_H - 1),
+    gx: Math.min(Math.max(Math.floor(p.x / TILE_M), 0), GRID_W - 1),
+    gy: Math.min(Math.max(Math.floor(p.z / TILE_M), 0), GRID_H - 1),
   };
 }
 
 function setLoading(msg) { $('world-loading').textContent = msg; }
 
-async function rebuildWindow(origin, { isInitial = false } = {}) {
+/** §3.1: the explicit scene request identity + the latest-wins terrain queue.
+ *  DEDUPE: while a rebuild is RUNNING (or queued) for the SAME origin, a
+ *  repeated identical request does NOT invalidate it (the streaming tick fires
+ *  every ~400 ms; without this the in-flight rebuild would be perpetually
+ *  superseded — measured in this run's own browser probe). A request for a
+ *  DIFFERENT origin, or an explicit forceNew (a CONFIG change: profile/seed/
+ *  density are part of the scene identity), bumps the sequence — the stale
+ *  build aborts before applying and the newest runs. */
+function requestScene(origin, { forceNew = false } = {}) {
+  const runningSame = state.rebuildBusy && state.runningOrigin &&
+    state.runningOrigin.gx === origin.gx && state.runningOrigin.gy === origin.gy;
+  const pendingSame = state.pendingOrigin &&
+    state.pendingOrigin.gx === origin.gx && state.pendingOrigin.gy === origin.gy;
+  if ((runningSame || pendingSame) && !forceNew) {
+    return state.sceneRequest?.id ?? state.sceneSeq; // already building/queued for THIS origin
+  }
+  const id = ++state.sceneSeq;
+  state.sceneRequest = {
+    id,
+    origin,
+    era: state.status?.era ?? 'PCG_9_3_5',
+    containers: state.status?.containers ?? null,
+    profileMode: state.vegConfig.profileMode,
+    profile: state.vegConfig.profile,
+    labSeed: state.vegConfig.labSeed,
+    density: state.vegConfig.densityPercent,
+    calibration: state.status?.calibration ?? null,
+    versions: {
+      heightQuery: 'peheight-query-triangle-v1', vegetation: VEGETATION_SCHEMA_VERSION,
+      splat: WORLD_SPLAT_SCHEMA_VERSION, lod: WORLD_LOD_VERSION,
+    },
+  };
+  state.readyShown = false;
+  if (state.rebuildBusy) {
+    state.pendingOrigin = origin; // latest wins (the slot is overwritten by newer requests)
+  } else {
+    void rebuildWindow(origin, id);
+  }
+  return id;
+}
+
+/** Fetch the window tiles + the 1-tile REAL-sample halo (§3.2) with bounded
+ *  concurrency. Returns { field (10x10, nulls on failure), windowFailed } . */
+async function fetchFieldTiles(origin) {
+  const field = [];
+  const wanted = [];
+  for (let dy = 0; dy < FIELD_T; dy++) {
+    const row = [];
+    for (let dx = 0; dx < FIELD_T; dx++) row.push(null);
+    field.push(row);
+    for (let dx = 0; dx < FIELD_T; dx++) {
+      const gx = origin.gx - HALO_T + dx, gy = origin.gy - HALO_T + dy;
+      if (gx >= 0 && gy >= 0 && gx < GRID_W && gy < GRID_H) wanted.push([gx, gy, dx, dy]);
+    }
+  }
+  let done = 0, failed = 0;
+  for (let i = 0; i < wanted.length; i += 8) {
+    const chunk = wanted.slice(i, i + 8);
+    const results = await Promise.all(chunk.map(async ([gx, gy]) => {
+      try { return { tile: await fetchTile(gx, gy) }; }
+      catch (e) { state.fetchErrors++; state.lastError = String(e.message); return { err: e, gx, gy }; }
+    }));
+    for (let k = 0; k < chunk.length; k++) {
+      const [gx, gy, dx, dy] = chunk[k];
+      const r = results[k];
+      if (r.err) { failed++; }
+      else field[dy][dx] = r.tile;
+      done++;
+    }
+    if (failed > 0) setLoading(`okno + halo: ${done}/${wanted.length} pobranych, BŁĘDY: ${failed} (NODATA/odmowa — UCZCIWIE)`);
+  }
+  return { field, failed };
+}
+
+async function rebuildWindow(origin, requestId, { isInitial = false } = {}) {
   state.rebuildBusy = true;
+  state.runningOrigin = origin; // the requestScene dedupe key (this build's target)
   try {
-    const wanted = [];
-    for (let dy = 0; dy < WINDOW_T; dy++) {
-      for (let dx = 0; dx < WINDOW_T; dx++) wanted.push([origin.gx + dx, origin.gy + dy]);
-    }
-    // fetch with bounded concurrency (chunks of 8)
-    const tiles = [];
-    let done = 0, failed = 0;
-    for (let i = 0; i < wanted.length; i += 8) {
-      const chunk = wanted.slice(i, i + 8);
-      const results = await Promise.all(chunk.map(async ([gx, gy]) => {
-        try { return { tile: await fetchTile(gx, gy) }; }
-        catch (e) { state.fetchErrors++; state.lastError = String(e.message); return { err: e, gx, gy }; }
-      }));
-      for (const r of results) {
-        if (r.err) { failed++; tiles.push(null); }
-        else tiles.push(r.tile);
-      }
-      done += chunk.length;
-      if (isInitial || failed > 0) {
-        setLoading(`okno 8×8 kafli: ${done}/${wanted.length} pobranych${failed ? `, BŁĘDY: ${failed} (NODATA/odmowa — UJCIWIE)` : ''}`);
+    const stale = () => state.sceneRequest?.id !== requestId;
+    const { field, failed } = await fetchFieldTiles(origin);
+    if (stale()) return; // the newer request owns the scene now — nothing applied
+    // the inner 8x8 render window must be fully present (missing inner tile = no mesh over void)
+    const innerMissing = [];
+    for (let dy = HALO_T; dy < HALO_T + WINDOW_T; dy++) {
+      for (let dx = HALO_T; dx < HALO_T + WINDOW_T; dx++) {
+        if (!field[dy][dx]) innerMissing.push(tileName(origin.gx + (dx - HALO_T), origin.gy + (dy - HALO_T)));
       }
     }
-    if (failed > 0) {
-      // MISSING DATA NEVER BUILDS A MESH OVER VOID: keep the previous mesh (or
-      // none on initial), stop movement at the boundary, show the banner.
+    if (innerMissing.length > 0) {
       state.boundaryHit = true;
+      state.boundaryReason = 'LOADING';
       $('boundary-banner').hidden = false;
       if (isInitial) {
-        setLoadStatus(`ERROR_TERRAIN_LOAD: ${failed} kafli okna niedostępne — ${state.lastError}`);
+        setLoadStatus(`ERROR_TERRAIN_LOAD: ${innerMissing.length} kafli okna niedostępne — ${state.lastError}`);
         banner(`BŁĄD ŁADOWANIA TERENU: ${state.lastError}`);
       }
-      return;
+      return; // keep the previous coherent scene (never a mesh over void)
     }
-    // assemble rows[gy][gx] (PETerrainRegion contract: rows=y, cols=x)
+    // THE SHARED HEIGHT FIELD (10x10 with the real-sample halo; missing halo
+    // tiles are explicit nulls — the query refuses to cross them)
+    const heightField = new PEHeightField(field, { tileWorldMeters: TILE_M });
+    // the RENDER window (8x8 — the production PETerrainRegion path)
     const rows = [];
     for (let dy = 0; dy < WINDOW_T; dy++) {
       const row = [];
-      for (let dx = 0; dx < WINDOW_T; dx++) row.push(tiles[dy * WINDOW_T + dx]);
+      for (let dx = 0; dx < WINDOW_T; dx++) row.push(field[dy + HALO_T][dx + HALO_T]);
       rows.push(row);
     }
     const region = new PETerrainRegion(rows);
     const geo = region.buildGeometry();
-    state.lastGeo = geo; // for the tile-bounds toggle rebuild
-    // renderer-side (RECONSTRUCTION_PREVIEW): normals + height palette colors
+    state.lastGeo = geo;
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(geo.positions, 3));
     g.setAttribute('color', new THREE.BufferAttribute(paletteColors(geo.positions), 3));
@@ -700,37 +728,37 @@ async function rebuildWindow(origin, { isInitial = false } = {}) {
       state.mesh.position.set(origin.gx * TILE_M, 0, origin.gy * TILE_M);
       scene.add(state.mesh);
     }
-    // ETAP D: the material now reflects the texture toggle (the REAL swap —
-    // palette preview when OFF, the original-texture splat when ON and this
-    // window's splat is applied; until the new window's splat is built the
-    // palette shows, honestly, for the moving window)
     applyTerrainMaterial();
     state.mesh.material.wireframe = $('tog-wireframe').checked;
     buildTileBounds(region, geo, origin);
     state.region = region;
+    state.heightField = heightField;
     state.windowOrigin = origin;
+    state.coherence.terrain = origin;
     state.rebuilds++;
     state.boundaryHit = false;
+    state.boundaryReason = null;
     $('boundary-banner').hidden = true;
-    setLoading(`teren: okno 8×8 (64 kafle aktywne) przy origin ${origin.gx},${origin.gy} — z SUROWYCH próbek u16; przebudowań: ${state.rebuilds}`);
+    setLoading(`teren: okno 8×8 (64 kafle) + halo 10×10 przy origin ${origin.gx},${origin.gy} — z SUROWYCH próbek u16; przebudowań: ${state.rebuilds}`);
     if (isInitial && !state.firstFrameDone) {
-      hud(`teren gotowy — ${geo.positions.length / 3} wierzchołków z surowych u16; tryb: ORBITA (klawisze 1/2/3 zmieniają tryb)`);
+      hud(`teren gotowy — ${geo.positions.length / 3} wierzchołków z surowych u16; tryb: ORBITA (1/2/3 zmienia tryb); F dopasuj, R reset`);
     }
-    // ETAP D: rebuild THIS window's texture resources (async on window moves;
-    // the initial boot awaits the first application so READY means textured
-    // or honestly diagnosed)
-    if (state.texturesOn && !isInitial) void applyTexturesForWindow(origin);
-    // ETAP E: rebuild the vegetation instances for the NEW window (async on
-    // moves; per-tile determinism makes the order irrelevant — the census is
-    // refreshed when done; the initial build is awaited in boot)
-    if (!isInitial) void rebuildVegetation(origin);
+    // the distant LOD follows (mid ring + far hole; NOT gen-critical — the LOD
+    // is window-derived and idempotent; a late mid rebuild is harmless)
+    void state.lod?.rebuildMid(origin).then(() => { updateCensusPanel(); });
+    // textures + vegetation for THIS request (gen-gated; latest wins)
+    if (state.texturesOn) void applyTexturesForWindow(origin, requestId);
+    if (!isInitial) void rebuildVegetation(origin, requestId);
+    updateCensusPanel();
   } finally {
     state.rebuildBusy = false;
+    state.runningOrigin = null;
     if (state.pendingOrigin) {
       const next = state.pendingOrigin;
       state.pendingOrigin = null;
       if (next.gx !== state.windowOrigin?.gx || next.gy !== state.windowOrigin?.gy) {
-        void rebuildWindow(next);
+        const id = state.sceneRequest?.id; // the request id is already the newest (requestScene bumped it)
+        void rebuildWindow(next, id);
       }
     }
   }
@@ -761,7 +789,6 @@ function paletteColors(positions) {
   return colors;
 }
 
-// tile-bound lines ON THE SURFACE (sample-grid lines at tile borders) — toggle
 function buildTileBounds(region, geo, origin) {
   if (state.boundsLines) {
     state.boundsLines.geometry.dispose();
@@ -786,11 +813,14 @@ function buildTileBounds(region, geo, origin) {
   scene.add(state.boundsLines);
 }
 
-// ---- three.js core ----
+// ---- three.js core (§5: the reference camera preset) ----
 const canvas = $('view-canvas');
-let renderer, scene, camera, controls;
+let renderer, scene, camera, controls, pointerLockFailed = false;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  // §5: near 0.5 + logarithmicDepthBuffer with far 200000 — the justified
+  // world-scale depth choice (close-up trees AND 14 km distant LOD in one
+  // frustum without z-collapse; a renderer choice, never a PE unit claim)
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, logarithmicDepthBuffer: true });
 } catch (e) {
   setLoadStatus(`ERROR_WEBGL: ${e.message}`);
   banner(`WebGL niedostępny: ${e.message}`);
@@ -799,7 +829,7 @@ try {
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0c1018);
-camera = new THREE.PerspectiveCamera(60, 1, 0.5, 30000);
+camera = new THREE.PerspectiveCamera(45, 1, 0.5, 200000); // §5 the live 9350 reference preset (FOV 45, far 200000)
 camera.position.set(0, 200, 0);
 const sun = new THREE.DirectionalLight(0xffffff, 1.25);
 sun.position.set(0.35, 1.0, 0.2);
@@ -807,61 +837,106 @@ scene.add(sun);
 scene.add(new THREE.AmbientLight(0x707890, 1.1));
 controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
-controls.dampingFactor = 0.08;
-controls.maxDistance = 12000;
-// the height-palette preview material (toggle OFF; RECONSTRUCTION_PREVIEW aid —
-// the ORIGINAL u16 heights drive it; shared across window rebuilds)
+controls.dampingFactor = 0.08;   // §5 the reference damping
+controls.minDistance = 10;       // §5 the reference limit
+controls.maxDistance = 50000;    // §5 the reference limit
 state.paletteMaterial = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
 
 function syncCanvasSize() {
   const w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
-  camera.updateProjectionMatrix();
+  camera.updateProjectionMatrix(); // resize updates the drawing buffer/aspect — the camera POSITION is never reset
 }
 window.addEventListener('resize', syncCanvasSize);
 
-// ---- exploration modes (contract §7) ----
-const move = { keys: new Set(), yaw: 0, pitch: 0 };
+// ---- exploration modes (§3.2: the movement guard; §5: no key capture from inputs) ----
+const move = { keys: new Set(), yaw: 0, pitch: 0, dragging: false, lastX: 0, lastY: 0 };
+
+function isTypingTarget(ev) {
+  const t = ev.target;
+  return t instanceof HTMLElement && (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+}
+
+function clearHeldKeys() { move.keys.clear(); } // §3.2: blur / lock loss / mode change
+window.addEventListener('blur', clearHeldKeys);
+
 function setMode(mode) {
+  if (state.mode === mode) return;
   state.mode = mode;
+  clearHeldKeys();
   for (const [id, m] of [['btn-mode-orbit', 'orbit'], ['btn-mode-fly', 'fly'], ['btn-mode-walk', 'walk']]) {
     $(id).classList.toggle('active', m === mode);
   }
   controls.enabled = mode === 'orbit';
   if (mode === 'orbit') {
     if (document.pointerLockElement === canvas) document.exitPointerLock();
-    if (state.region) {
-      const t = camera.position;
-      controls.target.set(t.x, groundAt(t.x, t.z) ?? t.y - 50, t.z);
-    }
-    $('lock-hint').style.display = 'none';
+    // keep the CURRENT focus: orbit pivots on the place you were looking at (no jump)
+    const t = state._lastFlyFocus ?? { x: camera.position.x, z: camera.position.z };
+    const g = state.heightField?.triangleHeightAtWorld(t.x, t.z);
+    controls.target.set(t.x, g ?? Math.max(camera.position.y - 50, 0), t.z);
+    $('lock-hint').hidden = true;
   } else {
     const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
     move.yaw = e.y; move.pitch = e.x;
+    state._lastFlyFocus = { x: camera.position.x, z: camera.position.z };
     if (mode === 'walk') {
-      const g = groundAt(camera.position.x, camera.position.z);
-      if (g !== null) camera.position.y = g + EYE_OFFSET_M; // snap to terrain on mode entry
+      const g = state.heightField?.triangleHeightAtWorld(camera.position.x, camera.position.z);
+      if (g !== null && g !== undefined) camera.position.y = g + EYE_OFFSET_M; // snap to the shared surface on mode entry
     }
-    $('lock-hint').style.display = 'block';
-    hud(`${mode === 'walk' ? 'SPACER' : 'LOT'}: kliknij canvas, aby przechwycić mysz (ESC uwalnia); WASD ${mode === 'walk' ? 'po terenie' : '+ Q/E'}; Shift ×3`);
+    $('lock-hint').hidden = false;
+    tryPointerLock();
+  }
+}
+function tryPointerLock() {
+  try {
+    const p = canvas.requestPointerLock();
+    if (p && typeof p.catch === 'function') {
+      p.catch(() => {
+        pointerLockFailed = true;
+        $('lock-hint').hidden = false;
+        $('lock-hint').textContent = 'przechwycenie myszy odrzucone przez przeglądarkę — działa tryb przeciągania: trzymaj LPM na canvasie i ruszaj myszą (WASD bez zmian)';
+      });
+    }
+  } catch {
+    pointerLockFailed = true;
   }
 }
 canvas.addEventListener('click', () => {
-  if (state.mode !== 'orbit' && document.pointerLockElement !== canvas) {
-    canvas.requestPointerLock(); // pointer lock ONLY after a conscious click
+  if (state.mode !== 'orbit' && document.pointerLockElement !== canvas && !pointerLockFailed) {
+    tryPointerLock();
+  } else if (state.mode !== 'orbit' && pointerLockFailed) {
+    tryPointerLock(); // retry on the conscious click (the fallback drag-look stays available regardless)
   }
 });
 document.addEventListener('pointerlockchange', () => {
   const locked = document.pointerLockElement === canvas;
-  hud(locked ? `mysz przechwycona (${state.mode}) — ESC uwalnia kursor` : 'kursor uwolniony');
+  if (!locked) clearHeldKeys(); // §3.2: lock loss clears held keys
+  if (!locked && state.mode !== 'orbit' && !pointerLockFailed) {
+    $('lock-hint').hidden = false;
+    $('lock-hint').textContent = 'kursor uwolniony — kliknij canvas, aby ponownie przechwycić mysz; WASD wznowione po kliknięciu';
+  }
 });
+// the drag-look fallback (works with OR without pointer lock; §3.2)
+canvas.addEventListener('mousedown', (ev) => {
+  if (state.mode === 'orbit') return;
+  move.dragging = true; move.lastX = ev.clientX; move.lastY = ev.clientY;
+});
+window.addEventListener('mouseup', () => { move.dragging = false; });
 document.addEventListener('mousemove', (ev) => {
-  if (document.pointerLockElement !== canvas) return;
-  move.yaw -= ev.movementX * 0.0022;
-  move.pitch = Math.min(Math.max(move.pitch - ev.movementY * 0.0022, -1.5), 1.5);
+  if (document.pointerLockElement === canvas) {
+    move.yaw -= ev.movementX * 0.0022;
+    move.pitch = Math.min(Math.max(move.pitch - ev.movementY * 0.0022, -1.5), 1.5);
+    return;
+  }
+  if (move.dragging && state.mode !== 'orbit') { // the drag-look fallback path
+    move.yaw -= (ev.clientX - move.lastX) * 0.0044;
+    move.pitch = Math.min(Math.max(move.pitch - (ev.clientY - move.lastY) * 0.0044, -1.5), 1.5);
+    move.lastX = ev.clientX; move.lastY = ev.clientY;
+  }
 });
 window.addEventListener('keydown', (ev) => {
+  if (isTypingTarget(ev)) return; // §5: the drawer inputs never capture movement keys
   if (ev.code === 'Digit1') setMode('orbit');
   else if (ev.code === 'Digit2') setMode('fly');
   else if (ev.code === 'Digit3') setMode('walk');
@@ -873,15 +948,6 @@ window.addEventListener('keydown', (ev) => {
 });
 window.addEventListener('keyup', (ev) => move.keys.delete(ev.code));
 
-function groundAt(x, z) {
-  if (!state.region || !state.windowOrigin) return null;
-  const vx = Math.floor((x - state.windowOrigin.gx * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE);
-  const vy = Math.floor((z - state.windowOrigin.gy * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE);
-  const sx = WINDOW_T * 32, sy = WINDOW_T * 32;
-  if (vx < 0 || vy < 0 || vx >= sx || vy >= sy) return null; // outside the ACTIVE DATA window
-  return worldHeightMeters(state.region.rawSample(vx, vy)); // the SAME terrain data
-}
-
 const MAP_MIN = 1, MAP_MAX_X = GRID_W * TILE_M - 1, MAP_MAX_Z = GRID_H * TILE_M - 1;
 function clampToMap(v) {
   const out = { x: v.x, z: v.z, clamped: false };
@@ -892,8 +958,17 @@ function clampToMap(v) {
   return out;
 }
 
+/** §3.2/WL-3 FIX: the candidate position is computed FIRST, the surface is
+ *  checked, and ONLY THEN is X/Y/Z committed. No surface data = the move is
+ *  REFUSED (the last safe position stands; never a void drop, never y=0). */
 function updateFlyWalk(dt) {
-  if (state.mode === 'orbit' || document.pointerLockElement !== canvas) return;
+  if (state.mode === 'orbit' || (document.pointerLockElement !== canvas && !move.dragging)) {
+    if (state.mode !== 'orbit' && move.keys.size > 0 && document.pointerLockElement !== canvas && !move.dragging) {
+      // no pointer lock AND no drag: WASD still works (the honest fallback input)
+    }
+  }
+  if (state.mode === 'orbit') return;
+  if (move.keys.size === 0 && !move.dragging) return;
   const speedBase = state.mode === 'walk' ? 12 : 60;
   const speed = speedBase * (move.keys.has('ShiftLeft') || move.keys.has('ShiftRight') ? 3 : 1);
   const dir = new THREE.Vector3();
@@ -909,54 +984,160 @@ function updateFlyWalk(dt) {
   if (dir.lengthSq() === 0 && up === 0) return;
   const rot = new THREE.Euler(move.pitch, move.yaw, 0, 'YXZ');
   const step = dir.normalize().applyEuler(rot).multiplyScalar(speed * dt);
-  const next = { x: camera.position.x + step.x, z: camera.position.z + step.z };
-  const c = clampToMap(next);
-  camera.position.x = c.x;
-  camera.position.z = c.z;
+  // ---- the CANDIDATE position (nothing committed yet) ----
+  const candidate = { x: camera.position.x + step.x, z: camera.position.z + step.z, y: camera.position.y };
+  const c = clampToMap(candidate);
   if (state.mode === 'walk') {
-    const g = groundAt(c.x, c.z);
-    if (g === null) {
-      // outside the ACTIVE DATA window: STOP the move (never drop into void)
+    const g = state.heightField ? state.heightField.triangleHeightAtWorld(c.x, c.z) : null;
+    if (g === null || g === undefined) {
+      // NO REAL SURFACE DATA: the move is refused at the last safe position
+      // (distinguish LOADING from the corpus edge honestly)
       state.boundaryHit = true;
+      const atEdge = c.x <= MAP_MIN || c.z <= MAP_MIN || c.x >= MAP_MAX_X || c.z >= MAP_MAX_Z;
+      state.boundaryReason = atEdge ? 'CORPUS_EDGE' : 'LOADING';
+      $('boundary-banner').textContent = state.boundaryReason === 'CORPUS_EDGE'
+        ? 'osiągnięto krawędź dostępnej mapy (regularnej siatki kafli) — ruch wstrzymany (to realna granica korpusu, nie błąd ładowania)'
+        : 'dane powierzchni jeszcze się ładują (okno/halo w przebudowie) — ruch wstrzymany na ostatniej bezpiecznej pozycji; prefetch (streaming) już działa';
       $('boundary-banner').hidden = false;
-      return;
+      return; // NOTHING committed
     }
-    camera.position.y = g + EYE_OFFSET_M;
+    candidate.y = g + EYE_OFFSET_M;
   } else {
-    camera.position.y = Math.min(Math.max(camera.position.y + up * speed * dt, 2), 8000);
+    candidate.y = Math.min(Math.max(camera.position.y + up * speed * dt, 2), 8000);
   }
+  // ---- the surface was checked: commit ----
+  camera.position.set(c.x, candidate.y, c.z);
   camera.quaternion.setFromEuler(new THREE.Euler(move.pitch, move.yaw, 0, 'YXZ'));
-  if (c.clamped) { state.boundaryHit = true; $('boundary-banner').hidden = false; }
-  else if (state.boundaryHit && !$('boundary-banner').hidden) { state.boundaryHit = false; $('boundary-banner').hidden = true; }
+  state._lastFlyFocus = { x: c.x, z: c.z };
+  if (c.clamped) { state.boundaryHit = true; state.boundaryReason = 'CORPUS_EDGE'; $('boundary-banner').hidden = false; }
+  else if (state.boundaryHit) { state.boundaryHit = false; state.boundaryReason = null; $('boundary-banner').hidden = true; }
 }
 
+/** §5/WL-4 FIX: fit frames the CURRENT FOCUS (the streaming follows the
+ * focus — the window NEVER chases the fit). Stable across repetitions. */
 function fitView() {
-  if (!state.windowOrigin) return;
-  const o = state.windowOrigin;
-  const cx = (o.gx + WINDOW_T / 2) * TILE_M, cz = (o.gy + WINDOW_T / 2) * TILE_M;
-  const g = groundAt(cx, cz) ?? 0;
+  const focus = focusPoint();
+  const g = state.heightField?.triangleHeightAtWorld(focus.x, focus.z) ?? Math.max(focus.y - 50, 0);
+  // frame the near window AROUND the focus (the reference autoFit direction 0.7/0.6/0.7; distance = extent*1.8)
+  const extent = WINDOW_T * TILE_M; // the window around the focus
+  const dist = extent * 1.8;
+  const dirV = new THREE.Vector3(0.7, 0.6, 0.7).normalize();
   if (state.mode === 'orbit') {
-    controls.target.set(cx, g, cz);
-    camera.position.set(cx + 360, g + 420, cz + 360);
+    controls.target.set(focus.x, g, focus.z); // the focus is PRESERVED (no window move)
+    camera.position.set(focus.x + dirV.x * dist, g + dirV.y * dist, focus.z + dirV.z * dist);
     controls.update();
   } else {
-    camera.position.set(cx, g + 240, cz + 240);
+    const back = new THREE.Vector3(-dirV.x, 0, -dirV.z).normalize();
+    camera.position.set(focus.x + back.x * 60, g + 160, focus.z + back.z * 60);
   }
-  hud('widok dopasowany do okna danych (F)');
+  hud('widok dopasowany do fokusu (F) — okno streamingu podąża za fokusem, nie za kamerą (stabilne przy powtórzeniach)');
 }
 function resetView() {
   if (!state.spawn) return;
   const s = state.spawn;
-  const g = groundAt(s.x, s.z) ?? 0;
+  // the teleport rule (§3.2): ensure the DESTINATION data first — the window
+  // request happens; the camera settles once the surface is available
+  const g = state.heightField?.triangleHeightAtWorld(s.x, s.z);
   if (state.mode === 'orbit') {
-    controls.target.set(s.x, g, s.z);
-    camera.position.set(s.x + 180, g + 220, s.z + 180);
+    controls.target.set(s.x, g ?? Math.max(120, s.x * 0), s.z); // focus at spawn; height from the shared query (no y=0 fallback)
+    const extent = WINDOW_T * TILE_M;
+    const dist = extent * 1.8;
+    const dirV = new THREE.Vector3(0.7, 0.6, 0.7).normalize();
+    camera.position.set(s.x + dirV.x * dist, (g ?? 200) + dirV.y * dist, s.z + dirV.z * dist);
     controls.update();
   } else {
-    camera.position.set(s.x, (state.mode === 'walk' ? g + EYE_OFFSET_M : g + 120), s.z);
+    camera.position.set(s.x, state.mode === 'walk' ? (g ?? 200) + EYE_OFFSET_M : (g ?? 200) + 120, s.z + 120);
   }
-  hud('reset kamery na spawn (R)');
+  hud('reset kamery na spawn (R) — focus na spawn; streaming podąża za fokusem');
 }
+
+// ---- teleport (§8 QC: distant regions + return) ----
+function teleportTo(gx, gy) {
+  const cx = gx * TILE_M + TILE_M / 2, cz = gy * TILE_M + TILE_M / 2;
+  state.teleportCount++;
+  // the window request FIRST (the destination data), then the camera settle
+  const want = desiredOrigin(gx, gy);
+  requestScene(want);
+  if (state.mode === 'orbit') {
+    controls.target.set(cx, 200, cz);
+    camera.position.set(cx + 400, 620, cz + 400);
+    controls.update();
+  } else {
+    camera.position.set(cx, 400, cz);
+    state._lastFlyFocus = { x: cx, z: cz };
+  }
+  // settle the focus height once the surface is in (honest: no y=0)
+  const settle = () => {
+    const g = state.heightField?.triangleHeightAtWorld(cx, cz);
+    if (g !== null && g !== undefined) {
+      if (state.mode === 'orbit') { controls.target.y = g; controls.update(); }
+      else if (state.mode === 'walk') camera.position.y = g + EYE_OFFSET_M;
+    } else {
+      setTimeout(settle, 250); // still loading — the focus stays where it is until real data
+    }
+  };
+  settle();
+  hud(`teleport → kafel ${gx},${gy} (najpierw dane miejsca docelowego; brak ground ≠ wysokość zero)`);
+}
+
+// ---- §7: the Rosetta debug point (click) ----
+const raycaster = new THREE.Raycaster();
+function debugPointFromClick(ev) {
+  if (state.mode !== 'orbit') return; // selection in orbit only (movement owns fly/walk input)
+  const rect = canvas.getBoundingClientRect();
+  const ndc = new THREE.Vector2(((ev.clientX - rect.left) / rect.width) * 2 - 1, -((ev.clientY - rect.top) / rect.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  const targets = [];
+  if (state.mesh) targets.push(state.mesh);
+  if (state.veg) targets.push(...state.veg.meshes, ...state.veg.markerMeshes);
+  const hits = raycaster.intersectObjects(targets, false);
+  if (!hits.length) return;
+  const hit = hits[0];
+  const s = state.status;
+  let out;
+  if (hit.object === state.mesh) {
+    const gx = Math.min(Math.max(Math.floor(hit.point.x / TILE_M), 0), GRID_W - 1);
+    const gy = Math.min(Math.max(Math.floor(hit.point.z / TILE_M), 0), GRID_H - 1);
+    const key = `${gx},${gy}`;
+    const cached = state.cache.get(key);
+    const h = state.heightField ? state.heightField.triangleHeightAtWorld(hit.point.x, hit.point.z) : null;
+    out = {
+      kind: 'TERRAIN',
+      era: cached?.identity?.era ?? s?.era,
+      container: cached?.identity?.container ?? 'Terrain/terrain.bnt',
+      containerSha256: cached?.identity?.containerSha256 ?? s?.containers?.terrain?.sha256,
+      entry: cached?.identity?.entryName ?? tileName(gx, gy),
+      decoder: 'PESourceMount.getTerrainTile (BNT2 terrain framing; TDF offset-64 heights, RAW uint16) → TerrainTile → PETerrainRegion/PEHeightField',
+      sceneObject: 'the near-layer render mesh (PETerrainRegion.buildGeometry quads)',
+      appliedPolicy: `LOD=near (8×8 window); calibration=CURRENT_RUNTIME_CALIBRATION applied EXACTLY ONCE; clickedSurface=${h === null ? 'BRAK DANYCH (null)' : `${h.toFixed(3)} adapter-m (the EXACT rendered-triangle plane)`}`,
+      note: 'entry/payload SHA available per-tile through /api/world/tile/<gx>/<gy>/meta (bounded); the click identity here is the cache-verified tile entry + container pin',
+    };
+  } else if (hit.object.userData?.vegetation) {
+    const v = hit.object.userData.vegetation;
+    const entry = state.veg.modelCache.get(v.modelId);
+    out = {
+      kind: 'VEGETATION_INSTANCE_MESH',
+      era: s?.era,
+      container: 'Models.bnt',
+      containerSha256: s?.containers?.models?.sha256,
+      entry: `${v.modelId}.nif`,
+      payloadSha256: entry?.payloadSha256 ?? '(fetch /api/world/model/<id> headers)',
+      decoder: 'parseWitnessModel (NifModelReader, v10.1.0.0 qualified importer — LOUD failures) → NiTriShape → NiTexturingProperty → NiArkTextureExtraData → <id>.dat → decodeModelTextureStrict (TGA 24/32 + DDS DXT1/DXT5 qualified)',
+      sceneObject: `InstancedMesh (shared geometry+material; shape ${v.shapeName ?? v.shapeIndex})`,
+      appliedPolicy: `RECONSTRUCTION_PREVIEW: [P-UNITS] cm→m ×0.01 RAZ; [P-AXIS] (x,z,-y); [P-UV] raw v; [P-SCALE] node×${2.0.toFixed(1)}/NODE_SCALE_MUL; placement = the SHARED triangle query surface; textureId=${v.textureId ?? '(untextured)'}`,
+      note: 'INSTANCE_DISTRIBUTION = the documented PEFoliageLabSeed wrapper (LAB_SEED-keyed) — reconstruction, NEVER a historical placement claim',
+    };
+  } else if (hit.object.userData?.marker === true || hit.object.material === state.veg._markerMaterial) {
+    out = { kind: 'UNSUPPORTED_MODEL_MARKER', note: 'the diagnostic marker — explicitly NOT an original tree model (UNSUPPORTED import chain; counted, never substituted)' };
+  }
+  if (out) {
+    state.debugPoint = out;
+    $('debug-point').textContent = JSON.stringify(out, null, 1).slice(0, 4000);
+    if ($('world-side').getAttribute('data-open') !== 'true') { /* the drawer stays as-is; the value waits there */ }
+  }
+}
+canvas.addEventListener('click', debugPointFromClick);
+canvas.addEventListener('pointerdown', (ev) => { /* orbit click-select kept distinct from mode clicks: see click above */ });
 
 // ---- HUD + census panels ----
 let censusTimer = 0;
@@ -967,53 +1148,110 @@ function updateHud(now) {
   const lx = Math.min(Math.max(Math.floor((p.x - gx * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE), 0), 31);
   const ly = Math.min(Math.max(Math.floor((p.z - gy * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE), 0), 31);
   let raw = '—';
-  if (state.region && state.windowOrigin) {
-    const vx = Math.floor((p.x - state.windowOrigin.gx * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE);
-    const vy = Math.floor((p.z - state.windowOrigin.gy * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE);
-    if (vx >= 0 && vy >= 0 && vx < WINDOW_T * 32 && vy < WINDOW_T * 32) raw = String(state.region.rawSample(vx, vy));
+  if (state.heightField) {
+    const r = state.heightField.rawSample(
+      Math.floor((p.x - (state.windowOrigin.gx - 1) * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE),
+      Math.floor((p.z - (state.windowOrigin.gy - 1) * TILE_M) / PE_TERRAIN_METER_PER_SAMPLE));
+    if (r !== null && r !== undefined) raw = String(r);
   }
   $('pos-hud').textContent =
     `pozycja (jednostki adaptera — NIE „oryginalne XYZ”): X=${p.x.toFixed(1)} Y=${p.y.toFixed(1)} Z=${p.z.toFixed(1)} m ` +
     `| kafel ${gx}:${gy} (${tileName(gx, gy)}) | próbka (x=${lx}, y=${ly}) | surowe u16=${raw} | tryb: ${{ orbit: 'ORBITA', fly: 'LOT', walk: 'SPACER' }[state.mode]}`;
   if (now - censusTimer > 400) {
     censusTimer = now;
-    let cacheBytes = 0; for (const e of state.cache.values()) cacheBytes += e.tile.heights.byteLength;
-    let texBytes = 0; for (const e of state.textureRgbaCache.values()) texBytes += e.rgba.byteLength;
-    const verts = state.mesh ? state.mesh.geometry.getAttribute('position').count : 0;
-    const idx = state.mesh ? state.mesh.geometry.getIndex().count / 3 : 0;
-    const d = state.mat.lastDiag;
-    const splatLine = !state.texturesOn
-      ? 'tekstury terenu: WYŁĄCZONE (paleta wysokości — przełącz włączony, zmienia renderowanie)'
-      : state.splat
-        ? `tekstury terenu: WŁĄCZONE — materiały resolved ${d?.resolvedLayers ?? 0}/${d?.layersTotal ?? 0} warstw, zdekodowane tekstury ${d?.decoded ?? 0}, zastosowane warstwy ${d?.appliedLayers ?? 0}${d?.unresolvedBindings?.length ? `, DIAGNOSTIC: ${d.unresolvedBindings.length} niepowiązanych (pominięte jawnie)` : ''}${d?.decodeFailures?.length ? `, błędy dekodowania: ${d.decodeFailures.length}` : ''}${d?.cappedCells ? `, komórki z przyciętymi warstwami: ${d.cappedCells}` : ''}`
-        : 'tekstury terenu: WŁĄCZONE — buduję łańcuch materiałów/tekstur okna…';
-    const vc = state.vegCensus;
-    const vegLine = !state.vegOn
-      ? 'roślinność: WYŁĄCZONA (przełącz #veg=0; współdzielony cache modeli zachowany)'
-      : vc && vc.ok
-        ? `roślinność: żądane ${vc.counts.requested} / wyrenderowane ${vc.counts.rendered} / ograniczone ${vc.counts.limited} (twardy limit widocznych ${MAX_VISIBLE_INSTANCES}) | modele: ${vc.models.withInstances} z instancjami (wsparte ${vc.models.supported.length}, bez tekstur ${vc.models.untextured.length}, UNSUPPORTED ${vc.models.unsupported.length})`
-        : vc && vc.unsupportedProfile
-          ? `roślinność: profil UNSUPPORTED (strict decoder) — ZERO instancji (uczciwie; bez konwersji przecinków)`
-          : `roślinność: błąd łańcucha (${state.veg?.lastError ?? '…'}) — uczciwie pokazany`;
-    $('world-census').textContent =
-      `kafle aktywne (okno 8×8): ${state.region ? WINDOW_T * WINDOW_T : 0} / limit 64\n` +
-      `cache klienta: ${state.cache.size} kafli (${(cacheBytes / 1024).toFixed(0)} KiB; limit ${CLIENT_CACHE_MAX})\n` +
-      `pobrania: ${state.fetchCount} | błędy: ${state.fetchErrors}${state.lastError ? `\nostatni błąd: ${state.lastError}` : ''}\n` +
-      `geometria: ${verts} wierzchołków, ${idx} trójkątów (1 mesh regionu) | przebudowań okna: ${state.rebuilds}\n` +
-      `${splatLine}\n` +
-      `${vegLine}\n` +
-      `cache tekstur RGBA: ${state.textureRgbaCache.size} (${(texBytes / 1024 / 1024).toFixed(1)} MiB; limit ${TEXTURE_CACHE_MAX}) | fetch materiałów: ${state.mat.materialsFetches} (błędy ${state.mat.materialsErrors}) | fetch tekstur: ${state.mat.textureFetches} (błędy ${state.mat.textureErrors})\n` +
-      `cache modeli roślinności: ${state.veg ? state.veg.modelCache.size : 0} (współdzielony; limit ${MODEL_CACHE_MAX}) | fetch modeli: ${state.veg ? state.veg.fetchCounters.modelPayloads : 0} | fetch tekstur modeli: ${state.veg ? state.veg.fetchCounters.texturePayloads : 0}\n` +
-      `origin okna: ${state.windowOrigin ? `${state.windowOrigin.gx},${state.windowOrigin.gy}` : '—'}`;
-    // stream check (window follow) — every census tick is enough (~400 ms)
-    const ct = cameraTile();
-    const want = desiredOrigin(ct.gx, ct.gy);
+    updateCensusPanel();
+    // stream check — the WINDOW FOLLOWS THE FOCUS (§5/WL-4), every census tick
+    const ft = focusTile();
+    const want = desiredOrigin(ft.gx, ft.gy);
     if (state.windowOrigin && (want.gx !== state.windowOrigin.gx || want.gy !== state.windowOrigin.gy)) {
-      if (state.rebuildBusy) state.pendingOrigin = want;
-      else void rebuildWindow(want);
+      requestScene(want);
     }
   }
 }
+
+/** §3.1: the honest scene-coherence line (never terrain A with trees B as READY). */
+function updateCoherencePanel() {
+  const req = state.sceneRequest;
+  if (!req) { $('scene-coherence').textContent = 'scena: — (brak żądania)'; return; }
+  const same = (a) => a && a.gx === req.origin.gx && a.gy === req.origin.gy;
+  const terrainOk = same(state.coherence.terrain);
+  const splatOk = !state.texturesOn || same(state.coherence.splat);
+  const vegOk = !state.vegOn || same(state.coherence.veg);
+  const all = terrainOk && splatOk && vegOk;
+  const o = (a) => a ? `${a.gx},${a.gy}` : '—';
+  $('scene-coherence').textContent =
+    `scena #${req.id}: żądane okno ${req.origin.gx},${req.origin.gy} | teren ${o(state.coherence.terrain)} | tekstury ${state.texturesOn ? o(state.coherence.splat) : 'wył.'} | roślinność ${state.vegOn ? o(state.coherence.veg) : 'wył.'}\n` +
+    `status spójności: ${all ? 'GOTOWA (wszystkie komponenty tego samego żądania)' : `${!terrainOk ? 'teren ładowany; ' : ''}${!splatOk ? 'tekstury budowane; ' : ''}${!vegOk ? 'roślinność budowana; ' : ''}(PARTIAL — poprzednia spójna scena pozostaje widoczna)`}\n` +
+    `tożsamość: era ${req.era} | profil ${req.profileMode}${req.profileMode === 'global' ? `:${req.profile}` : ' (mapa NASZA)'} | LAB_SEED ${req.labSeed} | gęstość ${req.density}% | wersje: heightQuery=${req.versions.heightQuery} veg=${req.versions.vegetation} lod=${req.versions.lod}`;
+  if (all && !state.readyShown) {
+    state.readyShown = true;
+    setLoadStatus('READY');
+    hud(`scena GOTOWA — okno ${req.origin.gx},${req.origin.gy} (teren+tekstury+roślinność tego samego żądania); F dopasuj, R reset`);
+  }
+}
+
+function updateCensusPanel() {
+  let cacheBytes = 0; for (const e of state.cache.values()) cacheBytes += e.tile.heights.byteLength;
+  let texBytes = 0; for (const e of state.textureRgbaCache.values()) texBytes += e.rgba.byteLength;
+  const verts = state.mesh ? state.mesh.geometry.getAttribute('position').count : 0;
+  const idx = state.mesh ? state.mesh.geometry.getIndex().count / 3 : 0;
+  const d = state.mat.lastDiag;
+  const splatLine = !state.texturesOn
+    ? 'tekstury terenu: WYŁĄCZONE (paleta wysokości)'
+    : state.splat
+      ? `tekstury terenu: WŁĄCZONE — resolved ${d?.resolvedLayers ?? 0}/${d?.layersTotal ?? 0} warstw, zdekodowane ${d?.decoded ?? 0}, zastosowane ${d?.appliedLayers ?? 0}${d?.decodeFailures?.length ? `, błędy dekodowania: ${d.decodeFailures.length}` : ''}`
+      : 'tekstury terenu: WŁĄCZONE — buduję łańcuch materiałów/tekstur okna…';
+  const vc = state.vegCensus;
+  const vegLine = !state.vegOn
+    ? 'roślinność: WYŁĄCZONA (#veg=0; współdzielony cache modeli zachowany)'
+    : vc && vc.ok
+      ? `roślinność: żądane ${vc.counts.requested} / wybrane ${vc.counts.selected} / umieszczone ${vc.counts.placed} / ograniczone ${vc.counts.limited} (limit ${vc.counts.cap}; sprawiedliwy dobór per kafel)\n` +
+        `  statusy: PLACED ${vc.statusCounts.PLACED_ON_AVAILABLE_SURFACE} | DEFERRED_NO_SURFACE ${vc.statusCounts.DEFERRED_NO_SURFACE} | UNSUPPORTED_MODEL ${vc.statusCounts.UNSUPPORTED_MODEL} | LOD_LIMITED ${vc.statusCounts.LOD_LIMITED}\n` +
+        `  modele: kandydaci ${vc.distinctIds.candidates} → wybrane ${vc.distinctIds.selected} → geometry renderowane ${vc.distinctIds.geometryRendered} (wsparte ${vc.models.supported.length}, bez tekstur ${vc.models.untextured.length}, UNSUPPORTED ${vc.models.unsupported.length}, markery ${vc.distinctIds.markers})`
+      : vc && vc.unsupportedProfile
+        ? 'roślinność: profil UNSUPPORTED (strict decoder) — ZERO instancji (uczciwie)'
+        : `roślinność: ${state.vegBusy ? 'budowanie…' : (vc?.error ?? '…')}`;
+  const lod = state.lod;
+  const lodLine = lod
+    ? `daleki LOD: far ${lod.far.status === 'READY' ? `GOTOWY (${lod.far.tris} trójk., reprezentuje ${lod.coverage.farTilesRepresented} kafli, braki ${lod.coverage.farTilesMissing})` : lod.farProgressNote()} | mid ${lod.mid.status === 'READY' ? `GOTOWY (${lod.mid.tris} trójk. przy ${JSON.stringify(lod.mid.origin)}, bloków w cache ${lod.mid.blocksCache.size})` : 'budowanie…'}`
+    : 'daleki LOD: nie uruchomiony';
+  $('world-census').textContent =
+    `kafle aktywne (okno 8×8): ${state.region ? WINDOW_T * WINDOW_T : 0} / limit 64 | halo 10×10 (rzeczywiste próbki) dla wysokości drzew/spaceru\n` +
+    `cache klienta: ${state.cache.size} kafli (${(cacheBytes / 1024).toFixed(0)} KiB; limit ${CLIENT_CACHE_MAX})\n` +
+    `pobrania: ${state.fetchCount} | błędy: ${state.fetchErrors}${state.lastError ? `\nostatni błąd: ${state.lastError}` : ''}\n` +
+    `geometria bliska: ${verts} wierzchołków, ${idx} trójkątów (1 mesh regionu) | przebudowań okna: ${state.rebuilds} | teleporty: ${state.teleportCount}\n` +
+    `${splatLine}\n` +
+    `${vegLine}\n` +
+    `${lodLine}\n` +
+    `cache tekstur RGBA: ${state.textureRgbaCache.size} (${(texBytes / 1024 / 1024).toFixed(1)} MiB; limit ${TEXTURE_CACHE_MAX}) | fetch materiałów: ${state.mat.materialsFetches} (błędy ${state.mat.materialsErrors}) | fetch tekstur: ${state.mat.textureFetches} (błędy ${state.mat.textureErrors})\n` +
+    `cache modeli roślinności: ${state.veg ? state.veg.modelCache.size : 0} (limit ${MODEL_CACHE_MAX}) | fetch modeli: ${state.veg ? state.veg.fetchCounters.modelPayloads : 0} | fetch tekstur modeli: ${state.veg ? state.veg.fetchCounters.texturePayloads : 0}\n` +
+    `renderer: draw calls ${renderer.info.render.calls}, trójkąty ${renderer.info.render.triangles}, tekstury ${renderer.info.memory.textures}, geometrie ${renderer.info.memory.geometries}\n` +
+    `origin okna: ${state.windowOrigin ? `${state.windowOrigin.gx},${state.windowOrigin.gy}` : '—'}`;
+  updateCoherencePanel();
+  const vs = $('veg-status-line');
+  vs.hidden = !state.vegOn || !vc?.ok;
+  if (state.vegOn && vc?.ok) {
+    vs.textContent = `roślinność: ${vc.counts.placed} instancji na powierzchni · ${vc.distinctIds.geometryRendered} typów modeli z geometrią · profil ${vc.profiles.mode}`;
+  }
+}
+
+// ---- §7/§8 QC: a minimal READ-ONLY debug handle (introspection for the
+// browser QC harnesses; no behavior is changed through it — the debug POINT
+// in the drawer remains the human-facing provenance view) ----
+window.__peR2Debug = {
+  get mode() { return state.mode; },
+  get keys() { return [...move.keys]; },
+  get yawPitch() { return { yaw: move.yaw, pitch: move.pitch }; },
+  get camera() { return { x: camera.position.x, y: camera.position.y, z: camera.position.z }; },
+  get windowOrigin() { return state.windowOrigin ? { ...state.windowOrigin } : null; },
+  get fieldSpan() {
+    const f = state.heightField;
+    if (!f) return null;
+    return { originGx: f.originGridX, originGy: f.originGridY, tilesX: f.tilesX, tilesY: f.tilesY, ...f.census() };
+  },
+  get running() { return { busy: state.rebuildBusy, runningOrigin: state.runningOrigin ? { ...state.runningOrigin } : null, pending: state.pendingOrigin ? { ...state.pendingOrigin } : null, sceneId: state.sceneRequest?.id ?? null }; },
+  queryHeightAt(x, z) { return state.heightField ? state.heightField.triangleHeightAtWorld(x, z) : null; },
+};
 
 // ---- animate ----
 let lastT = performance.now();
@@ -1027,7 +1265,7 @@ function animate() {
   renderer.render(scene, camera);
   if (!state.firstFrameDone && state.mesh) {
     state.firstFrameDone = true;
-    setLoadStatus('READY');
+    if (!state.readyShown) setLoadStatus('LOADING');
   }
   updateHud(now);
 }
@@ -1037,34 +1275,25 @@ $('tog-wireframe').addEventListener('change', (ev) => { if (state.mesh) state.me
 $('tog-tilebounds').addEventListener('change', () => {
   if (state.region && state.lastGeo && state.windowOrigin) buildTileBounds(state.region, state.lastGeo, state.windowOrigin);
 });
-// ETAP D — the REAL terrain-texture toggle: ON builds+applies the window's
-// original-texture splat (if not applied yet) and swaps the mesh material;
-// OFF swaps back to the height-palette preview. The swap is measured by the
-// PIXEL on/off gates — a toggle that changes nothing would FAIL them.
 $('tog-textures').addEventListener('change', async (ev) => {
   state.texturesOn = ev.target.checked;
   if (state.texturesOn && state.windowOrigin && !state.splat) {
     hud('buduję tekstury terenu (łańcuch materiał→tekstura)…');
-    await applyTexturesForWindow(state.windowOrigin);
+    await applyTexturesForWindow(state.windowOrigin, state.sceneRequest?.id);
   }
+  if (state.splat) state.coherence.splat = state.splat.origin;
   applyTerrainMaterial();
-  hud(state.texturesOn ? 'tekstury terenu WŁĄCZONE (oryginalne, z łańcucha id@+16 → <id>.dat; preset RENDER_RECONSTRUCTION)' : 'tekstury terenu WYŁĄCZONE (paleta wysokości)');
+  hud(state.texturesOn ? 'tekstury terenu WŁĄCZONE (oryginalne z łańcucha id@+16 → <id>.dat; preset RENDER_RECONSTRUCTION)' : 'tekstury terenu WYŁĄCZONE (paleta wysokości)');
 });
-// ETAP E — the REAL vegetation toggle: ON builds+applies the deterministic
-// reconstruction-preview instances (per-tile generation through the
-// PEFoliageLabSeed wrapper; the model cache is shared — re-enabling reuses
-// it without re-fetching); OFF hides + disposes the per-window instance
-// meshes (the shared model cache survives). The swap is measured by the
-// PIXEL on/off gates — a toggle that changes nothing would FAIL them.
 $('tog-vegetation').addEventListener('change', async (ev) => {
   state.vegOn = ev.target.checked;
   if (state.veg) state.veg.setEnabled(state.vegOn);
   if (state.vegOn && state.veg && state.windowOrigin) {
     hud('buduję podgląd roślinności (deterministyczny wrapper LAB_SEED + oryginalne modele z Models.bnt)…');
-    await rebuildVegetation(state.windowOrigin);
+    await rebuildVegetation(state.windowOrigin, state.sceneRequest?.id);
   }
   hud(state.vegOn
-    ? 'roślinność WŁĄCZONA (RECONSTRUCTION_PREVIEW: profile .vcl + byte-locked RNG + wrapper LAB_SEED; modele ORYGINALNE z łańcucha Models.bnt → NIF → Tekstury)'
+    ? 'roślinność WŁĄCZONA (RECONSTRUCTION_PREVIEW: profile .vcl + byte-locked RNG + wrapper LAB_SEED; modele ORYGINALNE)'
     : 'roślinność WYŁĄCZONA (instancje okna zwolnione; współdzielony cache modeli zachowany)');
 });
 $('btn-mode-orbit').addEventListener('click', () => setMode('orbit'));
@@ -1073,16 +1302,71 @@ $('btn-mode-walk').addEventListener('click', () => setMode('walk'));
 $('btn-fit').addEventListener('click', fitView);
 $('btn-reset').addEventListener('click', resetView);
 $('btn-launcher').addEventListener('click', () => { location.href = '/launcher'; });
+$('btn-assetlab').addEventListener('click', () => { location.href = '/compat/assetlab.html'; });
+$('tp-go').addEventListener('click', () => {
+  const gx = parseInt($('tp-gx').value, 10), gy = parseInt($('tp-gy').value, 10);
+  if (Number.isInteger(gx) && Number.isInteger(gy) && gx >= 0 && gy >= 0 && gx < GRID_W && gy < GRID_H) teleportTo(gx, gy);
+  else banner('teleport: podaj poprawny kafel gx (0..219), gy (0..235)');
+});
+
+// ---- the „Szczegóły” drawer (§5) ----
+function applyDrawerState() {
+  const open = localStorage.getItem('pe-world-drawer') === '1';
+  $('world-side').setAttribute('data-open', open ? 'true' : 'false');
+}
+$('btn-drawer').addEventListener('click', () => {
+  const cur = $('world-side').getAttribute('data-open') === 'true';
+  $('world-side').setAttribute('data-open', cur ? 'false' : 'true');
+  localStorage.setItem('pe-world-drawer', cur ? '0' : '1');
+  syncCanvasSize();
+});
+$('btn-drawer-close').addEventListener('click', () => {
+  $('world-side').setAttribute('data-open', 'false');
+  localStorage.setItem('pe-world-drawer', '0');
+  syncCanvasSize();
+});
+
+// ---- the vegetation config controls (drawer inputs; apply = a NEW scene request) ----
+function fillVegProfileSelect(climates) {
+  const sel = $('veg-profile');
+  sel.innerHTML = '';
+  for (const p of climates.profiles ?? []) {
+    const opt = document.createElement('option');
+    opt.value = String(p.index);
+    opt.textContent = `${p.index} — ${p.status === 'DECODED' ? 'DECODED' : `UNSUPPORTED (${p.error ?? 'strict decoder'})`}${p.modelSummary ? ` (${p.modelSummary.distinctModels ?? '?'} modeli)` : ''}`;
+    sel.appendChild(opt);
+  }
+  sel.value = String(state.vegConfig.profile);
+}
+$('veg-mode').addEventListener('change', (ev) => { state.vegConfig.profileMode = ev.target.value; });
+$('veg-profile').addEventListener('change', (ev) => { state.vegConfig.profile = parseInt(ev.target.value, 10) || 0; });
+$('veg-seed').addEventListener('change', (ev) => { state.vegConfig.labSeed = Math.max(0, Math.floor(Number(ev.target.value) || 0)); });
+$('veg-density').addEventListener('input', (ev) => {
+  state.vegConfig.densityPercent = parseInt(ev.target.value, 10) || 0;
+  $('veg-density-value').textContent = `${ev.target.value}%`;
+});
+$('veg-apply').addEventListener('click', async () => {
+  if (!state.veg) return;
+  await state.veg.setConfig(state.vegConfig);
+  if (state.windowOrigin) {
+    // the CONFIG is part of the scene identity: a config change REQUIRES a new
+    // request id even for the same origin (forceNew — §3.1)
+    const id = requestScene(state.windowOrigin, { forceNew: true });
+    void rebuildVegetation(state.windowOrigin, id);
+  }
+  hud(`roślinność: profil ${state.vegConfig.profileMode}${state.vegConfig.profileMode === 'global' ? `:${state.vegConfig.profile}` : ''} | LAB_SEED ${state.vegConfig.labSeed} | gęstość ${state.vegConfig.densityPercent}% — przebudowa`);
+});
 
 // ---- boot ----
 async function boot() {
   setLoadStatus('LOADING');
+  applyDrawerState();
   syncCanvasSize();
   hud('łączę z serwerem świata…');
   state.status = await fetchJson('/api/world/status');
   state.status.identityOf = {
     era: state.status.era,
-    container: 'Terrain/terrain.bnt', // the mounted terrain container identity
+    container: 'Terrain/terrain.bnt',
     containerSha256: state.status.containers.terrain.sha256,
   };
   // anchor: explicit selection or the measured default (data-derived; no city names)
@@ -1090,11 +1374,31 @@ async function boot() {
     ? { gx: Math.min(state.status.census.maxMeanTile.gridX, GRID_W - 4), gy: Math.min(state.status.census.maxMeanTile.gridY, GRID_H - 4) }
     : { gx: 108, gy: 116 });
   state.anchor = anchor;
-  state.spawn = { x: anchor.gx * TILE_M + 128, z: anchor.gy * TILE_M + 128 }; // center of the 4x4 patch
-  // ---- ETAP E: the vegetation subsystem (contract §6) ----
-  // ORIGINAL_CLIMATE_RECORDS (strict .vcl decode via the API) + the
-  // RECOVERED byte-locked RNG chain + the DOCUMENTED LAB_SEED wrapper —
-  // VEGETATION_MODE = RECONSTRUCTION_PREVIEW (no historical claims).
+  state.spawn = { x: anchor.gx * TILE_M + 128, z: anchor.gy * TILE_M + 128 };
+  // the distant LOD subsystem (§4) — mid + far from decimated REAL samples
+  state.lod = new WorldLod({
+    scene,
+    fetchJson,
+    fetchBinary: async (url) => {
+      const r = await fetch(url, { cache: 'no-store' });
+      if (!r.ok) {
+        const t = await r.text();
+        let msg = `HTTP ${r.status}`;
+        try { msg = JSON.parse(t).message || msg; } catch { /* raw */ }
+        throw new Error(`${url}: ${msg}`);
+      }
+      return { payload: new Uint8Array(await r.arrayBuffer()), headers: {} };
+    },
+  });
+  state.lod.setGrid(GRID_W, GRID_H); // the far payload header carries the MEASURED grid (verified in ensureFar)
+  // vegetation subsystem (§6) — the SHARED height query (§3.2): one stable
+  // delegating handle over the per-window PEHeightField (rendering, trees and
+  // walking all read the SAME triangle-exact field)
+  const sharedHeightQuery = {
+    version: 'peheight-query-triangle-v1',
+    triangleHeightAtWorld: (x, z) => (state.heightField ? state.heightField.triangleHeightAtWorld(x, z) : null),
+    _delegatesTo: () => state.heightField,
+  };
   state.veg = new WorldVegetation({
     scene,
     fetchJson,
@@ -1104,28 +1408,36 @@ async function boot() {
       }
       return fetchVegBinary(url, { container: 'Textures.bnt', containerSha256: state.status?.containers?.textures?.sha256 });
     },
-    heightSampler: vegHeightSampler,
+    heightField: sharedHeightQuery,
   });
-  await state.veg.setConfig({ profile: params.profile, labSeed: params.seed, densityPercent: params.density });
-  updateVegPanel(); // the honest profile/seed panel (rendered from the server + census state)
+  await state.veg.setConfig(state.vegConfig);
+  // the climate census for the profile picker (drawer)
+  try {
+    const climates = await fetchJson('/api/world/climates');
+    fillVegProfileSelect(climates);
+  } catch { /* the select stays empty; the config still applies */ }
+  $('veg-mode').value = state.vegConfig.profileMode;
+  $('veg-seed').value = String(state.vegConfig.labSeed);
+  $('veg-density').value = String(state.vegConfig.densityPercent);
+  $('veg-density-value').textContent = `${state.vegConfig.densityPercent}%`;
+  updateVegPanel();
   updateEvidencePanel();
-  setLoading('pobieram okno terenu 8×8 (64 kafle) wokół zaznaczenia…');
-  // initial window centered on the anchor's patch
+  // initial window centered on the anchor + the first scene request
   const origin = desiredOrigin(state.anchor.gx + 1, state.anchor.gy + 1);
-  await rebuildWindow(origin, { isInitial: true });
+  const id = requestScene(origin);
+  await new Promise((resolve) => {
+    const wait = () => { if (state.coherence.terrain) resolve(); else setTimeout(wait, 120); };
+    wait();
+  });
   if (!state.mesh) {
     if (!$('diagnostics').getAttribute('data-load-status').startsWith('ERROR')) {
       setLoadStatus('ERROR_TERRAIN_LOAD: brak mesha po początkowym ładowaniu (uczciwy błąd)');
     }
     return;
   }
-  // ---- ETAP D: the original-texture chain for the initial window ----
-  // The toggle default state comes from the URL (#textures=0|1; default ON).
+  // the texture chain for the initial window (toggle default from the URL)
   $('tog-textures').checked = state.texturesOn;
   if (state.texturesOn) {
-    // the pinned Textures.bnt index becomes READY right after the fail-closed
-    // pin verification (~seconds after server boot) — poll BOUNDED (honest
-    // timeout: never an infinite READY wait)
     setLoading('czekam na indeks tekstur (weryfikacja pinu Textures.bnt)…');
     const waitT0 = performance.now();
     for (;;) {
@@ -1133,7 +1445,7 @@ async function boot() {
       const stx = state.status?.containers?.textures;
       if (stx?.indexState === 'READY') break;
       if (performance.now() - waitT0 > 20000) {
-        banner(`TEKSTURY TERENU: indeks Textures.bnt niegotowy po 20 s (state: ${stx?.indexState ?? 'nieznany'}) — teren działa z paletą wysokości; tekstury włącz ręcznie po powodzeniu weryfikacji.`);
+        banner(`TEKSTURY TERENU: indeks Textures.bnt niegotowy po 20 s — teren działa z paletą; tekstury włącz ręcznie po powodzeniu weryfikacji.`);
         state.texturesOn = false;
         $('tog-textures').checked = false;
         break;
@@ -1141,13 +1453,13 @@ async function boot() {
       await new Promise((r) => setTimeout(r, 500));
     }
     if (state.texturesOn) {
-      setLoading('buduję łańcuch materiały→tekstury okna (maski@record+56 → id@+16 → <id>.dat → TGA2 → RGBA → GPU)…');
-      await applyTexturesForWindow(origin);
+      setLoading('buduję łańcuch materiały→tekstury okna…');
+      const td = await applyTexturesForWindow(origin, id);
+      if (td && !td.aborted) state.coherence.splat = state.splat?.origin ?? null;
     }
   }
-  // ---- ETAP E: the initial vegetation build (awaited — READY means the
-  // vegetation census is REAL or honestly diagnosed; a component failure
-  // never disables the terrain but is always shown) ----
+  // the initial vegetation build (awaited — the scene is READY only when the
+  // census is real or honestly diagnosed)
   $('tog-vegetation').checked = state.vegOn;
   if (state.vegOn) {
     setLoading('czekam na indeks modeli (weryfikacja pinu Models.bnt)…');
@@ -1157,7 +1469,7 @@ async function boot() {
       const stm = state.status?.containers?.models;
       if (stm?.indexState === 'READY') break;
       if (performance.now() - waitT0 > 20000) {
-        banner(`ROŚLINNOŚĆ: indeks Models.bnt niegotowy po 20 s (state: ${stm?.indexState ?? 'nieznany'}) — teren działa; roślinność włącz ręcznie po powodzeniu weryfikacji.`);
+        banner(`ROŚLINNOŚĆ: indeks Models.bnt niegotowy po 20 s — teren działa; roślinność włącz ręcznie.`);
         state.vegOn = false;
         $('tog-vegetation').checked = false;
         break;
@@ -1165,96 +1477,103 @@ async function boot() {
       await new Promise((r) => setTimeout(r, 500));
     }
     if (state.vegOn) {
-      setLoading('buduję podgląd roślinności (profil .vcl → wrapper LAB_SEED → instancje → oryginalne modele z Models.bnt + tekstury)…');
-      await rebuildVegetation(origin, { awaited: true });
+      setLoading('buduję podgląd roślinności (profil .vcl → wrapper LAB_SEED → instancje → oryginalne modele)…');
+      await rebuildVegetation(origin, id, { awaited: true });
     }
   }
+  // the far LOD: poll the census progress honestly (no zero placeholder)
+  void (async () => {
+    setLoading('daleki LOD: czekam na census regularnych kafli (rzeczywiste próbki, decymowane)…');
+    for (;;) {
+      try {
+        const p = await fetchJson('/api/world/overview/progress');
+        if (state.lod.far.status === 'READY') break;
+        const ok = await state.lod.ensureFar();
+        if (ok) {
+          state.lod.rebuildFarIndex(state.lod.mid.origin ?? origin);
+          break;
+        }
+        if (!state.lodFarReadyShown) {
+          state.lodFarReadyShown = true;
+        }
+        await new Promise((r) => setTimeout(r, 1000));
+      } catch {
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+      if (state.lod.far.status === 'READY' || state.lod.far.status === 'FAILED') break;
+    }
+    updateCensusPanel();
+    if (state.lod.far.status === 'FAILED') {
+      banner(`DALEKI LOD: ${state.lod.far.error?.slice(0, 160) ?? 'błąd'} — świat działa z warstwą bliską + mid; brak nie jest maskowany.`);
+    }
+  })();
   updateVegPanel();
-  updateEvidencePanel(); // with the measured chain census (resolved/decoded/applied)
+  updateEvidencePanel();
   resetView();
   animate();
 }
 
-/** The vegetation profile/seed panel (ETAP E — „Profil roślinności” +
- * „Seed podglądu”; the THREE-WAY SEPARATION surfaced verbatim; the census
- * from the server's MEASURED default-profile support + this view's own
- * per-model render states). */
 function updateVegPanel() {
-  const cfg = state.veg?.config;
+  const cfg = state.vegConfig;
   const vc = state.vegCensus;
   const sv = state.status?.vegetation;
   const lines = [];
-  lines.push(`Profil roślinności: ${cfg?.profile ?? params.profile} | Seed podglądu (LAB_SEED): ${cfg?.labSeed ?? params.seed} | gęstość podglądu: ${cfg?.densityPercent ?? params.density}% | p3 = 0 [P-RNG-P3] (pokazane OSOBNO — nigdy LAB_SEED)`);
+  lines.push(`Tryb profilu: ${cfg.profileMode === 'regional' ? 'REGIONALNY RECONSTRUCTION_PREVIEW (mapa NASZA — nie historyczny biom)' : 'GLOBALNY (oryginalnie odczytany profil)'} | profil ${cfg.profile} | LAB_SEED ${cfg.labSeed} | gęstość ${cfg.densityPercent}% | p3 = 0 [P-RNG-P3] (OSOBNO — nigdy LAB_SEED)`);
+  if (cfg.profileMode === 'regional') {
+    lines.push(`mapa regionów (NASZA rekonstrukcja): ${REGIONAL_PREVIEW.mapRule}; region = ${REGIONAL_PREVIEW.regionTiles} kafli; profile ${JSON.stringify(REGIONAL_PREVIEW.profiles)} — ${REGIONAL_PREVIEW.note}`);
+  }
   if (sv) {
     lines.push(`VEGETATION_MODE = ${sv.mode} — ${sv.threeWaySeparation.INSTANCE_DISTRIBUTION}`);
-    if (sv.defaultProfile) {
-      lines.push(`domyślny profil serwera: ${sv.defaultProfile.index} (pomiarowe uzasadnienie: ${sv.defaultProfile.measuredJustification})`);
-    }
-    if (sv.supportCensusState === 'READY' && sv.supportCensus) {
-      const c = sv.supportCensus.counts;
-      lines.push(`census wsparcia profilu ${sv.defaultProfile.index}: modele ${c.distinctModels} (wsparte z teksturami ${c.supported}, geometryjnie-bez-tekstur ${c.supportedUntextured}, UNSUPPORTED ${c.unsupported})`);
-    }
+    if (sv.defaultProfile) lines.push(`domyślny profil serwera: ${sv.defaultProfile.index} (${sv.defaultProfile.measuredJustification})`);
   }
   if (vc && vc.ok) {
-    lines.push(`instancje okna: żądane ${vc.counts.requested} / wyrenderowane ${vc.counts.rendered} / ograniczone ${vc.counts.limited} (twardy limit ${vc.counts.cap})`);
-    if (vc.models.untextured.length) {
-      lines.push(`modele bez oryginalnych tekstur (uczciwie, bez zamienników): ${vc.models.untextured.map((m) => m.id).join(', ')}`);
-    }
-    if (vc.models.unsupported.length) {
-      lines.push(`modele UNSUPPORTED (znacznik diagnostyczny — NIE oryginalny model): ${vc.models.unsupported.map((m) => m.id).join(', ')}`);
-    }
-    lines.push(`umiejscowienie: wysokość terenu z TEGO SAMEGO okna (próbkowanie dwuliniowe po surowych u16) — REKONSTRUKCJA (nigdy historyczny placement)`);
+    lines.push(`instancje okna: żądane ${vc.counts.requested} / wybrane ${vc.counts.selected} / umieszczone ${vc.counts.placed} / ograniczone ${vc.counts.limited} (limit ${vc.counts.cap})`);
+    lines.push(`statusy (jawne): PLACED_ON_AVAILABLE_SURFACE ${vc.statusCounts.PLACED_ON_AVAILABLE_SURFACE} | DEFERRED_NO_SURFACE ${vc.statusCounts.DEFERRED_NO_SURFACE} | UNSUPPORTED_MODEL ${vc.statusCounts.UNSUPPORTED_MODEL} | LOD_LIMITED ${vc.statusCounts.LOD_LIMITED}`);
+    lines.push(`profile w oknie: ${vc.profiles.mode} → ${JSON.stringify(vc.profiles.used)} | rekordy ${vc.profiles.records}`);
+    if (vc.models.untextured.length) lines.push(`modele bez oryginalnych tekstur (uczciwie): ${vc.models.untextured.map((m) => m.id).join(', ')}`);
+    if (vc.models.unsupported.length) lines.push(`modele UNSUPPORTED (znacznik diagnostyczny): ${vc.models.unsupported.map((m) => m.id).join(', ')}`);
+    if (vc.models.slotDiagnostics?.length) lines.push(`pominięte sloty tekstur (jawne): ${vc.models.slotDiagnostics.length}`);
+    lines.push(`umiejscowienie: WSPÓLNE zapytanie trójkątowe (dokładnie renderowane płaszczyzny + halo rzeczywistych próbek) — REKONSTRUKCJA (nigdy historyczny placement)`);
   } else if (vc && vc.unsupportedProfile) {
-    lines.push(`PROFIL UNSUPPORTED (strict decoder): ${vc.error ?? '—'} — zero instancji; wybierz profil zdekodowany (25.vcl pozostaje UNSUPPORTED — bez konwersji przecinków)`);
+    lines.push(`PROFIL UNSUPPORTED (strict decoder): ${vc.error ?? '—'} — zero instancji (25.vcl pozostaje UNSUPPORTED — bez konwersji przecinków)`);
   } else if (state.vegOn && !vc) {
     lines.push('łańcuch roślinności: budowanie…');
   } else if (!state.vegOn) {
     lines.push('roślinność WYŁĄCZONA (#veg=0)');
   }
-  lines.push(`rozdział (kontrakt §6): ORIGINAL_CLIMATE_RECORDS = dane z przypiętych .vcl (strict); RECOVERED_RNG_ARITHMETIC = nietknięty łańcuch byte-locked PEFoliageCore; INSTANCE_DISTRIBUTION = wrapper PEFoliageLabSeed (LAB_SEED) — rekonstrukcja`);
+  lines.push(`rozdział (kontrakt §6): ORIGINAL_CLIMATE_RECORDS = przypięte .vcl (strict); RECOVERED_RNG_ARITHMETIC = byte-locked PEFoliageCore NIETKNIĘTY; INSTANCE_DISTRIBUTION = wrapper PEFoliageLabSeed v2 (recIndex w kluczu, gęstość frakcyjna — wersjonowane)`);
   $('world-veg').textContent = lines.join('\n');
 }
 
-/** The evidence panel (separate from viewer fit/centering — source identity
- * facts + the Etap D chain provenance, refreshed after the chain runs). */
 function updateEvidencePanel() {
   const s = state.status;
   const d = state.mat.lastDiag;
+  const den = s?.denominator;
   $('world-evidence').textContent = [
     `era: ${s.era} | terrain.bnt SHA256: ${s.containers.terrain.sha256} (pin zweryfikowany fail-closed)`,
-    `kalibracja (CURRENT_RUNTIME_CALIBRATION — preset z provenance, NIE fakt historyczny):`,
-    `  u16PerMeter=${s.calibration.u16PerMeter}; meterPerSample=${s.calibration.meterPerSample}; min/max=${s.calibration.minMax}`,
-    `  konwersja u16→metry zastosowana DOKŁADNIE RAZ w PETerrainRegion.buildGeometry (worldHeightMeters); odwracalna: ×${s.calibration.u16PerMeter}`,
-    `topologia inter-tile (wybór renderera, udokumentowany): quady przez granice kafli z SASIEDNICH ORYGINALNYCH próbek;`,
-    `  kafle = rozłączne bloki 32×32 (bez nakładania, bez napraw szwów — różnice na granicach to DANE ORYGINALNE);`,
-    `  brak zmian wysokości dla maskowania skoku.`,
-    `---- ETAP D: łańcuch tekstur terenu (oryginalne) ----`,
-    `materiały: rekordy nazwane TDF, maska@record+56 (pola 52..55 = extra4, NIE maska); wagi RAW u8 — sumy >255 to DANE ORYGINALNE (bez normalizacji)`,
-    `relacja: id@+16 → "<id>.dat" w Textures.bnt (era PCG_9_3_5; potwierdzona silnikowo — 9.3.5 czyta sub@+16 jako id TEKSTURY materiału; ponownie zweryfikowana na próbkach tego uruchomienia)`,
-    `kontener tekstur: Textures.bnt SHA256 ${s.containers.textures.sha256} (pin fail-closed; LAZY indeks ${s.containers.textures.index?.parsedEntries ?? '—'} wpisów; pojedyncze odczyty plików, bez ładowania całego kontenera)`,
-    `dekoder: decodeTga2 (TGA 2.0, 24bpp, 256×256, stopka TRUEVISION-XFILE) — TEN SAM moduł produkcyjny po stronie serwera i przeglądarki`,
-    d ? `okno: warstwy resolved ${d.resolvedLayers ?? d.resolved ?? 0}/${d.layersTotal ?? 0} | tekstury zdekodowane ${d.decoded ?? 0} | warstwy zastosowane ${d.appliedLayers ?? d.applied ?? 0}${d.unresolvedBindings?.length ? ` | DIAGNOSTIC: ${d.unresolvedBindings.length} niepowiązanych (pominięte jawnie, bez tekstur zastępczych)` : ''}` : `okno: łańcuch tekstur jeszcze niezbudowany`,
-    `preset renderowania: RENDER_RECONSTRUCTION — ${RENDER_RECONSTRUCTION_PRESET.blendForm};`,
-    `  UV: ${RENDER_RECONSTRUCTION_PRESET.uv}`,
-    `  kolejność wierszy: ${RENDER_RECONSTRUCTION_PRESET.rowOrder}`,
-    `  próbki komórek: ${RENDER_RECONSTRUCTION_PRESET.cellSampling}`,
-    `  przestrzeń barw: ${RENDER_RECONSTRUCTION_PRESET.colorSpace}`,
-    `  limity: ${RENDER_RECONSTRUCTION_PRESET.caps}`,
-    `normale + paleta kolorów (tryb OFF) = RECONSTRUCTION_PREVIEW (renderer); bajty źródłowe i transformacje sceny (mesh.position = origin×64 m)`,
-    `  są oddzielne od dopasowania kamery (fit/centering tylko w kontrolerze kamery).`,
-    `---- ETAP E: podgląd roślinności (RECONSTRUCTION_PREVIEW) ----`,
-    `trójstopniowy rozdział (kontrakt §6):`,
-    `  ORIGINAL_CLIMATE_RECORDS = dane z przypniętych .vcl (strict VegetationClimateDecoder; ${state.status.containers.vegetationClimates.sha256?.slice(0, 16)}…); 25.vcl = UNSUPPORTED (bez konwersji)`,
-    `  RECOVERED_RNG_ARITHMETIC = PEFoliageCore (byte-locked; seed FUN_0098cdf0, LCG FUN_0098ce30, lerp FUN_0095ac30, node01=/65535.0 f32; operand lock iter035) — NIETKNIĘTY`,
-    `  INSTANCE_DISTRIBUTION = wrapper PEFoliageLabSeed (LAB_SEED-keyed [P-CELLSTREAM] stand-in) — rekonstrukcja (źródło cell stream NIEUSTALENE)`,
-    `LAB_SEED = ${state.veg?.config?.labSeed ?? params.seed} (wpływa TYLKO na rekonstrukcyjny cell stream; NIE oryginalny p3; NIE historyczny seed) | p3 = 0 [P-RNG-P3] | viewBand = 10 (STRONGLY_SUPPORTED)`,
-    `modele: <id>.nif z przypiętego PCG_9_3_5 Models.bnt (${state.status.containers.models.sha256?.slice(0, 16)}…) → parseWitnessModel (ISTNIEJĄCY kwalifikowany importer; głośne odmowy = uczciwe UNSUPPORTED) → NiTriShape → NiTexturingProperty → NiArkTextureExtraData id → <id>.dat z Textures.bnt → decodeModelTextureStrict (A32 32bpp IMAGE order / TGA2 24bpp) → GPU`,
-    `  granice uczciwe: [P-UNITS] cm→m ×0.01 RAZ; [P-AXIS] (x,z,-y); [P-UV] surowe v + flipY=false; [P-SCALE] mostek 2.0/NODE_SCALE_MUL×0.01 (CURRENT_RUNTIME_CALIBRATION — rozmiar NIE historyczny);`,
-    `  kształty bez łańcucha texprop→Ark ( Bip01/Box ) = NIE-wizualne (kandydaci kolizji — rola UNVERIFIED; liczone, nie renderowane);`,
-    `  łańcuch tekstury nierozwiązywalny (np. DDS poza strict subset) → model renderowany uczciwie BEZ tekstur (diagnostyka; nigdy tekstura zastępcza)`,
-    `limit: ${MAX_VISIBLE_INSTANCES} widocznych instancji (twardy) — census żądane/wyrenderowane/ograniczone; determinizm: (era+profil+LAB_SEED+gęstość+kalibracja+tileKey) → TEN SAM zestaw niezależnie od kolejności ładowania`,
-    `spawn: kafel ${state.anchor.gx},${state.anchor.gy} (środek zaznaczenia 4×4 z launchera; domyślnie = najwyższa zmierzona średnia — wybór z DANYCH, bez zgadywania nazw miast).`,
+    `mianownik (ZMIERZONY z indeksu — nie hardcode): zwykłe kafle w indeksie ${den?.indexRegularTiles ?? '—'} (pojemność siatki ${den?.gridCapacity ?? '—'}); wpisy razem ${den?.indexTotalEntries ?? '—'}; wiersze specjalne ${den?.specialRows ?? '—'}; sentinel ${den?.sentinel ?? '—'}`,
+    `kalibracja (CURRENT_RUNTIME_CALIBRATION — preset z provenance, NIE fakt historyczny): u16PerMeter=${s.calibration.u16PerMeter}; meterPerSample=${s.calibration.meterPerSample}; min/max=${s.calibration.minMax}`,
+    `konwersja u16→metry zastosowana DOKŁADNIE RAZ (wspólne PEHeightField/PETerrainRegion — worldHeightMeters); odwracalna: ×${s.calibration.u16PerMeter}; bez wygładzania źródła`,
+    `---- wysokość: jedno wspólne zapytanie (kontrakt §3.2) ----`,
+    `rendering + drzewa + spacer = PEHeightField.triangleHeightAtWorld (DOKŁADNIE renderowane trójkąty warstwy bliskiej;`
+    + ` ten sam podział quada co PETerrainRegion.buildGeometry); halo = 1 kafel RZECZYWISTYCH sąsiednich próbek (rozwiązanie granicy 256/0..510 vs generator 0..512);`
+    + ` brak danych = null (nigdy y=0, nigdy duplikat ostatniej wysokości); statusy instancji: PLACED/DEFERRED_NO_SURFACE/UNSUPPORTED_MODEL/LOD_LIMITED`,
+    `---- ciągły świat (kontrakt §4) ----`,
+    `near = okno 8×8 (RAW u16, PETerrainRegion); mid = 40×40 kafli, 8×8 decymowanych RZECZYWISTYCH próbek/kafel (bloki /api/world/lod8);`
+    + ` far = cały świat 4×4 decymowane (census-gated); granice poziomów = te same oryginalne próbki na liniach cięcia (bez szwów, bez skirtów);`
+    + ` brakujące kafle = jawne dziury (status, nie zero); polityka = RENDERERA (nie format źródłowy, nie odzyskany paging PE)`,
+    `---- tekstury terenu (oryginalne) ----`,
+    `materiały: rekordy nazwane TDF, maska@record+56; wagi RAW u8 — sumy >255 to DANE ORYGINALNE (bez normalizacji)`,
+    `relacja: id@+16 → "<id>.dat" w Textures.bnt (era PCG_9_3_5; potwierdzona silnikowo)`,
+    d ? `okno: resolved ${d.resolvedLayers ?? 0}/${d.layersTotal ?? 0} | zdekodowane ${d.decoded ?? 0} | zastosowane ${d.appliedLayers ?? 0}${d.decodeFailures?.length ? ` | błędy: ${d.decodeFailures.length}` : ''}` : `okno: łańcuch tekstur jeszcze niezbudowany`,
+    `preset renderowania: RENDER_RECONSTRUCTION — ${RENDER_RECONSTRUCTION_PRESET.blendForm}; UV ${RENDER_RECONSTRUCTION_PRESET.uv}; próbki komórek ${RENDER_RECONSTRUCTION_PRESET.cellSampling}`,
+    `---- roślinność (RECONSTRUCTION_PREVIEW) ----`,
+    `trójstopniowy rozdział: ORIGINAL_CLIMATE_RECORDS (.vcl strict; 25 UNSUPPORTED) | RECOVERED_RNG_ARITHMETIC (PEFoliageCore byte-locked — NIETKNIĘTY) | INSTANCE_DISTRIBUTION (wrapper PEFoliageLabSeed v2 — LAB_SEED; recIndex w kluczu pozycji; gęstość frakcyjna ${'labseed-density-v2-fractional'}; rekonstrukcja)`,
+    `modele: <id>.nif z PCG_9_3_5 Models.bnt → parseWitnessModel → NiTriShape → NiTexturingProperty → NiArkTextureExtraData → <id>.dat z Textures.bnt → decodeModelTextureStrict (TGA2 24bpp / A32 32bpp / DDS DXT1+DXT5 — kwalifikowane na RZECZYWISTYCH payloadach tego runu: 518860/518862/516807 DXT1, 166881 DXT5; kontrole negatywne: truncated/fourcc/magic) → GPU`,
+    `granic uczciwe: [P-UNITS] cm→m ×0.01 RAZ; [P-AXIS] (x,z,-y); [P-UV] surowe v; [P-SCALE] 2.0/NODE_SCALE_MUL×0.01 (CURRENT_RUNTIME_CALIBRATION); brak łańcucha texprop→Ark = NIE-wizualne; UNSUPPORTED → znacznik diagnostyczny, nigdy zamiennik`,
+    `spawn: kafel ${state.anchor.gx},${state.anchor.gy} (zaznaczenie z launchera / domyślnie najwyższa zmierzona średnia — wybór z DANYCH)`,
     `census terenu: ${s.census.measured}/${s.census.total} zwykłych kafli zmierzonych; NODATA: ${s.census.missing}+${s.census.failed}; sentinel/wiersze specjalne wykluczone.`,
+    `HISTORICAL_TREE_DISTRIBUTION = NOT_ESTABLISHED | ORIGINAL_REGION_TO_CLIMATE_JOIN = NOT_ESTABLISHED | WORLD_XYZ_RECOVERED = NO`,
   ].join('\n');
 }
 

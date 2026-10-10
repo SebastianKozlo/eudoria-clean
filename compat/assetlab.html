@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!-- assetlab.html — PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010 (contract §7)
+     THE ASSET LAB: a small model-inspection mode using the EXISTING catalog/
+     viewer chains — large viewport + the SAME corrected orbit preset as the
+     world view (FOV 45, damping 0.08, min 10, max 50000, far 200000).
+     Witnesses (each with its OWN honest status; earlier DECODED is NOT a
+     render proof — the lab measures the actual chain live):
+       - PCG_9_3_5 witness 519316.nif — the live original-bytes chain
+         (/api/world/model/519316 → parseWitnessModel → shape→texprop→Ark →
+         <id>.dat → decodeModelTextureStrict incl. the qualified DDS
+         DXT1/DXT5 subset; the SIX texture names resolve to REAL same-era
+         entries: 518860/518862/516807 (DXT1) + 519227 (TGA A32) — see the
+         drawer per-slot diagnostics);
+       - the four CD_JAN_2003 proxy CONTROLS 192374/193207/193313/193684 —
+         the pinned Models.ark (SEPARATE era identity) through the bounded
+         NIF 4.1.0.12 reader; SOURCE-UNTEXTURED per the established catalog
+         finding (no UV/texture bindings in the examined payloads) — rendered
+         with an explicit neutral material, NEVER invented bindings.
+     HONESTY: display centering is a reversible wrapper (file-space mapping
+     shown); no unit conversion for the CD controls (FILE_SCENE space);
+     the PCG witness carries the documented [P-UNITS]/[P-AXIS]/[P-UV]
+     bridges of the world-vegetation chain. -->
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE Eudoria — Asset Lab (witnessy oryginalnych modeli)</title>
+<link rel="stylesheet" href="/compat/compat.css">
+<link rel="stylesheet" href="/compat/world.css">
+<script type="importmap">
+{ "imports": {
+    "three": "/node_modules/three/build/three.module.js",
+    "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header id="app-header">
+  <div class="brand-row">
+    <div class="brand">PE Eudoria — Asset Lab | run PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010</div>
+    <button id="btn-drawer">Szczegóły</button>
+  </div>
+  <div class="labels">
+    <span class="lab">witness 519316 = ORYGINALNY PCG_9_3_5 (łańcuch na żywo: Models.bnt → parseWitnessModel → Ark → Textures.bnt → TGA/DDS-DXT) · 4 proxy CD_JAN_2003 = KONTROLA (source-untextured, bez wymyślonych bindingów)</span>
+    <span class="lab">ery NIE są mieszane: PCG_9_3_5 i CD_JAN_2003 mają odrębne tożsamości mount/cache (odmowa cross-era jest jawna)</span>
+  </div>
+</header>
+<div id="hud-line">boot…</div>
+<div id="error-banner" hidden></div>
+<main id="world-layout">
+  <div id="viewport-wrap">
+    <canvas id="view-canvas"></canvas>
+    <div id="action-bar">
+      <select id="witness-select" title="wybierz witness"></select>
+      <button id="btn-fit">Dopasuj [F]</button>
+      <button id="btn-launcher">← Launcher</button>
+      <button id="btn-world">→ Świat</button>
+    </div>
+    <div id="pos-hud" class="small mono">…</div>
+  </div>
+  <aside id="world-side" aria-label="Szczegóły">
+    <div class="drawer-head">
+      <b>Szczegóły — Asset Lab</b>
+      <button id="btn-drawer-close">Zwiń</button>
+    </div>
+    <section class="diag-section">
+      <h4>Status witnessa (uczciwie)</h4>
+      <div id="witness-status" class="small mono">…</div>
+    </section>
+    <section class="diag-section">
+      <h4>Łańcuch provenance (klik = odśwież)</h4>
+      <div id="witness-chain" class="small mono">…</div>
+    </section>
+    <section class="diag-section">
+      <h4>Diagnostyka slotów tekstur (pominięte jawnie)</h4>
+      <div id="slot-diag" class="small mono">—</div>
+    </section>
+    <section class="diag-section">
+      <h4>Kamera / mapa wyświetlania</h4>
+      <div id="cam-note" class="small mono">…</div>
+    </section>
+  </aside>
+</main>
+<script type="module" src="/compat/assetlab.js"></script>
+</body>
+</html>

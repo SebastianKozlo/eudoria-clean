@@ -135,13 +135,20 @@ import { Bnt2TerrainArchive } from '../src/pesource/Bnt2TerrainArchive.js';
 import { isSentinelName } from '../src/pesource/TdfDecoder.js';
 import { parseWitnessModel } from '../src/pesource/NifModelReader.js';
 import { decodeTga2, decodeTga2A32Image } from '../src/pesource/TgaDecoder.js';
+import { ArkArchive } from '../src/pesource/ArkArchive.js';
+import { LOD_DECIMATION, HEIGHT_QUERY_VERSION } from '../src/peworld/PEHeightQuery.js';
+// the bounded phase-3 NIF 4.1.0.12 reader (the FOUR CD primaries ONLY; loud
+// failures) — imported SERVER-SIDE for the Asset Lab wire (the browser gets
+// the parsed wire JSON, the catalog-viewer pattern; the tool itself imports
+// node:fs and is NOT a client module)
+import { readNif41, PEC_NIF41_READER_VERSION } from '../tools/pecompat/nif41_deep.mjs';
 import {
   VEGETATION_THREE_WAY_SEPARATION, LABSEED_WINDOW_CALIBRATION,
 } from '../src/peworld/PEFoliageLabSeed.js';
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url))); // repo root
 const RUN_ID = 'PE_WORLD_LAUNCHER_R1_20261010';
-const SERVER_VERSION = 'world-server-r1-etap-e (loopback, allowlist statics, bounded index-derived world APIs; extends the catalog/sceneir server design; terrain through PESourceMount.getTerrainTile — raw u16, offset 64, filename-xy grid; ETAP D: per-tile material tails (mask@record+56, raw weights) + the id@+16 -> "<id>.dat" texture chain through the LAZY bounded pinned-Textures.bnt reader, CAM-C3 identity on every cache; ETAP E: /api/world/model/<id> bounded NIF payloads through the LAZY pinned-Models.bnt reader + the measured default-profile support census (parseWitnessModel + strict texture decode) + the per-profile .vcl model summaries)';
+const SERVER_VERSION = 'world-server-r2 (PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010: loopback, allowlist statics, bounded index-derived world APIs; extends the catalog/sceneir server design; terrain through PESourceMount.getTerrainTile — raw u16, offset 64, filename-xy grid; per-tile material tails (mask@record+56, raw weights) + the id@+16 -> "<id>.dat" texture chain through the LAZY bounded pinned-Textures.bnt reader, CAM-C3 identity on every cache; /api/world/model/<id> bounded NIF payloads; R2: /api/world/lod8/<bx>/<by> (mid-LOD 8x8-decimated REAL-sample blocks) + /api/world/far (whole-world 4x4-decimated REAL-sample grid, census-gated) + /api/world/asset/cd/<id> (the four CD_JAN_2003 Asset Lab proxy controls from the pinned Models.ark — SEPARATE era identity, never mixed)';
 
 // ---- configured inputs (the ONLY filesystem paths this server may read) ----
 const FOREIGN_STANDING_PORTS = [8140, 8161]; // standing sceneir + catalog servers — NEVER bound over
@@ -157,6 +164,12 @@ const CONFIG = {
   texturesPath: process.env.PEWORLD_TEXTURES ?? `${PCG_DATA}\\Textures\\Textures.bnt`,
   modelsPath: process.env.PEWORLD_MODELS ?? `${PCG_DATA}\\Models\\Models.bnt`,
   catalogUrl: process.env.PEWORLD_CATALOG_URL ?? 'http://127.0.0.1:8161/catalog',
+  // R2 §7 — the Asset Lab CD-era CONTROL container (read-only, SEPARATE era/
+  // cache identity from PCG_9_3_5; only the four proxy payloads are served —
+  // never the whole container, never a cross-era texture resolution)
+  cdModelsArkPath: process.env.PEWORLD_CD_MODELS_ARK ?? 'D:\\Eudoria_Reconstruction\\pcg2003_install\\Data\\Models\\Models.ark',
+  cdModelsArkPin: 'F660D055B4B9471B3B6E16B07F5368DBD6F2208DAB6B51BB9BDB9942BD73EA62',
+  assetLabProxyIds: [192374, 193207, 193313, 193684],
   // pinned container SHA256 (contract §1 table; verified fail-closed)
   pins: {
     terrain: '95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990',
@@ -205,6 +218,9 @@ const WORLD_FILES = Object.freeze({
   'world-vegetation.js': 'compat/world-vegetation.js',
   'world.css': 'compat/world.css',
   'world-splat.js': 'compat/world-splat.js',
+  'world-lod.js': 'compat/world-lod.js',
+  'assetlab.html': 'compat/assetlab.html',
+  'assetlab.js': 'compat/assetlab.js',
   'compat.css': 'compat/compat.css',
 });
 // Client-side world modules (served EXACT — the world app builds canonical
@@ -218,13 +234,21 @@ const WORLD_FILES = Object.freeze({
 // production reader; NO guard widening client-side) + the byte-locked
 // PEFoliageCore (the RECOVERED_RNG_ARITHMETIC module, imported untouched) +
 // the documented LAB_SEED wrapper (src/peworld/PEFoliageLabSeed.js).
+// R2 adds: the SHARED height query (src/peworld/PEHeightQuery.js — the exact
+// rendered-triangle planes + the real-sample halo; contract §3.2) + the
+// qualified DDS DXT1/DXT5 strict decoder (src/pesource/DdsDecoder.js — the
+// two REAL same-era texture formats of this run's inputs; contract §6.6).
+// The bounded phase-3 NIF 4.1.0.12 reader stays SERVER-SIDE ONLY (it imports
+// node:fs — the Asset Lab CD controls are served as the parsed WIRE).
 const CLIENT_MODULES = Object.freeze([
   'src/peworld/PETerrainCore.js',
   'src/peworld/PEFoliageCore.js',
   'src/peworld/PEFoliageLabSeed.js',
+  'src/peworld/PEHeightQuery.js',
   'src/pesource/TerrainTile.js',
   'src/pesource/PEProvenance.js',
   'src/pesource/TgaDecoder.js',
+  'src/pesource/DdsDecoder.js',
   'src/pesource/NifModelReader.js',
 ]);
 
@@ -924,6 +948,72 @@ export async function buildWorldRuntime({ io = makeNodeIo(), terrainPath = CONFI
     zeroTiles: 0, nonzeroTiles: 0,
   };
 
+  // R2 (contract §4) — the FAR LOD grid: 4x4 decimated REAL samples per tile,
+  // collected by the SAME census pass that measures every regular tile (the
+  // decimation is of ORIGINAL SAMPLES — never averaging; the LOD policy text
+  // lives in src/peworld/PEHeightQuery.js LOD_DECIMATION). Not ready until
+  // the census completes (the client shows honest PENDING until then).
+  const FAR = LOD_DECIMATION.far;
+  const MID = LOD_DECIMATION.mid;
+  const farLod = {
+    perTileEdge: FAR.perTile,
+    indices: FAR.indices,
+    samples: new Uint16Array(N * FAR.perTile * FAR.perTile), // 16 real u16 per tile
+    ready: false,
+    decimationLabel: FAR.label,
+  };
+
+  // R2 — the bounded mid-LOD block cache (8x8 tiles per block, 8x8 decimated
+  // REAL samples per tile; decimation happens ON the production tile payloads —
+  // the SAME PESourceMount.getTerrainTile path the tile API serves)
+  const LOD8_BLOCKS_X = Math.ceil(WORLD_GRID.width / 8);
+  const LOD8_BLOCKS_Y = Math.ceil(WORLD_GRID.height / 8);
+  const lod8Cache = new Map(); // "bx,by" -> {bytes(Buffer 64 status + 8192 samples), at}
+  const LOD8_CACHE_MAX = 128;  // bounded (~1 MiB)
+  const lod8Building = new Map(); // "bx,by" -> Promise<Buffer> (in-flight dedupe)
+  async function buildLod8Block(bx, by) {
+    const key = `${bx},${by}`;
+    const hit = lod8Cache.get(key);
+    if (hit?.bytes) return hit.bytes;
+    const inFlight = lod8Building.get(key);
+    if (inFlight) return inFlight;
+    const p = (async () => {
+      const status = new Uint8Array(64);         // per-tile status, row-major tiles (0 OK / 2 MISSING / 3 FAILED / 4 OUTSIDE_GRID)
+      const samples = new Uint16Array(64 * 64);  // 64x64 decimated samples (missing/outside tiles stay 0 — MASKED by status, never surface)
+      for (let ty = 0; ty < 8; ty++) {
+        for (let tx = 0; tx < 8; tx++) {
+          const gx = bx * 8 + tx, gy = by * 8 + ty;
+          const sIdx = ty * 8 + tx;
+          if (gx >= WORLD_GRID.width || gy >= WORLD_GRID.height) { status[sIdx] = 4; continue; }
+          const name = gx.toString(16).padStart(4, '0') + gy.toString(16).padStart(4, '0') + '.tdf';
+          if (!names.has(name)) { status[sIdx] = 2; continue; } // missing entry — honest hole in the mid LOD
+          try {
+            const tile = await mount.getTerrainTile({ era: WORLD_ERA, gridX: gx, gridY: gy });
+            const h = tile.heights;
+            for (let ky = 0; ky < 8; ky++) {
+              const iy = MID.indices[ky];
+              for (let kx = 0; kx < 8; kx++) {
+                samples[(ty * 8 + ky) * 64 + (tx * 8 + kx)] = h[iy * 32 + MID.indices[kx]];
+              }
+            }
+            status[sIdx] = 0;
+          } catch {
+            status[sIdx] = 3; // decode failure — honest hole (masked, never zero-as-surface)
+          }
+        }
+      }
+      const bytes = Buffer.concat([Buffer.from(status.buffer, status.byteOffset, status.byteLength), Buffer.from(samples.buffer, samples.byteOffset, samples.byteLength)]);
+      lod8Cache.set(key, { bytes, at: Date.now() });
+      while (lod8Cache.size > LOD8_CACHE_MAX) {
+        const first = lod8Cache.keys().next().value;
+        lod8Cache.delete(first);
+      }
+      return bytes;
+    })();
+    lod8Building.set(key, p);
+    try { return await p; } finally { lod8Building.delete(key); }
+  }
+
   const state = {
     mount, terrainArchive, names, indexCensus, identity, stats, census,
     tileCache: new TileCache(CONFIG.tileCacheCapacity),
@@ -962,6 +1052,30 @@ export async function buildWorldRuntime({ io = makeNodeIo(), terrainPath = CONFI
       textures: { state: 'PENDING', sha256: null, path: texturesPath, sizeBytes: null, mounted: false, note: 'ETAP D: stream-hash pin verification, then a LAZY bounded index mount (footer+directory+per-entry reads only; NEVER the whole container, never a whole-container route)' },
     },
     climates: { total: 32, profiles: null, decoded: null, unsupported: null },
+    // R2 (contract §4) — the distant-LOD state
+    farLod,
+    lod8: {
+      blocksX: LOD8_BLOCKS_X, blocksY: LOD8_BLOCKS_Y,
+      perTileEdge: MID.perTile, decimationLabel: MID.label,
+      cacheMax: LOD8_CACHE_MAX,
+      bytesPerBlock: 64 + 64 * 64 * 2,
+      served: 0,
+      build: buildLod8Block, // the async bounded block builder (this closure owns the LRU + the in-flight dedupe)
+      cacheSize: () => lod8Cache.size,
+    },
+    // R2 (contract §7) — the Asset Lab CD-era proxy controls (lazy load)
+    assetLabCd: {
+      state: 'NOT_LOADED', // NOT_LOADED -> LOADING -> READY | FAILED
+      era: ERAS.CD_JAN_2003,
+      container: 'Models/Models.ark',
+      path: CONFIG.cdModelsArkPath,
+      pinSha256: CONFIG.cdModelsArkPin,
+      proxyIds: CONFIG.assetLabProxyIds,
+      payloads: null, // Map id -> {payloadBytes, sha256, sizeBytes, entryName}
+      containerSha256: null,
+      loadedAt: null,
+      note: 'the four CD_JAN_2003 proxy controls of the Asset Lab (source-untextured per the established catalog finding); mounted READ-ONLY from the pinned Models.ark with a SEPARATE era/cache identity — never mixed with PCG_9_3_5',
+    },
     stageLog: [],
     startedAt: new Date().toISOString(),
   };
@@ -999,6 +1113,13 @@ export async function buildWorldRuntime({ io = makeNodeIo(), terrainPath = CONFI
             const mean = Math.round(sum / 1024);
             stats.mean[idx] = mean; stats.min[idx] = mn; stats.max[idx] = mx;
             stats.status[idx] = 1; census.measured++;
+            // R2 (§4): the SAME pass collects the FAR LOD decimated REAL samples
+            for (let ky = 0; ky < FAR.perTile; ky++) {
+              const iy = FAR.indices[ky];
+              for (let kx = 0; kx < FAR.perTile; kx++) {
+                farLod.samples[idx * (FAR.perTile * FAR.perTile) + ky * FAR.perTile + kx] = h[iy * 32 + FAR.indices[kx]];
+              }
+            }
             if (mn < gMin) gMin = mn;
             if (mx > gMax) gMax = mx;
             if (mean > bestMean) { bestMean = mean; bestIdx = idx; }
@@ -1022,6 +1143,7 @@ export async function buildWorldRuntime({ io = makeNodeIo(), terrainPath = CONFI
     }
     census.zeroTiles = zeroTiles; census.nonzeroTiles = nonzeroTiles;
     census.ready = true;
+    farLod.ready = true; // the far grid is complete only with the census
     census.finishedAt = new Date().toISOString();
     census.elapsedMs = Date.now() - t0;
   }
@@ -1272,6 +1394,38 @@ function statusPayload(state, serverInfo) {
       maxMeanTile: c.maxMeanTile, zeroTiles: c.zeroTiles, nonzeroTiles: c.nonzeroTiles,
       note: 'raw u16 value 0 is DATA (not NODATA); NODATA = missing entry or decode failure',
     },
+    // R2 — the RE-MEASURED regular-tile denominator (from the terrain.bnt
+    // INDEX at boot — never a hardcoded 51920): indexCensus.regular counts the
+    // filename-xy regular entries actually present in the pinned container.
+    denominator: {
+      gridCapacity: WORLD_GRID.width * WORLD_GRID.height,
+      indexRegularTiles: state.indexCensus.regular,
+      indexTotalEntries: state.indexCensus.totalEntries,
+      specialRows: state.indexCensus.specialRows,
+      sentinel: state.indexCensus.sentinel,
+      note: 'the 220x236 grid CAPACITY is the filename-xy addressing space; the MEASURED denominator of actually present regular tiles is indexRegularTiles (counted from the container index at boot)',
+    },
+    continuousWorld: {
+      version: 'r2-continuous-world-v1',
+      near: { windowTiles: 8, note: 'the near layer renders the 8x8-tile window from the RAW payloads (PETerrainRegion); the height sampling field extends with a 1-tile REAL-sample halo (contract §3.2)' },
+      midLod: { perTileEdge: state.lod8.perTileEdge, blocksX: state.lod8.blocksX, blocksY: state.lod8.blocksY, decimation: state.lod8.decimationLabel, blocksServed: state.lod8.served, cacheSize: state.lod8.cacheSize(), cacheMax: state.lod8.cacheMax },
+      farLod: { ready: state.farLod.ready, perTileEdge: state.farLod.perTileEdge, decimation: state.farLod.decimationLabel, gatedBy: 'the regular-tile census (503 until READY; no zero-filled placeholder)' },
+      heightQueryVersion: HEIGHT_QUERY_VERSION,
+      note: 'distant terrain = decimated REAL terrain.bnt samples (mid + far); LOD is a RENDERER policy with explicit coverage/seams — never a new source format, never a stock-PE paging claim',
+    },
+    assetLab: {
+      cd: {
+        state: state.assetLabCd.state,
+        era: state.assetLabCd.era,
+        container: state.assetLabCd.container,
+        containerSha256: state.assetLabCd.containerSha256,
+        pinSha256: state.assetLabCd.pinSha256,
+        proxyIds: state.assetLabCd.proxyIds,
+        loadedAt: state.assetLabCd.loadedAt,
+        note: state.assetLabCd.note,
+      },
+      pcgWitness: { id: 519316, source: '/api/world/model/519316 (the pinned PCG_9_3_5 Models.bnt)', note: 'DECODED in the catalog batch is NOT a render proof — the Asset Lab measures the actual parse/texture chain status live' },
+    },
     tileCache: state.tileCache.stats(),
     overviewLayout: WORLD_OVERVIEW_LAYOUT,
     catalog: { url: CONFIG.catalogUrl, note: 'separate standing catalog server (npm run serve:catalog, port 8161) — this world server never serves /catalog' },
@@ -1383,6 +1537,82 @@ function buildMaterialsServed(state, gx, gy, name, mm) {
 }
 
 export function createWorldApp(state, serverInfo = {}) {
+  /** The LAZY bounded CD mount + the SERVER-SIDE wire build (R2 §7 — called
+   *  by BOTH the raw-payload route and the wire route; once-only, fail-closed
+   *  on the container pin; the 128 MB container buffer is dropped after the
+   *  four proxy payloads + wires are extracted). */
+  async function ensureAssetLabCd() {
+    if (state.assetLabCd.state !== 'NOT_LOADED') return;
+    state.assetLabCd.state = 'LOADING';
+    try {
+      const whole = new Uint8Array(await fsp.readFile(CONFIG.cdModelsArkPath));
+      const digest = createHash('sha256').update(Buffer.from(whole.buffer, whole.byteOffset, whole.byteLength)).digest('hex');
+      if (digest.toLowerCase() !== CONFIG.cdModelsArkPin.toLowerCase()) {
+        throw new Error(`Models.ark SHA256 ${digest} != pinned ${CONFIG.cdModelsArkPin} — REFUSING (fail-closed era pin)`);
+      }
+      const ark = new ArkArchive(whole);
+      const payloads = new Map();
+      for (const pid of CONFIG.assetLabProxyIds) {
+        const entry = ark.entryById(pid);
+        if (!entry) throw new Error(`proxy ${pid}.nif: NO entry in the pinned Models.ark index`);
+        const { payload } = ark.readEntry(entry);
+        const sha = createHash('sha256').update(Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength)).digest('hex');
+        payloads.set(pid, { payloadBytes: Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength), sha256: sha, sizeBytes: payload.byteLength, entryName: entry.name });
+      }
+      state.assetLabCd.payloads = payloads;
+      state.assetLabCd.containerSha256 = digest;
+      state.assetLabCd.state = 'READY';
+      state.assetLabCd.loadedAt = new Date().toISOString();
+      // the SERVER-SIDE wire build (the catalog pattern): parse each proxy
+      // ONCE with the bounded nif41 reader; the browser renders the wire
+      // (the reader itself imports node:fs — server-side only)
+      const wires = new Map();
+      for (const pid of CONFIG.assetLabProxyIds) {
+        const rec = payloads.get(pid);
+        const r41 = readNif41(new Uint8Array(rec.payloadBytes), { sourceName: rec.entryName });
+        const byIndex = new Map(r41.blocks.map((b) => [b.index, b]));
+        const shapes = [];
+        let triangles = 0, vertices = 0;
+        for (const b of r41.blocks) {
+          if (b.type !== 'NiTriShape') continue;
+          const data = b.dataRef != null ? byIndex.get(b.dataRef) : null;
+          const g = data?.geometry;
+          if (!g || !g.positions || !g.indices) continue;
+          triangles += g.numTriangles ?? 0;
+          vertices += g.numVertices ?? 0;
+          shapes.push({
+            shapeBlock: b.index, shapeName: b.name, dataBlock: b.dataRef,
+            numVertices: g.numVertices, numTriangles: g.numTriangles,
+            uvSetCount: data.fields?.uvSetCount ?? 0,
+            hasNormals: !!g.normals, hasColors: !!g.colors,
+            positions: Array.from(g.positions),           // FILE_SCENE space (NO unit/axis ops)
+            normals: g.normals ? Array.from(g.normals) : null,
+            uv0: g.uvSets?.[0] ? Array.from(g.uvSets[0]) : null,
+            indices: Array.from(g.indices),
+          });
+        }
+        wires.set(pid, {
+          ok: true,
+          readerVersion: PEC_NIF41_READER_VERSION,
+          nifVersion: r41.header.versionString,
+          closure: r41.closure,
+          blockCensus: Object.fromEntries(Object.entries(r41.blocks.reduce((a, b) => { a[b.type] = (a[b.type] ?? 0) + 1; return a; }, {}))),
+          shapes, triangles, vertices,
+          provenance: {
+            era: ERAS.CD_JAN_2003, container: 'Models.ark', containerSha256: digest,
+            entry: rec.entryName, payloadSha256: rec.sha256, sizeBytes: rec.sizeBytes,
+            note: 'the wire is the SERVER-SIDE parse of the pinned ORIGINAL payload through the bounded phase-3 NIF 4.1.0.12 reader (the four CD primaries ONLY); positions/normals/uv/indices are FILE_SCENE ORIGINAL values — the client performs NO unit conversion, NO axis swap',
+          },
+        });
+      }
+      state.assetLabCd.wires = wires;
+      state.stageLog.push({ at: state.assetLabCd.loadedAt, kind: 'ASSET_LAB_CD_READY', ids: CONFIG.assetLabProxyIds, containerSha256: digest });
+    } catch (e) {
+      state.assetLabCd.state = 'FAILED';
+      state.assetLabCd.error = String(e?.message ?? e);
+      state.stageLog.push({ at: new Date().toISOString(), kind: 'ASSET_LAB_CD_FAILED', error: state.assetLabCd.error });
+    }
+  }
   return async function handle(req, res) {
     if (CONFIG.logRequests) {
       res.on('finish', () => console.log(`[req] ${req.method} ${req.url} -> ${res.statusCode}`));
@@ -1425,6 +1655,11 @@ export function createWorldApp(state, serverInfo = {}) {
     }
     if (urlPath === '/world' || urlPath === '/world/' || urlPath === '/world/index.html') {
       const b = await readRepoFile(WORLD_FILES['world.html']);
+      serveBytes(res, 200, b, 'text/html');
+      return;
+    }
+    if (urlPath === '/assetlab' || urlPath === '/assetlab/') {
+      const b = await readRepoFile(WORLD_FILES['assetlab.html']);
       serveBytes(res, 200, b, 'text/html');
       return;
     }
@@ -1845,8 +2080,138 @@ export function createWorldApp(state, serverInfo = {}) {
       return;
     }
 
+    // ---- R2 (contract §4): the WHOLE-WORLD FAR LOD grid (census-gated) ----
+    // 4x4 decimated REAL samples per regular tile (decimation of ORIGINAL
+    // SAMPLES — never averaging; the same census pass collects them). Not
+    // ready until the census completes: 503 with the honest progress. The
+    // payload: [u16 gridW][u16 gridH][u16 perTileEdge][u16 pad] + N u8 status
+    // + N*16 u16 LE samples. Tiles whose status != 1 have NO samples served
+    // as surface (the client masks them — missing is NAMED, never zero).
+    if (urlPath === '/api/world/far') {
+      if (!state.farLod.ready) {
+        deny(res, 503, 'FAR_LOD_NOT_READY',
+          `the far LOD grid fills with the regular-tile census (measured ${state.census.measured}/${state.census.total}, pending ${state.census.pending}) — retry after READY (the client polls /api/world/overview/progress); no zero-filled placeholder is served`, rawUrl);
+        return;
+      }
+      const N = WORLD_GRID.width * WORLD_GRID.height;
+      const buf = Buffer.alloc(8 + N + N * 16 * 2);
+      buf.writeUInt16LE(WORLD_GRID.width, 0);
+      buf.writeUInt16LE(WORLD_GRID.height, 2);
+      buf.writeUInt16LE(state.farLod.perTileEdge, 4);
+      buf.writeUInt16LE(0, 6);
+      Buffer.from(state.stats.status.buffer, state.stats.status.byteOffset, state.stats.status.byteLength).copy(buf, 8);
+      Buffer.from(state.farLod.samples.buffer, state.farLod.samples.byteOffset, state.farLod.samples.byteLength).copy(buf, 8 + N);
+      serveBytes(res, 200, buf, 'application/octet-stream', {
+        'X-PE-Era': WORLD_ERA,
+        'X-PE-Container': WORLD_TERRAIN_CONTAINER,
+        'X-PE-Container-Sha256': String(state.identity?.containerSha256 ?? ''),
+        'X-PE-Far-Per-Tile-Edge': String(state.farLod.perTileEdge),
+        'X-PE-Far-Decimation': 'FAR_LOD_DECIMATION_4 (every ~10th ORIGINAL sample; the sample keeps its own world position)',
+        'X-PE-Height-Query-Version': HEIGHT_QUERY_VERSION,
+      });
+      return;
+    }
+
+    // ---- R2 (contract §4): ONE mid-LOD block (8x8 tiles, 8x8 REAL decimated
+    // samples per tile) — decimated ON DEMAND from the production tile reader
+    // (bounded LRU of blocks; never a new source format — the same pinned
+    // terrain.bnt payloads, decimated server-side). Layout: 64 u8 per-tile
+    // status (row-major tiles) + 64x64 u16 LE samples.
+    if (urlPath.startsWith('/api/world/lod8/')) {
+      const rest = urlPath.slice('/api/world/lod8/'.length).replace(/\.bin$/, '');
+      const m = rest.match(/^(\d+)\/(\d+)$/);
+      if (!m) {
+        deny(res, 400, 'LOD8_BLOCK_INVALID', `the lod8 route serves /api/world/lod8/<bx>/<by> (bx 0..${state.lod8.blocksX - 1}, by 0..${state.lod8.blocksY - 1}); got "${rest}"`, rawUrl);
+        return;
+      }
+      const bx = parseInt(m[1], 10), by = parseInt(m[2], 10);
+      if (bx < 0 || by < 0 || bx >= state.lod8.blocksX || by >= state.lod8.blocksY) {
+        deny(res, 400, 'LOD8_BLOCK_OUT_OF_RANGE', `lod8 block ${bx},${by} outside the regular grid blocks (0..${state.lod8.blocksX - 1} x 0..${state.lod8.blocksY - 1})`, rawUrl);
+        return;
+      }
+      const bytes = await state.lod8.build(bx, by);
+      state.lod8.served++;
+      serveBytes(res, 200, bytes, 'application/octet-stream', {
+        'X-PE-Era': WORLD_ERA,
+        'X-PE-Container': WORLD_TERRAIN_CONTAINER,
+        'X-PE-Container-Sha256': String(state.identity?.containerSha256 ?? ''),
+        'X-PE-Lod-Per-Tile-Edge': String(state.lod8.perTileEdge),
+        'X-PE-Lod-Decimation': 'MID_LOD_DECIMATION_8 (every ~4th ORIGINAL sample; the sample keeps its own world position)',
+        'X-PE-Height-Query-Version': HEIGHT_QUERY_VERSION,
+      });
+      return;
+    }
+
+    // ---- R2 (contract §7): the Asset Lab CD_JAN_2003 proxy CONTROLS ----
+    // The four catalog primaries (192374/193207/193313/193684) from the PINNED
+    // CD Models.ark — READ-ONLY, bounded (only these four payloads are ever
+    // extracted; the 128 MB container buffer is dropped after extraction), a
+    // SEPARATE era identity (CD_JAN_2003) that is never mixed with the
+    // PCG_9_3_5 mounts (the PCG texture route keeps refusing CD-era labels).
+    if (urlPath.startsWith('/api/world/asset/cd/')) {
+      // ---- the WIRE route first (the parsed geometry; the catalog pattern) ----
+      if (urlPath.endsWith('/wire')) {
+        const rest = urlPath.slice('/api/world/asset/cd/'.length).replace(/\/wire$/, '');
+        if (!/^\d+$/.test(rest)) {
+          deny(res, 400, 'CD_WIRE_ID_INVALID', `the cd wire route serves /api/world/asset/cd/<pinned proxy id>/wire; got "${rest}"`, rawUrl);
+          return;
+        }
+        const id = parseInt(rest, 10);
+        if (!CONFIG.assetLabProxyIds.includes(id)) {
+          deny(res, 404, 'CD_WIRE_NOT_SERVED', `cd wire id ${id}: not one of the pinned Asset Lab proxy controls (${CONFIG.assetLabProxyIds.join(', ')})`, rawUrl);
+          return;
+        }
+        await ensureAssetLabCd(); // the lazy mount + wire build (once)
+        if (state.assetLabCd.state !== 'READY' || !state.assetLabCd.wires?.has(id)) {
+          deny(res, 503, 'CD_WIRE_NOT_READY', `the pinned CD Models.ark mount/wire is not READY (state: ${state.assetLabCd.state}${state.assetLabCd.error ? `; ${state.assetLabCd.error.slice(0, 120)}` : ''}) — retry`, rawUrl);
+          return;
+        }
+        const wire = state.assetLabCd.wires.get(id);
+        serveBytes(res, 200, Buffer.from(JSON.stringify(wire, null, 1) + '\n'), 'application/json', {
+          'X-PE-Era': ERAS.CD_JAN_2003,
+          'X-PE-Container': 'Models.ark',
+          'X-PE-Entry': wire.provenance.entry,
+          'X-PE-Payload-Sha256': wire.provenance.payloadSha256,
+          'X-PE-Reader-Version': PEC_NIF41_READER_VERSION,
+        });
+        return;
+      }
+      const rest = urlPath.slice('/api/world/asset/cd/'.length).replace(/\.nif$/, '');
+      if (!/^\d+$/.test(rest)) {
+        deny(res, 400, 'CD_ASSET_ID_INVALID', `the cd asset route serves /api/world/asset/cd/<one of ${CONFIG.assetLabProxyIds.join('/')}> ONLY (the four pinned proxy controls); got "${rest}"`, rawUrl);
+        return;
+      }
+      const id = parseInt(rest, 10);
+      if (!CONFIG.assetLabProxyIds.includes(id)) {
+        deny(res, 404, 'CD_ASSET_NOT_SERVED',
+          `cd asset id ${id} is NOT one of the four pinned Asset Lab proxy controls (${CONFIG.assetLabProxyIds.join(', ')}) — the route is bounded to the pinned proxy ids BY CONSTRUCTION (never the whole CD container)`, rawUrl);
+        return;
+      }
+      // the LAZY bounded CD mount + wire build (once): see ensureAssetLabCd()
+      await ensureAssetLabCd();
+      if (state.assetLabCd.state === 'FAILED') {
+        deny(res, 500, 'CD_CONTAINER_FAILED', `the pinned CD Models.ark mount FAILED: ${state.assetLabCd.error} (fail-closed; the Asset Lab shows the honest error, no fallback bytes)`, rawUrl);
+        return;
+      }
+      if (state.assetLabCd.state !== 'READY') {
+        deny(res, 503, 'CD_CONTAINER_LOADING', 'the pinned CD Models.ark is still loading (retry)', rawUrl);
+        return;
+      }
+      const rec = state.assetLabCd.payloads.get(id);
+      serveBytes(res, 200, rec.payloadBytes, 'application/octet-stream', {
+        'X-PE-Era': ERAS.CD_JAN_2003,
+        'X-PE-Container': 'Models.ark',
+        'X-PE-Container-Sha256': String(state.assetLabCd.containerSha256 ?? ''),
+        'X-PE-Entry': rec.entryName,
+        'X-PE-Payload-Sha256': rec.sha256,
+        'X-PE-Entry-Size': String(rec.sizeBytes),
+        'X-PE-Nif-Reader-Scope': 'the SERVER parses with the bounded phase-3 NIF 4.1.0.12 reader (tools/pecompat/nif41_deep.mjs - the four CD primaries ONLY; loud failures); the Asset Lab serves the parsed WIRE at /api/world/asset/cd/<id>/wire; SOURCE-UNTEXTURED status established by the catalog finding (no UV/texture bindings in the examined payloads) - rendered without invented bindings',
+      });
+      return;
+    }
+
     deny(res, 404, 'ROUTE_NOT_FOUND',
-      'no route matches; this server exposes ONLY the launcher/world app allowlist, the client world modules, the pinned three package subtree, and the bounded /api/world/* index-derived APIs (status, overview, overview/progress, tile/<gx>/<gy>[+/meta+/materials], texture/<id>, model/<id>, climates, climate/<0..31>, gaps) — arbitrary filesystem paths and the original containers are not servable BY CONSTRUCTION (no whole-container route exists)', rawUrl);
+      'no route matches; this server exposes ONLY the launcher/world app allowlist, the client world modules, the pinned three package subtree, and the bounded /api/world/* index-derived APIs (status, overview, overview/progress, tile/<gx>/<gy>[+/meta+/materials], texture/<id>, model/<id>, climates, climate/<0..31>, far, lod8/<bx>/<by>, asset/cd/<pinned proxy id>, gaps) — arbitrary filesystem paths and the original containers are not servable BY CONSTRUCTION (no whole-container route exists)', rawUrl);
   };
 }
 

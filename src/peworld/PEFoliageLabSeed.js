@@ -84,7 +84,34 @@ import {
   NODE_POS_DIVISOR, FOLIAGE_OPERAND_LOCK, FOLIAGE_RE, FOLIAGE_PLACEHOLDERS,
 } from './PEFoliageCore.js';
 
-export const LABSEED_WRAPPER_VERSION = 'peworld-foliage-labseed-v1';
+export const LABSEED_WRAPPER_VERSION = 'peworld-foliage-labseed-v2';
+
+// PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010 — THE v2 CHANGES (both RECONSTRUCTION
+// wrapper policy, versioned; the byte-locked PEFoliageCore chain is untouched):
+//   (a) RECINDEX IDENTITY (contract §6.1): the LAB placement hash now mixes
+//       recIndex in. Duplicate model rows (the 0x30 row vectors — e.g. profile
+//       0 records 8 and 9, both model 166878) are SEPARATE climate records;
+//       pre-v2 they generated IDENTICAL positions. A true random collision is
+//       a different (honest) phenomenon from this wrapper defect — measured
+//       by the PRE/POST WL-5 gates.
+//   (b) FRACTIONAL DENSITY (contract §6.3): the per-tile/per-cell count is now
+//       floor + a DETERMINISTIC fractional extra (a stable hash test against
+//       the fractional part), replacing the identical per-tile Math.round
+//       that vanished small positive records everywhere at 50% (R1 measured:
+//       3 of 10 IDs instantiated). Monotonicity: floor(v) is non-decreasing in
+//       density and the fractional test fires once and stays fired within a
+//       bucket (hash < frac(d) and frac grows) — increasing density never
+//       flips earlier identities; density=0 gives exactly zero; the count
+//       stays LINEAR in the source weight col1 (expected value = col1*d% —
+//       the source weights are preserved rather than forcing every model
+//       into every tile).
+export const LAB_DENSITY_POLICY = Object.freeze({
+  version: 'labseed-density-v2-fractional',
+  rule: 'count(record, cell, tile) = floor(v) + (densityHash01(labSeed, gx, gy, cellX, cellY, recIndex, modelId) < frac(v) ? 1 : 0), v = col1 * densityPercent / 100',
+  monotoneInDensity: 'floor(v) non-decreasing + the fractional test, once fired within a bucket, stays fired (hash < frac grows monotonically within the bucket)',
+  densityZero: 'v = 0 → count = 0 (exactly zero)',
+  note: 'RECONSTRUCTION preview policy (the .vcl col1 values are ORIGINAL DATA, never modified); at 100% the expected count equals PEFoliageCore’s round(col1) in expectation but no longer clamps small records to whole tiles identically',
+});
 
 /** The three-way separation labels, surfaced verbatim in the UI + artifacts
  * (contract §6; the single source of truth for the Etap E labels). */
@@ -111,19 +138,38 @@ export function tileU16Span(tileWorldMeters = LABSEED_WINDOW_CALIBRATION.tileWor
 }
 
 /** [P-CELLSTREAM] THE LAB_SEED-KEYED PLACEMENT HASH — RECONSTRUCTION-ONLY.
- * The same splitmix-finalize shape as PEFoliageCore's internal placementHash,
- * with the LAB_SEED mixed into the first xor stage. This replaces the
- * seedless [P-CELLSTREAM] stand-in INSIDE this wrapper only (PEFoliageCore
- * is never edited). Keyed on the sub-cell u16 box origin (bx0, by0 — which
- * encodes tile + sub-cell), modelId and j: two calls (j*2, j*2+1) give the
- * two independent position fractions, exactly like PEFoliageCore. */
-function labPlacementHash(labSeed, bx0, by0, modelId, j) {
+ * v2: the RECIDX MIX-IN (contract §6.1). The same splitmix-finalize shape as
+ * PEFoliageCore's internal placementHash, with the LAB_SEED and the RECORD
+ * INDEX mixed into the first xor stage: duplicate model rows are SEPARATE
+ * climate records and get SEPARATE position streams (pre-v2 they generated
+ * identical positions — the PRE/POST WL-5 gates measure the change). This
+ * replaces the seedless [P-CELLSTREAM] stand-in INSIDE this wrapper only
+ * (PEFoliageCore is never edited). Keyed on the sub-cell u16 box origin
+ * (bx0, by0 — which encodes tile + sub-cell), recIndex, modelId and j: two
+ * calls (j*2, j*2+1) give the two independent position fractions, exactly
+ * like PEFoliageCore. */
+function labPlacementHash(labSeed, bx0, by0, recIndex, modelId, j) {
   let h = (((labSeed >>> 0) * 0x9E3779B1) ^ ((bx0 >>> 0) * 0x85EBCA77) ^
-           ((by0 >>> 0) * 0xC2B2AE3D) ^ ((modelId >>> 0) * 0x27D4EB2F) ^
-           ((j >>> 0) * 0x165667B1)) >>> 0;
+           ((by0 >>> 0) * 0xC2B2AE3D) ^ ((recIndex >>> 0) * 0x94D0BB4B) ^
+           ((modelId >>> 0) * 0x27D4EB2F) ^ ((j >>> 0) * 0x165667B1)) >>> 0;
   h = Math.imul(h ^ (h >>> 16), 0x21F0AAAD) >>> 0;
   h = Math.imul(h ^ (h >>> 15), 0x735A2D97) >>> 0;
   return (h ^ (h >>> 15)) >>> 0;
+}
+
+/** The DETERMINISTIC fractional-density extra (contract §6.3, v2): a stable
+ *  hash test against the fractional part of v — the "stochastic" rounding is
+ *  a pure function of (tile, cell, record, model) — NEVER the LAB_SEED and
+ *  never a runtime RNG — so the seed moves POSITIONS only while DENSITY
+ *  controls COUNTS (the R1 determinism semantics preserved; the same config
+ *  always yields the same counts). */
+function densityHash01(gx, gy, cellX, cellY, recIndex, modelId) {
+  let h = (((gx >>> 0) * 0x85EBCA77) ^ ((gy >>> 0) * 0xC2B2AE3D) ^
+           ((cellX >>> 0) * 0x27D4EB2F) ^ ((cellY >>> 0) * 0x165667B1) ^
+           ((recIndex >>> 0) * 0x94D0BB4B) ^ ((modelId >>> 0) * 0x8E3D9D1B)) >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x21F0AAAD) >>> 0;
+  h = Math.imul(h ^ (h >>> 15), 0x735A2D97) >>> 0;
+  return ((h ^ (h >>> 15)) >>> 0) / 4294967296; // [0,1)
 }
 
 /**
@@ -217,9 +263,15 @@ export function generateTileInstances({
       records.forEach((rec, recIndex) => {
         const modelId = rec[0] | 0;
         const density = rec[1];
-        // The preview-density filter (RECONSTRUCTION): at 100% this is
-        // EXACTLY PEFoliageCore's [P-CELLSTREAM] count rule round(col1).
-        const count = Math.max(0, Math.round(density * dp / 100));
+        // The preview-density filter (RECONSTRUCTION, v2 FRACTIONAL — see
+        // LAB_DENSITY_POLICY): floor(v) + a deterministic fractional extra
+        // keyed on (labSeed, tile, cell, recIndex, modelId). Monotone in the
+        // density; 0 → exactly 0; the source weights stay linear.
+        const v = density * dp / 100;
+        const base = Math.floor(Math.max(0, v));
+        const frac = v - Math.floor(Math.max(0, v));
+        const extra = frac > 0 && densityHash01(gx, gy, cx, cy, recIndex, modelId) < frac ? 1 : 0;
+        const count = base + extra;
         cell.counts[`rec${recIndex}_m${modelId}`] = count;
         if (count === 0) {
           zeroCountRecords.push({ recIndex, modelId, density });
@@ -232,9 +284,10 @@ export function generateTileInstances({
           // [P-CELLSTREAM] THE LAB_SEED-KEYED STAND-IN RECORD {u16 x, u16 y,
           // u32 model_id} (the FUN_00990810 triple layout): the position lands
           // STRICTLY INSIDE the tile's half-open u16 box (edge ownership by
-          // construction — WORLD_VEG_EDGE_OWNERSHIP).
-          const hA = labPlacementHash(labSeed, bx0, by0, modelId, j * 2);
-          const hB = labPlacementHash(labSeed, bx0, by0, modelId, j * 2 + 1);
+          // construction — WORLD_VEG_EDGE_OWNERSHIP). v2: recIndex is mixed in
+          // (duplicate records get SEPARATE position streams).
+          const hA = labPlacementHash(labSeed, bx0, by0, recIndex, modelId, j * 2);
+          const hB = labPlacementHash(labSeed, bx0, by0, recIndex, modelId, j * 2 + 1);
           const ux = bx0 + Math.min(bw - 1, Math.floor(((hA >>> 16) & 0xFFFF) / 65536 * bw));
           const uy = by0 + Math.min(bh - 1, Math.floor((hB & 0xFFFF) / 65536 * bh));
 
@@ -274,6 +327,7 @@ export function generateTileInstances({
 
   const census = {
     wrapperVersion: LABSEED_WRAPPER_VERSION,
+    densityPolicy: LAB_DENSITY_POLICY,
     threeWaySeparation: VEGETATION_THREE_WAY_SEPARATION,
     reChain: FOLIAGE_RE,
     operandLock: FOLIAGE_OPERAND_LOCK,

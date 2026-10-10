@@ -61,6 +61,7 @@ const suites = [
   ['world_materials.test.mjs', (await import('./world_materials.test.mjs')).run],
   ['world_vegetation.test.mjs', (await import('./world_vegetation.test.mjs')).run],
   ['world_headless_load.test.mjs', (await import('./world_headless_load.test.mjs')).run],
+  ['world_r2_gates.test.mjs', (await import('./world_r2_gates.test.mjs')).run],
 ];
 
 const all = [];
