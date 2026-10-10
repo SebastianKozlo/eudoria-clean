@@ -1,11 +1,18 @@
 #!/usr/bin/env node
-// run_app_tests.mjs — APP_SERVER_TESTS phase harness — PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009
-// Runs the phase-3 preregistered app/server gates: T7 (API + path denial
-// against the RUNNING server), T8 (app-integration through the app's own
-// builder path) and T9 PREP (headless real-browser load). The T7/T9 suites own
-// their bounded server lifecycle (start/stop/PID/port-freed proof; NOTHING is
-// left running at the end). The phase-2 unit harness (run_tests.mjs) and its
-// verified artifacts are untouched.
+// run_app_tests.mjs — APP_SERVER_TESTS harness — base PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009,
+// T9 gate fix + run relabel PE_CITY_ASSET_MAP_R1_20261010 (worktree pe-city-asset-map-r1).
+// Runs the app/server gates: T7 (API + path denial against a RUNNING server),
+// T8 (app-integration through the app's own builder path) and T9 (headless
+// real-browser load through the FIXED 5-conjunct gate — see
+// tests/pecompat/headless_load.test.mjs for the SCENEIR-T9-C1 defect history).
+// The T7/T9 suites own their bounded server lifecycle (start/stop/PID/
+// port-freed proof; NOTHING is left running at the end). The phase-2 unit
+// harness (run_tests.mjs) and its verified artifacts are untouched.
+//
+// Harness exit code: ANY FAIL record (suite crash, gate failure, side error)
+// produces a NONZERO harness exit (fail > 0 -> exit 1); NOT_PERFORMED records
+// do NOT fail the harness but are counted separately and can never be
+// reported as PASS.
 //
 // Usage:
 //   node tests/pecompat/run_app_tests.mjs [--models <Models.bnt>]
@@ -13,18 +20,21 @@
 // Without --models, T8 reports NOT_PERFORMED_CONTAINER_UNAVAILABLE loudly
 // (T7 also fails closed — the server refuses to serve without the pinned
 // container; that refusal is itself a recorded fail-closed behavior).
+// The DEFAULT raw dir is THIS run's report package (never the historical
+// READ_ONLY package of the predecessor run).
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFile } from 'node:fs/promises';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(here, '..', '..');
+const RUN_ID = 'PE_CITY_ASSET_MAP_R1_20261010';
 
 const args = process.argv.slice(2);
 const ctx = {
   modelsPath: null,
   threeRoot: null,
-  rawDir: path.join(REPO_ROOT, 'docs', 'audits', 'PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009', 'raw'),
+  rawDir: path.join(REPO_ROOT, 'docs', 'audits', RUN_ID, 'raw'),
   jsonOut: null,
 };
 for (let i = 0; i < args.length; i++) {
@@ -44,7 +54,7 @@ const all = [];
 let pass = 0, fail = 0, notPerformed = 0;
 const t0 = Date.now();
 
-console.log('== PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009 — APP_SERVER_TESTS (T7/T8/T9-prep) ==');
+console.log(`== ${RUN_ID} — APP_SERVER_TESTS (T7/T8/T9 fixed gate; harness inherited from PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009) ==`);
 console.log(`run: node tests/pecompat/run_app_tests.mjs --models "${ctx.modelsPath ?? '(none)'}" --raw-dir "${ctx.rawDir}"`);
 
 for (const [file, run] of suites) {
@@ -78,7 +88,8 @@ for (const [file, run] of suites) {
 }
 
 const summary = {
-  run: 'PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009',
+  run: RUN_ID,
+  harnessInheritedFrom: 'PE_935_SCENEIR_MODEL_218757_BROWSER_R1_20261009',
   phase: 'APP_SERVER_TESTS',
   harness: 'tests/pecompat/run_app_tests.mjs',
   ctx: { modelsPath: ctx.modelsPath, rawDir: ctx.rawDir, threeRoot: ctx.threeRoot },

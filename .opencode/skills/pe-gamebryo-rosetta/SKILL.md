@@ -7,8 +7,14 @@ description: Interpret and implement PE NIF scene behavior using local versioned
 
 Use this skill to turn a specific SDK mechanism and PE evidence into a tested
 client behavior. It is a starting reference, not a claim of completed engine
-research — and (since 2026-10) it carries ONE fully executed implementation
-lineage: the 218757 SceneIR adapter + local Three.js viewer.
+research — and (since 2026-10) it carries TWO fully executed implementation
+lineages: the 218757 SceneIR adapter + local Three.js viewer, and the
+PE_CITY_ASSET_MAP_R1 two-era asset catalog + /catalog viewer (phase 2-4).
+For era identity, catalog coverage classes, proxy-vs-render role and texture
+provenance read [catalog-era-identity](references/catalog-era-identity.md)
+BEFORE writing any catalog, container or texture-resolution code — every claim
+in it is source- and scope-labeled and the reuse map at its end lists the
+existing modules to reuse.
 
 ## Select sources
 

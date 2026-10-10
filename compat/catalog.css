@@ -1,0 +1,170 @@
+/* catalog.css — PE_CITY_ASSET_MAP_R1_20261010, phase 4 (contract §5)
+   The /catalog layout (extends the shared compat.css base). */
+
+#catalog-layout {
+  display: grid;
+  grid-template-columns: minmax(560px, 55%) minmax(340px, 45%);
+  grid-template-rows: minmax(0, 1fr); /* the ONE row fills the constrained height (implicit auto rows would grow to content) */
+  gap: 10px;
+  padding: 8px 10px;
+  flex: 1;          /* body is already a column flex (compat.css) — take the remaining viewport height */
+  min-height: 0;
+  min-width: 0;
+}
+
+#catalog-list-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  min-height: 0; /* let the table wrap shrink inside the grid row */
+}
+
+#catalog-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  padding: 6px 8px;
+  background: #131a24;
+  border: 1px solid #263243;
+  border-radius: 4px;
+}
+#catalog-controls label { display: inline-flex; align-items: center; gap: 4px; color: #aebccd; }
+#catalog-controls select, #catalog-controls input {
+  background: #0c1018;
+  color: #dce7f4;
+  border: 1px solid #2a3849;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 12px;
+}
+#catalog-controls button {
+  background: #1b2838;
+  color: #cfe0f2;
+  border: 1px solid #33506e;
+  border-radius: 3px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+#catalog-controls button:hover { background: #24374d; }
+
+#catalog-coverage, #catalog-sort-rule {
+  font-size: 11px;
+  color: #8fa3ba;
+  padding: 2px 6px;
+  white-space: pre-line;
+}
+
+#catalog-table-wrap {
+  flex: 1;
+  min-height: 0; /* flex item shrink (classic min-height:auto trap) */
+  overflow: auto;
+  border: 1px solid #263243;
+  border-radius: 4px;
+  background: #0e141d;
+}
+#catalog-table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+#catalog-table th {
+  position: sticky;
+  top: 0;
+  background: #16202e;
+  color: #b9cae0;
+  text-align: left;
+  padding: 5px 7px;
+  border-bottom: 1px solid #2c3b50;
+  font-weight: 600;
+  font-size: 11px;
+  white-space: nowrap;
+}
+#catalog-table td {
+  padding: 4px 7px;
+  border-bottom: 1px solid #1a2534;
+  color: #c7d6e8;
+  vertical-align: top;
+  white-space: nowrap;
+}
+#catalog-table td.wide { white-space: normal; max-width: 330px; }
+#catalog-table tr.row-selected td { background: #1c2c42; }
+#catalog-table tr.clickable { cursor: pointer; }
+#catalog-table tr.clickable:hover td { background: #16233a; }
+
+.era-badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+.era-CD_2003 { background: #33261a; color: #e8b268; border: 1px solid #6e4d22; }
+.era-PCG_9_3_5 { background: #1a2c33; color: #6cc4e0; border: 1px solid #22606e; }
+
+.unknown-badge {
+  display: inline-block;
+  background: #33141b;
+  color: #ff9d9d;
+  border: 1px solid #6e2233;
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.status-DECODED_FULL_CLOSURE { color: #7fe08d; }
+.status-DECODED { color: #9fd97f; }
+.status-DECODED_NO_MESH { color: #d9c97f; }
+.status-FAILED { color: #ff8f8f; }
+.status-VERSION_GATED { color: #c0a6ff; }
+.status-CATALOG_ONLY { color: #a5b6c9; }
+.previewable-flag { color: #7fe08d; font-weight: 700; }
+.not-previewable { color: #7d8fa3; }
+
+#catalog-preview-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto minmax(180px, 32%);
+  gap: 6px;
+  min-width: 0;
+  min-height: 0;
+}
+#preview-head { display: flex; flex-direction: column; gap: 4px; }
+#preview-title { font-size: 12.5px; color: #cfe0f2; }
+#preview-action-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+#preview-action-bar button {
+  background: #1b2838;
+  color: #cfe0f2;
+  border: 1px solid #33506e;
+  border-radius: 3px;
+  padding: 3px 9px;
+  cursor: pointer;
+  font-size: 12px;
+}
+#preview-action-bar button.active { background: #2a4a6e; border-color: #5a8cc0; }
+#preview-action-bar button:hover { background: #24374d; }
+
+#view-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  background: #0c1018;
+  border: 1px solid #263243;
+  border-radius: 4px;
+  display: block;
+}
+#preview-hint { font-size: 10.5px; color: #7d8fa3; }
+
+#preview-side { overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+#hierarchy-panel {
+  background: #131a24;
+  border: 1px solid #263243;
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+#hierarchy-panel h3 { font-size: 12px; color: #b9cae0; margin: 0 0 4px 0; }
+#hierarchy-tree .tree-node { padding: 1px 0 1px 12px; }
+#hierarchy-tree .tree-shape { padding: 1px 0 1px 26px; }
+#hierarchy-tree label { cursor: pointer; }
+#hierarchy-tree .wire-note { color: #7d8fa3; font-size: 10px; }
+
+#catalog-header .labels .lab { font-size: 10.5px; }

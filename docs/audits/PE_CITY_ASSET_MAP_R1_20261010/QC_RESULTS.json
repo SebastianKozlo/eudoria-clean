@@ -1,0 +1,112 @@
+{
+  "artifact": "QC_RESULTS.json",
+  "runId": "PE_CITY_ASSET_MAP_R1_20261010",
+  "qcRunId": "PE_CITY_ASSET_MAP_R1_20261010_INTERNAL_QC_R1_20261010",
+  "phase": "INTERNAL_QC",
+  "qcOrigin": "FRESH_INTERNAL_REVIEW (pe-master-auditor fresh session; internal to PE-MASTER; NOT an independent Desktop post-audit)",
+  "governingContract": {
+    "path": "C:\\Users\\User\\Documents\\ChatGPT\\PE\\OPENCODE_CITY_ASSET_MAP_R1_20261010.md",
+    "sizeBytes": 13212,
+    "sha256": "9EED1A48F88F5F01744AB4D27527BADF6B3D5DCA8B74B6C16D25398DDD85B080",
+    "identityVerified": "MATCH"
+  },
+  "qcVerdict": "PASS_WITH_FINDINGS",
+  "browserVerdictState": {
+    "LOAD": "EXECUTED_AND_VERIFIED (fresh real headless-Edge /catalog through the FIXED 5-conjunct production gate; all conjuncts PASS; READY; 98906 B DOM; plus 2 battery loads)",
+    "PIXEL_RENDER": "EXECUTED_AND_VERIFIED (executor calibrated 5-shot gate PASS + fresh QC screenshot 121320 B, 1096 unique colors, lumaStdDev 41.8; PNG in PRIVATE_OUTPUT only)",
+    "INTERACTIVE": "NOT_PERFORMED (automation daemon down: ECONNREFUSED 127.0.0.1:9222 and [::1]:9222)",
+    "promotionRule": "NOT SATISFIED — NO BROWSER_VERIFIED claim (executor correctly does not claim it)"
+  },
+  "findings": [
+    {
+      "id": "P2-1",
+      "severity": "P2",
+      "title": "TEXTURE_LINK_DISPOSITIONS.csv: unquoted comma in container_entry — 1545/1587 rows violate the 7-field schema",
+      "location": "every PCG_9_3_5 aggregated row, field container_entry ('Textures.bnt (8,381 entries)')",
+      "counterCheck": "QC2 field counts {7:42, 8:1545}; QC3 sums all verified (3357 NAME_NOT_FOUND, 794 material, 4151 edges, 1545 models, 19+19+4 CD rows)",
+      "effect": "strict CSV consumers mis-split 97% of rows at schema level; data itself intact and unambiguous",
+      "requiredCorrection": "quote the container_entry field or remove the thousands separator at persistence; do not alter disposition values",
+      "revalidationGate": "strict RFC4180 parse -> 7 fields every row; data rows 1587; QC3 sums unchanged"
+    },
+    {
+      "id": "P3-1",
+      "severity": "P3",
+      "title": "INTERVENTION_LEDGER F12 claims 1588 data rows; actual 1587",
+      "location": "INTERVENTION_LEDGER.md phase-3 F12",
+      "counterCheck": "QC2: 42 CD_2003 + 1545 PCG_9_3_5 = 1587; batch summary supports 1545; file is UTF-8 with 19 em-dash sites (not ASCII-only)",
+      "requiredCorrection": "append a one-line ledger correction at persistence (append-only)",
+      "revalidationGate": "recount = 1587; correction line present"
+    },
+    {
+      "id": "P3-2",
+      "severity": "P3",
+      "title": "skill chapter example '656865.nif' does not exist in either era container",
+      "location": ".opencode/skills/pe-gamebryo-rosetta/references/catalog-era-identity.md section 1",
+      "counterCheck": "QC14/QC15: 0 hits in both catalogs; overlap count 2177 is CORRECT; real examples 266865.nif and 65678.nif verified in BOTH eras",
+      "requiredCorrection": "replace the example with a verified overlap name",
+      "revalidationGate": "named example exists in BOTH phase-2 catalogs"
+    },
+    {
+      "id": "P3-3",
+      "severity": "P3",
+      "title": "private PHASE3_NativeControl/run_records.json has a UTF-8 BOM; strict JSON.parse fails",
+      "location": "PRIVATE_OUTPUT/PHASE3_NativeControl/run_records.json",
+      "counterCheck": "QC5 BOM census: 21 private JSONs, exactly 1 with BOM and exactly 1 strict-parse failure; content parses after BOM strip; all 4 native runs exit=1 'Error loading stream.'",
+      "requiredCorrection": "strip the BOM at persistence (content byte-identical) or record the limitation",
+      "revalidationGate": "strict JSON.parse succeeds on the fixed artifact"
+    }
+  ],
+  "observations": [
+    "OBS-1: Models.bnt 150133 B tail slack between last payload end (395262727) and directory start (395412860); the 0-overlap/0-gap/monotonic claims hold; slack semantics UNKNOWN — recommend recording as UNKNOWN boundary note",
+    "OBS-2: 6 raw console .txt captures are UTF-16LE+BOM (PowerShell redirect); authoritative JSONs are UTF-8; no repair needed",
+    "OBS-3: fetch normalizes dot-segments client-side; raw-socket probes confirmed the server's own PATH_TRAVERSAL_BLOCKED / STATIC_FILE_NOT_ALLOWEDLISTED refusals; all 18 denial probes refused",
+    "OBS-4: rows API default size sort returns the cross-era largest (225492.nif 10029720 B PCG935); the era-scoped CD_2003 largest (212124.nif 936544 B) is a different, also-correct scope",
+    "OBS-5: assets/cd2003 contains exactly 16 GLBs (claim precise); 0 GLB for the four primaries in the pe_asset_viewer_v4 tree (bounded re-search; executor's depth-6 search not re-executed)"
+  ],
+  "reexecutionSummary": {
+    "t9StandinNegative": "PASS (reproduced: 20 PASS / 2 FAIL / 0 NOT_PERFORMED, harness exit 1, both modes FAIL with all five named conjuncts, STAND_IN_PROCESS labels, 3 attempts each)",
+    "t9FailClosedProbe": "PASS (server startup side-error FAIL + NOT_PERFORMED loads + nonzero exit)",
+    "containerIdentities": "MATCH (Models.ark f660d055... 128742137 B; Models.bnt c950a8c2... 395412868 B REQUIRED pin)",
+    "catalogRehash": "31 sampled entries (16 ARK incl. 4 primaries + 15 BNT incl. 218757 entry 781): ALL offset/size/CRC32/SHA256 MATCH the phase-2 catalogs; 218757 SHA 3e8a22c2... reproduced",
+    "ownWalks": { "ark": "2492 entries; chain ends exactly at CD offset; EOCD+22 == file size; 0 dup names", "bnt2": "5596 entries; directory ends exactly at footer; 0 overlaps/gaps; monotonic; 0 dups" },
+    "countsAndArithmetic": "2492/4833/5596/8381 verified; 1815+440+237=2492; 4838+757+1=5596; 1551+17+3270+758=5596; batch state raw rows 4838 = 3270 FAILED + 1551 DECODED + 17 NO_MESH (0 parse errors)",
+    "deepAnalysisRerun": "4/4 DECODED; regenerated block dumps BYTE-IDENTICAL to PHASE3_BlockDumps; blocks 26/38/22/14; names reproduced; extents maxAxis 31765.85/33739.21/32789.15/26940.91; complexity exact; placement VERTICES; components 596/670/600/419",
+    "boundsCountercheck": "COUNTERCHECK_PASS x4 (own minimal raw-byte NIF-4.1 reader, zero executor imports; closure exact; counts match; per-axis min/max within 0.01; identity TRS independently confirmed; tolerance 0.01 covers the 2-dp print rounding)",
+    "textureDiscipline": "0 bindings / UNTEXTURED_PROXY_MESH x19; MATERIAL_APPLIED=YES + BROWSER_OBSERVED=PIXEL_RENDER x19; no Ark-tail interpretation transfer",
+    "nativeControl": "4x EXITED exit=1, stdout 0 B, stderr 'Error loading stream.' verbatim (provenance complete)",
+    "catalogBattery": "33 PASS / 0 FAIL / 0 NOT_PERFORMED, exit 0 (my re-run)",
+    "regression": "unit 24 PASS exit 0; app 22 PASS exit 0 (my re-runs)",
+    "catalogServerQc": "startup regeneration exact (8088 rows; extent 1555/6533; decode distribution exact); rows paging math OK (81 pages); four-preview wire pins MATCH; 18 denials ALL refused with named errors; stop + port freed",
+    "realBrowserQc": "headless Edge /catalog through FIXED gate: all five conjuncts PASS, READY, 98906 B DOM; screenshot PNG 121320 B -> PRIVATE_OUTPUT; non-triviality PASS (1096 unique colors, lumaStdDev 41.8)",
+    "proprietaryCensus": "99 changed text files: 0 payload bytes / 0 bulk NIF headers / 0 long base64 / 0 long hex / 0 binary; report package metadata-only; 20/20 private artifacts path+size+SHA256 verified",
+    "skillNumericClaims": "overlap 2177 CORRECT; 65678.nif dual-existence CORRECT; '656865.nif' nonexistent (finding P3-2)"
+  },
+  "governance": {
+    "worktreeHead": "59641caa1b14ade84e1842ca36b395842deb241e",
+    "branch": "codex/pe-city-asset-map-r1-20261010",
+    "noCommits": true,
+    "masterLocalOriginFreshRemote": "3fbe93eec04759395223e6677b5040273d29222a (all three EQUAL)",
+    "oldSceneirWorktree": "59641ca clean",
+    "allowlistCensus": "PASS (all changed paths inside the contract section-8 allowlist; package.json scripts-only, three 0.185.0 unchanged; src/pesource/NifModelReader.js byte-identical to the 59641ca blob 7d926fb326339c4983f571cfa839bdefcdd155bb; 218757 app files byte-identical; AUDIT_ENTRYPOINT/governance untouched; foreign untracked preserved)",
+    "foreignServer8140": "PID 21288 ALIVE (node, LISTENING) at QC START and END; untouched; zero QC leftover processes; QC ports 8160/8161/8188/8197/8199 all freed"
+  },
+  "missingReportFiles": ["REPORT.md", "CLAIM_MATRIX.csv", "LIMITATIONS.md", "EVIDENCE_INDEX.md", "HANDOFF.md", "MANIFEST (last, report-package only, self-excluded, bijection-verified)"],
+  "claimMatrixRequiredSchema": "claim_id, phase, era, subject, claim_text, status (CONFIRMED/STRONGLY_SUPPORTED/PLAUSIBLE/UNVERIFIED/REJECTED), evidence_class (original bytes / independently generated / project derivative), evidence_ref (path+SHA256), countercheck_ref (path+SHA256), negative_control (falsifier + result), coverage_mode (FULL_READ/RECOMPUTED/CENSUS_ONLY/BOUNDED_INSPECTION/NOT_CHECKED), revalidation_gate (exact predicate), notes",
+  "repairsPerformed": [],
+  "blockers": [],
+  "notChecked": [
+    "full read-to-EOF of tools/pecompat/catalog_data.mjs, 6 of the 7 catalog suites, compat/catalog-*.js/html/css internals, phase-2 tool bodies, phase-3 tools other than nif41_deep.mjs, phase-4 tools, full t9_pixel_render.mjs body (outputs behaviorally verified instead)",
+    "cross-era candidate probe not re-executed (honest PROBE_FAILED records; not load-bearing)",
+    "executor 5-shot PIXEL gate not re-executed as-is (fresh single-shot capture + non-triviality spot-check per the QC assignment)",
+    "depth-6 GLB search not re-executed (bounded v4-tree re-search: 0 primary GLBs, 16 cd2003 GLBs)",
+    "JSONL/batch-state rows parsed and counted, not per-row semantically re-derived",
+    "historical SceneIR packages, EU2008-era copies, original containers beyond bounded reads: untouched"
+  ],
+  "standingScienceFlags": {
+    "HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+    "WORLD_XYZ_RECOVERED": "NO",
+    "CANONICAL_GATE_EFFECT": "NONE",
+    "NEXT_EXPERIMENT_AUTHORIZED": "NO",
+    "HARD_STOP": "YES"
+  }
+}

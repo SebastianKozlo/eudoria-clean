@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!-- catalog.html — PE_CITY_ASSET_MAP_R1_20261010, phase 4 (contract §5)
+     THE /catalog MODE of the compat viewer family — a SEPARATE route served
+     by compat/server-catalog.mjs (loopback-only; exact-allowlist statics;
+     bounded index-derived catalog APIs). The 218757 asset/scene modes stay on
+     their own app/server (compat/index.html + server-sceneir.mjs) — untouched.
+     Three.js 0.185.0 from the pinned local package (no CDN). Zero-framework
+     vanilla JS + ES modules.
+
+     HONESTY LABELS in this UI (never removed):
+     - every row carries an explicit ERA (CD_2003 / PCG_9_3_5); the same entry
+       name in both eras is TWO DISTINCT assets (identity = era + container
+       SHA + entry name + payload SHA);
+     - UNKNOWN is visible as UNKNOWN (badge), never as 0 — sort: measured
+       largest->smallest, UNKNOWN always LAST;
+     - SCENE_EXTENT/COMPLEXITY are FILE_SCENE_SPACE, ORIGINAL file units
+       (unit semantics NOT established — never called meters);
+     - SOURCE_FILE_SCENE_SPACE ≠ WORLD_PLACEMENT (HISTORICAL_PLACEMENT =
+       NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO);
+     - node names are byte-level REPRODUCED Desktop name HYPOTHESES — NOT
+       game classes, NOT city names; MSC/MAC not promoted;
+     - the four CD_2003 primaries are UNTEXTURED_PROXY_MESH — the preview
+       applies ONLY verified NiMaterialProperty diffuse colors (material
+       preview); no fake textures, no textured PASS;
+     - all rankings are LARGEST-MEASURED (coverage incomplete) — no
+       "largest of all" claims, no city/place identification. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE asset catalog — two eras (PE_CITY_ASSET_MAP_R1_20261010)</title>
+<link rel="stylesheet" href="/compat/compat.css">
+<link rel="stylesheet" href="/compat/catalog.css">
+<script type="importmap">
+{ "imports": {
+    "three": "/node_modules/three/build/three.module.js",
+    "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header id="catalog-header">
+  <div class="brand">PE asset catalog — two eras | run PE_CITY_ASSET_MAP_R1_20261010 (phase 4, contract §5)</div>
+  <div class="labels">
+    <span class="lab">ERA-SEPARATED (CD_2003 | PCG_9_3_5) — identity = era + container SHA + entry name + payload SHA</span>
+    <span class="lab">UNKNOWN = UNKNOWN (badge), never 0 — sort: measured largest→smallest, UNKNOWN last</span>
+    <span class="lab">SOURCE_FILE_SCENE_SPACE ≠ WORLD_PLACEMENT — ORIGINAL file units (never called meters)</span>
+    <span class="lab">names = Desktop HYPOTHESES reproduced byte-level — NOT game classes, NOT city names</span>
+  </div>
+  <div class="labels">
+    <span class="lab">largest-MEASURED only (coverage line in the coverage box) — no "largest of all" claims</span>
+    <span class="lab">four CD_2003 primaries preview = UNTEXTURED_PROXY_MESH (material preview only — no fake textures)</span>
+  </div>
+</header>
+
+<div id="hud-line">boot…</div>
+<div id="error-banner" hidden></div>
+
+<main id="catalog-layout">
+  <section id="catalog-list-panel">
+    <div id="catalog-controls">
+      <label>era <select id="ctl-era">
+        <option value="ALL" selected>ALL eras</option>
+        <option value="CD_2003">CD_2003 (2003 CD installer)</option>
+        <option value="PCG_9_3_5">PCG_9_3_5 (PCG 9.3.5)</option>
+      </select></label>
+      <label>decode coverage <select id="ctl-status">
+        <option value="ALL" selected>ALL</option>
+        <option value="DECODED_FULL_CLOSURE">DECODED_FULL_CLOSURE</option>
+        <option value="DECODED">DECODED (PCG935 batch)</option>
+        <option value="DECODED_NO_MESH">DECODED_NO_MESH</option>
+        <option value="FAILED">FAILED</option>
+        <option value="VERSION_GATED">VERSION_GATED</option>
+        <option value="CATALOG_ONLY">CATALOG_ONLY</option>
+      </select></label>
+      <label>sort <select id="ctl-sort">
+        <option value="size" selected>payload size (bytes)</option>
+        <option value="extent">scene extent (maxAxisExtent, original units)</option>
+        <option value="triangles">complexity — triangles</option>
+        <option value="vertices">complexity — vertices</option>
+        <option value="shapes">complexity — shapes</option>
+      </select></label>
+      <label>search ID/name <input id="ctl-q" type="search" placeholder="e.g. 193313 or 65678 (both eras)" size="28"></label>
+      <button id="ctl-prev">◀ prev page</button>
+      <span id="ctl-page" class="mono">page 1</span>
+      <button id="ctl-next">next page ▶</button>
+    </div>
+    <div id="catalog-coverage" class="small mono">coverage: loading…</div>
+    <div id="catalog-sort-rule" class="small"></div>
+    <div id="catalog-table-wrap">
+      <table id="catalog-table">
+        <thead><tr>
+          <th>era</th><th>ID / entry name</th><th>file size<br>(bytes, uncompressed)</th>
+          <th>scene extent<br>maxAxisExtent (orig. units)</th>
+          <th>geometry<br>tri / vert / shapes</th>
+          <th>decode coverage</th>
+          <th>texture coverage</th>
+          <th>role hypothesis (Desktop names) + evidence</th>
+        </tr></thead>
+        <tbody id="catalog-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="catalog-preview-panel">
+    <div id="preview-head">
+      <div id="preview-title">no model selected — click a PREVIEWABLE row (the four CD_2003 primaries) to open the preview</div>
+      <div id="preview-action-bar">
+        <button id="btn-fit" title="fit camera to the current visible bounds (key F)">Fit bounds [F]</button>
+        <button id="btn-reset" title="reset camera (key R)">Reset camera [R]</button>
+        <button id="btn-origcoords" class="active" title="toggle the view mode: ORIGINAL file coordinates (wrapper identity) vs fit-to-view centering (wrapper offset applied EXACTLY ONCE)">View: original coords [C]</button>
+        <button id="btn-wire" title="toggle solid/wireframe (key W)">Wireframe [W]</button>
+      </div>
+    </div>
+    <canvas id="view-canvas"></canvas>
+    <div id="preview-hint" class="small mono">SOURCE_FILE_SCENE_SPACE ≠ WORLD_PLACEMENT — preview shows FILE-scene geometry only; centering (fit-to-view) is applied exactly once in the presentation wrapper; original values intact; ORIGINAL file units.</div>
+    <aside id="preview-side">
+      <details id="diagnostics" open data-load-status="PENDING">
+        <summary>DIAGNOSTICS (honest, field-complete)</summary>
+        <div class="diag-section"><h4>catalog status</h4><div id="diag-catalog" class="small mono">…</div></div>
+        <div class="diag-section"><h4>preview identity (fail-closed pins)</h4><div id="diag-preview-identity" class="small mono">no preview open</div></div>
+        <div class="diag-section"><h4>bounds / origin (FILE_SCENE_SPACE, original units)</h4><div id="diag-bounds" class="small mono">—</div></div>
+        <div class="diag-section"><h4>UV / texture diagnostics</h4><div id="diag-texture" class="small mono">—</div></div>
+        <div class="diag-section"><h4>materials (applied in the preview — measured)</h4><div id="diag-materials" class="small mono">—</div></div>
+        <div class="diag-section"><h4>view mode / wrapper policy</h4><div id="diag-wrapper" class="small mono">—</div></div>
+        <div class="diag-section"><h4>preview layout + camera (measured)</h4><div id="diag-layout" class="small mono">—</div></div>
+        <div class="diag-section"><h4>load timings (measured)</h4><div id="diag-timing" class="small mono">—</div></div>
+      </details>
+      <section id="hierarchy-panel">
+        <h3>Original hierarchy — parts (isolation: per-shape visibility)</h3>
+        <div id="hierarchy-tree" class="small mono">no preview open</div>
+      </section>
+    </aside>
+  </section>
+</main>
+
+<script type="module" src="/compat/catalog-app.js"></script>
+</body>
+</html>
