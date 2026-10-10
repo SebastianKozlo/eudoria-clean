@@ -24,6 +24,11 @@ REMOTE_SHA            = git ls-remote origin refs/heads/codex/pe-world-continuou
   `git show --stat --name-only <RESULTING_SHA>` == ten sam zbiór.
 - Manifest bijekcja: każdy fizyczny plik pakietu dokładnie raz (MANIFEST_SHA256.csv
   sam się wyklucza — precedent self-exclusion); policzone dwukrotnie.
+  [SUPERSEDED w rundzie korekty 2026-10-10: dla ORYGINALNEGO opublikowanego
+  stanu twierdzenie było fałszywe (QC P1-1: mismatch wiersza REPORT.md —
+  manifest 12408/95650dbc… vs plik 12410/EFCA8566…); manifest zregenerowany
+  ze stanu finalnego pakietu korekty i zweryfikowany DWIEMA NIEZALEŻNYMI
+  metodami — patrz CORRECTIONS.md P1-1.]
 
 ## Bramki (§8 — oddzielne)
 
@@ -69,15 +74,35 @@ byte-identical z BASE (T6).
   PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010\` (screenshots PNG, logi serwera,
   skrypty probe sesji).
 - Changed-path census: 25 ścieżek (pełna lista w REPORT §5; allowlist-only:
-  compat/, src/peworld/, src/pesource (2 NEW files), tests/pecompat/,
-  tools/pecompat/, skill pe-gamebryo-rosetta, .gitignore, OUTPUT_REPO_PATH).
+  compat/, src/peworld/, src/pesource (1 NEW file: DdsDecoder.js — jedyny
+  nowy plik w src/pesource; [POPRAWIONE w rundzie korekty: pierwotne pole
+  mówiło błędnie „2 NEW files"]), tests/pecompat/, tools/pecompat/,
+  skill pe-gamebryo-rosetta, OUTPUT_REPO_PATH; [.gitignore USUNIĘTY z listy
+  w rundzie korekty — plik nietknięty, git diff --name-status BASE..HEAD
+  daje pusty wynik dla .gitignore]).
   Zero proprietary payloadów w repo (rozszerzenia binarne skanowane).
+
+## Runda korekty (2026-10-10, po INTERNAL_QC) — dodatkowe changed paths
+
+Commit korekty (na wierzchu b4dfae7) zmienia: compat/world-app.js (P1-2
+wrapper latest-wins + vegTrace diagnostyka read-only),
+tools/pecompat/world_r2_counterchecks.mjs (WL-1 wrapper + --no-canonical),
+tools/pecompat/world_r2_correction_counterchecks.mjs (NEW),
+tools/pecompat/world_r2_correction_browser.mjs (NEW),
+tests/pecompat/world_r2_gates.test.mjs (bramka R2_VEG_WRAPPER_LATEST_WINS),
+tests/pecompat/run_world_tests.mjs, run_app_tests.mjs, run_catalog_tests.mjs
+(P3a neutral raw-dirs) oraz pliki pakietu (REPORT/HANDOFF/RUN_AND_STOP/
+INPUT_IDENTITIES/CORRECTIONS.md NEW/CORRECTION_COUNTERCHECKS.json NEW/
+raw/CORRECTION/* NEW/MANIFEST_SHA256.csv regenerated). Pełne rozliczenie:
+CORRECTIONS.md.
 
 ## Serwer
 
 - RUNNING: `http://127.0.0.1:8163` (launcher /launcher, świat /world,
-  Asset Lab /assetlab); node PID 33876; start/stop + served↔published
-  identity: RUN_AND_STOP.md.
+  Asset Lab /assetlab); node PID 23232 (runda korekty: restart na kodzie
+  korekty; [POPRAWIONE w rundzie korekty: pierwotny zapis mówił PID 33876 —
+  martwy w momencie QC; pełny łańcuch restartów w RUN_AND_STOP.md]);
+  start/stop + served↔published identity: RUN_AND_STOP.md.
 
 ## Zachowane frazy (§10 — verbatim)
 

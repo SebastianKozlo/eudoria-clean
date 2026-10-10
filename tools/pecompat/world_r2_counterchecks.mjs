@@ -40,6 +40,8 @@
 // Usage:
 //   node tools/pecompat/world_r2_counterchecks.mjs --phase pre  --out <dir>
 //   node tools/pecompat/world_r2_counterchecks.mjs --phase post --out <dir>
+//   (correction-round/revalidation: add --no-canonical — the published
+//    PRE_/POST_COUNTERCHECKS.json evidence stays immutable; raw output only)
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -55,10 +57,11 @@ const ORIGIN = { gx: 53, gy: 114 };   // the Desktop post-audit window origin (W
 const hash = (b) => crypto.createHash('sha256').update(b).digest('hex');
 
 const args = process.argv.slice(2);
-let phase = null, outDir = null;
+let phase = null, outDir = null, noCanonical = false;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--phase') phase = args[++i];
   else if (args[i] === '--out') outDir = args[++i];
+  else if (args[i] === '--no-canonical') noCanonical = true; // revalidation runs: write raw ONLY (the published PRE_/POST_COUNTERCHECKS.json evidence stays immutable)
 }
 if (phase !== 'pre' && phase !== 'post') {
   console.error('usage: node tools/pecompat/world_r2_counterchecks.mjs --phase pre|post --out <dir>');
@@ -160,6 +163,94 @@ async function climateRecords(profileIndex) {
     reproduced: phase === 'pre' ? !latestApplied : undefined,
   };
   veg.dispose();
+}
+
+// WL-1 (b) — THE PRODUCTION WRAPPER PATH (P1-2 correction round): the
+// class-level queue above was measured CLASS-ISOLATED; the ORIGINAL published
+// wrapper (compat/world-app.js#rebuildVegetation at b4dfae7) short-circuited
+// with `if (state.vegBusy) return null;` BEFORE the request could reach the
+// class — in the production path the newest request was LOST and a
+// class-queued census was never committed to state.vegCensus /
+// state.coherence.veg. This sub-check extracts the wrapper VERBATIM from the
+// current compat/world-app.js and drives the same A -> B-while-busy race
+// through it (the wrapper is the production entry point for every veg build:
+// streaming, teleport, toggle, config-apply).
+{
+  const vm2 = vm; // the same vm module as above
+  const wrapperStart = appSource.indexOf('async function rebuildVegetation(');
+  const wrapperEnd = wrapperStart >= 0 ? appSource.indexOf('\n}', wrapperStart) + 2 : -1;
+  const wrapperSrc = wrapperStart >= 0 && wrapperEnd > wrapperStart ? appSource.slice(wrapperStart, wrapperEnd) : null;
+  if (wrapperSrc) {
+    const calls = [];
+    const banners = [];
+    let releaseA = null;
+    const gateA = new Promise((res) => { releaseA = res; });
+    const vegStandIn = {
+      lastCensus: null,
+      async rebuild(origin, windowTiles) {
+        calls.push({ gx: origin.gx, gy: origin.gy });
+        if (origin.gx === 0) await gateA; // the SLOW provider leg (climate+models+textures in flight)
+        const c = {
+          ok: true, aborted: false, unsupportedProfile: false, error: null,
+          window: { origin: { gx: origin.gx, gy: origin.gy }, windowTiles },
+          counts: { requested: 1, selected: 1, placed: 1, limited: 0, cap: 5000 },
+          statusCounts: { PLACED_ON_AVAILABLE_SURFACE: 1, DEFERRED_NO_SURFACE: 0, UNSUPPORTED_MODEL: 0, LOD_LIMITED: 0 },
+        };
+        vegStandIn.lastCensus = c;
+        return c;
+      },
+    };
+    const fx = {
+      vegOn: true, veg: vegStandIn, vegCensus: null, vegBusy: false, vegPending: null,
+      coherence: { terrain: { gx: 0, gy: 0 }, splat: { gx: 0, gy: 0 }, veg: null },
+      sceneRequest: { id: 1, origin: { gx: 0, gy: 0 } },
+    };
+    const wctx = vm2.createContext({
+      state: fx, WINDOW_T: 8,
+      banner: (m) => { banners.push(String(m)); },
+      updateVegPanel: () => {}, updateEvidencePanel: () => {},
+    });
+    vm2.runInContext(wrapperSrc, wctx, { filename: 'compat/world-app.js#rebuildVegetation(extracted)' });
+    const runA = wctx.rebuildVegetation({ gx: 0, gy: 0 }, 1);
+    await new Promise((r) => setTimeout(r, 40)); // A in flight (vegBusy)
+    const busyDuringA = fx.vegBusy;
+    fx.sceneRequest = { id: 2, origin: { gx: 8, gy: 0 } }; // requestScene moved the scene to B
+    fx.coherence.terrain = { gx: 8, gy: 0 };               // rebuildWindow(B) committed the newer terrain
+    fx.coherence.splat = { gx: 8, gy: 0 };                // ...and the newer texture chain
+    const runB = wctx.rebuildVegetation({ gx: 8, gy: 0 }, 2); // requested WHILE the veg rebuild is busy
+    const busyReturn = await runB;
+    releaseA();
+    await runA;
+    await new Promise((r) => setTimeout(r, 120)); // the delivered newest request runs
+    const finalOrigin = fx.vegCensus?.window?.origin ?? null;
+    const coherenceVeg = fx.coherence?.veg ?? null;
+    const reqNow = fx.sceneRequest;
+    const same = (a) => !!(a && a.gx === reqNow.origin.gx && a.gy === reqNow.origin.gy);
+    const wrapperLatestWins = !!(finalOrigin && finalOrigin.gx === 8 && finalOrigin.gy === 0
+      && coherenceVeg && coherenceVeg.gx === 8 && coherenceVeg.gy === 0
+      && same(fx.coherence.terrain) && same(fx.coherence.splat) && same(fx.coherence.veg));
+    result.findings.WL_1.wrapper = {
+      path: 'the PRODUCTION wrapper (compat/world-app.js#rebuildVegetation, extracted verbatim) — the entry point of every production veg build',
+      scenario: 'A=(0,0) id1 slow provider -> scene moves to B=(8,0) id2 (terrain+splat committed by rebuildWindow) -> veg requested WHILE busy -> A resolves',
+      busyDuringA,
+      busyPathReturn: busyReturn === null || busyReturn === undefined ? 'null' : '(non-null census returned while busy)',
+      classDeliveryOrder: calls.map((c) => `(${c.gx},${c.gy})`),
+      newestRequestReachedTheClass: calls.some((c) => c.gx === 8 && c.gy === 0),
+      finalCommittedVegCensusOrigin: finalOrigin,
+      coherenceVeg,
+      readyReachableForTheNewestRequest: wrapperLatestWins,
+      expectedPre: 'BROKEN (the b4dfae7 wrapper drops B before the class; final committed census/coherence do NOT reflect B; READY unreachable — QC P1-2, measured in CORRECTION_COUNTERCHECKS.json phase pre)',
+      expectedPost: 'FIXED (the wrapper stores the newest request while busy and delivers it; the winning census commits gen-gated; coherence.veg = B; READY reachable)',
+      fixed: phase === 'post' ? wrapperLatestWins : undefined,
+      reproduced: phase === 'pre' ? !wrapperLatestWins : undefined,
+    };
+    result.findings.WL_1.fixed = phase === 'post'
+      ? (result.findings.WL_1.fixed === true && wrapperLatestWins)
+      : result.findings.WL_1.fixed;
+  } else {
+    result.findings.WL_1.wrapper = { note: 'wrapper extraction failed (rebuildVegetation not found)', fixed: phase === 'post' ? false : undefined };
+    if (phase === 'post') result.findings.WL_1.fixed = false;
+  }
 }
 
 // ===========================================================================
@@ -467,15 +558,26 @@ const outPath = path.join(outDir, `${phase.toUpperCase()}_COUNTERCHECKS_RAW.json
 fs.writeFileSync(outPath, JSON.stringify(result, null, 1) + '\n');
 
 // also write the canonical package copy (PRE_COUNTERCHECKS.json / POST_COUNTERCHECKS.json)
-const canonical = path.join(ROOT, 'docs', 'audits', RUN_ID, phase === 'pre' ? 'PRE_COUNTERCHECKS.json' : 'POST_COUNTERCHECKS.json');
-fs.writeFileSync(canonical, JSON.stringify(result, null, 1) + '\n');
+// --no-canonical (correction-round/revalidation runs): the PUBLISHED evidence
+// files stay immutable; the run is proven by its raw output only
+if (!noCanonical) {
+  const canonical = path.join(ROOT, 'docs', 'audits', RUN_ID, phase === 'pre' ? 'PRE_COUNTERCHECKS.json' : 'POST_COUNTERCHECKS.json');
+  fs.writeFileSync(canonical, JSON.stringify(result, null, 1) + '\n');
+}
 
 const summary = {
   phase,
   head: result.git.head,
   dirty: result.git.status.length,
   productionSources: result.productionSources,
-  WL_1: { latestRequestApplied: result.findings.WL_1.latestRequestApplied },
+  WL_1: {
+    latestRequestApplied: result.findings.WL_1.latestRequestApplied,
+    wrapper: {
+      newestRequestReachedTheClass: result.findings.WL_1.wrapper?.newestRequestReachedTheClass ?? null,
+      readyReachableForTheNewestRequest: result.findings.WL_1.wrapper?.readyReachableForTheNewestRequest ?? null,
+      fixed: result.findings.WL_1.wrapper?.fixed ?? null,
+    },
+  },
   WL_2: {
     instances: result.findings.WL_2.instances,
     sharedQueryNullNoSurface: result.findings.WL_2.sharedQueryNullNoSurface,
@@ -496,7 +598,8 @@ const summary = {
     densityMonotone: result.findings.WL_5.densityRounding.monotonicity,
   },
   WL_6: { literalGate: result.findings.WL_6.literalOriginalBaseGateCompliance, parent: result.findings.WL_6.r1ActualParentMeasuredNow },
-  outPath, canonical,
+  outPath,
+  canonicalWrite: noCanonical ? 'SKIPPED (--no-canonical: the published PRE_/POST_COUNTERCHECKS.json evidence is immutable; raw output only)' : (phase === 'pre' ? 'PRE_COUNTERCHECKS.json' : 'POST_COUNTERCHECKS.json'),
 };
 fs.writeFileSync(path.join(outDir, `${phase.toUpperCase()}_SUMMARY.json`), JSON.stringify(summary, null, 1) + '\n');
 console.log(JSON.stringify(summary, null, 2));

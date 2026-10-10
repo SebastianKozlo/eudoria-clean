@@ -1,0 +1,56 @@
+{
+ "run": "PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010",
+ "phase": "pre",
+ "measuredAt": "2026-10-10T19:29:49.309Z",
+ "git": {
+  "head": "b4dfae7ce3c49e87f221fc04707074200e645209",
+  "status": [
+   "?? docs/audits/PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010/CORRECTION_COUNTERCHECKS.json",
+   "?? docs/audits/PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010/raw/CORRECTION/",
+   "?? tools/pecompat/world_r2_correction_counterchecks.mjs"
+  ]
+ },
+ "productionWrapper": {
+  "source": "compat/world-app.js#rebuildVegetation (extracted verbatim; executed in a controlled VM context)",
+  "worldAppSha256": "ce691ec337755f4b554a15970b8dbc47e29a67afdb91d172c2d68f1238c9e6a2",
+  "extractMethod": "indexof(\"async function rebuildVegetation(\") .. first \"\\n}\" — the exact function text the browser runs"
+ },
+ "tool": {
+  "path": "tools/pecompat/world_r2_correction_counterchecks.mjs",
+  "sha256": "ad8b818a384dd5e249e32b75e677984ff6d0a5a521a07571d2ec06b04ff7920c",
+  "sameToolBothPhases": true
+ },
+ "scenarioLatestWins": {
+  "scenario": "A=(0,0) id 1 starts (slow provider) -> scene moves to B=(8,0) id 2 requested WHILE the veg rebuild is busy -> A provider resolves -> drain",
+  "vegBusyDuringA": true,
+  "busyPathReturn": "null",
+  "classDeliveryOrder": [
+   "(0,0)"
+  ],
+  "bReachedTheClass": false,
+  "finalCommittedVegCensusOrigin": null,
+  "coherenceVeg": null,
+  "lastRequestWins": false,
+  "coherenceVegMatchesLastRequest": false,
+  "readyReachableForTheLastRequest": false,
+  "panelsUpdated": 0
+ },
+ "scenarioIdenticalRepeatDedupe": {
+  "scenario": "identical repeat (same origin + same request id) while the same request is running -> the repeat must NOT re-run the class build",
+  "classCalls": 1,
+  "dedupeHeld": true,
+  "committedOrigin": {
+   "gx": 0,
+   "gy": 0
+  }
+ },
+ "scenarioStaleRequestGenGate": {
+  "scenario": "a veg request with a STALE request id (29 vs current scene id 30): the census must NOT be committed",
+  "staleCensusCommitted": false,
+  "coherenceVegAfterStale": null,
+  "gateHeld": true
+ },
+ "expectedPre": "BROKEN (the busy wrapper drops the newer request BEFORE the class: B never reaches the class; the final committed vegCensus/coherence do NOT reflect B; READY not reachable for the new window — stale PARTIAL persists until the next user action)",
+ "expectedPost": "FIXED (the wrapper STORES the newest request while busy (latest-wins) and DELIVERS it to the class when the running build finishes; the WINNING census (the LAST request) is committed gen-gated vs requestId; coherence.veg = the last request window; READY reachable)",
+ "verdict": "P1-2 REPRODUCED on the production wrapper path (pre-fix)"
+}

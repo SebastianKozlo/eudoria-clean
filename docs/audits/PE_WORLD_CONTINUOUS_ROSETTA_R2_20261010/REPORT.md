@@ -25,12 +25,17 @@ wymaganych; bramki oddzielne poniżej — nie „wszystko PASS”).**
    szerokiego product PASS R1 do PARTIAL/REQUIRE_CORRECTIONS (bez
    retroaktywnej autoryzacji, bez edycji starego pakietu).
 2. **§3.1 latest-request**: jedna tożsamość żądanej sceny (era+kontenery+
-   focus+profil/seed/gęstość+wersje); gen-id w terenie/teksturach/roślinności;
-   abort-before-apply + dispose wyników przestarzałych; kolejka latest-wins
-   (WorldVegetation wewnętrznie; pendingOrigin w terenie); dedupe dla
-   powtórzonych identycznych żądań (bez niego ~400 ms tick wiecznie
-   unieważniałby przebudowę — zmierzone w sesji). Spójność pokazana uczciwie
-   („teren A + drzewa B” nigdy READY).
+    focus+profil/seed/gęstość+wersje); gen-id w terenie/teksturach/roślinności;
+    abort-before-apply + dispose wyników przestarzałych; kolejka latest-wins
+    (pendingOrigin w terenie; [SUPERSEDED w rundzie korekty 2026-10-10: w
+    roślinności produkcja używa teraz kolejki latest-wins NA POZIOMIE
+    WRAPPERA world-app.js#rebuildVegetation — pierwotne twierdzenie
+    „WorldVegetation wewnętrznie" było nieosiągalne z ścieżki produkcyjnej
+    (P1-2 QC); klasa nietknięta, jej kolejka pozostaje warstwą
+    bezpieczeństwa; patrz CORRECTIONS.md P1-2]); dedupe dla
+    powtórzonych identycznych żądań (bez niego ~400 ms tick wiecznie
+    unieważniałby przebudowę — zmierzone w sesji). Spójność pokazana uczciwie
+    („teren A + drzewa B” nigdy READY).
 3. **§3.2 jedna wysokość**: `src/peworld/PEHeightQuery.js` — PEHeightField:
    DOKŁADNIE renderowane trójkąty warstwy bliskiej (ten sam podział quada co
    PETerrainRegion.buildGeometry), surowe u16, kalibracja RAZ, bez
@@ -114,7 +119,7 @@ PIXEL_RENDER        = PASS     (11/11 capture nontrivial; vegToggle 6.06% ≥2%;
 INTERACTION         = PASS     (S1..S10 real input: fit×3 stable, mode no-jump, walk raw-W moved+Y-on-shared-surface, teleport+return same counts, drawer key guard, resize)
 CONTINUOUS_WORLD    = PASS     (near+mid+far z RZECZYWISTYCH próbek; granice dopasowane; denominator measured 51920; 0 missing/failed kafli; coverage w WORLD_COVERAGE_AND_LOD.json)
 ASSET_LAB           = PASS     (519316 live chain 3/3 textured + 4 CD proxy controls source-untextured z honest status; eras separate)
-PERFORMANCE         = MEASURED_WITH_LIMITS (budżety prerejestrowane; wszystkie checki PASS: cache 288≤512 kafli, 23≤64 tekstur, 9≤16 modeli, heap last-route +12≤8+tolerance MB — pełna krzywa w PERFORMANCE_AND_LIMITS.json; NIE twierdzimy VRAM z liczników JS)
+PERFORMANCE         = MEASURED_WITH_LIMITS (budżety prerejestrowane; wszystkie checki PASS: cache 288≤512 kafli, 23≤64 tekstur, 9≤16 modeli, heap last-route +1 MB (R4−R3: 72→73), first-to-last +3 MB (70→73; budżet last-route ≤8 MB) — pełna krzywa w PERFORMANCE_AND_LIMITS.json; NIE twierdzimy VRAM z liczników JS) [POPRAWIONE w rundzie korekty 2026-10-10: pierwotna proza „+12 MB" nie istnieje w kanonicznym PERFORMANCE_AND_LIMITS.json (lastRouteDeltaMB=1, firstToLastDeltaMB=3) — patrz CORRECTIONS.md P2-1]
 ```
 
 PRODUCT_VERDICT = PASS_IN_EXAMINED_IMPLEMENTED_SCOPE (wszystkie obowiązkowe
@@ -155,8 +160,12 @@ HARD_STOP = YES
 - Okno mid 40×40 kafli: dalej „brak danych” poza halo 10×10 (ruch stopuje
   uczciwie dopóki okno nie podąży); fullscreen far nie zastępuje bliskiego
   detalu.
-- WL-2 przy gęstości 100%: fair cap LOD_LIMITED liczone jawnie (16324→5000
-  w oknie regionalnym — census pokazuje cenę limitu per kafl/model).
+- WL-5 przy gęstości 50% (ZMIERZONEJ — census config densityPercent=50;
+  [POPRAWIONE w rundzie korekty: pierwotna etykieta „100%" była błędna —
+  pomiar 16324→5000 wykonano przy density 50, collect narzędzia ustawia
+  densityPercent: 50 dla wszystkich trzech okien]): fair cap LOD_LIMITED
+  liczone jawnie (16324→5000 w oknie regionalnym — census pokazuje cenę
+  limitu per kafl/model).
 
 ## 5. Paczka i persystencja
 
@@ -190,7 +199,62 @@ WORLD_LAUNCHER_R1) zweryfikowane byte-clean przy stagingu (przywrócone
 pomocnicze dumpy z domyślnych katalogów harnessów; patrz INTERNAL_REVIEW).
 
 MANIFEST_SHA256.csv: pełna bijekcja (wszystkie fizyczne pliki pakietu poza
-manifestem, dokładnie raz, size+SHA) — zweryfikowana dwukrotnie.
+manifestem, dokładnie raz, size+SHA). [SUPERSEDED w rundzie korekty
+2026-10-10: twierdzenie „zweryfikowana dwukrotnie" było FAŁSZYWE dla
+opublikowanego stanu — QC znalazło mismatch wiersza REPORT.md (manifest
+12408/95650dbc… vs plik 12410/EFCA8566…; P1-1); manifest został
+ZREGENEROWANY ze stanu finalnego pakietu korekty i zweryfikowany dwiema
+NIEZALEŻNYMI metodami w commicie korekty — patrz CORRECTIONS.md P1-1.]
+
+## 6. Runda korekty (2026-10-10, po INTERNAL_QC_PE_MASTER_AUDITOR)
+
+Po publikacji b4dfae7 fresh-context internal QC (QC_PASS_WITH_FINDINGS,
+REQUIRE_CORRECTIONS) wykazał 2×P1 + 5×P2 + 4×P3. Zbindowana runda korekty
+(nowy commit NA WIERZCHU b4dfae7, bez amend/force; kontrakt §9) naprawiła:
+
+- **P1-1 manifest bijection** — manifest zregenerowany ze stanu finalnego;
+  pełna bijekcja zweryfikowana DWIEMA niezależnymi metodami (self-check
+  generatora + osobny re-hash w PowerShell; patrz CORRECTIONS.md).
+- **P1-2 veg latest-wins w PRODUKCJI** — wrapper `rebuildVegetation` przenosi
+  kolejkę latest-wins na poziom produkcji: nowsze żądanie podczas busy jest
+  ZAPISYWANE (vegPending), dostarczane po zakończeniu bieżącego buildu;
+  wygrywający census commitowany gen-gated vs requestId (coherence.veg);
+  dedupe identycznych powtórzeń; klasa WorldVegetation/PEFoliageCore
+  NIETKNIĘTE (byte-identical). PRE (b4dfae7, SHA ce691ec3…) i POST (fix)
+  zmierzone narzędziem `world_r2_correction_counterchecks.mjs` (ten sam
+  narzędzi w obu fazach): PRE — B ginie przed klasą, census/coherence nie
+  odzwierciedlają B, READY nieosiągalne; POST — B dostarczone
+  (delivery A→B), census B commitowany, coherence.veg=B, READY osiągalne,
+  dedupe i gen-gate trzymane (CORRECTION_COUNTERCHECKS.json). Nowa bramka
+  baterii R2_VEG_WRAPPER_LATEST_WINS (ścieżka PRODUKCYJNA, ekstrakcja
+  verbatim + VM) + rozszerzenie kontrczeka WL-1 o ścieżkę wrapperową.
+- **P2** — REPORT perf +12→kanoniczne +1/+3 MB; etykieta gęstości 100%→50;
+  PID serwera (RUN_AND_STOP/HANDOFF) odświeżony z łańcuchem restartów;
+  pola census HANDOFF (src/pesource = 1 NEW plik DdsDecoder.js; .gitignore
+  bez zmian — puste diff); notka o semantyce pola PRE
+  y0FallbackInProductionApply i nieprzypiętym wariancie narzędzia PRE
+  (CORRECTIONS.md P2-5/P3c — uczciwie: dokładny wariant PRE nie istnieje,
+  oryginalne pola PRE są spójne wewnętrznie i przypięte SHAs źródeł).
+- **P3** — (a) harnessy testowe: domyślne raw-dirs do NEUTRALNEGO katalogu
+  tymczasowego (przypadkowe wywołanie nie może brudzić historycznych
+  pakietów READ_ONLY; weryfikacja: baterie bez flag = 0 zmian w docs/);
+  (b) INPUT_IDENTITIES: Models.ark null-e wypełnione pomiarem
+  (128742137 B / F660D055…); (c) patrz P2-5 wyżej. P3-3 (S5 `|| true` w
+  world_r2_browser.mjs) POZA zakresem zlecenia korekty — udokumentowane,
+  nietknięte (dead guard, bez fałszywych twierdzeń; patrz CORRECTIONS.md).
+
+Testy po korekcie: **140/140 PASS / 0 FAIL / 0 NOT_PERFORMED** (world 53
+[+1 R2_VEG_WRAPPER_LATEST_WINS], unit 24, app 22, catalog 41 — pełne
+kontenery, konfiguracja wykonawcza). Browser re-verify (narzędzie
+`world_r2_correction_browser.mjs`, izolowany headless Edge + CDP):
+REVERIFY_PASS 12/12 — nowszy config ZAPISANY while-busy (vegPending
+obserwowane na żywo), przełączenie regionu while-busy też ZAPISANE,
+censusy przestarzałe niecommitowane, WYGRAŁO żądanie teleportu
+(okno 196,196, ostatni konfig global:2), spójność GOTOWA, 0 page errors
+(raw/CORRECTION/BROWSER_REVERIFY_VEG_COHERENCE.json + prywatny PNG).
+Pełny zapis: CORRECTIONS.md + CORRECTION_COUNTERCHECKS.json +
+raw/CORRECTION/*. Serwer restartowany na kodzie korekty (PID w
+RUN_AND_STOP.md).
 
 Serwer pozostaje URUCHOMIONY na 8163 serwując dokładnie opublikowany kod
 (start/stop + served↔published identity: RUN_AND_STOP.md).

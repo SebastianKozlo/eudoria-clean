@@ -1,0 +1,575 @@
+{
+ "scenario": "CORRECTION_REVERIFY_VEG_COHERENCE (P1-2): the LIVE browser requests a NEWER CONFIG (a second veg-apply) and then SWITCHES REGION (teleport) while vegetation rebuilds are in flight. The wrapper must STORE the newer request (running.vegPending observed while busy), stale-guard the superseded censuses (never committed), commit the LAST request census gen-gated, and reach the page all-coherent marker with the teleport window + the LAST config",
+ "measuredAt": "2026-10-10T19:43:54.876Z",
+ "base": "http://127.0.0.1:8163",
+ "url": "http://127.0.0.1:8163/world",
+ "configA": {
+  "mode": "global",
+  "profile": 1,
+  "density": 50,
+  "whyCold": "profile 1 — 14 records / 10 DISTINCT original models, never fetched by this page before the apply"
+ },
+ "configB": {
+  "mode": "global",
+  "profile": 2,
+  "density": 50,
+  "whyNewer": "profile 2 — 11 records / 8 DISTINCT original models; the NEWER config requested while the A build is in flight"
+ },
+ "teleport": {
+  "tile": {
+   "gx": 200,
+   "gy": 200
+  },
+  "window": {
+   "gx": 196,
+   "gy": 196
+  },
+  "whyWarm": "pre-visited in the warm-up (tiles + textures cached)"
+ },
+ "homeTile": {
+  "gx": 54,
+  "gy": 115
+ },
+ "homeWindow": {
+  "gx": 50,
+  "gy": 111
+ },
+ "steps": [
+  {
+   "step": "boot-to-coherent",
+   "ok": true,
+   "at": {
+    "gotowa": true,
+    "line": "scena #1: żądane okno 50,111 | teren 50,111 | tekstury 50,111 | roślinność 50,111",
+    "identity": "tożsamość: era PCG_9_3_5 | profil global:0 | LAB_SEED 0 | gęstość 50% | wersje: heightQuery=peheight-query-triangle-v1 veg=world-vegetation-r2 lod=world-lod-r2-v1",
+    "win": {
+     "gx": 50,
+     "gy": 111
+    },
+    "vegBusy": false
+   }
+  },
+  {
+   "step": "warm-up (teleport target + home)",
+   "ok": true,
+   "warmTargetWin": {
+    "gx": 196,
+    "gy": 196
+   }
+  },
+  {
+   "step": "config A applied (global profile 1; build in flight)",
+   "ok": true,
+   "vegBusyAfterMs": 165
+  },
+  {
+   "step": "config B applied while A building — observe the stored newer request (vegPending while busy)",
+   "ok": true
+  },
+  {
+   "step": "region switch (teleport) while veg building",
+   "ok": true,
+   "vegBusyAtClick": true
+  }
+ ],
+ "boot": {
+  "coherent": true,
+  "waitedMs": 849,
+  "at": {
+   "gotowa": true,
+   "line": "scena #1: żądane okno 50,111 | teren 50,111 | tekstury 50,111 | roślinność 50,111",
+   "identity": "tożsamość: era PCG_9_3_5 | profil global:0 | LAB_SEED 0 | gęstość 50% | wersje: heightQuery=peheight-query-triangle-v1 veg=world-vegetation-r2 lod=world-lod-r2-v1",
+   "win": {
+    "gx": 50,
+    "gy": 111
+   },
+   "vegBusy": false
+  }
+ },
+ "warmupTarget": {
+  "click": {
+   "sceneId": 2,
+   "vegBusy": false,
+   "windowOrigin": {
+    "gx": 50,
+    "gy": 111
+   }
+  },
+  "coherent": {
+   "coherent": true,
+   "waitedMs": 7017,
+   "at": {
+    "gotowa": true,
+    "line": "scena #2: żądane okno 196,196 | teren 196,196 | tekstury 196,196 | roślinność 196,196",
+    "identity": "tożsamość: era PCG_9_3_5 | profil global:0 | LAB_SEED 0 | gęstość 50% | wersje: heightQuery=peheight-query-triangle-v1 veg=world-vegetation-r2 lod=world-lod-r2-v1",
+    "win": {
+     "gx": 196,
+     "gy": 196
+    },
+    "vegBusy": false
+   }
+  }
+ },
+ "warmupHome": {
+  "click": {
+   "sceneId": 3,
+   "vegBusy": false,
+   "windowOrigin": {
+    "gx": 196,
+    "gy": 196
+   }
+  },
+  "coherent": {
+   "coherent": true,
+   "waitedMs": 1704,
+   "at": {
+    "gotowa": true,
+    "line": "scena #3: żądane okno 50,111 | teren 50,111 | tekstury 50,111 | roślinność 50,111",
+    "identity": "tożsamość: era PCG_9_3_5 | profil global:0 | LAB_SEED 0 | gęstość 50% | wersje: heightQuery=peheight-query-triangle-v1 veg=world-vegetation-r2 lod=world-lod-r2-v1",
+    "win": {
+     "gx": 50,
+     "gy": 111
+    },
+    "vegBusy": false
+   }
+  }
+ },
+ "applyA": {
+  "sceneId": 3,
+  "vegBusy": false,
+  "vegPending": null,
+  "windowOrigin": {
+   "gx": 50,
+   "gy": 111
+  }
+ },
+ "applyAVegBusyAfterMs": 165,
+ "applyB": {
+  "sceneId": 4,
+  "vegBusy": true,
+  "vegPending": null,
+  "windowOrigin": {
+   "gx": 50,
+   "gy": 111
+  }
+ },
+ "midRace": {
+  "vegBusy": true,
+  "vegPending": {
+   "origin": {
+    "gx": 50,
+    "gy": 111
+   },
+   "requestId": 5
+  },
+  "sceneId": 5,
+  "runningOrigin": {
+   "gx": 50,
+   "gy": 111
+  },
+  "busy": true,
+  "observedAfterMs": 171
+ },
+ "teleportClick": {
+  "sceneId": 6,
+  "vegBusy": true,
+  "windowOrigin": {
+   "gx": 50,
+   "gy": 111
+  },
+  "vegBusyAtClick": true
+ },
+ "finalCoherent": {
+  "coherent": true,
+  "waitedMs": 4846,
+  "at": {
+   "gotowa": true,
+   "line": "scena #6: żądane okno 196,196 | teren 196,196 | tekstury 196,196 | roślinność 196,196",
+   "identity": "tożsamość: era PCG_9_3_5 | profil global:2 | LAB_SEED 0 | gęstość 50% | wersje: heightQuery=peheight-query-triangle-v1 veg=world-vegetation-r2 lod=world-lod-r2-v1",
+   "win": {
+    "gx": 196,
+    "gy": 196
+   },
+   "vegBusy": false
+  }
+ },
+ "final": {
+  "loadStatus": "READY",
+  "windowOrigin": {
+   "gx": 196,
+   "gy": 196
+  },
+  "running": {
+   "busy": false,
+   "runningOrigin": null,
+   "pending": null,
+   "sceneId": 6,
+   "vegBusy": false,
+   "vegPending": null,
+   "vegTrace": [
+    {
+     "t": 485,
+     "event": "drain-done (wrapper idle)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 1
+    },
+    {
+     "t": 2343,
+     "event": "request-take (idle)",
+     "origin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "requestId": 2
+    },
+    {
+     "t": 2343,
+     "event": "drain-run",
+     "origin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "requestId": 2,
+     "runOrigin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "runRequestId": 2
+    },
+    {
+     "t": 2349,
+     "event": "class-rebuild-returned",
+     "origin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "requestId": 2,
+     "runOrigin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "runRequestId": 2,
+     "censusOrigin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "aborted": false
+    },
+    {
+     "t": 2349,
+     "event": "census-committed (current scene)",
+     "origin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "requestId": 2,
+     "runOrigin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "runRequestId": 2,
+     "censusOrigin": {
+      "gx": 196,
+      "gy": 196
+     }
+    },
+    {
+     "t": 2349,
+     "event": "drain-done (wrapper idle)",
+     "origin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "requestId": 2
+    },
+    {
+     "t": 9612,
+     "event": "request-take (idle)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 3
+    },
+    {
+     "t": 9612,
+     "event": "drain-run",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 3,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 3
+    },
+    {
+     "t": 9616,
+     "event": "class-rebuild-returned",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 3,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 3,
+     "censusOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "aborted": false
+    },
+    {
+     "t": 9616,
+     "event": "census-committed (current scene)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 3,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 3,
+     "censusOrigin": {
+      "gx": 50,
+      "gy": 111
+     }
+    },
+    {
+     "t": 9616,
+     "event": "drain-done (wrapper idle)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 3
+    },
+    {
+     "t": 10039,
+     "event": "request-take (idle)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4
+    },
+    {
+     "t": 10039,
+     "event": "drain-run",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 4
+    },
+    {
+     "t": 10371,
+     "event": "request-stored-pending (busy)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 5
+    },
+    {
+     "t": 12310,
+     "event": "class-rebuild-returned",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 4,
+     "censusOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "aborted": false
+    },
+    {
+     "t": 12310,
+     "event": "census-not-committed (stale or aborted)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 4,
+     "censusOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "sceneIdNow": 6
+    },
+    {
+     "t": 12310,
+     "event": "drain-run",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 5
+    },
+    {
+     "t": 13264,
+     "event": "request-stored-pending (busy)",
+     "origin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "requestId": 6
+    },
+    {
+     "t": 13759,
+     "event": "class-rebuild-returned",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 5,
+     "censusOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "aborted": false
+    },
+    {
+     "t": 13759,
+     "event": "census-not-committed (stale or aborted)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "runRequestId": 5,
+     "censusOrigin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "sceneIdNow": 6
+    },
+    {
+     "t": 13759,
+     "event": "drain-run",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "runRequestId": 6
+    },
+    {
+     "t": 15290,
+     "event": "class-rebuild-returned",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "runRequestId": 6,
+     "censusOrigin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "aborted": false
+    },
+    {
+     "t": 15290,
+     "event": "census-committed (current scene)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4,
+     "runOrigin": {
+      "gx": 196,
+      "gy": 196
+     },
+     "runRequestId": 6,
+     "censusOrigin": {
+      "gx": 196,
+      "gy": 196
+     }
+    },
+    {
+     "t": 15290,
+     "event": "drain-done (wrapper idle)",
+     "origin": {
+      "gx": 50,
+      "gy": 111
+     },
+     "requestId": 4
+    }
+   ]
+  },
+  "coherence": "scena #6: żądane okno 196,196 | teren 196,196 | tekstury 196,196 | roślinność 196,196\nstatus spójności: GOTOWA (wszystkie komponenty tego samego żądania)\ntożsamość: era PCG_9_3_5 | profil global:2 | LAB_SEED 0 | gęstość 50% | wersje: heightQuery=peheight-query-triangle-v1 veg=world-vegetation-r2 lod=world-lod-r2-v1",
+  "vegPanel": "Tryb profilu: GLOBALNY (oryginalnie odczytany profil) | profil 2 | LAB_SEED 0 | gęstość 50% | p3 = 0 [P-RNG-P3] (OSOBNO — nigdy LAB_SEED)\nVEGETATION_MODE = RECONSTRUCTION_PREVIEW — reconstruction-only until the cell-stream source is proven (iter032 bound 3): the LAB_SEED-keyed deterministic cell-stream stand-in in this wrapper + the [P-WINDOW] per-tile calibration — NEVER claimed historical; placement 1:1 NOT claimed\ndomyślny profil serwera: 0 (MEASURED CHOICE (never \"the historical biome of this place\"): profile 0 is DECODED by the strict VegetationClimateDecoder with 12 non-empty records, an",
+  "censusPanel": "kafle aktywne (okno 8×8): 64 / limit 64 | halo 10×10 (rzeczywiste próbki) dla wysokości drzew/spaceru\ncache klienta: 200 kafli (400 KiB; limit 512)\npobrania: 500 | błędy: 0\ngeometria bliska: 65536 wierzchołków, 130050 trójkątów (1 mesh regionu) | przebudowań okna: 4 | teleporty: 3\ntekstury terenu: WŁĄCZONE — resolved 261/261 warstw, zdekodowane 16, zastosowane 44204\nroślinność: żądane 1523 / wybrane 1523 / umieszczone 1011 / ograniczone 0 (limit 5000; sprawiedliwy dobór per kafel)\n  statusy: PLACED 1011 | DEFERRED_NO_SURFACE 0 | UNSUPPORTED_MODEL 512 | LOD_LIMITED 0\n  modele: kandydaci 8 → wybrane 8 → geometry renderowane 7 (wsparte 7, bez tekstur 0, UNSUPPORTED 1, markery 1)\ndaleki LOD: far GOTOWY (1607232 trójk., reprezentuje 51920 kafli, braki 0) | mid GOTOWY (195584 trójk. przy {\"gx\":180,\"gy\":180}, bloków w cache 72)\ncache tekstur RGBA: 36 (9.0 MiB; limit 64) | fetch materiałów: 192 "
+ },
+ "screenshot": {
+  "file": "correction_veg_coherence_reverify.png",
+  "bytes": 449639,
+  "sha256": "13b8a7d688c6dac38041202aab152ce24d5db9d9709fa4e26449d970059945ff"
+ },
+ "pass": {
+  "bootCoherent": true,
+  "warmupCoherent": true,
+  "aBuildInFlightAtB": true,
+  "newerConfigStoredWhileBusy": true,
+  "regionSwitchStoredWhileBusy": true,
+  "staleGuardedCensuses": true,
+  "committedCensusIsLastRequest": true,
+  "finalSceneCoherentForTeleport": true,
+  "coherenceAllTarget": true,
+  "lastConfigCommitted": true,
+  "vegDrainedAfter": true,
+  "noPageErrors": true
+ },
+ "verdict": "REVERIFY_PASS",
+ "pageErrors": []
+}

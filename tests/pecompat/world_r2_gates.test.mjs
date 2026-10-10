@@ -330,5 +330,111 @@ export async function run(ctx) {
     }));
   }
 
+  // ---- R2_VEG_WRAPPER_LATEST_WINS (the PRODUCTION wrapper path; P1-2
+  // correction round) ----
+  // The WL-1 class-level latest-wins queue was measured CLASS-ISOLATED by the
+  // original run; the PRODUCTION wrapper (compat/world-app.js#rebuildVegetation)
+  // is the entry point of every production veg build (streaming tick, teleport,
+  // toggle, config-apply). This gate extracts the wrapper VERBATIM from the
+  // current source and drives the A -> B-while-busy race through it with a
+  // SLOW synthetic provider: the newest request must be STORED while busy
+  // (never dropped), DELIVERED to the class when the running build finishes,
+  // and its WINNING census committed gen-gated vs requestId (coherence.veg =
+  // the last request's window; READY reachable). Also: an identical repeat is
+  // deduped, and a STALE request id never commits (negative control).
+  {
+    const VMX = await import('node:vm');
+    const appSource2 = await fsp.readFile(path.join(ROOT, 'compat/world-app.js'), 'utf8');
+    const start = appSource2.indexOf('async function rebuildVegetation(');
+    const end = start >= 0 ? appSource2.indexOf('\n}', start) + 2 : -1;
+    const wrapperSrc = start >= 0 && end > start ? appSource2.slice(start, end) : null;
+    const makeFixture = () => {
+      const calls = [];
+      let releaseA = null;
+      const gateA = new Promise((res) => { releaseA = res; });
+      const vegStandIn = {
+        lastCensus: null,
+        async rebuild(origin, windowTiles) {
+          calls.push({ gx: origin.gx, gy: origin.gy });
+          if (origin.gx === 0) await gateA; // the SLOW provider leg (climate+models+textures)
+          const c = {
+            ok: true, aborted: false, unsupportedProfile: false, error: null,
+            window: { origin: { gx: origin.gx, gy: origin.gy }, windowTiles },
+            counts: { requested: 1, selected: 1, placed: 1, limited: 0, cap: 5000 },
+            statusCounts: { PLACED_ON_AVAILABLE_SURFACE: 1, DEFERRED_NO_SURFACE: 0, UNSUPPORTED_MODEL: 0, LOD_LIMITED: 0 },
+          };
+          vegStandIn.lastCensus = c;
+          return c;
+        },
+      };
+      const fx = {
+        vegOn: true, veg: vegStandIn, vegCensus: null, vegBusy: false, vegPending: null,
+        coherence: { terrain: { gx: 0, gy: 0 }, splat: { gx: 0, gy: 0 }, veg: null },
+        sceneRequest: { id: 1, origin: { gx: 0, gy: 0 } },
+      };
+      const cx = VMX.createContext({
+        state: fx, WINDOW_T: 8,
+        banner: () => {}, updateVegPanel: () => {}, updateEvidencePanel: () => {},
+      });
+      VMX.runInContext(wrapperSrc, cx, { filename: 'compat/world-app.js#rebuildVegetation(extracted)' });
+      return { fx, cx, calls, releaseA };
+    };
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    // (1) the race: A (slow) in flight -> the scene moves to B (terrain+splat
+    //     committed by rebuildWindow(B)) -> the veg request for B arrives WHILE busy
+    const f1 = makeFixture();
+    const runA = f1.cx.rebuildVegetation({ gx: 0, gy: 0 }, 1);
+    await sleep(40);
+    const busyDuringA = f1.fx.vegBusy;
+    f1.fx.sceneRequest = { id: 2, origin: { gx: 8, gy: 0 } };
+    f1.fx.coherence.terrain = { gx: 8, gy: 0 };
+    f1.fx.coherence.splat = { gx: 8, gy: 0 };
+    const runB = f1.cx.rebuildVegetation({ gx: 8, gy: 0 }, 2);
+    const busyReturn = await runB;
+    f1.releaseA();
+    await runA;
+    await sleep(120);
+    const finalOrigin = f1.fx.vegCensus?.window?.origin ?? null;
+    const coherenceVeg = f1.fx.coherence?.veg ?? null;
+    const reqNow = f1.fx.sceneRequest;
+    const same = (a) => !!(a && a.gx === reqNow.origin.gx && a.gy === reqNow.origin.gy);
+    const readyReachable = same(f1.fx.coherence.terrain) && same(f1.fx.coherence.splat) && same(f1.fx.coherence.veg);
+    const newestDelivered = f1.calls.length === 2 && f1.calls[0].gx === 0 && f1.calls[1].gx === 8;
+    const lastWins = !!(finalOrigin && finalOrigin.gx === 8 && finalOrigin.gy === 0
+      && coherenceVeg && coherenceVeg.gx === 8 && coherenceVeg.gy === 0);
+    // (2) the dedupe: an identical repeat (same origin + same request id) while
+    //     the same request runs must NOT re-run the class build
+    const f2 = makeFixture();
+    const rA = f2.cx.rebuildVegetation({ gx: 0, gy: 0 }, 1);
+    await sleep(30);
+    const rRepeat = f2.cx.rebuildVegetation({ gx: 0, gy: 0 }, 1); // identical repeat while busy
+    f2.releaseA();
+    await rA; await rRepeat;
+    await sleep(80);
+    const dedupeHeld = f2.calls.length === 1 && f2.fx.vegCensus?.window?.origin?.gx === 0;
+    // (3) the stale-gate negative control: a request whose id is no longer the
+    //     current scene request must NOT commit its census
+    const f3 = makeFixture();
+    f3.fx.sceneRequest = { id: 30, origin: { gx: 16, gy: 0 } }; // the scene already moved on
+    const rStale = f3.cx.rebuildVegetation({ gx: 16, gy: 0 }, 29); // the STALE veg request id
+    await rStale;
+    await sleep(60);
+    const staleGateHeld = f3.fx.vegCensus === null && f3.fx.coherence.veg === null;
+    out.push(record('R2_VEG_WRAPPER_LATEST_WINS',
+      'the PRODUCTION wrapper (compat/world-app.js#rebuildVegetation, extracted verbatim): a newer vegetation request while a build is busy is STORED (never dropped) and DELIVERED to the class; the WINNING census (the LAST request) commits gen-gated vs requestId; coherence.veg + READY reflect the last request; identical repeats dedupe; a stale id never commits',
+      (wrapperSrc && newestDelivered && lastWins && readyReachable && busyDuringA && dedupeHeld && staleGateHeld) ? 'PASS' : 'FAIL', {
+      resultClass: 'EXTRACTED_PRODUCTION_FUNCTION_CONTROL (the production wrapper path — the P1-2 correction; never the class in isolation)',
+      measuredQuantity: 'class delivery order + the final committed vegCensus origin + coherence.veg + the READY condition + dedupe + the stale gate',
+      measured: {
+        race: { busyDuringA, busyPathReturn: busyReturn === null ? 'null' : '(non-null while busy)', classDeliveryOrder: f1.calls.map((c) => `(${c.gx},${c.gy})`), finalCommittedVegCensusOrigin: finalOrigin, coherenceVeg, readyReachable },
+        dedupe: { classCalls: f2.calls.length, committedOrigin: f2.fx.vegCensus?.window?.origin ?? null },
+        staleGate: { staleCensusCommitted: f3.fx.vegCensus !== null, coherenceVegAfterStale: f3.fx.coherence.veg },
+      },
+      independentSourceOfTruth: 'the current compat/world-app.js source, executed verbatim in a controlled VM context with a slow synthetic provider; the updateCoherencePanel same() rule re-derived in-test',
+      whyNonCircular: 'the b4dfae7 wrapper (PRE, measured in CORRECTION_COUNTERCHECKS.json) drops the newest request before the class and never commits it — this gate FAILS against that code',
+      failureCaseDetected: (newestDelivered && lastWins && readyReachable && dedupeHeld && staleGateHeld) ? 'none' : 'a newer veg request was lost while busy, its census was not committed, a repeat re-ran the build, or a stale id committed',
+    }));
+  }
+
   return out;
 }

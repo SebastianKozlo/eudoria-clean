@@ -32,20 +32,26 @@
 // Usage:
 //   node tests/pecompat/run_world_tests.mjs [--terrain <terrain.bnt>]
 //        [--textures <Textures.bnt>] [--raw-dir <dir>] [--json-out <path>]
-// The DEFAULT raw dir is THIS run's report package (never a historical package).
+// P3a FIX (correction round 2026-10-10): the DEFAULT raw dir is a NEUTRAL
+// temp directory (os.tmpdir()), NOT a docs/audits package — an accidental
+// flagless invocation can no longer write into the HISTORICAL READ_ONLY
+// packages (PE_WORLD_LAUNCHER_R1_20261010 was the old default and was
+// dirtied by exactly such an invocation in the original run). Writing into
+// any docs/audits package now requires an EXPLICIT --raw-dir.
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFile } from 'node:fs/promises';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(here, '..', '..');
-const RUN_ID = 'PE_WORLD_LAUNCHER_R1_20261010';
+const RUN_ID = 'PE_WORLD_LAUNCHER_R1_20261010'; // the battery lineage label ONLY — never a write path (see the P3a fix above)
 
 const args = process.argv.slice(2);
 const ctx = {
   terrainPath: null,
   texturesPath: null,
-  rawDir: path.join(REPO_ROOT, 'docs', 'audits', RUN_ID, 'raw', 'WORLD'),
+  rawDir: path.join(os.tmpdir(), 'pecompat-tests-raw', 'WORLD'),
   jsonOut: null,
 };
 for (let i = 0; i < args.length; i++) {

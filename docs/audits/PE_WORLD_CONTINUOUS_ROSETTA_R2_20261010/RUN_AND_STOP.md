@@ -3,17 +3,36 @@
 Serwer świata pozostaje URUCHOMIONY po tym runie, serwując DOKŁADNIE
 opublikowany kod (weryfikacja tożsamości served↔published poniżej).
 
-## Live (stan na koniec runu)
+## Live (stan na koniec RUNDU KOREKTY 2026-10-10)
 
 - URL launcher: `http://127.0.0.1:8163/launcher`
 - URL świata: `http://127.0.0.1:8163/world`
 - URL Asset Lab: `http://127.0.0.1:8163/assetlab`
 - Bind: `127.0.0.1:8163` (loopback ONLY; brak publicznych portów/firewalla).
-- Proces: `node.exe compat/server-world.mjs` — PID node: **33876**;
-  rodzic (wrapper powershell z env): PID **30780**. CWD serwera:
+- Proces: `node.exe compat/server-world.mjs` — PID node: **23232**
+  (start rundy korekty; węzeł cmd-wrapper: PID **29328**). CWD serwera:
   `D:\Eudoria_Reconstruction\12_WebGame\pe-world-continuous-r2`
   (worktree RESULT_BRANCH). Logi serwera (append):
-  `D:\Eudoria_Reconstruction\99_Audits\PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010\server-run.log`.
+  `D:\Eudoria_Reconstruction\99_Audits\PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010\server-run.log`
+  (stdout) i `server-err.log` (stderr).
+
+## Historia restartów (uczciwa — [POPRAWIONE w rundzie korekty: pierwotny
+## zapis PIN 33876 był martwy w momencie QC])
+
+Plik server-run.log pokazuje pełny łańcuch własnych restartów tego runu
+(każdy poprzedni proces zatrzymany zanim następny wystartował; port 8163
+nigdy nie był udostępniany publicznie; obce standing serwery
+8140/8161/8162/9350 nietknięte):
+
+```text
+32048 → 35384 → 32592 → 35452 → 33876 → 5780 (live w czasie QC)
+→ 23232 (restart RUNDY KOREKTY na kodzie korekty — serwuje DOKŁADNIE
+   nowy opublikowany kod; weryfikacja served↔published poniżej)
+```
+
+Start wrapperów tej serii używał różnych wariantów startu (powershell/cmd
+z env); wszystkie z CWD = worktree RESULT_BRANCH i pinem
+PEWORLD_THREE_ROOT na node_modules THIS worktree.
 
 ## Start (jeśli trzeba odtworzyć)
 
@@ -30,8 +49,8 @@ standing serwery 8140/8161/8162/9350 pozostają nietknięte.)
 ## Stop (tylko WŁASNY proces)
 
 ```powershell
-Stop-Process -Id 33876 -Force   # PID node (własny serwer tego runu)
-# (ewentualnie także wrapper-rodzica 30780, jeśli wciąż żyje)
+Stop-Process -Id 23232 -Force   # PID node (własny serwer tego runu)
+# (ewentualnie także wrapper-rodzica 29328, jeśli wciąż żyje)
 ```
 
 ## Tożsamość served↔published

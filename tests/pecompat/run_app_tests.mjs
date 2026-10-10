@@ -20,21 +20,25 @@
 // Without --models, T8 reports NOT_PERFORMED_CONTAINER_UNAVAILABLE loudly
 // (T7 also fails closed — the server refuses to serve without the pinned
 // container; that refusal is itself a recorded fail-closed behavior).
-// The DEFAULT raw dir is THIS run's report package (never the historical
-// READ_ONLY package of the predecessor run).
+// P3a FIX (correction round 2026-10-10): the DEFAULT raw dir is a NEUTRAL
+// temp directory (os.tmpdir()), NOT a docs/audits package — an accidental
+// flagless invocation can no longer write into the HISTORICAL READ_ONLY
+// packages (PE_CITY_ASSET_MAP_R1_20261010 was the old default). Writing
+// into any docs/audits package now requires an EXPLICIT --raw-dir.
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFile } from 'node:fs/promises';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(here, '..', '..');
-const RUN_ID = 'PE_CITY_ASSET_MAP_R1_20261010';
+const RUN_ID = 'PE_CITY_ASSET_MAP_R1_20261010'; // the battery lineage label ONLY — never a write path (see the P3a fix above)
 
 const args = process.argv.slice(2);
 const ctx = {
   modelsPath: null,
   threeRoot: null,
-  rawDir: path.join(REPO_ROOT, 'docs', 'audits', RUN_ID, 'raw'),
+  rawDir: path.join(os.tmpdir(), 'pecompat-tests-raw', 'APP'),
   jsonOut: null,
 };
 for (let i = 0; i < args.length; i++) {

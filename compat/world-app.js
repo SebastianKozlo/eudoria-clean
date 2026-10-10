@@ -122,6 +122,8 @@ const state = {
   veg: null,
   vegCensus: null,
   vegBusy: false,
+  vegPending: null, // P1-2 fix: the WRAPPER-level latest-wins slot (a newer request while busy is STORED, never dropped)
+  vegTrace: [],     // P1-2 diagnostics: a bounded ring of wrapper request/store/drain/commit events (read-only via __peR2Debug)
   vegConfig: { profileMode: params.region === '1' ? 'regional' : 'global', profile: params.profile, labSeed: params.seed, densityPercent: params.density },
   // ---- the distant LOD ----
   lod: null,
@@ -560,24 +562,68 @@ async function fetchVegBinary(url, { container, containerSha256 }) {
 }
 
 async function rebuildVegetation(origin, requestId, { awaited = false } = {}) {
+  // P1-2 diagnostics: a bounded read-only event ring (never a behavior input;
+  // defensive in non-browser harness contexts — a missing vegTrace is fine)
+  const trace = (event, extra = {}) => {
+    if (!Array.isArray(state.vegTrace)) return;
+    const t = (typeof performance !== 'undefined' && performance.now) ? Math.round(performance.now()) : Date.now();
+    state.vegTrace.push({ t, event, origin: { gx: origin.gx, gy: origin.gy }, requestId, ...extra });
+    if (state.vegTrace.length > 48) state.vegTrace.splice(0, state.vegTrace.length - 48);
+  };
   if (!state.vegOn || !state.veg) { state.vegCensus = state.veg ? state.veg.lastCensus : null; return null; }
-  if (state.vegBusy) return null; // WorldVegetation queues the LATEST request internally (WL-1 fix)
+  // P1-2 FIX (production wiring; correction round 2026-10-10): a newer request
+  // arriving while a veg rebuild is BUSY is STORED at the WRAPPER level
+  // (latest-wins — the slot is overwritten by newer requests) and DELIVERED
+  // to the WorldVegetation class by the drain loop below. The busy path no
+  // longer drops the newest request, and the WINNING census is committed back
+  // to state.vegCensus/state.coherence.veg gen-gated vs requestId. The
+  // class-internal pendingRequest queue (WL-1) remains as a second safety
+  // layer for direct rebuild() callers; in the production path the wrapper
+  // delivers requests SERIALLY, so the class queue is not engaged.
+  trace(state.vegBusy ? 'request-stored-pending (busy)' : 'request-take (idle)');
+  state.vegPending = { origin, requestId };
+  if (state.vegBusy) return null; // the running drain loop delivers the newest pending when the current build finishes
   state.vegBusy = true;
+  let lastCensus = null;
+  let lastReq = null;
   try {
-    const c = await state.veg.rebuild(origin, WINDOW_T);
-    if (c && c.aborted) return c; // superseded — the newer request is queued inside
-    if (state.sceneRequest?.id !== requestId) return c; // stale census: do NOT mark coherence for it
-    state.vegCensus = c;
-    state.coherence.veg = c && c.ok ? c.window.origin : null;
-    if (c && !c.ok && !c.unsupportedProfile) {
-      banner(`ROŚLINNOŚĆ: ${c.error ?? 'błąd łańcucha'} — podgląd roślinności niedostępny dla tej konfiguracji (teren działa); wybierz profil zdekodowany.`);
+    for (;;) {
+      const req = state.vegPending;
+      state.vegPending = null;
+      if (!req) break; // no newer request — the wrapper queue is drained
+      // DEDUPE (the requestScene analogue): a repeat of the request JUST run
+      // (same origin + same request id = the same scene identity incl. the
+      // veg config — config changes bump the id via forceNew) is already
+      // served by that build; re-running it is pointless.
+      if (lastReq && req.origin.gx === lastReq.origin.gx && req.origin.gy === lastReq.origin.gy && req.requestId === lastReq.requestId) {
+        trace('drain-deduped-repeat', { pendingOrigin: req.origin, pendingRequestId: req.requestId });
+        break;
+      }
+      trace('drain-run', { runOrigin: req.origin, runRequestId: req.requestId });
+      const c = await state.veg.rebuild(req.origin, WINDOW_T);
+      lastReq = req;
+      lastCensus = c;
+      trace('class-rebuild-returned', { runOrigin: req.origin, runRequestId: req.requestId, censusOrigin: c?.window?.origin ?? null, aborted: !!(c && c.aborted) });
+      if (c && !c.aborted && state.sceneRequest?.id === req.requestId) {
+        state.vegCensus = c; // the WINNING census propagates (gen-gated vs requestId)
+        state.coherence.veg = c.ok ? c.window.origin : null;
+        trace('census-committed (current scene)', { runOrigin: req.origin, runRequestId: req.requestId, censusOrigin: c.window.origin });
+        if (!c.ok && !c.unsupportedProfile) {
+          banner(`ROŚLINNOŚĆ: ${c.error ?? 'błąd łańcucha'} — podgląd roślinności niedostępny dla tej konfiguracji (teren działa); wybierz profil zdekodowany.`);
+        }
+        updateVegPanel();
+        updateEvidencePanel();
+      } else {
+        trace('census-not-committed (stale or aborted)', { runOrigin: req.origin, runRequestId: req.requestId, censusOrigin: c?.window?.origin ?? null, sceneIdNow: state.sceneRequest?.id ?? null });
+      }
+      // a STALE census (sceneRequest moved on) is NOT committed — the newer
+      // scene's own veg request (queued or arriving) owns the commit
     }
-    updateVegPanel();
-    updateEvidencePanel();
-    return c;
   } finally {
     state.vegBusy = false;
+    trace('drain-done (wrapper idle)');
   }
+  return lastCensus;
 }
 
 // ---- window management (streaming; the FOCUS-following near window) ----
@@ -1249,7 +1295,7 @@ window.__peR2Debug = {
     if (!f) return null;
     return { originGx: f.originGridX, originGy: f.originGridY, tilesX: f.tilesX, tilesY: f.tilesY, ...f.census() };
   },
-  get running() { return { busy: state.rebuildBusy, runningOrigin: state.runningOrigin ? { ...state.runningOrigin } : null, pending: state.pendingOrigin ? { ...state.pendingOrigin } : null, sceneId: state.sceneRequest?.id ?? null }; },
+  get running() { return { busy: state.rebuildBusy, runningOrigin: state.runningOrigin ? { ...state.runningOrigin } : null, pending: state.pendingOrigin ? { ...state.pendingOrigin } : null, sceneId: state.sceneRequest?.id ?? null, vegBusy: state.vegBusy, vegPending: state.vegPending ? { origin: { ...state.vegPending.origin }, requestId: state.vegPending.requestId } : null, vegTrace: state.vegTrace.slice(-24) }; },
   queryHeightAt(x, z) { return state.heightField ? state.heightField.triangleHeightAtWorld(x, z) : null; },
 };
 
