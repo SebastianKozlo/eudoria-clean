@@ -22,4 +22,17 @@ Procedure executed:
    the immutable worktree, report FINAL_8140_HANDOFF=FAILED_ROLLED_BACK.
 
 Result: recorded in the final return (the handoff is executed AFTER the
-publication step per the contract order).
+publication step per the contract order; CORRECTION_ROUND1 restart note:
+both servers restarted from the corrected commit, PIDs verified by cmdline
+server-pcg935-viewer.mjs before any stop — never unknown PIDs).
+
+## Terminal labels (contract-required)
+
+```text
+HISTORICAL_WORLD_PLACEMENT = NOT_ESTABLISHED
+WORLD_XYZ_RECOVERED = NO
+CANONICAL_GATE_EFFECT = NONE
+INDEPENDENT_DESKTOP_POST_AUDIT = PENDING
+NEXT_EXPERIMENT_AUTHORIZED = NO
+HARD_STOP = YES
+```

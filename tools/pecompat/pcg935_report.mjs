@@ -99,8 +99,15 @@ W('RANKING_COVERAGE.json', {
   runId: 'PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010',
   policy: catalog.rankingPolicy,
   coverageDenominators: catalog.stats.coverage,
+  unknownExtentDecomposition: {
+    total: catalog.stats.unknownExtent,
+    parseFail: 7,
+    meshLess: 1818,
+    meshBearingNoMeasurableGeometry: 18,
+    note: 'CORRECTION_ROUND1 / QC P2-7: NOT "genuinely mesh-less" — 18 rows carry meshes (tris up to 38,912) but non-finite bounds; 7 are parse-FAIL rows',
+  },
   spotChecks: gatesNode.gates.gate4,
-  note: 'UNKNOWN (mesh-less assets) ranked last, stable id-ASC tie-break, no null->0 promotion; alternate sorts measured with their own coverage.',
+  note: 'UNKNOWN (mesh-less / unmeasurable / failed) ranked last, stable id-ASC tie-break, no null->0 promotion (diagonal/vertical coverage counts only FINITE extents: 3,753 — CORRECTION_ROUND1 / QC P2-7; the previous release counted truthy-but-null extents arrays as covered, 5,589).',
 });
 
 // ---- TEXTURE_BINDING_SUMMARY.csv ----
@@ -125,14 +132,19 @@ W('ANIMATION_COVERAGE.json', {
   runId: 'PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010',
   states: ['PLAYABLE', 'NO_ANIMATION_DETECTED_IN_DECODED_SCOPE', 'DETECTION_UNRESOLVED', 'UNSUPPORTED_CONTROLLER'],
   corpusCensus: sweep.gate9.animationCensus,
+  psysDenominators: {
+    niPSysDataOnly: '127 assets (MODEL_STATUS_INDEX psys column; 252 NiPSysData blocks)',
+    decoderFamily7Type: '130 assets (PecAnimDecoder counts NiPSysData/NiPSysEmitterCtlr/NiPSysUpdateCtlr/NiPSysResetOnLoopCtlr/NiPSysModifierActiveCtlr/NiPSysColliderMgr/NiMeshPSysData; 256 family blocks)',
+    note: 'CORRECTION_ROUND1 / QC P2-6: both definitions recorded; never interchangeable',
+  },
   playbackWitnesses: [
-    { id: 462325, version: '10.1.0.0', family: 'keyframe+textkey', detail: '50 controllers -> 50 tracks, 3.33 s, loop/pause/stop/scrub/speed/once-repeat verified in browser; >2-duration repeat wraps cleanly (no drift)' },
+    { id: 462325, version: '10.1.0.0', family: 'keyframe+textkey', detail: '50 controllers -> 50 tracks, 3.33 s, loop/pause/stop/scrub/speed/once-repeat verified in browser; >2-duration repeat wraps cleanly to 1.40/3.33 (no drift, per BROWSER_INTERACTION.json)' },
     { id: 360268, version: '4.1.0.12', family: 'keyframe+skin+textured (v4)', detail: '6 controllers (5.00 s), 7-bone skin, 9 meshes, 2 TEXTURED_EXACT slots; scrub 3.00/5.00 measured' },
     { id: 508326, version: '10.1.0.0', family: 'skin+psys', detail: 'skin (2 bones, 11 weights) + 6 PSys blocks DETECTION_UNRESOLVED' },
     { id: 592572, version: '10.1.0.0', family: 'morph', detail: 'NiVertexMorphExtraData present (region recorded RAW; morph target semantics UNRESOLVED)' },
   ],
   honestLabels: {
-    psys: 'DETECTION_UNRESOLVED (opaque runtime metadata; no simulated particles)',
+    psys: 'DETECTION_UNRESOLVED (opaque runtime metadata; no simulated particles; 127 assets NiPSysData-only / 130 decoder-family)',
     morphs: 'MORPH_REGION_RECORDED_RAW (reader records the region; target semantics UNRESOLVED)',
     propertyControllers: 'UV/vis/flip/material-color/alpha emitted with original keys; viewer applies keyframe clips; property-controller application is PARTIAL (see PERFORMANCE_AND_LIMITS)',
   },
@@ -196,18 +208,22 @@ W('PERFORMANCE_AND_LIMITS.json', {
 // ---- KNOWLEDGE_GAPS.md ----
 W('KNOWLEDGE_GAPS.md', `# Knowledge gaps — PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010
 
-Honest open items (all era-labelled PCG 9.3.5, measured this run):
+Honest open items (all era-labelled PCG 9.3.5, measured this run; updated in
+CORRECTION_ROUND1 per QC_ROUND2):
 
-1. **7 parse failures (0.125%)** — 4 MODEL_DATA_REF_TYPE_MISMATCH (472836,
-   543836, 546348, 68336), 2 NiSkinData-context closure fails (592605,
+1. **7 parse failures (0.125%, all v10)** — MODEL_DATA_REF_TYPE_MISMATCH x3
+   (472836, 543836, 546348), closure x4: 2 NiSkinData-context (592605,
    591780), 1 NiSkinPartition context (204828), 1 EOF-region (419159).
-   Recorded AMBIGUOUS/non-pass; API returns truthful 422.
+   Recorded as FAIL with reasons (non-pass); API returns truthful 422.
+   (68336 is NOT a failure — PASS, 37 blocks, 2 meshes, TEXTURED_EXACT.)
 2. **NiLight 4.0.0.2 trailing f32 semantics** — measured values 1.0/1.0/0.0
    after specular; UNRESOLVED (dimmer-like).
 3. **Morph target semantics** — NiVertexMorphExtraData regions recorded RAW;
    target application UNRESOLVED (116 assets).
-4. **Particle systems** — DETECTION_UNRESOLVED (130 assets with PSys blocks;
-   no simulated particles emitted).
+4. **Particle systems** — DETECTION_UNRESOLVED, both denominators recorded:
+   127 assets by the NiPSysData-only census (MODEL_STATUS_INDEX psys column,
+   252 blocks) vs 130 assets by the 7-type decoder family (256 family
+   blocks); no simulated particles emitted.
 5. **Property-controller runtime application** — UV/vis/flip/material-color/
    alpha decoded + inventoried; not yet applied as live property animation.
 6. **JPEG textures (19 entries)** + TGA types 1/3/10 (30 entries) —
@@ -216,9 +232,17 @@ Honest open items (all era-labelled PCG 9.3.5, measured this run):
    UNRESOLVED (value 0 measured on the witness).
 8. **Textured meshes with failed controls** — 28 UNRESOLVED + 2 DECODE_FAIL +
    73 PARTIAL(RENDER_RECONSTRUCTION) assets; never promoted to TEXTURED_EXACT.
+9. **18 mesh-bearing assets without measurable geometry** — e.g. 591813 (1
+   mesh, 38,912 tris) has non-finite FILE_SCENE_SPACE bounds; kept UNKNOWN
+   (not mesh-less, not failed).
 
+HISTORICAL_WORLD_PLACEMENT = NOT_ESTABLISHED
+WORLD_XYZ_RECOVERED = NO
+CANONICAL_GATE_EFFECT = NONE
 INDEPENDENT_DESKTOP_POST_AUDIT = PENDING (this package is SELF_REVIEW +
 machine gates; independent QC by PE-MASTER remains).
+NEXT_EXPERIMENT_AUTHORIZED = NO
+HARD_STOP = YES
 `);
 
 // ---- GAMEBRYO_IMPLEMENTATION_LINKS.md ----
@@ -249,9 +273,72 @@ W('PRE_POST_AND_AMENDMENT_LOG.md', `# Pre/post and amendment log — PE_SCENEIR_
 7. Camera-up/space conventions follow the old viewer (default Y-up, raw
    FILE_SCENE_SPACE rendering, AABB fit on updateMatrixWorld(true)).
 
-## Post
+## Post (first publication)
 - All 11 gates PASS (STAGE_ACCEPTANCE_GATES.csv; TEST_RESULTS.json).
-- Package finalized; MANIFEST generated last.
+- Commit 0940a89 pushed (fast-forward); 8140 handoff COMPLETED_VERIFIED.
+
+## CORRECTION_ROUND1 (QC_ROUND2 findings; every pre→post below)
+
+Input authority: QC_ROUND2/QC_FINDINGS.md (23 findings; this round corrects
+the dispatched 17-item scope). Pre values are the 0940a89 publication.
+
+- **P1-1 v10 PASS count**: REPORT.md/corpus-coverage.md/CAPABILITY_PLAN.md
+  "4,832/4,838 (99.88%)" → **"4,831/4,838 (99.86%)"** (4,838−7; the
+  aggregate 5,589/5,596 = 99.87% was already correct).
+- **P1-2 phantom failure id**: failure lists in KNOWLEDGE_GAPS.md /
+  corpus-coverage.md / REPORT.md "MODEL_DATA_REF ×4 (…, 68336) + closure ×4"
+  (8 instances over 7 fails) → **MISMATCH ×3 (472836, 543836, 546348) +
+  closure ×4 (592605, 591780 NiSkinData; 204828 NiSkinPartition; 419159
+  EOF)**. 68336 is a PASS asset (37 blocks, 2 meshes, TEXTURED_EXACT).
+- **P1-3 gate-3 stub**: pcg935_sweep.mjs gate3.negativeEntryCached
+  (hard-coded assetCacheValid:true, valid-id call, unused idsInCache) →
+  **REAL injection negatives** through the actual buildAssetResponse path:
+  missing-identity / wrong-entry-identity / wrong-era / wrong-payload-SHA
+  cache entries each DROPPED with a counted reason
+  (cache_dropped_missing_identity / _entry_identity_mismatch /
+  _era_version_mismatch / _payload_sha_mismatch), wrong container SHA
+  refused via the extracted verifyInputSha guard (throws, counted
+  input_sha_mismatch; boot wraps into a fatal exit), negative-cache repeat
+  re-serves the recorded reason, foreign id → null. Cache entries now store
+  identity meta (entryName, version, payloadSha256, container).
+- **P2-4 negative-cache degradation**: repeated GET on a fail-id returned
+  422 with a Buffer.from(null) TypeError text instead of the parse reason
+  → the route stores {failed, failStatus, failCode, failMessage} and
+  re-serves the RECORDED denial; regression added to the API battery
+  (GET /api/asset/592605 twice — second response asserts the recorded
+  reason, no TypeError/Buffer.from text).
+- **P2-7 ranking null→0**: rank tool + viewer diagonal/vertical treated
+  truthy-but-null extents arrays as covered (Math.hypot(null,null,null)=0)
+  → finite-extent gate added (all-finite check); diagonal/vertical coverage
+  5,589 → **3,753** (= extent coverage); catalog.json regenerated; gate 4
+  extended with the coverageConsistent assertion.
+- **P2-8 contract labels**: HISTORICAL_WORLD_PLACEMENT=NOT_ESTABLISHED,
+  WORLD_XYZ_RECOVERED=NO, CANONICAL_GATE_EFFECT=NONE,
+  INDEPENDENT_DESKTOP_POST_AUDIT=PENDING, NEXT_EXPERIMENT_AUTHORIZED=NO,
+  HARD_STOP=YES — added to REPORT.md + HANDOFF.md + KNOWLEDGE_GAPS.md
+  terminal blocks and the viewer header comment.
+- **P2-9 validator nested loop**: PecSceneIR.validateSceneGraph null-slot
+  census was nested INSIDE the per-block loop (duplicate warnings up to N
+  per block, O(N²)) → dedented to ONE top-level pass; verdicts unchanged
+  (duplicate warnings never flipped ok); re-validated on the witness set.
+- **P2-10 changed-path census**: 69 paths (missing MANIFEST_SHA256.csv) →
+  **70 paths** after manifest staging (set-equals git diff base..HEAD).
+- **P3-11 loop-drift value**: REPORT.md/animation-decoder.md/
+  viewer-runtime-lessons.md "1.44/3.33" → **"1.40/3.33"** (= the recorded
+  BROWSER_INTERACTION.json interaction.loopDrift.timeTextAfter2x).
+- **MM psys definitions**: "130 assets" used without definition → both
+  denominators recorded everywhere (127 assets NiPSysData-only census vs
+  130 assets 7-type decoder family; 252 vs 256 blocks).
+- **MM textkeys card count**: animation-decoder.md "textkeys 1038 blocks"
+  → **"textkeys 1031 assets / 1039 blocks"** (re-derived from the catalog).
+- **MM UNKNOWN descriptor**: "1,843 genuinely mesh-less (measured ZERO)"
+  → **"1,843 UNKNOWN extent = 7 FAIL + 1,818 mesh-less + 18 mesh-bearing
+  without measurable geometry"** (tris up to 38,912 in the 18).
+
+Re-runs after corrections: gate 3 (real injections), gate 4 (coverage
+consistency), API battery (repeat-fetch regression), node gate battery,
+browser battery (viewer comparator change), sweep. Manifest regenerated
+LAST. Second single-parent commit on the same branch (parent 0940a89).
 `);
 
 // ---- QC_REPORT.md ----
@@ -259,7 +346,10 @@ W('QC_REPORT.md', `# QC report — PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010
 
 Reviewer origin: **SELF_REVIEW** (the executor's own fresh pass over the final
 artifacts; NOT an independent Desktop audit — INDEPENDENT_DESKTOP_POST_AUDIT
-stays PENDING).
+stays PENDING). A separate fresh-context INTERNAL_QC by pe-master-auditor
+(QC_ROUND2, 23 findings) was the input authority for CORRECTION_ROUND1; its
+dispatched 17-item scope is fully corrected (PRE_POST_AND_AMENDMENT_LOG.md
+carries every pre→post value) and all affected gates re-run.
 
 ## Checked
 - Corpus accounting: 5,596 = index = catalog = extentOrder bijection (gate 1).
@@ -336,7 +426,20 @@ Procedure executed:
    the immutable worktree, report FINAL_8140_HANDOFF=FAILED_ROLLED_BACK.
 
 Result: recorded in the final return (the handoff is executed AFTER the
-publication step per the contract order).
+publication step per the contract order; CORRECTION_ROUND1 restart note:
+both servers restarted from the corrected commit, PIDs verified by cmdline
+server-pcg935-viewer.mjs before any stop — never unknown PIDs).
+
+## Terminal labels (contract-required)
+
+\`\`\`text
+HISTORICAL_WORLD_PLACEMENT = NOT_ESTABLISHED
+WORLD_XYZ_RECOVERED = NO
+CANONICAL_GATE_EFFECT = NONE
+INDEPENDENT_DESKTOP_POST_AUDIT = PENDING
+NEXT_EXPERIMENT_AUTHORIZED = NO
+HARD_STOP = YES
+\`\`\`
 `);
 
 W('RUN_AND_STOP.md', `# Run and stop — PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010
@@ -383,7 +486,7 @@ Executed plan (draft under PRIVATE_OUTPUT_ROOT/CAPABILITY_PLAN_DRAFT.md):
 | Wave | Capability | Result |
 |---|---|---|
 | 1 | Full corpus census (5596, per-version) | DONE — denominators match pinned set |
-| 2 | NIF 10.1.0.0 corpus reader | DONE — 4832/4838 (7 honest FAILs) |
+| 2 | NIF 10.1.0.0 corpus reader | DONE — 4831/4838 (7 honest FAILs; 99.86%) |
 | 3 | NIF 4.1.0.12 + 4.0.0.2 readers | DONE — 757/757 + 1/1 EOF-exact |
 | 4 | Catalog: composed bounds, ranking, alternate sorts | DONE — coverage measured |
 | 5 | Texture chain (controls + DDS/TGA + states) | DONE — see TEXTURE_BINDING_SUMMARY.csv |

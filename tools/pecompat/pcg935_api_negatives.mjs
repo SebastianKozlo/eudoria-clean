@@ -48,5 +48,35 @@ for (const pr of probes) {
   console.log(`${result.ok ? 'ok  ' : 'FAIL'} ${pr.m} ${pr.p.slice(0, 60)} -> ${res.status} ${code ?? ''}${result.ok ? '' : ` (wanted ${pr.wantStatus} ${pr.wantCode ?? ''})`}`);
 }
 const all = results.every((r) => r.ok);
-fs.writeFileSync(path.join(OUT, 'api_negatives.json'), JSON.stringify({ runId: 'PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010', generated: new Date().toISOString(), results, pass: all }, null, 1));
-console.log('API NEGATIVES:', all ? 'PASS' : 'NON-PASS');
+
+// ---- CORRECTION_ROUND1 / QC P2-4 regression: repeat GET on a known-fail id ----
+// The FIRST request pays the real parse (fails loudly, recorded); the SECOND
+// request hits the negative cache and MUST re-serve the RECORDED truthful
+// reason — never a degraded Buffer.from(null) TypeError text.
+const repeatRegression = { probes: [] };
+try {
+  const failIdPath = '/api/asset/592605';
+  const r1 = await fetch(BASE + failIdPath);
+  const j1 = await r1.json();
+  const r2 = await fetch(BASE + failIdPath);
+  const j2 = await r2.json();
+  repeatRegression.first = { status: r1.status, code: j1.error, message: j1.message };
+  repeatRegression.second = { status: r2.status, code: j2.error, message: j2.message };
+  repeatRegression.assertions = {
+    both422: r1.status === 422 && r2.status === 422,
+    sameCode: j1.error === j2.error,
+    sameRecordedReason: j1.message === j2.message,
+    reasonIsParseFailure: (j2.message ?? '').includes('CLOSURE_FAIL'),
+    noTypeErrorDegradation: !(j2.message ?? '').includes('TypeError') && !(j2.message ?? '').includes('Buffer.from'),
+  };
+  repeatRegression.pass = Object.values(repeatRegression.assertions).every(Boolean);
+} catch (e) {
+  repeatRegression.pass = false;
+  repeatRegression.error = String(e.message).slice(0, 200);
+}
+console.log('repeat-fetch regression (592605 twice):', repeatRegression.pass ? 'PASS' : 'NON-PASS');
+console.log('  second:', JSON.stringify(repeatRegression.second ?? {}));
+
+const passAll = all && repeatRegression.pass !== false;
+fs.writeFileSync(path.join(OUT, 'api_negatives.json'), JSON.stringify({ runId: 'PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010', generated: new Date().toISOString(), results, repeatRegression, pass: passAll }, null, 1));
+console.log('API NEGATIVES:', passAll ? 'PASS' : 'NON-PASS');

@@ -18,28 +18,33 @@ created: 2026-10-11
 
 ## Parse outcome (per-version corpus readers)
 
-- 10.1.0.0: 4,832/4,838 PASS (99.88%) — 7 honest FAILs (below)
+- 10.1.0.0: 4,831/4,838 PASS (99.86%) — 7 honest FAILs (below)
 - 4.1.0.12: 757/757 PASS (100%)
 - 4.0.0.2: 1/1 PASS (EOF-exact, 37 blocks)
 - Union: 5,589/5,596 PASS (99.87%), 7 FAIL (0.125%)
 
-## The 7 honest FAILs (recorded, not relabeled)
+## The 7 honest FAILs (recorded as FAIL with reasons — non-pass; all v10)
 
-- 472836, 543836, 546348, 68336 — closure returns but a TriShape dataRef
-  points at a NiNode (MODEL_DATA_REF_TYPE_MISMATCH family; candidate sets
-  wrong-but-closing; recorded AMBIGUOUS).
-- 592605, 591780 — CLOSURE_FAIL in the NiSkinData context (64K attempts;
-  these files combine ArkViewportInfo + ArkShaderExtraData +
-  VertexMorphExtraData boundary blocks + skins; candidate product explodes).
-- 204828 — CLOSURE_FAIL in the NiSkinPartition context (block 160 region).
-- 419159 — EOF-region misparse (last blocks 22-24 + tail bytes unresolved).
+- MODEL_DATA_REF_TYPE_MISMATCH ×3: 472836, 543836, 546348 — closure returns
+  but a TriShape dataRef points at a NiNode (wrong-but-closing candidate sets).
+- CLOSURE_FAIL ×4: 592605, 591780 — NiSkinData context (64K attempts; these
+  files combine ArkViewportInfo + ArkShaderExtraData + VertexMorphExtraData
+  boundary blocks + skins; candidate product explodes); 204828 —
+  NiSkinPartition context (block 160 region); 419159 — EOF-region misparse
+  (last blocks 22-24 + tail bytes unresolved).
+- 68336 is NOT a failure (PASS: 37 blocks, 2 meshes, 1,372 tris,
+  TEXTURED_EXACT) — CORRECTION_ROUND1: it was previously mislisted in the
+  MISMATCH family; the family is exactly the 3 ids above.
 
-## Extent UNKNOWN (1,843 entries — NOT failures)
+## Extent UNKNOWN (1,843 entries — NOT all mesh-less)
 
-Genuinely mesh-less assets: lights (NiPointLight/NiAmbientLight holders),
-empty viewport placeholders, controller/rig-only files (e.g. 462325: 50 kf
-controllers, 0 meshes). Their mesh/tri/vert counts are measured ZERO and
-extent stays UNKNOWN — never null->0 promotion, ranked LAST.
+CORRECTION_ROUND1 decomposition (QC P2-7): 7 parse-FAIL rows (no measured
+counts) + 1,818 PASS mesh-less assets (measured ZERO meshes — lights
+[NiPointLight/NiAmbientLight holders], empty viewport placeholders,
+controller/rig-only files such as 462325: 50 kf controllers, 0 meshes) +
+18 PASS rows WITH meshes but no measurable geometry (e.g. 591813: 1 mesh,
+38,912 tris; 581688: 32,768 tris — bounds non-finite in FILE_SCENE_SPACE).
+Their extent stays UNKNOWN — never null->0 promotion, ranked LAST.
 
 ## Runtime sweep categories (gate 9)
 

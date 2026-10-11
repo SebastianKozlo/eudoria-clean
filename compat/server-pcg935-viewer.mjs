@@ -65,10 +65,32 @@ function fail(msg) {
   process.exit(1);
 }
 
+// Cache-integrity injection counters (CORRECTION_ROUND1 / QC P1-3): every
+// negative-injection drop through the actual buildAssetResponse path is
+// COUNTED here with its reason — real evidence for gate 3.
+const cacheIntegrityCounters = {};
+function countDrop(reason) {
+  cacheIntegrityCounters[reason] = (cacheIntegrityCounters[reason] ?? 0) + 1;
+}
+
+/** Fail-closed input verification (the boot guard), extracted as a real
+ * injectable function: wrong container SHA refuses (throws, counted) — the
+ * boot wrapper turns the throw into a fatal exit. */
+function verifyInputSha(buf, pinnedPrefix, label) {
+  const actual = sha256(buf);
+  if (!actual.startsWith(pinnedPrefix)) {
+    countDrop('input_sha_mismatch');
+    throw new Error(`CONTAINER_SHA_MISMATCH (${label}): sha256 ${actual} does not match the pinned prefix ${pinnedPrefix}`);
+  }
+  return actual;
+}
+
+let modelsSha;
 const modelsBytes = new Uint8Array(fs.readFileSync(CONFIG.modelsPath));
-const modelsSha = sha256(modelsBytes);
-if (!modelsSha.startsWith(CONFIG.modelsSha256)) {
-  fail(`Models.bnt sha256 ${modelsSha} does not match the pinned prefix ${CONFIG.modelsSha256}`);
+try {
+  modelsSha = verifyInputSha(modelsBytes, CONFIG.modelsSha256, 'Models.bnt');
+} catch (e) {
+  fail(e.message);
 }
 const modelsArchive = new Bnt2Archive(modelsBytes);
 const modelsEntries = modelsArchive.entries();
@@ -77,9 +99,11 @@ const entryIdByName = new Map(modelsEntries.map((e) => [e.name, parseInt(e.name,
 const entryById = new Map(modelsEntries.map((e) => [parseInt(e.name, 10), e]));
 
 const texturesBytes = new Uint8Array(fs.readFileSync(CONFIG.texturesPath));
-const texturesSha = sha256(texturesBytes);
-if (!texturesSha.startsWith(CONFIG.texturesSha256Prefix)) {
-  fail(`Textures.bnt sha256 ${texturesSha} does not match the pinned prefix ${CONFIG.texturesSha256Prefix}`);
+let texturesSha;
+try {
+  texturesSha = verifyInputSha(texturesBytes, CONFIG.texturesSha256Prefix, 'Textures.bnt');
+} catch (e) {
+  fail(e.message);
 }
 const texturesArchive = new Bnt2Archive(texturesBytes);
 const textureEntryById = new Map(texturesArchive.entries().map((e) => [parseInt(e.name, 10), e]));
@@ -195,14 +219,46 @@ function buildAssetResponse(id) {
   return buildAssetResponseImpl(id);
 }
 
-export { buildAssetResponse, assetCache, textureCache, CONFIG };
+export { buildAssetResponse, assetCache, textureCache, CONFIG, cacheIntegrityCounters, verifyInputSha };
 
 function buildAssetResponseImpl(id) {
+  const entry = entryById.get(id);
+  if (!entry) return null;
+  // entry is served ONLY if its recorded identity matches the CURRENT entry's
+  // recomputed identity (era/version, entryName, payloadSha256, container —
+  // the container SHA is verified fail-closed at boot via verifyInputSha).
+  // Wrong-era / wrong-identity / wrong-payload-SHA / missing-identity cache
+  // entries are DROPPED with a COUNTED reason and re-parsed from the actual
+  // bytes — never served as stale acceptance.
   const cached = assetCache.get(id);
-  if (cached) return cached;
+  if (cached && !cached.failed) {
+    const meta = cached.meta ?? null;
+    let dropReason = null;
+    if (!meta) dropReason = 'cache_dropped_missing_identity';
+    else if (meta.entryName !== entry.name) dropReason = 'cache_dropped_entry_identity_mismatch';
+    else {
+      const payload = modelsBytes.subarray(entry.offset, entry.offset + entry.size);
+      const dv0 = new DataView(modelsBytes.buffer, modelsBytes.byteOffset, modelsBytes.byteLength);
+      const p0 = modelsBytes.subarray(entry.offset, entry.offset + 64);
+      const nl0 = p0.indexOf(0x0a);
+      const ver0 = dv0.getUint32(entry.offset + nl0 + 1, true);
+      const vs0 = ver0 >= 0x0a000000 ? '10.1.0.0' : (ver0 === 0x04000002 ? '4.0.0.2' : '4.1.0.12');
+      if (meta.version !== vs0) dropReason = 'cache_dropped_era_version_mismatch';
+      else if (meta.payloadSha256 !== sha256(payload)) dropReason = 'cache_dropped_payload_sha_mismatch';
+    }
+    if (dropReason) {
+      countDrop(dropReason);
+      assetCache.set(id, undefined);
+    } else {
+      return cached;
+    }
+  }
+  // negative cache entries: re-serve the RECORDED truthful denial (QC P2-4 —
+  // never degrade to a Buffer.from(null) TypeError on repeat requests)
+  if (cached && cached.failed) return cached;
   const parsed = parseEntry(id);
   if (!parsed) return null;
-  const { r, payload, version, entry } = parsed;
+  const { r, payload, version } = parsed; // entry: the outer identity-checked const above
   const versionString = version >= 0x0a000000 ? '10.1.0.0' : (version === 0x04000002 ? '4.0.0.2' : '4.1.0.12');
   const ir = buildAssetIR(r, {
     assetId: id, era: 'PCG_9_3_5', build: 'PCG_9_3_5_Models_bnt_entry',
@@ -279,13 +335,25 @@ function buildAssetResponseImpl(id) {
     },
     animations: anim,
     textures: { state: tex.state, exactSlots: tex.exactSlots, mapSlots: tex.mapSlots, fallback: tex.fallback, meshes: tex.results },
-    generatedAt: new Date().toISOString(),
+    // NOTE: no generatedAt here — the response is DETERMINISTIC (same input
+    // bytes + same code => byte-identical JSON => stable etag across
+    // re-parses; CORRECTION_ROUND1 — a per-parse timestamp made cache-drop
+    // re-serves differ from the original and etags unstable).
   };
   const json = JSON.stringify(response);
   if (json.length > CONFIG.maxAssetJsonBytes) {
     throw Object.assign(new Error(`asset ${id} JSON ${json.length} B exceeds the ${CONFIG.maxAssetJsonBytes} B ceiling`), { statusCode: 413 });
   }
-  const obj = { json, etag: `"a-${sha256(Buffer.from(json)).slice(0, 16)}"` };
+  const entryPayload = payload;
+  const obj = {
+    json, etag: `"a-${sha256(Buffer.from(json)).slice(0, 16)}"`,
+    meta: {
+      entryName: entry.name,
+      version: versionString,
+      payloadSha256: sha256(entryPayload),
+      container: 'Models.bnt', // container SHA pinned fail-closed at boot (verifyInputSha)
+    },
+  };
   assetCache.set(id, obj);
   return obj;
 }
@@ -397,13 +465,19 @@ export function createApp({ wire, statusInfo }) {
       try {
         const obj = buildAssetResponse(id);
         if (!obj) { deny(res, 500, 'PARSE_FAILED', `id ${id} could not be parsed`, rawUrl); return; }
+        if (obj.failed) {
+          // negative cache hit: re-serve the RECORDED truthful denial (QC P2-4)
+          deny(res, obj.failStatus, obj.failCode, obj.failMessage, rawUrl);
+          return;
+        }
         serveBytes(res, 200, Buffer.from(obj.json), 'application/json', { etag: obj.etag });
       } catch (err) {
         const isSize = err?.statusCode === 413;
         const status = isSize ? 413 : 422;
-        deny(res, status, isSize ? 'ASSET_TOO_LARGE' : 'PARSE_FAILED_TRUTHFUL',
-          `id ${id}: ${String(err?.message ?? err).slice(0, 400)}`, rawUrl);
-        assetCache.set(id, { json: null, etag: null, failed: true });
+        const code = isSize ? 'ASSET_TOO_LARGE' : 'PARSE_FAILED_TRUTHFUL';
+        const message = `id ${id}: ${String(err?.message ?? err).slice(0, 400)}`;
+        assetCache.set(id, { json: null, etag: null, failed: true, failStatus: status, failCode: code, failMessage: message });
+        deny(res, status, code, message, rawUrl);
         return;
       }
       return;

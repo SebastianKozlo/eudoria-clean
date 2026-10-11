@@ -19,10 +19,15 @@ const sha256 = (b) => crypto.createHash('sha256').update(b).digest('hex');
 const staged = fs.readFileSync(path.join(PKG, 'CHANGED_PATH_CENSUS.json'), 'utf8');
 const census = JSON.parse(staged);
 const { execSync } = await import('node:child_process');
-const stagedNames = execSync('git diff --cached --name-only', { cwd: REPO, encoding: 'utf8' })
+// CORRECTION_ROUND1 / QC P2-10: the census must set-equal the CUMULATIVE
+// publication change set (base e9bb1f5 .. HEAD incl. staged), not the
+// incremental staged-vs-HEAD set.
+const BASE_SHA = 'e9bb1f5120444f8bafd7d90c426f9e64d6b9bf2c';
+const stagedNames = execSync(`git diff --name-only ${BASE_SHA}`, { cwd: REPO, encoding: 'utf8' })
   .split('\n').map((s) => s.trim()).filter(Boolean);
 census.stagedPaths = stagedNames;
 census.stagedCount = stagedNames.length;
+census.censusBasis = `git diff --name-only ${BASE_SHA} (cumulative publication change set: base..HEAD incl. staged) — CORRECTION_ROUND1 / QC P2-10`;
 census.payloadExclusion = 'verified: no .bnt/.ark/.exe/.dll/.pyc/wiedza/game/SDK payloads or binary assets in the staged census (pattern probe returned zero matches)';
 census.foreignPaths = stagedNames.filter((p) =>
   !p.startsWith('compat/pcg935-') && !p.startsWith('compat/server-pcg935-')

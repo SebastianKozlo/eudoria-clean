@@ -244,24 +244,29 @@ export function validateSceneGraph(ir) {
         }
       }
     }
-    // NULL (-1) child slots are LEGAL NIF null links (measured on 218757: the
-    // root NiNode carries 19 of them alongside 12 real children). They are
-    // recorded as diagnostics and skipped in claims/composition — NOT errors.
-    for (const b of ir.blocks) {
-      let nullSlots = 0;
-      for (const c of b.children ?? []) {
-        if (c == null) continue;
-        if (c < 0) { nullSlots++; continue; }
-        if (c >= numBlocks) {
-          errors.push({ class: 'CHILD_REF_OUT_OF_RANGE', block: b.index, child: c });
-        }
+  }
+
+  // NULL (-1) child slot census: ONE pass over all blocks (CORRECTION_ROUND1 /
+  // QC P2-9 — this loop was previously nested inside the per-block loop above,
+  // duplicating every NULL_CHILD_SLOTS warning up to N times per block and
+  // making validation O(N²); dedented to the top level).
+  // NULL (-1) child slots are LEGAL NIF null links (measured on 218757: the
+  // root NiNode carries 19 of them alongside 12 real children). They are
+  // recorded as diagnostics and skipped in claims/composition — NOT errors.
+  for (const b of ir.blocks) {
+    let nullSlots = 0;
+    for (const c of b.children ?? []) {
+      if (c == null) continue;
+      if (c < 0) { nullSlots++; continue; }
+      if (c >= numBlocks) {
+        errors.push({ class: 'CHILD_REF_OUT_OF_RANGE', block: b.index, child: c });
       }
-      if (nullSlots > 0) {
-        warnings.push({
-          class: 'NULL_CHILD_SLOTS', block: b.index, count: nullSlots,
-          note: 'legal NIF NULL child links (-1); skipped in claims and composition',
-        });
-      }
+    }
+    if (nullSlots > 0) {
+      warnings.push({
+        class: 'NULL_CHILD_SLOTS', block: b.index, count: nullSlots,
+        note: 'legal NIF NULL child links (-1); skipped in claims and composition',
+      });
     }
   }
 

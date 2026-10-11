@@ -4,7 +4,7 @@ card: animation-decoder
 status: MEASURED_ON_CORPUS
 sources:
   - module: src/pecompat/PecAnimDecoder.js (pec-anim-decoder-pcg935-r1)
-corpus_scope: catalog — kf 1844 assets, skin 373, morph 116, psys 256 blocks, textkeys 1038 blocks
+corpus_scope: catalog — kf 1844 assets, skin 373, morph 116, psys 127 assets by the NiPSysData-only census (130 assets by the 7-type decoder family), textkeys 1031 assets / 1039 blocks
 classification: INTERNAL_QC_ONLY_PENDING_DESKTOP
 created: 2026-10-11
 ---
@@ -32,7 +32,9 @@ created: 2026-10-11
 
 ## Honest labels (no simulated clips anywhere)
 
-- **PSys** (256 blocks): `DETECTION_UNRESOLVED` — opaque runtime metadata.
+- **PSys** (256 family blocks across 130 assets; the NiPSysData-only subset is
+  252 blocks / 127 assets): `DETECTION_UNRESOLVED` — opaque runtime metadata.
+  Both denominators recorded explicitly (CORRECTION_ROUND1 / QC P2-6).
 - **Morphs** (NiVertexMorphExtraData, 116 assets): region recorded RAW by
   the reader; label `MORPH_REGION_RECORDED_RAW`.
 - Empty controllers (0 keys in every group) are counted as a separate
@@ -42,7 +44,7 @@ created: 2026-10-11
 
 - 462325.nif (v10): 50 controllers -> 50 tracks/clips, 3.33 s, 1 textKey
   block; browser playback: play/pause/stop/scrub(3.00/5.00 on 360268)/
-  speed/once-repeat; >2-duration repeat wraps cleanly (1.44/3.33 after
+  speed/once-repeat; >2-duration repeat wraps cleanly (1.40/3.33 after
   2×+1.5 s) — deterministic LoopRepeat, no drift.
 - 360268.nif (v4): 6 keyframe controllers (5.00 s) + 7-bone skin + 9 meshes
   + 2 TEXTURED_EXACT slots — the v4 animated+skinned+textured witness.

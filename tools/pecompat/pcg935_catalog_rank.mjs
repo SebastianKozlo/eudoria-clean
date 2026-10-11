@@ -16,7 +16,13 @@ const list = [...byName.values()];
 console.log('[rank] unique entries:', list.length);
 
 const ver = (r) => ({ '4838': '10.1.0.0', '757': '4.1.0.12', '1': '4.0.0.2' });
-const diag = (r) => r.extents ? Math.hypot(r.extents[0], r.extents[1], r.extents[2]) : null;
+// Finite-extent check (CORRECTION_ROUND1 / QC P2-7): extents arrays exist for
+// all PASS rows but mesh-less assets carry [-Inf,-Inf,-Inf] which JSON-serializes
+// as [null,null,null] — truthy but NOT measured. Hypot(null,null,null) === 0
+// silently promoted those rows to diagonal 0; every metric must treat
+// all-null extents as UNKNOWN (no null->0 promotion).
+const finiteExtents = (r) => Array.isArray(r.extents) && r.extents.every((x) => Number.isFinite(x));
+const diag = (r) => (finiteExtents(r) ? Math.hypot(r.extents[0], r.extents[1], r.extents[2]) : null);
 
 const sorters = {
   extent: (a, b) => {
@@ -37,7 +43,8 @@ const sorters = {
     return db - da || a.id - b.id;
   },
   vertical: (a, b) => {
-    const va = a.extents ? a.extents[2] : null; const vb = b.extents ? b.extents[2] : null;
+    const va = finiteExtents(a) ? a.extents[2] : null;
+    const vb = finiteExtents(b) ? b.extents[2] : null;
     if (va == null && vb == null) return a.id - b.id;
     if (va == null) return 1;
     if (vb == null) return -1;
@@ -50,8 +57,9 @@ const coverage = {
   bytes: list.length,
   tris: list.filter((r) => (r.tris ?? 0) > 0).length,
   verts: list.filter((r) => (r.verts ?? 0) > 0).length,
+  // finite-extent coverage only — mesh-less/failed rows stay UNKNOWN (QC P2-7)
   diagonal: list.filter((r) => diag(r) != null).length,
-  vertical: list.filter((r) => r.extents != null).length,
+  vertical: list.filter((r) => finiteExtents(r) && Number.isFinite(r.extents[2])).length,
 };
 const slim = list.map((r) => ({
   id: r.id, name: r.name, v: r.versionString, size: r.sizeBytes, status: r.status,

@@ -90,7 +90,10 @@ for (let i = 0; i < ids.length; i++) {
 }
 cpOut.end();
 
-// ---- gate 3: cache bounds + negative entry checks ----
+// ---- gate 3: REAL cache/status injection negatives (CORRECTION_ROUND1 / QC P1-3:
+// the previous `negativeEntryCached` block was a hard-coded stub; every
+// injection below goes through the ACTUAL buildAssetResponse path and must
+// refuse/drop with a COUNTED reason) ----
 const gate3 = {
   name: 'cache_status_injection_negatives',
   assetCacheMaxConfigured: CONFIG.assetCacheMax,
@@ -98,16 +101,69 @@ const gate3 = {
   textureCacheMaxConfigured: CONFIG.textureCacheMax,
   assetCacheBoundHeld: cacheMaxSeen <= CONFIG.assetCacheMax,
   textureCacheBound: textureCache.size() <= CONFIG.textureCacheMax,
-  negativeEntryCached: (() => {
-    // a foreign texture id must be cached as a negative entry (404), not retried
-    const before = textureCache.size();
-    try { buildAssetResponse(223534); } catch { }
-    // simulate: unknown texture id -> the cache records 404 via the server path;
-    // here we verify the parse cache holds only real ids
-    const idsInCache = [...assetCache.keys?.() ?? []];
-    return { before, assetCacheValid: true, sizeAfter: assetCache.size() };
-  })(),
+  injections: {},
 };
+{
+  const GOOD = 223534; // a known-good v4 asset (fast parse)
+  const injections = gate3.injections;
+  // baseline: the real entry serves with identity meta
+  const good0 = buildAssetResponse(GOOD);
+  injections.baseline_valid = { ok: !!good0?.json && !!good0?.meta, served: !!good0?.json };
+  // the ACTUAL payload SHA (from the freshly-parsed entry's own meta)
+  const realPayloadSha = good0.meta.payloadSha256;
+  const realVersion = good0.meta.version;
+  const mkMeta = (over = {}) => ({
+    entryName: '223534.nif', version: realVersion,
+    payloadSha256: realPayloadSha, container: 'Models.bnt', ...over,
+  });
+  const tamper = (label, staleEntry) => {
+    assetCache.set(GOOD, staleEntry);
+    const again = buildAssetResponse(GOOD);
+    injections[label] = {
+      ok: again.json !== 'STALE' && !!again?.meta && again.json === good0.json,
+      dropped: again.json !== 'STALE',
+      reServedFresh: again.json === good0.json,
+    };
+  };
+  // (1) missing required identity: an entry WITHOUT meta must be dropped
+  tamper('missing_required_identity', { json: 'STALE', etag: '"stale"' });
+  // (2) wrong entry identity
+  tamper('wrong_entry_identity', { json: 'STALE', etag: '"stale"', meta: mkMeta({ entryName: '999999.nif' }) });
+  // (3) wrong era (version mismatch)
+  tamper('wrong_era_version', { json: 'STALE', etag: '"stale"', meta: mkMeta({ version: '10.1.0.0' }) });
+  // (4) wrong payload SHA
+  tamper('wrong_payload_sha', { json: 'STALE', etag: '"stale"', meta: mkMeta({ payloadSha256: '0'.repeat(64) }) });
+  // (5) wrong container SHA: the boot guard (verifyInputSha) must refuse
+  try {
+    server.verifyInputSha(new Uint8Array([1, 2, 3]), 'deadbeef', 'injection-test');
+    injections.wrong_container_sha = { ok: false, refused: false, error: 'NO THROW — guard did not refuse' };
+  } catch (e) {
+    injections.wrong_container_sha = { ok: true, refused: true, message: String(e.message).slice(0, 120) };
+  }
+  // (6) negative-cache repeat (QC P2-4): a stored failure (exactly as the
+  // route stores it after a caught parse error) must re-serve the RECORDED
+  // reason — never degrade to a Buffer.from(null) TypeError text
+  const failId = 592605;
+  const recMsg = `id ${failId}: CLOSURE_FAIL: no candidate set closed 592605.nif (injection fixture — the actual route stores the real parse error here)`;
+  assetCache.set(failId, { json: null, etag: null, failed: true, failStatus: 422, failCode: 'PARSE_FAILED_TRUTHFUL', failMessage: recMsg });
+  const negHit = buildAssetResponse(failId);
+  injections.negative_cache_repeat = {
+    ok: negHit?.failed === true && negHit.failMessage === recMsg && negHit.json === null,
+    failedFlag: negHit?.failed === true,
+    recordedReason: negHit?.failMessage ?? null,
+    noTypeErrorDegradation: !(negHit?.failMessage ?? '').includes('TypeError'),
+  };
+  // (7) foreign id: the parse path returns null (the route's 404 basis)
+  injections.foreign_id = { ok: buildAssetResponse(9999999) === null, refused: true };
+  gate3.injectionCounters = { ...server.cacheIntegrityCounters };
+  gate3.allInjectionsRefusedOrDropped = Object.values(injections).every((x) => x.ok !== false);
+  gate3.pass = gate3.assetCacheBoundHeld && gate3.textureCacheBound && gate3.allInjectionsRefusedOrDropped
+    && (gate3.injectionCounters.cache_dropped_missing_identity ?? 0) >= 1
+    && (gate3.injectionCounters.cache_dropped_entry_identity_mismatch ?? 0) >= 1
+    && (gate3.injectionCounters.cache_dropped_era_version_mismatch ?? 0) >= 1
+    && (gate3.injectionCounters.cache_dropped_payload_sha_mismatch ?? 0) >= 1
+    && (gate3.injectionCounters.input_sha_mismatch ?? 0) >= 1;
+}
 
 // ---- gate 10: lifecycle A/B/A memory ----
 const heap = () => process.memoryUsage().heapUsed;

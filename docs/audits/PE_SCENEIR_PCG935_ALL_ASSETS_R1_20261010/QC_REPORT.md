@@ -2,7 +2,10 @@
 
 Reviewer origin: **SELF_REVIEW** (the executor's own fresh pass over the final
 artifacts; NOT an independent Desktop audit — INDEPENDENT_DESKTOP_POST_AUDIT
-stays PENDING).
+stays PENDING). A separate fresh-context INTERNAL_QC by pe-master-auditor
+(QC_ROUND2, 23 findings) was the input authority for CORRECTION_ROUND1; its
+dispatched 17-item scope is fully corrected (PRE_POST_AND_AMENDMENT_LOG.md
+carries every pre→post value) and all affected gates re-run.
 
 ## Checked
 - Corpus accounting: 5,596 = index = catalog = extentOrder bijection (gate 1).

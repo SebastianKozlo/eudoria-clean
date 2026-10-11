@@ -27,7 +27,7 @@ max 6 held during the 5,596-entry sweep.
 
 THREE.AnimationMixer + action.setLoop(LoopRepeat) — deterministic mixer
 time. Evidence: after >2× duration (3.33 s clip played 8.1 s) the action
-time wrapped to 1.44/3.33 (cycle 2 in progress), display derived from
+time wrapped to 1.40/3.33 (cycle 2 in progress), display derived from
 action.time only. No wall-clock accumulation anywhere.
 
 ## The r185 scrub pitfall (REAL BUG FOUND AND FIXED)

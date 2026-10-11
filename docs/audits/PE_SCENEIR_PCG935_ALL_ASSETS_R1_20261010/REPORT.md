@@ -12,12 +12,12 @@ A complete PCG-9.3.5 full-asset SceneIR viewer with the entire Models.bnt corpus
 
 1. **Census** — all 5,596 entries enumerated from the physical BNT2 index, payload-hashed, header-version-identified: 4,838 × NIF 10.1.0.0, 757 × 4.1.0.12, 1 × 4.0.0.2 (matches the pinned denominators; no hardcoding — re-measured).
 2. **Three version-aware corpus readers** on the src/pecompat architecture (fail-closed, closure + EOF-exact with recorded-tail fallback, memoized backtracking):
-   - NIF 10.1.0.0: 4,832/4,838 PASS (99.88%) — 7 honest FAILs recorded with reasons.
+   - NIF 10.1.0.0: 4,831/4,838 PASS (99.86%) — 7 honest FAILs recorded with reasons.
    - NIF 4.1.0.12: **757/757 PASS** — the v4 lineage extended against real PCG payloads (layout corrections measured this run: the NiProperty double-flags trap, the ArkTexture unnamed i32, the light version-split).
    - NIF 4.0.0.2: **1/1 PASS** (52555.nif, 37 blocks, EOF-exact; 4-byte booleans, hasUv, no z-function, raw-ptr lights + trailing f32).
-3. **Catalog with composed bounds** (parentWorld × local, FILE_SCENE_SPACE): default ranking maxAxis extent largest→smallest, UNKNOWN (1,843 genuinely mesh-less assets) LAST with stable id-ASC ties, plus bytes/tris/verts/diagonal/vertical alternate sorts with per-metric coverage.
+3. **Catalog with composed bounds** (parentWorld × local, FILE_SCENE_SPACE): default ranking maxAxis extent largest→smallest, UNKNOWN (1,843 entries: 1,818 mesh-less + 18 mesh-bearing without measurable geometry + 7 parse-FAIL) LAST with stable id-ASC ties, plus bytes/tris/verts/diagonal/vertical alternate sorts with per-metric coverage (diagonal/vertical finite-extent coverage 3,753 — the same as extent; mesh-less/failed rows stay UNKNOWN, no null→0 promotion).
 4. **Texture chain — the actual era binding**: mesh → texturing property → ArkTexture entry (joined by texturingPropertyRef) → 9-byte tail → **dual controls (byte-shape + same-era reference)** → Textures.bnt id → decode (strict DDS DXT1/DXT5 donor decoder; TGA2 24/32-bpp). States separated: 3,678 TEXTURED_EXACT · 73 PARTIAL (RENDER_RECONSTRUCTION fallback only) · 28 UNRESOLVED · 2 DECODE_FAIL · 1,808 SOURCE_UNTEXTURED. Checkerboard = visible PARTIAL, never TEXTURED_EXACT. The 218757 universal tail interpretation stays RETRACTED.
-5. **Original animations**: keyframe controllers → per-node quaternion/position/scale tracks with ORIGINAL keys (duration from real key times); text keys preserved; skins with bind pose/inverse-bind/weights; UV/vis/flip/material-color/alpha emitted with original keys (inventoried; property application partial); PSys DETECTION_UNRESOLVED; morphs recorded-RAW. Browser playback: clip selector, play/pause/stop, scrub, speed, once/repeat, **>2-duration repeat without drift** (wrapped cleanly to 1.44/3.33). No invented/simulated clips.
+5. **Original animations**: keyframe controllers → per-node quaternion/position/scale tracks with ORIGINAL keys (duration from real key times); text keys preserved (1,031 assets / 1,039 blocks); skins with bind pose/inverse-bind/weights; UV/vis/flip/material-color/alpha emitted with original keys (inventoried; property application partial); PSys DETECTION_UNRESOLVED (127 assets by the NiPSysData census; 130 assets by the 7-type decoder family — both definitions recorded); morphs recorded-RAW (116 assets). Browser playback: clip selector, play/pause/stop, scrub, speed, once/repeat, **>2-duration repeat without drift** (wrapped cleanly to 1.40/3.33, per the recorded BROWSER_INTERACTION.json). No invented/simulated clips.
 6. **Viewer app** (compat/pcg935-viewer.html/js/css): main canvas dominant, drawers closed by default, search/filter/sort/deep-links (#asset/<id>), old-SceneIR orbit feel with stable AABB fit (updateMatrixWorld first), latest-wins generation identity, whole/parts with per-part visibility, wireframe/textures/axes/grid/bounds toggles, reset/fit, truthful failure display.
 7. **Server** (compat/server-pcg935-viewer.mjs, 127.0.0.1:8164): loopback-only, static allowlist, pinned Three.js 0.185.0 (version-verified at startup), bounded routes with truthful errors (verified by 17 negative probes), LRU-bounded caches (assets 6 / textures 128, held at 6 during the full sweep).
 
@@ -28,13 +28,26 @@ corpus bijection · parser fixtures pos/neg · cache/status negatives · ranking
 
 ## Honest residuals (never hidden)
 
-- 7 parse failures (0.125%) — MODEL_DATA_REF_TYPE_MISMATCH ×4, NiSkinData/NiSkinPartition/EOF-region closure ×4 (see KNOWLEDGE_GAPS.md).
+- 7 parse failures (0.125%, all v10) — MODEL_DATA_REF_TYPE_MISMATCH ×3 (472836, 543836, 546348) + closure ×4 (592605, 591780 NiSkinData-context; 204828 NiSkinPartition-context; 419159 EOF-region) — recorded as FAIL with reasons (non-pass); see KNOWLEDGE_GAPS.md.
 - ALL_TEXTURE_BINDINGS_RESOLVED = NO (28 UNRESOLVED + 2 DECODE_FAIL + 73 fallback-PARTIAL).
-- ALL_ANIMATIONS_PLAYABLE = NO (PSys 130 assets DETECTION_UNRESOLVED; morph semantics unresolved; property controllers inventoried but not applied live).
+- ALL_ANIMATIONS_PLAYABLE = NO (PSys DETECTION_UNRESOLVED: 127 assets by the NiPSysData census / 130 by the 7-type decoder family; morph semantics unresolved; property controllers inventoried but not applied live).
 - JPEG (19) and TGA types 1/3/10 (30) textures UNSUPPORTED_FORMAT (truthful 415).
 
 ## Claims discipline
 
 ALL_CATALOGUED = YES (5,596/5,596) · ALL_ATTEMPTED = YES (5,596) · ALL_RENDERABLE = PARTIAL (5,589 runtime responses built; browser render verified on witnesses — no per-entry screenshot claims) · publication and 8140 handoff per contract order.
+
+## Terminal labels (contract-required)
+
+```text
+HISTORICAL_WORLD_PLACEMENT = NOT_ESTABLISHED
+WORLD_XYZ_RECOVERED = NO
+CANONICAL_GATE_EFFECT = NONE
+INDEPENDENT_DESKTOP_POST_AUDIT = PENDING
+NEXT_EXPERIMENT_AUTHORIZED = NO
+HARD_STOP = YES
+```
+
+The positions rendered by the viewer are FILE_SCENE_SPACE transforms of the original NIF scene graph — no historical PE world placement is claimed or recovered by this run.
 
 **This package is SELF_REVIEW + machine gates. INDEPENDENT_DESKTOP_POST_AUDIT = PENDING.**

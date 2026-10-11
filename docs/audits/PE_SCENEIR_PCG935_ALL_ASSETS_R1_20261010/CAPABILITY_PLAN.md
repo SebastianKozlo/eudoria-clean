@@ -5,7 +5,7 @@ Executed plan (draft under PRIVATE_OUTPUT_ROOT/CAPABILITY_PLAN_DRAFT.md):
 | Wave | Capability | Result |
 |---|---|---|
 | 1 | Full corpus census (5596, per-version) | DONE — denominators match pinned set |
-| 2 | NIF 10.1.0.0 corpus reader | DONE — 4832/4838 (7 honest FAILs) |
+| 2 | NIF 10.1.0.0 corpus reader | DONE — 4831/4838 (7 honest FAILs; 99.86%) |
 | 3 | NIF 4.1.0.12 + 4.0.0.2 readers | DONE — 757/757 + 1/1 EOF-exact |
 | 4 | Catalog: composed bounds, ranking, alternate sorts | DONE — coverage measured |
 | 5 | Texture chain (controls + DDS/TGA + states) | DONE — see TEXTURE_BINDING_SUMMARY.csv |

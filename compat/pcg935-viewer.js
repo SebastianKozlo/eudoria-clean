@@ -8,6 +8,11 @@
 //     play/pause/stop/scrub/speed/once-repeat, drift-free looping evidence
 //   - latest-wins generation identity; full disposal on asset change
 //   - deep links (#asset/<id>), search/filter/sort, parts drawer, toggles.
+//
+// PLACEMENT DISCLAIMER (contract-required labels): the positions shown are
+// FILE_SCENE_SPACE transforms of the original NIF scene graph.
+//   HISTORICAL_WORLD_PLACEMENT = NOT_ESTABLISHED
+//   WORLD_XYZ_RECOVERED = NO
 'use strict';
 
 import * as THREE from 'three';
@@ -110,16 +115,21 @@ function applyFilters() {
     tris: (a, b) => (b.tris || 0) - (a.tris || 0) || a.id - b.id,
     verts: (a, b) => (b.verts || 0) - (a.verts || 0) || a.id - b.id,
     diagonal: (a, b) => {
-      const da = a.ex ? Math.hypot(a.ex[0], a.ex[1], a.ex[2]) : null;
-      const db = b.ex ? Math.hypot(b.ex[0], b.ex[1], b.ex[2]) : null;
+      // finite-extent gate (CORRECTION_ROUND1 / QC P2-7): all-null extents
+      // (mesh-less/failed rows serialize as [null,null,null]) are UNKNOWN —
+      // Math.hypot(null,null,null) === 0 would silently promote them to 0.
+      const finite = (e) => Array.isArray(e) && e.every((x) => Number.isFinite(x));
+      const da = finite(a.ex) ? Math.hypot(a.ex[0], a.ex[1], a.ex[2]) : null;
+      const db = finite(b.ex) ? Math.hypot(b.ex[0], b.ex[1], b.ex[2]) : null;
       if (da == null && db == null) return a.id - b.id;
       if (da == null) return 1;
       if (db == null) return -1;
       return db - da || a.id - b.id;
     },
     vertical: (a, b) => {
-      const da = a.ex ? a.ex[2] : null;
-      const db = b.ex ? b.ex[2] : null;
+      const finite = (e) => Array.isArray(e) && e.every((x) => Number.isFinite(x));
+      const da = finite(a.ex) ? a.ex[2] : null;
+      const db = finite(b.ex) ? b.ex[2] : null;
       if (da == null && db == null) return a.id - b.id;
       if (da == null) return 1;
       if (db == null) return -1;

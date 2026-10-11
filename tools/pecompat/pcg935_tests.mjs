@@ -138,7 +138,14 @@ const catalog = JSON.parse(fs.readFileSync(path.join(PRIVATE, 'catalog', 'catalo
   g.altSortBytesTop = byBytes.slice(0, 5).map((e) => e.id);
   g.altSortDiffersFromExtent = byBytes.slice(0, 5).join() !== order.slice(0, 5).join();
   g.coverage = catalog.stats.coverage;
-  g.pass = monotonic && g.nullsAtEnd && g.top5IsLargest && tieOk && g.altSortDiffersFromExtent;
+  // CORRECTION_ROUND1 / QC P2-7: diagonal/vertical must count only FINITE
+  // extents — no null->0 promotion via truthy-but-null extents arrays.
+  const finiteRows = catalog.entries.filter((e) => Array.isArray(e.ex) && e.ex.every((x) => Number.isFinite(x)));
+  g.finiteExtentsRows = finiteRows.length;
+  g.coverageConsistent = g.coverage.diagonal === finiteRows.length
+    && g.coverage.vertical === finiteRows.length
+    && g.coverage.diagonal !== 5589; // the inflated pre-correction value must be gone
+  g.pass = monotonic && g.nullsAtEnd && g.top5IsLargest && tieOk && g.altSortDiffersFromExtent && g.coverageConsistent;
   gates.gate4 = g;
 }
 
