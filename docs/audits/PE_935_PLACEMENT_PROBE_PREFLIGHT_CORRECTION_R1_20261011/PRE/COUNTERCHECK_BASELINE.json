@@ -1,0 +1,91 @@
+{
+  "tool": "COUNTERCHECK_BASELINE_INDEPENDENT_MINIPARSER",
+  "cases": {
+    "LAYOUT": {
+      "strideCountVisited": 126,
+      "headerCountVisited": 1,
+      "layoutAttemptsExpected": 126,
+      "layoutsAdmittedExpected": 0,
+      "bufferLength": 10007,
+      "primalityNote": "10007 % s != 0 for all s in 12..512 (10007 is prime)"
+    },
+    "XYZ": {
+      "rowsExamined": 80,
+      "perAxisFinite": [
+        "72/80",
+        "72/80",
+        "72/80"
+      ],
+      "perAxisFiniteRate": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "columnMeanRateExpected": 0.9,
+      "completeFiniteTriples": 56,
+      "tripleRateExpected": "56/80",
+      "tripleRateValue": 0.7,
+      "idColumnRateExpected": 1
+    },
+    "SAMPLE_VS_CENSUS": {
+      "tableRows": 4800,
+      "sampleRows": 1200,
+      "fullIdRateExpected": "1200/4800",
+      "fullIdRateValue": 0.25,
+      "sampleIdRateExpected": "1200/1200",
+      "sampleIdRateValue": 1,
+      "note": "fixture: valid IDs only at rows i%4===2; original sample indices are 4j+2 (all valid) — sample rate 1.0 hides the 0.25 table quality"
+    },
+    "COUNTERS_AS_FLOATS": {
+      "examined": 240,
+      "subnormalF32": 240,
+      "finiteF32": 240,
+      "zeroF32": 0,
+      "sample": [
+        {
+          "u32": 1,
+          "asFloat": 1.401298464324817e-45
+        },
+        {
+          "u32": 1000,
+          "asFloat": 1.401298464324817e-42
+        },
+        {
+          "u32": 5000,
+          "asFloat": 7.006492321624085e-42
+        },
+        {
+          "u32": 2,
+          "asFloat": 2.802596928649634e-45
+        },
+        {
+          "u32": 1001,
+          "asFloat": 1.4026997627891419e-42
+        },
+        {
+          "u32": 5001,
+          "asFloat": 7.00789362008841e-42
+        }
+      ],
+      "alternativeU32": [
+        1,
+        1000,
+        5000
+      ]
+    },
+    "CENSUS": {
+      "declaredEntries": 4,
+      "expectedByConstruction_configA": {
+        "SCANNED": 2,
+        "FILTERED_EXTENSION": 1,
+        "TOO_SMALL": 1,
+        "recordedByOriginal_skipRows": 0
+      },
+      "regexConfigB": {
+        "FILTERED_REGEX": 3,
+        "SCANNED": 1
+      },
+      "note": "entries scan.rec(2576B,records) tex.nif(2576B,records,ext-skip) tiny.rec(8B,too-small) huge.rec(2576B,records); original records zero skip rows here — all four dispositions are silent except none; ENTRY_TOO_LARGE only if size > 4 MiB"
+    }
+  }
+}

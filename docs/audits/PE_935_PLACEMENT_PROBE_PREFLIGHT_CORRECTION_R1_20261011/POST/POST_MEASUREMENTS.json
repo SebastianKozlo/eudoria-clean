@@ -1,0 +1,449 @@
+{
+  "tool": "POST_MEASUREMENTS_CORRECTED_R1",
+  "harnessRevision": "v2_after_fresh_qc_round_2",
+  "codeIdentity": {
+    "placement_probe": "368888042eae0409243a4ed4efc3dcd6ad354b91d36207270f75149aaf70662a",
+    "ids_from_export": "dafb10b002d51ac018b16c25d6384444c16fe36bc8258319633ffaa966b85206",
+    "fixtures": "de683b00fdaf9039bb5147aaf50202e2d094f05862a1587502a04279e760dd8f",
+    "node": "v22.22.0"
+  },
+  "fixtureIdentity": {
+    "records80": "b86aa5e96b1f4a163a555d2a16d0a9714148eaae6ae6debb8325081ca8796ed6",
+    "xyzFixture80": "d05484b1d1db598e23ee89859d2865fd75a7e245507ae451e596202b7d274fcd",
+    "layoutBuffer10007": "83e2c22aa61f6a7a53c6b9a55c75bfbbb18cd77e2df0487b1a42b316f3e18595",
+    "poisoned4800": "a87692464299d8fef98569f9084f5ccffd9a7f725201d48844beabef6234682b",
+    "countersAsFloats": "d95e907bc3b9ab459246b65575dc7814f4b48272fb3b3cb39947cfa74d5cbfff",
+    "singleIdTable80": "e37b9db0eb1fa2f6c6f8925a589f7d6111e596420303192fdd23a889f3ec109a",
+    "recordsTwoIdSmall": "40a8ea2bb8e6ada57a2a00e426830be98454ae06fad201fe732d356b1e50955a",
+    "records80Headerless": "578a3a77659a0527e5c83ccacd9bdb83712a622eefd9fe5331880eef36303015"
+  },
+  "node": "v22.22.0",
+  "cases": {
+    "TEST_SUITE": {
+      "command": "node --test (5 files)",
+      "exitCode": 0,
+      "tests": 27,
+      "pass": 27,
+      "fail": 0,
+      "originalSevenPass": true,
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.387Z"
+    },
+    "O1_INVALID_NUMERIC_CONFIG": {
+      "command": "CLI --max-stride not-a-number / --max-stride (missing); exported analyzeBlob(maxStride=NaN, minIdRate=1.5); legal boundary maxHeader=0",
+      "cli_bad_exit": 3,
+      "cli_bad_invalidLabel": true,
+      "cli_bad_scanStartedNo": true,
+      "cli_bad_noOutDir": true,
+      "cli_missing_exit": 3,
+      "cli_missing_scanStartedNo": true,
+      "exported_nan_throws": true,
+      "exported_rate_throws": true,
+      "legal_boundary_headerless_candidates": 26,
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.484Z"
+    },
+    "O2_EXCLUSION_CENSUS": {
+      "command": "CLI single c.bnt (4 declared entries), default and --entry-regex",
+      "exitCode": 0,
+      "declared": 4,
+      "dispositionTotal": 4,
+      "censusOk": true,
+      "counts": {
+        "SCANNED": 2,
+        "FILTERED_EXTENSION": 1,
+        "TOO_SMALL": 1
+      },
+      "units": {
+        "containers": 1,
+        "scannedPayloads": 2
+      },
+      "regexCounts": {
+        "SCANNED": 1,
+        "FILTERED_REGEX": 3
+      },
+      "regexCensusOk": true,
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.658Z"
+    },
+    "O3_SAMPLE_VS_CENSUS": {
+      "command": "CLI single big.vfs (4800 rows, valid IDs only at i%4===2), --max-stride 64",
+      "exitCode": 0,
+      "tableRowCount": 4800,
+      "sampledRowCount": 1200,
+      "sampleIdRate": 1,
+      "sampleXyzFiniteRate": 1,
+      "censusStatus": "FULL_CENSUS",
+      "fullCensusRowCount": 4800,
+      "fullCensusIdRate": 0.25,
+      "fullCensusXyzFiniteRate": 1,
+      "note": "sample rate 1.0 is NOT presented as table quality; the FULL_CENSUS reproduces the known 0.25 quality",
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.768Z"
+    },
+    "O4_SINGLE_DEFINITION_TABLE": {
+      "command": "exported analyzeBlob on singleIdTable(80), minDistinctId=1 vs default 2",
+      "minDistinctId1_candidates": 22,
+      "allIdDistinct1": true,
+      "default_candidates": 0,
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.782Z"
+    },
+    "O5_INTEGER_COUNTERS_AS_FLOATS": {
+      "command": "exported analyzeBlob on countersAsFloats() (u32 counters 1..5079 as f32 subnormals)",
+      "candidateFound": true,
+      "censusStatus": "FULL_CENSUS",
+      "perAxis": [
+        {
+          "finiteRate": 1,
+          "nanCount": 0,
+          "infinityCount": 0,
+          "subnormalCount": 80,
+          "zeroCount": 0,
+          "u32": {
+            "min": 1,
+            "max": 80,
+            "zeroCount": 0,
+            "distinctCount": 80
+          }
+        },
+        {
+          "finiteRate": 1,
+          "nanCount": 0,
+          "infinityCount": 0,
+          "subnormalCount": 80,
+          "zeroCount": 0,
+          "u32": {
+            "min": 1000,
+            "max": 1079,
+            "zeroCount": 0,
+            "distinctCount": 80
+          }
+        },
+        {
+          "finiteRate": 1,
+          "nanCount": 0,
+          "infinityCount": 0,
+          "subnormalCount": 80,
+          "zeroCount": 0,
+          "u32": {
+            "min": 5000,
+            "max": 5079,
+            "zeroCount": 0,
+            "distinctCount": 80
+          }
+        }
+      ],
+      "placementClaimPresent": false,
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.786Z"
+    },
+    "O6_ACTUAL_PROJECT_ADAPTERS": {
+      "command": "CLI RAW+BNT2+ARK with the real BASE adapters (repo = BASE worktree)",
+      "exitCode": 0,
+      "sourceCount": 3,
+      "candidateCount": 87,
+      "adaptersGitBlobs": {
+        "Bnt2Archive": "1fb862905b4749f3336bb47da87441edbd018fb7",
+        "ArkArchive": "a9c9f04319dc3128d527d0688285ec5384f8aa97"
+      },
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.902Z"
+    },
+    "O7_NUMERIC_DAT_MODEL_NAME_PATTERN": {
+      "command": "ids_from_export with models.dat (rejected) and models.bnt (numeric + non-numeric names)",
+      "datExit": 1,
+      "datRejected": true,
+      "bntExit": 0,
+      "modelIds": 2,
+      "nifEntries": 2,
+      "nonNumericNamesExcluded": 1,
+      "note": "hypothetical .dat is a helper limitation, NOT presented as a defect of the actual Models.bnt",
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.976Z"
+    },
+    "S7a_LAYOUT_ATTEMPTS_VS_ADMITTED": {
+      "command": "exported analyzeBlob on 10007B 0xFF buffer, maxHeader=0, strides 12..512; lowered limit 60",
+      "layoutAttempts": 126,
+      "layoutsAdmitted": 0,
+      "legacyLayoutsTested": 0,
+      "coverage": "FULL",
+      "loweredLimit": {
+        "threshold": 60,
+        "layoutAttempts": 61,
+        "budgetExhausted": true,
+        "coverage": "PARTIAL",
+        "refusal": {
+          "kind": "LAYOUT_EVALUATIONS",
+          "detail": "layout attempt 61 exceeds 60",
+          "layoutAttempts": 61,
+          "scannedBytes": 0,
+          "syntheticInputs": 0,
+          "fullCensusRows": 0,
+          "retainedPeak": 0,
+          "externalRetained": 0
+        }
+      },
+      "budgetChargedQuantity": "LAYOUT_ATTEMPTS (first magnitude), not LAYOUTS_ADMITTED",
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.977Z"
+    },
+    "S7b_XYZ_TRIPLE_RATE": {
+      "command": "exported analyzeBlob on xyzFixture80() (8 NaN per axis in rows 0..7/8..15/16..23)",
+      "legacyXyzRateColumnMean": 0.9,
+      "sampleXyzFiniteRate": 0.7,
+      "completeFiniteTriples": 56,
+      "sampleDenominator": 80,
+      "perAxisFiniteRates": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "perAxisNanCounts": [
+        8,
+        8,
+        8
+      ],
+      "censusStatus": "FULL_CENSUS",
+      "fullCensusXyzFiniteRate": 0.7,
+      "fullCensusRowCount": 80,
+      "expectedFromCountercheck": {
+        "columnMean": 0.9,
+        "tripleRate": 0.7,
+        "triples": "56/80"
+      },
+      "note": "0.9 stays labeled as the legacy per-axis column mean; the joint XYZ_FINITE_RATE is 56/80=0.7 and is the quantity reported as the common rate",
+      "outcome": "PASS",
+      "timeUtc": "2026-10-11T10:15:23.982Z"
+    },
+    "BUDGET_BATTERY": {
+      "command": "CLI + exported budget scenarios B1..B7 + census extra categories CX1..CX4 (thresholds LOWERED, ceilings never raised)",
+      "B1": {
+        "limit": "SYNTHETIC_INPUTS",
+        "ceiling": 32,
+        "legalBoundaryAdmitted": 32,
+        "refusals": [
+          {
+            "kind": "SYNTHETIC_INPUTS",
+            "detail": "refused payload admission: C:\\Users\\User\\AppData\\Local\\Temp\\pe-post-d92o7T\\many.bnt!e32.rec",
+            "layoutAttempts": 0,
+            "scannedBytes": 8704,
+            "syntheticInputs": 32,
+            "fullCensusRows": 0,
+            "retainedPeak": 0,
+            "externalRetained": 0
+          },
+          {
+            "kind": "SYNTHETIC_INPUTS",
+            "detail": "refused payload admission: C:\\Users\\User\\AppData\\Local\\Temp\\pe-post-d92o7T\\one.bnt!x.rec",
+            "layoutAttempts": 68544,
+            "scannedBytes": 8704,
+            "syntheticInputs": 32,
+            "fullCensusRows": 256,
+            "retainedPeak": 32,
+            "externalRetained": 32
+          }
+        ],
+        "exhausted": [
+          "SYNTHETIC_INPUTS"
+        ],
+        "coverage": "PARTIAL",
+        "firstContainer": {
+          "overBudget": 1,
+          "scanned": 32,
+          "censusOk": true
+        },
+        "secondContainer": {
+          "declared": 1,
+          "disposition": "OVER_BUDGET",
+          "censusOk": true
+        },
+        "candidates": 32,
+        "outcome": "PASS"
+      },
+      "B2": {
+        "limit": "SCANNED_BYTES",
+        "ceiling": 67108864,
+        "exceedCase": {
+          "scannedBytes": 2576,
+          "exhausted": [
+            "SCANNED_BYTES"
+          ],
+          "secondInputDisposition": "OVER_BUDGET"
+        },
+        "legalBoundary": {
+          "scannedBytes": 5152,
+          "coverage": "FULL",
+          "bothScanned": true
+        },
+        "outcome": "PASS"
+      },
+      "B3": {
+        "limit": "LAYOUT_EVALUATIONS",
+        "ceiling": 100000,
+        "aggregatedAttempts": 3001,
+        "exhausted": [
+          "LAYOUT_EVALUATIONS"
+        ],
+        "refusal": {
+          "kind": "LAYOUT_EVALUATIONS",
+          "detail": "layout attempt 3001 exceeds 3000",
+          "layoutAttempts": 3001,
+          "scannedBytes": 5152,
+          "syntheticInputs": 2,
+          "fullCensusRows": 718,
+          "retainedPeak": 56,
+          "externalRetained": 29
+        },
+        "secondInputDisposition": "SCANNED",
+        "budgetStopRecorded": true,
+        "preExhaustionCase": {
+          "attempts": 701,
+          "secondInputDisposition": "OVER_BUDGET",
+          "censusOk": true
+        },
+        "defaultCeilingCase": {
+          "layoutAttempts": 4284,
+          "coverage": "FULL"
+        },
+        "outcome": "PASS"
+      },
+      "B4": {
+        "limit": "FULL_CENSUS_ROWS",
+        "ceiling": 50000,
+        "exceedCase": {
+          "censusRowsUsed": 160,
+          "statuses": [
+            "FULL_CENSUS",
+            "PARTIAL_BUDGET_EXHAUSTED"
+          ],
+          "refusals": [
+            {
+              "kind": "FULL_CENSUS_ROWS",
+              "detail": "census 160+80 exceeds 160",
+              "layoutAttempts": 4284,
+              "scannedBytes": 5152,
+              "syntheticInputs": 2,
+              "fullCensusRows": 160,
+              "retainedPeak": 31,
+              "externalRetained": 2
+            },
+            {
+              "kind": "FULL_CENSUS_ROWS",
+              "detail": "census 160+80 exceeds 160",
+              "layoutAttempts": 4284,
+              "scannedBytes": 5152,
+              "syntheticInputs": 2,
+              "fullCensusRows": 160,
+              "retainedPeak": 31,
+              "externalRetained": 2
+            }
+          ]
+        },
+        "legalBoundary": {
+          "statuses": [
+            "FULL_CENSUS"
+          ],
+          "coverage": "FULL"
+        },
+        "outcome": "PASS"
+      },
+      "B5": {
+        "limit": "RETAINED_CANDIDATES",
+        "ceiling": 256,
+        "exceedCase": {
+          "peakRetained": 4,
+          "exhausted": [
+            "RETAINED_CANDIDATES"
+          ],
+          "candidates": 4,
+          "coverage": "PARTIAL"
+        },
+        "twoInputAggregation": {
+          "peakRetained": 4,
+          "exhausted": true,
+          "coverage": "PARTIAL",
+          "candidates": 4
+        },
+        "legalBoundary": {
+          "peakRetained": 29,
+          "coverage": "FULL"
+        },
+        "outcome": "PASS"
+      },
+      "B6": {
+        "rule": "threshold may not exceed canonical ceiling",
+        "exportedRaised": {
+          "threw": true,
+          "message": "INVALID_CONFIGURATION: budgetThresholds.layoutEvaluations out of range [1, 100000] (ceiling 100000): 100001"
+        },
+        "cliRaised": {
+          "exitCode": 3,
+          "invalidLabel": true,
+          "scanStartedNo": true,
+          "stderr": "INVALID_CONFIGURATION: budgetThresholds.layoutEvaluations out of range [1, 100000] (ceiling 100000): 100001\nSCAN_STARTED=NO"
+        },
+        "outcome": "PASS"
+      },
+      "B7": {
+        "rule": "no-reset-per-payload aggregation; reservation refund; separate container/control byte accounting",
+        "firstAdmitted": true,
+        "secondRefused": true,
+        "scannedBytesAfterFirst": 300,
+        "refundWorks": true,
+        "refundZeroesInputs": true,
+        "exhausted": [
+          "SCANNED_BYTES"
+        ],
+        "coverage": "PARTIAL",
+        "separate": {
+          "containerReadBytes": 1234,
+          "controlWorkBytes": 512,
+          "scannedBytes": 0
+        },
+        "outcome": "PASS"
+      },
+      "CX1": {
+        "case": "ENTRY_TOO_LARGE",
+        "counts": {
+          "SCANNED": 1,
+          "ENTRY_TOO_LARGE": 1
+        },
+        "censusOk": true,
+        "outcome": "PASS"
+      },
+      "CX2": {
+        "case": "INPUT_TOO_LARGE",
+        "parseStatus": "INPUT_TOO_LARGE",
+        "declaredEntryCount": null,
+        "candidateCount": 0,
+        "scannedBytes": 0,
+        "outcome": "PASS"
+      },
+      "CX3": {
+        "case": "UNSUPPORTED",
+        "exitCode": 2,
+        "parseStatus": "UNSUPPORTED",
+        "declaredEntryCount": null,
+        "skipRecorded": true,
+        "outcome": "PASS"
+      },
+      "CX4": {
+        "case": "PAYLOAD_SIZE_MISMATCH",
+        "shimActuallyTruncated": true,
+        "parseFailed": 1,
+        "censusOk": true,
+        "scannedBytesAfterRefund": 0,
+        "syntheticInputsAfterRefund": 0,
+        "skipRecorded": true,
+        "outcome": "PASS"
+      },
+      "timeUtc": "2026-10-11T10:15:25.119Z"
+    }
+  },
+  "generated": {
+    "pass": 47,
+    "controlPass": 0,
+    "fail": 0
+  }
+}

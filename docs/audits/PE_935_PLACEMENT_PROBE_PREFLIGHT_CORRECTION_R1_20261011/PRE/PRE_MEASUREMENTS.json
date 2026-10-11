@@ -1,0 +1,135 @@
+{
+  "tool": "PRE_REPRODUCE_ORIGINAL_R1",
+  "node": "v22.22.0",
+  "stage": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011\\staging\\kit_r1",
+  "cases": {
+    "ORIGINAL_SEVEN_TESTS": {
+      "exitCode": 0,
+      "pass": "7",
+      "fail": "0",
+      "timeUtc": "2026-10-11T09:46:04.383Z"
+    },
+    "INVALID_NUMERIC_CONFIG": {
+      "cli_bad_max_stride": {
+        "exitCode": 0,
+        "scanStartedSummaryExists": true,
+        "invalidConfigurationLabel": false,
+        "candidatesReported": 0
+      },
+      "exported_nan_maxStride": {
+        "threw": false,
+        "candidates": 0,
+        "note": "NaN maxStride accepted by exported analyzeBlob"
+      },
+      "cli_missing_value_after_flag": {
+        "exitCode": 0,
+        "invalidConfigurationLabel": false
+      },
+      "legal_maxHeader0_negative_posLo": {
+        "threw": false,
+        "candidates": 0
+      },
+      "interpretation": "Original R1 accepts NaN numeric options silently (scan runs with zero candidates = false success); no INVALID_CONFIGURATION, no SCAN_STARTED=NO marker.",
+      "timeUtc": "2026-10-11T09:46:04.621Z"
+    },
+    "EXCLUSION_CENSUS": {
+      "declaredEntryCount": 4,
+      "scannedSourceCount": 2,
+      "recordedSkipRows_configA": 0,
+      "skipReasons_configA": [],
+      "regexRun": {
+        "scannedSourceCount": 1,
+        "recordedSkipRows": 0
+      },
+      "knownSilentSkips_configA": {
+        "ext_nif": 1,
+        "too_small_tiny": 1,
+        "regex_none": 0
+      },
+      "interpretation": "Original R1 records only INPUT_TOO_LARGE/ENTRY_TOO_LARGE/READER_FAILURE/SCAN_EXCEPTION/PER_SOURCE_CANDIDATE_CAP; FILTERED_EXTENSION/TOO_SMALL/FILTERED_REGEX are silent. DECLARED_ENTRIES != sum of recorded dispositions.",
+      "timeUtc": "2026-10-11T09:46:05.048Z"
+    },
+    "SAMPLE_VS_CENSUS": {
+      "tableRowCount": 4800,
+      "sampleCount": 1200,
+      "sampleIdRate": 1,
+      "sampleXyzRate": 1,
+      "fullCensusFieldsPresent": false,
+      "censusStatusFieldPresent": false,
+      "interpretation": "Original R1 evaluates only the sampled rows; no FULL_CENSUS_* fields, no CENSUS_STATUS. In this fixture the evenly spread 1200-row sample sees a 100% valid ID column while the whole 4800-row table is 25% valid — the sample cannot and does not represent the full table.",
+      "timeUtc": "2026-10-11T09:46:05.648Z"
+    },
+    "SINGLE_DEFINITION_TABLE": {
+      "minDistinctId1_candidates": 22,
+      "default_minDistinctId2_candidates": 0,
+      "defaultDistinctInterfaceExists": true,
+      "interpretation": "Original R1 exposes --min-distinct-id / minDistinctId (default 2). At minDistinctId=1 a single-definition table (all rows ID 4057) is detected; under the default it is silently excluded (explicit coverage restriction).",
+      "timeUtc": "2026-10-11T09:46:05.689Z"
+    },
+    "INTEGER_COUNTERS_AS_FLOATS": {
+      "candidateFound": true,
+      "xyzRateReported": 1,
+      "sampleFloatValues": [
+        1.401298464324817e-45,
+        1.401298464324817e-42,
+        7.006492321624085e-42
+      ],
+      "diagnosticsPresent": false,
+      "interpretation": "Original R1 accepts subnormal f32 (u32 counters 1..5080 as bits) as in-range positions with rate 1.0 and reports no NAN/SUBNORMAL/INFINITY/u32-alternative diagnostics; subnormal candidates pass as ordinary position candidates.",
+      "timeUtc": "2026-10-11T09:46:05.696Z"
+    },
+    "ACTUAL_PROJECT_ADAPTERS_SYNTHETIC_INPUTS": {
+      "exitCode": 0,
+      "sourceCount": 3,
+      "candidateCount": 87,
+      "containerKinds": [
+        "RAW_BLOB_UNFRAMED",
+        ".bnt",
+        ".ark"
+      ],
+      "csvMentionsAllThreeInputs": true,
+      "adaptersUsed": {
+        "bnt2Blob": "1fb862905b4749f3336bb47da87441edbd018fb7",
+        "arkBlob": "a9c9f04319dc3128d527d0688285ec5384f8aa97",
+        "repo": "BASE worktree D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011\\workspace\\eudoria-clean"
+      },
+      "stderr": "",
+      "timeUtc": "2026-10-11T09:46:05.933Z"
+    },
+    "NUMERIC_DAT_MODEL_NAME_PATTERN": {
+      "datRun": {
+        "exitCode": 1,
+        "rejected": true,
+        "stderrTail": "    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)"
+      },
+      "bntRun": {
+        "exitCode": 0,
+        "modelIds": [
+          123,
+          218757
+        ],
+        "nonNumericNameExcluded": true
+      },
+      "interpretation": "ids_from_export R1 accepts only .bnt/.ark model archives (a hypothetical .dat is rejected, NOT presented as a defect of the actual Models.bnt) and counts only <numeric>.nif names (non-numeric names silently excluded from S_model).",
+      "timeUtc": "2026-10-11T09:46:06.151Z"
+    },
+    "LAYOUT_ATTEMPTS_VS_ADMITTED": {
+      "fixture": {
+        "bytes": 10007,
+        "fill": "0xFF",
+        "note": "10007 is prime: no stride in 12..512 divides it"
+      },
+      "original_layoutsTested": 0,
+      "expectedVisitedLayoutAttempts": 126,
+      "layoutsAdmitted": 0,
+      "interpretation": "Original R1 increments layoutsTested only AFTER the divisibility and minRows filters, so a fully-visited-but-undividable buffer reports layoutsTested=0. Budget accounting on this quantity would charge 0 instead of 126.",
+      "timeUtc": "2026-10-11T09:46:06.154Z"
+    },
+    "XYZ_COLUMN_MEAN_VS_ROW_TRIPLE_RATE": {
+      "candidateFound": true,
+      "original_xyzRate": 0.9,
+      "interpretation": "Original R1 xyzRate is the MEAN of the three per-axis column in-range rates (0.9 in this fixture). It is NOT the joint row-triple finite rate, which is 56/80=0.7 in this fixture (independently recomputed by the run countercheck).",
+      "timeUtc": "2026-10-11T09:46:06.164Z"
+    }
+  }
+}

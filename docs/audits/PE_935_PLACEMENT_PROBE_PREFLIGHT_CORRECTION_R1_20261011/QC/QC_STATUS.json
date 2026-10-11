@@ -1,0 +1,54 @@
+{
+  "run": "PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011",
+  "qc_stage": "FRESH_INTERNAL_QC (post-correction, pre-publication)",
+  "qc_worker": "pe-master-auditor — separately-dispatched fresh QC context; internal to this run; NOT an independent Desktop post-audit",
+  "qc_date_utc": "2026-10-11",
+  "qc_status": "PASS_WITH_FINDINGS",
+  "verdict_scope_note": "Core corrected behaviors independently verified: §5 fail-closed validation, §6 seven observations (O1..O7), §7 both cases (126/0 and 56/80 vs 0.9), census reconciliation, POST-vs-code identity, PRE preservation, standing science — all CONFIRMED by fresh execution and by a QC-owned independent mini-implementation. §8 budget semantics is PARTIAL: F1 (P1) is a demonstrated unmet §8 requirement (RETAINED_CANDIDATES global peak overshoot 261>256 measured), F2/F3 are §8 ordering/aggregation defects. Per contract §10, unmet expectations block CORRECTION_PASS for the affected B-case expectations; the executor's stamped all-PASS therefore overstates §8 completeness. Overall: the correction stands with required narrow corrections (REQUIRE_CORRECTIONS limited to the F1..F3 budget-semantics/report items); no science-claims, PRE artifacts, allowlist or standing-science violations were found.",
+  "finding_counts": { "P0": 0, "P1": 1, "P2": 3, "P3": 6, "TOTAL": 10 },
+  "findings": [
+    "F1 (P1) RETAINED_CANDIDATES does not strictly bound the peak of simultaneously stored candidate records across all structures; measured global overshoot 261 > ceiling 256 with 9 raw inputs; B5 tests a single input only (contract §8 requires peak-across-all-structures and >=2-input aggregation for shared limits).",
+    "F2 (P2) SCANNED_BYTES is reserved AFTER the payload read in both paths (raw: readFileSync before admitPayload; container: readEntry extraction before admitPayload); README/POST-B2/test-title claim 'reservation before read' — only 'refused before admission/scan' is implemented (contract §8 'Rezerwuj budżet przed dopuszczeniem/odczytem payloadu').",
+    "F3 (P2) B3 exceed case stops during input 1 (one records80 input at max-stride 512 consumes 2142 layout attempts > cap 700, measured), so the refusal does NOT aggregate across two inputs; input 2 is admitted, labeled SCANNED, never analyzed (skip BUDGET_EXHAUSTED); the test message 'admitted and partially scanned' is factually wrong; SCANNED for a never-analyzed payload conflicts with §5.2 (remaining entries after exhaustion -> OVER_BUDGET).",
+    "F4 (P2) CORRECTION_MATRIX.csv row ORIGINAL_SEVEN_TESTS is self-contradictory: measured_outcome=FAIL (wrong generator predicate tr.testsCount===7 on a 23-test suite) while its own evidence 'suite=23 pass=23 fail=0 exit=0' and disposition=case_pass show all tests (including the byte-identical original 7) pass.",
+    "F5 (P3) POST B6 INVALID_CONFIGURATION message stored as slice(0,80) — silently truncated mid-number ('...out of range [1, 10000'); full message is '...out of range [1, 100000] (ceiling 100000): 100001'; same truncated string replicated in BUDGET_ACCOUNTING.json.",
+    "F6 (P3) ids_from_export.mjs header comment references tests/dat-helper.test.mjs which does not exist; the .dat-limitation reproduction actually lives in tests/correction_matrix.test.mjs (O7).",
+    "F7 (P3) run_post.mjs stamps outcome:'PASS' as a literal per case (no per-case predicate evaluation), so generated.pass=39 counts hand-stamped labels; §10's CONTROL_PASS class is unused (controlPass=0) although O1/B6 CLI rejections and the O7 .dat rejection are expected-rejection cases. No false PASS was found by independent recomputation.",
+    "F8 (P3) FEATURE_COVERAGE_MATRIX.csv cites FINAL_REPORT.md as standing-science evidence, but FINAL_REPORT.md does not exist at QC time (pipeline: it is generated after QC); forward reference must be re-verified at generation.",
+    "F9 (P3) §8 'aggregation across at least two inputs' is only partially exercised: B1 aggregates 33 payloads of ONE input file; B5 uses a single input; only B2/B4 (and the unasserted B3 default-case measurement 4284=2x2142 plus B7 class test) cover two inputs.",
+    "F10 (P3) additional census categories are defined but untested: ENTRY_TOO_LARGE, INPUT_TOO_LARGE, PAYLOAD_SIZE_MISMATCH (PARSE_FAILED variant) and container-level UNSUPPORTED have no test in the suite or POST battery (contract §5.2: an additional category requires definition AND test)."
+  ],
+  "verified_pass": [
+    "Contract identity: SHA256 3F443D8680130BD24854F02232D29D8BD6EE6CA54B5BC9C3312087F617888EA3, 25139 B (re-hashed by QC)",
+    "Original ZIP re-hash: 21832 B / F03D6DA3E8D909014FE07F366095DBDA03FF2A54B2611BA23AFB140520A6F93B; staging originals placement_probe.mjs E5B70684.../ids_from_export.mjs A2E4F071... (all contract pins match)",
+    "BASE integrity: worktree HEAD = 3fbe93eec04759395223e6677b5040273d29222a on research/pe935-placement-probe-correction-r1-20261011; src/, terrain/, assets/, server.mjs untouched; adapters Bnt2Archive git blob 1fb862905b4749f3336bb47da87441edbd018fb7 / ArkArchive a9c9f04319dc3128d527d0688285ec5384f8aa97, SHA256 763217BA.../D6886B30... (contract + PRE pins match)",
+    "Original 7 test files byte-identical to the kit pins (probe.test.mjs 5459C1EB..., cli-fixture.test.mjs 5E643FD8...)",
+    "POST codeIdentity matches on-disk corrected code (placement_probe.mjs BB67D7EA..., ids_from_export.mjs D6D712B7..., fixtures.mjs DE683B00...)",
+    "PRE preserved and truthful: original R1 behaviors recorded (layoutsTested=0 on the 10007B 0xFF fixture; xyzRate=0.9 as column-mean on the 80-row NaN fixture; silent FILTERED_EXTENSION/TOO_SMALL skips; NaN maxStride accepted silently; 7/7 original tests exit 0)",
+    "Q2 independent recomputation (QC-owned mini-implementation, no tool import): S7a 126 attempts / 0 admitted (10007 prime, trial-division verified); S7b per-axis 72/80=0.9 finite, 8 NaN/axis, column mean 0.9, 56 complete finite triples = 0.7, ID rate 1.0; O3 sample 1200 rows all valid -> 1.0 vs full 1200/4800=0.25; all three fixture SHA256 byte-identical to POST fixtureIdentity",
+    "Fresh full test-suite execution: 23/23 pass, exit 0, node v22.22.0 (matches POST_TEST_RESULTS.json)",
+    "Fresh targeted re-execution of corrected code: S7a 126/0/legacy-0 + lowered 60->61 PARTIAL; S7b legacy xyzRate 0.9 / joint 0.7 / 56 / denominator 80 / FULL_CENSUS 0.7/80; O1 legal maxHeader=0 headerless -> 26 candidates; O4 22 at minDistinctId=1 (all idDistinct=1) / 0 at default; O2 census on REAL BASE adapters: declared 4 = SCANNED 2 + FILTERED_EXTENSION 1 + TOO_SMALL 1, censusOk, containers 1 vs scanned payloads 2, separate containerReadBytes 7847 / controlWorkBytes 148352; O3 4800/1200/1.0 vs 0.25 FULL_CENSUS — every POST value matches",
+    "Over-claim scan: no placement/world-XYZ/218757-join/milestone-advancement claims anywhere in the tool, README, tests, matrices, PRE or POST (CANDIDATE_ONLY everywhere; MODEL_218757_TO_CMO_JOIN=NOT_ESTABLISHED and WORLD_XYZ_RECOVERED=NO preserved verbatim); no trivially-true test assertion patterns (the one weak assertion was removed by the executor in amendment round 1 and is verifiably gone)",
+    "Exhaustion semantics: BUDGET_EXHAUSTED + COVERAGE=PARTIAL, never NO_CANDIDATE (no NO_CANDIDATE status exists; B1/B5 assert; fresh probes confirm)"
+  ],
+  "not_checked": [
+    "PUBLICATION STAGE (§11): FINAL_REPORT.md, INTERNAL_REVIEW.md, HANDOFF.md, EVIDENCE_INDEX.md, MANIFEST_SHA256.csv and the AUDIT_ENTRYPOINT.md run entry are not on disk at QC time — pipeline-consistent (QC precedes them); commit/staged-blob/manifest-bijection/push/remote verification NOT performed; must be verified after the executor completes §11. Worktree state at QC: HEAD=BASE, only untracked tools/placement_probe/** and docs/audits/PE_935.../** (allowlist-consistent).",
+    "Byte-level regeneration of POST_MEASUREMENTS.json by re-running run_post.mjs (would rewrite POST artifacts; forbidden read-only QC). Instead, every load-bearing POST value was verified by targeted fresh re-execution and independent recomputation.",
+    "Re-execution of the ORIGINAL R1 kit PRE measurements (staging/kit_r1) — PRE accepted as preserved record per §4; its internal identities (command/cwd/exit/identities) are consistent and the original binaries re-hash to the contract pins.",
+    "ENTRY_TOO_LARGE / INPUT_TOO_LARGE / PAYLOAD_SIZE_MISMATCH / UNSUPPORTED disposition code paths — implemented and defined but not executed by any test (see F10); not independently exercised by QC either (recorded as untested, not as malfunctioning).",
+    "Standing-science blocks of FINAL_REPORT/INTERNAL_REVIEW/HANDOFF — files not yet generated; verified only in README/matrices/PRE/POST (all clean).",
+    "Ghidra/EXE/client/original-game-payload interactions — out of run scope; QC confirms none occurred (no such artifacts, no src/ modifications, tool is read-only on inputs)."
+  ],
+  "qc_output_files": [
+    "QC/QC_STATUS.json",
+    "QC/QC_FINDINGS.md",
+    "QC/QC_RECOMPUTATION.json",
+    "QC/QC_GATE_TABLE.csv",
+    "QC/QC_INTERNAL_REVIEW_NOTE.md",
+    "QC/qc_recompute.mjs (QC-owned independent mini-implementation; provenance below)",
+    "QC/qc_verify_post_claims.mjs (QC-owned POST-vs-code re-execution harness)",
+    "QC/qc_retained_gap_probe.mjs (QC-owned F1 reproduction probe)",
+    "QC/qc_micro_probes.mjs (QC-owned B6-message and 2142-attempt micro-measurements)"
+  ],
+  "environment": { "node": "v22.22.0", "os": "win32", "qc_scripts_write_only_inside": "docs/audits/PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011/QC/" }
+}

@@ -1,0 +1,125 @@
+{
+  "run": "PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011",
+  "recheck_stage": "ROUND2_RECHECK (fresh re-QC of the ROUND 2 correction delta on the FINAL bytes)",
+  "recheck_worker": "pe-master-auditor — separately-dispatched FRESH RE-QC context",
+  "scope_statement": "This re-QC is INTERNAL TO THE RUN. It is NOT an independent Desktop post-audit (which remains PENDING after publication per contract §10/§11), NOT a PE-MASTER verdict, NOT milestone closure and NOT canonical promotion of anything. It verifies only the ROUND 2 delta claimed in AMENDMENT_LOG.md against the final on-disk bytes.",
+  "recheck_date_utc": "2026-10-11",
+  "recheck_status": "PASS_WITH_FINDINGS",
+  "verdict_scope_note": "All ten ROUND 2 fix claims verified on the final bytes by full-file code reading plus fresh execution: F1 (peak 256<=256 measured on 9- and 20-input probes, round-1 measured 261>256), F2 (reservation-before-read ordering implemented; reader-failure/mismatch refunds measured via CX4), F3 (pre-exhaustion disposition corrected for the first unanalyzed payload; B3 redesigned and measured 3001/701/4284), F4 (originalSevenNamesPass predicate; row consistent), F5 (full 107-byte B6 message byte-identical to live), F6 (no dangling test reference), F7 (all 21 case outcomes predicate-computed; sensitivity DEMONSTRATED by an executed sabotage: cap 2999 -> B3 FAIL, 46/1), F9 (real two-input aggregation in B1/B3; B5's two-input case degenerates, see R2-3), F10 (CX1..CX4 executed green). F8 remains a PUBLICATION_PENDING forward reference (FINAL_REPORT.md absent at re-QC time). Full harness re-execution in temp (byte-identical code, WT hardcode as the only documented patch) reproduced 47 PASS / 0 FAIL with value-identity on every compared case field. NEW residual findings: R2-5 (P2) multi-entry containers leave the 2nd+ admitted-but-unanalyzed payloads mislabeled SCANNED after a shared-budget exhaustion (measured e2/e3 SCANNED, never analyzed, no skip rows) — same §5.2 class as F3; plus five P3 items (R2-1 pre-exhaustion refund claimed in prose but not implemented; R2-2 bounded transient copy overlaps outside the tracked peak; R2-3 degenerate B5 two-input test; R2-4 containerReadBytes charged for refused-never-read raw inputs; R2-6 AMENDMENT_LOG internal inconsistencies). None corrupts science; all must be disclosed in §11 (MAX_FIX_ROUNDS=2 is exhausted) or receive a separate parent-authorized correction.",
+  "finding_counts": { "P0": 0, "P1": 0, "P2": 1, "P3": 5, "NEW_TOTAL": 6 },
+  "per_finding_verification": {
+    "F1": {
+      "status": "FIXED_VERIFIED",
+      "reason": "Budget.externalRetained + tryRetain(external+local) + trackTotalHeld verified in code (placement_probe.mjs lines 101-134, 295-296, 422-427); re-run of the round-1 9-input probe: peakRetainedCandidates=256 <= 256 (round-1 measured 261), candidateCount=256, RETAINED_CANDIDATES exhausted at the 256th retention, the 9th input's found list capped at 24 (232+24+1 refused) proving main rows are counted; 20-input stress: peak 256; adversarial lowered caps: 2 inputs cap 4 -> 4, 5 inputs cap 10 -> 10, mixed raw+container cap 12 -> 12; B5 (+ its two-input case) green in the fresh suite run.",
+      "residuals": ["R2-2 (P3): bounded transient copy overlaps remain outside the tracked peak under the strictest 'independent copies' reading of §8", "R2-3 (P3): the B5 two-input regression test degenerates (input 2 never opened at cap 4) — the fix is proven by the 9-input probe instead"]
+    },
+    "F2": {
+      "status": "FIXED_VERIFIED",
+      "reason": "Code order verified by full read: raw path statSync size -> admitPayload (line 393) BEFORE readFileSync (397); container path declared e.size -> admitPayload (379) BEFORE readEntry (381); refundPayload on READER_FAILURE (381) and PAYLOAD_SIZE_MISMATCH (383); README 'reserved before payload read' wording now true of the implemented ordering; CX4 executed green (scannedBytes=0, syntheticInputs=0 after refund); B2 exceed case: refused raw input never charged (2576) and never read.",
+      "residuals": ["R2-1 (P3): 'pre-exhaustion skip' refund is claimed in three prose locations but NOT implemented (measured 5152/2, charge stands)", "R2-4 (P3): containerReadBytes is charged at line 350 for refused-before-read raw inputs (measured 5152 with only 2576 actually read)"]
+    },
+    "F3": {
+      "status": "FIXED_VERIFIED",
+      "reason": "Pre-exhaustion branch (lines 404-414) corrects the first unanalyzed payload's SCANNED -> OVER_BUDGET with honest detail + BUDGET_EXHAUSTED skip row (measured: input 2 disposition OVER_BUDGET, detail 'budget exhausted before analysis: LAYOUT_EVALUATIONS', censusOk true at cap 700); B3 redesigned: cap 3000 -> attempts 3001 with both inputs analyzed and the stop mid-input-2 (SCANNED honest), cap 700 pre-exhaustion case, legal boundary 4284=2x2142 — all re-measured and green.",
+      "residuals": ["R2-5 (P2): the correction covers ONLY the first post-exhaustion payload per input file; in a multi-entry container the 2nd+ admitted-but-unanalyzed payloads remain mislabeled SCANNED with no skip rows (measured: 4-entry container, cap 100 -> e2/e3 SCANNED, never analyzed)"]
+    },
+    "F4": {
+      "status": "FIXED_VERIFIED",
+      "reason": "gen_matrices.mjs line 13 predicate is now failCount===0 && originalSevenPass===true; POST_TEST_RESULTS.json recomputes originalSevenPass from the 7 exact original test names against TAP stdout (all 7 verified as 'ok' in my own fresh suite run); CORRECTION_MATRIX.csv row 2 shows PASS with evidence 'suite=27 pass=27 fail=0 exit=0 originalSevenNamesPass=true' and disposition case_pass — no self-contradiction."
+    },
+    "F5": {
+      "status": "FIXED_VERIFIED",
+      "reason": "run_post.mjs stores the full message (String(e.message), no slice); POST B6 + BUDGET_ACCOUNTING B6 contain the complete 107-byte message ending ': 100001'; live re-derivation byte-identical to the stored string (measured)."
+    },
+    "F6": {
+      "status": "FIXED_VERIFIED",
+      "reason": "ids_from_export.mjs header (lines 5-7) now references tests/correction_matrix.test.mjs (case O7); grep over the worktree shows no dat-helper reference remaining in any tool/test file (only in round-1 QC records and the AMENDMENT_LOG fix description — correct historical context)."
+    },
+    "F7": {
+      "status": "FIXED_VERIFIED",
+      "reason": "All 21 case outcomes (TEST_SUITE, O1..O7, S7a, S7b, B1..B7, CX1..CX4) are computed by explicit predicates over measured values; the only 'PASS' literal is the PASSED constant (line 23); counters are generated from outcomes (lines 319-325). Sensitivity DEMONSTRATED BY EXECUTION: a sabotaged copy (B3 cap 2999 instead of 3000 — measurement perturbation only) produced attempts=3000, B3 outcome FAIL, generated 46 PASS / 1 FAIL. An unmodified copy (single documented WT-hardcode patch) reproduced 47 PASS / 0 FAIL with value-identity on every compared case field including the B3 refusal counters. Disposition note: the CONTROL_PASS label class was consciously not adopted (AMENDMENT_LOG item 7) — expected-rejection cases assert the rejection inside their predicates; the round-1 defect (labels that could not catch a false PASS) is closed; no finding."
+    },
+    "F8": {
+      "status": "FIXED_NOT_VERIFIED",
+      "reason": "PUBLICATION_PENDING: the AMENDMENT_LOG claims the FINAL_REPORT.md reference 'resolves inside the published package', but FINAL_REPORT.md (and INTERNAL_REVIEW.md, HANDOFF.md, EVIDENCE_INDEX.md, MANIFEST_SHA256.csv) do not exist at re-QC time — the §11 publication stage has not run. The FEATURE_COVERAGE_MATRIX row-14 evidence cell is a forward reference exactly as in round 1; it MUST be re-verified at/after §11 generation. Not a regression — a still-open pipeline item."
+    },
+    "F9": {
+      "status": "FIXED_VERIFIED",
+      "reason": "B1 now scans two container inputs with the cross-file assertion (second container's single entry OVER_BUDGET, censusOk true — measured in POST and reproduced in my harness re-run); B3 uses two raw inputs in all three of its cases; B5 has a two-input case; B2/B4 already two inputs. Caveat: the B5 two-input case degenerates at cap 4 (input 2 never opened; measured syntheticInputs=1, exclusionCensus.length=1) — see R2-3; real cross-structure aggregation for RETAINED_CANDIDATES is proven by the 9/20-input probes instead."
+    },
+    "F10": {
+      "status": "FIXED_VERIFIED",
+      "reason": "tests/census_extra.test.mjs defines and executes CX1 (ENTRY_TOO_LARGE, lowered per-entry cap, small entry still scanned), CX2 (INPUT_TOO_LARGE, declaredEntryCount null, scannedBytes=0), CX3 (UNSUPPORTED bad-footer container, exit 2, CONTAINER_PARSE_FAILED skip), CX4 (PAYLOAD_SIZE_MISMATCH with truncated-payload shim and reservation refund asserted); all four executed green in my fresh suite run (ok 8..11) and appear in POST/CORRECTION_MATRIX with predicate-computed PASS."
+    }
+  },
+  "new_findings": ["R2-1 (P3)", "R2-2 (P3)", "R2-3 (P3)", "R2-4 (P3)", "R2-5 (P2)", "R2-6 (P3)"],
+  "measured_suite": {
+    "command": "node --test probe.test.mjs cli-fixture.test.mjs correction_matrix.test.mjs budget.test.mjs census_extra.test.mjs",
+    "node": "v22.22.0",
+    "tests": 27, "pass": 27, "fail": 0, "cancelled": 0, "skipped": 0, "exitCode": 0,
+    "matches_POST_TEST_RESULTS": true,
+    "originalSevenPass_recomputed_from_my_TAP": true
+  },
+  "adversarial_peak_probes": {
+    "P1_9inputs_default": { "peak": 256, "cap": 256, "candidateCount": 256, "exhausted": ["RETAINED_CANDIDATES"], "withinCap": true, "round1_measured": 261 },
+    "P1b_20inputs_default": { "peak": 256, "cap": 256, "withinCap": true },
+    "P2_2inputs_cap4": { "peak": 4, "withinCap": true, "note": "input 2 never opened (main-loop break) — see R2-3" },
+    "P3_5inputs_cap10": { "peak": 10, "withinCap": true, "note": "inputs 2-5 never opened (main-loop break)" },
+    "P4_mixed_raw_and_container_cap12": { "peak": 12, "withinCap": true },
+    "conclusion": "No input sequence was found that makes the TRACKED peakRetainedCandidates exceed the cap; the global accounting provably includes main rows (the 9th input's found list was capped by the 232 externally-held rows). Residual bounded copy-overlap outside the tracked peak: R2-2."
+  },
+  "harness_reproducibility_and_sensitivity": {
+    "unmodified_copy_run_in_temp": { "generated": { "pass": 47, "controlPass": 0, "fail": 0 }, "value_identity": "every compared case field identical to the published POST_MEASUREMENTS.json (refusal detail strings excluded only for temp-path prefixes; B3 refusal counters compared equal: 3001/5152/2/56/29)", "patch": "single documented line: WT hardcoded; all other bytes identical" },
+    "sabotaged_copy_run_in_temp": { "sabotage": "B3 CLI cap 3000 -> 2999 (measurement perturbation only)", "result": { "B3_attempts": 3000, "B3_outcome": "FAIL", "generated": { "pass": 46, "fail": 1 } }, "conclusion": "predicates are sensitive to measured values — a false PASS would be caught (round-1 F7 gate)" }
+  },
+  "standing_science_check": {
+    "verdict": "CLEAN — no standing-science violation introduced by ROUND 2",
+    "method": "full-file reads of all changed files + worktree-wide grep for dat-helper / PLACEMENT_CONFIRMED / HISTORICAL_PLACEMENT / WORLD_XYZ_RECOVERED / MODEL_218757_TO_CMO_JOIN / world coordinate / placement proof / CONFIRMED_PLACEMENT / milestone advancement",
+    "evidence": "only negative-control contexts: placement_probe.mjs usage 'never CONFIRMED by heuristics' + status 'NO_PLACEMENT_CONFIRMED'; README standing-science block intact (MODEL_218757_TO_CMO_JOIN=NOT_ESTABLISHED, WORLD_INSTANCE_IDENTITY=NOT_ESTABLISHED, HISTORICAL_PLACEMENT=NOT_ESTABLISHED, WORLD_XYZ_RECOVERED=NO); correction_matrix.test.mjs line 120 is an ABSENCE assertion; no positive placement/world-XYZ/join/milestone claim anywhere in the changed files"
+  },
+  "integrity": {
+    "code_hashes_on_disk_vs_POST_codeIdentity": "MATCH — placement_probe.mjs 368888042EAE0409243A4ED4EFC3DCD6AD354B91D36207270F75149AAF70662A, ids_from_export.mjs DAFB10B002D51AC018B16C25D6384444C16FE36BC8258319633FFAA966B85206, fixtures.mjs DE683B00FDAF9039BB5147AAF50202E2D094F05862A1587502A04279E760DD8F (POST artifacts were generated against these exact final bytes; no post-run edits)",
+    "original_test_files": "probe.test.mjs 5459C1EB2076770FEA0EA6E70C10AEC344D7541DF5E8D2EC69C68560CB3ED995, cli-fixture.test.mjs 5E643FD8403D4FCCB037561A82B813D4E8E67953BB456620B3DB73F5211FE467 — byte-identical to the round-1 QC kit pins",
+    "git": "HEAD 3fbe93eec04759395223e6677b5040273d29222a (BASE, unchanged); worktree has only the two untracked run paths (tools/placement_probe/**, docs/audits/PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011/**); §11 publication still pending",
+    "PRE_and_round1_QC_records": "not modified during ROUND 2 (file mtimes 02:45-02:46 PRE, 02:57-03:01 QC round-1 vs 03:02-03:05 ROUND 2 edits; hash-level re-verification of PRE not performed in this re-QC — see NOT_CHECKED)"
+  },
+  "recheck_output_files": [
+    "QC/ROUND2_RECHECK/RECHECK_STATUS.json",
+    "QC/ROUND2_RECHECK/RECHECK_FINDINGS.md",
+    "QC/ROUND2_RECHECK/recheck_probes.mjs (QC-owned probe script; probes P1-P8)",
+    "QC/ROUND2_RECHECK/recheck_probes_output.json (measured probe outputs)"
+  ],
+  "full_read_log": [
+    "tools/placement_probe/placement_probe.mjs (489 lines, full)",
+    "tools/placement_probe/ids_from_export.mjs (39, full)",
+    "tools/placement_probe/README.md (83, full)",
+    "tools/placement_probe/tests/budget.test.mjs (167, full)",
+    "tools/placement_probe/tests/census_extra.test.mjs (82, full)",
+    "tools/placement_probe/tests/correction_matrix.test.mjs (208, full)",
+    "tools/placement_probe/tests/probe.test.mjs (49, full)",
+    "tools/placement_probe/tests/cli-fixture.test.mjs (33, full)",
+    "tools/placement_probe/tests/fixtures.mjs (159, full)",
+    "POST/run_post.mjs (327, full)",
+    "POST/gen_matrices.mjs (61, full)",
+    "POST/POST_MEASUREMENTS.json (449, full)",
+    "POST/POST_TEST_RESULTS.json (27, full)",
+    "CORRECTION_MATRIX.csv (22, full)",
+    "BUDGET_ACCOUNTING.json (235, full)",
+    "FEATURE_COVERAGE_MATRIX.csv (17, full)",
+    "AMENDMENT_LOG.md (34, full)",
+    "QC/QC_STATUS.json (54, full — round-1 record)",
+    "QC/QC_FINDINGS.md (219, full — round-1 record)",
+    "QC/QC_INTERNAL_REVIEW_NOTE.md (81, full — round-1 record)",
+    "QC/qc_retained_gap_probe.mjs (25, full — round-1 probe, re-executed)",
+    "QC/qc_micro_probes.mjs (24, full — round-1 probe, read)"
+  ],
+  "not_checked": [
+    "PUBLICATION STAGE (§11): FINAL_REPORT.md, INTERNAL_REVIEW.md, HANDOFF.md, EVIDENCE_INDEX.md, MANIFEST_SHA256.csv absent on disk (measured) — commit/staged-blob/manifest-bijection/push/remote NOT verified; F8 closure pending there.",
+    "Byte-level hash chain of the PRE/* artifacts and the round-1 QC evidence files (QC_RECOMPUTATION.json, QC_GATE_TABLE.csv, qc_recompute.mjs, qc_verify_post_claims.mjs) — not re-read/re-hashed in this re-QC; round-1 QC records are treated as immutable history (mtime evidence shows no ROUND 2 modification).",
+    "In-place regeneration of the published POST_MEASUREMENTS.json (forbidden: would modify project files). Substitute: full harness re-execution from a temp copy with byte-identical code (value-identity on all compared fields, 47/0/0).",
+    "Ghidra/EXE/client/original-game-payload interactions — out of scope; none occurred (tool is read-only on inputs; no src/ modifications; git status confirms).",
+    "Runtime behavior of the tool on real PCG payloads (PLACEMENT_DISCOVERY contract-prohibited; all inputs in this run are synthetic fixtures)."
+  ],
+  "environment": { "node": "v22.22.0", "os": "win32", "write_scope": "QC/ROUND2_RECHECK/ only (plus OS temp for the harness copies); no project file modified" },
+  "independence_limitations": "Fresh context with no executor session state; QC-owned probes; however same machine/Node runtime and same AI infrastructure family as the executor (as in round 1). All load-bearing values were re-measured by fresh execution and the §7-class arithmetic is deterministic byte arithmetic."
+}

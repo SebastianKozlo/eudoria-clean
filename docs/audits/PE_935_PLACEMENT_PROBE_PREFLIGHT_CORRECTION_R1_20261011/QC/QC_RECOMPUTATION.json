@@ -1,0 +1,79 @@
+{
+  "run": "PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011",
+  "tool": "QC_RECOMPUTE_INDEPENDENT_MINIPARSER (QC-owned; implements the contract §7 cases and the §6 O3 sample arithmetic directly from the contract text; does NOT import placement_probe.mjs)",
+  "scripts": ["QC/qc_recompute.mjs", "QC/qc_verify_post_claims.mjs", "QC/qc_retained_gap_probe.mjs", "QC/qc_micro_probes.mjs"],
+  "node": "v22.22.0",
+  "s7a_layout": {
+    "fixture": { "bytes": 10007, "fill": "0xFF", "qc_sha256": "83e2c22aa61f6a7a53c6b9a55c75bfbbb18cd77e2df0487b1a42b316f3e18595", "post_fixtureIdentity_layoutBuffer10007": "83e2c22aa61f6a7a53c6b9a55c75bfbbb18cd77e2df0487b1a42b316f3e18595", "match": "PASS" },
+    "primality_10007": { "method": "QC trial division", "prime": true, "witness": null },
+    "values": [
+      { "quantity": "LAYOUT_ATTEMPTS (every visited (source,header,stride) before divisibility/minRows; maxHeader=0, strides 12..512 step 4)", "qc_value": 126, "post_value": 126, "verdict": "PASS" },
+      { "quantity": "LAYOUTS_ADMITTED (post-filter)", "qc_value": 0, "post_value": 0, "verdict": "PASS" },
+      { "quantity": "legacy layoutsTested (original R1 field, post-filter)", "qc_value_pre_on_original_r1": 0, "post_legacyLayoutsTested": 0, "verdict": "PASS (legacy field kept, not renamed)" },
+      { "quantity": "stride denominator (12..512 step 4)", "qc_value": 126, "verdict": "PASS (denominator confirmed = attempts; 10007 prime => 0 admitted)" },
+      { "quantity": "lowered limit 60 -> stop moment", "qc_value": 61, "post_value": 61, "post_coverage": "PARTIAL", "qc_note": "attempt 61 exceeds 60, then the scan stops; refusal recorded with actual counters", "verdict": "PASS" }
+    ]
+  },
+  "s7b_xyz": {
+    "fixture": { "rows": 80, "header": 16, "stride": 32, "id_u16": "4057/4058 alternating at +0", "f32_base": "row*3+axis*100+1 at +4/+8/+12", "nan_rows": "axis0: 0..7, axis1: 8..15, axis2: 16..23", "rest": "0xFF", "qc_sha256": "d05484b1d1db598e23ee89859d2865fd75a7e245507ae451e596202b7d274fcd", "post_fixtureIdentity_xyzFixture80": "d05484b1d1db598e23ee89859d2865fd75a7e245507ae451e596202b7d274fcd", "match": "PASS" },
+    "values": [
+      { "quantity": "per-axis finite counts (of 80)", "qc_value": [72, 72, 72], "verdict": "PASS" },
+      { "quantity": "per-axis finite rates", "qc_value": [0.9, 0.9, 0.9], "post_perAxisFiniteRates": [0.9, 0.9, 0.9], "verdict": "PASS" },
+      { "quantity": "per-axis NaN counts", "qc_value": [8, 8, 8], "post_perAxisNanCounts": [8, 8, 8], "verdict": "PASS" },
+      { "quantity": "legacy column mean (mean of per-axis in-range rates, posLo=-200000/posHi=200000)", "qc_value": 0.9, "post_legacyXyzRateColumnMean": 0.9, "verdict": "PASS (0.9 stays labeled as the legacy column mean, NOT the joint rate)" },
+      { "quantity": "complete finite triples", "qc_value": 56, "post_completeFiniteTriples": 56, "verdict": "PASS" },
+      { "quantity": "joint XYZ_FINITE_RATE (complete triples / examined rows)", "qc_value": 0.7, "post_sampleXyzFiniteRate": 0.7, "post_fullCensusXyzFiniteRate": 0.7, "verdict": "PASS" },
+      { "quantity": "sample denominator", "qc_value": 80, "post_sampleDenominator": 80, "verdict": "PASS" },
+      { "quantity": "ID column rate (S_tpl membership)", "qc_value": 1.0, "verdict": "PASS" },
+      { "quantity": "POST does NOT report 0.9 as the joint rate", "qc_value": true, "verdict": "PASS (POST carries 0.7 as sampleXyzFiniteRate and fullCensusXyzFiniteRate; 0.9 only as the legacy column-mean field)" }
+    ]
+  },
+  "o3_sample_vs_census": {
+    "fixture": { "rows": 4800, "header": 16, "stride": 32, "valid_ids_only_at": "i%4===2 (4057 if i%8===2 else 4058; poison 49281 otherwise)", "qc_sha256": "a87692464299d8fef98569f9084f5ccffd9a7f725201d48844beabef6234682b", "post_fixtureIdentity_poisoned4800": "a87692464299d8fef98569f9084f5ccffd9a7f725201d48844beabef6234682b", "match": "PASS" },
+    "values": [
+      { "quantity": "sample rows (default maxSampleRows 1200)", "qc_value": 1200, "post_sampledRowCount": 1200, "verdict": "PASS" },
+      { "quantity": "R1 sampler indices floor((j+0.5)*4800/1200) mod 4", "qc_value": [2], "qc_note": "all sample indices are valid-ID rows by construction", "verdict": "PASS" },
+      { "quantity": "sample ID rate", "qc_value": 1.0, "post_sampleIdRate": 1, "verdict": "PASS" },
+      { "quantity": "full-census ID rate (1200 valid / 4800 rows)", "qc_value": 0.25, "post_fullCensusIdRate": 0.25, "verdict": "PASS" },
+      { "quantity": "sample rate NOT presented as table quality", "qc_value": true, "verdict": "PASS (POST records both with separate names + FULL_CENSUS status; the corrected code emits fullCensusIdRate separately)" }
+    ]
+  },
+  "post_vs_code_reexecution": {
+    "method": "QC re-executed the corrected tool (analyzeBlob / CLI) on the same fixtures and compared against POST_MEASUREMENTS.json",
+    "values": [
+      { "quantity": "S7a layoutAttempts/layoutsAdmitted/legacyTested/coverage", "code_value": [126, 0, 0, "FULL"], "post_value": [126, 0, 0, "FULL"], "verdict": "PASS" },
+      { "quantity": "S7a lowered-60 case (attempts/exhausted/coverage/refusal kind+detail)", "code_value": [61, true, "PARTIAL", "LAYOUT_EVALUATIONS", "layout attempt 61 exceeds 60"], "post_value": [61, true, "PARTIAL", "LAYOUT_EVALUATIONS", "layout attempt 61 exceeds 60"], "verdict": "PASS" },
+      { "quantity": "S7b xyzRate (legacy)/sampleXyzFiniteRate/triples/denominator/perAxis/nan/fullCensus", "code_value": [0.9, 0.7, 56, 80, [0.9,0.9,0.9], [8,8,8], 0.7], "post_value": [0.9, 0.7, 56, 80, [0.9,0.9,0.9], [8,8,8], 0.7], "verdict": "PASS" },
+      { "quantity": "O1 legal maxHeader=0 headerless candidates", "code_value": 26, "post_value": 26, "verdict": "PASS" },
+      { "quantity": "O4 minDistinctId=1 candidates / all idDistinct=1 / default candidates", "code_value": [22, true, 0], "post_value": [22, true, 0], "verdict": "PASS" },
+      { "quantity": "O2 census (REAL BASE adapters, repo=worktree): declared/dispositionTotal/censusOk/counts/containers/payloads", "code_value": [4, 4, true, { "SCANNED": 2, "FILTERED_EXTENSION": 1, "TOO_SMALL": 1 }, 1, 2], "post_value": [4, 4, true, { "SCANNED": 2, "FILTERED_EXTENSION": 1, "TOO_SMALL": 1 }, 1, 2], "verdict": "PASS (POST used shim readers; QC cross-checked with the real Bnt2Archive/ArkArchive — same census)" },
+      { "quantity": "O3 CLI: table/sampled/sampleIdRate/sampleXyzFiniteRate/censusStatus/fullRows/fullIdRate/fullXyzRate", "code_value": [4800, 1200, 1, 1, "FULL_CENSUS", 4800, 0.25, 1], "post_value": [4800, 1200, 1, 1, "FULL_CENSUS", 4800, 0.25, 1], "verdict": "PASS" },
+      { "quantity": "full test suite fresh execution (tests/pass/fail/exit)", "code_value": [23, 23, 0, 0], "post_value": [23, 23, 0, 0], "verdict": "PASS" }
+    ]
+  },
+  "qc_failure_reproductions": {
+    "F1_retained_overshoot": { "scenario": "9 raw records80 inputs, default ceilings (retained 256, top 100), one invocation", "measured": { "candidateCount": 261, "peakRetainedCandidates": 261, "ceiling": 256, "exhausted_after": "9th file", "refusal_detail": "global rows retention at 261", "coverage": "PARTIAL", "status": "BUDGET_EXHAUSTED_COVERAGE_PARTIAL" }, "verdict": "OVERSHOOT REPRODUCED (261 > 256; peak not bounded at the ceiling)" },
+    "F3_b3_single_input_stop": { "scenario": "one records80 input, --max-stride 512, default maxHeader 64", "measured_layoutAttempts": 2142, "derived": "B3 cap 700 (POST: refusal at 701, syntheticInputs 1, scannedBytes 2576) stops during input 1; input 2 never analyzed", "verdict": "REPRODUCED (exceed case does not aggregate across inputs)" },
+    "F5_b6_message_truncation": { "full_message": "INVALID_CONFIGURATION: budgetThresholds.layoutEvaluations out of range [1, 100000] (ceiling 100000): 100001", "stored_by_post": "INVALID_CONFIGURATION: budgetThresholds.layoutEvaluations out of range [1, 10000", "stored_equals_slice80": true, "verdict": "REPRODUCED (silent slice(0,80) truncation)" }
+  },
+  "identity_chain_verified": {
+    "contract_sha256": "3F443D8680130BD24854F02232D29D8BD6EE6CA54B5BC9C3312087F617888EA3 (25139 B)",
+    "original_zip": "F03D6DA3E8D909014FE07F366095DBDA03FF2A54B2611BA23AFB140520A6F93B (21832 B)",
+    "original_placement_probe_mjs": "E5B70684049743D72217004C2247FB69A6139BC31546E89E67E395DA4F5B53C4 (17806 B)",
+    "original_ids_from_export_mjs": "A2E4F071539E02D82C182A5ED96168691F751EE24F9E15A685360B32719AFC48 (2937 B)",
+    "original_probe_test_mjs": "5459C1EB2076770FEA0EA6E70C10AEC344D7541DF5E8D2EC69C68560CB3ED995 (byte-identical in worktree)",
+    "original_cli_fixture_test_mjs": "5E643FD8403D4FCCB037561A82B813D4E8E67953BB456620B3DB73F5211FE467 (byte-identical in worktree)",
+    "corrected_placement_probe_mjs": "BB67D7EA49020B3A00342EB88994C6AE1218E4C78F345A8E8F0594B9609A4B21 (matches POST codeIdentity)",
+    "corrected_ids_from_export_mjs": "D6D712B7A108C66F5FA8E16740F0A8A1639A5A21B27B863FDD500738B663D57B (matches POST codeIdentity)",
+    "fixtures_mjs": "DE683B00FDAF9039BB5147AAF50202E2D094F05862A1587502A04279E760DD8F (matches POST codeIdentity)",
+    "Bnt2Archive_git_blob": "1fb862905b4749f3336bb47da87441edbd018fb7 (SHA256 763217BA01E1EC91DD0B3DA733C53DE0FF505F30DA55FD7F583B36FC5B7D70C5)",
+    "ArkArchive_git_blob": "a9c9f04319dc3128d527d0688285ec5384f8aa97 (SHA256 D6886B30B8C4E0DAB436D7FF44265E58AFD6C24C507B6A6391BEB2D4FF15CC93)",
+    "worktree_head": "3fbe93eec04759395223e6677b5040273d29222a (EXPECTED_BASE_SHA; branch research/pe935-placement-probe-correction-r1-20261011; src/terrain/assets/server.mjs unmodified)"
+  },
+  "summary": {
+    "q2_independent_values_all_pass": true,
+    "post_matches_corrected_code_all_checked_values": true,
+    "fixture_bytes_identical_between_qc_construction_and_post": true,
+    "qc_failure_reproductions": ["F1 retained overshoot 261>256", "F3 B3 stop in input 1 (2142>700)", "F5 B6 slice(0,80)"]
+  }
+}

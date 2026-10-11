@@ -1,0 +1,235 @@
+{
+  "run": "PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011",
+  "limits": {
+    "MAX_FIX_ROUNDS": 2,
+    "MAX_SYNTHETIC_INPUTS_PER_INVOCATION": 32,
+    "MAX_SCANNED_BYTES_PER_INVOCATION": 67108864,
+    "MAX_LAYOUT_EVALUATIONS_PER_INVOCATION": 100000,
+    "MAX_FULL_CENSUS_ROWS_PER_INVOCATION": 50000,
+    "MAX_RETAINED_CANDIDATES": 256
+  },
+  "perLimit": {
+    "B1": {
+      "limit": "SYNTHETIC_INPUTS",
+      "ceiling": 32,
+      "legalBoundaryAdmitted": 32,
+      "refusals": [
+        {
+          "kind": "SYNTHETIC_INPUTS",
+          "detail": "refused payload admission: C:\\Users\\User\\AppData\\Local\\Temp\\pe-post-d92o7T\\many.bnt!e32.rec",
+          "layoutAttempts": 0,
+          "scannedBytes": 8704,
+          "syntheticInputs": 32,
+          "fullCensusRows": 0,
+          "retainedPeak": 0,
+          "externalRetained": 0
+        },
+        {
+          "kind": "SYNTHETIC_INPUTS",
+          "detail": "refused payload admission: C:\\Users\\User\\AppData\\Local\\Temp\\pe-post-d92o7T\\one.bnt!x.rec",
+          "layoutAttempts": 68544,
+          "scannedBytes": 8704,
+          "syntheticInputs": 32,
+          "fullCensusRows": 256,
+          "retainedPeak": 32,
+          "externalRetained": 32
+        }
+      ],
+      "exhausted": [
+        "SYNTHETIC_INPUTS"
+      ],
+      "coverage": "PARTIAL",
+      "firstContainer": {
+        "overBudget": 1,
+        "scanned": 32,
+        "censusOk": true
+      },
+      "secondContainer": {
+        "declared": 1,
+        "disposition": "OVER_BUDGET",
+        "censusOk": true
+      },
+      "candidates": 32,
+      "outcome": "PASS"
+    },
+    "B2": {
+      "limit": "SCANNED_BYTES",
+      "ceiling": 67108864,
+      "exceedCase": {
+        "scannedBytes": 2576,
+        "exhausted": [
+          "SCANNED_BYTES"
+        ],
+        "secondInputDisposition": "OVER_BUDGET"
+      },
+      "legalBoundary": {
+        "scannedBytes": 5152,
+        "coverage": "FULL",
+        "bothScanned": true
+      },
+      "outcome": "PASS"
+    },
+    "B3": {
+      "limit": "LAYOUT_EVALUATIONS",
+      "ceiling": 100000,
+      "aggregatedAttempts": 3001,
+      "exhausted": [
+        "LAYOUT_EVALUATIONS"
+      ],
+      "refusal": {
+        "kind": "LAYOUT_EVALUATIONS",
+        "detail": "layout attempt 3001 exceeds 3000",
+        "layoutAttempts": 3001,
+        "scannedBytes": 5152,
+        "syntheticInputs": 2,
+        "fullCensusRows": 718,
+        "retainedPeak": 56,
+        "externalRetained": 29
+      },
+      "secondInputDisposition": "SCANNED",
+      "budgetStopRecorded": true,
+      "preExhaustionCase": {
+        "attempts": 701,
+        "secondInputDisposition": "OVER_BUDGET",
+        "censusOk": true
+      },
+      "defaultCeilingCase": {
+        "layoutAttempts": 4284,
+        "coverage": "FULL"
+      },
+      "outcome": "PASS"
+    },
+    "B4": {
+      "limit": "FULL_CENSUS_ROWS",
+      "ceiling": 50000,
+      "exceedCase": {
+        "censusRowsUsed": 160,
+        "statuses": [
+          "FULL_CENSUS",
+          "PARTIAL_BUDGET_EXHAUSTED"
+        ],
+        "refusals": [
+          {
+            "kind": "FULL_CENSUS_ROWS",
+            "detail": "census 160+80 exceeds 160",
+            "layoutAttempts": 4284,
+            "scannedBytes": 5152,
+            "syntheticInputs": 2,
+            "fullCensusRows": 160,
+            "retainedPeak": 31,
+            "externalRetained": 2
+          },
+          {
+            "kind": "FULL_CENSUS_ROWS",
+            "detail": "census 160+80 exceeds 160",
+            "layoutAttempts": 4284,
+            "scannedBytes": 5152,
+            "syntheticInputs": 2,
+            "fullCensusRows": 160,
+            "retainedPeak": 31,
+            "externalRetained": 2
+          }
+        ]
+      },
+      "legalBoundary": {
+        "statuses": [
+          "FULL_CENSUS"
+        ],
+        "coverage": "FULL"
+      },
+      "outcome": "PASS"
+    },
+    "B5": {
+      "limit": "RETAINED_CANDIDATES",
+      "ceiling": 256,
+      "exceedCase": {
+        "peakRetained": 4,
+        "exhausted": [
+          "RETAINED_CANDIDATES"
+        ],
+        "candidates": 4,
+        "coverage": "PARTIAL"
+      },
+      "twoInputAggregation": {
+        "peakRetained": 4,
+        "exhausted": true,
+        "coverage": "PARTIAL",
+        "candidates": 4
+      },
+      "legalBoundary": {
+        "peakRetained": 29,
+        "coverage": "FULL"
+      },
+      "outcome": "PASS"
+    },
+    "B6": {
+      "rule": "threshold may not exceed canonical ceiling",
+      "exportedRaised": {
+        "threw": true,
+        "message": "INVALID_CONFIGURATION: budgetThresholds.layoutEvaluations out of range [1, 100000] (ceiling 100000): 100001"
+      },
+      "cliRaised": {
+        "exitCode": 3,
+        "invalidLabel": true,
+        "scanStartedNo": true,
+        "stderr": "INVALID_CONFIGURATION: budgetThresholds.layoutEvaluations out of range [1, 100000] (ceiling 100000): 100001\nSCAN_STARTED=NO"
+      },
+      "outcome": "PASS"
+    },
+    "B7": {
+      "rule": "no-reset-per-payload aggregation; reservation refund; separate container/control byte accounting",
+      "firstAdmitted": true,
+      "secondRefused": true,
+      "scannedBytesAfterFirst": 300,
+      "refundWorks": true,
+      "refundZeroesInputs": true,
+      "exhausted": [
+        "SCANNED_BYTES"
+      ],
+      "coverage": "PARTIAL",
+      "separate": {
+        "containerReadBytes": 1234,
+        "controlWorkBytes": 512,
+        "scannedBytes": 0
+      },
+      "outcome": "PASS"
+    },
+    "CX1": {
+      "case": "ENTRY_TOO_LARGE",
+      "counts": {
+        "SCANNED": 1,
+        "ENTRY_TOO_LARGE": 1
+      },
+      "censusOk": true,
+      "outcome": "PASS"
+    },
+    "CX2": {
+      "case": "INPUT_TOO_LARGE",
+      "parseStatus": "INPUT_TOO_LARGE",
+      "declaredEntryCount": null,
+      "candidateCount": 0,
+      "scannedBytes": 0,
+      "outcome": "PASS"
+    },
+    "CX3": {
+      "case": "UNSUPPORTED",
+      "exitCode": 2,
+      "parseStatus": "UNSUPPORTED",
+      "declaredEntryCount": null,
+      "skipRecorded": true,
+      "outcome": "PASS"
+    },
+    "CX4": {
+      "case": "PAYLOAD_SIZE_MISMATCH",
+      "shimActuallyTruncated": true,
+      "parseFailed": 1,
+      "censusOk": true,
+      "scannedBytesAfterRefund": 0,
+      "syntheticInputsAfterRefund": 0,
+      "skipRecorded": true,
+      "outcome": "PASS"
+    }
+  },
+  "fixRoundsUsed": 2,
+  "notes": "Thresholds lowered only for short fixtures; ceilings never raised. LAYOUT_ATTEMPTS is charged (not LAYOUTS_ADMITTED). Reservation happens BEFORE the payload read using the verified size (declared directory size / on-disk stat size) and is refunded when the payload fails to decode (read failure, size mismatch); an admitted payload skipped due to earlier budget exhaustion stays charged (admission-time accounting). Container-read and control-work bytes are reported separately from SCANNED_BYTES. RETAINED_CANDIDATES applies to the GLOBAL peak across all structures (main rows + per-call lists). Exhaustion => BUDGET_EXHAUSTED + COVERAGE=PARTIAL, never NO_CANDIDATE. Aggregation across >= 2 inputs is exercised for SYNTHETIC_INPUTS (B1), SCANNED_BYTES (B2), LAYOUT_EVALUATIONS (B3), FULL_CENSUS_ROWS (B4), RETAINED_CANDIDATES (B5)."
+}

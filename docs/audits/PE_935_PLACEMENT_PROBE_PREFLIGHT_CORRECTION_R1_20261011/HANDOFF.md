@@ -1,0 +1,33 @@
+# HANDOFF — PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011
+
+RUN_ID = PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011
+CONTRACT = OPENCODE_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R2_COMPLETE.md (25139 B / SHA256 3F44D8680130BD24854F02232D29D8BD6EE6CA54B5BC9C3312087F617888EA3)
+EXPECTED_BASE_SHA = 3fbe93eec04759395223e6677b5040273d29222a
+RESULT_BRANCH = research/pe935-placement-probe-correction-r1-20261011
+BRANCH_RESERVATION = PRE/BRANCH_RESERVATION.json (create-only push of BASE, verified by ls-remote)
+CORRECTION_STATUS = PARTIAL (honest; residual R2-5 P2 + R2-1..R2-4 P3 disclosed; both fix rounds used)
+ORIGINAL_TESTS_PRE = 7/7 pass, exit 0 (PRE/ORIGINAL_TEST_RESULTS.json)
+ORIGINAL_TESTS_POST = 7/7 pass, suite 27/27, exit 0 (POST/POST_TEST_RESULTS.json, originalSevenNamesPass=true)
+SEVEN_OBSERVATION_MATRIX = all PASS (CORRECTION_MATRIX.csv, POST_MEASUREMENTS.json)
+LAYOUT_ATTEMPTS_CASE_PRE_POST = PRE layoutsTested=0 -> POST LAYOUT_ATTEMPTS=126, LAYOUTS_ADMITTED=0
+XYZ_TRIPLE_RATE_CASE_PRE_POST = PRE xyzRate=0.9 (column mean) -> POST joint 56/80=0.7 + FULL_CENSUS, legacy 0.9 kept labeled
+BUDGET_ENFORCEMENT_TESTS = B1..B7, CX1..CX4 all PASS (BUDGET_ACCOUNTING.json)
+BUDGET_USED = canonical ceilings never exceeded; lowered thresholds used in tests; MAX_FIX_ROUNDS=2 used
+PEAK_RETAINED_CANDIDATES = capped at 256 (adversarial QC probes: 256/256 at 9 and 20 inputs)
+FRESH_INTERNAL_QC_STATUS = PASS_WITH_FINDINGS (QC/QC_STATUS.json) -> round-2 re-QC PASS_WITH_FINDINGS, all round-1 findings FIXED_VERIFIED except F8 (publication artifacts — resolved by this package)
+QC_ORIGIN = fresh pe-master-auditor contexts, internal to this run; NOT an independent Desktop post-audit
+CHANGED_PATH_CENSUS = see MANIFEST_SHA256.csv (all paths changed vs BASE, self-excluded manifest)
+PACKAGE_PATH = docs/audits/PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011
+NOT_CHECKED = original PCG payloads for placement (prohibited); no-run items listed in QC/QC_STATUS.json
+OPEN_FINDINGS = R2-5 (P2), R2-1..R2-4 (P3) — see FINAL_REPORT.md; no P0/P1 open
+EXTERNAL_DESKTOP_POST_AUDIT = PENDING
+PLACEMENT_DISCOVERY = NOT_EXECUTED
+STANDING_SCIENCE_STATUS_CHANGES = NONE
+WORLD_XYZ_RECOVERED = NO
+CANONICAL_GATE_EFFECT = NONE
+PILOT_SCAN = AWAITING_HUMAN_AUTHORIZATION
+NEXT_EXPERIMENT_AUTHORIZED = NO
+NEXT_MILESTONE_AUTHORIZED = NO
+HARD_STOP = YES
+
+Next step for the human: independent external Desktop post-audit of the exact published SHA. No further work is authorized by this run.

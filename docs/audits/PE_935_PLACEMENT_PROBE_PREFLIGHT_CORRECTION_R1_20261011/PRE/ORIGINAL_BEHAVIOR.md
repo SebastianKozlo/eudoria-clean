@@ -1,0 +1,22 @@
+# ORIGINAL_BEHAVIOR (PRESERVED PRE) — PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011
+
+All measurements below were taken on the ORIGINAL R1 kit (ZIP SHA256 F03D6DA3E8D909014FE07F366095DBDA03FF2A54B2611BA23AFB140520A6F93B, placement_probe.mjs E5B70684049743D72217004C2247FB69A6139BC31546E89E67E395DA4F5B53C4, ids_from_export.mjs A2E4F071539E02D82C182A5ED96168691F751EE24F9E15A685360B32719AFC48), executed from the isolated staging copy, before any code change. Synthetic inputs only. Full raw measurements: PRE_MEASUREMENTS.json, ORIGINAL_TEST_RESULTS.json, COUNTERCHECK_BASELINE.json.
+
+## Original 7 tests
+7/7 pass, exit 0 (node v22.22.0). Positive detection, wrong-ID negative, ID-only negative, missing-set error, truncated-buffer negative, anchor-joint control and the CLI RAW/BNT2/Ark shim smoke all behave as TEST_RESULTS.txt recorded historically.
+
+## §6 observations on the original code (PRE)
+- O1 INVALID_NUMERIC_CONFIG: `--max-stride not-a-number` and a missing value after the flag are accepted; CLI exits 0 and writes a full scan output (SCAN_STARTED effectively YES) with zero candidates. Exported analyzeBlob(maxStride: NaN) does not throw. No INVALID_CONFIGURATION label, no SCAN_STARTED=NO marker. Legal maxHeader=0 and negative posLo work. => false-success path, not fail-closed.
+- O2 EXCLUSION_CENSUS: container fixture with 4 declared entries (scan.rec, tex.nif, tiny.rec, huge.rec): declaredEntryCount=4, scannedSourceCount=2, recorded skip rows=0. FILTERED_EXTENSION, TOO_SMALL (and FILTERED_REGEX under --entry-regex) are silent continues. DECLARED_ENTRIES is not reconciled against any disposition sum. Unit mixing: sources=1 container does not mean 1 scanned payload.
+- O3 SAMPLE_VS_CENSUS: 4800-row fixture where the evenly spread default 1200-row sample sees a 100% valid ID column while the whole table is 25% valid: original reports sampleCount=1200, idRate=1.0 with no FULL_CENSUS_* fields and no CENSUS_STATUS — the sample result is the only result.
+- O4 SINGLE_DEFINITION_TABLE: minDistinctId=1 detects the all-4057 table (22 candidate rows in this run); the default minDistinctId=2 silently excludes it. The single-ID interface exists and is kept.
+- O5 INTEGER_COUNTERS_AS_FLOATS: u32 counters (1..5080) at the XYZ offsets are accepted as positions with xyzRate=1.0 (sample values 1.4e-45..7e-42, all subnormal); no NAN/INFINITY/SUBNORMAL/ZERO counts, no magnitude summary, no ALTERNATIVE_U32_INTERPRETATION.
+- O6 ACTUAL_PROJECT_ADAPTERS: positive RAW/BNT2/ARK smoke with the real BASE adapters (git blobs 1fb8629..., a9c9f04...) on synthetic bytes: exit 0, 3 sources, 87 candidates — adapter compatibility is intact.
+- O7 NUMERIC_DAT_MODEL_NAME_PATTERN: ids_from_export rejects a .dat model archive ("Model archive must be .bnt or .ark", exit 1) — a hypothetical .dat limitation, NOT a defect of the actual Models.bnt; and it counts only <numeric>.nif names (non-numeric names silently excluded from S_model).
+
+## §7 cases on the original code (PRE)
+- LAYOUT_ATTEMPTS_VS_ADMITTED: 10007-byte 0xFF buffer, maxHeader=0, strides 12..512 step 4: original stats.layoutsTested=0, while the visited (source, header, stride) attempts are 126 (independently recomputed in COUNTERCHECK_BASELINE.json) and LAYOUTS_ADMITTED=0 (10007 is prime; no stride divides it). The original counts only post-filter layouts, so any budget charged on layoutsTested would bill 0 for 126 visits.
+- XYZ_COLUMN_MEAN_VS_ROW_TRIPLE_RATE: 80-row fixture (8 NaN per axis in rows 0..7/8..15/16..23): original reports xyzRate=0.9 — the MEAN of the three per-axis column rates. The joint row-triple finite rate is 56/80=0.7 (independently recomputed). The 0.9 remains the historical column-mean measurement of this fixture; it is NOT the joint XYZ_FINITE_RATE and must not be presented as such.
+
+## Interpretation discipline
+These are tool-mechanics observations on synthetic inputs. They do not establish or refute any historical placement hypothesis. Standing science statuses (J3, MODEL_218757_TO_CMO_JOIN=NOT_ESTABLISHED, WORLD_INSTANCE_IDENTITY=NOT_ESTABLISHED, HISTORICAL_PLACEMENT=NOT_ESTABLISHED, WORLD_XYZ_RECOVERED=NO) are unchanged. The historical PCG Models.bnt inventory (5596 names <id>.nif incl. 218757.nif, earlier measurement) is preserved as prior record and was NOT re-opened in this run.
