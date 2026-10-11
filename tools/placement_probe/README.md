@@ -1,9 +1,58 @@
-# placement_probe — PE935 placement candidate reconnaissance (correction R1)
+# placement_probe — PE935 placement candidate reconnaissance (postaudit correction R1)
 
 Read-only recon tool that scans SYNTHETIC or verified inputs for fixed-stride record
 layouts whose columns look like (template ID, X, Y, Z). **Every output is
 CANDIDATE_ONLY_NOT_PLACEMENT_PROOF.** The tool never establishes a historical
 placement, a world instance, or a model→instance join.
+
+Postaudit correction R1 (run `PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011`,
+fixing the three P2 findings of the external Desktop post-audit of `938aa946`)
+changed, on top of the previous correction R1:
+
+- **DA-1 — semantically truthful census.** Every declared entry now carries a
+  disjoint state vector `{admitted, payloadRead, analysisStarted, analysisStatus}`
+  with `analysisStatus ∈ {NOT_ANALYZED, COMPLETED, PARTIAL, ANALYSIS_ERROR}`.
+  `SCANNED` is reserved for payloads whose ANALYSIS actually started
+  (`analysisStatus=COMPLETED|PARTIAL|ANALYSIS_ERROR`); `scannedPayloadCount`
+  counts analysisStarted payloads only (admission/read never counts as a scan).
+  Entries stopped by the budget are `OVER_BUDGET` with `analysisStarted=false`;
+  the WHOLE tail is accounted (no break after the first budget-stopped payload),
+  duplicate entry names are keyed by stable `entryIndex` (never by name), payloads
+  that cannot be analyzed are not readEntry-decoded after exhaustion, and files
+  never opened get a `NOT_OPENED_BUDGET` record with `UNKNOWN_ENTRY_COUNT`
+  (no invented catalog). `censusOk` is computed by the exported `censusGate()`,
+  which re-derives the census from the state vectors: a mutant that flips a
+  not-analyzed entry to SCANNED (keeping the sum) is REFUSED by the SAME gate.
+- **DA-2 — distinct-record cap.** `RETAINED_CANDIDATES ≤ 256` bounds the
+  simultaneously live DISTINCT candidate records in every holding collection:
+  the forwarded row IS the candidate object (aliased once between the per-call
+  candidate list and the global rows — the same object in two arrays counts
+  once), and the CSV is serialized over the live rows with a cell transformer —
+  no second full array of records is ever materialized. Identity-based
+  observers (Set of object identities) verify creation, forward and
+  serialization phases against the cap.
+- **DA-3 — effective Budget validation.** The `Budget` constructor validates
+  all five limits (finite safe integers in `[1, canonical ceiling]`), and the
+  exported `analyzeBlob` re-validates the EFFECTIVE tracker at use time; a
+  valid supplied `Budget` with contradictory `budgetThresholds` is refused
+  fail-closed; an object masquerading as a Budget supplies nothing. A NaN limit
+  throws `INVALID_CONFIGURATION` — it is never serialized as a valid `null`
+  limit, and there is no fake NO_CANDIDATE result.
+- **Request/refusal counter semantics.** `layoutAttempts` counts REQUESTS and
+  INCLUDES the one refused at the limit (a limit of 60 shows 61 requests: 60
+  executed evaluations + 1 refusal); `layoutRefusals` counts refusals and
+  `layoutsAdmitted` counts admitted layouts. `layoutAttempts` is therefore
+  never a claim of "61 performed layout evaluations".
+- **PA-1 regression fixtures** (`tests/fixtures.mjs`): the original XYZ
+  1200/4800 counterexample is now three byte-pinned named fixtures
+  (`pa1A`/`pa1B`/`pa1C`, SHA256 pins in `PA1_PINS`) closing the regression
+  coverage gap; the algorithm itself was NOT rewritten (the unchanged BASE
+  already computed the correct rates — a coverage gap, not a computation bug).
+- **PA-2 live identity gate** (`verify_inputs.mjs`): frozen expected size/SHA256
+  pins, separately measured values and a CONDITIONAL verdict; a BLOCKED gate
+  means `BLOCKED_INPUT_IDENTITY` and zero downstream work (spy-verified by
+  `docs/audits/.../PRE/verify_inputs_runner.mjs`, which supersedes the
+  historical literal-PASS PRE generator).
 
 Correction R1 (run `PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011`) changed:
 
@@ -17,10 +66,13 @@ Correction R1 (run `PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011`) ch
    tests against over-rejection.
 2. **Exclusion census.** Every declared archive entry receives exactly ONE
    disposition, in fixed order: `FILTERED_REGEX → FILTERED_EXTENSION →
-   ENTRY_TOO_LARGE → TOO_SMALL → PARSE_FAILED → OVER_BUDGET → SCANNED`
-   (`UNSUPPORTED` = container-level framing failure with NO invented entry count).
-   `DECLARED_ENTRIES` must equal the disposition sum (`censusOk` in SUMMARY.json).
-   Container / entry / payload / candidate-table counts are separate units.
+   ENTRY_TOO_LARGE → TOO_SMALL → (analysis-capable budget stop) → admission →
+   PARSE_FAILED → analysis` (`UNSUPPORTED` = container-level framing failure with
+   NO invented entry count; `NOT_OPENED_BUDGET` = file never opened,
+   `UNKNOWN_ENTRY_COUNT`). `DECLARED_ENTRIES` must equal the disposition sum AND the
+   state vectors must be semantically consistent (`censusOk` in SUMMARY.json is
+   computed by the exported `censusGate()` — the same gate that refuses a mutant
+   census). Container / entry / payload / candidate-table counts are separate units.
 3. **Layout accounting.** `LAYOUT_ATTEMPTS` counts every visited
    (source, header, stride) BEFORE the divisibility/minRows filters; the legacy
    post-filter `layoutsTested` field is kept (renamed nowhere) and

@@ -1,20 +1,36 @@
 #!/usr/bin/env node
 /*
- * PE935 placement candidate reconnaissance - CORRECTION R1 (2026-10-11)
- * Corrected per contract PE_935_PLACEMENT_PROBE_PREFLIGHT_CORRECTION_R1_20261011:
- *  - fail-closed numeric configuration validation (INVALID_CONFIGURATION, exit!=0, SCAN_STARTED=NO)
- *  - exclusion census: every declared archive entry has exactly one disposition
- *  - LAYOUT_ATTEMPTS counted for every visited (source, header, stride) BEFORE the
- *    divisibility/minRows filters; LAYOUTS_ADMITTED reported separately
- *  - joint XYZ_FINITE_RATE (complete finite triples / examined rows) reported for
- *    the sample AND (for finalists) as a real FULL_CENSUS over all table rows;
- *    the legacy xyzRate (mean of per-axis column in-range rates) is kept under its
- *    original name and meaning and is NOT renamed to the joint rate
- *  - f32 diagnostics per candidate field: FINITE_RATE with explicit denominator,
- *    NAN/INFINITY/SUBNORMAL/ZERO counts, magnitude summary, ALTERNATIVE_U32_INTERPRETATION
- *  - per-invocation budgets (shared across all inputs/entries): SYNTHETIC_INPUTS,
- *    SCANNED_BYTES (reserved before payload read), LAYOUT_EVALUATIONS,
- *    FULL_CENSUS_ROWS, RETAINED_CANDIDATES (peak across all structures)
+ * PE935 placement candidate reconnaissance - POSTAUDIT CORRECTION R1 (2026-10-11)
+ * Corrected per contract PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011,
+ * fixing the three P2 findings of the external Desktop post-audit of 938aa946:
+ *  - DA-1 (R2-5): semantically truthful census. Dispositions are disjoint state
+ *    vectors: every declared entry carries {admitted, payloadRead, analysisStarted,
+ *    analysisStatus in {NOT_ANALYZED, COMPLETED, PARTIAL, ANALYSIS_ERROR}}.
+ *    SCANNED is reserved for payloads whose ANALYSIS actually started;
+ *    scannedPayloadCount counts analysisStarted payloads only. Entries stopped by
+ *    the budget get OVER_BUDGET with analysisStarted=false; files never opened get
+ *    a NOT_OPENED_BUDGET record with UNKNOWN_ENTRY_COUNT (no invented catalog).
+ *    Payloads that cannot be analyzed are not readEntry-decoded after exhaustion.
+ *    Duplicate entry names are keyed by stable entryIndex identity, never by name.
+ *    censusGate() re-derives the census from the state vectors — a mutant that
+ *    flips a not-analyzed entry to SCANNED (keeping the sum) is REFUSED by the
+ *    SAME gate that produced the published censusOk.
+ *  - DA-2 (R2-2): MAX_RETAINED_CANDIDATES=256 bounds simultaneously live DISTINCT
+ *    candidate records in every holding collection (creation/found, forward/allRows,
+ *    serialization). The forwarded row IS the candidate object (aliased once — the
+ *    same object in two arrays counts once); CSV serialization walks `rows` with a
+ *    cell transformer and never materializes a second full record array.
+ *  - DA-3: the Budget constructor AND the effective tracker used by the exported
+ *    analyzeBlob validate all five limits as finite safe integers in
+ *    [1, canonical ceiling]; a supplied Budget instance is re-validated at use
+ *    time and contradictory budgetThresholds are refused fail-closed.
+ *  - layoutAttempts counts REQUESTS (the refused 61st at a limit of 60 included);
+ *    layoutRefusals counts refusals; executed layout evaluations =
+ *    layoutAttempts - layoutRefusals; admitted layouts are reported separately
+ *    (layoutsAdmitted). None of these is a claim of 61 performed evaluations.
+ * Retained from the previous correction: fail-closed numeric configuration
+ * validation, LAYOUT_ATTEMPTS-before-filters accounting, joint XYZ_FINITE_RATE with
+ * finalist FULL_CENSUS, f32/u32 candidate diagnostics, per-invocation budgets.
  * Read-only input. NEVER labels a candidate as a historical placement.
  * No external dependencies. Node.js >= 20.
  */
@@ -43,6 +59,10 @@ function rng(seed) { let x = seed >>> 0; return () => { x ^= x << 13; x ^= x >>>
 function shuffleCopy(arr, seed) { const a = Array.from(arr), rand = rng(seed); for (let j = a.length - 1; j > 0; j--) { const k = Math.floor(rand() * (j + 1)); [a[j], a[k]] = [a[k], a[j]]; } return a; }
 function csvEscape(v) { const x = String(v ?? ''); return /[",\n\r]/.test(x) ? '"' + x.replaceAll('"', '""') + '"' : x; }
 function writeCsv(to, objects, cols) { const out = [cols.join(','), ...objects.map(v => cols.map(k => csvEscape(v[k])).join(','))].join('\n') + '\n'; fs.writeFileSync(to, out, 'utf8'); }
+// DA-2: CSV serialization over the holding collection itself. The cell values are
+// computed per row by a transformer, so no second full array of candidate records is
+// ever materialized; the serialized objects ARE the live `rows` records.
+function writeCsvRows(to, objects, cols, cellsOf) { const parts = [cols.join(',')]; for (const o of objects) parts.push(cellsOf(o).map(csvEscape).join(',')); fs.writeFileSync(to, parts.join('\n') + '\n', 'utf8'); }
 
 // ---------------- configuration validation (fail-closed) ----------------
 const INT_RULES = {
@@ -97,16 +117,32 @@ export function validateOptions(cfg) {
 }
 function assertValidConfig(cfg) { const v = validateOptions(cfg); if (!v.ok) throw new Error('INVALID_CONFIGURATION: ' + v.errors.join('; ')); return v.budgets; }
 
+// ---------------- budget limit validation (DA-3: fail-closed) ----------------
+// Validates a COMPLETE five-limit map (missing keys must be filled with the canonical
+// ceilings first). Used by the Budget constructor AND by analyzeBlob for the
+// effective tracker, so an injected or mutated tracker cannot bypass the check.
+export function budgetLimitErrors(limits) {
+  const bad = [];
+  for (const [k, r] of Object.entries(BUDGET_RULES)) {
+    const v = limits?.[k];
+    if (!Number.isSafeInteger(v)) bad.push('budget.' + k + ' must be a safe integer in [' + r.min + ', ' + r.max + '] (ceiling ' + BUDGET_CEILINGS[k] + '); got ' + JSON.stringify(v));
+    else if (v < r.min || v > r.max) bad.push('budget.' + k + ' out of range [' + r.min + ', ' + r.max + '] (ceiling ' + BUDGET_CEILINGS[k] + '): ' + v);
+  }
+  return bad;
+}
 // ---------------- budget tracker (per invocation, shared across inputs) --------
 export class Budget {
   constructor(thresholds) {
-    this.limits = Object.freeze({ ...BUDGET_CEILINGS, ...thresholds });
-    this.layoutAttempts = 0; this.scannedBytes = 0; this.syntheticInputs = 0;
+    const limits = { ...BUDGET_CEILINGS, ...(thresholds || {}) };
+    const bad = budgetLimitErrors(limits);
+    if (bad.length) throw new Error('INVALID_CONFIGURATION: ' + bad.join('; ')); // DA-3: the constructor validates its own limits
+    this.limits = Object.freeze(limits);
+    this.layoutAttempts = 0; this.layoutRefusals = 0; this.scannedBytes = 0; this.syntheticInputs = 0;
     this.fullCensusRows = 0; this.peakRetained = 0; this.sampleRowsExamined = 0;
     this.containerReadBytes = 0; this.controlWorkBytes = 0;
     this.exhausted = []; this.refusals = []; this.externalRetained = 0;
   }
-  markExhausted(kind, detail) { if (!this.exhausted.includes(kind)) this.exhausted.push(kind); this.refusals.push({ kind, detail, layoutAttempts: this.layoutAttempts, scannedBytes: this.scannedBytes, syntheticInputs: this.syntheticInputs, fullCensusRows: this.fullCensusRows, retainedPeak: this.peakRetained, externalRetained: this.externalRetained }); }
+  markExhausted(kind, detail) { if (!this.exhausted.includes(kind)) this.exhausted.push(kind); this.refusals.push({ kind, detail, layoutAttempts: this.layoutAttempts, layoutRefusals: this.layoutRefusals, scannedBytes: this.scannedBytes, syntheticInputs: this.syntheticInputs, fullCensusRows: this.fullCensusRows, retainedPeak: this.peakRetained, externalRetained: this.externalRetained }); }
   refundPayload(size) { this.scannedBytes -= size; this.syntheticInputs--; } // reservation released when a reserved payload is never scanned (parse failure / pre-exhaustion skip)
   admitPayload(size, label) {
     if (this.syntheticInputs + 1 > this.limits.syntheticInputs) { this.markExhausted('SYNTHETIC_INPUTS', 'refused payload admission: ' + label); return false; }
@@ -114,8 +150,8 @@ export class Budget {
     this.syntheticInputs++; this.scannedBytes += size; return true; // reservation BEFORE read, using verified size
   }
   tryLayoutAttempt() {
-    this.layoutAttempts++;
-    if (this.layoutAttempts > this.limits.layoutEvaluations) { this.markExhausted('LAYOUT_EVALUATIONS', 'layout attempt ' + this.layoutAttempts + ' exceeds ' + this.limits.layoutEvaluations); return false; }
+    this.layoutAttempts++; // REQUEST counter: the attempt that is refused at the limit is included
+    if (this.layoutAttempts > this.limits.layoutEvaluations) { this.layoutRefusals++; this.markExhausted('LAYOUT_EVALUATIONS', 'layout request ' + this.layoutAttempts + ' exceeds ' + this.limits.layoutEvaluations + ' (refused requests: ' + this.layoutRefusals + '; executed evaluations: ' + (this.layoutAttempts - this.layoutRefusals) + ')'); return false; }
     return true;
   }
   tryRetain(localCount) {
@@ -130,7 +166,7 @@ export class Budget {
     this.fullCensusRows += rows; return true;
   }
   get coverage() { return this.exhausted.length ? 'PARTIAL' : 'FULL'; }
-  summary() { return { limits: this.limits, used: { layoutAttempts: this.layoutAttempts, scannedBytes: this.scannedBytes, syntheticInputs: this.syntheticInputs, fullCensusRows: this.fullCensusRows, peakRetainedCandidates: this.peakRetained, sampleRowsExamined: this.sampleRowsExamined }, containerReadBytes: this.containerReadBytes, controlWorkBytes: this.controlWorkBytes, exhausted: this.exhausted, refusals: this.refusals, coverage: this.coverage }; }
+  summary() { return { limits: this.limits, used: { layoutAttempts: this.layoutAttempts, layoutRefusals: this.layoutRefusals, scannedBytes: this.scannedBytes, syntheticInputs: this.syntheticInputs, fullCensusRows: this.fullCensusRows, peakRetainedCandidates: this.peakRetained, sampleRowsExamined: this.sampleRowsExamined }, containerReadBytes: this.containerReadBytes, controlWorkBytes: this.controlWorkBytes, exhausted: this.exhausted, refusals: this.refusals, coverage: this.coverage }; }
 }
 // ---------------- ids / helpers (unchanged discovery semantics) ----------------
 function readIds(jsonPath) {
@@ -261,7 +297,29 @@ function evaluateCandidateControls(buf, candidate, set, opts, anchors, budget) {
 }export function analyzeBlob(buffer, sets, opts = {}) {
   const cfg = { ...DEFAULTS, ...opts };
   assertValidConfig(cfg); // exported function path validates too - no bypass of option checks
-  const budget = cfg.budget instanceof Budget ? cfg.budget : new Budget(cfg.budgetThresholds || {});
+  // DA-3: validate the EFFECTIVE tracker that will actually run this analysis — not
+  // only cfg.budgetThresholds. An injected Budget instance is re-validated at use
+  // time (its limits could be mutated after construction); an object merely
+  // masquerading as a Budget is not instanceof and cannot supply effective limits.
+  let budget;
+  if (cfg.budget instanceof Budget) {
+    budget = cfg.budget;
+    const errs = budgetLimitErrors(budget.limits);
+    if (errs.length) throw new Error('INVALID_CONFIGURATION: effective Budget instance limits invalid: ' + errs.join('; '));
+    const th = cfg.budgetThresholds || {};
+    if (Object.keys(th).length) {
+      // fail-closed policy: a valid supplied Budget together with contradictory
+      // budgetThresholds is REFUSED instead of silently resolved in either direction.
+      const thLimits = { ...BUDGET_CEILINGS, ...th };
+      const thErrs = budgetLimitErrors(thLimits);
+      if (thErrs.length) throw new Error('INVALID_CONFIGURATION: budgetThresholds invalid while a Budget instance was supplied: ' + thErrs.join('; '));
+      for (const k of Object.keys(BUDGET_CEILINGS)) {
+        if (thLimits[k] !== budget.limits[k]) throw new Error('INVALID_CONFIGURATION: contradictory budgetThresholds.' + k + '=' + thLimits[k] + ' vs supplied Budget limit ' + budget.limits[k] + ' (fail-closed: refusing to guess which limit is intended)');
+      }
+    }
+  } else {
+    budget = new Budget(cfg.budgetThresholds || {}); // DA-3: the constructor validates every limit
+  }
   const buf = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
   if (!sets?.S_tpl?.size) throw Error('non-empty template ID set required');
   const found = []; let layoutsAdmitted = 0, positionTriples = 0, idColumnsFound = 0;
@@ -325,7 +383,9 @@ function evaluateCandidateControls(buf, candidate, set, opts, anchors, budget) {
   }
   for (const c of selected) delete c._set; // sets are not JSON-serializable; controls retained
   const stats = {
-    layoutAttempts: budget.layoutAttempts, // every visited (source,header,stride) BEFORE filters
+    layoutAttempts: budget.layoutAttempts, // REQUEST counter: every visited (source,header,stride) BEFORE filters, INCLUDING the refused one
+    layoutRequests: budget.layoutAttempts,  // explicit alias (requests); executed evaluations = layoutAttempts - layoutRefusals
+    layoutRefusals: budget.layoutRefusals, // refused requests (never performed evaluations)
     layoutsTested: layoutsAdmitted,        // LEGACY field (post-filter), kept for API compatibility
     layoutsAdmitted, positionTriples, idColumns: idColumnsFound,
     candidatesBeforeCap: found.length, candidatesEmitted: selected.length,
@@ -337,17 +397,79 @@ function evaluateCandidateControls(buf, candidate, set, opts, anchors, budget) {
 function normalizeCandidate(c) { const { sampleIndices, idValues, controls, ...rest } = c; return { ...rest, controls }; }
 function verifyDirectoryInputs(inputs) { const o = []; for (let item of inputs) { if (!item || !fs.existsSync(item)) throw Error('input not found: ' + item); if (!fs.statSync(item).isFile()) throw Error('input must be regular file: ' + item); o.push(path.resolve(item)); } return o; }
 
+// ---------------- DA-1: semantic census gate ----------------
+// Re-derives the census from the recorded per-entry state vectors and REFUSES any
+// record whose meaning contradicts execution (e.g. a not-analyzed entry flipped to
+// SCANNED while keeping the disposition sum). This SAME gate computes the published
+// censusOk in SUMMARY.json, so a mutant census is refused by the very function whose
+// opinion the publication uses — there is no separate "checker" to fool.
+export function censusGate(containerRecord) {
+  const reasons = [];
+  if (containerRecord.parseStatus !== 'OK') {
+    const r = { ok: null, reasons: ['parseStatus=' + containerRecord.parseStatus + ' — entry-level disposition census not applicable (INPUT_TOO_LARGE / UNSUPPORTED / NOT_OPENED_BUDGET have no invented catalog)'] };
+    return r;
+  }
+  const declared = containerRecord.declaredEntryCount;
+  if (typeof declared !== 'number' || !Number.isSafeInteger(declared)) {
+    reasons.push('declaredEntryCount is not a known integer (UNKNOWN_ENTRY_COUNT) — cannot reconcile a census against an unknown catalog');
+  } else if (containerRecord.dispositions.length !== declared) {
+    reasons.push('disposition total ' + containerRecord.dispositions.length + ' != declaredEntryCount ' + declared + ' (sum mismatch)');
+  }
+  const seen = new Set();
+  const allowedAnalyzed = new Set(['COMPLETED', 'PARTIAL', 'ANALYSIS_ERROR']);
+  for (const d of containerRecord.dispositions) {
+    if (seen.has(d.entryIndex)) reasons.push('duplicate entryIndex ' + JSON.stringify(d.entryIndex));
+    seen.add(d.entryIndex);
+    if (d.disposition === 'SCANNED') {
+      if (d.analysisStarted !== true) reasons.push('entryIndex ' + d.entryIndex + ' (' + d.name + ') claims SCANNED but analysisStarted=' + JSON.stringify(d.analysisStarted) + ' — analysis never started');
+      if (!allowedAnalyzed.has(d.analysisStatus)) reasons.push('entryIndex ' + d.entryIndex + ' (' + d.name + ') claims SCANNED but analysisStatus=' + JSON.stringify(d.analysisStatus) + ' (must be COMPLETED | PARTIAL | ANALYSIS_ERROR)');
+      if (d.payloadRead !== true) reasons.push('entryIndex ' + d.entryIndex + ' (' + d.name + ') claims SCANNED but payloadRead=' + JSON.stringify(d.payloadRead));
+      if (d.admitted !== true) reasons.push('entryIndex ' + d.entryIndex + ' (' + d.name + ') claims SCANNED but admitted=' + JSON.stringify(d.admitted));
+    } else {
+      if (d.analysisStarted === true) reasons.push('entryIndex ' + d.entryIndex + ' (' + d.name + ') has disposition ' + d.disposition + ' but analysisStarted=true');
+      if (d.disposition === 'OVER_BUDGET' && d.analysisStatus !== 'NOT_ANALYZED') reasons.push('entryIndex ' + d.entryIndex + ' (' + d.name + ') has OVER_BUDGET but analysisStatus=' + JSON.stringify(d.analysisStatus) + ' (must be NOT_ANALYZED)');
+    }
+  }
+  const started = containerRecord.dispositions.filter(d => d.analysisStarted === true).length;
+  const readCount = containerRecord.dispositions.filter(d => d.payloadRead === true).length;
+  const admittedCount = containerRecord.dispositions.filter(d => d.admitted === true).length;
+  if (containerRecord.scannedPayloadCount !== started) reasons.push('scannedPayloadCount=' + containerRecord.scannedPayloadCount + ' != analysisStarted count=' + started);
+  if (typeof containerRecord.payloadReadCount === 'number' && containerRecord.payloadReadCount !== readCount) reasons.push('payloadReadCount=' + containerRecord.payloadReadCount + ' != payloadRead count=' + readCount);
+  if (typeof containerRecord.admittedCount === 'number' && containerRecord.admittedCount !== admittedCount) reasons.push('admittedCount=' + containerRecord.admittedCount + ' != admitted count=' + admittedCount);
+  return { ok: reasons.length === 0, reasons, derived: { analysisStartedCount: started, payloadReadCount: readCount, admittedCount } };
+}
+
 // ---------------- container scan with exclusion census ----------------
+// DA-1: every declared entry carries a disjoint state vector
+//   { admitted, payloadRead, analysisStarted, analysisStatus }
+// with analysisStatus in { NOT_ANALYZED, COMPLETED, PARTIAL, ANALYSIS_ERROR }.
+// The named disposition is derived from that vector:
+//   FILTERED_REGEX / FILTERED_EXTENSION / ENTRY_TOO_LARGE / TOO_SMALL  -> declared, never admitted
+//   PARSE_FAILED                                                      -> admitted (refunded), read failed/mismatch
+//   OVER_BUDGET                                                       -> stopped by a budget, analysis never started
+//   SCANNED                                                           -> analysis STARTED (status COMPLETED/PARTIAL/ANALYSIS_ERROR)
+// Admission or a payload read without analysis never yields SCANNED.
+function dispositionRecord(entryIndex, name, kind, extra = {}) {
+  return { entryIndex, name, disposition: kind, admitted: false, payloadRead: false, analysisStarted: false, analysisStatus: 'NOT_ANALYZED', ...extra };
+}
+function layoutBudgetExhausted(budget) { return budget.exhausted.includes('LAYOUT_EVALUATIONS'); } // analysis cannot perform any layout evaluation
+function finalizeContainerCounters(containerRecord) {
+  const d = containerRecord.dispositions;
+  containerRecord.admittedCount = d.filter(x => x.admitted === true).length;
+  containerRecord.payloadReadCount = d.filter(x => x.payloadRead === true).length;
+  containerRecord.scannedPayloadCount = d.filter(x => x.analysisStarted === true).length; // DA-1: analysisStarted, NOT admission/read
+  containerRecord.analysisStatusCounts = d.reduce((m, x) => { m[x.analysisStatus] = (m[x.analysisStatus] || 0) + 1; return m; }, {});
+}
 async function scanInput(file, opts, sets, adapters, allRows, allSources, skips, budget) {
   const size = fs.statSync(file).size;
-  const containerRecord = { input: file, sizeBytes: size, containerKind: null, parseStatus: null, declaredEntryCount: null, dispositions: [], scannedPayloadCount: 0, scanExceptions: 0 };
+  const containerRecord = { input: file, sizeBytes: size, containerKind: null, parseStatus: null, declaredEntryCount: null, dispositions: [], scannedPayloadCount: 0, admittedCount: 0, payloadReadCount: 0, analysisStatusCounts: {}, scanExceptions: 0 };
   if (size > opts.maxInputMiB * 1024 * 1024) {
     containerRecord.containerKind = path.extname(file).toLowerCase() || 'RAW_BLOB_UNFRAMED';
     containerRecord.parseStatus = 'INPUT_TOO_LARGE';
     skips.push({ file, entry: '', reason: 'INPUT_TOO_LARGE', size, message: '' });
     allSources.push(containerRecord); return;
   }
-  budget.containerReadBytes += size;
+  budget.containerReadBytes += size; // container-read bytes are a separate accounting unit; admission is not a performed scan
   const ext = path.extname(file).toLowerCase();
   let sources = [];
   if (ext === '.bnt' || ext === '.ark') {
@@ -368,52 +490,61 @@ async function scanInput(file, opts, sets, adapters, allRows, allSources, skips,
     }
     for (const e of entries) {
       // exactly one disposition per declared entry, in fixed filter order:
-      // FILTERED_REGEX -> FILTERED_EXTENSION -> ENTRY_TOO_LARGE -> TOO_SMALL -> PARSE_FAILED -> OVER_BUDGET -> SCANNED
-      if (opts.entryRegex && !opts.entryRegex.test(e.name)) { containerRecord.dispositions.push({ entryIndex: e.entryIndex, name: e.name, disposition: 'FILTERED_REGEX' }); continue; }
+      // FILTERED_REGEX -> FILTERED_EXTENSION -> ENTRY_TOO_LARGE -> TOO_SMALL -> (analysis-capable budget) -> admission -> PARSE_FAILED -> analysis
+      if (opts.entryRegex && !opts.entryRegex.test(e.name)) { containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'FILTERED_REGEX')); continue; }
       const extE = path.extname(e.name).toLowerCase();
-      if (!opts.includeAssets && !opts.includeAllEntries && MAGIC_SKIP_EXTS.has(extE)) { containerRecord.dispositions.push({ entryIndex: e.entryIndex, name: e.name, disposition: 'FILTERED_EXTENSION' }); continue; }
-      if (e.size > opts.maxPayloadMiB * 1024 * 1024) { containerRecord.dispositions.push({ entryIndex: e.entryIndex, name: e.name, disposition: 'ENTRY_TOO_LARGE', detail: 'size ' + e.size + ' > cap' }); skips.push({ file, entry: e.name, reason: 'ENTRY_TOO_LARGE', size: e.size, message: '' }); continue; }
-      if (e.size < opts.minRows * 12) { containerRecord.dispositions.push({ entryIndex: e.entryIndex, name: e.name, disposition: 'TOO_SMALL', detail: 'size ' + e.size + ' < minRows*12' }); continue; }
+      if (!opts.includeAssets && !opts.includeAllEntries && MAGIC_SKIP_EXTS.has(extE)) { containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'FILTERED_EXTENSION')); continue; }
+      if (e.size > opts.maxPayloadMiB * 1024 * 1024) { containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'ENTRY_TOO_LARGE', { detail: 'size ' + e.size + ' > cap' })); skips.push({ file, entry: e.name, reason: 'ENTRY_TOO_LARGE', size: e.size, message: '' }); continue; }
+      if (e.size < opts.minRows * 12) { containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'TOO_SMALL', { detail: 'size ' + e.size + ' < minRows*12' })); continue; }
+      // DA-1: once the shared LAYOUT_EVALUATIONS budget is exhausted, this payload
+      // cannot be analyzed — do NOT even readEntry/decode it; account it honestly.
+      if (layoutBudgetExhausted(budget)) { containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'OVER_BUDGET', { detail: 'budget exhausted before analysis: ' + budget.exhausted.join(',') })); skips.push({ file, entry: e.name, reason: 'BUDGET_EXHAUSTED', size: e.size, total: '', emitted: '', message: budget.exhausted.join(',') }); continue; }
       // budget reservation BEFORE the payload read, using the declared (directory) size;
       // the read result is verified below and the reservation is refunded if the payload is never scanned
-      if (!budget.admitPayload(e.size, file + '!' + e.name)) { containerRecord.dispositions.push({ entryIndex: e.entryIndex, name: e.name, disposition: 'OVER_BUDGET', detail: budget.exhausted[budget.exhausted.length - 1] }); continue; }
+      if (!budget.admitPayload(e.size, file + '!' + e.name)) { containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'OVER_BUDGET', { detail: budget.exhausted[budget.exhausted.length - 1] })); continue; }
       let p = null;
-      try { p = arch.readEntry(e).payload; } catch (ex) { budget.refundPayload(e.size); containerRecord.dispositions.push({ entryIndex: e.entryIndex, name: e.name, disposition: 'PARSE_FAILED', message: String(ex) }); skips.push({ file, entry: e.name, reason: 'READER_FAILURE', size: e.size, message: String(ex) }); continue; }
+      try { p = arch.readEntry(e).payload; } catch (ex) { budget.refundPayload(e.size); containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'PARSE_FAILED', { admitted: true, message: String(ex) })); skips.push({ file, entry: e.name, reason: 'READER_FAILURE', size: e.size, message: String(ex) }); continue; }
       const payload = Buffer.from(p.buffer, p.byteOffset, p.byteLength);
-      if (payload.length !== e.size) { budget.refundPayload(e.size); containerRecord.dispositions.push({ entryIndex: e.entryIndex, name: e.name, disposition: 'PARSE_FAILED', message: 'payload size mismatch: declared ' + e.size + ', actual ' + payload.length }); skips.push({ file, entry: e.name, reason: 'PAYLOAD_SIZE_MISMATCH', size: e.size, message: 'actual ' + payload.length }); continue; }
-      containerRecord.dispositions.push({ entryIndex: e.entryIndex, name: e.name, disposition: 'SCANNED' });
-      sources.push({ bytes: payload, entry: e.name, index: e.entryIndex, offset: e.offset ?? e.dataOffset });
+      if (payload.length !== e.size) { budget.refundPayload(e.size); containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'PARSE_FAILED', { admitted: true, payloadRead: true, message: 'payload size mismatch: declared ' + e.size + ', actual ' + payload.length })); skips.push({ file, entry: e.name, reason: 'PAYLOAD_SIZE_MISMATCH', size: e.size, message: 'actual ' + payload.length }); continue; }
+      // DA-1: PAYLOAD_READ is an intermediate state — SCANNED is only set when the
+      // analysis actually starts for this entry (stable entryIndex identity, not name).
+      containerRecord.dispositions.push(dispositionRecord(e.entryIndex, e.name, 'PAYLOAD_READ', { admitted: true, payloadRead: true }));
+      sources.push({ bytes: payload, entry: e.name, index: e.entryIndex, offset: e.offset ?? e.dataOffset, dispIndex: e.entryIndex });
     }
-    containerRecord.scannedPayloadCount = sources.length;
   } else {
     // RAW input: budget reservation BEFORE the payload read, using the verified on-disk size
     containerRecord.containerKind = 'RAW_BLOB_UNFRAMED';
     containerRecord.parseStatus = 'OK';
     containerRecord.declaredEntryCount = 1; // the raw file itself is one declared unit
+    if (layoutBudgetExhausted(budget)) {
+      containerRecord.dispositions.push(dispositionRecord(0, '[whole file]', 'OVER_BUDGET', { detail: 'budget exhausted before analysis: ' + budget.exhausted.join(',') }));
+      skips.push({ file, entry: '[whole file]', reason: 'BUDGET_EXHAUSTED', size, total: '', emitted: '', message: budget.exhausted.join(',') });
+      finalizeContainerCounters(containerRecord); allSources.push(containerRecord); return; // refused BEFORE the read
+    }
     if (!budget.admitPayload(size, file)) {
-      containerRecord.dispositions.push({ entryIndex: 0, name: '[whole file]', disposition: 'OVER_BUDGET', detail: budget.exhausted[budget.exhausted.length - 1] });
-      allSources.push(containerRecord); return; // refused BEFORE the read
+      containerRecord.dispositions.push(dispositionRecord(0, '[whole file]', 'OVER_BUDGET', { detail: budget.exhausted[budget.exhausted.length - 1] }));
+      finalizeContainerCounters(containerRecord); allSources.push(containerRecord); return; // refused BEFORE the read
     }
     const bytes = fs.readFileSync(file);
     containerRecord.sha256 = sha256(bytes);
-    containerRecord.dispositions.push({ entryIndex: 0, name: '[whole file]', disposition: 'SCANNED' });
-    sources.push({ bytes, entry: '[whole file]', index: -1, offset: 0 });
-    containerRecord.scannedPayloadCount = sources.length;
+    containerRecord.dispositions.push(dispositionRecord(0, '[whole file]', 'PAYLOAD_READ', { admitted: true, payloadRead: true }));
+    sources.push({ bytes, entry: '[whole file]', index: -1, offset: 0, dispIndex: 0 });
   }
   allSources.push(containerRecord);
   for (const src of sources) {
-    if (budget.exhausted.length && (budget.exhausted.includes('LAYOUT_EVALUATIONS') || budget.exhausted.includes('RETAINED_CANDIDATES'))) {
-      // a shared per-invocation budget was exhausted by an earlier payload: this admitted
-      // payload is NOT analyzed - its admission-level disposition is corrected to OVER_BUDGET
-      // (it was admitted, but no scan work was performed on it), recorded honestly,
-      // and no double-charged layout attempt is burned.
-      const d = containerRecord.dispositions.find(x => x.name === src.entry && x.disposition === 'SCANNED');
+    // DA-1: every remaining known entry is accounted — the loop does NOT break after
+    // the first budget-stopped payload. Keyed by stable entryIndex identity (duplicate
+    // entry names are different entries).
+    const d = containerRecord.dispositions.find(x => x.entryIndex === (src.dispIndex ?? src.index) && x.disposition === 'PAYLOAD_READ');
+    if (layoutBudgetExhausted(budget)) {
       if (d) { d.disposition = 'OVER_BUDGET'; d.detail = 'budget exhausted before analysis: ' + budget.exhausted.join(','); }
       skips.push({ file, entry: src.entry, reason: 'BUDGET_EXHAUSTED', total: '', emitted: '', message: budget.exhausted.join(',') });
-      break;
+      continue;
     }
+    if (d) { d.disposition = 'SCANNED'; d.analysisStarted = true; d.analysisStatus = 'PARTIAL'; } // started; finalized below
     try {
       const data = analyzeBlob(src.bytes, sets, { ...opts, budget });
+      if (d) d.analysisStatus = data.stats.budgetExhausted ? 'PARTIAL' : 'COMPLETED';
       const meta = { input: file, containerSha256: containerRecord.sha256, entry: src.entry, entryIndex: src.index, entryOffset: src.offset, payloadSize: src.bytes.length, payloadSha256: sha256(src.bytes) };
       const rank = data.candidates;
       for (let k = 0; k < rank.length; k++) {
@@ -429,12 +560,23 @@ async function scanInput(file, opts, sets, adapters, allRows, allSources, skips,
           const i = c.sampleIndices[j], base = c.header + i * c.stride;
           coords.push({ row: i, sourceOffset: src.offset + base, ID: readNum(src.bytes, base + c.idOffset, c.idWidth), xyz: [0, 4, 8].map(v => src.bytes.readFloatLE(base + c.xyzOffset + v)) });
         }
-        allRows.push({ ...meta, ...normalizeCandidate(c), sampleRows: coords, scanStats: data.stats });
+        // DA-2: the forwarded row IS the candidate object — aliased once between
+        // data.candidates and allRows (the same object in two arrays counts once);
+        // NO spread copy. sampleIndices/idValues were consumed above and are
+        // stripped in place, so the row shape equals the old normalizeCandidate copy.
+        delete c.sampleIndices; delete c.idValues;
+        Object.assign(c, meta, { sampleRows: coords, scanStats: data.stats });
+        allRows.push(c);
       }
       if (data.stats.capTruncated) skips.push({ file, entry: src.entry, reason: 'PER_SOURCE_CANDIDATE_CAP', total: data.stats.candidatesBeforeCap, emitted: data.stats.candidatesEmitted, message: '' });
       if (data.stats.budgetExhausted) skips.push({ file, entry: src.entry, reason: 'BUDGET_EXHAUSTED', total: '', emitted: '', message: data.stats.exhaustedKinds.join(',') });
-    } catch (ex) { containerRecord.scanExceptions++; skips.push({ file, entry: src.entry, reason: 'SCAN_EXCEPTION', message: String(ex) }); }
+    } catch (ex) {
+      containerRecord.scanExceptions++;
+      if (d) d.analysisStatus = 'ANALYSIS_ERROR'; // analysis started and threw — never COMPLETED/PARTIAL
+      skips.push({ file, entry: src.entry, reason: 'SCAN_EXCEPTION', message: String(ex) });
+    }
   }
+  finalizeContainerCounters(containerRecord);
 }
 async function main(argv) {
   let opts;
@@ -456,20 +598,48 @@ async function main(argv) {
   const adapters = { Bnt2Archive: x.Bnt2Archive, ArkArchive: y.ArkArchive };
   fs.mkdirSync(root, { recursive: true });
   let rows = [], sources = [], skips = [];
-  for (const f of files) {
-    await scanInput(f, opts, set, adapters, rows, sources, skips, budget);
+  for (let fi = 0; fi < files.length; fi++) {
+    await scanInput(files[fi], opts, set, adapters, rows, sources, skips, budget);
     budget.trackPeak(rows.length);
-    if (rows.length >= budget.limits.retainedCandidates) { budget.markExhausted('RETAINED_CANDIDATES', 'global rows retention at ' + rows.length); break; }
+    if (rows.length >= budget.limits.retainedCandidates) {
+      budget.markExhausted('RETAINED_CANDIDATES', 'global rows retention at ' + rows.length);
+      // DA-1: every remaining DECLARED file that is never opened is accounted as
+      // NOT_OPENED_BUDGET with UNKNOWN_ENTRY_COUNT — no catalog is invented for a
+      // container that was not read.
+      for (const rest of files.slice(fi + 1)) {
+        sources.push({ input: rest, sizeBytes: fs.statSync(rest).size, containerKind: null, parseStatus: 'NOT_OPENED_BUDGET', declaredEntryCount: null, declaredEntryCountState: 'UNKNOWN_ENTRY_COUNT', dispositions: [], scannedPayloadCount: 0, admittedCount: 0, payloadReadCount: 0, analysisStatusCounts: {}, scanExceptions: 0, unopenedReason: 'RETAINED_CANDIDATES budget stop: the file was never opened; its entry count is unknown' });
+        skips.push({ file: rest, entry: '', reason: 'NOT_OPENED_BUDGET', size: fs.statSync(rest).size, message: 'never opened: retained-candidates budget stop' });
+      }
+      break;
+    }
   }
   rows.sort((a, b) => b.score - a.score || b.idRate - a.idRate);
   const cols = ['input','entry','entryIndex','entryOffset','containerSha256','payloadSha256','payloadSize','header','stride','rowCount','sampleCount','tableRowCount','sampledRowCount','sampleXyzFiniteRate','fullCensusRowCount','fullCensusXyzFiniteRate','fullCensusIdRate','censusStatus','idOffset','idWidth','idSetName','idRate','idHits','idDistinct','xyzOffset','xyzRate','score','control_wrongSet','control_byteShuffle','control_neighbor','control_idShuffleInvariance','control_anchorMatches','control_shuffledAnchorMatches','status'];
-  const csvRows = rows.map(x => ({ ...x, control_wrongSet: x.controls.wrongSetHitRate, control_byteShuffle: x.controls.byteShuffleIdRate, control_neighbor: JSON.stringify(x.controls.neighborStrideIdRates), control_idShuffleInvariance: x.controls.permutationMembershipInvariant, control_anchorMatches: x.controls.independentAnchorJoint?.close ?? 'NOT_PERFORMED', control_shuffledAnchorMatches: x.controls.shuffledIdAnchorJoint?.close ?? 'NOT_PERFORMED', status: 'CANDIDATE_ONLY_NOT_PLACEMENT_PROOF' }));
-  writeCsv(path.join(root, 'placement_candidates.csv'), csvRows, cols);
+  // DA-2: the CSV is serialized directly over the live `rows` records with a cell
+  // transformer — no second full array of candidate records is materialized.
+  const csvRowCells = r => [r.input, r.entry, r.entryIndex, r.entryOffset, r.containerSha256, r.payloadSha256, r.payloadSize, r.header, r.stride, r.rowCount, r.sampleCount, r.tableRowCount, r.sampledRowCount, r.sampleXyzFiniteRate, r.fullCensusRowCount, r.fullCensusXyzFiniteRate, r.fullCensusIdRate, r.censusStatus, r.idOffset, r.idWidth, r.idSetName, r.idRate, r.idHits, r.idDistinct, r.xyzOffset, r.xyzRate, r.score, r.controls.wrongSetHitRate, r.controls.byteShuffleIdRate, JSON.stringify(r.controls.neighborStrideIdRates), r.controls.permutationMembershipInvariant, r.controls.independentAnchorJoint?.close ?? 'NOT_PERFORMED', r.controls.shuffledIdAnchorJoint?.close ?? 'NOT_PERFORMED', 'CANDIDATE_ONLY_NOT_PLACEMENT_PROOF'];
+  writeCsvRows(path.join(root, 'placement_candidates.csv'), rows, cols, csvRowCells);
   writeCsv(path.join(root, 'scan_skips.csv'), skips, ['file','entry','reason','size','message','total','emitted']);
   fs.writeFileSync(path.join(root, 'candidates_top.json'), JSON.stringify(rows.slice(0, Math.min(20, rows.length)), null, 2) + '\n');
   fs.writeFileSync(path.join(root, 'sources.json'), JSON.stringify(sources, null, 2) + '\n');
-  // exclusion census reconciliation: every declared entry accounted exactly once
-  const census = sources.map(c => ({ input: c.input, containerKind: c.containerKind, parseStatus: c.parseStatus, declaredEntryCount: c.declaredEntryCount, scannedPayloadCount: c.scannedPayloadCount, scanExceptions: c.scanExceptions, dispositions: c.dispositions, dispositionCounts: c.dispositions.reduce((m, d) => (m[d.disposition] = (m[d.disposition] || 0) + 1, m), {}), dispositionTotal: c.dispositions.length, censusOk: c.parseStatus === 'OK' ? (c.dispositions.length === c.declaredEntryCount) : null }));
+  // exclusion census reconciliation: every declared entry accounted exactly once,
+  // and every container record re-derived through the SAME semantic census gate
+  // that refuses a mutant flipping a not-analyzed entry to SCANNED (DA-1).
+  const census = sources.map(c => {
+    const gate = censusGate(c);
+    return {
+      input: c.input, containerKind: c.containerKind, parseStatus: c.parseStatus,
+      declaredEntryCount: c.parseStatus === 'NOT_OPENED_BUDGET' ? 'UNKNOWN_ENTRY_COUNT' : c.declaredEntryCount,
+      declaredEntryCountState: c.declaredEntryCountState ?? (c.parseStatus === 'OK' ? 'KNOWN_FROM_CONTAINER_DIRECTORY' : 'UNKNOWN_ENTRY_COUNT'),
+      unopenedReason: c.unopenedReason ?? null,
+      scannedPayloadCount: c.scannedPayloadCount, admittedCount: c.admittedCount, payloadReadCount: c.payloadReadCount,
+      analysisStatusCounts: c.analysisStatusCounts, scanExceptions: c.scanExceptions,
+      dispositions: c.dispositions,
+      dispositionCounts: c.dispositions.reduce((m, d) => (m[d.disposition] = (m[d.disposition] || 0) + 1, m), {}),
+      dispositionTotal: c.dispositions.length,
+      censusOk: gate.ok, censusGateReasons: gate.reasons, censusDerivedCounts: gate.derived ?? null,
+    };
+  });
   const safeOpts = Object.fromEntries(Object.entries(opts).filter(([key]) => !['entryRegex', 'anchors', 'budget'].includes(key)));
   const record = {
     tool: 'PE935_PLACEMENT_PROBE_R1_CORRECTION', timeUtc: new Date().toISOString(), mode: 'READ_ONLY_INPUTS__CANDIDATES_NOT_PROOF',

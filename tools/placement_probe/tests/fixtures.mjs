@@ -157,3 +157,46 @@ export function records80Headerless() {
   }
   return b;
 }
+
+// --- PA-1 regression fixtures (contract section F, byte-exact pinned builders) ---
+// PA1-A: the EXACT original sparse builder from the pinned review_counterchecks.mjs
+// (lines 54-60). 4800 rows, header 16, stride 32; only rows i=4j+2 (j=0..1199, the
+// rows the 1200-row sampler picks) carry a valid u16 ID 4057/4058 and finite f32
+// xyz (j*2 + k*100 at +4/+8/+12); everything else stays 0xFF. The original fixture
+// does NOT have valid IDs everywhere: sample sees 100%, the whole table is 25%.
+// Bytes=153616; SHA256=9AB2D32A1DE4DB50E0496F5364C1EE694A08D3D2B3B82A7E65B460EBB52681C7.
+export function pa1A() {
+  const b = Buffer.alloc(16 + 4800 * 32, 0xff);
+  for (let j = 0; j < 1200; j++) {
+    const i = Math.floor((j + 0.5) * 4800 / 1200);
+    const p = 16 + i * 32;
+    b.writeUInt16LE(j % 2 ? 4058 : 4057, p);
+    [4, 8, 12].forEach((o, k) => b.writeFloatLE(j * 2 + k * 100, p + o));
+  }
+  return b;
+}
+// PA1-B: from A change ONLY the IDs of the unsampled rows (i%4 !== 2) to i%2?4058:4057,
+// without touching XYZ. Sample XYZ stays 1.0, full XYZ stays 0.25, full ID becomes 1.0.
+// SHA256=2E8520FF73690D5ED44026A568C9438CA4625ED85DA9A433169B1143B5153622.
+export function pa1B() {
+  const b = pa1A();
+  for (let i = 0; i < 4800; i++) {
+    if (i % 4 !== 2) b.writeUInt16LE(i % 2 ? 4058 : 4057, 16 + i * 32);
+  }
+  return b;
+}
+// PA1-C: from B change ONLY the unsampled f32 xyz (+4/+8/+12) to i*2 + k*100.
+// Sample XYZ 1.0, full XYZ 1.0, full ID 1.0.
+// SHA256=20258A0CD3D93B2FD2C496AAC32F1655E7A45768450177A3F6E764B2D7EA926B.
+export function pa1C() {
+  const b = pa1B();
+  for (let i = 0; i < 4800; i++) {
+    if (i % 4 !== 2) [4, 8, 12].forEach((o, k) => b.writeFloatLE(i * 2 + k * 100, 16 + i * 32 + o));
+  }
+  return b;
+}
+export const PA1_PINS = {
+  A: { sizeBytes: 153616, sha256: '9AB2D32A1DE4DB50E0496F5364C1EE694A08D3D2B3B82A7E65B460EBB52681C7', SAMPLE_XYZ_FINITE_RATE: 1.0, FULL_XYZ_FINITE_RATE: 0.25, FULL_ID_HIT_RATE: 0.25 },
+  B: { sizeBytes: 153616, sha256: '2E8520FF73690D5ED44026A568C9438CA4625ED85DA9A433169B1143B5153622', SAMPLE_XYZ_FINITE_RATE: 1.0, FULL_XYZ_FINITE_RATE: 0.25, FULL_ID_HIT_RATE: 1.0 },
+  C: { sizeBytes: 153616, sha256: '20258A0CD3D93B2FD2C496AAC32F1655E7A45768450177A3F6E764B2D7EA926B', SAMPLE_XYZ_FINITE_RATE: 1.0, FULL_XYZ_FINITE_RATE: 1.0, FULL_ID_HIT_RATE: 1.0 },
+};

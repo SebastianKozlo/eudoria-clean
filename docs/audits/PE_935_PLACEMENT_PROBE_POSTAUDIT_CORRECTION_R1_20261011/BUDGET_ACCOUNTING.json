@@ -1,0 +1,43 @@
+{
+  "runId": "PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011",
+  "timeUtc": "2026-10-11T13:35:00Z",
+  "limits": {
+    "MAX_SYNTHETIC_INPUTS_PER_INVOCATION": 32,
+    "MAX_SCANNED_BYTES_PER_INVOCATION": 67108864,
+    "MAX_LAYOUT_EVALUATIONS_PER_INVOCATION": 100000,
+    "MAX_FULL_CENSUS_ROWS_PER_INVOCATION": 50000,
+    "MAX_RETAINED_CANDIDATES": 256,
+    "MAX_FIX_ROUNDS": 2
+  },
+  "limitsUnchangedFromBASE": true,
+  "perLimitCoverage": {
+    "SYNTHETIC_INPUTS": { "legalBoundary": "B1 (32 of 33 admitted)", "refusal": "B1 (33rd admission refused before read) + DA3 (33/NaN refused)", "joinTwoInputs": "B1 (many.bnt + one.bnt)", "censusUnit": "admittedCount is a separate unit from scannedPayloadCount (DA-1)" },
+    "SCANNED_BYTES": { "legalBoundary": "B2 (cap 5152 admits both)", "refusal": "B2 (second input refused before read) + DA3 (67108865/NaN refused)", "joinTwoInputs": "B2 (two raw inputs aggregated)", "note": "reservation BEFORE read using verified size; refund on parse failure (CX4); P3-4: containerReadBytes is charged from the stat size before a RAW admission refusal — pre-existing disclosed limitation (R2-4), unchanged" },
+    "LAYOUT_EVALUATIONS": { "legalBoundary": "B3 (default covers 2x2142)", "refusal": "B3 (cap 700: request 701 refused) + DA3 (100001/NaN/Infinity/-1/1.5 refused)", "joinTwoInputs": "B3 (cap 3000 stops the second input mid-analysis)", "counterSemantics": "layoutAttempts = REQUESTS including the refused one (61 at limit 60 = 60 executed + 1 refused, layoutRefusals=1); never described as 61 performed evaluations" },
+    "FULL_CENSUS_ROWS": { "legalBoundary": "B4 (default 50000)", "refusal": "B4 (cap 160 -> honest PARTIAL_BUDGET_EXHAUSTED) + PA1 no-budget control (fullCensusRows 100)", "joinTwoInputs": "B4 (two inputs share the finalist census budget)", "mandatoryTarget": "PA-1 target receives the legal budget of exactly 4800 rows -> FULL_CENSUS 4800" },
+    "RETAINED_CANDIDATES": { "legalBoundary": "B5 (256 no exhaustion) + DA2_CAP256 (every phase <= 256)", "refusal": "B5 (cap 4 -> honest PARTIAL with candidates retained) + DA2_MUTANT_COPY (forced copy detected by the identity observer)", "joinTwoInputs": "B5 + DA2_CAP4 (2 inputs) + DA2_CAP256 (9 inputs; both inputs actually deliver records — object identities measured, not the tracker)" }
+  },
+  "distinctRecordAccounting": {
+    "rule": "MAX_RETAINED_CANDIDATES bounds simultaneously live DISTINCT candidate records across found/per-call candidate lists and allRows",
+    "aliasing": "the forwarded row IS the candidate object — the same object in two arrays counts ONCE; new objects with the same fields count SEPARATELY",
+    "notRecords": "CSV/JSON text, indexes, configuration and per-axis statistics are not candidate records",
+    "oracle": "Set-of-identities observer over the actual holding collections; the production peakRetained tracker is recorded but is NOT the oracle; no GC-based proof",
+    "preOnBase": { "cap4": { "tracker": 4, "forwardDistinct": 8, "serializationDistinct": 8 }, "cap256": { "tracker": 256, "forwardDistinct": 280, "serializationDistinct": 512 } },
+    "post": { "cap4": { "creation": 4, "forward": 4, "serialization": 4 }, "cap256": { "creation": 256, "forward": 256, "serialization": 256 }, "mutantDetected": "forced-copy mutant forward distinct 8 > cap 4 (CONTROL_PASS)" }
+  },
+  "exhaustionSemantics": {
+    "admissionIsNotAScan": "scannedPayloadCount counts analysisStarted payloads only (DA-1)",
+    "containerDirectoryCost": "containerReadBytes is a separate unit from SCANNED_BYTES",
+    "exhaustionIsNeverNoCandidate": "BUDGET_EXHAUSTED + COVERAGE=PARTIAL with retained candidates kept (B5/DA2_CAP4)",
+    "noReadAfterExhaustion": "payloads that cannot be analyzed are not readEntry-decoded after the shared LAYOUT budget is exhausted",
+    "unopenedFiles": "NOT_OPENED_BUDGET + UNKNOWN_ENTRY_COUNT — no invented catalog"
+  },
+  "invocations": {
+    "plannedPerPreregistration": { "nodeTestSuites": 2, "toolCliInvocations": 14, "gateRunnerInvocationsInPost": 3, "gateRunnerRealSequenceBeforePost": 1 },
+    "actualRecordedInPOST": { "nodeTestSuites": 2, "toolCliInvocations": 14, "gateRunnerInvocationsInPost": 3, "gateRunnerRealSequenceBeforePost": 1 },
+    "note": "in-process controls (DA3 refusals/positives, PA1 truth+production, aggregator controls) are recorded per case in POST_TEST_RESULTS.json"
+  },
+  "fixRoundsUsed": 0,
+  "fixRoundsMax": 2,
+  "honestNote": "the corrected tool needed no fix after its first green full-suite run; implementation bring-up iterations and POST/QC harness bugs are disclosed in AMENDMENT_LOG.md"
+}

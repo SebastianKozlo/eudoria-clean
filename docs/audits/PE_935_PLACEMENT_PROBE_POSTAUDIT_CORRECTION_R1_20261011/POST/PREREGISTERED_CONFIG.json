@@ -1,0 +1,126 @@
+{
+  "runId": "PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011",
+  "stage": "PREREGISTERED_BEFORE_POST",
+  "timeUtc": "2026-10-11T12:05:00Z",
+  "purpose": "Preregistration of the POST battery: configurations, fixtures, expectations and the planned invocation count are frozen BEFORE any POST measurement. No criterion changes after an outcome for the sake of a PASS.",
+  "principle": "Every named case records MEASURED_QUANTITY, EXPECTED, ACTUAL, DENOMINATOR, SOURCE_OF_TRUTH, NEGATIVE_CONTROL, FAILURE_CASE_DETECTED, RESULT. Where no denominator exists the field is NOT_APPLICABLE with a unit — no number is invented. Expected rejection of a mutant is TEST_PASS/CONTROL_PASS, not a science PASS.",
+  "codeUnderTest": {
+    "tools/placement_probe/placement_probe.mjs": "the corrected tool (DA-1/DA-2/DA-3); identity re-measured and recorded by run_post.mjs",
+    "tools/placement_probe/verify_inputs.mjs": "the PA-2 gate module",
+    "tools/placement_probe/tests/fixtures.mjs": "fixtures incl. the pinned PA1-A/B/C builders",
+    "adapters": "src/pesource/Bnt2Archive.js (git blob 1fb862905b4749f3336bb47da87441edbd018fb7) and src/pesource/ArkArchive.js (git blob a9c9f04319dc3128d527d0688285ec5384f8aa97) — UNCHANGED BASE bytes, imported from the pinned BASE worktree"
+  },
+  "plannedSuites": [
+    { "id": "ORIGINAL_SEVEN", "invocations": 1, "command": "node --test tests/probe.test.mjs tests/cli-fixture.test.mjs", "location": "isolated stage of the pinned ZIP kit (byte-identical to FILE_HASHES.json members)", "expected": { "tests": 7, "pass": 7, "fail": 0, "exitCode": 0 } },
+    { "id": "FULL_SUITE", "invocations": 1, "command": "node --test <10 test files>", "location": "isolated byte-identical stage of the corrected tools", "expected": { "fail": 0, "exitCode": 0, "requiredNamedTestsPresent": ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "CX1", "CX2", "CX3", "CX4", "O1", "O2", "O3", "O4", "O5", "O6", "O7", "S7a", "S7b", "DA1-C1", "DA1-C2", "DA1-C3", "DA1-C4", "DA1-C5", "DA3", "DA2", "PA1", "PA2"] } }
+  ],
+  "plannedCases": [
+    {
+      "id": "DA1_CENSUS", "invocations": 1, "config": "CLI --input four_entries.bnt (4 x records80, real BASE Bnt2Archive adapter) --budget-layout-evals 100",
+      "fixtureIdentity": "four_entries.bnt built by fixtures.realBnt2 on synthetic bytes",
+      "measuredQuantity": "per-entry disposition + state vector; scannedPayloadCount",
+      "expected": { "e0": "SCANNED/PARTIAL (analysis started, cut at request 101)", "e1_e2_e3": "OVER_BUDGET/NOT_ANALYZED (analysisStarted=false)", "scannedPayloadCount": 1, "censusOk": true, "declaredEntryDenominator": 4 },
+      "sourceOfTruth": "the corrected scan execution itself (dispositions are derived from execution state)",
+      "negativeControl": "a mutated census flipping entry 2 to SCANNED while keeping the disposition sum must be REFUSED by the SAME exported censusGate()",
+      "failureCaseDetected": "false SCANNED for entries whose analysis never started (the external post-audit R2-5 P2)"
+    },
+    {
+      "id": "DA1_NOT_OPENED", "invocations": 1, "config": "CLI --input first.ark (4 entries) second.ark third.bnt --budget-retained-candidates 4 (real BASE adapters)",
+      "measuredQuantity": "census records for files never opened",
+      "expected": { "second_and_third": "parseStatus=NOT_OPENED_BUDGET, declaredEntryCount=UNKNOWN_ENTRY_COUNT, dispositions=[], scannedPayloadCount=0, censusOk=null" },
+      "sourceOfTruth": "scan execution (the files were never opened; no catalog may be invented)",
+      "negativeControl": "the first container must still be fully accounted (4 SCANNED/COMPLETED)",
+      "failureCaseDetected": "unaccounted declared files at a budget stop"
+    },
+    {
+      "id": "DA2_CAP4", "invocations": 2, "config": "CLI 2 raw inputs --budget-retained-candidates 4; unmodified + identity-observed instrumented copy (read-only hooks, byte-compared outputs)",
+      "measuredQuantity": "distinct live candidate-record objects per phase (creation/forward/serialization) via Set identity",
+      "expected": { "everyPhaseDistinct": "<= 4", "serializationIdentitiesAreLiveRows": true, "outputsByteIdentical": true, "budgetsIdentical": true, "coverage": "PARTIAL with candidates retained (honest exhaustion kept)" },
+      "preReference": "on BASE: tracker 4 while 8 distinct records lived at forward and serialization",
+      "sourceOfTruth": "object identity in the actual holding collections (the production peakRetained tracker is recorded but is NOT the oracle)",
+      "negativeControl": "a deliberately forced extra copy (allRows.push({...c})) must be DETECTED (forward distinct > cap)",
+      "failureCaseDetected": "distinct-record cap bypass via unnecessary copies (R2-2 P2)"
+    },
+    {
+      "id": "DA2_CAP256", "invocations": 2, "config": "CLI 9 raw inputs, canonical ceilings; unmodified + observed",
+      "expected": { "everyPhaseDistinct": "<= 256", "serializationIdentitiesAreLiveRows": true, "outputsByteIdentical": true },
+      "preReference": "on BASE: forward 280 distinct, CSV serialization 512 distinct",
+      "sourceOfTruth": "same identity observer",
+      "negativeControl": "aliasing: the same object in two arrays counts once (forward distinct == live rows, not 2x)",
+      "failureCaseDetected": "same as DA2_CAP4 at the canonical ceiling"
+    },
+    {
+      "id": "DA2_MUTANT_COPY", "invocations": 1, "config": "CLI 2 raw inputs --budget-retained-candidates 4 on a PRIVATE MUTANT of the corrected tool that forces an extra copy at forward (allRows.push({...c})); identity observer attached",
+      "measuredQuantity": "forward distinct live records observed on the mutant",
+      "expected": { "forwardDistinct": "> cap 4 (the observer DETECTS the forced copy)", "trackedPeakStillSatisfied": "the production tracker alone would NOT detect it — it is not the oracle" },
+      "sourceOfTruth": "the Set-identity observer",
+      "negativeControl": "this IS the negative control; its expected detection outcome is CONTROL_PASS",
+      "failureCaseDetected": "a reintroduced copy regression"
+    },
+    {
+      "id": "DA2_SMALL_FIXTURE", "invocations": 1, "config": "CLI single recordsTwoIdSmall (272 B)",
+      "expected": { "candidateCount": "> 0 (the copy-free forwarding does not remove candidates)", "coverage": "FULL" },
+      "sourceOfTruth": "SUMMARY.json candidateCount",
+      "negativeControl": "an empty-result regression would show candidateCount=0",
+      "failureCaseDetected": "over-aggressive cap enforcement deleting valid results"
+    },
+    {
+      "id": "DA3_REFUSALS", "invocations": 6, "config": "exported analyzeBlob / Budget constructor: layoutEvaluations in {100001, NaN, Infinity, -1, 1.5}; retainedCandidates 512; syntheticInputs {33, NaN}; scannedBytes {67108865, NaN}; fullCensusRows {50001, NaN}; contradictory valid Budget+budgetThresholds; masquerading plain object; post-construction mutated instance; CLI --budget-* raised/NaN flags",
+      "measuredQuantity": "refusal (INVALID_CONFIGURATION) vs acceptance; layout attempts after refusal",
+      "expected": { "allRefused": true, "attemptsAfterRefusal": 0, "cli": "exit!=0 + SCAN_STARTED=NO, no output dir", "noNullLimitLeak": "a NaN limit throws; no result object with limits.layoutEvaluations=null" },
+      "sourceOfTruth": "the Budget constructor + effective-tracker validation in analyzeBlob",
+      "negativeControl": "legal minimum 1, exact ceilings, defaults and a lowered limit 60 must all be ACCEPTED",
+      "failureCaseDetected": "configuration bypass via an injected Budget instance (the new P2)"
+    },
+    {
+      "id": "DA3_POSITIVES", "invocations": 0, "config": "in-process: new Budget() defaults; min=1; exact ceilings; limit 60; shared Budget across 2 inputs without reset",
+      "measuredQuantity": "limits; layoutAttempts/layoutRefusals/layoutsAdmitted; aggregation on one instance",
+      "expected": { "limit60": "layoutAttempts=61 requests = 60 executed + 1 refused (honestly labeled; never claimed as 61 performed evaluations)", "sharedNoReset": "second call sees the accumulated counters of the same instance" },
+      "sourceOfTruth": "Budget counters",
+      "negativeControl": "the refusal record must name the executed count",
+      "failureCaseDetected": "misdescribed counter semantics"
+    },
+    {
+      "id": "PA1_REGRESSION", "invocations": 0, "config": "exported analyzeBlob on the pinned PA1-A/B/C fixtures: maxStride 32, maxHeader 16, top 10, budgetThresholds fullCensusRows 4800 (the legal budget for the mandatory target); plus a no-budget control (fullCensusRows 100)",
+      "fixtureIdentity": "PA1-A SHA256 9AB2D32A1DE4DB50E0496F5364C1EE694A08D3D2B3B82A7E65B460EBB52681C7; PA1-B 2E8520FF73690D5ED44026A568C9438CA4625ED85DA9A433169B1143B5153622; PA1-C 20258A0CD3D93B2FD2C496AAC32F1655E7A45768450177A3F6E764B2D7EA926B; 153616 B each",
+      "measuredQuantity": "sampleXyzFiniteRate, fullCensusXyzFiniteRate, fullCensusIdRate, censusStatus vs independently computed ground truth",
+      "expected": { "A": "sample 1.0, full XYZ 0.25 (1200/4800), full ID 0.25, FULL_CENSUS 4800", "B": "sample 1.0, full XYZ 0.25, full ID 1.0, FULL_CENSUS 4800", "C": "sample 1.0, full XYZ 1.0, full ID 1.0, FULL_CENSUS 4800", "deltaDiscipline": "full result changes ONLY after changing unsampled bytes", "noBudgetControl": "censusStatus=PARTIAL_BUDGET_EXHAUSTED (honest PARTIAL)" },
+      "sourceOfTruth": "ground truth computed by the harness directly from the synthetic bytes (independent of the production reader/sampler); the pinned Desktop recheck as the external reference",
+      "negativeControl": "a forged FULL_XYZ=1.0 for A/B (sample kept 1.0) must be REJECTED by the harness gate",
+      "failureCaseDetected": "a future regression that extrapolates the sample onto the whole table"
+    },
+    {
+      "id": "PA2_LIVE_GATE", "invocations": 3, "config": "the live runner (PRE/verify_inputs_runner.mjs) was ALREADY invoked once in the REAL sequence before POST (receipt recorded); POST re-runs three MUTANT runner invocations on private copies with UNCHANGED expected pins: all-same-size-wrong-sha, all-missing, one-wrong-size",
+      "measuredQuantity": "gate verdict; exit code; downstream spy counts after refusal",
+      "expected": { "live": "PASS 16/16, exit 0, EFFECTIVE_GATE_RESULT=GATE_PASS__DOWNSTREAM_AUTHORIZED", "mutants": "BLOCKED_INPUT_IDENTITY, exit 3, downstreamCalls all zero", "noRealGitHubWrite": "no mutant performs a real GitHub write" },
+      "sourceOfTruth": "the frozen pins + separate measurements + conditional verdict in verify_inputs.mjs",
+      "negativeControl": "the mutant runs themselves; the historical literal-PASS generator is superseded (SUPERSESSION.md)",
+      "failureCaseDetected": "an unconditional PASS gate that proves nothing (the PA-2 finding)"
+    },
+    {
+      "id": "AGGREGATOR_CONTROL", "invocations": 0, "config": "computeQualification(requiredResults): full set -> PASS + exit 0; each required result removed in turn -> refuses PASS + exit != 0",
+      "measuredQuantity": "aggregator verdict + process exit code",
+      "expected": { "fullSet": "PASS/exit0", "eachSingleRemoval": "REFUSED/exit!=0" },
+      "sourceOfTruth": "the aggregator code path itself",
+      "negativeControl": "removal of one required result at a time",
+      "failureCaseDetected": "a collector that always exits 0 regardless of missing required results"
+    }
+  ],
+  "plannedInvocationCounts": {
+    "nodeTestSuites": 2,
+    "toolCliInvocations": 14,
+    "gateRunnerInvocationsInPost": 3,
+    "gateRunnerRealSequenceBeforePost": 1,
+    "inProcessControls": "DA3 refusals/positives, PA1 truth+production, aggregator controls (recorded per case)",
+    "note": "The battery count is dynamic; no fixed final total is imposed. toolCliInvocations = DA1_CENSUS 1 + DA1_NOT_OPENED 1 + DA2_CAP4 2 + DA2_CAP256 2 + DA2_MUTANT_COPY 1 + DA2_SMALL_FIXTURE 1 + DA3 CLI refusals 6."
+  },
+  "limits": {
+    "MAX_FIX_ROUNDS": 2,
+    "MAX_SYNTHETIC_INPUTS_PER_INVOCATION": 32,
+    "MAX_SCANNED_BYTES_PER_INVOCATION": 67108864,
+    "MAX_LAYOUT_EVALUATIONS_PER_INVOCATION": 100000,
+    "MAX_FULL_CENSUS_ROWS_PER_INVOCATION": 50000,
+    "MAX_RETAINED_CANDIDATES": 256
+  },
+  "independenceDisclaimer": "run_post.mjs is the executor's own harness; a replay of it is not a second implementation. Independent anchors in this run: the pinned external Desktop post-audit measurements (PRE), the frozen byte pins of the contract, the exported censusGate identity check, the Set-identity DA-2 observer, the PA-1 harness-computed ground truth, and the fresh-context internal QC of the final bytes (QC/INTERNAL_REVIEW.md)."
+}
