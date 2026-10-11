@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!-- pcg935-viewer.html — PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010 (Wave 7)
+     Full-asset SceneIR viewer: every Models.bnt entry, ranked largest->smallest,
+     real textures (era-labelled states), original animations with playback.
+     Three.js 0.185.0 from the pinned local package (no CDN). Zero-framework. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PCG 9.3.5 SceneIR — All Assets (R1)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/node_modules/three/build/three.module.js",
+        "three/addons/": "/node_modules/three/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header id="topbar">
+    <button id="btn-drawer" class="tb-btn" title="Toggle catalog drawer (C)">☰ Catalog</button>
+    <div class="tb-title">PCG 9.3.5 SceneIR · All 5,596 Assets · PE_SCENEIR_PCG935_ALL_ASSETS_R1</div>
+    <div class="tb-right">
+      <span id="gen-indicator" class="gen"></span>
+      <label class="tb-toggle"><input type="checkbox" id="t-wireframe">Wireframe</label>
+      <label class="tb-toggle"><input type="checkbox" id="t-textures" checked>Textures</label>
+      <label class="tb-toggle"><input type="checkbox" id="t-axes" checked>Axes/Grid</label>
+      <label class="tb-toggle"><input type="checkbox" id="t-bounds" checked>Bounds</label>
+      <button id="btn-fit" class="tb-btn" title="Reset camera to asset (F)">Fit</button>
+      <button id="btn-parts" class="tb-btn" title="Toggle parts drawer (P)">Parts</button>
+    </div>
+  </header>
+
+  <aside id="drawer" class="closed">
+    <div class="drawer-head">
+      <input id="search" type="search" placeholder="Search id / name…" autocomplete="off">
+      <div class="filters">
+        <select id="f-version">
+          <option value="">All versions</option>
+          <option value="10.1.0.0">10.1.0.0 (4,838)</option>
+          <option value="4.1.0.12">4.1.0.12 (757)</option>
+          <option value="4.0.0.2">4.0.0.2 (1)</option>
+        </select>
+        <select id="f-status">
+          <option value="">All states</option>
+          <option value="PASS">Parsed</option>
+          <option value="FAIL">Parse failed</option>
+          <option value="animated">Animated (kf)</option>
+          <option value="skinned">Skinned</option>
+          <option value="textured">Textured (ArkTex)</option>
+          <option value="mesh">Has meshes</option>
+          <option value="nomesh">No meshes (UNKNOWN extent)</option>
+        </select>
+        <select id="f-sort">
+          <option value="extent">Sort: extent (default)</option>
+          <option value="bytes">Sort: payload bytes</option>
+          <option value="tris">Sort: triangles</option>
+          <option value="verts">Sort: vertices</option>
+          <option value="diagonal">Sort: diagonal</option>
+          <option value="vertical">Sort: vertical extent</option>
+        </select>
+      </div>
+      <div id="drawer-stats" class="drawer-stats">loading catalog…</div>
+    </div>
+    <div id="list" class="list" role="listbox"></div>
+    <button id="more" class="more-btn" hidden>show more rows…</button>
+  </aside>
+
+  <main id="canvas-wrap">
+    <canvas id="c"></canvas>
+    <div id="loading" class="overlay hidden">loading asset…</div>
+    <div id="asset-info" class="asset-info hidden"></div>
+    <div id="fail-note" class="fail-note hidden"></div>
+  </main>
+
+  <aside id="parts" class="closed">
+    <div class="drawer-head"><b>Parts</b> <span id="parts-count"></span></div>
+    <div id="parts-list" class="parts-list"></div>
+  </aside>
+
+  <section id="anim" class="closed">
+    <div class="anim-head">
+      <b>Animation</b>
+      <select id="a-clip"><option value="">— no clips —</option></select>
+      <button id="a-play" class="tb-btn">Play</button>
+      <button id="a-pause" class="tb-btn">Pause</button>
+      <button id="a-stop" class="tb-btn">Stop</button>
+      <label class="tb-toggle">speed <input id="a-speed" type="number" min="0.1" max="4" step="0.1" value="1"></label>
+      <label class="tb-toggle">repeat <input type="checkbox" id="a-repeat" checked></label>
+      <span id="a-time" class="a-time">0.00 / 0.00</span>
+      <input id="a-scrub" type="range" min="0" max="1000" value="0" step="1">
+    </div>
+  </section>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

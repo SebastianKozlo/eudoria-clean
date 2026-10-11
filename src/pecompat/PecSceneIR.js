@@ -382,6 +382,7 @@ export function computeSceneBounds(ir, worldTransforms) {
     meshCount++;
     const w = worldTransforms.get(b.index);
     const pos = data.geometry.positions;
+    if (!pos || !w) continue; // hasVertices=0 data blocks / non-scene meshes contribute no vertices
     for (let i = 0; i < pos.length; i += 3) {
       const p = applyTrsPoint(w, [pos[i], pos[i + 1], pos[i + 2]]);
       for (let k = 0; k < 3; k++) {

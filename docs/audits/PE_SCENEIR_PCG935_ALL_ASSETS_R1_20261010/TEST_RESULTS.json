@@ -1,0 +1,563 @@
+{
+ "runId": "PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010",
+ "generated": "2026-10-11T08:21:56.079Z",
+ "harness": "tests/pecompat/run_pcg935_viewer_tests.mjs",
+ "battery": "tests/pecompat/pcg935_viewer.test.mjs",
+ "results": [
+  {
+   "label": "node-gates (1,2,4,5,6,11)",
+   "tool": "pcg935_tests.mjs",
+   "ok": true,
+   "ms": 1455,
+   "out": "gate1 corpus_bijection: PASS\ngate2 parser_fixtures_pos_neg: PASS\ngate4 ranking_spot_checks: PASS\ngate5 texture_controls: PASS\ngate6 animation_inventory_unit: PASS\ngate11 regression_218757_457485: PASS\nALL NODE GATES: PASS\n"
+  },
+  {
+   "label": "api-negatives (7)",
+   "tool": "pcg935_api_negatives.mjs",
+   "ok": true,
+   "ms": 250,
+   "out": "D_TEXTURE_ID\nok   GET /api/asset/%00 -> 400 NULL_BYTE_IN_URL\nok   GET /nope -> 404 ROUTE_NOT_FOUND\nok   GET /api/nope -> 404 ROUTE_NOT_FOUND\nok   POST /api/asset/223534 -> 405 METHOD_NOT_ALLOWED_READ_ONLY\nok   DELETE /api/asset/223534 -> 405 METHOD_NOT_ALLOWED_READ_ONLY\nok   PUT /app.js -> 405 METHOD_NOT_ALLOWED_READ_ONLY\nok   GET /api/asset/592605 -> 422 PARSE_FAILED_TRUTHFUL\nAPI NEGATIVES: PASS\n"
+  },
+  {
+   "label": "browser-battery (8)",
+   "tool": "pcg935_cdp_battery.mjs",
+   "ok": true,
+   "ms": 33253,
+   "out": "LOAD: true PIXEL: true INTERACTION: true ALL: true\n"
+  }
+ ],
+ "gates": [
+  {
+   "name": "gate1-2-4-5-6-11",
+   "ok": true,
+   "detail": {
+    "runId": "PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010",
+    "generated": "2026-10-11T08:21:22.467Z",
+    "gates": {
+     "gate1": {
+      "name": "corpus_bijection",
+      "indexEntries": 5596,
+      "catalogEntries": 5596,
+      "missingInCatalog": [],
+      "foreignInCatalog": [],
+      "dupNames": 0,
+      "extentOrderBijection": true,
+      "pass": true
+     },
+     "gate2": {
+      "name": "parser_fixtures_pos_neg",
+      "positives": {
+       "505775.nif": {
+        "pass": true,
+        "blocks": 103,
+        "version": "a010000"
+       },
+       "218757.nif": {
+        "pass": true,
+        "blocks": 66,
+        "version": "a010000"
+       },
+       "457485.nif": {
+        "pass": true,
+        "blocks": 16,
+        "version": "a010000"
+       },
+       "462325.nif": {
+        "pass": true,
+        "blocks": 157,
+        "version": "a010000"
+       },
+       "360268.nif": {
+        "pass": true,
+        "blocks": 60,
+        "version": "401000c"
+       },
+       "52555.nif": {
+        "pass": true,
+        "blocks": 37,
+        "version": "4000002"
+       },
+       "223534.nif": {
+        "pass": true,
+        "blocks": 10,
+        "version": "401000c"
+       }
+      },
+      "negatives": {
+       "truncated_100B": {
+        "pass": true,
+        "error": "[PecNif41] CLOSURE_FAIL: no candidate set closed truncated_100B under the documented v4 la"
+       },
+       "garbled_version_field": {
+        "pass": true,
+        "error": "[PecNif41] version 0xffffffff NOT implemented — this reader implements NIF 4.1.0.12 and 4."
+       },
+       "empty_payload": {
+        "pass": true,
+        "error": "[PecNif41] no newline in header — LOUD FAIL"
+       },
+       "header_only": {
+        "pass": true,
+        "error": "[PecNif41] read(4) at 45 exceeds size 45 (source=header_only)"
+       },
+       "implausible_numBlocks": {
+        "pass": true,
+        "error": "[PecNif41] implausible numBlocks 999999"
+       }
+      },
+      "pass": true
+     },
+     "gate4": {
+      "name": "ranking_spot_checks",
+      "extentMonotonicDescUnknownLast": true,
+      "top5": [
+       {
+        "id": 545598,
+        "extent": 277609.33122735634
+       },
+       {
+        "id": 430823,
+        "extent": 150001.51174154918
+       },
+       {
+        "id": 131380,
+        "extent": 124321.71875
+       },
+       {
+        "id": 132683,
+        "extent": 124321.71875
+       },
+       {
+        "id": 356768,
+        "extent": 107755.48828125
+       }
+      ],
+      "top5IsLargest": true,
+      "nullsAtEnd": true,
+      "tieBreakIdAsc": true,
+      "tieSamples": [
+       100,
+       917.3886343504752,
+       839.25341796875
+      ],
+      "altSortBytesTop": [
+       225492,
+       501730,
+       489861,
+       509815,
+       382946
+      ],
+      "altSortDiffersFromExtent": true,
+      "coverage": {
+       "extent": 3753,
+       "bytes": 5596,
+       "tris": 3757,
+       "verts": 3757,
+       "diagonal": 5589,
+       "vertical": 5589
+      },
+      "pass": true
+     },
+     "gate5": {
+      "name": "texture_controls",
+      "byteShape": {
+       "validTail": true,
+       "badAnimFlag": true,
+       "badIdZero": true,
+       "shortTail": true
+      },
+      "referenceControl": {
+       "existingId": true,
+       "foreignId": true
+      },
+      "ddsDecode": {
+       "ok": true,
+       "format": "DDS",
+       "width": 256,
+       "height": 256
+      },
+      "tga2Decode": {
+       "ok": true,
+       "id": "515179.dat",
+       "width": 32,
+       "height": 32
+      },
+      "jpegUnsupported": {
+       "ok": true,
+       "error": "JPEG textures unsupported in this run (19 entries corpus-wide)"
+      },
+      "witness223534": {
+       "state": "TEXTURED_EXACT",
+       "exactSlots": 1,
+       "mapSlots": 1
+      },
+      "fallbackNeverLabelledExact": true,
+      "pass": true
+     },
+     "gate6": {
+      "name": "animation_inventory_unit",
+      "witness462325": {
+       "kf": 50,
+       "clips": 50,
+       "textKeys": 1
+      },
+      "witness360268v4": {
+       "kf": 6,
+       "skins": 1,
+       "bones": 7
+      },
+      "clipsWithOriginalData": 50,
+      "emptyControllers": 0,
+      "noSimulatedClips": true,
+      "psysUnresolved": true,
+      "textKeysPreserved": true,
+      "pass": true
+     },
+     "gate11": {
+      "name": "regression_218757_457485",
+      "witnesses": {
+       "218757.nif": {
+        "pass": true,
+        "blocks": 66,
+        "meshes": 14,
+        "validationOk": true,
+        "extent": 3350,
+        "byteIdenticalPecNif10Reader": true
+       },
+       "457485.nif": {
+        "pass": true,
+        "blocks": 16,
+        "meshes": 1,
+        "validationOk": true,
+        "extent": 179.2664794921875,
+        "byteIdenticalPecNif10Reader": true
+       }
+      },
+      "PecNif10Reader.js": {
+       "bytes": 37483,
+       "sha256": "e00d44e36b370aee0a3f6944e9b43ed0322163008e9240aea653a7b98a6f3c47"
+      },
+      "NifModelReader.js": {
+       "bytes": 29910,
+       "sha256": "2c2199545fa6ae62873a3227c6fa1394cd13c8508bd1e0cdb515926079612359"
+      },
+      "pass": true
+     }
+    },
+    "allPass": true,
+    "notes": []
+   }
+  },
+  {
+   "name": "gate7-api-negatives",
+   "ok": true,
+   "detail": {
+    "runId": "PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010",
+    "generated": "2026-10-11T08:21:22.782Z",
+    "results": [
+     {
+      "m": "GET",
+      "p": "/api/asset/..%2f..%2fserver-pcg935-viewer.mjs",
+      "wantStatus": 400,
+      "wantCode": "MALFORMED_ASSET_ID",
+      "gotStatus": 400,
+      "gotCode": "MALFORMED_ASSET_ID",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/texture/..%5c..%5cModels.bnt",
+      "wantStatus": 400,
+      "wantCode": "BACKSLASH_IN_URL",
+      "gotStatus": 400,
+      "gotCode": "BACKSLASH_IN_URL",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/node_modules/three/../server-pcg935-viewer.mjs",
+      "wantStatus": 403,
+      "wantCode": "ONLY_THREE_ALLOWED",
+      "gotStatus": 403,
+      "gotCode": "ONLY_THREE_ALLOWED",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/node_modules/other/package.js",
+      "wantStatus": 403,
+      "wantCode": "ONLY_THREE_ALLOWED",
+      "gotStatus": 403,
+      "gotCode": "ONLY_THREE_ALLOWED",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/%2e%2e/compat/server-pcg935-viewer.mjs",
+      "wantStatus": 404,
+      "gotStatus": 404,
+      "gotCode": "ROUTE_NOT_FOUND",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/asset/9999999",
+      "wantStatus": 404,
+      "wantCode": "ASSET_ID_NOT_IN_INDEX",
+      "gotStatus": 404,
+      "gotCode": "ASSET_ID_NOT_IN_INDEX",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/texture/9999999",
+      "wantStatus": 404,
+      "wantCode": "TEXTURE_ID_NOT_IN_INDEX",
+      "gotStatus": 404,
+      "gotCode": "TEXTURE_ID_NOT_IN_INDEX",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/asset/12x34",
+      "wantStatus": 400,
+      "gotStatus": 400,
+      "gotCode": "MALFORMED_ASSET_ID",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/asset/",
+      "wantStatus": 400,
+      "gotStatus": 400,
+      "gotCode": "MALFORMED_ASSET_ID",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/texture/-1",
+      "wantStatus": 400,
+      "gotStatus": 400,
+      "gotCode": "MALFORMED_TEXTURE_ID",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/asset/%00",
+      "wantStatus": 400,
+      "gotStatus": 400,
+      "gotCode": "NULL_BYTE_IN_URL",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/nope",
+      "wantStatus": 404,
+      "wantCode": "ROUTE_NOT_FOUND",
+      "gotStatus": 404,
+      "gotCode": "ROUTE_NOT_FOUND",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/nope",
+      "wantStatus": 404,
+      "wantCode": "ROUTE_NOT_FOUND",
+      "gotStatus": 404,
+      "gotCode": "ROUTE_NOT_FOUND",
+      "ok": true
+     },
+     {
+      "m": "POST",
+      "p": "/api/asset/223534",
+      "wantStatus": 405,
+      "wantCode": "METHOD_NOT_ALLOWED_READ_ONLY",
+      "gotStatus": 405,
+      "gotCode": "METHOD_NOT_ALLOWED_READ_ONLY",
+      "ok": true
+     },
+     {
+      "m": "DELETE",
+      "p": "/api/asset/223534",
+      "wantStatus": 405,
+      "gotStatus": 405,
+      "gotCode": "METHOD_NOT_ALLOWED_READ_ONLY",
+      "ok": true
+     },
+     {
+      "m": "PUT",
+      "p": "/app.js",
+      "wantStatus": 405,
+      "gotStatus": 405,
+      "gotCode": "METHOD_NOT_ALLOWED_READ_ONLY",
+      "ok": true
+     },
+     {
+      "m": "GET",
+      "p": "/api/asset/592605",
+      "wantStatus": 422,
+      "wantCode": "PARSE_FAILED_TRUTHFUL",
+      "gotStatus": 422,
+      "gotCode": "PARSE_FAILED_TRUTHFUL",
+      "ok": true
+     }
+    ],
+    "pass": true
+   }
+  },
+  {
+   "name": "gate8-browser",
+   "ok": true,
+   "detail": {
+    "runId": "PE_SCENEIR_PCG935_ALL_ASSETS_R1_20261010",
+    "load": {
+     "ready": true,
+     "catalogRows": 200,
+     "drawerStats": "5596 of 5596 shown · pass 5589 / fail 7",
+     "defaultHash": "#asset/505775",
+     "genText": "gen 2",
+     "pass": true
+    },
+    "pixel": {
+     "assetA": {
+      "id": 505775,
+      "lit": 115181,
+      "total": 271984,
+      "litRatio": 0.4235,
+      "colorVariety": 128
+     },
+     "assetB": {
+      "id": 223534,
+      "lit": 14253,
+      "total": 271984,
+      "litRatio": 0.0524,
+      "colorVariety": 55
+     },
+     "wireframeDelta": {
+      "id": 223534,
+      "lit": 2557,
+      "total": 271984,
+      "litRatio": 0.0094,
+      "colorVariety": 53
+     },
+     "pass": true,
+     "endCensus": {
+      "lit": 4432,
+      "total": 271984,
+      "litRatio": 0.0163,
+      "colorVariety": 103
+     }
+    },
+    "interaction": {
+     "witness360268": {
+      "info": "360268.nif 4.1.0.12status OK · 60 blocks · 9 meshes · 212 trisextent 1356.47 · textures TEXTURED_EXACT (2/2 slots)anim: kf 6 · textKeys 0 · skins 1 · morph 0 · psys 0",
+      "clips": [
+       "keyframes (6 tracks, 5.00s)"
+      ],
+      "hash": "#asset/360268"
+     },
+     "playV4": {
+      "timeText": "1.47 / 5.00"
+     },
+     "scrubMid": {
+      "timeText": "3.00 / 5.00"
+     },
+     "stop": {
+      "timeText": "0.00 / 5.00"
+     },
+     "loopDrift": {
+      "timeTextAfter2x": "1.40 / 3.33"
+     },
+     "loopDriftAnalysis": {
+      "wrapped": true,
+      "note": "after >2x duration the action time wrapped cleanly to < duration — deterministic LoopRepeat, no accumulated drift"
+     },
+     "toggles": {
+      "axesOff": true,
+      "drawerOpen": true,
+      "searchRows": [
+       "218757"
+      ],
+      "deepLinkHash": "#asset/218757",
+      "info": "218757.nif 10.1.0.0status OK · 66 blocks · 14 meshes · 526 trisextent 3350.00 · textures TEXTURED_EXACT (5/9 slots)anim: kf 0 · textKeys 0 · skins 0 · morph 0 ·"
+     },
+     "latestWins": {
+      "hash": "#asset/360268",
+      "gen": "gen 9",
+      "infoHas360268": true,
+      "infoHas505775": false,
+      "info": "360268.nif 4.1.0.12status OK · 60 blocks · 9 meshes · 212 trisextent 1356.47 · textures TEXTURED_EXACT (2/2 slots)anim: "
+     },
+     "pass": true
+    },
+    "allPass": true,
+    "generated": "2026-10-11T08:21:56.060Z"
+   }
+  },
+  {
+   "name": "gate3-9-10-sweep",
+   "ok": true,
+   "detail": {
+    "gate9": {
+     "name": "runtime_coverage_sweep_bounded_unload",
+     "attempted": 5596,
+     "ok": 5589,
+     "fail": 0,
+     "skippedKnownFail": 7,
+     "completedCategories": {
+      "ok": 5589,
+      "fail": 0,
+      "skippedKnownFail": 7
+     },
+     "jsonBytesTotal": 638189288,
+     "avgJsonBytes": 114187,
+     "textureStateCensus": {
+      "TEXTURED_EXACT": 3678,
+      "SOURCE_UNTEXTURED": 1808,
+      "UNRESOLVED": 28,
+      "DECODE_FAIL": 2,
+      "PARTIAL": 73
+     },
+     "animationCensus": {
+      "kfAssets": 1844,
+      "skinAssets": 373,
+      "morphAssets": 116,
+      "psysAssets": 130,
+      "textKeyAssets": 1031
+     },
+     "cacheMaxSeen": 6,
+     "cacheBoundHeld": true,
+     "pass": true
+    },
+    "gate3": {
+     "name": "cache_status_injection_negatives",
+     "assetCacheMaxConfigured": 6,
+     "assetCacheMaxSeen": 6,
+     "textureCacheMaxConfigured": 128,
+     "assetCacheBoundHeld": true,
+     "textureCacheBound": true,
+     "negativeEntryCached": {
+      "before": 0,
+      "assetCacheValid": true,
+      "sizeAfter": 6
+     }
+    },
+    "gate10": {
+     "name": "lifecycle_ab_memory",
+     "samples": {
+      "before": 21712616,
+      "a1": 21705400,
+      "b": 21672624,
+      "a2": 21120968
+     },
+     "deltaAB": 32776,
+     "deltaA2": 584432,
+     "boundedDelta": true,
+     "note": "heapUsed deltas across A/B/A loads after gc; LRU-bounded caches",
+     "pass": true
+    }
+   }
+  }
+ ],
+ "allPass": true
+}
