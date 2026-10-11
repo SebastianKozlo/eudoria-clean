@@ -1,0 +1,60 @@
+{
+  "MEASURED_QUANTITY": "The unchanged BASE full POST's PA2_LIVE_GATE result, final aggregator verdict and process exit on three receipts: the unmodified archived CLEAN receipt and two single-field mutants (M1: perPin[0].MEASURED.sha256 zeroed; M2: moduleIdentity.gateModule.sha256 zeroed) — the defect reproduction required by contract §3",
+  "EXPECTED": {
+    "historicalObservation": "all three QUALIFICATION_PASS/exit0 with suite 53/53 — the externally measured false-PASS of the load-bearing PA2 gate (Desktop RECEIPT_MUTATION_RESULTS.json, E0B61A041F5C5BA1D75DFFD5A058E1799D2F2000D66B92B21999D4CC2101A717)",
+    "note": "per contract §3 this expectation is the recorded historical observation, not a desired outcome; PRE is frozen and was never rewritten"
+  },
+  "ACTUAL": {
+    "summary": [
+      { "case": "clean", "exit": 0, "PA2_LIVE_GATE": "PASS", "finalQualification": "QUALIFICATION_PASS", "suite": "53/53", "verdict": "DEFECT_CONFIRMED" },
+      { "case": "m1_measured_sha_zeroed", "exit": 0, "PA2_LIVE_GATE": "PASS", "finalQualification": "QUALIFICATION_PASS", "suite": "53/53", "verdict": "DEFECT_CONFIRMED" },
+      { "case": "m2_gate_module_sha_zeroed", "exit": 0, "PA2_LIVE_GATE": "PASS", "finalQualification": "QUALIFICATION_PASS", "suite": "53/53", "verdict": "DEFECT_CONFIRMED" }
+    ],
+    "rawRecords": "see results[] below (commands, harness/receipt hashes, exit codes, PA2 case detail, final aggregator, stderr tails) and PRE/RAW/{clean,m1,m2}/"
+  },
+  "UNIT": "full-POST executions on the unchanged BASE harness", "DENOMINATOR": 3,
+  "SOURCE_OF_TRUTH": "spawned UNCHANGED BASE full POST processes (private byte-identical harness copies, SHA256 3bbdc404e40b0ed2135ba74d5c978e5db810aad0a962c45d23fbe04d4b25c3bb verified per case; never the scripts inside the source package or Desktop snapshot) with the original normal JSON loader and full battery; outputs parsed from each case's POST_TEST_RESULTS.json",
+  "WHY_NON_CIRCULAR": "the harness is byte-identical to the BASE blob (hash recorded per case); only the receipt-under-test field changed per case (before/after diffs recorded); the historical expectation is an externally measured pin, not this run's own output",
+  "NEGATIVE_CONTROL": "the CLEAN case is the positive baseline; the two single-field mutants isolate exactly the two externally measured false-PASS paths (M1/M2)",
+  "FAILURE_CASE_DETECTED": "the PA2-RC1 defect: a full POST that accepts receipts whose MEASURED.sha256 or moduleIdentity SHA was zeroed (later closed by the corrected canonical POST — see POST/RECEIPT_MUTATION_MATRIX.json)",
+  "RESULT": "DEFECT_REPRODUCED (matches the historical observation exactly)",
+  "results": [
+    {
+      "case": "clean",
+      "command": "node <private-copy>/POST/run_post.mjs --worktree <isolated-worktree> --runroot <private-case-root> --kitdir <verified-extracted-kit>",
+      "harness": { "source": "docs/audits/PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011/POST/run_post.mjs", "sourceSha256": "3bbdc404e40b0ed2135ba74d5c978e5db810aad0a962c45d23fbe04d4b25c3bb", "copySha256": "3bbdc404e40b0ed2135ba74d5c978e5db810aad0a962c45d23fbe04d4b25c3bb", "byteIdentical": true },
+      "receipt": { "source": "docs/audits/PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011/POST/IDENTITY_GATE_LIVE_RECEIPT.json", "cleanSourceSha256": "837030ab901d7e2d3ca72c89d555f0c75d06b4cc04e0a71b1793841d52a1da88", "mutatedCopySha256": "837030ab901d7e2d3ca72c89d555f0c75d06b4cc04e0a71b1793841d52a1da88", "unmodified": true, "mutations": [] },
+      "counters": { "pass": 12, "controlPass": 1, "fail": 0 },
+      "exitCode": 0,
+      "PA2_LIVE_GATE": { "TEST_RESULT": "PASS", "live": { "verdict": "PASS", "matched": 16, "mode": "REAL_SEQUENCE" } },
+      "suite": { "tests": 53, "pass": 53, "fail": 0, "exitCode": 0 },
+      "finalQualification": { "verdict": "QUALIFICATION_PASS", "ok": true, "missing": [], "failing": [], "exitCode": 0 }
+    },
+    {
+      "case": "m1_measured_sha_zeroed",
+      "command": "node <private-copy>/POST/run_post.mjs --worktree <isolated-worktree> --runroot <private-case-root> --kitdir <verified-extracted-kit>",
+      "harness": { "source": "docs/audits/PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011/POST/run_post.mjs", "sourceSha256": "3bbdc404e40b0ed2135ba74d5c978e5db810aad0a962c45d23fbe04d4b25c3bb", "copySha256": "3bbdc404e40b0ed2135ba74d5c978e5db810aad0a962c45d23fbe04d4b25c3bb", "byteIdentical": true },
+      "receipt": { "source": "docs/audits/PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011/POST/IDENTITY_GATE_LIVE_RECEIPT.json", "cleanSourceSha256": "837030ab901d7e2d3ca72c89d555f0c75d06b4cc04e0a71b1793841d52a1da88", "mutatedCopySha256": "408e726b0d76c0fc89c4e9235df74bea6a9bb7c8174cf21b47de96871e8d33db", "unmodified": false, "mutations": [{ "field": "perPin[0].MEASURED.sha256", "before": "3d1a9ea1c4c358cf5730faf61d7624f09a91f5de5b9347303f3f186b819bd4c4", "after": "0000000000000000000000000000000000000000000000000000000000000000" }] },
+      "counters": { "pass": 12, "controlPass": 1, "fail": 0 },
+      "exitCode": 0,
+      "PA2_LIVE_GATE": { "TEST_RESULT": "PASS", "live": { "verdict": "PASS", "matched": 16, "mode": "REAL_SEQUENCE" } },
+      "suite": { "tests": 53, "pass": 53, "fail": 0, "exitCode": 0 },
+      "finalQualification": { "verdict": "QUALIFICATION_PASS", "ok": true, "missing": [], "failing": [], "exitCode": 0 },
+      "defect": "the unchanged BASE POST qualified a receipt whose perPin[0].MEASURED.sha256 was zeroed — the exact Desktop M1 false-PASS"
+    },
+    {
+      "case": "m2_gate_module_sha_zeroed",
+      "command": "node <private-copy>/POST/run_post.mjs --worktree <isolated-worktree> --runroot <private-case-root> --kitdir <verified-extracted-kit>",
+      "harness": { "source": "docs/audits/PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011/POST/run_post.mjs", "sourceSha256": "3bbdc404e40b0ed2135ba74d5c978e5db810aad0a962c45d23fbe04d4b25c3bb", "copySha256": "3bbdc404e40b0ed2135ba74d5c978e5db810aad0a962c45d23fbe04d4b25c3bb", "byteIdentical": true },
+      "receipt": { "source": "docs/audits/PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011/POST/IDENTITY_GATE_LIVE_RECEIPT.json", "cleanSourceSha256": "837030ab901d7e2d3ca72c89d555f0c75d06b4cc04e0a71b1793841d52a1da88", "mutatedCopySha256": "12ea6b3fc636dd78032cefb0381b03754ba44f68a74687e94cffe2e26dfc01fd", "unmodified": false, "mutations": [{ "field": "moduleIdentity.gateModule.sha256", "before": "568ce3f29f68ebddf5aa40e7550278717cd6e9f868a239fb132ae2c623a2b43d", "after": "0000000000000000000000000000000000000000000000000000000000000000" }] },
+      "counters": { "pass": 12, "controlPass": 1, "fail": 0 },
+      "exitCode": 0,
+      "PA2_LIVE_GATE": { "TEST_RESULT": "PASS", "live": { "verdict": "PASS", "matched": 16, "mode": "REAL_SEQUENCE" } },
+      "suite": { "tests": 53, "pass": 53, "fail": 0, "exitCode": 0 },
+      "finalQualification": { "verdict": "QUALIFICATION_PASS", "ok": true, "missing": [], "failing": [], "exitCode": 0 },
+      "defect": "the unchanged BASE POST qualified a receipt whose moduleIdentity.gateModule.sha256 was zeroed — the exact Desktop M2 false-PASS"
+    }
+  ],
+  "purpose": "PRE defect reproduction on the UNCHANGED BASE full POST (contract §3). Historical observation reproduced exactly; PRE frozen (never rewritten after execution; the raw records below were captured at execution time).",
+  "node": "v22.22.0"
+}

@@ -4,8 +4,15 @@
 // The historical gen_pre_identity.mjs wrote verdict:'PASS' as a string literal — its
 // PASS proved no effective gate (superseded READ_ONLY; see SUPERSESSION.md). Here
 // the gate is exercised on PRIVATE MUTANT COPIES with UNCHANGED expected pins, and
-// the runner's spy proves ZERO downstream analysis/correction/ref-reservation calls
-// after a refusal. No mutant performs a real GitHub write.
+// the runner's spy counters record that ZERO downstream analysis/correction/
+// ref-reservation callbacks are invoked by THIS runner after a refusal — an
+// authentic zero observation about this runner's own callbacks (never reached on
+// clean runs either); it does NOT by itself establish automatic downstream
+// enforcement for any other or future runner (HISTORICAL_SPY_PROVEN_ZERO_DOWNSTREAM
+// = RETRACTED; PA2_DOWNSTREAM_AUTOMATIC_ENFORCEMENT = NOT_ESTABLISHED; see
+// docs/audits/PE_935_PLACEMENT_PA2_RECEIPT_QUALIFICATION_CORRECTION_R1_20261011/
+// SUPERSESSION.md). No mutant performs a real GitHub write. (Wording corrected by
+// PA2-RC2 records-only supersession, 2026-10-11; the assertions are unchanged.)
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import os from 'node:os';
@@ -104,7 +111,7 @@ test('PA2: the live runner is actually invoked — clean inputs authorize (exit 
     assert.equal(rm.mode, 'MUTANT_TEST (private copies; expected pins frozen and unchanged)');
     assert.equal(rm.gate.verdict, 'BLOCKED_INPUT_IDENTITY');
     assert.equal(rm.gate.blockedCount, 16);
-    assert.deepEqual(rm.downstreamCallsAfterGate, { analysis: 0, correction: 0, refReservation: 0, postQualification: 0 }, 'spy proves ZERO downstream calls after the refusal');
+    assert.deepEqual(rm.downstreamCallsAfterGate, { analysis: 0, correction: 0, refReservation: 0, postQualification: 0 }, 'spy counters record ZERO downstream calls by THIS runner after the refusal (authentic zero observation; NOT proof of downstream automatic enforcement — see SUPERSESSION.md of PE_935_PLACEMENT_PA2_RECEIPT_QUALIFICATION_CORRECTION_R1_20261011)');
     assert.match(rm.downstreamPolicy, /must NOT run/);
     // missing-file mutant: every pin overridden to a nonexistent path
     const overridesMissing = Object.fromEntries(EXPECTED_INPUT_PINS.map(p => [p.pin, path.join(root, 'missing', p.pin)]));

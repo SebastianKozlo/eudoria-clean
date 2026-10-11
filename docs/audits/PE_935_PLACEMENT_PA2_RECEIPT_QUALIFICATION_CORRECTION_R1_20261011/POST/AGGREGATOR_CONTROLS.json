@@ -1,0 +1,68 @@
+{
+  "MEASURED_QUANTITY": "the ACTUAL aggregator (computeQualification imported by the canonical POST) over the REAL measured CLEAN outcomes with the required PA2 result mutated to missing / FAIL / NOT_PERFORMED",
+  "EXPECTED": "each mutation refuses: QUALIFICATION_REFUSED with a nonzero exit code, the affected gate named PA2_RECEIPT_QUALIFICATION",
+  "ACTUAL": {
+    "controls": [
+      {
+        "control": "PA2_result_missing",
+        "kind": "ACTUAL aggregator control (the shared computeQualification imported by the canonical POST, over the REAL measured CLEAN outcomes)",
+        "affectedGate": "PA2_RECEIPT_QUALIFICATION",
+        "codePath": "computeQualification missing-result branch",
+        "required": "QUALIFICATION_REFUSED with a nonzero exit code",
+        "actual": {
+          "verdict": "QUALIFICATION_REFUSED",
+          "ok": false,
+          "missing": [
+            "PA2_RECEIPT_QUALIFICATION"
+          ],
+          "failing": [],
+          "exitCode": 4
+        },
+        "VERDICT": "CONTROL_SUCCESS"
+      },
+      {
+        "control": "PA2_result_FAIL",
+        "kind": "ACTUAL aggregator control (the shared computeQualification imported by the canonical POST, over the REAL measured CLEAN outcomes)",
+        "affectedGate": "PA2_RECEIPT_QUALIFICATION",
+        "codePath": "computeQualification failing-result branch",
+        "required": "QUALIFICATION_REFUSED with a nonzero exit code",
+        "actual": {
+          "verdict": "QUALIFICATION_REFUSED",
+          "ok": false,
+          "missing": [],
+          "failing": [
+            "PA2_RECEIPT_QUALIFICATION"
+          ],
+          "exitCode": 4
+        },
+        "VERDICT": "CONTROL_SUCCESS"
+      },
+      {
+        "control": "PA2_result_NOT_PERFORMED",
+        "kind": "ACTUAL aggregator control (the shared computeQualification imported by the canonical POST, over the REAL measured CLEAN outcomes)",
+        "affectedGate": "PA2_RECEIPT_QUALIFICATION",
+        "codePath": "computeQualification failing-result branch (explicitly documented statuses only)",
+        "required": "QUALIFICATION_REFUSED with a nonzero exit code",
+        "actual": {
+          "verdict": "QUALIFICATION_REFUSED",
+          "ok": false,
+          "missing": [],
+          "failing": [
+            "PA2_RECEIPT_QUALIFICATION"
+          ],
+          "exitCode": 4
+        },
+        "VERDICT": "CONTROL_SUCCESS"
+      }
+    ],
+    "count": 3
+  },
+  "UNIT": "aggregator mutations",
+  "DENOMINATOR": 3,
+  "SOURCE_OF_TRUTH": "the shared computeQualification + EXPECTED_OUTCOMES from tools/placement_probe/qualification/pa2_r1/validate_receipt.mjs (the same function/map the canonical POST uses), applied to the outcomes parsed from the CLEAN case POST_TEST_RESULTS.json",
+  "WHY_NON_CIRCULAR": "not a hand-copied toy conjunction: the actual aggregator function and the actual expectations map run over the actual measured outcomes",
+  "NEGATIVE_CONTROL": "the three mutations themselves; kept separate from receipt cases and from test counts",
+  "FAILURE_CASE_DETECTED": "an aggregator that tolerates a missing/failing/NOT_PERFORMED PA2 result",
+  "RESULT": "PASS",
+  "note": "three ACTUAL aggregator controls over the real measured CLEAN outcomes; separate from receipt cases and from test counts"
+}

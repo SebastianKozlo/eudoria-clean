@@ -1,0 +1,94 @@
+{
+  "MEASURED_QUANTITY": "direct validator calls on profile-mutated receipts: wrong historical runId, wrong stage, wrong mode, unreadable/truncated JSON — plus the CLEAN-unchanged control",
+  "EXPECTED": "all four mutations: controlled refusal (RECEIPT_QUALIFICATION FAIL with the specific profile/context reason); CLEAN stays PASS and its source file is unmodified",
+  "ACTUAL": {
+    "controls": [
+      {
+        "control": "wrong_runId",
+        "kind": "unit profile control (direct validator call, not a full POST case)",
+        "receiptPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PLACEMENT_PA2_RECEIPT_QUALIFICATION_CORRECTION_R1_20261011\\matrix\\receipts\\wrong_runId.json",
+        "required": "controlled refusal (RECEIPT_QUALIFICATION FAIL with a profile/context reason)",
+        "actualVerdict": "FAIL",
+        "actualReason": "runId/stage/mode do not match the frozen historical context (expected PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011 / PA2_LIVE_IDENTITY_GATE / REAL_SEQUENCE)",
+        "context": {
+          "runId": "PE_935_SOME_OTHER_RUN_ID",
+          "stage": "PA2_LIVE_IDENTITY_GATE",
+          "mode": "REAL_SEQUENCE",
+          "expected": {
+            "runId": "PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011",
+            "stage": "PA2_LIVE_IDENTITY_GATE",
+            "mode": "REAL_SEQUENCE",
+            "contextBase": "28e91eb67511a3022a911ab6d4e02e68119b1f68"
+          }
+        },
+        "VERDICT": "CONTROL_SUCCESS"
+      },
+      {
+        "control": "wrong_stage",
+        "kind": "unit profile control (direct validator call, not a full POST case)",
+        "receiptPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PLACEMENT_PA2_RECEIPT_QUALIFICATION_CORRECTION_R1_20261011\\matrix\\receipts\\wrong_stage.json",
+        "required": "controlled refusal (RECEIPT_QUALIFICATION FAIL with a profile/context reason)",
+        "actualVerdict": "FAIL",
+        "actualReason": "runId/stage/mode do not match the frozen historical context (expected PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011 / PA2_LIVE_IDENTITY_GATE / REAL_SEQUENCE)",
+        "context": {
+          "runId": "PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011",
+          "stage": "PA2_SOME_OTHER_STAGE",
+          "mode": "REAL_SEQUENCE",
+          "expected": {
+            "runId": "PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011",
+            "stage": "PA2_LIVE_IDENTITY_GATE",
+            "mode": "REAL_SEQUENCE",
+            "contextBase": "28e91eb67511a3022a911ab6d4e02e68119b1f68"
+          }
+        },
+        "VERDICT": "CONTROL_SUCCESS"
+      },
+      {
+        "control": "wrong_mode",
+        "kind": "unit profile control (direct validator call, not a full POST case)",
+        "receiptPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PLACEMENT_PA2_RECEIPT_QUALIFICATION_CORRECTION_R1_20261011\\matrix\\receipts\\wrong_mode.json",
+        "required": "controlled refusal (RECEIPT_QUALIFICATION FAIL with a profile/context reason)",
+        "actualVerdict": "FAIL",
+        "actualReason": "runId/stage/mode do not match the frozen historical context (expected PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011 / PA2_LIVE_IDENTITY_GATE / REAL_SEQUENCE)",
+        "context": {
+          "runId": "PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011",
+          "stage": "PA2_LIVE_IDENTITY_GATE",
+          "mode": "MUTANT_TEST (private copies; expected pins frozen and unchanged)",
+          "expected": {
+            "runId": "PE_935_PLACEMENT_PROBE_POSTAUDIT_CORRECTION_R1_20261011",
+            "stage": "PA2_LIVE_IDENTITY_GATE",
+            "mode": "REAL_SEQUENCE",
+            "contextBase": "28e91eb67511a3022a911ab6d4e02e68119b1f68"
+          }
+        },
+        "VERDICT": "CONTROL_SUCCESS"
+      },
+      {
+        "control": "unreadable_truncated_json",
+        "kind": "unit profile control (direct validator call, not a full POST case)",
+        "receiptPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PLACEMENT_PA2_RECEIPT_QUALIFICATION_CORRECTION_R1_20261011\\matrix\\receipts\\truncated.json",
+        "required": "controlled refusal (fail-closed parse failure, never an exception-to-PASS)",
+        "actualVerdict": "FAIL",
+        "actualReason": "receipt is not valid JSON (unreadable/truncated): Expected ',' or '}' after property value in JSON at position 4000 (line 111 column 5)",
+        "VERDICT": "CONTROL_SUCCESS"
+      },
+      {
+        "control": "CLEAN_unchanged_control",
+        "kind": "unit profile control (direct validator call)",
+        "receiptPath": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PLACEMENT_PA2_RECEIPT_QUALIFICATION_CORRECTION_R1_20261011\\matrix\\receipts\\CLEAN_control.json",
+        "required": "PASS (the unmodified archived receipt still qualifies; the unit controls did not modify the validator or the CLEAN source)",
+        "actualVerdict": "PASS",
+        "VERDICT": "CONTROL_SUCCESS"
+      }
+    ],
+    "count": 5
+  },
+  "UNIT": "unit profile controls (separately counted from the ten full-POST cases)",
+  "DENOMINATOR": 4,
+  "SOURCE_OF_TRUTH": "qualifyReceipt (the shared validator) invoked directly per control",
+  "WHY_NON_CIRCULAR": "each control mutates exactly one profile field of a fresh CLEAN copy; the refusal reason names the failed check",
+  "NEGATIVE_CONTROL": "the CLEAN-unchanged control proves the unit controls did not alter the validator or the CLEAN source",
+  "FAILURE_CASE_DETECTED": "a receipt with the wrong historical context or an unparseable body qualifying anyway",
+  "RESULT": "PASS",
+  "note": "four unit controls (wrong runId, wrong stage, wrong mode, unreadable/truncated JSON) + the CLEAN-unchanged control; separately counted from the ten full-POST cases"
+}

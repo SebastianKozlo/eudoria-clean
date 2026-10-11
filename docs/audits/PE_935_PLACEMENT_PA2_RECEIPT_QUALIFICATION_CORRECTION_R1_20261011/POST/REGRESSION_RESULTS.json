@@ -1,0 +1,109 @@
+{
+  "MEASURED_QUANTITY": "test replay counts: the exact BASE 53 tests replayed separately from the new suite; the original seven kit tests from the verified pinned ZIP; the new current suite (10 BASE files + 2 new files)",
+  "EXPECTED": {
+    "base53": {
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "exitCode": 0
+    },
+    "kit7": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "exitCode": 0,
+      "sevenPass": true,
+      "zipMembersVerified": true
+    },
+    "currentSuite": {
+      "fail": 0,
+      "exitCode": 0,
+      "allRequiredPresent": true
+    }
+  },
+  "ACTUAL": {
+    "base53": {
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "exitCode": 0,
+      "files": [
+        "probe.test.mjs",
+        "cli-fixture.test.mjs",
+        "correction_matrix.test.mjs",
+        "budget.test.mjs",
+        "census_extra.test.mjs",
+        "da1_census.test.mjs",
+        "da2_retained.test.mjs",
+        "da3_budget.test.mjs",
+        "pa1_regression.test.mjs",
+        "pa2_identity_gate.test.mjs"
+      ],
+      "note": "replayed from the isolated byte-identical stage inside every canonical POST run (BASE_53_REPLAY case); 9/10 files byte-identical to BASE; pa2_identity_gate.test.mjs carries only the PA2-RC2 comment/assert-message corrections (recorded diff in AMENDMENT_LOG.md), assertions and test count unchanged"
+    },
+    "kit7": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "exitCode": 0,
+      "sevenPass": true,
+      "zipMembersVerified": true,
+      "kitPlacementProbeSha256": "e5b70684049743d72217004c2247fb69a6139bc31546e89e67e395da4f5b53c4"
+    },
+    "currentSuite": {
+      "tests": 64,
+      "pass": 64,
+      "fail": 0,
+      "exitCode": 0,
+      "allRequiredPresent": true,
+      "requiredPresent": {
+        "B1:": true,
+        "B2:": true,
+        "B3:": true,
+        "B4:": true,
+        "B5:": true,
+        "B6:": true,
+        "B7:": true,
+        "CX1:": true,
+        "CX2:": true,
+        "CX3:": true,
+        "CX4:": true,
+        "O1:": true,
+        "O2:": true,
+        "O3:": true,
+        "O4:": true,
+        "O5:": true,
+        "O6:": true,
+        "O7:": true,
+        "S7a:": true,
+        "S7b:": true,
+        "DA1-C1": true,
+        "DA1-C2": true,
+        "DA1-C3": true,
+        "DA1-C4": true,
+        "DA1-C5": true,
+        "DA3:": true,
+        "DA2:": true,
+        "PA1:": true,
+        "PA2:": true,
+        "PA2-RQ:": true,
+        "DA2-COV:": true
+      },
+      "files": 12,
+      "baseFiles": 10,
+      "newFiles": [
+        "pa2_receipt_qualification.test.mjs (11 tests, prefix PA2-RQ:)",
+        "da2_two_source.test.mjs (2 tests, prefix DA2-COV:)"
+      ]
+    },
+    "standaloneSuiteCommand": "node --test <12 files> in the isolated worktree (executor bring-up): 64/64 pass, exit 0",
+    "postCommands": "each of the 10 matrix cases executed the full battery (suite 64/64 recorded per case in POST/RECEIPT_MUTATION_MATRIX.json)"
+  },
+  "UNIT": "tests",
+  "DENOMINATOR": 60,
+  "SOURCE_OF_TRUTH": "node:test TAP output over the isolated stage (BASE 53), the byte-pinned original kit (7) and the current stage (64)",
+  "WHY_NON_CIRCULAR": "the BASE 53 replay is a preservation check on the unchanged BASE test files; the seven kit tests are replayed from the externally pinned ZIP whose 7 members are re-verified by size+SHA before execution; the current suite adds only the two new regressions with prefix probes so a dropped/renamed required test cannot hide behind the total count",
+  "NEGATIVE_CONTROL": "FULL_SUITE requires the exact named prefixes (B1..B7, CX1..CX4, O1..O7, S7a/S7b, DA1-C1..C5, DA3:, DA2:, PA1:, PA2:, PA2-RQ:, DA2-COV:) — a missing or failing required test refuses qualification",
+  "FAILURE_CASE_DETECTED": "a correction that damaged the preserved BASE coverage, the original kit behavior, or the new regressions",
+  "RESULT": "PASS"
+}

@@ -1,0 +1,31 @@
+{
+  "principle": "The unchanged scanner ceilings are EXECUTION CEILINGS, not targets; never raised. All fixtures are synthetic; NO original game payload was scanned (NEW_GAME_PAYLOAD_SCANS=0); no EXE/Gamebryo/SDK research; placement discovery NOT executed. Identity hashing of the pinned evidence/ZIP is the only permitted hashing of external files.",
+  "unchangedScannerCeilings": { "syntheticInputs": 32, "scannedBytes": 67108864, "layoutEvaluations": 100000, "fullCensusRows": 50000, "retainedCandidates": 256, "source": "tools/placement_probe/placement_probe.mjs BUDGET_CEILINGS (BASE 28e91eb, byte-identical in this run)", "ceilingsRaised": false },
+  "loweredFixtureLimitsUsed": [
+    { "fixture": "DA2_TWO_SOURCE / da2_two_source.test.mjs cap32 case", "lowered": { "retainedCandidates": 32 }, "inputs": 2, "scannedBytes": 5152, "note": "records80 x2 (2576 B each); cap 32 lowered from the 256 ceiling" },
+    { "fixture": "da2_two_source.test.mjs cap29 negative control", "lowered": { "retainedCandidates": 29 }, "inputs": 2, "note": "proves the second input is never opened when the first fills the cap" },
+    { "fixture": "DA2_CAP4 (POST case + da2_retained.test.mjs)", "lowered": { "retainedCandidates": 4 }, "inputs": 2, "note": "BASE behavior preserved unchanged" },
+    { "fixture": "DA2_CAP256", "lowered": {}, "inputs": 9, "note": "the canonical ceiling exercised at its own value (not raised)" },
+    { "fixture": "DA1_CENSUS / DA1_NOT_OPENED", "lowered": { "layoutEvals": 100, "retainedCandidates": 4 }, "note": "budget-stop census cases" },
+    { "fixture": "DA3 limit-60 request/refusal semantics", "lowered": { "layoutEvaluations": 60 }, "note": "61 requests = 60 executed + 1 refused (unchanged semantics)" },
+    { "fixture": "PA1 regression", "lowered": { "fullCensusRows": 4800 }, "note": "byte-pinned fixtures pa1A/pa1B/pa1C (unchanged)" }
+  ],
+  "executionCensus": {
+    "fullPostExecutions": {
+      "pre_batch_on_unchanged_base_harness": 3,
+      "bring_up_canonical_post": 2,
+      "matrix_batch_1_completed_before_crash_INVALIDATED": 5,
+      "matrix_batch_2_complete_SUPERSEDED": 10,
+      "matrix_batch_3_FINAL": 10,
+      "qc_D_replay": 1,
+      "note": "each full-POST execution independently runs the whole battery: suite (53 BASE or 64 current tests), original 7 kit tests from the verified ZIP, all DA/PA scan cases — every full-POST case is separately counted, never disguised as one scan"
+    },
+    "testSuiteInvocations": { "standalone_suite_runs": 6, "in_post_suite_runs": "10 per matrix batch x 3 batches + 5 (batch 1) + 3 (PRE, 53-test suite) + 2 (bring-up) + 1 (QC-D)", "two_new_files_only_runs": 3 },
+    "cliScanInvocations": { "scratch_cap32_probe": 2, "two_source_measurements": "2 per measurement (ordinary + instrumented) — 1 scratch + 1 in every full-POST case + 1 QC-G replay", "cap4_cap256_da1_da3_pa1_scan_cases": "per full-POST battery as in the predecessor (identical fixtures/config, BASE behavior preserved)" },
+    "gateModuleInvocations": { "live_16_pin_verification": "1 (CLI) + 1 per canonical POST PA2 case (verifyAllInputs) + staged-runner invocations per POST case (1 clean + 3 mutant counterchecks)", "note": "read-only measurement; writes nothing" }
+  },
+  "perInvocationMaximaActuallyUsed": { "syntheticInputs_max": 9, "scannedBytes_max": "a few hundred KiB across the largest batteries (fixtures are 272 B..153616 B synthetic buffers)", "retainedCandidates_max": 256, "layoutEvaluations_max": 100000, "fullCensusRows_max": 50000 },
+  "identityHashingOfPinnedEvidence": { "permitted": "size+SHA256 of the 16 pinned evidence files, the kit ZIP and its 7 members, the contract, the BASE load-bearing files", "performed": true },
+  "secrets": "none present in any evidence; no redaction required (no credentials, tokens or private keys in any log or artifact)",
+  "newExeAccess": "NO", "newGamePayloadScans": 0, "newScienceEdgeInterpretations": 0, "pilotScan": "NOT_AUTHORIZED_NOT_EXECUTED"
+}
