@@ -1,0 +1,136 @@
+{
+  "run_id": "PE_935_WRAPPER_POINTER_NEIGHBORHOOD_R2_20261016",
+  "ts": "2026-10-16T16:01:13.919131+00:00",
+  "executed_before_first_exe_byte_read": true,
+  "synthetic_only": true,
+  "tests": [
+    {
+      "test_id": "F01",
+      "name": "slot address vs stored function VA",
+      "expected_result": "0 hits for slot-15 ADDRESS in a buffer containing only the VALUE bytes 0x00852A30",
+      "actual_result": "hits=0",
+      "pass": true,
+      "detected_error_class": "SLOT_ADDRESS_VALUE_CONFUSION",
+      "source_of_truth": "TARGET definition: slot addresses 0x00A91CC0+4i, not window values"
+    },
+    {
+      "test_id": "F02",
+      "name": "non-aligned match found",
+      "expected_result": "hit at offset 3 (no alignment requirement)",
+      "actual_result": "hit_offsets=[3]",
+      "pass": true,
+      "detected_error_class": "FALSE_ALIGNMENT_REQUIREMENT",
+      "source_of_truth": "pattern position in synthetic buffer"
+    },
+    {
+      "test_id": "F03",
+      "name": "chunk-boundary match",
+      "expected_result": "hit at 62 with CHUNK=64, CARRY=3",
+      "actual_result": "hit_offsets=[62] census_complete=True",
+      "pass": true,
+      "detected_error_class": "BOUNDARY_MISS",
+      "source_of_truth": "pattern straddling chunk boundary in synthetic buffer"
+    },
+    {
+      "test_id": "F04",
+      "name": "last valid start accepted, incomplete tail rejected",
+      "expected_result": "hit at 96; no hit for 3-byte prefix at 97",
+      "actual_result": "last_start_hits=1 tail_hits=0",
+      "pass": true,
+      "detected_error_class": "OFF_BY_ONE_TAIL_OVERREAD",
+      "source_of_truth": "eligible starts = RawSize-3; pattern needs 4 full bytes"
+    },
+    {
+      "test_id": "F05",
+      "name": "pattern in RAW padding classified RAW_PADDING_ONLY",
+      "expected_result": "span=RAW_PADDING_ONLY for offset 95 (VSize=90)",
+      "actual_result": "span=RAW_PADDING_ONLY",
+      "pass": true,
+      "detected_error_class": "PADDING_MISCLASSIFICATION",
+      "source_of_truth": "VSize < offset < RawSize"
+    },
+    {
+      "test_id": "F06",
+      "name": "pattern crossing VirtualSize classified CROSSES_VIRTUAL_SIZE_END",
+      "expected_result": "span=CROSSES_VIRTUAL_SIZE_END for offset 88",
+      "actual_result": "span=CROSSES_VIRTUAL_SIZE_END",
+      "pass": true,
+      "detected_error_class": "SPAN_MISCLASSIFICATION",
+      "source_of_truth": "offset<VSize and offset+4>VSize"
+    },
+    {
+      "test_id": "F07",
+      "name": "hit inside synthetic instruction interior NOT promoted",
+      "expected_result": "QUALIFICATION stays RAW_ADDRESS_OCCURRENCE_UNQUALIFIED; no instruction-head/vtable-store claim",
+      "actual_result": "qualification=RAW_ADDRESS_OCCURRENCE_UNQUALIFIED",
+      "pass": true,
+      "detected_error_class": "PREMATURE_QUALIFICATION",
+      "source_of_truth": "contract: raw hit != confirmed instruction/constructor/vtable store"
+    },
+    {
+      "test_id": "F08",
+      "name": "wrong ImageBase produces wrong VA (detectable mismatch)",
+      "expected_result": "0x500000-based VA != 0x400000 truth; mapping check must flag",
+      "actual_result": "good=0x00401064 bad=0x00501064 equal=False",
+      "pass": true,
+      "detected_error_class": "ADDRESSING_ERROR",
+      "source_of_truth": "parsed PE header (machine 014C, magic 010B, imagebase 0x400000)"
+    },
+    {
+      "test_id": "F09",
+      "name": "short read flagged, not silently processed",
+      "expected_result": "ShortRead raised when actual != requested",
+      "actual_result": "short_read_raised=True",
+      "pass": true,
+      "detected_error_class": "SILENT_TRUNCATION",
+      "source_of_truth": "reader contract: full-length verification"
+    },
+    {
+      "test_id": "F10",
+      "name": "candidate overflow stops at MAX_HITS=4096, census_complete=false, hits=prefix",
+      "expected_result": "hits=4096 census_complete=false; occurrences in buffer=5000",
+      "actual_result": "hits=4096 census_complete=False",
+      "pass": true,
+      "detected_error_class": "UNBOUNDED_CENSUS",
+      "source_of_truth": "MAX_HITS=4096 preregistered; overflow -> PARTIAL with incomplete prefix"
+    },
+    {
+      "test_id": "F11",
+      "name": "binary roundtrip of all 256 byte values",
+      "expected_result": "read-back == written, byte-for-byte",
+      "actual_result": "equal=True sha_match=True",
+      "pass": true,
+      "detected_error_class": "IO_CORRUPTION",
+      "source_of_truth": "identity of written vs read bytes"
+    },
+    {
+      "test_id": "F12",
+      "name": "manifest mismatch flagged, traversal rejected, junction detectable, collision refused",
+      "expected_result": "MISSING_FILE flagged; PATH_TRAVERSAL rejected; junction detectable via realpath; xb collision raises",
+      "actual_result": "missing_flag=True traversal_flag=True junction_detected=True collision_refused=True",
+      "pass": true,
+      "detected_error_class": "MANIFEST_MISMATCH/PATH_TRAVERSAL/JUNCTION/OUTPUT_COLLISION",
+      "source_of_truth": "physical file set vs manifest rows; os.path.realpath; FileExistsError on 'xb'"
+    },
+    {
+      "test_id": "F13",
+      "name": "preregistered S7 anchor absent from complete scan -> PRIOR_EVIDENCE_CONFLICT",
+      "expected_result": "conflict raised when a preregistered position is not found by a census_complete scan",
+      "actual_result": "conflict_raised=True",
+      "pass": true,
+      "detected_error_class": "EXPECTATION_MATCHING_BIAS",
+      "source_of_truth": "preregistered expected positions vs complete census results"
+    },
+    {
+      "test_id": "F14",
+      "name": "correct full scan with only the known control -> zero NEW candidates, not an error",
+      "expected_result": "census_complete=true; TOTAL_RAW_HITS=1; NEW_RAW_CANDIDATES=0",
+      "actual_result": "census_complete=True total=1 new=0 known=1",
+      "pass": true,
+      "detected_error_class": "EMPTY_RESULT_MISREAD_AS_FAILURE",
+      "source_of_truth": "novelty axis: correct-zero novelty is a valid outcome"
+    }
+  ],
+  "passed": 14,
+  "total": 14
+}

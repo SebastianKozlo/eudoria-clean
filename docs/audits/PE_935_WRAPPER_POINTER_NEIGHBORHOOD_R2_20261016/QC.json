@@ -1,0 +1,118 @@
+{
+  "run_id": "PE_935_WRAPPER_POINTER_NEIGHBORHOOD_R2_20261016",
+  "ts": "2026-10-16T16:07:09.523327+00:00",
+  "QC_ORIGIN": "SELF_QC (executor self-check; NOT an INDEPENDENT audit)",
+  "SELF_QC != INDEPENDENT_QC": true,
+  "verdict": "QC_PASS",
+  "checks": [
+    {
+      "id": "QC-01",
+      "check": "source identity: 2 hash passes == pin",
+      "status": "PASS",
+      "detail": "pass1=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 pass2=E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+    },
+    {
+      "id": "QC-02",
+      "check": "budget exact: purposes and 22,802,688 B total",
+      "status": "PASS",
+      "detail": "purposes={'HASH_PASS_1': 8015872, 'PE_HEADER_PARSE': 4096, 'WINDOW_READ_1': 128, 'WINDOW_READ_2': 128, 'RAW_TEXT_SCAN': 6766592, 'HASH_PASS_2': 8015872} total=22802688"
+    },
+    {
+      "id": "QC-03",
+      "check": "both windows 128 B and 128/128 equal",
+      "status": "PASS",
+      "detail": "sizes 128/128 equal=True"
+    },
+    {
+      "id": "QC-04",
+      "check": "roster: 32 entries, all fields present",
+      "status": "PASS",
+      "detail": "entries=32"
+    },
+    {
+      "id": "QC-05",
+      "check": "VA/RVA/file addressing re-derivation",
+      "status": "PASS",
+      "detail": "file_offset_start=6888640"
+    },
+    {
+      "id": "QC-06",
+      "check": "roster values re-derived from saved window buffer",
+      "status": "PASS",
+      "detail": "all 32 match"
+    },
+    {
+      "id": "QC-07",
+      "check": "mandatory control slot 15 == 0x00852A30",
+      "status": "PASS",
+      "detail": "{\"dword_index\": 15, \"site_va\": \"0x00A91CFC\", \"value\": \"0x00852A30\", \"expected\": \"0x00852A30\", \"pass\": true}"
+    },
+    {
+      "id": "QC-08",
+      "check": "scan completeness: eligible starts + census_complete + cross-check",
+      "status": "PASS",
+      "detail": "evaluated=6766589 eligible=6766589 chunks=7 cc=True xcheck=True"
+    },
+    {
+      "id": "QC-09",
+      "check": "hit census: jsonl lines == meta total; spans sum; per-slot sum",
+      "status": "PASS",
+      "detail": "jsonl=13 total=13 spans=13"
+    },
+    {
+      "id": "QC-10",
+      "check": "hit addressing + pattern re-derivation (all hits)",
+      "status": "PASS",
+      "detail": "hits=13"
+    },
+    {
+      "id": "QC-11",
+      "check": "all 4 S7 preregistered controls evaluated + \u00a73 investigation layer present and byte-consistent",
+      "status": "PASS",
+      "detail": "[{\"id\": \"S7-C1\", \"result\": \"PRIOR_EVIDENCE_CONFLICT\"}, {\"id\": \"S7-C2\", \"result\": \"PRIOR_EVIDENCE_CONFLICT\"}, {\"id\": \"S7-C3\", \"result\": \"PRIOR_EVIDENCE_CONFLICT\"}, {\"id\": \"S7-C4\", \"result\": \"PRIOR_EVIDENCE_CONFLICT\"}]; investigation: patterns+post-bytes byte-confirmed at S7 va anchors; census hits at S7 va"
+    },
+    {
+      "id": "QC-12",
+      "check": "novelty counters re-derived on BOTH bases (frozen + investigation-refined); no duplication",
+      "status": "PASS",
+      "detail": "frozen: 0 prior / 13 new; refined(recomputed): 4 prior; unique pairs=13"
+    },
+    {
+      "id": "QC-13",
+      "check": "verbatim standing labels present in REPORT",
+      "status": "PASS",
+      "detail": "5 labels + SELF_QC marker"
+    },
+    {
+      "id": "QC-14",
+      "check": "output limits: <=96 own files, <=8 MiB",
+      "status": "PASS",
+      "detail": "files=20 bytes=133795"
+    },
+    {
+      "id": "QC-15",
+      "check": "write discipline: every write xb + re-read verified; no overwrite",
+      "status": "PASS",
+      "detail": "writes=17"
+    },
+    {
+      "id": "QC-16",
+      "check": "falsifiers 14/14 PASS before first EXE read",
+      "status": "PASS",
+      "detail": "passed=14/14"
+    },
+    {
+      "id": "QC-17",
+      "check": "predecessor bijection (both locations) PASS",
+      "status": "PASS",
+      "detail": "rows=24 physical=25 both locations"
+    },
+    {
+      "id": "QC-18",
+      "check": "unknowns preserved (no default-success fallback)",
+      "status": "PASS",
+      "detail": "all hits unqualified; semantic roles not established"
+    }
+  ],
+  "note": "external post-audit of this run is a PE-MASTER decision; this file is the executor's own self-check against the contract gates"
+}
