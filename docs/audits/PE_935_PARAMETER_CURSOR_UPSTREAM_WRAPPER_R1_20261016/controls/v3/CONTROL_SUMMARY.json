@@ -1,0 +1,49 @@
+{
+  "tool": "t08_controls_v3.py",
+  "repair_note": "REPAIR ROUND 2 rerun. Round 1: v1 (attempt 0011) child argv flag defect (ARG_ERROR before qualification). Round 2: v2 (attempt 0012) sent the WRAPPER object instead of the raw claims record (STRUCTURE_ERROR before any predicate). Both v1 and v2 plus their outputs are preserved byte-untouched (controls/ and controls/v2/). v3 sends the RAW claims record via stdin with a defensive unwrap in the child; qualify() is UNCHANGED across v1/v2/v3.",
+  "control_cases": 4,
+  "case_names": [
+    "C1",
+    "C2",
+    "C3",
+    "C4"
+  ],
+  "base_outcome": "ACCEPTED",
+  "base_exit_code": 0,
+  "mutant_outcomes": {
+    "C1": {
+      "outcome": "REFUSED",
+      "reason": "NOT_INSTRUCTION_HEAD",
+      "expected_reason": "NOT_INSTRUCTION_HEAD",
+      "exit_code": 1,
+      "control_pass": true
+    },
+    "C2": {
+      "outcome": "REFUSED",
+      "reason": "ROLE_OR_SLOT_MISMATCH",
+      "expected_reason": "ROLE_OR_SLOT_MISMATCH",
+      "exit_code": 1,
+      "control_pass": true
+    },
+    "C3": {
+      "outcome": "REFUSED",
+      "reason": "UNJUSTIFIED_OPAQUE_PRESERVATION",
+      "expected_reason": "UNJUSTIFIED_OPAQUE_PRESERVATION",
+      "exit_code": 1,
+      "control_pass": true
+    },
+    "C4": {
+      "outcome": "REFUSED",
+      "reason": "UNSUPPORTED_SOURCE_OR_WORLD_PROMOTION",
+      "expected_reason": "UNSUPPORTED_SOURCE_OR_WORLD_PROMOTION",
+      "exit_code": 1,
+      "control_pass": true
+    }
+  },
+  "qualifier_executions": 5,
+  "procedural_attempts": 5,
+  "retries": 0,
+  "all_control_pass": true,
+  "semantics": "CONTROL_PASS = the required refusal for that specific counter-trial on a COPY of the claims record; not a falsification proof of the real hypothesis; not a universal validator",
+  "generated_utc": "2026-10-16T14:24:31.361311+00:00"
+}

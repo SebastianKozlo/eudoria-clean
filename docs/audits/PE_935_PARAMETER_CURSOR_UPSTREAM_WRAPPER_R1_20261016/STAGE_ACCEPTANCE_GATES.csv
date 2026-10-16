@@ -1,0 +1,27 @@
+gate_id,expectation,result,status,source
+G01,Contract identity 25252 B / F0EA823C650953FAFA4D2524538332258573D49F6B2AE6A7D0879B199435F7C2 matches the human order,MEASURED MATCH,PASS,PREFLIGHT.json
+G02,INPUT_PINS.json 6186 B / E6F46702F9BE6821282C40B1F1C3479E523CFDF0BB9384D547C32D8C08BE3B65 matches the contract pin,MEASURED MATCH,PASS,PREFLIGHT.json
+G03,Exactly 12/12 pinned inputs present; no extras/missing/duplicates; no symlink escape,MEASURED 12/12 EXACT SET,PASS,PREFLIGHT.json
+G04,OUTPUT_ROOT ABSENT before atomic creation; no .git in ancestors; local Fixed drive on the VM,ABSENT BEFORE CREATION; 0 GIT ANCESTORS; DriveType=Fixed,PASS,PREFLIGHT.json
+G05,PATH_A available with objdump binary SHA256 96AFB8521834982D0E711B5D6E9785252BF82129FB0106B93A6BD54D83FAE11F,GNU objdump 2.44 exit 0 SHA MATCH,PASS,PREFLIGHT.json + ATTEMPT_LOG 0007
+G06,PATH_B 27188 B / C8E8470EFD762F66FF20369B2F656694C635131261F4D611DCA9C504E2B90B95 import read-only no main no pyc,IMPORT_OK NO PYC NO MAIN,PASS,PREFLIGHT.json + ATTEMPT_LOG 0008
+G07,PREREGISTRATION.json written before the first original EXE hash/read,ATTEMPT 0002 PRECEDES 0003,PASS,ATTEMPT_LOG.jsonl
+G08,First full EXE streaming hash equals the pin,8015872 B / E7785430... MATCH,PASS,ATTEMPT_LOG 0003 + SOURCE_READS.json
+G09,PE32 mapping machine-derived: i386 magic PE32 ImageBase 0x400000 unique RAW-backed .text coverage bounds no overlap no BSS no wraparound; file offset 0x00452A30 derived not copied,ALL CHECKS TRUE,PASS,records/pe32_mapping.json
+G10,Exactly two 82-B window reads saved separately and byte-identical before analysis,82/82 B BYTE-IDENTICAL SHA 43134E71...,PASS,ATTEMPT_LOG 0005 + SOURCE_READS.json
+G11,A/B independent full-window decode agreement,37/37 HEADS+LENGTH+RAW; 7/7 TARGETS; 0 DISAGREEMENTS; 0 CONTINUATION LINES,PASS,decode/ab_comparison.json
+G12,Actual transfer to expected target established from bytes,CALL REL32 @0x00852A77 -> 0x00852750 (ARITHMETIC_FROM_RECORDED_RAW; PATH_A operand agrees),PASS,decode/INSTRUCTION_ROSTER.json + EVIDENCE.json
+G13,C relay and O receiver relay established; value identities across the single opaque helper CALL typed CONDITIONAL_ON_ABI_MODEL; without the model NOT_ESTABLISHED; no in-window construction observed,RELAY C ([entryESP+4]) AND O (entry ECX) CONDITIONAL_ON_DECLARED_MODELS,PASS,EVIDENCE.json
+G14,B gate and guard paths established exactly,B==1 GATE (MOVZX/SUB 1/JE); valid-fail / size-fail(+valid clear) / read-success recorded separately per the governing ingress interpretation,PASS,EVIDENCE.json provenance rows 2-4
+G15,Four controls each producing the required refusal with the proper reason and nonzero exit on a COPY of the claims record; base accepted through the same predicate,BASE ACCEPTED EXIT 0; C1 NOT_INSTRUCTION_HEAD; C2 ROLE_OR_SLOT_MISMATCH; C3 UNJUSTIFIED_OPAQUE_PRESERVATION; C4 UNSUPPORTED_SOURCE_OR_WORLD_PROMOTION; 4/4 CONTROL_PASS,PASS,controls/v3/CONTROL_SUMMARY.json
+G16,Typed standing block machine-checked against the contract section 11 ini block,22/22 KEYS EXACT MATCH,PASS,records/STANDING_CHECK.json
+G17,Strict JSON/JSONL parse of the package (duplicate keys NaN Infinity rejected),50/50 PASS AT CLOSE; T10 RE-VALIDATES THE COMPLETE SET,PASS,records/JSON_VALIDATION.json
+G18,SOURCE_UNCHANGED in the measured scope,PASS2==PASS1==PIN E7785430...; INPUTS RE-HASH 14/14 MATCH,PASS,records/SOURCE_UNCHANGED.json
+G19,All read/decode/state budgets within limits,WINDOW 2/2 164B; HEADER 1/1 4096B; HASH 2/2; SWEEPS 1/2; APPLICATIONS 37/192; STARTS 37/96; CALLSITE UNITS 2/6; STATES 8/8; PROVENANCE 8/12; TOTAL ORIGINAL BYTES 16036004/16036004 EXACTLY AT MAX,PASS,BUDGET_USED.json
+G20,Error-correction rounds within the 2-round limit,2/2 EXHAUSTED (round 1 v1 argv; round 2 v2 wrapper) -> PARTIAL TERMINAL DISCLOSED PER CONTRACT 9; defective versions preserved,PASS_WITH_DISCLOSURE (BUDGET AT LIMIT; TERMINAL PARTIAL),QC.json repair_rounds_records + BUDGET_USED.json
+G21,Own files <= 128,PREDICTED FINAL 125 AT THIS CSV WRITE; BINDING = MANIFEST CENSUS; VERIFIED READ-ONLY AFTER THE MANIFEST (SEE TERMINAL MESSAGE),PASS_PREDICTED_PENDING_READ_ONLY_VERIFY,physical census + t10 manifest
+G22,Own package bytes <= 8388608,~530 KB AT THIS CSV WRITE; BINDING = MANIFEST CENSUS,PASS_PREDICTED_PENDING_READ_ONLY_VERIFY,physical census + t10 manifest
+G23,CRLF write-translation finding F1 disclosed OPEN with damage inventory proven reversibility predicate and science-impact assessment,DISCLOSED OPEN; REVERSIBILITY PROVEN (4096 B / 636B01A2...); SCIENCE UNAFFECTED,PASS (DISCLOSURE; DEFECT ITSELF OPEN),QC.json findings/F1
+G24,Repair-round discipline: open/close times PRE/POST hashes recorded; defective versions and outputs preserved byte-untouched,ROUND 1 + ROUND 2 FULLY RECORDED,PASS,QC.json repair_rounds_records
+G25,Manifest full bijection zero exclusions zero sampling; manifest is the LAST write; identity reported outside the package,PENDING AT THIS CSV WRITE; EXECUTED BY t10; VERIFIED READ-ONLY AFTER; RESULT IN TERMINAL MESSAGE,PENDING_AT_CSV_WRITE_VERIFIED_READ_ONLY_AFTER,tools/t10_manifest.py + terminal message
+G26,Document timestamps serializer-measured at write; ledger times tool-measured; this CSV authored directly without time fields (disclosed),ALL DOC generated_utc SERIALIZER-MEASURED; LEDGER TOOL-MEASURED; THIS CSV HAS NO TIME FIELDS,PASS_WITH_DISCLOSURE,ATTEMPT_LOG.jsonl + QC.json findings/F3

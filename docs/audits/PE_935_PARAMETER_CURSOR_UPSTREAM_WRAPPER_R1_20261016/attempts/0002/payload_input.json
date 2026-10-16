@@ -1,0 +1,79 @@
+{
+  "document": "PREREGISTRATION.json",
+  "run_id": "PE_935_PARAMETER_CURSOR_UPSTREAM_WRAPPER_R1_20261016",
+  "registered_before": "the first original EXE hash/read; not rewritten after seeing results",
+  "question": "In the recorded scope FUN_00852A30 [0x00852A30, 0x00852A82): is the value passed to FUN_00852750 the same cursor C the wrapper received at entry; which receiver O is passed; and which exact local gate of the read byte allows this transfer?",
+  "era": "PCG_9_3_5",
+  "scope": {
+    "subject": "FUN_00852A30",
+    "window_start_va": "0x00852A30",
+    "window_end_exclusive_va": "0x00852A82",
+    "window_size_bytes": 82,
+    "new_function_bodies": 1,
+    "new_callee_bodies": 0,
+    "wrapper_hops": 0,
+    "downstream_expected_target_va": "0x00852750 (EXPECTED from the historical analyzer; must be verified from bytes; the transfer form is not presumed to be CALL)",
+    "opaque_helper_hint_va": "0x0040DE60 (NAVIGATION_ONLY hint; body closed; actual effects remain NOT_ESTABLISHED)"
+  },
+  "entry_assumption_declared": {
+    "anchor": "decode starts at window offset 0 = VA 0x00852A30, the function head recorded by the historical analyzer (body=0x00852A30-0x00852A81 per inputs/WRAPPER_PRIOR_PSEUDO.txt)",
+    "status": "CONDITIONAL_ON_ENTRY_MODEL",
+    "limits": "decoder agreement from this start does not prove all entries of this address, does not prove the window is a complete CFG, and does not prove a particular caller's reachability; the window is a frozen read limit"
+  },
+  "navigation_only_hint_acknowledged": "inputs/WRAPPER_PRIOR_PSEUDO.txt suggests: cursor struct fields data@+0, size@+8, offset@+0xC, valid@+0x11; a one-byte read from data+offset under valid/size guards; a clear-valid branch; a call to FUN_0040de60(1) after a successful read; a gate on the read byte minus 1; and a call to FUN_00852750 with the same param_1. NONE of this is fresh byte evidence: signature, transfer form, byte role and ABI are to be established from the pinned EXE bytes by two independent decoders. Bytes contradicting the hint are preserved without changing the window.",
+  "hypotheses_to_distinguish": {
+    "H1_relay": "the value passed to FUN_00852750 is the same cursor C the wrapper received at entry (no in-window construction/fill of a new cursor for the transfer)",
+    "H2_local_construction": "the wrapper constructs or fills a cursor (or a distinct pointer) in-window before the transfer",
+    "H3_field_or_global_load": "the transferred value is loaded from an object field or a global rather than the entry argument",
+    "H4_opaque_return": "the transferred value is the return of an opaque call",
+    "H5_not_qualified": "a decode barrier, unsupported encoding or disagreement prevents qualification within bound"
+  },
+  "abi_models_declared": {
+    "entry_model": "CONDITIONAL_ON_ENTRY_MODEL: entry state evaluated with ESP at function entry (entryESP); incoming stack arguments live at [entryESP+4], [entryESP+8], ...; incoming receiver register convention per the ABI model below; the wrapper's own calling convention (RET vs RET imm16) is to be established from bytes and is NOT derived from the pseudocode signature",
+    "conditional_msvc_x86": "EBX/EBP/ESI/EDI callee-saved; ECX thiscall receiver; stack arguments pushed right-to-left; callee cleans fixed arguments (RET imm16). In-window support for the convention hypothesis of this compilation unit (FUN_00852750 saves/restores EBX/EBP/ESI/EDI and returns RET 0x4) is historical evidence, NOT proof of any specific callee's behaviour.",
+    "model_without_callee_saved": "a separate model without the callee-saved assumption: values of ESI/EDI/EBP/EBX after any opaque CALL are NOT_ESTABLISHED; identity claims that depend on preservation across an opaque CALL are typed CONDITIONAL_ON_ABI_MODEL and remain NOT_ESTABLISHED without that condition",
+    "no_callee_opening": "no callee body (FUN_00852750, 0x0040DE60 or any other) is opened to recover cleanups or ABI"
+  },
+  "expected_local_elements_to_verify_from_bytes": {
+    "byte_read": "source (data+offset), width (8/16/32-bit per encoding), guard order and direction (which comparison, unsigned/signed, which jump mnemonic and target)",
+    "gate_of_transfer": "which exact condition on the read byte allows the transfer to 0x00852750 (the pseudo hints a compare-with-1 shape; this is NOT assumed)",
+    "transfer_form": "CALL rel32 / JMP (tail) / indirect; for JMP the existing stack argument is mapped to [parser_entryESP+4] without a new push; for CALL the pushed return address is accounted; a register holding a code address is not C or O",
+    "receiver": "which value is in ECX at the transfer (preserved entry receiver, a reloaded field, an opaque return, or something else) - mapped by slot, not by name",
+    "cursor_slots": "C_wrapper_entry (incoming slot with exact entryESP offset), C_at_read, C_at_opaque_helper, C_at_parser, O_wrapper_entry, O_at_parser, B_read, P_code_target - each separately named without automatic identification"
+  },
+  "budgets_declared": {
+    "NEW_FUNCTION_BODIES": 1, "NEW_CALLEE_BODIES": 0, "MAX_WRAPPER_HOPS": 0,
+    "MAX_UNIQUE_INSTRUCTION_STARTS": 96, "MAX_ACCOUNTED_CALLSITE_UNITS": 6,
+    "MAX_SYMBOLIC_STATES": 8, "MAX_PROVENANCE_ROWS": 12,
+    "MAX_FULL_EXE_HASH_PASSES": 2, "MAX_HEADER_READS": 1, "MAX_HEADER_BYTES": 4096,
+    "MAX_ORIGINAL_CODE_WINDOW_READS": 2, "MAX_ORIGINAL_CODE_BYTES": 164,
+    "MAX_TOTAL_ORIGINAL_EXE_BYTES_READ": 16036004,
+    "MAX_PATH_A_FULL_SWEEPS": 2, "MAX_PATH_B_DECODE_APPLICATIONS": 192,
+    "MAX_SYNTHETIC_X86_DECODE_APPLICATIONS": 0,
+    "ADDITIONAL_SAVED_INPUT_FILES": 0,
+    "MAX_ERROR_CORRECTION_ROUNDS": 2,
+    "MAX_OWN_FILES": 128, "MAX_OWN_PACKAGE_BYTES": 8388608,
+    "note": "16036004 = 2x8015872 + 4096 + 2x82; counters are shared across executor, corrections, QC and materialization; exhaustion yields PARTIAL/NOT_ESTABLISHED_WITHIN_BOUND without scope extension"
+  },
+  "budget_arithmethic_note": "instruction/callsite/state budgets are generated from actual lists; no forecast of instruction or callsite counts is made in this preregistration",
+  "controls_declared": {
+    "C1": "transfer-site anchored at a byte inside the actual transfer instruction; expected refusal NOT_INSTRUCTION_HEAD (nonzero exit)",
+    "C2": "C and O/receiver/argument descriptions swapped against the established operands and slots; expected refusal ROLE_OR_SLOT_MISMATCH (nonzero exit)",
+    "C3": "preservation after the opaque helper promoted to unconditional CONFIRMED without proof and without the ABI model; expected refusal UNJUSTIFIED_OPAQUE_PRESERVATION (nonzero exit)",
+    "C4": "FILE/NETWORK/VFS/STATIC_BUILDING/XYZ entered as established source/role without separate proof; expected refusal UNSUPPORTED_SOURCE_OR_WORLD_PROMOTION (nonzero exit)",
+    "base_case": "the real claims record must be ACCEPTED by the same predicate at the actually demonstrated (conditional) level; CONTROL_PASS means the required refusal for that specific mutation only; if an anchor or role is not demonstrated, the dependent control is NOT_PERFORMED with reason"
+  },
+  "allowed_terminals_declared": {
+    "RUN_STATUS": ["COMPLETE_WITHIN_BOUND", "PARTIAL", "BLOCKED_PREFLIGHT", "BLOCKED_TOOLING", "NOT_QUALIFIED_TOOL_LIMIT"],
+    "SCIENCE_RESULT": ["WRAPPER_CURSOR_RELAY_CONFIRMED_CONDITIONAL_ON_DECLARED_MODELS", "LOCAL_CURSOR_ORIGIN_OBSERVED_WITH_STATED_SCOPE", "NOT_ESTABLISHED_WITHIN_BOUND", "NOT_QUALIFIED_TOOL_LIMIT"],
+    "note": "no relay, tag=1 or expected success is forced; if bytes contradict the hint, that result is preserved without changing the window; EVIDENCE_STATUS (CONFIRMED/STRONGLY_SUPPORTED/PLAUSIBLE/UNVERIFIED/REJECTED) is kept separate from RUN_STATUS and SCIENCE_RESULT"
+  },
+  "falsifiers_declared": [
+    "decoder disagreement in heads/lengths/raw/targets",
+    "a decode barrier (library REJECT) inside the window that cannot be qualified within bound",
+    "bytes showing the transfer argument is NOT the entry cursor (construction/field-load/opaque-return)",
+    "budget exhaustion before the transfer is qualified",
+    "critical EXE identity/mapping mismatch (halts science)"
+  ],
+  "negative_result_policy": "a negative or partial result is preserved honestly; NOT_QUALIFIED_TOOL_LIMIT or NOT_ESTABLISHED_WITHIN_BOUND is not converted into success; no callee, region or Ghidra is opened to rescue a result"
+}

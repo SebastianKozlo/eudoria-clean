@@ -1,0 +1,61 @@
+{
+  "document": "BUDGET_USED.json",
+  "run_id": "PE_935_PARAMETER_CURSOR_UPSTREAM_WRAPPER_R1_20261016",
+  "counters_source": "physical lists: decode/INSTRUCTION_ROSTER.json (instruction starts), decode/ab_comparison.json (targets/applications), ATTEMPT_LOG.jsonl (passes, sweeps, rounds), the physical file census (own files/bytes); no forecast values",
+  "budgets": {
+    "NEW_FUNCTION_BODIES": {"actual": 1, "limit": 1, "note": "FUN_00852A30 [0x00852A30,0x00852A82)"},
+    "NEW_CALLEE_BODIES": {"actual": 0, "limit": 0},
+    "MAX_WRAPPER_HOPS": {"actual": 0, "limit": 0},
+    "MAX_UNIQUE_INSTRUCTION_STARTS": {"actual": 37, "limit": 96},
+    "MAX_ACCOUNTED_CALLSITE_UNITS": {
+      "actual": 2, "limit": 6,
+      "units": [
+        {"va": "0x00852A56", "role": "OPAQUE_HELPER_ADVANCE_HINT_CALL_0x0040DE60 (used as the single opaque boundary between load and use of ESI/EDI/BL)"},
+        {"va": "0x00852A77", "role": "TRANSFER_CALL_TO_FUN_00852750"}
+      ]
+    },
+    "MAX_SYMBOLIC_STATES": {
+      "actual": 8, "limit": 8,
+      "states": ["C_wrapper_entry", "C_at_read", "C_at_opaque_helper", "C_at_parser", "O_wrapper_entry", "O_at_parser", "B_read", "P_code_target"]
+    },
+    "MAX_PROVENANCE_ROWS": {"actual": 8, "limit": 12},
+    "MAX_FULL_EXE_HASH_PASSES": {"actual": 2, "limit": 2, "note": "8015872 B each, streaming, both match the pin"},
+    "MAX_HEADER_READS": {"actual": 1, "limit": 1},
+    "MAX_HEADER_BYTES": {"actual": 4096, "limit": 4096},
+    "MAX_ORIGINAL_CODE_WINDOW_READS": {"actual": 2, "limit": 2, "note": "both 82-B reads of [0x00852A30,0x00852A82), byte-identical"},
+    "MAX_ORIGINAL_CODE_BYTES": {"actual": 164, "limit": 164},
+    "MAX_TOTAL_ORIGINAL_EXE_BYTES_READ": {
+      "actual": 16036004, "limit": 16036004,
+      "note": "2x8015872 (hash passes) + 4096 (header) + 2x82 (windows) = exactly the contract maximum; the header read is logged in SOURCE_READS.json attempt 0004; the final hash pass in records/SOURCE_UNCHANGED.json"
+    },
+    "MAX_PATH_A_FULL_SWEEPS": {"actual": 1, "limit": 2, "note": "objdump -D -b binary -m i386 -M intel --adjust-vma=0x00852A30 over the saved buffer via /mnt/d, exit 0"},
+    "MAX_PATH_B_DECODE_APPLICATIONS": {"actual": 37, "limit": 192, "note": "sequential sweep from offset 0, no barrier, reached the window end exactly"},
+    "MAX_SYNTHETIC_X86_DECODE_APPLICATIONS": {"actual": 0, "limit": 0},
+    "ADDITIONAL_SAVED_INPUT_FILES": {"actual": 0, "limit": 0},
+    "MAX_ERROR_CORRECTION_ROUNDS": {"actual": 2, "limit": 2, "note": "BINDING and EXHAUSTED: round 1 = t08_controls.py v1 child-argv defect (attempt 0011 -> v2); round 2 = v2 claims-wrapper defect (attempt 0012 -> v3); both corrections succeeded (v3 controls 4/4 CONTROL_PASS); remaining 0; per contract section 9 the run terminal is PARTIAL; full PRE/POST records in QC.json repair_rounds_records"}
+  },
+  "own_files_and_bytes": {
+    "census_at_budget_write": {
+      "physical_files": 105,
+      "note": "measured immediately before materializing this document (104 package files + this document's authored payload)"
+    },
+    "remaining_planned_writes_after_this_document": [
+      "REPORT.md via t00 (doc + attempt capture + payload: +5)",
+      "HANDOFF.md via t00 (+5)",
+      "STAGE_ACCEPTANCE_GATES.csv agent-authored CSV (+1)",
+      "t10_manifest.py: artifact_index.csv + MANIFEST_SHA256.csv + attempt capture (+5)"
+    ],
+    "predicted_final_physical_files": 125,
+    "predicted_final_own_files_limit": 128,
+    "binding_final_count": "the MANIFEST_SHA256.csv bijection (written last, self-excluded) plus the manifest itself; the manifest census is the binding truth, not this prediction",
+    "package_bytes_at_budget_write": "measured in the physical census below",
+    "own_package_bytes_limit": 8388608
+  },
+  "original_exe_budget_identity": {
+    "path": "D:\\Eudoria_Reconstruction\\pcg_install\\Entropia.exe",
+    "size_bytes": 8015872,
+    "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31",
+    "pass1_equals_pass2_equals_pin": true,
+    "no_whole_exe_copy_ever_written": true
+  }
+}

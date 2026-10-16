@@ -1,0 +1,132 @@
+{
+  "case": "BASE",
+  "mutation_description": null,
+  "claims": {
+    "transfer_site": {
+      "va": "0x00852A77",
+      "raw_hex": "e8 d4 fc ff ff",
+      "declared_transfer_kind": "CALL_REL32",
+      "declared_target": "0x00852750",
+      "role": "TRANSFER_TO_FUN_00852750"
+    },
+    "head_anchors": [
+      {
+        "va": "0x00852A32",
+        "raw_hex": "8b 74 24 0c"
+      },
+      {
+        "va": "0x00852A3E",
+        "raw_hex": "8b f9"
+      },
+      {
+        "va": "0x00852A4F",
+        "raw_hex": "8a 1c 01"
+      },
+      {
+        "va": "0x00852A56",
+        "raw_hex": "e8 05 b4 bb ff"
+      },
+      {
+        "va": "0x00852A64",
+        "raw_hex": "0f b6 c3"
+      },
+      {
+        "va": "0x00852A67",
+        "raw_hex": "83 e8 01"
+      },
+      {
+        "va": "0x00852A6A",
+        "raw_hex": "74 08"
+      },
+      {
+        "va": "0x00852A74",
+        "raw_hex": "56"
+      },
+      {
+        "va": "0x00852A75",
+        "raw_hex": "8b cf"
+      }
+    ],
+    "role_bindings": [
+      {
+        "symbol": "O_wrapper_entry",
+        "role_class": "entry_ecx_receiver_save",
+        "carrier": {
+          "va": "0x00852A3E",
+          "fact_key": "mov_dst",
+          "expected_value": "EDI"
+        }
+      },
+      {
+        "symbol": "C_at_parser",
+        "role_class": "stack_argument_value_at_transfer",
+        "carrier": {
+          "va": "0x00852A74",
+          "fact_key": "push_register",
+          "expected_value": "ESI"
+        }
+      },
+      {
+        "symbol": "O_at_parser",
+        "role_class": "thiscall_receiver_at_transfer",
+        "carrier": {
+          "va": "0x00852A75",
+          "fact_key": "mov_dst",
+          "expected_value": "ECX"
+        }
+      }
+    ],
+    "opaque_preservations": [
+      {
+        "claim": "ESI (C) preserved across the opaque helper CALL 0x0040DE60 @0x00852A56 so that PUSH ESI @0x00852A74 passes the entry cursor value",
+        "crosses_opaque_call": true,
+        "status": "CONDITIONAL_ON_ABI_MODEL",
+        "requires": [
+          "ABI_MODEL"
+        ],
+        "proof_key": null
+      },
+      {
+        "claim": "EDI (O_wrapper_entry) preserved across the same opaque CALL so that MOV ECX,EDI @0x00852A75 passes the entry receiver",
+        "crosses_opaque_call": true,
+        "status": "CONDITIONAL_ON_ABI_MODEL",
+        "requires": [
+          "ABI_MODEL"
+        ],
+        "proof_key": null
+      },
+      {
+        "claim": "BL (B_read, low byte of EBX) preserved across the same opaque CALL so that the B==1 gate @0x00852A64..0x00852A6A sees the read byte",
+        "crosses_opaque_call": true,
+        "status": "CONDITIONAL_ON_ABI_MODEL",
+        "requires": [
+          "ABI_MODEL"
+        ],
+        "proof_key": null
+      }
+    ],
+    "byte_proofs": {},
+    "source_and_world": [
+      {
+        "key": "CURSOR_SOURCE_MEDIUM",
+        "value": "UNKNOWN",
+        "evidence": null
+      },
+      {
+        "key": "CURSOR_CONSTRUCTION_OR_FILL_UPSTREAM",
+        "value": "NOT_ESTABLISHED",
+        "evidence": null
+      },
+      {
+        "key": "STATIC_BUILDING_ROLE",
+        "value": "NOT_ESTABLISHED",
+        "evidence": null
+      },
+      {
+        "key": "WORLD_XYZ_RECOVERED",
+        "value": "NO",
+        "evidence": null
+      }
+    ]
+  }
+}

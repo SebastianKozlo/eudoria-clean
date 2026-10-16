@@ -1,0 +1,96 @@
+{
+  "audit_verdict": "PARTIAL_PASS",
+  "audit_process_status": "SCOPE_VIOLATED_DISCLOSED",
+  "source_package_untouched": true,
+  "next_experiment_executed": false,
+  "science_result": "WRAPPER_CURSOR_RELAY_CONFIRMED_CONDITIONAL_ON_DECLARED_MODELS",
+  "findings": [
+    {
+      "id": "WRAP-PROC-01",
+      "priority": "P2",
+      "disposition": "NEW_MATERIAL_OPEN",
+      "title": "Uncounted full original EXE read through file_identity",
+      "evidence": [
+        "tools/t02_hash_exe.py:31-37,49",
+        "tools/run_common.py:42-50,88-91",
+        "attempts/0003/entry.json",
+        "tools/t09_close.py:58-64",
+        "SOURCE_READS.json",
+        "BUDGET_USED.json"
+      ],
+      "reported_full_passes": 2,
+      "minimum_full_passes": 3,
+      "limit": 2,
+      "reported_original_bytes": 16036004,
+      "minimum_original_bytes": 24051876,
+      "omitted_bytes": 8015872,
+      "basis": "saved code and retained execution records only; identified before audit accidental reads",
+      "impact": "budget claim invalid; local relay bytes unaffected"
+    },
+    {
+      "id": "WRAP-SCI-01",
+      "priority": "P2",
+      "disposition": "NEW_MATERIAL_OPEN",
+      "title": "Pseudo return-mask incorrectly retracted",
+      "evidence": [
+        "REPORT.md:23",
+        "EVIDENCE.json:/provenance_rows/3/finding",
+        "EVIDENCE.json:/pseudo_vs_bytes_disclosures/0",
+        "decode/INSTRUCTION_ROSTER.json:0x00852A64,0x00852A67,0x00852A6E"
+      ],
+      "correction": "On bypass EAX=(u32(B)-1)&0xFFFFFF00; B=0 => EAX=0xFFFFFF00 while AL=0. B=1 enters parser. No C return-type assertion.",
+      "impact": "narrow return interpretation; relay and B==1 gate remain"
+    },
+    {
+      "id": "F1",
+      "priority": "P2",
+      "disposition": "KNOWN_OPEN_RECONFIRMED",
+      "title": "CRT text-mode binary write changes physical bytes and identities",
+      "disk_header_bytes": 4099,
+      "logical_header_bytes": 4096,
+      "identity_refs_checked": 97,
+      "disk_identity_mismatches": 41,
+      "all_mismatches_explained_by_documented_crt_inverse": true,
+      "impact": "header and textual identities affected; both 82-byte windows physically intact; final physical manifest valid"
+    },
+    {
+      "id": "WRAP-DOC-01",
+      "priority": "P3",
+      "disposition": "NEW_MINOR_OPEN",
+      "title": "QC F1 window digest missing final hex C",
+      "evidence": [
+        "QC.json:/findings/F1/affected_artifacts/window_buffers"
+      ],
+      "impact": "63-character typo; no physical buffer mismatch"
+    },
+    {
+      "id": "WRAP-LIMIT-01",
+      "priority": null,
+      "disposition": "QUALIFICATION_LIMIT",
+      "title": "Four controls do not establish general fail-closed",
+      "correction": "Specific BASE0 and C1-C4/1 retained; C4 joint FILE+XYZ short-circuits at FILE. No independent all-promotion or missing-coverage guarantee."
+    },
+    {
+      "id": "WRAP-LIMIT-02",
+      "priority": null,
+      "disposition": "STATUS_CALIBRATION",
+      "title": "2/2 repair rounds is a limit, not an independent material defect",
+      "correction": "PARTIAL justified by open F1 and budget overrun; no third correction permitted. Earlier failed controls and final v3 denominator remain separate."
+    },
+    {
+      "id": "AUDIT-SCOPE-01",
+      "priority": "P2",
+      "disposition": "OWN_AUDIT_DEVIATION_DISCLOSED",
+      "title": "Process subagent accidentally read original EXE three times",
+      "agent": "ingress_process_review",
+      "trigger": "Path(root)/absolute_input_path selects original external path on Windows; read_bytes for entries0003,0004,0005",
+      "accidental_full_reads": 3,
+      "bytes_each": 8015872,
+      "total_bytes": 24047616,
+      "writes": 0,
+      "decoder_executions": 0,
+      "results_used_as_evidence": false,
+      "containment": "Stopped original I/O; root verifier rejects external path before I/O; full raw note retained. Deviation is not retroactively repaired."
+    }
+  ]
+}

@@ -1,0 +1,488 @@
+{
+  "document": "EVIDENCE.json",
+  "run_id": "PE_935_PARAMETER_CURSOR_UPSTREAM_WRAPPER_R1_20261016",
+  "era": "PCG_9_3_5",
+  "question": "In the recorded scope FUN_00852A30 [0x00852A30,0x00852A82): is the value passed to FUN_00852750 the same cursor C the wrapper received at entry; which receiver O is passed; and which exact local gate of the read byte allows this transfer?",
+  "decode_agreement": {
+    "path_a": "GNU objdump 2.44 (/usr/bin/objdump, binary SHA256 96AFB8521834982D0E711B5D6E9785252BF82129FB0106B93A6BD54D83FAE11F), 1 full sweep (1/2) over the SAVED buffer via /mnt/d passthrough (no copy into WSL /tmp or home), exit 0, 37 instruction heads, 0 continuation lines",
+    "path_b": "x86dec_pinned.py (27188 B / C8E8470EFD762F66FF20369B2F656694C635131261F4D611DCA9C504E2B90B95, imported read-only by explicit path, no main, no .pyc), sequential sweep from window entry offset 0, 37 decode applications (37/192), no barrier, reached the window end exactly; PATH_B was NEVER fed PATH_A heads",
+    "heads_compared": 37,
+    "start_length_raw_agreement": "37/37",
+    "target_comparisons": "7/7 agree (5 in-window branches + 2 direct CALL rel32)",
+    "disagreements": 0,
+    "target_source": "every branch/call target recomputed as (VA+length+signed_rel) mod 2^32 from the recorded raw bytes (TARGET_SOURCE=ARITHMETIC_FROM_RECORDED_RAW) and compared against the PATH_A printed operand; this is not two independent full operand-semantics verifications",
+    "known_path_b_limitations_not_exercised": "opcodes 0x3C/0x3D absent from the pinned table were NOT present in this window (the CMP encodings used are 0x3A/0x3B ModRM forms, both in the table; SUB is 83 /5; no far 0x9A/0xEA forms)",
+    "coverage_scope": "both decoders independently swept the full 82-B window from the preregistered start 0x00852A30; decoder agreement from this start does not prove all entries of this address, does not prove a complete CFG, and does not prove any caller's reachability"
+  },
+  "roster_reference": {
+    "file": "decode/INSTRUCTION_ROSTER.json",
+    "rows": 37,
+    "unique_instruction_starts": 37
+  },
+  "symbols_separately_typed": {
+    "C_wrapper_entry": {
+      "definition": "the wrapper's single incoming stack argument at [entryESP+4], loaded into ESI @0x00852A32 (8b 74 24 0c, MOV ESI,[ESP+0xC]; at that point ESP=entryESP-8 after PUSH EBX/PUSH ESI, so [ESP+0xC]=[entryESP+4])",
+      "slot_offset": "entryESP+4",
+      "ret_cleanup_support": "RET 0x4 on both exits (@0x00852A71 and @0x00852A7F) proves cleanup of 4 bytes; 'exactly one stack argument' is the convention-model reading, consistent with the window never reading [entryESP+8]"
+    },
+    "C_at_read": {
+      "definition": "the same ESI value; no CALL between the load (0x00852A32) and the field reads; cursor struct fields read from ESI in-window: data@[C+0] u32 (@0x00852A4D), size@[C+8] u32 (@0x00852A48), offset@[C+0xC] u32 (@0x00852A42), valid@[C+0x11] u8 (@0x00852A36)",
+      "preservation": "UNCONDITIONAL within the window (pure register dataflow, no opaque crossing before the reads)"
+    },
+    "C_at_opaque_helper": {
+      "definition": "receiver of the helper CALL @0x00852A56: ECX:=ESI @0x00852A54 (8b ce); no CALL between the ESI load and this point, so the receiver register holds the entry cursor value UNCONDITIONALLY at the CALL site",
+      "helper": "CALL 0x0040DE60 with first stack argument 1 (PUSH 0x1 @0x00852A52, 6a 01); actual advance/memory effects of the helper: NOT_ESTABLISHED (body closed)"
+    },
+    "C_at_parser": {
+      "definition": "the value PUSHed as the parser's stack argument @0x00852A74 (56, PUSH ESI); same register ESI that was loaded from [entryESP+4], crossing exactly ONE opaque CALL (0x0040DE60 @0x00852A56)",
+      "preservation": "ESI=C at the PUSH is CONDITIONAL_ON_ABI_MODEL (ESI callee-saved across the one opaque CALL); without the model: NOT_ESTABLISHED"
+    },
+    "O_wrapper_entry": {
+      "definition": "the wrapper's entry ECX, saved into EDI @0x00852A3E (8b f9, MOV EDI,ECX); note: the PUSH EDI @0x00852A3D saves the CALLER's pre-entry EDI, not O; O has no stack anchor in this window - its only in-window carrier is the register EDI",
+      "preservation": "register-only carrier; EDI=O at the transfer is CONDITIONAL_ON_ABI_MODEL (EDI callee-saved across the one opaque CALL)"
+    },
+    "O_at_parser": {
+      "definition": "ECX at the transfer CALL, set by MOV ECX,EDI @0x00852A75 (8b cf); under the ABI model this is the relayed entry receiver O_wrapper_entry; class identity UNKNOWN; no stack-slot or pointer-level claim beyond the register transfer"
+    },
+    "B_read": {
+      "definition": "the byte read @0x00852A4F (8a 1c 01, MOV BL,[ECX+EAX*1]) where ECX=[C+0xC] (offset, loaded @0x00852A42) and EAX=[C] (data, loaded @0x00852A4D); width u8; effective address data+offset computed in 32-bit modulo 2^32 (no separate no-wrap/OOB-safety proof); default value 0 (XOR BL,BL @0x00852A39)",
+      "at_gate": "B lives in BL (low byte of EBX); between the read and the B-gate there is exactly ONE opaque CALL (the helper); B at the gate is CONDITIONAL_ON_ABI_MODEL (EBX callee-saved); without the model: NOT_ESTABLISHED",
+      "semantics": "UNKNOWN - an admitted B value is NOT automatically a record type, version, building tag, position or model"
+    },
+    "P_code_target": {
+      "definition": "the transfer instruction CALL rel32 @0x00852A77 (e8 d4 fc ff ff) with recomputed target 0x00852750 (=0x00852A7C+s32(0xFFFFFCD4)), agreeing with the PATH_A printed operand; the CALL form pushes the return address 0x00852A7C; the two direct CALL targets of this window (0x0040DE60, 0x00852750) are OPEN_EDGE callees outside the window - not read",
+      "separation": "P is a CODE address; no register holding a code address was treated as C or O"
+    }
+  },
+  "provenance_rows": [
+    {
+      "row": 1,
+      "role": "PROLOGUE_AND_STACK_EQUATION",
+      "instructions": [
+        {
+          "va": "0x00852A30",
+          "raw": "53",
+          "text": "push ebx"
+        },
+        {
+          "va": "0x00852A31",
+          "raw": "56",
+          "text": "push esi"
+        },
+        {
+          "va": "0x00852A32",
+          "raw": "8b 74 24 0c",
+          "text": "mov esi,DWORD PTR [esp+0xc]"
+        },
+        {
+          "va": "0x00852A3D",
+          "raw": "57",
+          "text": "push edi"
+        },
+        {
+          "va": "0x00852A3E",
+          "raw": "8b f9",
+          "text": "mov edi,ecx"
+        },
+        {
+          "va": "0x00852A71",
+          "raw": "c2 04 00",
+          "text": "ret 0x4"
+        }
+      ],
+      "finding": "C is taken from [entryESP+4] (after two pushes ESP=entryESP-8, so [ESP+0xC]=[entryESP+4]); the window never reads [entryESP+8]; O = entry ECX is preserved only in the register EDI (the PUSH EDI @0x00852A3D saves the caller's pre-entry EDI, not O); RET 0x4 on both exits proves cleanup4 - the exact argument count and the thiscall reading are convention-model statements, not RET-only deductions"
+    },
+    {
+      "row": 2,
+      "role": "B_READ_SOURCE_AND_WIDTH",
+      "instructions": [
+        {
+          "va": "0x00852A39",
+          "raw": "32 db",
+          "text": "xor bl,bl"
+        },
+        {
+          "va": "0x00852A42",
+          "raw": "8b 4e 0c",
+          "text": "mov ecx,DWORD PTR [esi+0xc]"
+        },
+        {
+          "va": "0x00852A4D",
+          "raw": "8b 06",
+          "text": "mov eax,DWORD PTR [esi]"
+        },
+        {
+          "va": "0x00852A4F",
+          "raw": "8a 1c 01",
+          "text": "mov bl,BYTE PTR [ecx+eax*1]"
+        }
+      ],
+      "finding": "B is an 8-bit read from [C.data + C.offset] (offset in ECX from [C+0xC], data in EAX from [C+0], ModRM 1C 01 = [ecx+eax*1]); default B=0 (XOR BL,BL); effective-address arithmetic is 32-bit modulo 2^32; these are actual operations, not a declared structure from the pseudo"
+    },
+    {
+      "row": 3,
+      "role": "THREE_SEPARATE_PATHS",
+      "instructions": [
+        {
+          "va": "0x00852A36",
+          "raw": "8a 46 11",
+          "text": "mov al,BYTE PTR [esi+0x11]"
+        },
+        {
+          "va": "0x00852A3B",
+          "raw": "3a c3",
+          "text": "cmp al,bl"
+        },
+        {
+          "va": "0x00852A40",
+          "raw": "74 22",
+          "text": "je 0x852a64"
+        },
+        {
+          "va": "0x00852A45",
+          "raw": "8d 51 01",
+          "text": "lea edx,[ecx+0x1]"
+        },
+        {
+          "va": "0x00852A48",
+          "raw": "3b 56 08",
+          "text": "cmp edx,DWORD PTR [esi+0x8]"
+        },
+        {
+          "va": "0x00852A4B",
+          "raw": "77 10",
+          "text": "ja 0x852a5d"
+        },
+        {
+          "va": "0x00852A61",
+          "raw": "88 5e 11",
+          "text": "mov BYTE PTR [esi+0x11],bl"
+        }
+      ],
+      "finding": "the paths are separate and do NOT share a common zeroing: (a) valid-fail: [C+0x11]==0 at the loop-head test -> JE @0x00852A40 to the gate with B still 0 - no register or byte is zeroed and valid is NOT cleared on this path; (b) size-fail (valid!=0, offset+1 > size unsigned): JA @0x00852A4B to 0x00852A5D, then MOV [C+0x11],BL clears valid ([C+0x11]:=0 because BL=0); B stays 0 - the byte is NOT zeroed here, it was never set; (c) read-success: B:=byte[data+offset] @0x00852A4F, then the opaque helper CALL and JMP to the gate. The re-test CMP AL,BL @0x00852A5D with JE @0x00852A5F is byte-real; on the described size-fail path valid!=0, so that JE is not taken there; no dead-code claim is made"
+    },
+    {
+      "row": 4,
+      "role": "OFFSET_PLUS_1_ARITHMETIC_AND_B_GATE",
+      "instructions": [
+        {
+          "va": "0x00852A64",
+          "raw": "0f b6 c3",
+          "text": "movzx eax,bl"
+        },
+        {
+          "va": "0x00852A67",
+          "raw": "83 e8 01",
+          "text": "sub eax,0x1"
+        },
+        {
+          "va": "0x00852A6A",
+          "raw": "74 08",
+          "text": "je 0x852a74"
+        }
+      ],
+      "finding": "the guard arithmetic is LEA EDX,[ECX+1] - 32-bit unsigned modulo 2^32 (no separate no-wrap/OOB-safety proof); the size test is CMP EDX,[C+8] with JA (unsigned above) - success requires offset+1 <= size; the B gate is EXACTLY B==1: zero-extend BL to 32 bits, subtract 1 (32-bit modulo 2^32; B=0 yields 0xFFFFFFFF, nonzero, gate fails), JE on the zero flag; between the JE and the CALL there is NO further condition; on gate failure the bypass epilogue returns AL:=0 (XOR AL,AL @0x00852A6E) - the historical pseudo's 'return bVar2-1 & 0xffffff00' is NOT in the bytes (decompiler noise; the bytes supersede the navigation hint on this point)"
+    },
+    {
+      "row": 5,
+      "role": "OPAQUE_HELPER_CALL",
+      "instructions": [
+        {
+          "va": "0x00852A52",
+          "raw": "6a 01",
+          "text": "push 0x1"
+        },
+        {
+          "va": "0x00852A54",
+          "raw": "8b ce",
+          "text": "mov ecx,esi"
+        },
+        {
+          "va": "0x00852A56",
+          "raw": "e8 05 b4 bb ff",
+          "text": "call 0x40de60"
+        }
+      ],
+      "finding": "the helper LOOKS like advance(1): receiver ECX:=ESI (the cursor value, unconditionally equal to the entry cursor at this point - no CALL between the load and here), first stack argument 1; direct CALL rel32 target 0x0040DE60 (OPEN_EDGE, body closed). The actual offset increment and any memory modification by the helper remain NOT_ESTABLISHED; its stack discipline is NOT_ESTABLISHED (the arg 1 is pushed before the CALL; no caller-side ADD ESP follows)"
+    },
+    {
+      "row": 6,
+      "role": "B_VALUE_AFTER_HELPER",
+      "instructions": [
+        {
+          "va": "0x00852A4F",
+          "raw": "8a 1c 01",
+          "text": "mov bl,BYTE PTR [ecx+eax*1]"
+        },
+        {
+          "va": "0x00852A56",
+          "raw": "e8 05 b4 bb ff",
+          "text": "call 0x40de60"
+        },
+        {
+          "va": "0x00852A64",
+          "raw": "0f b6 c3",
+          "text": "movzx eax,bl"
+        }
+      ],
+      "finding": "B is held in BL (low byte of EBX, a callee-saved register under the declared model) across exactly one opaque CALL; B at the gate is therefore CONDITIONAL_ON_ABI_MODEL, and NOT_ESTABLISHED without it; the window never reads volatile AL after the helper CALL (the AL re-test @0x00852A5D lies only on the size-fail path which skipped the helper); no value from before the CALL is carried to the return or the gate without this explicit model condition"
+    },
+    {
+      "row": 7,
+      "role": "ACTUAL_TRANSFER_TO_FUN_00852750",
+      "instructions": [
+        {
+          "va": "0x00852A74",
+          "raw": "56",
+          "text": "push esi"
+        },
+        {
+          "va": "0x00852A75",
+          "raw": "8b cf",
+          "text": "mov ecx,edi"
+        },
+        {
+          "va": "0x00852A77",
+          "raw": "e8 d4 fc ff ff",
+          "text": "call 0x852750"
+        }
+      ],
+      "finding": "the transfer is a DIRECT CALL rel32 to 0x00852750 at VA 0x00852A77 (P_code_target); form CALL, so the return address 0x00852A7C is pushed: the parser receives the pushed ESI value at [parser_entryESP+4] and the EDI value in ECX; the local gate that admits the transfer is exactly B==1 (JE @0x00852A6A); on the bypass (B!=1) the epilogue returns AL:=0 without any call; the parser's own return value is passed through unchanged on the transfer path (EAX is not modified between the CALL and the epilogue RET 0x4)"
+    },
+    {
+      "row": 8,
+      "role": "CLASSIFICATION_RELAY_VS_CONSTRUCTION",
+      "instructions": [
+        {
+          "va": "0x00852A32",
+          "raw": "8b 74 24 0c",
+          "text": "mov esi,DWORD PTR [esp+0xc]"
+        },
+        {
+          "va": "0x00852A74",
+          "raw": "56",
+          "text": "push esi"
+        },
+        {
+          "va": "0x00852A75",
+          "raw": "8b cf",
+          "text": "mov ecx,edi"
+        }
+      ],
+      "finding": "RELAY (conditional on the declared models): the pushed argument value is the SAME register loaded from [entryESP+4] and the receiver is the SAME register saved from entry ECX; within this window there is NO cursor construction, no allocation, no field/global load and no opaque return feeding the transferred values - the only writes to the cursor object are the valid-flag clear [C+0x11]:=0 on the size-fail path (an in-window mutation of one field, not a construction; on that path B stays 0 so the transfer is never reached), plus whatever the opaque helper does (NOT_ESTABLISHED). Passing C does NOT prove its construction or fill, does NOT establish the cursor's historical source medium, the helper's actual advance, any static building role, or any world position"
+    }
+  ],
+  "abi_models": {
+    "entry_model": "CONDITIONAL_ON_ENTRY_MODEL: entry state evaluated with ESP at function entry (entryESP); the decode anchor 0x00852A30 is the preregistered historical analyzer anchor; agreement from this start does not prove all entries or a complete CFG",
+    "conditional_msvc_x86": "EBX/EBP/ESI/EDI callee-saved; ECX thiscall receiver; arguments pushed right-to-left; callee cleans fixed arguments (RET imm16)",
+    "opaque_crossings_load_to_use": {
+      "ESI_C_load_0x00852A32_to_push_0x00852A74": [
+        "0x00852A56 -> 0x0040DE60 (opaque helper CALL)"
+      ],
+      "EDI_O_save_0x00852A3E_to_mov_ecx_edi_0x00852A75": [
+        "0x00852A56 -> 0x0040DE60 (opaque helper CALL)"
+      ],
+      "BL_B_read_0x00852A4F_to_gate_0x00852A64": [
+        "0x00852A56 -> 0x0040DE60 (opaque helper CALL)"
+      ]
+    },
+    "model_without_callee_saved": "without the callee-saved assumption the value of ESI at the PUSH, the value of EDI at MOV ECX,EDI and the value of BL at the gate are all NOT_ESTABLISHED; the identity claims are typed CONDITIONAL_ON_ABI_MODEL and remain NOT_ESTABLISHED without that condition; no callee body was opened to recover cleanups; the in-window support of the convention hypothesis (FUN_00852750 historically saves/restores these registers and returns RET 0x4) is unit-consistency evidence, not proof of any specific callee's behaviour",
+    "separation_note": "the relay claim concerns the POINTER VALUE of C (register identity); the CONTENTS of the cursor object may be mutated by the wrapper ([C+0x11]:=0 on the size-fail path) and by the opaque helper (effects NOT_ESTABLISHED); pointer preservation and content preservation are separate claims"
+  },
+  "variants_qualified": {
+    "valid_fail": "[C+0x11]==0 at the head test -> JE @0x00852A40 -> gate with B=0 -> bypass returns AL:=0; valid is NOT cleared, no byte read occurs",
+    "size_fail": "valid!=0 and offset+1 > size (unsigned JA) -> JA @0x00852A4B -> 0x00852A5D -> valid-fail re-test not taken -> [C+0x11]:=0 (valid clear, the only cursor write on this path) -> gate with B=0 -> bypass returns AL:=0; the transfer is never reached on this path",
+    "read_success_gate_fail": "byte read ok but B!=1 (including B=0) -> gate JE not taken -> bypass epilogue returns AL:=0",
+    "read_success_gate_pass": "B==1 (CONDITIONAL_ON_ABI_MODEL for B's survival across the helper) -> PUSH ESI; MOV ECX,EDI; CALL 0x00852750 -> returns the parser's value unchanged; epilogue RET 0x4",
+    "all_branch_targets_in_window": "the 5 branch targets of this window (0x00852A64 x3, 0x00852A5D, 0x00852A74) are inside the window; the 2 CALL targets (0x0040DE60, 0x00852750) are OPEN_EDGE callees, not read"
+  },
+  "classification": {
+    "transfer": "RELAY of the existing cursor C and of the entry receiver O to FUN_00852750",
+    "form": "direct CALL rel32 @0x00852A77 to 0x00852750 (not JMP/tail; the return address is pushed)",
+    "not_observed_in_window": "no local cursor construction, no allocation, no field/global load and no opaque return feeding the transferred values",
+    "limits": "relay does not prove the cursor's construction/fill upstream, its historical source medium, the helper's actual advance, the parser's callee effects, any class name, any static building role, any world instance identity or position"
+  },
+  "pseudo_vs_bytes_disclosures": [
+    "the historical pseudo's bypass return expression '(bVar2-1) & 0xffffff00' is NOT in the bytes: the bypass writes AL:=0 (xor al,al @0x00852A6E) and returns",
+    "the pseudo's redundant inner re-test of valid on the size-fail path IS byte-real (cmp al,bl @0x00852A5D; je @0x00852A5F) and is recorded as observed without a dead-code claim",
+    "the pseudo hides the receiver of FUN_00852750: the bytes show MOV ECX,EDI @0x00852A75 - the receiver is the relayed entry ECX value (under the ABI model)",
+    "the pseudo's FUN_0040de60(1) matches PUSH 0x1 + MOV ECX,ESI + CALL: the receiver (cursor) and argument 1 are byte-established; 'advance' remains a hint, its effects NOT_ESTABLISHED"
+  ],
+  "machine_checkable_claims": {
+    "transfer_site": {
+      "va": "0x00852A77",
+      "raw_hex": "e8 d4 fc ff ff",
+      "declared_transfer_kind": "CALL_REL32",
+      "declared_target": "0x00852750",
+      "role": "TRANSFER_TO_FUN_00852750"
+    },
+    "head_anchors": [
+      {
+        "va": "0x00852A32",
+        "raw_hex": "8b 74 24 0c"
+      },
+      {
+        "va": "0x00852A3E",
+        "raw_hex": "8b f9"
+      },
+      {
+        "va": "0x00852A4F",
+        "raw_hex": "8a 1c 01"
+      },
+      {
+        "va": "0x00852A56",
+        "raw_hex": "e8 05 b4 bb ff"
+      },
+      {
+        "va": "0x00852A64",
+        "raw_hex": "0f b6 c3"
+      },
+      {
+        "va": "0x00852A67",
+        "raw_hex": "83 e8 01"
+      },
+      {
+        "va": "0x00852A6A",
+        "raw_hex": "74 08"
+      },
+      {
+        "va": "0x00852A74",
+        "raw_hex": "56"
+      },
+      {
+        "va": "0x00852A75",
+        "raw_hex": "8b cf"
+      }
+    ],
+    "role_bindings": [
+      {
+        "symbol": "O_wrapper_entry",
+        "role_class": "entry_ecx_receiver_save",
+        "carrier": {
+          "va": "0x00852A3E",
+          "fact_key": "mov_dst",
+          "expected_value": "EDI"
+        }
+      },
+      {
+        "symbol": "C_at_parser",
+        "role_class": "stack_argument_value_at_transfer",
+        "carrier": {
+          "va": "0x00852A74",
+          "fact_key": "push_register",
+          "expected_value": "ESI"
+        }
+      },
+      {
+        "symbol": "O_at_parser",
+        "role_class": "thiscall_receiver_at_transfer",
+        "carrier": {
+          "va": "0x00852A75",
+          "fact_key": "mov_dst",
+          "expected_value": "ECX"
+        }
+      }
+    ],
+    "opaque_preservations": [
+      {
+        "claim": "ESI (C) preserved across the opaque helper CALL 0x0040DE60 @0x00852A56 so that PUSH ESI @0x00852A74 passes the entry cursor value",
+        "crosses_opaque_call": true,
+        "status": "CONDITIONAL_ON_ABI_MODEL",
+        "requires": [
+          "ABI_MODEL"
+        ],
+        "proof_key": null
+      },
+      {
+        "claim": "EDI (O_wrapper_entry) preserved across the same opaque CALL so that MOV ECX,EDI @0x00852A75 passes the entry receiver",
+        "crosses_opaque_call": true,
+        "status": "CONDITIONAL_ON_ABI_MODEL",
+        "requires": [
+          "ABI_MODEL"
+        ],
+        "proof_key": null
+      },
+      {
+        "claim": "BL (B_read, low byte of EBX) preserved across the same opaque CALL so that the B==1 gate @0x00852A64..0x00852A6A sees the read byte",
+        "crosses_opaque_call": true,
+        "status": "CONDITIONAL_ON_ABI_MODEL",
+        "requires": [
+          "ABI_MODEL"
+        ],
+        "proof_key": null
+      }
+    ],
+    "byte_proofs": {},
+    "source_and_world": [
+      {
+        "key": "CURSOR_SOURCE_MEDIUM",
+        "value": "UNKNOWN",
+        "evidence": null
+      },
+      {
+        "key": "CURSOR_CONSTRUCTION_OR_FILL_UPSTREAM",
+        "value": "NOT_ESTABLISHED",
+        "evidence": null
+      },
+      {
+        "key": "STATIC_BUILDING_ROLE",
+        "value": "NOT_ESTABLISHED",
+        "evidence": null
+      },
+      {
+        "key": "WORLD_XYZ_RECOVERED",
+        "value": "NO",
+        "evidence": null
+      }
+    ]
+  },
+  "evidence_status": {
+    "EVIDENCE_STATUS": "CONFIRMED",
+    "claim": "FUN_00852A30 relays its incoming cursor C ([entryESP+4]) and its incoming receiver O (entry ECX) to FUN_00852750, gated locally by exactly B==1",
+    "scope_flags": {
+      "window": "[0x00852A30, 0x00852A82) of the pinned Entropia.exe (SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31)",
+      "decode": "37/37 head+length+raw agreement, 7/7 target agreement, 0 disagreements, both decoders full-window from the preregistered start",
+      "not_established_outside": "all entries of 0x00852A30, complete CFG, caller reachability, callee effects, cursor source medium, upstream construction"
+    },
+    "model_flags": {
+      "conditional_on": [
+        "CONDITIONAL_ON_ENTRY_MODEL",
+        "CONDITIONAL_ON_ABI_MODEL"
+      ],
+      "without_models": "NOT_ESTABLISHED",
+      "unconditional_byte_facts": "the PUSH/MOV/CALL instruction sequence, the slot arithmetic [entryESP+4], the field offsets/widths, the guard directions, the B==1 gate form, the RET 0x4 cleanup on both exits"
+    }
+  },
+  "typed_final_status_block": {
+    "FIELD_SEMANTICS": "UNVERIFIED_EXCEPT_SCOPED_WIDTH_AND_ADDRESS_FACTS",
+    "CURSOR_SOURCE_MEDIUM": "UNKNOWN",
+    "CURSOR_CONSTRUCTION_OR_FILL_UPSTREAM": "NOT_ESTABLISHED",
+    "ACTUAL_ADVANCE_HELPER_EFFECTS": "NOT_ESTABLISHED",
+    "ACTUAL_VIRTUAL_CALLEE_TARGET": "NOT_ESTABLISHED_UNLESS_DIRECTLY_EVIDENCED_IN_SCOPE",
+    "ACTUAL_VIRTUAL_CALLEE_EFFECTS": "NOT_ESTABLISHED",
+    "ALLOCATION_RETURN_EQUALS_INITIALIZATION_RETURN": "NOT_ESTABLISHED",
+    "STATIC_BUILDING_ROLE": "NOT_ESTABLISHED",
+    "MODEL_218757_TO_THIS_PARSER_INSTANCE": "NOT_ESTABLISHED",
+    "MODEL_218757_TO_CMO_JOIN": "NOT_ESTABLISHED",
+    "WORLD_INSTANCE_IDENTITY": "NOT_ESTABLISHED",
+    "HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+    "WORLD_XYZ_RECOVERED": "NO",
+    "PREDECESSOR_PROCESS_TERMINAL": "PARTIAL",
+    "RETROACTIVE_AUTHORIZATION": "NO",
+    "CANONICAL_GATE_EFFECT": "NONE",
+    "REPOSITORY_MODIFIED": "NO",
+    "COMMIT_PUSH": "NOT_PERFORMED",
+    "EXTERNAL_POSTAUDIT_OF_THIS_RUN": "PENDING",
+    "NEXT_EXPERIMENT_AUTHORIZED": "NO",
+    "NEXT_MILESTONE_AUTHORIZED": "NO",
+    "HARD_STOP": "YES"
+  },
+  "trace_end_and_missing_edges": {
+    "trace_ends_at": "the direct CALL transfer to FUN_00852750 @0x00852A77 (parser entry; parser body is the previously examined ingress window, NOT reopened here)",
+    "first_missing_edge_proposal_not_executed": "who supplies C to FUN_00852A30 and where its buffer is constructed/filled (upstream of this wrapper; this run ends at the wrapper entry)",
+    "note": "the caller census of FUN_00852A30 is NOT performed; the helper body 0x0040DE60 and the parser body 0x00852750 remain closed"
+  },
+  "generated_utc": "2026-10-16T14:22:12.052852+00:00",
+  "generated_by_tool": "t00_write_doc.py",
+  "payload_sha256": "D9EF0DEBA7C93097EC4D063F492716C18F1521C21058CC0FDEDA786E59022926"
+}

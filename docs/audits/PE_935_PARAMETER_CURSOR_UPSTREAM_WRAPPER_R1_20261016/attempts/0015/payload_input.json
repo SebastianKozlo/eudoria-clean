@@ -1,0 +1,134 @@
+{
+  "document": "QC.json",
+  "run_id": "PE_935_PARAMETER_CURSOR_UPSTREAM_WRAPPER_R1_20261016",
+  "qc_origin": "SELF_REVIEW_WITH_LIMITATIONS",
+  "qc_origin_note": "Executor self-review; no separate fresh reviewer context was available in this session; two algorithms of one author are not two audits. PE-MASTER may assign a separate records-only auditor QC afterwards; this document does not claim that.",
+  "verdict": "QC_PARTIAL",
+  "verdict_basis": "All science-content checks PASS and are independently byte-grounded in the saved roster/buffers; two material OPEN process findings remain (F1 CRLF write translation, F2 exhausted repair budget) that cannot be repaired within this run",
+  "checks": [
+    {"id": "QC-01", "check": "contract + INPUT_PINS + 12 input copies identity (preflight) and post-science re-hash (t09 records/SOURCE_UNCHANGED.json)", "result": "PASS", "evidence": "14/14 identities match pins at preflight and at close"},
+    {"id": "QC-02", "check": "PREREGISTRATION.json written before the first original EXE hash/read", "result": "PASS", "evidence": "ledger order: attempt 0002 (PREREGISTRATION) precedes attempt 0003 (hash pass 1)"},
+    {"id": "QC-03", "check": "decoder independence: PATH_B never fed PATH_A heads", "result": "PASS", "evidence": "t06 sequential sweep from offset 0 (code + argv + PATH_B_SWEEP.json); t05 PATH_A over the saved buffer via /mnt/d without any copy into WSL /tmp or home"},
+    {"id": "QC-04", "check": "A/B agreement: heads, lengths, raw bytes, targets", "result": "PASS", "evidence": "decode/ab_comparison.json: 37/37 start+length+raw, 7/7 targets (all recomputed from recorded raw bytes, TARGET_SOURCE=ARITHMETIC_FROM_RECORDED_RAW), 0 disagreements; 0 continuation lines; 37 unique starts vs limit 96"},
+    {"id": "QC-05", "check": "window buffer integrity", "result": "PASS", "evidence": "two 82-B reads byte-identical (sha 43134E71...); PATH_B decoded exactly 82 bytes reaching the window end exactly; roster last instruction ends exactly at 0x00852A82; no prefix read, no read past RET, no neighbourhood scan, no third read"},
+    {"id": "QC-06", "check": "C/O/B mapping and critical encodings vs the roster", "result": "PASS", "evidence": "hand-verified from saved records: 8b 74 24 0c = MOV ESI,[esp+0xc] (ModRM mod1 + SIB base ESP + disp8 0x0C; post-two-pushes [esp+0xc]=[entryESP+4]); 8b f9 = MOV EDI,ECX; 8a 1c 01 = u8 read [ecx+eax*1]; 8d 51 01 = LEA edx,[ecx+1]; 3b 56 08 = CMP edx,[esi+8]; 77 10 = JA (unsigned); 0f b6 c3 = MOVZX eax,bl; 83 e8 01 = SUB eax,1; 74 08 = JE; 56 = PUSH ESI; 8b cf = MOV ECX,EDI; e8 d4 fc ff ff = CALL rel32 target 0x00852750 (0x00852A7C+s32(0xFFFFFCD4)); e8 05 b4 bb ff = CALL 0x0040DE60; c2 04 00 = RET 0x4 on both exits; guard direction: JA fires when offset+1 > size (unsigned)"},
+    {"id": "QC-07", "check": "ABI typing discipline", "result": "PASS", "evidence": "every identity crossing an opaque CALL (ESI at the PUSH, EDI at MOV ECX,EDI, BL at the gate - all across the single helper CALL 0x0040DE60 @0x00852A56) is typed CONDITIONAL_ON_ABI_MODEL; the model-without is stated (NOT_ESTABLISHED); unconditional byte facts are listed separately; no callee body opened"},
+    {"id": "QC-08", "check": "controls C1-C4 with base case", "result": "PASS", "evidence": "controls/v3/CONTROL_SUMMARY.json: base ACCEPTED (exit 0); C1 REFUSED NOT_INSTRUCTION_HEAD; C2 REFUSED ROLE_OR_SLOT_MISMATCH; C3 REFUSED UNJUSTIFIED_OPAQUE_PRESERVATION; C4 REFUSED UNSUPPORTED_SOURCE_OR_WORLD_PROMOTION - each with the proper reason and a real nonzero child-process exit; 4/4 CONTROL_PASS; two repair rounds were required to reach this (see findings/repair_rounds_records)"},
+    {"id": "QC-09", "check": "typed standing block machine-checked against the contract", "result": "PASS", "evidence": "records/STANDING_CHECK.json: 22/22 keys, exact value match against the section 11 ini block of OPENCODE_PARAMETER_CURSOR_UPSTREAM_WRAPPER_R1.md"},
+    {"id": "QC-10", "check": "strict JSON/JSONL parse of the package", "result": "PASS", "evidence": "records/JSON_VALIDATION.json: 50 files PASS at close (duplicate keys and NaN/Infinity rejected by the strict loader); t10 re-validates the complete set before writing the manifest; empty stderr/stdout captures are honest 0-byte .txt files, not masked errors"},
+    {"id": "QC-11", "check": "ledger discipline", "result": "PASS", "evidence": "ATTEMPT_LOG.jsonl is the only appendable file; every line carries its pre-append prefix size+sha256 (first line marked FIRST_APPEND_FILE_ABSENT); no line edited or removed; every attempt has attempts/NNNN/{entry.json,stdout.txt,stderr.txt} with tool-measured times"},
+    {"id": "QC-12", "check": "timestamp honesty (revalidation predicate of the prior P2-1)", "result": "PASS_WITH_DISCLOSURE", "evidence": "all document generated_utc fields are serializer-measured inside t00_write_doc.py at the moment of writing the prepared content; all ledger times are tool-measured t_start/t_end; STAGE_ACCEPTANCE_GATES.csv is authored directly as a plain CSV without any time field (disclosed; no serializer stamp is claimed for it)"},
+    {"id": "QC-13", "check": "SOURCE_UNCHANGED in the measured scope", "result": "PASS", "evidence": "records/SOURCE_UNCHANGED.json: hash pass 2 == pass 1 == pinned E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31 (8015872 B each); inputs/pins/contract re-hash 14/14 match; no whole-EXE copy ever written"},
+    {"id": "QC-14", "check": "budget accounting from physical lists", "result": "PASS", "evidence": "BUDGET_USED.json (materialized after this document) lists actual/limit per counter from the roster, ledger and physical census; the manifest census is the binding final file/byte count"}
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "priority": "P2",
+      "kind": "PACKAGE_ARTIFACT_ENCODING_DEFECT",
+      "status": "OPEN",
+      "summary": "Windows CRT text-mode write defect in run_common.atomic_write_bytes (os.open without O_BINARY): every artifact written through that path had each 0x0A byte translated to 0x0D 0x0A on disk",
+      "detected": "while preparing the repair-round records: EVIDENCE.json disk identity (25386 B / 93F8B2EB...) differed from the ledger-recorded logical identity (24898 B / 95968C7E...)",
+      "damage_inventory": {
+        "pe_header_first4096_bin": "disk 4099 B (3 inserted 0x0D bytes) vs logical 4096 B; REVERSIBILITY PROVEN: replace(0x0D 0x0A -> 0x0A) reproduces exactly 4096 B with sha256 636B01A25A9DE410781805D67AE1149FA64DF3D26C5C4FDE7D2D9EBCABC5A5C0 == the logical identity recorded by t03 at write time",
+        "window_buffers": "UNAFFECTED - the 82 window bytes contain no 0x0A; both files are exactly 82 B with sha256 43134E71A4C84F7F06972F9EDC3C6BDC8A29A5FCBCF27E6D95252FE5B2D30B5 matching every recorded identity",
+        "text_artifacts": "all JSON/TXT artifacts carry CRLF line endings on disk; they remain strictly parseable (JSON validation 50/50 PASS) and content-faithful",
+        "attempt_log": "UNAFFECTED - appended in binary mode; LF-clean",
+        "ledger_identity_layer": "the ledger entry 'outputs' identities are the LOGICAL (pre-translation) identities computed in-memory at write time; for CRLF-affected files they do not equal the disk identities; the MANIFEST (written last from the physical disk census) is the binding disk truth"
+      },
+      "science_impact": "NONE: the PE mapping (records/pe32_mapping.json) was computed from the correct in-memory header bytes; both decoders consumed the byte-faithful 82-B window buffers; no analysis step read the CRLF-expanded header file; the two window reads are the only original bytes used by the science",
+      "disposition": "OPEN, not repaired: the error-correction budget was already exhausted (2/2) when this was detected; per contract section 9 the defective artifacts stay byte-untouched; no re-read of the EXE header is possible (header budget 1/1 exhausted); this finding consumes NO repair round because no correction was performed",
+      "auditor_verification_predicate": "buffers/pe_header_first4096.bin read as bytes, replace(b'\\r\\n', b'\\n') must yield exactly 4096 bytes with sha256 636B01A25A9DE410781805D67AE1149FA64DF3D26C5C4FDE7D2D9EBCABC5A5C0"
+    },
+    {
+      "id": "F2",
+      "priority": "P2",
+      "kind": "REPAIR_BUDGET_EXHAUSTED",
+      "status": "OPEN",
+      "summary": "the controls qualifier required BOTH error-correction rounds (2/2) before the four controls executed correctly; the run terminal is therefore PARTIAL per contract section 9",
+      "disposition": "both defective tool versions (t08_controls.py, t08_controls_v2.py) and all their outputs are preserved byte-untouched; the binding controls result is controls/v3/CONTROL_SUMMARY.json (4/4 CONTROL_PASS); no false PASS ever occurred - both earlier failures were fail-closed (ARG_ERROR / STRUCTURE_ERROR before any predicate evaluated)"
+    },
+    {
+      "id": "F3",
+      "priority": "P3",
+      "kind": "TIME_FIELD_SCOPE_DISCLOSURE",
+      "status": "DISCLOSED",
+      "summary": "STAGE_ACCEPTANCE_GATES.csv is authored directly (plain CSV, no time fields) to keep the package within MAX_OWN_FILES; it carries no generated_utc claim; its content derives from tool-written records"
+    }
+  ],
+  "repair_rounds_records": {
+    "rounds_used": 2,
+    "rounds_limit": 2,
+    "remaining": 0,
+    "round_1": {
+      "opened_at_detection": "2026-10-16T14:22:14.364548+00:00 (attempt 0011 t_end)",
+      "detected": "all five child processes of t08_controls.py exited ARG_ERROR before any qualification: run_common.parse_simple_args consumed '--case' as the VALUE of the value-less flag '--child' (child stderr: \"ARG_ERROR: unknown or incomplete argument 'C1'\")",
+      "correction": "tools/t08_controls_v2.py (new versioned filename; '--child' passed with an explicit value; claims delivered via stdin; results under controls/v2/)",
+      "pre_state": {
+        "t08_controls_py_sha256": "2E0270003910E117EAC2192E89D31CB0CA1F12EA782B6B27E09B07A25DC4AC25 (15648 B, preserved byte-untouched)",
+        "attempts_0011_entry_sha256": "2584226DB5B83F9FCBB82AE2F1F8148B67D0FB86F38155A11255E7DBA263AF77",
+        "controls_census_before_fix": [
+          "controls/BASE_CASE.json | 3388 | 500CE6762FF105F05263B2CB0ED626B724922A502AE40A5625EA365A9E0335A8",
+          "controls/BASE_RESULT.json | 906 | ABF5F3CCE1C56C1A0879426D103A59E46CF3F401A942EB7F5086DD0FC002BD04",
+          "controls/C1_MUTANT.json | 3466 | 0620A733B18E4904F92553E969D62823CC3E58CC692DD5D4E76FB34FFF56E641",
+          "controls/C1_RESULT.json | 900 | 47F1E6B0A003C8C3A6AC20680F1C161DA8ACE1D964B54296243FC8D40D6C18DF",
+          "controls/C2_MUTANT.json | 3468 | 089B007AF3DF0531E90E07412FA6FE7935E69A7ABC62FE7B86C7C4E164FB182A",
+          "controls/C2_RESULT.json | 900 | 491FB4FA3EDB8BD06DAF8DEB42F67A85FBB54F3B95045CE987EAE9B395C3263E",
+          "controls/C3_MUTANT.json | 3454 | 2B25F3DE07F533A10E2608419DD17FD1D4ED0B6841B48A07643F90E972CC67AD",
+          "controls/C3_RESULT.json | 900 | C8CAD6DDE8968B85BC0C2B65D4C493E8179F58997BE6617C6F0920661FAE50F2",
+          "controls/C4_MUTANT.json | 3476 | A1D12E5FEB4BE675EF4E5F92E0FC464DECAEB84EBBFD9DC80541DA18692CF782",
+          "controls/C4_RESULT.json | 900 | 0DFF5CBB67800239F58C97DA5733F50514D7A29A06210C2693413A24FED5C59E",
+          "controls/CONTROL_SUMMARY.json | 1282 | 08A0275D651B1A26067B8092F8370989046F68A69FA4E445F480944868E46E36"
+        ],
+        "evidence_json_disk_identity_at_0011": "25386 B / 93F8B2EBF2D5C4074D3864721EF72D034DCA8AF7CF4331C34EC63B0BEA5F6DF8"
+      },
+      "post_state": {
+        "t08_controls_v2_py_sha256": "2FC69AC7370B94FC54FDD45A82097AFE883FE1684A42192D615BF7CDB1AAF8D2 (16189 B)",
+        "attempts_0012_entry_sha256": "F9F549D5751B2D238BA02132E7298E57774344B6063BD6781EFEDC09173823B0",
+        "controls_v2_census": [
+          "controls/v2/BASE_RESULT.json | 1038 | 387FFF7F8DB8886D589001C0089D9BBACE59A63FCB955A690D2B4314BB7D6C24",
+          "controls/v2/C1_RESULT.json | 1032 | 81A4634AD8D4F3DD83F28E8B8BE680A599B5EDF4D43B24334736919FBFC97178",
+          "controls/v2/C2_RESULT.json | 1032 | 87F6263E81FC365B62D93E0DE3F16C389FCEF1290F1EA65DC7100A936595D20A",
+          "controls/v2/C3_RESULT.json | 1032 | C1F8EBF090FC2B77349397F97E2A2875F4B7BC87394A17752CF3DFB442B2ADCFE",
+          "controls/v2/C4_RESULT.json | 1032 | 9BECDC805CF9CFBDBD817579D51199E5FBCE046D77405D79A733287A29EB5C843",
+          "controls/v2/CONTROL_SUMMARY.json | 1801 | B2BBAED79780710568E6D4DD1E786445FCE72B4C9F94A79FCACB6CB3B0784ECB"
+        ],
+        "v2_outcome": "CONTROL_FAILURE (superseded by round 2: v2 sent the WRAPPER object to the child - a different defect, fail-closed STRUCTURE_ERROR before any predicate)"
+      },
+      "closed_at": "2026-10-16T14:23:26.351152+00:00 (attempt 0012 t_end)"
+    },
+    "round_2": {
+      "opened_at_detection": "2026-10-16T14:23:26.351152+00:00 (attempt 0012 t_end)",
+      "detected": "all five children of t08_controls_v2.py returned REFUSED/STRUCTURE_ERROR (missing transfer_site): the parent sent the WRAPPER object {case, mutation_description, claims} via stdin instead of the RAW claims record, so qualify() stopped before any predicate; no false PASS occurred",
+      "correction": "tools/t08_controls_v3.py (v2 preserved; the parent sends the RAW claims record; the child defensively unwraps any wrapper; results under controls/v3/)",
+      "pre_state": {
+        "t08_controls_v2_py_sha256": "2FC69AC7370B94FC54FDD45A82097AFE883FE1684A42192D615BF7CDB1AAF8D2 (16189 B, preserved byte-untouched)",
+        "attempts_0012_entry_sha256": "F9F549D5751B2D238BA02132E7298E57774344B6063BD6781EFEDC09173823B0",
+        "controls_v2_census": "the six files listed in round_1 post_state"
+      },
+      "post_state": {
+        "t08_controls_v3_py_sha256": "7B4869D75E8AB9389F9568889FE93328AF24E1D1C162C36932250A1B41E53E41 (16674 B)",
+        "attempts_0013_entry_sha256": "CA250D6A72CDE1D9D070201D95AEBBEC4D33201749B95E0CACD29DE567CD3EAD",
+        "controls_v3_census": [
+          "controls/v3/BASE_RESULT.json | 1153 | 2429FB5A036191D1C30C93A25720EBEA40D2B5B3D0B82144B884E30884A60EE4",
+          "controls/v3/C1_RESULT.json | 1316 | 02406DCC59ADB76B7BC2E4C63DDA76D36DD2D1141EF255A4BD2582EE74C36F83",
+          "controls/v3/C2_RESULT.json | 1421 | 9E9D71B38A1F36977BD3F9FD0EDC0B53016F6E2E74C658E7DF56631650AC484C",
+          "controls/v3/C3_RESULT.json | 1674 | ABA114E8A0517E98FE0B1907C3C1867EA00D400DC8234B79BEA606A0D1B51053",
+          "controls/v3/C4_RESULT.json | 1401 | 0B54C5D515059AB348DDC36CDD0AFCC3F3BB9114DC7712B66FB17FDADED8023E",
+          "controls/v3/CONTROL_SUMMARY.json | 1858 | 79398CA8675DF30BAC14496E72842E0146AF9510AAAC194431E0E35FB241EE18"
+        ],
+        "v3_outcome": "OK - base ACCEPTED (exit 0); C1-C4 REFUSED with the exact expected reasons and real nonzero child exits; 4/4 CONTROL_PASS"
+      },
+      "closed_at": "2026-10-16T14:24:31.362299+00:00 (attempt 0013 t_end)"
+    },
+    "not_counted_as_rounds": [
+      "F1 (CRLF write translation): detected after the budget was exhausted; NO correction was performed (the defective artifacts are preserved); it is disclosed as an OPEN finding, not a consumed round",
+      "the planned first writes of remaining documents (BUDGET_USED, REPORT, HANDOFF, STAGE_ACCEPTANCE_GATES, records, manifest) are normal completion, not repairs"
+    ]
+  },
+  "limitations": [
+    "SELF_REVIEW_WITH_LIMITATIONS: the executor authored both decoders' comparison tooling and this QC; no independent fresh-context review was performed in this session",
+    "the CRLF finding (F1) means the physical package text artifacts carry CRLF line endings; an auditor must use the MANIFEST as the binding disk identity layer and the ledger outputs as the logical identity layer",
+    "STAGE_ACCEPTANCE_GATES.csv is agent-authored (no tool attempt) to stay within MAX_OWN_FILES; it contains no time fields"
+  ]
+}
