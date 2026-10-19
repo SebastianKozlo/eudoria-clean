@@ -1,0 +1,157 @@
+{
+  "run_id": "PE_935_MODEL_PAIR_TRANSPORT_QUALIFICATION_SAVED_R1_20261019_QC_R2",
+  "assignment_mode": "INTERNAL_QC",
+  "audited_run": "PE_935_MODEL_PAIR_TRANSPORT_QUALIFICATION_SAVED_R1_20261019",
+  "started_utc": "2026-10-19T06:25:51Z",
+  "tooling": "PowerShell 5.1 Get-FileHash (independent); evidence_guard.py used ONLY for final seal of this QC directory",
+  "check_1_package_structure": {
+    "result": "PASS",
+    "science_packages": {
+      "count": 8,
+      "each_has": ["REPORT.md", "HANDOFF.md", "STAGE_ACCEPTANCE_GATES.csv", "artifact_index.csv", "MANIFEST_SHA256.csv", "CLAIMS.json"],
+      "manifest_rows_rehashed_total": 50,
+      "manifest_rows_ok": 50,
+      "per_package": {
+        "P01_DIRECT_R3": {"rows": 6, "ok": 6, "bijection_exact": true},
+        "P02_MEMBER_R1": {"rows": 6, "ok": 6, "bijection_exact": true},
+        "P03_CALLER_R1": {"rows": 6, "ok": 6, "bijection_exact": true},
+        "P04_CALLER2_R1": {"rows": 7, "ok": 7, "bijection_exact": true},
+        "P06_CONSUMER_R1": {"rows": 7, "ok": 7, "bijection_exact": true},
+        "P08_CONSUMER2_R1": {"rows": 6, "ok": 6, "bijection_exact": true},
+        "P09_CONSUMER3_R1": {"rows": 6, "ok": 6, "bijection_exact": true},
+        "P10_SINK_R1": {"rows": 6, "ok": 6, "bijection_exact": true}
+      }
+    },
+    "incomplete_child_attempt_dirs_without_quintet": {
+      "count": 2,
+      "dirs": ["P01_EXEC_R1", "P01_EXEC_R2"],
+      "classification": "documented incomplete child attempts per REPORT.md and CONTRACT section 10/11; extract pre-staged by parent (confirmed by child CONTRACT.json inputs list); not sealed packages by design"
+    }
+  },
+  "check_2_root_artifact_index": {
+    "result": "PASS",
+    "rows": 102,
+    "rows_size_and_sha_ok": 102,
+    "rows_bad": 0,
+    "physical_files_excluding_reviews": 103,
+    "bijection": "103 = 102 indexed + artifact_index.csv (self-excluded); no unindexed files, no missing files"
+  },
+  "check_3_admit_spotchecks": {
+    "result": "PASS",
+    "events": [
+      {
+        "event": "CONTROL/EVENTS/000002_ADMIT.json", "package": "P01",
+        "extract": "packages/P01_EXEC_R1/extracts/WINDOW_006C3640.txt",
+        "extract_sha256": "021062EC41487E0ABA8E70EDE0C7EEBC0F85847BA1B28F0AFA61C31935516BF7",
+        "selected_lines_sha256_event": "DABB3B0C094CAF8FCE3EAC0E84D860C8E840933E2A0CA6649C7D7D099166B386",
+        "selected_lines_sha256_recomputed_from_extract": "DABB3B0C094CAF8FCE3EAC0E84D860C8E840933E2A0CA6649C7D7D099166B386",
+        "selected_lines_sha256_recomputed_from_original_source_lines": "DABB3B0C094CAF8FCE3EAC0E84D860C8E840933E2A0CA6649C7D7D099166B386",
+        "source_slice": "GHIDRA_H5_VTABLE2.txt lines 649385-649431",
+        "instruction_rows": {"event": 47, "recomputed": 47},
+        "call_sites": {"event": 2, "recomputed": 2},
+        "admission_id_header_match": true
+      },
+      {
+        "event": "CONTROL/EVENTS/000005_ADMIT.json", "package": "P04",
+        "extract": "packages/P04_CALLER2_R1/extracts/WINDOW_006C3FE0.txt",
+        "extract_sha256": "C2099CFD2DE6A90AC5B949CE5F0F9ADBAB55FDCF1E817086A19D16EA66BE6C20",
+        "selected_lines_sha256_event": "3F5547AC0D81AE611B55CB9E1237E1DE4311C5B8EE6FD4B65113D9D23A753373",
+        "selected_lines_sha256_recomputed_from_extract": "3F5547AC0D81AE611B55CB9E1237E1DE4311C5B8EE6FD4B65113D9D23A753373",
+        "instruction_rows": {"event": 46, "recomputed": 46},
+        "call_sites": {"event": 2, "recomputed": 2},
+        "admission_id_header_match": true
+      },
+      {
+        "event": "CONTROL/EVENTS/000010_ADMIT.json", "package": "P08",
+        "extract": "packages/P08_CONSUMER2_R1/extracts/WINDOW_006C3D40.txt",
+        "extract_sha256": "33492820A0E01354E566E324F06C6F1F1BD4AFE6CF15709DB7B50AB6A333F530",
+        "selected_lines_sha256_event": "7C1806EE9E8761FE041A9FC8645B68A861D2F2658B74302F0FA39D219F17AB7B",
+        "selected_lines_sha256_recomputed_from_extract": "7C1806EE9E8761FE041A9FC8645B68A861D2F2658B74302F0FA39D219F17AB7B",
+        "instruction_rows": {"event": 69, "recomputed": 69},
+        "call_sites": {"event": 5, "recomputed": 5},
+        "admission_id_header_match": true
+      },
+      {
+        "event": "CONTROL/EVENTS/000012_ADMIT.json", "package": "P10",
+        "extract": "packages/P10_SINK_R1/extracts/WINDOW_006C36B0.txt",
+        "extract_sha256": "91923409E53A88C5F42E9E6CCD6D6ED08790B7A7FB65A5BA8921BCD125D48F55",
+        "selected_lines_sha256_event": "12352E27184B6EB8DD95D1B00933D5C76D14FF0FC97B7557250791E84EF128A5",
+        "selected_lines_sha256_recomputed_from_extract": "12352E27184B6EB8DD95D1B00933D5C76D14FF0FC97B7557250791E84EF128A5",
+        "instruction_rows": {"event": 42, "recomputed": 42},
+        "call_sites": {"event": 2, "recomputed": 2},
+        "admission_id_header_match": true
+      }
+    ],
+    "p02_document_body_extra": {
+      "selected_lines_sha256_event": "CA0CC7CA77518E0C94EF8CE5202DCAA1613BB3F756EC972C3178F2568B335BA9",
+      "recomputed_from_original_source_lines": "CA0CC7CA77518E0C94EF8CE5202DCAA1613BB3F756EC972C3178F2568B335BA9",
+      "source_slice": "GHIDRA_GATE_00407270.txt lines 66-80"
+    },
+    "source_pins_rehashed": {
+      "GHIDRA_H5_VTABLE2.txt": {"size_bytes": 50780146, "sha256": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB", "matches_all_admit_events": true},
+      "GHIDRA_GATE_00407270.txt": {"size_bytes": 1269, "sha256": "C34D2BD8995A41D34AD852316B41F603AFCFCDD4EE308727B2AB3E6B260502A5", "matches_p02_event": true}
+    },
+    "event_hash_chain": {"events": 12, "prev_ok": 12, "start_previous_all_zero": true},
+    "p01_duplicate_extract": "P01_EXEC_R1 and P01_EXEC_R2 copies byte-identical (021062EC...); single admission Abe53670b3300; charged once"
+  },
+  "check_4_p08_admission_incident": {
+    "result": "PASS",
+    "reserved": 2,
+    "actual_function_entries": 4,
+    "entries": ["006C3D40 full RET@006C3D8C", "006C3D90 full RET 4@006C3DA5", "006C3DB0 full RET 4@006C3DE9", "006C3DF0 cut"],
+    "disclosed_at": ["packages/P08_CONSUMER2_R1/REPORT.md (INCYDENT ADMISSION section)", "packages/P08_CONSUMER2_R1/CLAIMS.json process_status + P08-C2 REJECTED", "packages/P08_CONSUMER2_R1/HANDOFF.md", "packages/P08_CONSUMER2_R1/STAGE_ACCEPTANCE_GATES.csv G_P08_ADMISSION=FAIL", "root STAGE_ACCEPTANCE_GATES.csv G_RUN_P08_ADMISSION=FAIL", "root REPORT.md PROCESS_VERDICT"],
+    "load_bearing_claims_use_unintended_bodies": false,
+    "unintended_bodies_usage": "structural note only (006C3A50 usage + FLD/FMUL verified in extract); REJECTED-as-worded claim; conservative budget charge of 4 bodies / 5 CALL sites (3 sites inside unintended bodies, listed explicitly in package actuals)",
+    "p09_second_body_note": "006C2CE0 within reservation (2<=3), interpretation stopped, structural note only (P09-C2 REJECTED-as-worded)"
+  },
+  "check_5_budget_recompute": {
+    "result": "PASS_WITH_NOTE",
+    "limits": {"bodies": 24, "instructions": 4800, "calls": 160, "candidates": 24, "document_lines": 1000},
+    "instruction_rows_per_window_recomputed": {
+      "P01_WINDOW_006C3640": 47, "P03_WINDOW_006C3F50": 54, "P04_WINDOW_006C3FE0": 46,
+      "P05_WINDOW_006C4050": 6, "P06_WINDOW_006C4057": 41, "P07_WINDOW_006C40E0": 41,
+      "P08_WINDOW_006C3D40": 69, "P09_WINDOW_006C2C90": 58, "P10_WINDOW_006C36B0": 42
+    },
+    "call_sites_per_window_recomputed": {
+      "P01": 2, "P03": 6, "P04": 2, "P05": 0, "P06": 5, "P07": 3, "P08": 5, "P09": 1, "P10": 2
+    },
+    "sums": {
+      "instruction_rows_sum": 404,
+      "document_lines_sum": 15,
+      "call_sites_sum": 26,
+      "bodies_admit_ledger_reserved": 20,
+      "bodies_conservatively_charged": 21,
+      "bodies_actual_function_entries": 13,
+      "variants_charged": 22,
+      "p08_incident": {"reserved": 2, "actual": 4, "charged": 4}
+    },
+    "run_reported": {"rows": "419/4800", "doc_lines": "15/1000", "calls": "26/160", "bodies": "21/24", "variants": "22/24"},
+    "note": "reported 419 = 404 instruction rows + 15 P02 document lines (mixed denominator vs CONTRACT section 4 separate budgets; conservative direction; both values below limit; see finding P3-3)",
+    "all_limits_respected": true
+  },
+  "additional_checks": {
+    "contract_md_sha256": {"recomputed": "69472F5D1D9766EB126C5E29FFBC82CC26644B12E6E560F378E5CCFEB973EE27", "matches_pin": true},
+    "authoring_preflight": {"files_on_disk": 25, "manifest_rows": 24, "catalog_external_pins": 1275, "matches_report_claim": true},
+    "deny_000006_coherent": {"request_P04b_exists": true, "plan_P04b_exists": false, "reissued_as": "P05", "operational_only": true},
+    "gates_evidence_paths": {
+      "broken": ["packages/P08_CONSUMER_R1/REPORT.md (G_RUN_P08_ADMISSION; actual package: P08_CONSUMER2_R1)"],
+      "generic_cells": ["packages reports (G_RUN_H1_MECHANISM, G_RUN_H2_QUEUE, G_RUN_INSTANCE_EDGE)"],
+      "valid_paths": ["CONTROL/EVENTS/000001_START.json", "CONTROL/EVENTS", "packages/P03_CALLER_R1/CLAIMS.json", "REPORT.md", "PIVOT_RECORD.json"]
+    },
+    "region_overlap": {"p05_p06_intersection_bytes": "[0x006C4057,0x006C4060) = 9 padding bytes", "row_level_overlap": "none (sum=union=404 instruction rows; 006C40DF CALL counted once in P06)"}
+  },
+  "findings": [
+    {"id": "P2-1", "severity": "P2", "title": "REPORT.md references non-existent QC_QC_R1 artifacts; INDEPENDENT_QC status never materialized on disk"},
+    {"id": "P3-2", "severity": "P3", "title": "Root gates CSV: wrong evidence path for G_RUN_P08_ADMISSION (P08_CONSUMER_R1 vs actual P08_CONSUMER2_R1); 3 generic evidence cells"},
+    {"id": "P3-3", "severity": "P3", "title": "Budget metric 'Wiersze 419/4800' conflates 15 document lines into the instruction-row budget (true instruction rows: 404)"},
+    {"id": "P3-4", "severity": "P3", "title": "'No overlapping windows' false at VA-region level (P05∩P06 = 9 padding bytes; true at extracted-row level)"},
+    {"id": "P3-5", "severity": "P3", "title": "P01_EXEC_R2 CONTRACT.json byte-identical to R1 (package_id/paths still P01_EXEC_R1) — retry contract not re-templated"}
+  ],
+  "qc_verdict": "PASS_WITH_FINDINGS",
+  "full_read_log": "All 102 root-index files read to EOF (root docs, 12 events, 10 plans, 11 requests, 8 packages x 6-7 metadata files, 4 child-attempt files, 11 physical extracts / 10 unique windows); plus CONTRACT.md and evidence_guard.py (authoring) read to EOF",
+  "not_checked": [
+    "1275 external catalog pins not individually rehashed (out of assigned scope; the 2 load-bearing run sources rehashed directly and match)",
+    "authoring-root internal QA documents not semantically audited (preflight numbers and CONTRACT.md SHA verified only)",
+    "opaque callees unopened (per run scope; no claims exist to recheck)"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "package": "P06_CONSUMER_R1 (incl. P07 continuation window)",
+  "attribution": "DIRECT_ANALYST_FALLBACK by PE-MASTER parent",
+  "claims": [
+    {"id": "P06-C1", "claim": "006C4060 owns three stack containers and drives collection from three static id arrays 0xA855F0/0xA858B8/0xA858C0", "status": "CONFIRMED", "evidence": "006C4089-006C40C1", "falsifier": "none in window"},
+    {"id": "P06-C2", "claim": "Consumer chain after collection: 006C3D40 (sort), 006C2C90 (adjacent dup find), conditional 006C2C50, then 006C36B0 projecting into global 0xBA45E8", "status": "CONFIRMED", "evidence": "callsites 006C40D0/DF/F6/100/141 + P08/P09/P10 bodies", "falsifier": "callee semantics beyond their opened bodies"},
+    {"id": "P06-C3", "claim": "Exact mapping of stack dwords to container fields C1/C2/C3 at consumer callsites", "status": "PLAUSIBLE", "evidence": "stack-layout inference (premise P6-P1), slots 0x34/0x38/0x3C/0x40", "falsifier": "full stack bookkeeping of 006C4060 (body not fully closed)"},
+    {"id": "P06-C4", "claim": "006C4060 is fully closed by P06+P07 windows", "status": "REJECTED", "evidence": "window ends mid-body at 006C4160 with live pushes", "falsifier": "none — recorded as open edge"},
+    {"id": "P06-C5", "claim": "The pipeline is synchronous within one call", "status": "CONFIRMED", "evidence": "no thread/queue/async constructs; direct sequential calls", "falsifier": "code in unopened remainder of 006C4060"}
+  ]
+}

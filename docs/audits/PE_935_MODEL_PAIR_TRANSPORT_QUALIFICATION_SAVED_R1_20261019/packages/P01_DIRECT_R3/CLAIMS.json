@@ -1,0 +1,16 @@
+{
+  "package": "P01_DIRECT_R3",
+  "attribution": "DIRECT_ANALYST_FALLBACK by PE-MASTER parent (contract section 10)",
+  "claims": [
+    {"id": "P01-C1", "claim": "006C3640 iterates range [arg2,arg3) with element stride 0x20", "status": "CONFIRMED", "evidence": "006C368A ADD EDI,0x20; 006C368D CMP EDI,EBP; 006C364A CMP EDI,EBP", "falsifier": "different stride or exit condition in unopened adjacent code"},
+    {"id": "P01-C2", "claim": "For each element it synchronously calls callback arg5 with ECX=element", "status": "CONFIRMED", "evidence": "006C3658 MOV ECX,EDI; 006C365A CALL EBX", "falsifier": "conditional call path not visible in window"},
+    {"id": "P01-C3", "claim": "It appends 2-DWORD (8B) pair from callback result to container arg4 (tail@+4,limit@+8)", "status": "CONFIRMED", "evidence": "006C3668-006C366F; 006C3672 ADD [ESI+4],8", "falsifier": "overlapping/interleaved writes contradicting append semantics"},
+    {"id": "P01-C4", "claim": "Full container triggers opaque grow helper 006C2E00", "status": "STRONGLY_SUPPORTED", "evidence": "006C3662 JZ 006C3678; 006C3685 CALL 006C2E00 with this=ESI,tail,result", "falsifier": "helper does something other than grow; requires opening it"},
+    {"id": "P01-C5", "claim": "Mechanism is synchronous collection/projection (H1)", "status": "STRONGLY_SUPPORTED", "evidence": "entire window control flow; direct consumption of callback result at 006C365C", "falsifier": "a consumer outside this body treats the container as request queue with async effects"},
+    {"id": "P01-C6", "claim": "H2 request-transport/queue semantics inside this body", "status": "REJECTED", "evidence": "no function-pointer storage, no async flag/clock, no separate consumer dispatch in window", "falsifier": "instructions outside window altering this verdict"},
+    {"id": "P01-C7", "claim": "Out slot *arg1 receives container on success and arg4 on empty range", "status": "CONFIRMED", "evidence": "006C3695 MOV [EAX],ESI; 006C36A5 MOV [EAX],ECX", "falsifier": "none within window"},
+    {"id": "P01-C8", "claim": "Callback is registered anywhere by this routine", "status": "REJECTED", "evidence": "callback lives only in EBX for the loop duration", "falsifier": "hidden store outside window"},
+    {"id": "P01-C9", "claim": "B5 splits 006C3678/006C369C are separate functions", "status": "REJECTED", "evidence": "shared RETs 006C369B/006C36A8 and shared stack frame of one frame-owning body", "falsifier": "none within window"},
+    {"id": "P01-C10", "claim": "World-instance or transform relevance established by this stage", "status": "UNVERIFIED", "evidence": "window contains no instance/transform semantics", "falsifier": "n/a (scope-limited)"}
+  ]
+}

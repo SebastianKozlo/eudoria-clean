@@ -1,0 +1,12 @@
+{
+  "package": "P03_CALLER_R1",
+  "attribution": "DIRECT_ANALYST_FALLBACK by PE-MASTER parent",
+  "claims": [
+    {"id": "P03-C1", "claim": "006C3F50 resolves object EDI from arg1 via 0043A550+0072F580 chain", "status": "STRONGLY_SUPPORTED", "evidence": "006C3F5B..006C3F67", "falsifier": "opaque callees could return something else; unopened"},
+    {"id": "P03-C2", "claim": "006C3F50 appends {0x66, A} inline to container arg2 before calling 006C3640", "status": "CONFIRMED", "evidence": "006C3F8D-006C3F96; slow-path 006C3FA9 CALL 006C2E00", "falsifier": "none in window"},
+    {"id": "P03-C3", "claim": "Callback passed to 006C3640 at this callsite is 008BD720 (immediate)", "status": "CONFIRMED", "evidence": "006C3FB0 MOV EBX,0x8bd720; 006C3FC4 PUSH EBX", "falsifier": "none in window"},
+    {"id": "P03-C4", "claim": "Two DWORDs read from 0040B070(EDI) result are range begin/end pointers at EDI+0x14/+0x18", "status": "CONFIRMED", "evidence": "006C3FB5 CALL; 006C3FBE MOV EDX,[EAX+4]; 006C3FC1 MOV EAX,[EAX]; passed as arg2/arg3 of 006C3640 which iterates [arg2,arg3)", "falsifier": "none in window (matches P01 loop)"},
+    {"id": "P03-C5", "claim": "6th argument A (007CE1E0 result) is consumed by 006C3640", "status": "REJECTED", "evidence": "arg6 (entry+0x18) never read in 006C3640 body (P01 full window)", "falsifier": "code outside 006C3640 does not change this"},
+    {"id": "P03-C6", "claim": "Frame pair {66h,A} equals one of the projected element pairs", "status": "UNVERIFIED", "evidence": "both land in same container as sibling entries; no value-flow edge between them", "falsifier": "caller-chain or object contents could show equality for specific elements"}
+  ]
+}

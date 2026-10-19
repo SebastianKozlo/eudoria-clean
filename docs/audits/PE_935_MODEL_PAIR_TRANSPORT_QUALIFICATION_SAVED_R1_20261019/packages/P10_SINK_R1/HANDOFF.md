@@ -1,0 +1,2 @@
+# HANDOFF P10_SINK_R1
+Established: 006C36B0 = pair->dword projection into global 0xBA45E8 via 006C29D0 (opaque transform, receives stack-context struct). Pipeline fully synchronous. No world-instance/transform edge in the audited chain.

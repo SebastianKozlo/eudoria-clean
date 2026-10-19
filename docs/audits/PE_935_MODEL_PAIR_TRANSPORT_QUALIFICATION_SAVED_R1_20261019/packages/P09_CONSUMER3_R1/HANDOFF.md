@@ -1,0 +1,2 @@
+# HANDOFF P09_CONSUMER3_R1
+Established: 006C2C90 = adjacent-find duplicate detection over sorted pairs (006C24B0 handler opaque). 006C2CE0 (map-like scan) observed structurally only, interpretation stopped.

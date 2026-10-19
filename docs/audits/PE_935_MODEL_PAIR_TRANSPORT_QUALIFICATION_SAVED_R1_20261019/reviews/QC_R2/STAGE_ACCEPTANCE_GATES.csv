@@ -1,0 +1,14 @@
+gate_id,predicate,result,measured,evidence
+G_QC2_PACKAGES_QUINTET,each science package has REPORT.md+HANDOFF.md+STAGE_ACCEPTANCE_GATES.csv+artifact_index.csv+MANIFEST_SHA256.csv,PASS,8/8 science packages; 2 documented incomplete-attempt dirs (P01_EXEC_R1/R2) intentionally without quintet,RECHECKS.json check_1
+G_QC2_PKG_MANIFEST_REHASH,at least 3 files per package rehashed against its manifest,PASS (superset: all rows),50/50 rows OK across 8 packages; bijection exact 8/8,RECHECKS.json check_1
+G_QC2_ROOT_INDEX,root artifact_index.csv rows match files on disk (size+sha),PASS,102/102 rows OK; bijection 103=102+artifact_index.csv self-excluded,RECHECKS.json check_2
+G_QC2_ADMIT_SPOTCHECK,4 ADMIT events match extract pins (selected_lines_sha256+rows+calls+admission_id),PASS,000002 P01 / 000005 P04 / 000010 P08 / 000012 P10 all match; P01+P02 additionally re-derived from original source lines,RECHECKS.json check_3
+G_QC2_EVENT_CHAIN,CONTROL/EVENTS hash chain valid,PASS,12/12 previous_sha256 correct; START from 64x0,RECHECKS.json check_3
+G_QC2_SOURCE_PINS,admission source pins match physical sources,PASS,GHIDRA_H5_VTABLE2.txt 50780146B/642CC29A..; GHIDRA_GATE_00407270.txt 1269B/C34D2BD8..,RECHECKS.json check_3
+G_QC2_P08_INCIDENT_DISCLOSED,P08 admission incident (4 bodies vs 2 reserved) disclosed and no load-bearing claim uses unintended bodies,PASS,4 entries physically verified (006C3D40/3D90/3DB0/3DF0); disclosed in package REPORT/CLAIMS/HANDOFF/gates + root gates/REPORT; load-bearing claims anchor only to 006C3D40 rows,RECHECKS.json check_4
+G_QC2_BUDGET_RECOMPUTE,extract instruction-row sums within limits 24 bodies/4800 rows/160 calls,PASS,instruction rows 404 (run reports 419 incl 15 doc lines - P3-3); calls 26/160 exact; bodies charged 21/24 (ledger 20; P08 incident 4 vs 2 charged 4); variants 22/24; doc lines 15/1000,RECHECKS.json check_5
+G_QC2_CONTRACT_PIN,audited contract SHA matches pin,PASS,69472F5D.. equals REPORT.md claim and child CONTRACT.json reference,RECHECKS.json additional_checks
+G_QC2_PREFLIGHT_NUMBERS,authoring preflight numbers match REPORT claim,PASS,25 files / 24 manifest rows / 1275 external pins,RECHECKS.json additional_checks
+G_QC2_QC_R1_REFERENCE,REPORT.md QC section references existing QC_R1 artifacts,FAIL (finding P2-1; science unaffected),reviews\QC_QC_R1 absent; no root index rows; no HANDOFF mention; INDEPENDENT_QC status not recorded,REPORT.md finding P2-1
+G_QC2_GATES_EVIDENCE_PATH,root gates evidence paths resolvable,FAIL (finding P3-2),G_RUN_P08_ADMISSION cites packages/P08_CONSUMER_R1/REPORT.md (nonexistent; actual P08_CONSUMER2_R1); 3 generic 'packages reports' cells,REPORT.md finding P3-2
+G_QC2_FINDINGS_REGISTERED,all findings have severity+source+effect+correction+revalidation,PASS,1xP2 + 4xP3,REPORT.md findings section

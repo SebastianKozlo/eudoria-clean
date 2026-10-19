@@ -1,0 +1,72 @@
+{
+  "run_id": "PE_935_MODEL_PAIR_TRANSPORT_QUALIFICATION_SAVED_R1_20261019",
+  "origin": "Assimilation of PE_935_BUILDING_PLACEMENT_5H_DEEP_POSTAUDIT_R1_20261019; advisory, no canonical promotion",
+  "campaign_verdicts": {
+    "science": "PARTIAL_PASS_WITH_MATERIAL_CORRECTIONS",
+    "process": "NONCOMPLIANT_WITH_ADMISSION_AND_MANIFEST_CONTRACT"
+  },
+  "corrections": [
+    {
+      "id": "C1",
+      "old": "260/260 parent bijection PASS",
+      "new": "285 physical files; parent manifest listed 260 rows and omitted 24 nested manifests; full parent bijection FAIL; new catalog pins all 285 files individually",
+      "plan_impact": "New run uses SAVED_TEXT_CATALOG.json (authoring) as the only science corpus; no retroactive repair of old manifests"
+    },
+    {
+      "id": "C2",
+      "old": "133 CALL sites",
+      "new": "136 distinct CALL-site VAs; P07 has 13 sites vs 10 distinct targets; site/target metrics tracked separately in this run",
+      "plan_impact": "Helper counts CALL by unique VA, not target"
+    },
+    {
+      "id": "C3",
+      "old": "P06/P07 admission compliant",
+      "new": "P06 3/2 bodies and P07 148/133 rows and 13/10 CALL are reservation breaches; VA-window/global-cap compliance does not restore process PASS",
+      "plan_impact": "This run: prescan before admit, exact rows computed by helper, incident = PARTIAL/NONCOMPLIANT, no post-hoc ADMIT"
+    },
+    {
+      "id": "C4",
+      "old": "P11 all rows in-window",
+      "new": "P11 contained endpoint 006B6C9D excluded by end-exclusive window (1254 sum vs 1253 union)",
+      "plan_impact": "All regions end-exclusive; overlapping extractions charged to reservations conservatively; actuals report sum and union"
+    },
+    {
+      "id": "C5",
+      "old": "P04 event envelope equals child scope",
+      "new": "Caller 006A36F0 lay outside the single envelope; subregion lists required instead of one min/max envelope",
+      "plan_impact": "Requests use exact disjoint subregion lists; helper validates them"
+    },
+    {
+      "id": "C6",
+      "old": "0040B070 registers callback / scheduler queue semantics",
+      "new": "Saved decompile FUN_0040b070 = return param+0x14 (member-view candidate); 008BD720 = 2-row getter ECX+18h; append facts do not prove async queue",
+      "plan_impact": "H1/H2/H3 stay open; no queue/scheduler/registration assumptions in prompts"
+    },
+    {
+      "id": "C7",
+      "old": "Frame pair {66h,A} = projected pair for 296445",
+      "new": "Frame-pair to element+18h/+1Ch equality NOT_ESTABLISHED; opaque 0043C700 unqualified",
+      "plan_impact": "Pair identity measured by value-flow only; no automatic transfer of 296445"
+    },
+    {
+      "id": "C8",
+      "old": "Computed wrapper 0085BFA0 = ultimate transform source",
+      "new": "Receiver/source of 0085BFA0 data remains open; no runtime frequency measurement",
+      "plan_impact": "Transform source stays UNKNOWN in this run"
+    },
+    {
+      "id": "C9",
+      "old": "No historical values anywhere in 967 sources; 9.3.5 server-only",
+      "new": "Scoped 5-source negative: NO_QUALIFIED_HISTORICAL_INSTANCE_TRANSFORM_FOUND_IN_REVIEWED_SOURCES; 9.3.5 transfer UNVERIFIED",
+      "plan_impact": "No corpus-wide negatives or world-instance promotion from resource dependencies"
+    }
+  ],
+  "standing": {
+    "WORLD_XYZ_RECOVERED": "NO",
+    "HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+    "CURSOR_SOURCE_MEDIUM": "UNKNOWN",
+    "CANONICAL_GATE_EFFECT": "NONE"
+  },
+  "hypotheses_open": ["H1 synchronous collection/projection", "H2 request transport with separate consumer", "H3 other data projection/registration"],
+  "source_note": "GHIDRA_GATE_00407270.txt allowed as saved decompile text with pin and provenance qualification; no EXE/runtime/new exports"
+}

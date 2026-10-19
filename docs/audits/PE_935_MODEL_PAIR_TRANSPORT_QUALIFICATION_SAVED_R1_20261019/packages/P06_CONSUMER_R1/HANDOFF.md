@@ -1,0 +1,2 @@
+# HANDOFF P06_CONSUMER_R1
+Established: CONTAINER_OWNER=006C4060 (3 stack containers, static id arrays); consumer chain sort->dupfind->(cond 006C2C50)->project to global 0xBA45E8. Body NOT fully closed (open edge beyond 006C4160). Premise P6-P1 (slot mapping).

@@ -1,0 +1,12 @@
+{
+  "package": "P02_MEMBER_R1",
+  "attribution": "DIRECT_ANALYST_FALLBACK by PE-MASTER parent",
+  "claims": [
+    {"id": "P02-C1", "claim": "Saved decompile FUN_0040b070 body returns param_1+0x14", "status": "CONFIRMED", "evidence": "extract lines 69-77 (decompile text, pin 6AC83E27...)", "falsifier": "decompile not from the same program as H5 (program identity unverified)"},
+    {"id": "P02-C2", "claim": "0040B070 is a member-view getter (address of owner member @+0x14)", "status": "STRONGLY_SUPPORTED", "evidence": "decompile body; callsite in file casts result to basic_string* (type depends on owner class)", "falsifier": "instruction-level ABI differs from decompiler __fastcall assumption"},
+    {"id": "P02-C3", "claim": "Export is from the same binary/build as H5 listing", "status": "UNVERIFIED", "evidence": "same aggregate folder and naming convention (declaration only); stlp_std namespace consistent with PE2003-era client", "falsifier": "original binary unavailable; cannot be checked"},
+    {"id": "P02-C4", "claim": "0040B070 registers a callback / is a scheduler registrar", "status": "REJECTED", "evidence": "no function-pointer store, no call other than return computation; consistent with campaign raw plumbing (S2 postaudit)", "falsifier": "instruction-level body differing from decompile"},
+    {"id": "P02-C5", "claim": "Frame pair {66h,A} equals projected pair element+18h/+1Ch", "status": "UNVERIFIED", "evidence": "no value-flow edge in admitted corpus; 006C3640 (P01) copies 2 DWORD from callback result only", "falsifier": "owning caller shows {66h,A} written into element or identifies callback as 008BD720 on same elements"},
+    {"id": "P02-C6", "claim": "Member type/domain at owner+0x14 is fixed by getter", "status": "REJECTED", "evidence": "getter is typeless; callsite shows type depends on owner class", "falsifier": "none needed (rejected as worded)"}
+  ]
+}

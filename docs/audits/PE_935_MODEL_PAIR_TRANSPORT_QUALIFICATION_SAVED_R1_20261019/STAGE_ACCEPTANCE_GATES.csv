@@ -1,0 +1,13 @@
+gate_id,predicate,result,measured,evidence
+G_RUN_CONTRACT_SHA,CONTRACT.md SHA256 equals pinned value,PASS,69472F5D1D9766EB126C5E29FFBC82CC26644B12E6E560F378E5CCFEB973EE27,verified at BOOT
+G_RUN_PREFLIGHT,evidence_guard check passes before start,PASS,authoring 25 files/manifest ok; external pins 1275,CONTROL/EVENTS/000001_START.json
+G_RUN_ALL_PACKAGES_SEALED,each package sealed exclusive-create,PASS,8 package manifests (P01_DIRECT_R3,P02,P03,P04,P05-in-P04,P06,P08,P09,P10),package MANIFEST_SHA256.csv files
+G_RUN_ADMISSION_ORDER,plan->admit->extract before any content analysis,PASS,10 packages; 12 ADMIT + 1 DENY events,CONTROL/EVENTS
+G_RUN_P08_ADMISSION,bodies present <= reserved per package,FAIL (incident disclosed; conservative charge; interpretation of unintended bodies stopped),4 bodies vs 2 reserved,packages/P08_CONSUMER2_R1/REPORT.md
+G_RUN_H1_MECHANISM,pair transport is synchronous projection (H1) with instruction chain,PASS,006C3640+006C3F50+006C4060+006C3D40+006C2C90+006C36B0 windows,package REPORT/CLAIMS/extract files
+G_RUN_H2_QUEUE,request-transport/queue semantics in audited chain,FAIL-as-expected (rejected),no registration/async/dispatch instructions,package REPORT/CLAIMS/extract files
+G_RUN_PAIR_BRIDGE,frame pair equals projected pair,FAIL-as-NOT-ESTABLISHED,sibling entries only,packages/P03_CALLER_R1/CLAIMS.json
+G_RUN_INSTANCE_EDGE,world-instance or transform edge found in chain,FAIL-as-not-found (NOT_FOUND_IN_AUDITED_CHAIN),no instancing/transform bodies,package REPORT/CLAIMS/extract files
+G_RUN_BUDGET,shared budgets not exceeded,PASS,21/24 bodies;419/4800 rows;26/160 CALL;22/24 variants;15/1000 doc lines,REPORT.md budgets
+G_RUN_STANDING,no promotion of standing statuses,PASS,WORLD_XYZ_RECOVERED=NO etc. unchanged,REPORT.md
+G_RUN_PIVOT,SceneFeeder fallback resolved per contract,PASS (REJECTED with recorded reasons),PIVOT_RECORD.json,PIVOT_RECORD.json

@@ -1,0 +1,2 @@
+# HANDOFF P08_CONSUMER2_R1
+Established: 006C3D40 = sort of 8B pair range (introsort-shaped). ADMISSION INCIDENT: 4 bodies vs 2 reserved; unintended bodies (006C3D90/3DB0/3DF0) not interpreted (structural note only: 006C3A50 property-lookup + float ops observed). Process PARTIAL for this package.
