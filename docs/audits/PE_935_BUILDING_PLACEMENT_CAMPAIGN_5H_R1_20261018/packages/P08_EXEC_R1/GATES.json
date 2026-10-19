@@ -1,0 +1,84 @@
+{
+  "package_id": "P08",
+  "front": "D",
+  "gates": [
+    {
+      "gate_id": "P08-G1",
+      "name": "contract identity",
+      "predicate": "CONTRACT.json SHA256 == 12092315AF035249DD11DBA2319B7F03A6290007B0281836155BDE02881ABF4A and copy present in package",
+      "result": "PASS",
+      "evidence": "fresh Get-FileHash on CONTROL/CONTRACTS/P08.json and on package CONTRACT.json; both 12092315…ABF4A"
+    },
+    {
+      "gate_id": "P08-G2",
+      "name": "RUN_STARTED first",
+      "predicate": "RUN_STARTED.json materialized before any science write, with real tool clock",
+      "result": "PASS",
+      "evidence": "RUN_STARTED.json started_materialization_utc=2026-10-18T23:02:25Z via [DateTime]::UtcNow; all other artifacts written after"
+    },
+    {
+      "gate_id": "P08-G3",
+      "name": "source pins",
+      "predicate": "all read sources are catalog-pinned and fresh disk SHA256 == pin",
+      "result": "PASS",
+      "evidence": "CHECKED_SOURCES.json: 5/5 SHA_MATCH (DRAFT_FINAL_REPORT.md, HANDOFF.md, FINAL_REPORT.md, TRANSFORM_TABLE_CORRECTED.csv, 00_RAPORT_CORRECTED.md); catalog scope CLOSED_SAVED_TEXT_ONLY, 967 files"
+    },
+    {
+      "gate_id": "P08-G4",
+      "name": "zero body admission",
+      "predicate": "admitted_regions=[] respected; 0 bodies / 0 instruction rows / 0 CALL / 0 admit calls",
+      "result": "PASS",
+      "evidence": "COUNTERS.json all zero; only corpus documents + catalog JSON + CONTROL/CONTRACTS read; no campaign_control admit invoked"
+    },
+    {
+      "gate_id": "P08-G5",
+      "name": "forbidden list untouched",
+      "predicate": "no EXE/game payload/runtime; no new Ghidra exports; no old writer scripts; no frozen roots/config/skills/repo edits; no new VFS/BNT parsing",
+      "result": "PASS",
+      "evidence": "all reads limited to the five corpus documents + SAVED_TEXT_CATALOG.json (authoring root, read-only) + package writes under packages/P08_EXEC_R1; COUNTERS: exe_read_bytes=0, game_payload_files_opened=0, vfs_bnt_parsing_runs=0, ghidra_exports=0, old_writer_scripts_executed=0, config_changes=0, frozen_root_writes=0"
+    },
+    {
+      "gate_id": "P08-G6",
+      "name": "premises preserved",
+      "predicate": "all four contract premises explicitly applied and mapped in CLAIMS.json",
+      "result": "PASS",
+      "evidence": "CLAIMS.json premises_preserved section maps each premise to claims/classes: three-documents-one-source -> P08-CL4; SDK-scope -> P08-CL2/CL3; movable channel -> R-MECHANISM class; identity+frame test -> every class"
+    },
+    {
+      "gate_id": "P08-G7",
+      "name": "complete transform classification",
+      "predicate": "every transform-like value in the assimilated documents classified (model-internal / world-instance placement / SDK-control-default), with provenance and frame",
+      "result": "PASS",
+      "evidence": "CLAIMS.json P08-CL2 classification_table: 9 classes (M1-LOCAL, M2-WORLD-COMPOSED, M3-SUPERSEDED, M4-BOUNDS, Z-DEFAULT, I-SYNTHETIC-CONTROL, R-MECHANISM-NO-VALUES, P-PAYLOAD-NONPLACEMENT, E-ZONE-COORDS); zero classes classified world-instance placement"
+    },
+    {
+      "gate_id": "P08-G8",
+      "name": "scoped negative with bounds",
+      "predicate": "D1 answer is a scoped negative with explicit bounds and a precise remaining edge (no default-success, no unscoped claim)",
+      "result": "PASS",
+      "evidence": "REPORT.md section 3: searched-clean bounds, unsearched classes (Strings/*.bnt, .prt, media), values-provenance bound (server-delivered; FIRST_PEINST 0/6), frame bound (PE_WORLD_ROOT_IDENTITY/AXES_AND_UNITS); remaining edge stated precisely"
+    },
+    {
+      "gate_id": "P08-G9",
+      "name": "standing statuses unchanged",
+      "predicate": "no promotion of WORLD_XYZ / HISTORICAL_PLACEMENT / candidate transforms",
+      "result": "PASS",
+      "evidence": "CLAIMS.json P08-CL6: WORLD_XYZ_RECOVERED=NO, HISTORICAL_PLACEMENT=NOT_ESTABLISHED, CURSOR_SOURCE_MEDIUM=UNKNOWN, CANONICAL_GATE_EFFECT=NONE preserved; no candidate found so no CANDIDATE_HISTORICAL_TRANSFORM_PENDING_POSTAUDIT label"
+    },
+    {
+      "gate_id": "P08-G10",
+      "name": "package completeness and ordering",
+      "predicate": "contract section 12 minimum present: CONTRACT.json, RUN_STARTED.json, CHECKED_SOURCES.json, CLAIMS.json, MEMORY_AND_IDENTITY.json, COUNTERS.json, BARRIER_BACKLOG.json, REPORT.md, HANDOFF.md, GATES.json, artifact_index.csv; MANIFEST.json LAST self-excluded",
+      "result": "PASS",
+      "evidence": "artifact_index.csv enumerates all package files except MANIFEST.json; MANIFEST.json generated last from fresh disk census, self-excluded; bijection verified post-generation"
+    },
+    {
+      "gate_id": "P08-G11",
+      "name": "real clock and deadline",
+      "predicate": "all timestamps from real clock tools; package hard stop 2026-10-19T00:00:00Z respected",
+      "result": "PASS",
+      "evidence": "PowerShell [DateTime]::UtcNow used throughout; completion at 2026-10-18T23:0xZ, before hard stop"
+    }
+  ],
+  "overall": "PASS (11/11 gates PASS; no gate waived; no default-success fallback)"
+}

@@ -1,0 +1,25 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P03",
+  "run_status": "COMPLETED",
+  "gates": [
+    {"gate_id": "G1", "name": "contract_integrity", "check": "P03.json SHA256 matches value cited in dispatch prompt before any work", "result": "PASS", "evidence": "BFF9E307BDC4799FE55A54FA10CAA418D2E3AE04EA02CF49238BAA9DBBE7D171 (Get-FileHash, 2026-10-18T21:37:39Z)"},
+    {"gate_id": "G2", "name": "run_started_first", "check": "RUN_STARTED.json materialized FIRST in fresh package dir before any semantic read", "result": "PASS", "evidence": "RUN_STARTED.json at 2026-10-18T21:37:39Z; dir created fresh (Test-Path pre-check); first source row read after"},
+    {"gate_id": "G3", "name": "source_pin_reverify", "check": "admitted source SHA re-verified at run time against contract pin", "result": "PASS", "evidence": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, 50780146 B, 2026-10-18T21:37:49Z"},
+    {"gate_id": "G4", "name": "region_boundary_respected_semantic", "check": "semantic analysis restricted to admitted region 0x007B6C30-0x007B6C4A (end-exclusive; 14 rows)", "result": "PASS_WITH_DISCLOSURE", "evidence": "Read tool offset=959600 limit=14 (exact in-region rows only); incidental Grep navigation exposure of 3 boundary rows disclosed in COUNTERS.json/REPORT.md, not analyzed, no claim depends on them"},
+    {"gate_id": "G5", "name": "no_forbidden_access", "check": "no EXE/game payload/VFS/BNT/NIF/runtime/debugger/Ghidra-export/old-script/config/skill/frozen-root/repo action", "result": "PASS", "evidence": "only reads: P03.json, CONTRACT.md (parent), P02 REPORT.md (context), source listing region; EXE_READ_BYTES=0, RUNTIME_ACTIONS=0, CONFIG_CHANGES=0"},
+    {"gate_id": "G6", "name": "jump_target_reported_not_read", "check": "JNZ target reported as exact VA in HANDOFF; target region not read", "result": "PASS", "evidence": "0x007B6C4B reported in HANDOFF.md/CLAIMS P03-C6/MEMORY_AND_IDENTITY E1; no read of 0x007B6C4B+ content"},
+    {"gate_id": "G7", "name": "counters_within_reserve", "check": "actual counters <= reserved (bodies 1/1, rows 14/14, edges 2/2, CALL 0<=edges-2-reserve, candidates 2/2)", "result": "PASS", "evidence": "COUNTERS.json; actual CALL sites 0 (contract reserve field was edges=2; no refund claimed)"},
+    {"gate_id": "G8", "name": "wall_respected", "check": "all writes completed before package_hard_stop 2026-10-18T21:58:31Z", "result": "PASS", "evidence": "started 21:37:39Z; artifacts written 21:37-21:4x; real clock via Get-Date"},
+    {"gate_id": "G9", "name": "premises_preserved", "check": "three contract premises preserved in claims and not violated by any inference", "result": "PASS", "evidence": "CLAIMS.json premises_preserved_check: no virtual-dispatch claim (P03-C9 navigation only), no receiver identity from vtable key (P03-C6/C7), no final-value claim after opaque continuation"},
+    {"gate_id": "G10", "name": "evidence_levels_assigned", "check": "every claim carries evidence_level + claim_resolution + countermodel", "result": "PASS", "evidence": "CLAIMS.json P03-C1..C9"},
+    {"gate_id": "G11", "name": "required_outputs_present", "check": "CONTRACT.json copy, RUN_STARTED.json, SOURCE_PINS.json, extract with lines+SHA, CLAIMS.json, MEMORY_AND_IDENTITY.json, counters, BARRIER_BACKLOG.json, REPORT.md, HANDOFF.md, GATES.json, artifact_index.csv present; MANIFEST.json written LAST self-excluded", "result": "PASS", "evidence": "artifact_index.csv enumerates all; MANIFEST.json written after index, excludes itself"},
+    {"gate_id": "G12", "name": "no_nested_delegation", "check": "no Task/agent spawned; single-session execution; no untracked writer left behind", "result": "PASS", "evidence": "all operations in-session via bash/write/read tools; no background processes started"}
+  ],
+  "negative_controls": [
+    {"control": "null-key fast path cannot create/return a binding (no store, EAX forced 0) - the in-region 'pure' characterization has a concrete dead countermodel for register semantics on this path", "status": "verified in-region"},
+    {"control": "key-by-value + RET 0x4 stack balance refutes a hidden second argument that could carry a create-flag", "status": "verified in-region (P03-C2 countermodel refutation)"},
+    {"control": "for P02 callsites the fast path is unreachable (constant non-null key) - prevents over-reading the fast path as the leaf action's semantics", "status": "verified (P03-C5)"}
+  ],
+  "self_check_note": "SELF_CHECK by executing worker (pe-reconstruction), NOT an independent MASTER audit; parent QC/review pending per parent contract section 12."
+}

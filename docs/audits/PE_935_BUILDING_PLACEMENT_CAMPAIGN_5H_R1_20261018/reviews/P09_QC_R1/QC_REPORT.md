@@ -1,0 +1,75 @@
+# QC REPORT — P09 (Front C1 transport close-out, 0x006C3640) independent internal review
+# RUN_ID: PE_935_PLACEMENT_P09_QC_R1_20261018 | parent campaign: PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018
+
+- REVIEWER: pe-master-auditor, fresh child session dispatched directly by PE-MASTER (NO_NESTED_TASKS; no delegation; no Task tool invoked; no EXE/payload/runtime/config/repo actions; no corpus bodies opened beyond the P09 admitted region — this review's own boundary block is disclosed in §8 and mirrors the worker's N5)
+- TARGET PACK: `packages\P09_EXEC_R1` — immutable, not modified by this review; this review wrote only to `reviews\P09_QC_R1`
+- ADMISSION UNDER REVIEW: A14f4207636e3 (CONTROL/EVENTS/000010_ADMIT.json, 2026-10-18T23:06:48.333546Z; region 0x006C3640–0x006C3678 end-exclusive; reserve 1 body / 23 rows / 4 edges / 2 candidates) — event chain verified CHAIN_OK across all 10 events
+- PINNED SOURCE: `GHIDRA_H5_VTABLE2.txt` — SHA256 `642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB` **recomputed by this reviewer** (50,780,146 B) — MATCH
+- QC VERDICT: **QC_PASS** — process verdict: **PASS_WITH_CORRECTIONS** (all eight claims independently re-derived and upheld; zero rejections; 1×P2 QC-added fact + 4×P3 wording/presentation corrections + the worker's own disclosed-and-repaired timestamp-discipline defect, final state verified consistent)
+
+## 1. Mechanical integrity (all independently executed by this reviewer)
+
+| Check | Result |
+|---|---|
+| MANIFEST re-hash (13 entries) | 13/13 SHA256 match, 13/13 size match |
+| Manifest bijection | HOLDS (disk = 13 entries + MANIFEST.json self-excluded; zero unmanifested files) |
+| Package CONTRACT.json identity | SHA256 `7C9BCC86…CAC8` == `CONTROL\CONTRACTS\P09.json` (byte-identical copy) |
+| Source pin | Fresh re-hash == contract pin == event pin == worker value (MATCH) |
+| **Extract line parity** | **23/23 rows byte-identical** vs pinned source (listing lines 649385–649407); zero mismatches, zero gaps |
+| Window bounds | Preceded by `RET 0xc` @006c363c (line 649384 — previous body ends there); next row at 006c3678 (line 649408, out-of-window); last in-window row `JMP` @006c3676 is a 2-byte short jump ending **exactly** at the end-exclusive boundary 0x006C3678 |
+| Address continuity (independent) | All 23 consecutive-VA deltas fit standard x86 encodings; recomputed per-row lengths sum to **56 = 0x38 bytes** == window size — no undefined gaps; extract completeness follows |
+| **Barrier re-verification (own address search)** | 0x0040B070 / 0x0043E5B0 / 0x0043C700: **zero body rows**; CALL operand sites **17 / 1 / 10** (VA lists identical to the worker's); **zero other references** to any of the three addresses anywhere in the listing ("appears ONLY as CALL operand" tested, not assumed) |
+| Call-site census | 0x006C3640: exactly 1 body row (L649385) + **exactly 2 external call sites** (006c3fcd@L650209, 006d4501@L671433) — matches N1; back-edge `006c368f JNZ 0x006c3658` = exactly 1 occurrence (L649418) — matches N4 |
+| Chronology vs CONTROL/EVENTS | ADMIT 23:06:48.33Z → CONTRACT now_utc 23:06:52Z → RUN_STARTED 23:07:05.746Z → census/extract window → re-hash 23:12:29.117Z → MANIFEST 23:12:51.034Z — strictly ordered; no pre-admission read; hard stop 2026-10-19T00:20:00Z respected |
+| Attribution honesty | rg tool failure disclosed (CommandNotFoundException; outputs discarded); boundary read block disclosed (N5); timestamp-repair defect self-caught and disclosed in REPORT §5; QC_ORIGIN = SELF_CHECK throughout |
+
+## 2. Instruction-level verification of the decisive chains (dispatch-required)
+
+1. **Stack-argument loads (P09-C1)** — re-simulated ESP bookkeeping: after PUSH EBP, `MOV EBP,[ESP+0x10]` = [E0+0xC] = **arg2**; after PUSH EDI, `MOV EDI,[ESP+0x10]` = [E0+8] = **arg1**; after PUSH EBX, `MOV EBX,[ESP+0x20]` = [E0+0x14] = **arg4**; after PUSH ESI, `MOV ESI,[ESP+0x20]` = [E0+0x10] = **arg3**. **arg0 ([E0+4]) is never read**; entry ECX is untouched until `MOV ECX,EDI` @006c3658. The pack's slot resolution matches exactly; role labels are correctly flagged ARG-SHAPE INFERENCE.
+2. **CALL EBX (the single in-window CALL)** — row 649396 @006c365a, indirect register target; preceded by `MOV ECX,EDI` (element passed ECX-thiscall-shaped — labeled ABI INFERENCE, callee out-of-window). Count = **1 CALL**, matching the question's "1 call" and the worker's reconciliation of the dispatch's "4 CALL" prose against the contract's `edges: 4` reserve field.
+3. **The three JZ + one JMP (4 edges)** — `JZ 0x006c369c` @006c364c (empty-range exit, out-of-window), `JZ 0x006c3678` @006c3662 (capacity event, out-of-window), `JZ 0x006c3672` @006c3666 (**in-window** skip target = the ADD row), `JMP 0x006c368a` @006c3676 (loop tail, out-of-window). The worker's `edges_detail` is byte-accurate. *Dispatch-wording observation:* the parent's QC instruction spoke of "the three JZ targets (0x006C3678, 0x006C368A, 0x006C369C out-of-window)" — 0x006C368A is the **JMP** target, and the third JZ target 0x006C3672 is **in-window**; the campaign synthesis should use the worker's enumeration (in-window targets: 1; out-of-window: 3 — still 3 of 4 out-of-window as the pack states).
+4. **Cursor store/advance (P09-C2/C3)** — cursor `ECX=[ESI+4]` @006c365c; limit compare `[ESI+8]` @006c365f (read-only); pair copy `[EAX]→EDX→[ECX]` and `[EAX+4]→EAX→[ECX+4]` @006c3668–006c366f (direct dereference proves pointer-ness of [+4]); advance `ADD [ESI+4],0x8` @006c3672 — the **only** queue-object field write in-window; `[ESI+0]` never touched; no count/head update; no entry-pointer store into object fields. All confirmed.
+5. **Prefix-of-body claim** — no RET in the 23 rows; the previous body ends `RET 0xc` @006c363c; the body continues past 0x006C3678 (capacity-event handler + loop tail at 006c368a–006c369a with the verified back-edge `JNZ 006c3658`; epilogue further out) — "epilogue out-of-window, ABI unknown" is correct; **0 unforeseen in-window bodies** confirmed.
+
+## 3. Accepted claims (with evidence_level adjudicated)
+
+| Claim | Subject (condensed) | Pack level | Reviewer adjudication |
+|---|---|---|---|
+| P09-C1 | Window = prefix of body @0x006C3640; 4 stack args loaded (arg1→EDI, arg2→EBP, arg3→ESI, arg4→EBX); arg0 unread; ECX unused until 006c3658 | CONFIRMED / CONDITIONAL | **ACCEPTED — CONFIRMED (mechanics)**; role labels conditional as disclosed; RET-0xc boundary countermodel verified |
+| P09-C2 | Enqueue semantics: loop over [EDI,EBP), callback CALL EBX with ECX=element, EAX=result-pair pointer, 8-byte entry copy at cursor, +=8 advance; capacity-event / null-skip / store branch structure | CONFIRMED / CONDITIONAL | **ACCEPTED — CONFIRMED (in-window mechanics)**; EAX-return is a disclosed premise; stride/ABI out-of-window honestly left open; null-skip degeneracy disclosed as countermodel (verified real: NULL→ADD makes [+4]=8) |
+| P09-C3 | Queue object = arg3 (ESI): [+0] untouched; [+4] tail cursor (only field written, +=8); [+8] limit (read-only, equality-compared); no count/head update in-window | CONFIRMED / CONDITIONAL | **ACCEPTED — CONFIRMED (23-row field census)**; [+8] pointer-ness weaker (never dereferenced) — correctly labeled PLAUSIBLE in the pack |
+| P09-C4 | Entry = 8 bytes = 2 DWORDs from callback's returned pair; dense append; no per-entry header in-window | CONFIRMED / CONDITIONAL | **ACCEPTED — CONFIRMED (as transported pair)**; pair semantics ({0x66,A}) correctly cited-from-P07, not proven in-window |
+| P09-C5 | Capacity event @0x006C3678: CAND-A grow vs CAND-B lazy-alloc/flush | UNVERIFIED / NOT_ESTABLISHED | **ACCEPTED — properly un-promoted**; countermodel correctly notes a third behavior could also fit (reserve-bounded pair, not proof of exactly two) |
+| P09-C6 | Exactly 2 call sites (006c3fcd, 006d4501) in P07 clusters 006C3F98/006D44A4; second enqueue path of {0x66,A} with callback 8BD720 (cited P07); 43E5B0-equivalence NOT claimed | STRONGLY_SUPPORTED / CONDITIONAL | **ACCEPTED — 2-site census CONFIRMED by this review**; P07 citations verified against P07 REPORT L5(b); caller bodies not read; no equivalence overclaim (premise respected) |
+| P09-C7 | Data barrier: 40B070/43E5B0/43C700 zero body rows, CALL operands only 17/1/10 | CONFIRMED / CONDITIONAL | **ACCEPTED — CONFIRMED**, independently reproduced by a different tool (streaming PowerShell scan) with identical counts and identical VA lists; "only as CALL operand" tested via other-reference sweep (0 hits) |
+| P09-C8 | Scoped negative: no float math, no coordinates, no identity data, no VFS access in the 23 rows | CONFIRMED / NOT_ESTABLISHED | **ACCEPTED — CONFIRMED scoped negative** (window-bounded as claimed); one wording imprecision registered (QC-P09-3) |
+
+**Counters (actual vs reserved):** reserved 1/23/4/2 == actual 1 body (prefix) / 23 rows / **1 CALL** / 4 edges (JZ×3 + JMP×1; 3 of 4 targets out-of-window) / 2 candidates — **full match**; window 0x38 bytes recomputed from per-row encodings; 0 unforeseen bodies; 0 window incidents. The worker's reconciliation of the dispatch's "4 CALL" prose (edges=4, CALL=1) is byte-correct.
+
+## 4. Corrections (registered; none invalidates a claim)
+
+- **QC-P09-1 (P2, QC-added fact for the ledger) — P09-B3 backlog candidate is OUTSIDE the closed catalog.** The worker honestly recorded GHIDRA_GATE_00407270.txt as a backlog candidate with "catalog membership and content NOT verified in this package". This review closed that gap: the file exists (1,269 B) and contains the four observed match lines (L24/L60/L66/L69, grep-level re-verified), **but it is NOT a member of the campaign's closed SAVED_TEXT_CATALOG (967 files)**. Consequence for P09-B3: lifting the 0040B070 half of the barrier via this file requires an explicit **corpus-boundary decision by PE-MASTER** (out-of-catalog source), not merely a region admission. No change to any pack claim.
+- **QC-P09-2 (P3, process — verified repaired) — timestamp-discipline defect (worker-disclosed).** Several non-load-bearing stamps were initially written as estimates; the worker's SELF_CHECK caught this, replaced them with real tool-clock anchors or explicit bounded windows, and regenerated artifact_index.csv and MANIFEST.json. Final state verified consistent: anchors strictly ordered (23:07:05.746 → 23:12:08.533 → 23:12:29.117 → 23:12:51.034Z); manifest/index hashes match current disk 13/13; **no scientific content altered** (all scientific content independently re-verified against the pinned source — any alteration would have surfaced as a parity/census mismatch; none did). Residual, recorded: pre-repair intermediate states were not preserved, so "only timestamp lines changed" is consistent-with-all-checkable-evidence rather than directly provable; the "first computed in the 23:07:05.746Z run-start batch" statement is not independently verifiable (non-load-bearing — the hash value itself is verified against the current file).
+- **QC-P09-3 (P3, wording) — P09-C8 evidence phrase "the only memory writes are [ECX]/[ECX+4] and [ESI+4]".** The 4 PUSHes and the CALL EBX also write memory (the stack). Intended meaning (non-stack data writes) is clear and the claim's substance is unaffected. Ledger wording: "the only NON-STACK memory writes are [ECX]/[ECX+4] (entry payload) and [ESI+4] (cursor)".
+- **QC-P09-4 (P3, presentation) — HANDOFF.md has two sections numbered "## 5"** ("Counters and compliance" and "Artifacts"). No content loss; renumber the second to "## 6" if the pack is ever cloned as a template.
+- **QC-P09-5 (P3, presentation/counter ambiguity) — artifact_index.csv omits a self-note row** (P08's index pattern carries one) and `incidents: 0` coexists with the disclosed rg tool failure. The manifest covers all 13 files (authoritative index — no data defect), and the tool failure is separately disclosed under `navigation_operations.tool_failures_disclosed: 1`; recommend the campaign ledger record "1 disclosed tool failure (discarded, no evidence impact)" so `incidents: 0` is not misread as "zero anomalies".
+
+## 5. Rejected overclaims
+
+**None.** All eight claims survive independent re-derivation at their stated levels. Specifically verified as NOT overclaimed: 43E5B0≠006C3640 equivalence is not asserted (identical-shapes premise respected); the capacity-event candidates stay UNVERIFIED; queue class identity stays UNKNOWN; the {0x66,A} pair semantics stay cited-not-proven; the scoped negative keeps its window bounds; MODEL_INSTANCE_BINDING stays unchanged (transport-side only); standing statuses (WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CURSOR_SOURCE_MEDIUM=UNKNOWN; CANONICAL_GATE_EFFECT=NONE) are preserved.
+
+## 6. Precise remaining edge (adjudicated, confirmed well-formed)
+
+**FIRST_MISSING_EDGE:** the capacity-event handler at **0x006C3678** plus loop tail 0x006C368A–0x006C369A — it decides CAND-A (grow/extend) vs CAND-B (lazy-alloc/flush), carries the element stride and the function epilogue (RET width → caller arg count). Second-order, behind data barrier P09-B1: bodies of 40B070/43E5B0/43C700 are absent from the saved listing (independently re-verified); P09-B3 offers a saved decompiled 0040B070 in GHIDRA_GATE_00407270.txt — **now known to be outside the closed catalog** (QC-P09-1), so it needs a parent corpus-boundary decision before any admission. The queue CONSUMER (drain sites, queue class, role of [+0]) remains unmapped (P09-B4).
+
+## 7. Chronology and attribution (CONTRACT §12 checks)
+
+Event 000010 = the P09 admission (A14f4207636e3, region and reserve exactly as consumed); the 10-event previous_event_sha256 chain walks clean. All package writes confined to `packages\P09_EXEC_R1`; RUN_STARTED first; MANIFEST LAST self-excluded; deadline respected. Attribution: pack credits are the worker's own SELF_CHECK; no self-QC is presented as independent audit; the process defect was self-caught and disclosed rather than hidden.
+
+## 8. Reviewer's own boundary disclosure (L1/L12 discipline)
+
+To pin the window, this reviewer displayed listing lines 649380–649420 once (41 lines): 5 pre-window rows, the 23 in-window rows, 13 post-window rows. Out-of-window rows were used **only** for boundary verification (RET 0xc @006c363c), the back-edge check (006c368f JNZ 006c3658), and the end-exclusive boundary (next row @006c3678) — mirroring the worker's own N5 disclosure. **No semantic claims are made on any out-of-window row by this review.** No EXE/payload/runtime/config/repo actions; no new bodies opened; no parent CONTROL writes.
+
+## 9. Process verdict
+
+**PASS_WITH_CORRECTIONS.** All gates confirmed as published; reserve==actual on every field; extract parity 23/23; barrier triple-sourced (parent navigation → worker Grep → this review's independent scan, all agreeing); the timestamp-discipline defect was real but was self-caught, disclosed, and repaired in-run with the final state verified consistent; the registered corrections are ledger/wording-class (1×P2 QC-added fact, 4×P3) and require no change to the frozen pack's scientific content.

@@ -1,0 +1,79 @@
+{
+  "run_id": "PE_935_PLACEMENT_P09_QC_R1_20261018",
+  "package_id": "P09",
+  "admission_id": "A14f4207636e3",
+  "recomputed_by": "pe-master-auditor independent recount (primary evidence only)",
+  "manifest_and_bijection": {
+    "manifest_rows": 13,
+    "disk_files_total": 14,
+    "self_excluded": "MANIFEST.json",
+    "unmanifested_files": 0,
+    "hash_matches": "13/13",
+    "size_matches": "13/13",
+    "bijection_holds": true,
+    "artifact_index_note": "artifact_index.csv lists the 12 non-self, non-MANIFEST files (hashes == manifest); it omits a self-note row (unlike P08's index pattern) - presentational only, manifest is the authoritative complete index"
+  },
+  "reserved_vs_actual_recheck": {
+    "reserved_per_contract_and_event_000010": {"bodies": 1, "instructions": 23, "edges": 4, "candidates": 2},
+    "actual_recount": {
+      "bodies_opened": 1,
+      "bodies_note": "prefix of the body starting 0x006C3640; no RET in-window; epilogue out-of-window - no second body can start in-window",
+      "instruction_rows_read": 23,
+      "call_sites_in_window": 1,
+      "call_sites_detail": "006c365a CALL EBX (indirect, register target) - the ONLY CALL in the 23 rows",
+      "edges": 4,
+      "edges_detail": "JZ 0x006c369c (006c364c) [out], JZ 0x006c3678 (006c3662) [out], JZ 0x006c3672 (006c3666) [IN-window], JMP 0x006c368a (006c3676) [out]; in-window targets 1, out-of-window 3",
+      "candidates": 2,
+      "candidates_detail": "CAND-A grow/extend-on-full; CAND-B lazy-allocate-or-flush (for out-of-window capacity-event handler at 0x006C3678); both UNVERIFIED - properly un-promoted",
+      "unforeseen_in_window_bodies": 0,
+      "incidents": 0,
+      "float_values": 0,
+      "identity_edges": 0,
+      "transform_values": 0
+    },
+    "match": "FULL MATCH on all five reserve fields",
+    "dispatch_prose_discrepancy_adjudication": "dispatch prose '4 CALL' vs CONTRACT reserve field 'edges: 4' vs question text '1 call' - the worker's reconciliation (edges=4, CALL=1) is byte-correct; registered so the campaign ledger uses edges=4/CALL=1"
+  },
+  "window_recheck": {
+    "region": "0x006C3640-0x006C3678 (end-exclusive)",
+    "region_bytes": 56,
+    "region_bytes_hex": "0x38",
+    "listing_lines": "649385-649407",
+    "line_parity": "23/23 byte-identical vs pinned source (fresh re-hash MATCH)",
+    "address_continuity": "0 gaps; last row 006c3676 JMP (2B) ends exactly at 0x006C3678 end-exclusive; total 56 bytes recomputed from per-row encodings"
+  },
+  "independent_census_recheck": {
+    "method": "streaming PowerShell line-scan of the pinned listing (different tool path from the worker's Grep)",
+    "barrier_body_rows": {"0x0040B070": 0, "0x0043E5B0": 0, "0x0043C700": 0},
+    "barrier_call_operand_sites": {"0x0040B070": 17, "0x0043E5B0": 1, "0x0043C700": 10},
+    "barrier_other_references": {"0x0040B070": 0, "0x0043E5B0": 0, "0x0043C700": 0},
+    "call_sites_of_006C3640": 2,
+    "call_sites_detail": ["006c3fcd@line650209", "006d4501@line671433"],
+    "back_edge_JNZ_006c3658": 1,
+    "back_edge_detail": "006c368f@line649418",
+    "match_with_worker_census": "EXACT on every count and every VA list",
+    "match_with_parent_navigation": "EXACT (barrier statement re-verified independently)"
+  },
+  "timestamp_state_recheck": {
+    "anchors_ordered": ["RUN_STARTED 2026-10-18T23:07:05.746Z", "first post-write clock check 23:12:08.533Z", "stamped re-hash 23:12:29.117Z", "MANIFEST 23:12:51.034Z"],
+    "bounded_windows_used": ["EXTRACT extracted_utc 23:07:05.746..23:12:08.533", "NAVIGATION_CENSUS census_utc 23:07:05.746..23:12:08.533", "SELF_CHECK executed_utc 23:12:08.533..23:12:29.117"],
+    "invented_single_stamps_remaining": 0,
+    "manifest_index_consistency": "artifact_index.csv == MANIFEST.json == fresh disk hashes (13/13)",
+    "scientific_content_alteration_check": "no evidence of alteration: all scientific content re-verified against primary source (parity, censuses, semantics); pre-repair intermediates not preserved, so the worker's 'only timestamp lines changed' is consistent-with-checkable-evidence rather than directly proven - residual recorded, non-load-bearing"
+  },
+  "gates_recheck": {
+    "G1_RUN_STARTED_FIRST": "PASS (23:07:05.746Z, real clock, before semantic reads)",
+    "G2_SOURCE_PIN": "PASS (re-hash MATCH, independently reproduced)",
+    "G3_CONTRACT_SHA": "PASS (7C9BCC86... == parent contract == package copy)",
+    "G4_WINDOW_COMPLIANCE": "PASS_WITH_DISCLOSURE (semantic claims confined to 23 rows; boundary block disclosed N5 - mirrored and accepted by this review with its own disclosure)",
+    "G5_RESERVE_RECONCILIATION": "PASS (1/23/4/2 == reserved; CALL=1 vs edges=4 reconciled correctly)",
+    "G6_BARRIER_REVERIFICATION": "PASS (independently reproduced 0-body / 17-1-10 operand sites with a different tool)",
+    "G7_NO_OUT_OF_WINDOW_READS": "PASS (targets recorded in HANDOFF; incidentally displayed rows disclosed, no claims; this review found no out-of-window semantic claims in the pack)",
+    "G8_FORBIDDEN_OPS": "PASS (no EXE/payload/runtime/Ghidra/old-scripts/frozen-root/config/skills/repo actions; rg tool failure disclosed, outputs discarded)",
+    "G9_UNFORESEEN_BODY": "NOT_APPLICABLE (0 unforeseen; 0 window incidents)",
+    "G10_DEADLINE": "PASS (complete 23:12:51Z < hard stop 2026-10-19T00:20:00Z)",
+    "G11_OUTPUT_ROOT": "PASS (all writes under packages\\P09_EXEC_R1; fresh dir)",
+    "G12_MANIFEST_LAST": "PASS (self-excluded; bijection holds)",
+    "overall": "12/12 gate states confirmed as published"
+  }
+}

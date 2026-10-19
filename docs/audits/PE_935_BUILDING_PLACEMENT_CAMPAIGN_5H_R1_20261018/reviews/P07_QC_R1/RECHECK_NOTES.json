@@ -1,0 +1,147 @@
+{
+  "run_id": "P07_QC_R1_20261018",
+  "reviewer": "pe-master-auditor (fresh child, NO_NESTED_TASKS, no delegation)",
+  "target_pack": "packages/P07_EXEC_R1 (DIRECT_ANALYST_FALLBACK by PE-MASTER parent per CONTRACT.md section 4)",
+  "method": "Independent re-derivation from the pinned saved listing. Semantic read confined to the four admitted subregions (A0c76e3cc1494). Out-of-window targets recorded-not-read (address search = navigation only). Inherited bridge claims verified at CITATION level only (citation accuracy), never re-derived.",
+  "pinned_source_recheck": {
+    "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIGHT_AGGREGATE_20260905_160000\\GHIDRA_H5_VTABLE2.txt",
+    "sha256_recomputed": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB (matches pin; size 50780146 B)",
+    "tool_reported_total_lines": "1743930 (Read tool; P06 QC recorded 1743929 - trailing-line counting difference, immaterial)"
+  },
+
+  "line_parity": {
+    "SR1": "extract rows 32/32 byte-identical to source lines 809928-809959 (direct Read, all rows compared)",
+    "SR2": "extract rows 54/54 byte-identical to source lines 632981-633034 (direct Read, all rows compared)",
+    "SR3": "extract rows 29/29 byte-identical to source lines 650187-650215 (direct Read, all rows compared)",
+    "SR4": "extract rows 33/33 byte-identical to source lines 671404-671436 (direct Read, all rows compared)",
+    "total": "148/148 rows verified - FULL parity, exceeds the parent's 'spot checks' (G1)"
+  },
+
+  "window_bounds_and_completeness": {
+    "SR1": "VAs 00745bf0-00745c3d, all inside [0x00745BF0,0x00745C40); first row = window begin; RET 0x4 at 00745c3d (3B) ends exactly at 0x00745C40 = window end-exclusive",
+    "SR2": "VAs 006b6c9d-006b6d3c, all inside [0x006B6C9D,0x006B6D3E); JMP 006b6d3c (2B, EB 87) ends exactly at 0x006B6D3E; JZ @006b6cc9 target recomputed 006b6ccd+2+0x6F=0x006B6D3E (the excluded exit)",
+    "SR3": "VAs 006c3f98-006c3fdb, all inside [0x006C3F98,0x006C3FDC); RET at 006c3fdb (1B) ends exactly at 0x006C3FDC",
+    "SR4": "VAs 006d44a4-006d450c, all inside [0x006D44A4,0x006D450E); JMP 006d450c (2B, EB D2 -> 006d44e0 loop back-edge recomputed exact) ends exactly at 0x006D450E; JZ @006d44e4 target 006d44e6+2+0x28=0x006D450E (excluded exit)",
+    "completeness_argument": "All four windows tile perfectly: every consecutive-VA delta fits the standard x86 encoding of the listed mnemonic/operand, zero undefined-byte gaps, and each window closes exactly on its exclusive end. A missing in-window row would break the tiling; none does. Independent of the child's extractor tool (which I read to EOF and did NOT re-run - re-running the same generator would prove repeatability, not independence).",
+    "out_of_admission_rows": "NONE in any extract (decisive for the overshoot adjudication)"
+  },
+
+  "claim_rederivations": [
+    {
+      "claim": "P07-C1 (0x00745BF0 keyed map-lookup helper)",
+      "verdict": "UPHELD at STRONGLY_SUPPORTED",
+      "line_numbered_evidence": [
+        "L809928 @00745bf0 MOV EDX,[ESP+0x4] - EDX = stack arg1 (only stack arg; RET 0x4 at L809959 confirms 1-dword cleanup)",
+        "L809929 @00745bf4 SUB ESP,0x10 - first 16B frame",
+        "L809930-809931 @00745bf7-f8 PUSH EBX; MOV EBX,[ESP+0x4] - EBX = [ESP0-0x10]: a first-frame slot NOT written in-window (value provenance unestablished in-window)",
+        "L809934-809935 @00745bfe-c03 MOV EAX,0x4; MOV EDI,EAX - EDI = constant 4",
+        "L809936-809937 @00745c05-c09 LEA EAX,[ESP+0x20]; PUSH EAX - EAX = [ESP0-0x1c+0x20] = &arg1 (caller's stack argument passed by address; not mentioned in the claim - minor detail, no contradiction)",
+        "L809938-809939 @00745c0a-c0d SUB ESP,0x10; MOV EAX,ESP - key buffer base",
+        "L809940 @00745c0f MOV ESI,ECX - this",
+        "L809941 @00745c11 MOV ECX,[ESP+0x24] - [ESP0-0xc]: second first-frame slot, NOT written in-window (same nuance as key[0])",
+        "L809942-809946 @00745c15-c20 MOV [EAX],EBX; MOV [EAX+4],EDI; MOV [EAX+8],ECX; MOV [EAX+0xc],EDX - 4-DWORD key tuple built on stack; key[1] = constant 4 at the +0x4 slot exactly as claimed; key[3] = arg1",
+        "L809945+809947 @00745c1d+c23 MOV ECX,[ESI+8]; MOV EDX,[ESI+4] - this fields +8/+4",
+        "L809948-809950 @00745c26-c28 PUSH ECX; PUSH EDX; CALL 0x00745a70 - callee receives [this+4], [this+8], &arg1, key[0..3] by value (stack: [ESP+4]=[this+4], [ESP+8]=[this+8], [ESP+0xc]=&arg1, [ESP+0x10..0x1c]=key)",
+        "L809951 @00745c2d ADD ESP,0x1c - cleans exactly key(4) + 3 pushes = 7 dwords = 0x1c (stack arithmetic CONFIRMED)",
+        "L809952-809953 @00745c30-c33 CMP EAX,[ESI+8]; JZ 0x00745c40 - sentinel compare against [this+8]; fail JZ target 0x00745C40 recomputed exact (74 0B: 00745c35+0x0B) = first byte OUTSIDE window, as claimed",
+        "L809954 @00745c35 MOV EAX,[EAX] - success returns *[EAX] (deref), as claimed",
+        "L809955-809959 epilogue: POP EDI/ESI/EBX; ADD ESP,0x10; RET 0x4 - balanced in-window (SR1 is the only COMPLETE body of the four)"
+      ],
+      "nuance_registered": "key[0] (EBX) and key[2] (ECX) are read from first-frame slots never written in-window - their VALUES are not established by this window alone (live-in state or a corpus frame-model nuance). The claim does not assert their provenance; this supports its own STRONGLY_SUPPORTED (not CONFIRMED) level. id2/class-20006-tag-6 NOT confirmed in-window - correct; the read lives in un-admitted callee 745A70 (negative properly bounded, consistent with P06 REPORT 4.2 which moved the hypothesis into 745BF0's callee)."
+    },
+    {
+      "claim": "P07-C2 (no VFS/record-fed source in 745BF0 window; scoped negative)",
+      "verdict": "UPHELD at CONFIRMED (scoped)",
+      "line_numbered_evidence": [
+        "Full 32-row census L809928-809959: reads = stack arg1 (L809928), two first-frame slots (L809931/L809941), this fields +8/+4 (L809945/L809947), callee result deref (L809954). No file/VFS/record-array reader in-window; the only out-of-window data path is callee 745A70 (recorded-not-read).",
+        "Bounds kept: claim premise 'window-scoped only' + countermodel 'callee may read a VFS-fed structure' - the merge question is explicitly moved to 745A70 (HANDOFF priority 2), NOT claimed as end-to-end absence."
+      ]
+    },
+    {
+      "claim": "P07-C3 (0x006B6C9D {0x66,A}-forming registration pump)",
+      "verdict": "UPHELD at CONFIRMED for in-window structure; functional labels for un-admitted callees are premise-flagged arg-shape (claim's own premises) - accepted with wording note QC-P07-4",
+      "line_numbered_evidence": [
+        "L632990-632996 @006b6cb5-cd: worklist begin/end from stack slots [ESP+0x34]/[ESP+0x38]; CMP EBX,[ESP+0x18] @L632994; JZ 0x006b6d3e exit @L632996 (recomputed exact)",
+        "L632997-632998 @006b6ccf-d1: MOV EDI,[EBX]; MOV ECX,EDI - per-element pointer, as claimed",
+        "L632999-633001 @006b6cd3-da: CALL 0x0072fce0; TEST AL,AL; JZ 0x006b6d39 (skip; recomputed exact) - boolean-gated use; 'valid check' label inherited (citation verified, see citations block)",
+        "L633002-633004 @006b6cdc-e3: MOV ECX,EDI; CALL 0x007ce1e0; MOV [ESP+0x20],EAX - A-read result stored, as claimed",
+        "L633005-633010 @006b6ce7-f3: LEA EAX,[ESP+0x1c]; PUSH EAX; LEA ECX,[ESP+0x28]; PUSH ECX; MOV ECX,ESI; MOV [ESP+0x24],0x66 - THE DECISIVE 0x66 STORE @006b6cf3 (C7 44 24 24 66 00 00 00, 8B - encoding verified by VA delta 006b6cf3->006b6cfb). Stack arithmetic: after 2 pushes the store lands at frame slot (E0+0x1c), making the adjacent dword pair {(E0+0x1c)=0x66, (E0+0x20)=A-value} - the pair 43C700 is pointed at (args: &(E0+0x24), &(E0+0x1c))",
+        "L633011 @006b6cfb CALL 0x0043c700 - request-pair build (arg-shape; premise-disclosed)",
+        "L633012-633015 @006b6d00-d0a: MOV EBP,[ESI+8]; MOV ECX,EDI; MOV EBX,0x8bd720 (DECISIVE IMMEDIATE, BB imm32 5B - encoding verified); CALL 0x0040b070 - callback value through 40B070 with ECX=element (arg-shape 'registration'; premise-disclosed)",
+        "L633016-633029 @006b6d0f-d2b: MOV EDX,[ESP+0x28] (= A-value slot); PUSH EDX; PUSH EBX(=0x8bd720); SUB ESP,8; MOV ECX,ESP; MOV [ECX],ESI; MOV [ECX+4],EBP; MOV ECX,[EAX+4]; MOV EAX,[EAX]; PUSH ECX; PUSH EAX; LEA EAX,[ESP+0x44]; PUSH EAX; CALL 0x0043e5b0 - enqueue with {ESI,EBP=[ESI+8]} pair ('{ESI,request-field}' as claimed), 40B070-result fields [0]/[4], callback, A-value (arg-shape; premise-disclosed)",
+        "L633030-633034 @006b6d30-d3c: MOV EBX,[ESP+0x30]; ADD ESP,0x1c; XOR EBP,EBP; ADD EBX,4; JMP 0x006b6cc5 - loop tail: cursor advance + back-edge (EB 87 recomputed exact), as claimed"
+      ],
+      "entry_abi_nuance": "rows read stack slots above any entry-relative argument area ([ESP+0x38] @L632990, [ESP+0x50] @L632992, [ESP+0x58] target of LEA @L632983) and SR2 has no RET in-window (exit JZ -> 0x006B6D3E excluded) - consistent with a fragment whose enclosing/caller frame lies out-of-window; premise 'worklist source un-admitted' honestly covers this. No claim depends on entry ABI."
+    },
+    {
+      "claim": "P07-C4 (006C3F98 and 006D44A4 pass the SAME callback 0x008BD720 via 40B070 + 006C3640)",
+      "verdict": "UPHELD at CONFIRMED for the in-window pattern identity; 'register' is arg-shape wording (premise-disclosed) - accepted with wording note QC-P07-4",
+      "line_numbered_evidence": [
+        "SR3: L650196-650198 @006c3fae-b0 MOV ECX,EDI; MOV EBX,0x8bd720 (BB imm32, 5B, VA delta 006c3fb0->006c3fb5 verifies); L650198-650199 CALL 0x0040b070 @006c3fb5; pushes L650199-650208; CALL 0x006c3640 @006c3fcd; ADD ESP,0x18 cleans exactly the 6 pushed dwords; epilogue POP EDI/ESI/EBX + ADD ESP,8 + RET @L650215 (006c3fdb, 1B, window closes exact)",
+        "SR4: L671421-671423 @006d44e6-ed MOV ECX,[ESI]; MOV EDI,0x8bd720 (BF imm32, 5B, VA delta 006d44e8->006d44ed verifies); CALL 0x0040b070 @006d44ed; MOV ECX,[EAX+4]/MOV EAX,[EAX] @L671424-671425; pushes incl. EBP/EDI/EBX/ECX/EAX + LEA EDX,[ESP+0x2c]; CALL 0x006c3640 @006d4501; ADD ESP,0x18; ADD ESI,4; JMP 0x006d44e0 (loop back-edge, recomputed exact) - 'same pattern in a loop' as claimed; loop exit JZ 0x006d450e = window end-exclusive; JZ 0x006d4510 out-of-window continuation recorded",
+        "Pattern identity across the three sites: identical immediate 0x008bd720 (006b6d05 MOV EBX / 006c3fb0 MOV EBX / 006d44e8 MOV EDI), identical callee pair 40B070 -> result-deref ([EAX]/[EAX+4]) -> 6C3640-or-43E5B0 enqueue family - CONFIRMED in-window"
+      ]
+    },
+    {
+      "claim": "P07-C5 (consumer chain bounded; exact gap)",
+      "verdict": "UPHELD at STRONGLY_SUPPORTED (composition; premises explicit)",
+      "line_numbered_evidence": [
+        "Pair formation window 006B6CE3-006B6CFB = L633004-633011 (A-store + 0x66 store + 43C700 call) - address range as claimed",
+        "Citation 'callback 8BD720 leaf returning &req+0x18 per P06' VERIFIED: P06 REPORT section 3 + P06 QC section 2(a) - 'LEA EAX,[ECX+0x18]; RET ... side-effect-free leaf returning ECX+0x18; NO dispatch target VA' (CONFIRMED, re-derived there; this reviewer re-verified P06's rows are in P06's own admitted window - accepted as inherited, not re-derived)",
+        "Gap claim verified against campaign CONTROL: case-insensitive search of all CONTRACTS/REQUESTS/EVENTS for 40b070/43e5b0/6c3640/745a70/7ce1e0/72fce0/43c700/6b4120/6c2e00/733650/8bd720 finds ONLY P06's admission of the 8BD720 body region itself (0x008BD720-0x008BD740); NO campaign admission covers 40B070/43E5B0/6C3640/745A70 or any callback-invocation census region - 'NOT in any admitted window' is CONSISTENT with CONTROL (checked, not just asserted)"
+      ]
+    }
+  ],
+
+  "citation_verification_inherited_bridge": {
+    "7CE1E0": "ACCURATE. Corpus standing (read at citation level, NOT re-derived): getter A = MOV EAX,[ECX+0x08]; RET, bytes 8b 41 08 c3 @0x007CE1E0 - PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913/01_RAW/GH1_DECOMP_CENSUS.json ('0x007CE1E0':'8B4108C3CCCC...'); PE_935_CONSUMER_TRACE_CLAIMS_JOIN_R1_20260913/02_ANALYSIS/Z1_CLAIMS_MATRIX.md; PE_935_CAND4_CHILD_ROOT_PROVENANCE_R1_20261007/CLAIM_MATRIX.csv CL-06 ('prior-canon getter A ([template+0x08]; bridge CH1/X23 family)'). NUANCE (registered as QC-P07-4): PE_935_RECEIVER_PROVENANCE_CORRECTIONS_R1_20260913 F1 - the getter is +8-GENERIC (reads +8 of MULTIPLE receiver types); the A-role at THIS callsite (element EDI) is canon-inherited; the element/receiver type is un-admitted in P07 windows.",
+    "72FCE0": "ACCURATE. PE_935_CAND4_CHILD_ROOT_PROVENANCE_R1_20261007 CLAIM_MATRIX CL-05 (CONFIRMED, measured bytes): 'validity check FUN_0072FCE0 on the [+0x70] template holder'; GETTER_DECODE.md row 4; HANDOFF.md. In-window P07 usage (TEST AL,AL + JZ skip @L633000-633001) is consistent with the boolean-predicate standing.",
+    "8BD720": "ACCURATE per P06 (see P07-C5 block).",
+    "imm32 sites 006B6D05/006C3FB0/006D44E8": "ACCURATE per P06 REPORT section 9 navigation appendix (recorded-not-read there; P07 opened them under admission A0c76e3cc1494 - coherent campaign continuation; P06 QC remaining-edge list #1 is exactly what P07(b) executed)"
+  },
+
+  "counters_recheck_summary": {
+    "bodies": "4 actual = 4 declared body_entries = 4 reserved. No unforeseen in-window bodies (each window = one contiguous single-body fragment; no mid-window second prologue/RET pair; SR1 is a complete body, SR2/SR4 head-fragments, SR3 tail-fragment - see QC-P07-5)",
+    "instruction_rows": "148 actual (32+54+29+33, all verified by direct source read) vs 133 reserved; +15 overshoot entirely in SR2, entirely INSIDE the admitted window",
+    "call_sites": "10 actual = unique CALL targets {745a70, 6b4120, 72fce0, 7ce1e0, 43c700, 40b070, 43e5b0, 6c2e00, 6c3640, 733650} = 10 reserved. CALL ROWS per window: SR1=1, SR2=6, SR3=3, SR4=3 (total 13). Published call_breakdown SR1:1/SR2:8/SR3:3/SR4:2 is DEFECTIVE (see QC-P07-1)",
+    "candidates": "4 actual = 4 reserved; metric definition not stated in package docs (inferred: the four admitted body candidates) - observation QC-P07-5"
+  },
+
+  "overshoot_adjudication": {
+    "physical_facts": "SR2 extract max VA = 0x006b6d3c (JMP, 2B) ending exactly at 0x006B6D3E end-exclusive. NO extract row has VA >= 0x006B6D3E. All 54 rows inside [0x006B6C9D,0x006B6D3E).",
+    "ruling": "The '+15 rows' is actual-vs-RESERVE accounting (148 vs 133; implies SR2 reserve 39 = 133-32-29-33), covering the loop-tail portion of the ADMITTED window. It is NOT an admission-bounds violation: the region was admitted (EVENT 000009_ADMIT 2026-10-18T22:42:27.505Z) BEFORE extraction (extract mtimes 22:43:29Z); no out-of-admission row was extracted or read; no unforeseen body was opened; therefore NO retroactive authorization is needed (CONTRACT section 6 satisfied in substance). The published wording 'loop tail beyond the function-map window 0x006B6D3E' (COUNTERS note, REPORT Counters) is imprecise - nothing is beyond 0x006B6D3E; see correction QC-P07-3.",
+    "parent_obligations": "Carry ACTUAL 148 instruction rows (not 133) in the campaign ledger totals; record this adjudication; the 'no refund' direction in the pack note is moot (actual EXCEEDS reserve - the campaign budget books actuals per CONTRACT section 6 'podaj oddzielnie rezerwacje i rzeczywiste')"
+  },
+
+  "chronology_check": {
+    "order": "ADMIT 000009 22:42:27.505Z -> CONTRACT.json 22:42:32 -> RUN_STARTED.json 22:43:02 -> tool 22:43:27 -> extracts 22:43:29 (all four, single tool pass) -> analysis docs 22:51:18 -> MANIFEST.json 22:51:18 (LAST). Strictly ordered; no pre-admission semantic read; manifest_written_utc 22:51:18 matches mtime.",
+    "attempt_provenance": "Attempt-1 artifacts (CONTRACT, RUN_STARTED worker=pe-reconstruction, tool, 4 extracts) preserved and reused by the parent fallback; attempt 2 left no disk artifacts (consistent with 'added nothing' - a non-event, not independently provable, recorded as such)"
+  },
+
+  "attribution_check": "DIRECT_ANALYST_FALLBACK honestly present in REPORT.md (title + section), CLAIMS.json, COUNTERS.json, GATES.json, HANDOFF.md, MEMORY_AND_IDENTITY.json, SOURCE_PINS.json (note-level), BARRIER_BACKLOG.json, MANIFEST.json. RUN_STARTED.json honestly shows attempt-1 worker pe-reconstruction. G5 upheld.",
+
+  "premise_preservation": [
+    "identical names/shapes != common semantics: C4 premise 'the three contexts may serve different request classes sharing the callback' - preserved",
+    "definition registry != instance source: preserved (no VFS registry promotion; C2 keeps P06 standing)",
+    "no direct caller != exclusively virtual: not counter-violated in P07 (no caller-census claim made; 8BD720 standing cited from P06 with its 22 CALL + 3 imm32 evidence)",
+    "scoped negatives keep window bounds: preserved (C2 window-scoped only; C1 id2/tag-6 negative bounded to in-window, moved to 745A70)"
+  ],
+
+  "not_checked": [
+    "All out-of-window targets: 745A70, 6B4120, 72FCE0, 7CE1E0, 43C700, 40B070, 43E5B0, 6C2E00, 733650, 6C3640 bodies; 8BD720 body (P06's, inherited); fail-path 745C40+; SR2 exit 6B6D3E+; SR4 exits 6D450E/6D4510+; worklist/caller frame provenance - recorded-not-read (navigation only), per admission discipline and the dispatch's 'premises cited not re-derived' instruction",
+    "Earlier packages P01-P05 science (out of scope; P06 QC already adjudicated P06)",
+    "Campaign-wide budget arithmetic beyond this package (parent ledger)",
+    "Bridge context documents beyond citation-level checks (DRAFT_FINAL_REPORT/AMEND_LOG etc. - accepted as inherited labels exactly as the pack uses them)"
+  ],
+
+  "full_read_log": [
+    "packages/P07_EXEC_R1 to EOF: REPORT.md, CLAIMS.json, COUNTERS.json, GATES.json, HANDOFF.md, MEMORY_AND_IDENTITY.json, SOURCE_PINS.json, BARRIER_BACKLOG.json, CONTRACT.json, RUN_STARTED.json, MANIFEST.json, tools/extract_p07_subregions.py, all 4 extracts",
+    "CONTROL: CONTRACTS/P07.json, REQUESTS/REQUEST_P07.json, EVENTS/000001_START.json, EVENTS/000009_ADMIT.json",
+    "Parent CONTRACT.md (authoring run) sections 1-16, focus 5/6/9/12",
+    "Context docs: packages/P06_EXEC_R1/REPORT.md (full), reviews/P06_QC_R1/QC_REPORT.md (full), reviews/P06_QC_R1/RUN_STARTED.json",
+    "Pinned source: rehashed; 148 admitted rows read directly (4 windows); no semantic out-of-window read; two grep navigation passes over CONTROL (case-sensitive then case-insensitive) and one citation-level corpus grep (7ce1e0/72fce0/8bd720)",
+    "Citation-level reads: PE_935_ATTRIBUTE_ORIGIN_SEAM_R1 GH1_DECOMP_CENSUS.json (grep hit lines), PE_935_CONSUMER_TRACE_CLAIMS_JOIN_R1 Z1_CLAIMS_MATRIX.md (grep hit lines), PE_935_CAND4_CHILD_ROOT_PROVENANCE_R1 CLAIM_MATRIX.csv/GETTER_DECODE.md/HANDOFF.md (grep hit lines), PE_935_CAND4_CHILD_ROOT_POST_AUDIT_CORRECTION_R1 SUPERSESSION.md (grep hit lines), RECEIVER_PROVENANCE_CORRECTIONS entry via EU935_M1 audit-entrypoint summary line"
+  ],
+
+  "load_bearing_components_unchecked": "NONE - every load-bearing claim component was independently re-derived or its citation source verified; the ONLY items not checked are enumerated in not_checked and none is load-bearing for P07-C1..C5"
+}

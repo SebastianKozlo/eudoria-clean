@@ -1,0 +1,30 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P11",
+  "front": "C",
+  "attempt": "RETRY 1 of 1",
+  "recorded_utc": "2026-10-18T23:42:00Z",
+  "reserve_vs_actual": {
+    "bodies": { "reserved": 2, "actual": 2, "detail": ["0x006B6C1B (stage A, rows 632937-632958)", "0x006B6C5C (stage B, rows 632959-632980)"], "status": "AT_RESERVE" },
+    "instruction_rows": { "reserved": 60, "actual": 45, "detail": "source lines 632937-632981 inclusive; no overshoot; row 632981 = 0x006B6C9D PUSH 0x1 (declared in-region pump entry row)", "status": "UNDER_RESERVE (45/60)" },
+    "call_edges": { "reserved": 8, "actual": 4, "detail": "0x006B6C2E->0x006B4120, 0x006B6C36->0x006C27A0, 0x006B6C6F->0x006B4120, 0x006B6C77->0x006C27F0 (distinct targets: 3)", "status": "UNDER_RESERVE (4/8)" },
+    "candidates": { "reserved": 2, "actual": 2, "detail": ["producer A 0x006C27A0", "producer B 0x006C27F0"], "status": "AT_RESERVE" }
+  },
+  "additional_actual_counters": {
+    "branch_instructions": 6,
+    "branch_detail": {
+      "JZ": ["0x006B6C47 -> 0x006B6C5C (in-window)", "0x006B6C4B -> 0x006B6C53 (in-window)", "0x006B6C88 -> 0x006B6C9D (window-boundary target, pump entry)", "0x006B6C8C -> 0x006B6C94 (in-window)"],
+      "JMP": ["0x006B6C5A -> 0x006B6C74 (in-window)", "0x006B6C9B -> 0x006B6CB9 (OUT-of-window, recorded not read)"]
+    },
+    "distinct_out_of_window_targets_recorded_not_read": 5,
+    "out_of_window_target_list": ["0x006B4120 (helper, CALL x2)", "0x006C27A0 (producer A)", "0x006C27F0 (producer B)", "0x006B6CB9 (stage-B success exit, JMP target)", "0x006B6C9F.. (pump body continuation after the in-window entry row 0x006B6C9D; standing P07-C3 covers it - not re-read here)"],
+    "unforeseen_in_window_bodies": 0,
+    "incidents": 0,
+    "memory_operand_census": { "stack_slot_accesses": 16, "stack_detail": "[ESP+0x58] LEA2 + [ESP+0x20] LEA2 + [ESP+0x48] LEA2 + [ESP+0x14] W2 + [ESP+0x38] R4/W2 + [ESP+0x3c] R2", "object_field_reads": 2, "indirect_stores": 2, "global_absolute_refs": 0 },
+    "semantic_rows_read": 45,
+    "navigation_operations": "2 boundary greps (^006b6c1b, ^006b6c9d) + 15-line file-format header peek + this package's own files; no other source content read",
+    "hypotheses_recorded_not_claimed": 3,
+    "claims_emitted": { "CONFIRMED_as_instruction_parts": 6, "STANDING_INHERITED_parts": 2, "SCOPED_NEGATIVE_parts": 1, "UNKNOWN_parts": 4 }
+  },
+  "clock": "all timestamps PowerShell [DateTime]::UtcNow (real clock); package hard stop 2026-10-19T00:55:00Z respected"
+}

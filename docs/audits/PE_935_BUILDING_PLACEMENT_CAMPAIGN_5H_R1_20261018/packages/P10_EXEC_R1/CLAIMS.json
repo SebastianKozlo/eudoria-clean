@@ -1,0 +1,100 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P10",
+  "front": "C",
+  "question": "C merge discriminator (P07-C1): 0x00745A70 - the actual map read behind 745BF0. What key does it match? What entry structure does it walk/return? Does the id2/class-20006-tag-6 property hypothesis survive? Any VFS-record-fed source visible in-window (FAMILY-P/T merge question)?",
+  "extract": "EXTRACT_745A70_745B00.txt (sha256 1E7091F73667448A622C10D0E99E0C6EAFDC352842DBBE97565E8E7340D76645, 57 rows, source listing lines 809770-809826, VA 0x00745A70-0x00745AFF)",
+  "stack_slot_notation": {
+    "definition": "Sn = [ESP_entry + n*4] where ESP_entry is ESP at function entry (pointing at return address): S1=+0x4, S2=+0x8, S3=+0xC, S4=+0x10, S5=+0x14, S6=+0x18",
+    "derivation": "reads before pushes are direct; reads after k pushes are corrected by the 4*k byte shift (see claim P10-2 arithmetic)"
+  },
+  "claims": [
+    {
+      "claim_id": "P10-1",
+      "statement": "0x00745A70 is one self-contained function body: single entry at 0x00745A70, prologue PUSH EBX/ESI/EDI, single RET at 0x00745AFF, all 6 distinct branch targets in-window (0x00745AC6, 0x00745A90, 0x00745AFC, 0x00745AF2, 0x00745AE7, 0x00745AFA), zero CALL instructions; the only way execution leaves the region is the single RET.",
+      "evidence": "EXTRACT rows SRCLN 809770-809826: entry MOV EAX,[ESP+0x4] @0x00745A70; PUSH EBX @0x00745A78, PUSH ESI @0x00745A79, PUSH EDI @0x00745A7E; POP EDI/ESI/EBX @0x00745AFC-0x00745AFE; RET @0x00745AFF; branch targets listed at 0x00745A8C, 0x00745A96, 0x00745AA2, 0x00745AAE, 0x00745ABA, 0x00745AC4, 0x00745AD0, 0x00745AD5, 0x00745ADA, 0x00745AE2, 0x00745AED, 0x00745AF8 - all inside 0x00745A70-0x00745AFF; no CALL row exists in the 57-row window.",
+      "premises": ["region boundary 0x00745B00 (source line 809827) verified by address-only navigation scan; content at/after 0x00745B00 not read", "source listing is a saved Ghidra export, not a fresh EXE scan"],
+      "countermodel": "a second function entry inside 0x00745A70-0x00745AFF reached by an external jump - excluded because every byte-addressed instruction in the window is accounted for by the single-entry control flow and no in-window instruction is an unused orphan; fall-through into the region from the preceding body was not examined (out of window) but cannot create an in-window second RET.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_WITH_EVIDENCE"
+    },
+    {
+      "claim_id": "P10-2",
+      "statement": "The function reads exactly 4 of the 6 stack slots in its 0x18-byte read scope: S1=[ESP+0x4]->EAX (scan start/cursor init), S2=[ESP+0x8]->EDI (scan end), S4=[ESP+0x10]->ESI (additive address base term), S6=[ESP+0x18]->EDX (match value). S3=[ESP+0xC] and S5=[ESP+0x14] are never read anywhere in the window.",
+      "evidence": "slot-read arithmetic on the extract: (1) MOV EAX,[ESP+0x4] @0x00745A70 with 0 pushes so far -> S1; (2) MOV EDX,[ESP+0x18] @0x00745A74 with 0 pushes -> S6; (3) MOV ESI,[ESP+0x18] @0x00745A7a after 2 pushes (EBX,ESI) -> [ESP_entry+0x18-8]=S4; (4) MOV EDI,[ESP+0x14] @0x00745A7f after 3 pushes (EBX,ESI,EDI) -> [ESP_entry+0x14-12]=S2. No other memory-read instruction references a stack slot: every remaining memory operand is [ESI+EAX(+0x8)] (rows 809783-809821) or the epilogue POPs.",
+      "premises": ["reading a [ESP+imm] operand with a known push count determines the entry-frame slot exactly (x86 ESP-relative addressing, no EBP frame: no PUSH EBP/MOV EBP,ESP exists in-window)"],
+      "countermodel": "S3/S5 could be read after the region end (impossible: the only exit is RET at 0x00745AFF and no instruction after entry ever loads ESP differently; all reads occur before the epilogue) or an interrupt/SEH handler could consume them (out of scope of static dataflow of this body; no SEH setup in-window).",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_WITH_EVIDENCE"
+    },
+    {
+      "claim_id": "P10-3",
+      "statement": "Semantics = first-match linear scan over an array of 8-byte entries bounded by [S1,S2): main loop is a 4-way unrolled scan of 0x20-byte blocks (ECX = (S2-S1) SAR 5 = block count @0x00745A83-0x00745A8A; four checks per block at cursor+0/+8/+16/+24, cursor EAX advanced by ADD EAX,0x8 after each read block row), residual dispatch handles exactly 1, 2 or 3 remaining entries (ECX = ((S2-EAX)>>3)-1 then two more SUB 1 with JZ to 0x00745AF2 / 0x00745AE7 and JNZ to fail for count 0), byte value read is zero-extended (MOVZX) from [ESI+EAX] (first byte of the 8-byte entry) and compared to S6; on match the function returns EAX = cursor value of the START of the matching entry; on no match it returns EAX = S2 (MOV EAX,EDI @0x00745AFA, EDI never written after load @0x00745A7f - MOV EDI,EDI @0x00745A8E is a self-move with no effect).",
+      "evidence": "EXTRACT rows 809770-809826 def-use chain as cited per instruction in the statement; loop-back JG 0x00745A90 @0x00745AC4; skip JLE 0x00745AC6 @0x00745A8C; all seven match sites (0x00745A96, 0x00745AA2, 0x00745AAE, 0x00745ABA, 0x00745AE2, 0x00745AED, 0x00745AF8) jump to the common epilogue 0x00745AFC with EAX already advanced to the entry start by the preceding ADD EAX,0x8 (for checks 2-4 of a block) or not yet advanced (check 1, cursor already at entry start); fail path falls through MOV EAX,EDI @0x00745AFA. Remaining-count dispatch verified by enumeration: residual count 0 -> all three JZ fail -> JNZ 0x00745AFA (S2 returned); 1 -> JZ 0x00745AF2 single check; 2 -> JZ 0x00745AE7 two checks chained; 3 -> fall-through three checks at 0x00745ADC/0x00745AE7/0x00745AF2.",
+      "premises": ["SAR ECX,0x5 = signed division by 0x20; SAR ECX,0x3 = signed division by 8 - standard x86 semantics", "8-byte entry size is a compile-time property of the compiled code (unroll factor 4, block 0x20, residual multiples of 8), independent of what the 8 bytes mean"],
+      "countermodel": "the array could be misaligned by <8 bytes relative to S1 (then the dangling tail bytes are silently ignored and the last entry is partially scanned - not excluded in-window, but it changes no observable conclusion); the '8-byte entry' could also be one 8-byte scalar whose first byte is compared (same machine behavior, different semantic label - see P10-6/MEMORY_AND_IDENTITY).",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_WITH_EVIDENCE"
+    },
+    {
+      "claim_id": "P10-4",
+      "statement": "The ONLY match criterion in-window is a single byte: zero-extended byte (0..255) vs S6 as a full DWORD. Because MOVZX results are <=255, S6 with any nonzero byte above bit 7 can NEVER match (CMP EBX,EDX unequal for all entries) - the usable key space is exactly the 256 values of S6's low byte. No in-window immediate equals 20006 (0x4E26), 6, or 2; the immediates present in the window are only 0x4, 0x18, 0x14, 0x5, 0x8, 0x3, 0x1.",
+      "evidence": "all compare sites are CMP EBX,EDX / CMP ECX,EDX with EBX/ECX from MOVZX byte ptr (rows 809783-809784, 809786-809788, 809790-809792, 809794-809796, 809811-809812, 809815-809816, 809819-809820); EDX is loaded once at 0x00745A74 and never written again in-window; immediate census from the 57 rows: 0x4 (809770, 809826 area none other), 0x18 (809771, 809774), 0x14 (809776), 0x5 (809779), 0x8 (809786, 809787, 809790, 809791, 809794, 809795, 809798-809799 area, 809814, 809818), 0x3 (809804), 0x1 (809805, 809807, 809809, 809798).",
+      "premises": ["CMP with equal operands sets ZF=1 only on exact 32-bit equality"],
+      "countermodel": "a runtime value of S6 could still BE 6, 4 or any byte at the 0x00745C28 callsite - the claim excludes constant/structural presence of 20006/6/2, not their runtime delivery via S6 (caller-side, out of window). If S6 were ever 20006 at the callsite the scan would be a guaranteed always-fail returning S2 - a falsifiable caller-side implication handed to the parent.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_WITH_EVIDENCE"
+    },
+    {
+      "claim_id": "P10-5",
+      "statement": "The caller's 4-DWORD key (P07-cited: incl. constant 4) is NOT consumed as a composite 4-DWORD match key by 0x00745A70. At most, whichever key DWORD lands in slot S6 can act as the (single-byte) match value; whichever lands in S4 acts as an address-base term, and any DWORDs landing in S3/S5 are dead in this callee. Consequently the id2/class-20006-tag-6 property hypothesis, insofar as it requires this callee to match a multi-field composite key (id2 + class 20006 + tag 6), does NOT hold at the 0x00745A70 level.",
+      "evidence": "P10-2 (only S1,S2,S4,S6 consumed; S3,S5 dead) + P10-3 (single byte vs S6 is the only comparison) + P10-4 (no 20006/6/2 immediates; 20006 cannot be matched as a value >255) + P07 REPORT.md citation for the caller-side key description.",
+      "premises": ["identical names/shapes do not prove common semantics - the caller's 'key' label does not transfer to this callee", "P07's caller description is cited, not re-derived; its exact slot mapping is outside this window"],
+      "countermodel": "the WEAKER caller-side variant survives untouched: the caller may select WHICH byte tag to search (S6) and may interpret the found entry's payload (bytes 1..7) as id2/class/tag data - that variant is NOT_ESTABLISHED here, not refuted; it requires the 745BF0 window (already P07-admitted; a NEW semantic re-analysis of those instructions needs a fresh admission per parent contract section 6).",
+      "evidence_level": "CONFIRMED (for the callee-level negative); the caller-level variant is UNVERIFIED",
+      "claim_resolution": "REJECTED_WITH_EVIDENCE at 0x00745A70 level (scoped); caller-level variant NOT_ESTABLISHED"
+    },
+    {
+      "claim_id": "P10-6",
+      "statement": "Bytes 1..7 of each 8-byte entry are never read in-window; the entry payload's meaning (id2? class? tag? pointer? inline data?) is NOT established by this window. Only byte 0 of each entry participates in the scan.",
+      "evidence": "every in-window byte read is [ESI+EAX*1] or [ESI+EAX*1+0x8] with EAX at an entry start (displacement 0x8 always indexes the NEXT entry's byte 0 after the preceding ADD EAX,0x8) - no read of cursor+1..cursor+7 exists in the 57 rows.",
+      "premises": ["scoped negatives keep window bounds: unread-in-window does not mean meaningless in the program"],
+      "countermodel": "payload could be consumed by the caller after return (P07-cited: 745BF0 success path dereferences/returns *[EAX]) - consistent, outside window; or bytes 1..7 could be pure padding.",
+      "evidence_level": "CONFIRMED (as scoped negative)",
+      "claim_resolution": "CONFIRMED_WITH_EVIDENCE (scoped)"
+    },
+    {
+      "claim_id": "P10-7",
+      "statement": "No VFS-record-fed source is visible in-window: zero CALL instructions, no absolute/global data address in any instruction, no I/O or file/stream operation; every memory operand is stack-relative ([ESP+imm]) or array-relative ([ESI+EAX(+0x8)]). The origin of the scanned array (who populates the S4+[S1,S2) range) is not determinable from this window; the FAMILY-P/T merge question (is this map VFS-record-fed) cannot be resolved at this level.",
+      "evidence": "call census = 0 over 57 rows; instruction operand census: MOVZX byte ptr [ESI+EAX*1(+0x8)] (array), MOV dword ptr [ESP+0x4/0x18/0x14] (stack args), PUSH/POP EBX/ESI/EDI, register arithmetic (MOV ECX,EDI; SUB ECX,EAX; SAR; TEST; SUB ECX,1; ADD EAX,8; CMP), MOV EAX,EDI; jump targets are all in-window code addresses; RET. No dword/byte ptr [absolute] operand exists.",
+      "premises": ["scoped negatives keep window bounds: absence of a VFS-feeding operation in-window is NOT evidence that the map is not VFS-fed elsewhere; the populator is simply outside this window", "definition registry != instance source (if this array turns out to hold property definitions, that still does not identify per-instance records)"],
+      "countermodel": "the array could be populated by a VFS/parser path elsewhere in the binary - fully compatible with this window; conversely it could be a compile-time or registry-built table. Both models survive; the deciding evidence is the writer of the [this+4]/[this+8]-bounded range (caller-side object field semantics, out of window).",
+      "evidence_level": "CONFIRMED (as scoped negative with window bounds)",
+      "claim_resolution": "CONFIRMED_WITH_EVIDENCE (scoped); FAMILY-P/T merge verdict = NOT_DECIDABLE_AT_THIS_LEVEL"
+    },
+    {
+      "claim_id": "P10-8",
+      "statement": "The return cursor's addressing mode is dual and not decidable in-window: all byte reads are [ESI + cursor], so if S4=0 at the callsite the returned EAX is an absolute pointer into the array, and if S4!=0 the returned EAX is an offset from S4. P07's cited caller behavior (745BF0 success path returns *[EAX]) is consistent with S4=0 (absolute pointer) but could also be consistent with caller-side base addition not visible in the citation. Both models fit the 57 rows exactly.",
+      "evidence": "effective address [ESI+EAX*1] at all 10 byte-read sites; ESI loaded once at 0x00745A7A and never written in-window; EAX returned unchanged in kind (cursor value or S2 via 0x00745AFA).",
+      "premises": ["additive effective addresses are symmetric: the window cannot tell which term is 'base' and which is 'offset'"],
+      "countermodel": "S4 could be a nonzero small bias (e.g. struct field offset), making the raw return value NOT dereferenceable without re-adding the base - in that case a caller that dereferences the raw return would read the wrong address; resolving this requires the caller window.",
+      "evidence_level": "UNVERIFIED (both models consistent in-window)",
+      "claim_resolution": "NOT_ESTABLISHED (recorded as remaining sub-edge B4)"
+    },
+    {
+      "claim_id": "P10-9",
+      "statement": "ABI of the body: no EBP frame; 3 callee-saved registers preserved (EBX/ESI/EDI via 3 PUSH/3 POP, balanced); EAX/ECX/EDX clobbered; RET without immediate (no stack-arg cleanup by callee - caller cleans or pre-reserves); the entry-frame read scope spans 6 DWORD slots (up to [ESP+0x18]) at the callsite.",
+      "evidence": "PUSH/POP census rows 809772-809776 and 809823-809825; RET @0x00745AFF with no immediate byte (row 809826 is the last row of the region; the listing shows RET, not RET imm16); read scope from P10-2.",
+      "premises": ["calling convention inference from body shape only: '6 arguments' is PLAUSIBLE, not CONFIRMED - the slots could be caller-frame data consumed opportunistically; no direct caller != exclusively virtual (the single known direct caller 0x00745C28 does not preclude others)"],
+      "countermodel": "the callsite could pass fewer than 6 intentional arguments, with S3-S6 being caller-frame locals that the callee happens to read; the body shape cannot distinguish 'argument' from 'stack garbage with stable layout' - recorded as premise, not defect.",
+      "evidence_level": "CONFIRMED for the register/RET facts; PLAUSIBLE for the 6-argument reading",
+      "claim_resolution": "CONFIRMED_WITH_EVIDENCE (register/RET); PLAUSIBLE (arg-count reading)"
+    }
+  ],
+  "answers_to_package_question": {
+    "what_key_does_it_match": "A single byte value: slot S6 (=[ESP_entry+0x18]) compared as a full DWORD against the zero-extended FIRST byte of each 8-byte entry. Usable key space = S6's low byte (0..255); S6 values >255 can never match (always-fail, returns S2). It does NOT match the caller's 4-DWORD key as a composite - see P10-4/P10-5.",
+    "entry_structure_walked_returned": "Linear (non-hashed, non-tree) array of 8-byte entries in [S1,S2) addressed as [S4+cursor], cursor = S1,S1+8,...; byte 0 = compared tag; bytes 1..7 unread in-window. Main scan unrolled 4-per-iteration over 0x20-byte blocks; residual handles 1/2/3 entries; returns cursor (start of matching entry) on match, S2 (end) on fail - std::find-shaped contract, caller-distinguishable by comparison to S2.",
+    "id2_class_20006_tag_6_hypothesis_verdict": "Does NOT survive at the 0x00745A70 level as a composite-key property lookup: REJECTED_WITH_EVIDENCE in-window (single-byte match only; no 20006/6/2 immediates; 20006 as a match value would be degenerate always-fail). Weaker caller-side variant (caller selects the tag byte and/or interprets entry payload as id2/class/tag data) is NOT_ESTABLISHED here and moves to the 745BF0 window edge.",
+    "vfs_record_fed_source_visible": "NO - scoped negative with window bounds (P10-7): 0 calls, no global/static data addresses, no I/O in-window. The array populator is out of window; FAMILY-P/T merge question remains NOT_DECIDABLE at this level; deciding evidence = writer of the [this+4]/[this+8]-bounded array."
+  }
+}

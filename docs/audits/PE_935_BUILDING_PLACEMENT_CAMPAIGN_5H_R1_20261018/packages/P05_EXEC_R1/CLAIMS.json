@@ -1,0 +1,90 @@
+{
+ "attribution": "DIRECT_ANALYST_FALLBACK by PE-MASTER parent (contract section 4) after two incomplete child executions (see RUN_STARTED.json + RUN_STARTED_RETRY1.json preserved)",
+ "claims": [
+  {
+   "id": "P05-C1",
+   "claim": "0x00509070 is a thiscall 3-DWORD field setter: arg1 -> [ECX+0x80/+0x84/+0x88]; it is NOT a link/attach setter for SF+30 (no SF+30 access in window)",
+   "evidence": "extract R1 lines 145443-145450: MOV EAX,[ESP+4]; MOV EDX,[EAX]; MOV [ECX+0x80],EDX; ... RET 0x4",
+   "premises": [
+    "receiver class unknown; +0x80 field semantics unknown",
+    "window-scoped negative only"
+   ],
+   "countermodel": "an un-admitted caller uses 509070 for attach purposes - not excluded, but setter itself writes only 3 dwords",
+   "evidence_level": "CONFIRMED"
+  },
+  {
+   "id": "P05-C2",
+   "claim": "0x0085BFA0 (dominant producer) is a COMPUTED affine-matrix getter of the object at [this+0x2C]: virtual call vtable slot +0x24 (index 9) with out-arg, 12 floats from returned EAX reordered (3x3 transpose-like shuffle), CALL 0x0096cb20 (16-float 4x4 op), CALL 0x0096cf80 producing 9 dwords copied (REP MOVSD ECX=9) to arg1 out-record, then [out+0x24/+0x28/+0x2c] written from stack and [out+0x30]=1.0 (FLD1). The 12 position bytes consumed by writer 005094C0 derive from this computation",
+   "evidence": "extract R2 lines 1170926-1171004",
+   "premises": [
+    "0096cb20/0096cf80 semantics un-admitted (matrix math hypothesis from arg shapes only)",
+    "virtual slot +0x24 implementation un-admitted",
+    "out-record+0x24..0x2c matches P04 ambiguous record offsets (+0x24/+0x30) - alignment consistent but caller-side exact slot still ambiguous"
+   ],
+   "countermodel": "helpers could be identity/other ops - computed-not-raw conclusion rests on virtual-call delegation, not helper semantics",
+   "evidence_level": "CONFIRMED"
+  },
+  {
+   "id": "P05-C3",
+   "claim": "0x0085C0C0 is a pass-through 3-float getter: object [this+0x2C], virtual vtable slot +0x28 (index 10) with out-arg; returned EAX -> 3 floats copied to arg1 record; returns record pointer. Position bytes again virtual-delegated",
+   "evidence": "extract R3 lines 1171005-1171021",
+   "premises": [
+    "slot +0x28 implementation un-admitted"
+   ],
+   "countermodel": "none in-window",
+   "evidence_level": "CONFIRMED"
+  },
+  {
+   "id": "P05-C4",
+   "claim": "0x0085C0F0 (rotation producer of R5/P04) calls 0x0085BFA0, copies the 3x3 part to [ESP+0x8], writes zeros {0,0,0} to arg1 record, then CALL 0x0096cd10 with (ECX=&[ESP+0xc], arg=record) and returns record - a derived/rotation-related computation on the matrix, NOT a raw stored rotation",
+   "evidence": "extract R4 lines 1171022-1171044",
+   "premises": [
+    "0096cd10 semantics un-admitted",
+    "exact meaning (rotation extract/convert) hypothesis-level"
+   ],
+   "countermodel": "96cd10 could be identity-ish, leaving zeros - either way computed, not historical restore",
+   "evidence_level": "STRONGLY_SUPPORTED"
+  },
+  {
+   "id": "P05-C5",
+   "claim": "0x0085C280 is a conditional 3-float getter: gate byte [this+0x24]; object [this+0x2C] virtual slot +0x160 called with 0x80 (AL gate); if not taken, virtual slot +0xdc with out-arg returns EAX -> 3 floats copied to arg1. Un-taken paths leave the record untouched (stale-frame variant of P04 V3 remains live)",
+   "evidence": "extract R5 lines 1171144-1171172",
+   "premises": [
+    "slots +0x160/+0xdc implementations un-admitted"
+   ],
+   "countermodel": "none in-window",
+   "evidence_level": "CONFIRMED"
+  },
+  {
+   "id": "P05-C6",
+   "claim": "0x00862850 is a RAW FIELD COPY getter: [this+0x3C],[this+0x40],[this+0x44] -> arg1 record, no computation, no calls. First genuinely raw stored-value candidate in the writer-argument chain",
+   "evidence": "extract R6 lines 1178571-1178578",
+   "premises": [
+    "receiver class unknown; +0x3C field meaning unknown (could be velocity/any 3-float field, not necessarily position)"
+   ],
+   "countermodel": "raw bytes yes, semantic role of the field UNVERIFIED",
+   "evidence_level": "CONFIRMED"
+  },
+  {
+   "id": "P05-C7",
+   "claim": "Dominant position route to writer 005094C0 is COMPUTED (virtual-delegated + matrix helpers), not a historical record restore; the update-mechanism boundary has moved to: virtual slots +0x24/+0x28/+0xdc of the object at [this+0x2C], helpers 0096cb20/0096cf80/0096cd10, and the raw-field candidate 862850 receiver+0x3C",
+   "evidence": "C2+C3+C5+C6 composition",
+   "premises": [
+    "per-class vtable identity of [this+0x2C] objects not established",
+    "computed does not preclude the virtual callee reading raw fields - it moves the question one level deeper"
+   ],
+   "countermodel": "slot +0x28 may return a raw stored local translation",
+   "evidence_level": "STRONGLY_SUPPORTED"
+  },
+  {
+   "id": "P05-C8",
+   "claim": "Node-role/SF+30 edge remains UNRESOLVED: no admitted subregion reads or writes SF+30; 509070 writes [this+0x80..0x88] (C1) - the link-setter candidate is rejected for this body, root-vs-internal-node still UNDETERMINED",
+   "evidence": "R1-R6 full census",
+   "premises": [
+    "window-scoped negative only"
+   ],
+   "countermodel": "link setter may not exist (SF+30 written elsewhere/never)",
+   "evidence_level": "CONFIRMED"
+  }
+ ]
+}

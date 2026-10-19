@@ -1,0 +1,24 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P10",
+  "front": "C",
+  "gates": [
+    {"id": "G1", "name": "contract_integrity", "check": "P10.json SHA256 equals 87095d9a64664c3cf0d1b70439e67f0f808ca51105cfefad3c6932b4bc34b51b and local CONTRACT.json copy matches", "result": "PASS", "evidence": "Get-FileHash on both paths, identical hashes, verified 2026-10-18T23:26:44Z"},
+    {"id": "G2", "name": "source_pin_integrity", "check": "admitted source SHA256+size match contract pin before any semantic read", "result": "PASS", "evidence": "SHA256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, 50780146 bytes, verified 2026-10-18T23:26:50Z (before extract)"},
+    {"id": "G3", "name": "run_started_first_science_artifact", "check": "RUN_STARTED.json materialized before any semantic analysis", "result": "PASS_WITH_DISCLOSURE", "evidence": "RUN_STARTED.json written 2026-10-18T23:26:50Z window; only mechanical packaging (CONTRACT.json copy) preceded it; no extract, no semantic read, no analysis preceded it"},
+    {"id": "G4", "name": "extract_census_and_boundary", "check": "extract contains exactly the admitted region 0x00745A70-0x00745B00 end-exclusive with line numbers", "result": "PASS", "evidence": "57/57 rows, source lines 809770-809826, VA 0x00745A70-0x00745AFF; first out-of-region address 0x00745B00 at source line 809827 located by address-only scan and NOT included; extract sha256 1E7091F73667448A622C10D0E99E0C6EAFDC352842DBBE97565E8E7340D76645"},
+    {"id": "G5", "name": "window_discipline", "check": "no semantic read outside admitted region; navigation disclosed", "result": "PASS", "evidence": "two navigation events disclosed: (1) address search hit line 809950 (CALL 0x00745a70 inside 745BF0 body) - address+mnemonic only, body not read; (2) address-only column scan for boundary at line 809827 (0x00745B00) - addresses only, no instruction text; 0x00745B00-and-beyond content unread"},
+    {"id": "G6", "name": "budget_compliance", "check": "actual consumption within reservation and campaign caps", "result": "PASS", "evidence": "bodies 1/1, rows 57/57, CALL sites 0 (contract question said '0 calls'; prompt paraphrase '4 CALL' vs contract 'edges:4' disclosed in COUNTERS.json - no CALL consumed under either reading), candidates 2/2 identified"},
+    {"id": "G7", "name": "forbidden_actions", "check": "no EXE/payload/runtime/new-Ghidra-exports/old-scripts/config/skills/frozen-root/repo actions", "result": "PASS", "evidence": "only reads: P10.json, parent CONTRACT.md sections, P07 REPORT.md, admitted source listing region; only writes: fresh P10_EXEC_R1 package dir"},
+    {"id": "G8", "name": "denied_item_respected", "check": "Front-A 007B6C4B continuation (DENIED, FRONT_A_TIME_CAP, events 000011/000012) not read", "result": "PASS", "evidence": "no command or read targeted 007B6C4B or its continuation"},
+    {"id": "G9", "name": "real_clock_only", "check": "all timestamps from real clock tools, none estimated", "result": "PASS", "evidence": "Get-Date UTC used for RUN_STARTED, extract header, pins; no invented times"},
+    {"id": "G10", "name": "premises_preserved", "check": "four contract premises preserved and applied", "result": "PASS", "evidence": "MEMORY_AND_IDENTITY.json premises_preserved maps each premise to its application site"},
+    {"id": "G11", "name": "fresh_package_isolation", "check": "fresh dir, no foreign package/CONTROL writes, no other package modified", "result": "PASS", "evidence": "P10_EXEC_R1 newly created; all writes inside it; parent CONTROL untouched; P01-P09 untouched"},
+    {"id": "G12", "name": "unforeseen_body_incident_check", "check": "in-window unforeseen bodies disclosed as incident per P06 precedent", "result": "PASS_VACUOUS", "evidence": "0 CALL instructions in window -> 0 unforeseen bodies -> no incident to declare"},
+    {"id": "G13", "name": "claims_evidence_discipline", "check": "every claim carries evidence, premises, countermodel, evidence_level, claim_resolution; no default-success", "result": "PASS", "evidence": "CLAIMS.json P10-1..P10-9 complete; negative results (P10-5, P10-7, P10-8) recorded as such with window bounds"},
+    {"id": "G14", "name": "hard_stop_feasibility", "check": "package completes before 2026-10-19T00:40:00Z", "result": "PASS", "evidence": "all artifacts written within ~40 minutes of start; see artifact_index.csv created_utc stamps"}
+  ],
+  "gate_summary": {"pass": 13, "pass_with_disclosure": 1, "fail": 0},
+  "overall_gates_status": "PASS",
+  "run_status": "COMPLIANT"
+}

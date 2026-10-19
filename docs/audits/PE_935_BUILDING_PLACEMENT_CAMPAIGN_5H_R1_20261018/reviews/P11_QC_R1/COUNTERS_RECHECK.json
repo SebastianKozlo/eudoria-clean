@@ -1,0 +1,40 @@
+{
+  "qc_run_id": "PE935_CAMPAIGN_P11_QC_R1_20261018T234830Z",
+  "target_package": "P11_EXEC_R1",
+  "reserved_vs_actual_recheck": {
+    "bodies": { "reserved": 2, "recheck_actual": 2, "detail": "stage A 0x006B6C1B (L632937-632958), stage B 0x006B6C5C (L632959-632980), pump entry row 0x006B6C9D (L632981) declared in-region; MATCH" },
+    "instruction_rows": { "reserved": 60, "recheck_actual": 45, "detail": "extract = 45 rows = source L632937-632981 contiguous; parity 0 mismatches; UNDER_RESERVE honestly reported (no overshoot); the region's actual instruction count is 45 (VA stream 6c1b-6c9d gapless)" },
+    "call_edges": { "reserved": 8, "recheck_actual": 4, "detail": "independent census: 0x006b4120 x2, 0x006c27a0 x1, 0x006c27f0 x1 (4 total, 3 distinct); UNDER_RESERVE honest; MATCH with worker" },
+    "candidate_variants": { "reserved": 2, "recheck_actual": 2, "detail": "producers 0x006C27A0 / 0x006C27F0 recorded as the two admission candidates; MATCH" }
+  },
+  "additional_counters_recheck": {
+    "branch_instructions": { "worker": "6 (JZ x4, JMP x2; 1 out-of-window target 0x006B6CB9)", "recheck": "JZ: 6c47->6c5c, 6c4b->6c53, 6c88->6c9d, 6c8c->6c94 (x4); JMP: 6c5a->6c74, 6c9b->6cb9 (x2); total 6; out-of-window targets: 0x006B6CB9 only; MATCH" },
+    "memory_operand_census": { "worker": "16 stack-slot accesses, 2 object-field reads, 2 indirect stores, 0 global refs", "recheck": "16 [ESP+imm] accesses (LEA x6: 0x58/0x20/0x48 x2 each; W x2 [0x14]; R4/W2 [0x38]; R2 [0x3c]) = 16; [EDI+0x8] R x2; MOV [ECX],EAX x2; ABS refs 0; MATCH — this is the corrected 26->16 value: INDEPENDENTLY CONFIRMED CORRECT" },
+    "unforeseen_in_window_bodies": { "worker": 0, "recheck": "all 45 rows belong to the two declared stages + the declared pump entry row; no third entry shape; MATCH" },
+    "hypotheses_recorded_not_claimed": { "worker": 3, "recheck": "P11-H1 (pump consumes [ESP+0x14]), P11-H2 (PUSH-0x1 mirror shape), P11-H3 (loop latch) — all recorded as hypotheses, none promoted; MATCH" }
+  },
+  "retry_attribution_recheck": {
+    "prior_session_files_preserved": "CONTRACT.json sha256 369059f6... and RUN_STARTED.json sha256 8c0203a3... both re-hashed by QC = manifest/pin values; byte-identical to CONTROL contract (369059f6... = CONTROL/CONTRACTS/P11.json); preserved untouched",
+    "retry_marker": "RUN_STARTED_RETRY1.json (354c3b92..., 1194 B) present; adds the retry without overwriting the originals; GATES G11 PASS covers it",
+    "verdict": "attribution HONEST (attempt 1 empty -> retry 1 completed, both sessions' artifacts preserved and distinguishable)"
+  },
+  "chronology_check": {
+    "event_000014_ADMIT_utc": "2026-10-18T23:32:39Z",
+    "first_session_run_started_utc": "2026-10-18T23:32:58Z (session died after 2 files)",
+    "retry_marker_utc": "2026-10-18T23:36:51Z",
+    "source_pins_recorded_utc": "2026-10-18T23:39:29Z",
+    "manifest_generated_utc": "2026-10-18T23:41:30Z",
+    "counters_recorded_utc": "2026-10-18T23:42:00Z",
+    "gates_evaluated_utc": "2026-10-18T23:47:00Z",
+    "package_hard_stop_utc": "2026-10-19T00:55:00Z",
+    "verdict": "ANOMALY (P11-QC-F1): MANIFEST.json declares manifest_generated_utc=23:41:30Z, but COUNTERS.json (23:42:00Z) and GATES.json (23:47:00Z) carry LATER timestamps than the manifest. Either (a) the manifest's generated_utc stamp is mis-set (materialized later than stamped), or (b) the COUNTERS/GATES stamps were updated after the manifest was written. Per the campaign rule 'MANIFEST.json LAST, self-excluded', the manifest should be the final artifact; the recorded stamps are inconsistent with that ordering. No claim depends on the ordering; all CONTENT hashes verify (13/13). Finding recorded; correction for any future corrigendum: re-stamp or re-materialize the manifest after the last artifact edit."
+  },
+  "manifest_recheck": {
+    "hashes_recomputed": 13,
+    "hashes_match": 13,
+    "sizes_match": 13,
+    "bijection": "14 files on disk = 13 manifest 'files' + self-excluded MANIFEST.json; no extra/missing files",
+    "control_contract_hash": "CONTROL/CONTRACTS/P11.json sha256 369059F6CBD181033B10D84C8276C28E4CF539CBA392354C69CDFEF2C9F191A0 = package CONTRACT.json (prior-session preserved copy); MATCH",
+    "external_reference_hashes": "P07 REPORT.md = 80ca78b9... MATCH; bridge DRAFT_FINAL_REPORT.md = 2910289f... MATCH"
+  }
+}

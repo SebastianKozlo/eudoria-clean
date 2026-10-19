@@ -1,0 +1,67 @@
+{
+  "run_id": "P06_QC_R1_20261018",
+  "recheck_method": "independent single-pass scan of the pinned listing (window census + line capture + address navigation) + independent re-parse of both extracts + manual instruction census",
+  "counters_recheck": {
+    "bodies_in_window": { "worker_claim": 3, "reviewer_recomputed": 3, "verdict": "MATCH", "composition": "0x008BD720 (declared) + 0x008BD730 (unforeseen, INCIDENT-P06-I1, not used for claims) + 0x00848EA0 (declared; body continues past window end)" },
+    "bodies_used_for_claims": { "worker_claim": 2, "reviewer_verified": 2, "verdict": "MATCH" },
+    "instruction_rows": { "worker_claim": 92, "reviewer_recomputed": 92, "breakdown": { "subregion_A": 4, "subregion_B": 88 }, "verdict": "MATCH" },
+    "call_sites": { "worker_claim": 11, "reviewer_recomputed": 11, "breakdown": { "subregion_A": 0, "subregion_B": 11 }, "verdict": "MATCH" },
+    "unique_call_targets": { "worker_claim": 11, "reviewer_recomputed": 11, "targets": ["0x00745540","0x00745BF0","0x00843D60","0x00844660","0x0043A550","0x0072F580","0x008E0110","0x0072FCE0","0x0072FE30","0x00745690","0x006C1F90"], "verdict": "MATCH (list identical)" },
+    "indirect_calls": { "worker_claim": 0, "reviewer_recomputed": 0, "verdict": "MATCH" },
+    "candidate_variants": { "worker_claim": 4, "reviewer_verified": 4, "enumeration": "V1-V4 explicitly enumerated in COUNTERS.json with verdicts (V1 REJECTED_WITH_EVIDENCE, V2 adopted, V3 REJECTED scoped, V4 REJECTED)", "verdict": "MATCH" }
+  },
+  "reserve_vs_actual": {
+    "bodies": "3 vs 2 reserved - DEVIATION (unforeseen in-window body 0x008BD730; window-contained; disclosed as INCIDENT-P06-I1; region WAS inside admission A912213023006's VA span)",
+    "instruction_rows": "92 <= 98 reserved - OK",
+    "call_sites": "11 <= 14 reserved - OK",
+    "candidate_variants": "4 <= 4 reserved - OK"
+  },
+  "line_parity_vs_pinned_source": { "rows_checked": 92, "verbatim_ok": 92, "failures": 0 },
+  "window_completeness": {
+    "subregion_A": { "scan_rows": 4, "extract_rows": 4, "missing_in_extract": 0, "extra_in_extract": 0 },
+    "subregion_B": { "scan_rows": 88, "extract_rows": 88, "missing_in_extract": 0, "extra_in_extract": 0 }
+  },
+  "navigation_recheck": {
+    "pattern_8bd720": { "total_rows": 26, "body": 1, "call_sites": 22, "imm32_loads": 3, "other": 0, "call_site_va_list_matches_report": true },
+    "pattern_848ea0": { "total_rows": 2, "body": 1, "call_sites": 1, "imm32_loads": 0, "other": 0, "caller_va": "0x004E55F7" }
+  },
+  "manifest_recheck": { "entries": 15, "sha256_match": "15/15", "bytes_match": "15/15", "bijection_ok_intended_sense": true, "self_exclusion": "MANIFEST.json lists all pack files except itself (by design)" },
+  "counters_corrections": [
+    {
+      "id": "CNT-P06-CORR-1",
+      "severity": "P3 (prose in REPORT 4.1 row 9 + CLAIM-P06-C5 wording)",
+      "what": "'FLDZ + 7 FST/FSTP stores' -> actual 6 FST/FSTP stores (row census: 00848f4f, 00848f54, 00848f5c, 00848f61, 00848f69, 00848f70; 7 = instruction count including FLDZ, not store count)",
+      "effect": "none on any counter; descriptive only"
+    },
+    {
+      "id": "CNT-P06-CORR-2",
+      "severity": "P2 (self-inconsistent load-bearing dataflow description in REPORT 4.1 row 9 + CLAIM-P06-C5)",
+      "what": "'0x0072FE30 ... fills three 12-byte float3 frame buffers that were zero-initialized in-window' -> 6 stores = 24 bytes cover only TWO 12-byte buffers; the third out-arg pointer (LEA EDX,[ESP+0x24] @00848f65) resolves to the frame region the earlier (c,c,c) const-vec group initialized ([Q+0x1C],[Q+0x20],[Q+0x24] via PUSH ESI + FST [ESP+0x20/0x24/0x28]); under the thiscall callee-clean model the third buffer is (c,c,c)-filled in-window, NOT zero-filled (under a non-callee-clean model it is partially unwritten)",
+      "correction": "two of the three out-buffers are zero-initialized in-window; the third points at the (c,c,c) const buffer region; the out-param idiom and the produce chain are unaffected (callee overwrites the buffers)",
+      "effect": "no counter, gate or other claim depends on the store count or on all three buffers being zeroed"
+    },
+    {
+      "id": "CNT-P06-CORR-3",
+      "severity": "P3 (timestamp-provenance wording)",
+      "what": "COUNTERS.json 'counters_recorded_at_utc' and GATES.json 'gates_evaluated_at_utc' claim 'this file's final edit occurred between real-clock readings 22:27:38.348Z and 22:27:52.985Z', but the corrected files' mtimes are 2026-10-18T22:28:01Z / 22:28:03Z; the bound is true for the PRE-correction content, stale for the corrected files (the honesty-correction pass that embedded the sentence ran after the cited upper bound)",
+      "correction": "bound the corrected files' writes by (22:27:52.985Z, manifest stamp 22:28:12.493Z) instead; REPORT 6.9 and MANIFEST already disclose the correction pass, so no dishonesty is present - wording only"
+    },
+    {
+      "id": "CNT-P06-CORR-4",
+      "severity": "P3 (gate prose)",
+      "what": "GATES G3 'extraction began 22:23Z' vs extract mtimes 22:21:54-56Z; gate OUTCOME unaffected (RUN_STARTED 22:21:29Z precedes extraction); the figure is an estimate that survived the correction pass"
+    }
+  ],
+  "gate_recheck": {
+    "G1_contract_sha": "PASS upheld (reviewer re-hashed CONTRACT.json vs CONTROL/CONTRACTS/P06.json - identical bytes, sha 5239C441...4891905)",
+    "G2_source_pin_sha": "PASS upheld (reviewer recomputed 642CC29A...CC1D8DB at boot)",
+    "G3_run_started_first": "PASS upheld in substance; embedded '22:23Z' figure inaccurate (CORR-4)",
+    "G4_region_discipline": "PASS upheld (reviewer found no evidence of any out-of-window semantic read; all out-of-window references are recorded-not-read)",
+    "G5_G6_G7_G8_G9": "PASS upheld (premises applied; budgets verified by recheck)",
+    "G10_bodies_budget": "DEVIATION_DISCLOSED upheld - adjudication: compliant (see QC_REPORT.md incident section)",
+    "G11_G12": "PASS upheld (negative controls exercised the actual predicates; no default-success)",
+    "G13_hard_stop": "PASS upheld (all writes precede 23:15:00Z)",
+    "G14_output_set_complete": "PASS upheld (all required outputs present; manifest written LAST)",
+    "G15_no_delegation": "PASS upheld (no evidence of any nested task or external agent in the pack)"
+  }
+}

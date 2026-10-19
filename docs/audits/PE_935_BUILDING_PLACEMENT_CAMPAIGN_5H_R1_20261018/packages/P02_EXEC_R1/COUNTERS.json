@@ -1,0 +1,65 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P02",
+  "front": "A",
+  "reserved": {"bodies": 2, "instruction_rows": 136, "call_sites": 23, "candidates": 2},
+  "actual": {
+    "bodies": 2,
+    "bodies_note": "Actual = reserved = 2 per the contract's body_entries framing (0x006B1E0B, 0x006B1E2F). Both are in-function branch-target BLOCKS of the 006B1C80 walker continuation (P01-C8-class correction), NOT separate logical functions. New logical functions revealed: 0. The region completes the full body of 006B1C80 (epilogue RET 0x4 @006b1fa7); the function had been partially open since P01.",
+    "instruction_rows": 136,
+    "instruction_rows_note": "All 136 read rows analyzed; equals reservation exactly; rows are consecutive source lines 626546-626681.",
+    "call_sites": 23,
+    "call_sites_detail": {
+      "direct_by_va": [
+        "006b1e14 -> 0043ca60 (container helper, P01-known class)",
+        "006b1e36 -> 007b6c30 (keyed lookup, key=0x00A85460, ECX=EBX)",
+        "006b1e49 -> 007b6c30 (keyed lookup, key=0x00A85460, ECX=[EBX+0x24])",
+        "006b1e5a -> 008bd720 (ECX=ESI lookup result)",
+        "006b1e60 -> 004152f0 (arg=EAX from 008bd720; retain-shaped thunk, P01-context class)",
+        "006b1e67 -> 006ae840 (ECX=retained)",
+        "006b1e78 -> 006eb320 (ECX=EBP, bool TEST AL,AL)",
+        "006b1e83 -> 006c64d0 (ECX=EBP)",
+        "006b1e8c -> 004152f0 (arg=[EAX+0x4])",
+        "006b1e93 -> 006aded0 (ECX=retained)",
+        "006b1e9b -> 004152f0 (arg=[EAX])",
+        "006b1ea2 -> 006ae310 (ECX=retained)",
+        "006b1eb3 -> 004152f0 (args EBP,EBX)",
+        "006b1eba -> 006b0680 (ECX=result)",
+        "006b1ec1 -> 007558a0 (ECX=ESI lookup result)",
+        "006b1eed -> 006f2940 (cdecl 3 args: EBP, node+0x10, &steady[0x40])",
+        "006b1efe -> 007b4170 (ECX=M[steady+0x18], arg=EAX from 006f2940)",
+        "006b1f9f -> 0095d3ca (stack-cookie check, parent-contract-known)"
+      ],
+      "indirect_by_va": [
+        "006b1edb -> [0x00A75A00] (this=&steady[0x44] local container, arg=node+0x28 field)",
+        "006b1f0c -> [0x00A75A5C] (this=&steady[0x44], 0 stack args; per-node cleanup position)",
+        "006b1f13 -> [0x00A75854] (arg=ESI node; returns next node; caller ADD ESP,4)",
+        "006b1f5f -> [0x00A759FC] (arg pair: entry,0x80; P01-known indirect free)",
+        "006b1f7c -> [0x00A759FC] (arg pair: array base, count*4)"
+      ],
+      "unique_call_site_count": 23,
+      "note": "004152f0 occurs at 4 VAs (006b1e60/006b1e8c/006b1e9b/006b1eb3); 007b6c30 at 2 VAs; [0x00A759FC] at 2 VAs; all counted per call-site VA."
+    },
+    "candidates": 2,
+    "candidates_detail": ["CAND-P2a: 007b6c30 = constant-class-key element lookup on leaf elem / [leaf elem +0x24]", "CAND-P2b: 007b4170 = conditional element hand-off to frame-derived receiver M[steady+0x18]"]
+  },
+  "front_a_running_totals": {
+    "after_P02": {"bodies": "5/16", "instruction_rows": "372/1800", "call_sites": "42/64", "candidates": "6/12"},
+    "arithmetic": "P01 QC-confirmed actuals (3 bodies / 236 rows / 19 CALL / 4 candidates) + P02 actuals (2 / 136 / 23 / 2). All within Front A caps; campaign totals 5/96 bodies, 372/12000 rows, 42/320 CALL, 6/48 candidates."
+  },
+  "explicit_store_census_in_region": [
+    {"va": "006b1e00", "instr": "MOV dword ptr [EDI],EAX", "class": "worklist deque insert (P01-C4 continuation: EDI=[ESP+0x2c] insert cursor, EAX = child value loaded in P01 window)"},
+    {"va": "006b1e05", "instr": "MOV dword ptr [ESP + 0x2c],EDI", "class": "frame: insert-cursor field save"},
+    {"va": "006b1ee8", "instr": "MOV byte ptr [ESP + 0x74],0x1", "class": "frame: bool steady[0x68]=1 before CALL 006f2940 (store executes with ESP=steady-0xC)"},
+    {"va": "006b1f07", "instr": "MOV byte ptr [ESP + 0x68],0x0", "class": "frame: steady[0x68]=0 before indirect [0x00A75A5C] cleanup"},
+    {"va": "006b1f3a", "instr": "MOV dword ptr [ESP + 0x68],0xffffffff", "class": "frame: steady[0x68]=-1 at cleanup"},
+    {"va": "006b1f8d", "instr": "MOV dword ptr FS:[0x0],ECX", "class": "TEB SEH-frame restore (normal epilogue)"},
+    {"va": "006b1faa", "instr": "MOV byte ptr [ESP + 0x17],0x0", "class": "frame: result flag steady[0x17]=0 (failure path; returned as AL at 006b1f85)"}
+  ],
+  "store_census_negatives": "Full 136-row census: NO [elem+8] store (the only +8 access is the LOAD 'MOV ESI,[EBX + 0x8]' @006b1ec8); NO receiver-pointer store; NO registration-key store; NO global store (contrast P01 stub [0x00BA7220]=1); NO store of any resource-ID-like value; NO numeric ID constant (no 0x42/66, no 296445/0x4861D). PUSH args are frame-transient per P01 census convention and excluded from the store census.",
+  "opaque_write_channels_preserved": [
+    "0043ca60 receives &steady[0x18] BYREF in the 006B1E0B block (callee may write steady[0x18])",
+    "all 23 CALL callees may write memory internally",
+    "indirect targets [0x00A75A00]/[0x00A75A5C]/[0x00A75854]/[0x00A759FC] are pointer cells outside the region; their targets are not read"
+  ]
+}

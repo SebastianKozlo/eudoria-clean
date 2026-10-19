@@ -1,0 +1,41 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P09",
+  "reserved_vs_actual": {
+    "reserved_per_contract_json": {
+      "bodies": 1,
+      "instructions": 23,
+      "edges": 4,
+      "candidates": 2
+    },
+    "reserved_label_discrepancy_disclosed": "dispatch prose said '4 CALL' while CONTRACT.json reserves 'edges: 4'; the main_question itself says '1 call'. Reconciliation: reserve field is edges=4; ACTUAL in-window CALL count is 1 (matches '1 call' in the question).",
+    "actual": {
+      "bodies_opened": 1,
+      "bodies_opened_note": "prefix of body starting 0x006C3640; body continues out-of-window (epilogue not seen)",
+      "instruction_rows_read": 23,
+      "call_sites_in_window": 1,
+      "call_sites_in_window_detail": "006c365a CALL EBX (indirect, register target)",
+      "edges": 4,
+      "edges_detail": "JZ 0x006c369c (006c364c), JZ 0x006c3678 (006c3662), JZ 0x006c3672 (006c3666), JMP 0x006c368a (006c3676); in-window targets: 1 (006c3672); out-of-window targets: 3",
+      "candidates": 2,
+      "candidates_detail": "CAND-A grow/extend-on-full; CAND-B lazy-allocate-or-flush (both for out-of-window path at 0x006C3678)",
+      "unforeseen_in_window_bodies": 0,
+      "incidents": 0,
+      "float_values": 0,
+      "identity_edges": 0,
+      "transform_values": 0
+    },
+    "window": {
+      "region": "0x006C3640-0x006C3678 (end-exclusive)",
+      "region_bytes": 56,
+      "listing_lines": "649385-649407",
+      "sum_va_opened": "0x38 bytes",
+      "union_va_opened": "0x006C3640-0x006C3678"
+    },
+    "navigation_operations": {
+      "address_searches": "region anchors; 3 barrier addresses (operand + anchored-body patterns); call-site census for 0x006C3640",
+      "tool_failures_disclosed": "1 (rg CommandNotFoundException; outputs discarded and redone with Grep tool)"
+    }
+  },
+  "campaign_budget_note": "package-level reservation consumed: 1 body / 23 rows / 4 edges / 2 candidates (within single-package caps and shared campaign caps; parent tracks campaign totals)"
+}

@@ -1,0 +1,26 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P09",
+  "memory_discipline": {
+    "premises_preserved_from_contract": [
+      "arg-shape inference labeled as such: ALL register-role labels (begin/end/queue/callback) and the ECX=thiscall-shaped callback ABI note are labeled ARG-SHAPE/ABI INFERENCE in CLAIMS.json",
+      "identical names/shapes do not prove common semantics: the ESI queue shape matches a generic append-buffer but its class identity is declared UNKNOWN; 43E5B0 (first enqueue path, cited P07) is NOT claimed equivalent to 006C3640 despite P07's similar-shape context",
+      "scoped negatives keep window bounds: P09-C8 is explicitly bounded to the 23 in-window rows"
+    ],
+    "inherited_context_cited_not_rederived": [
+      "P07: 006B6C9D pump forms {0x66,A} (72FCE0 valid check, 7CE1E0 A-read bridge-CONFIRMED [ECX+0x08], 43C700 pair build, 40B070 callback registration)",
+      "P07: 006C3F98 and 006D44A4 register the same callback 0x008BD720 via 40B070 + 006C3640 (second enqueue path); 006B6C9D enqueues via 43E5B0 instead"
+    ]
+  },
+  "identity_state": {
+    "MODEL_INSTANCE_BINDING": "UNCHANGED-TRANSPORT-SIDE-ONLY: this package closes the second enqueue path's mechanics (queue object fields, 8-byte pair entry layout, cursor append) but adds NO new identity edge between a concrete model resource and a concrete world instance",
+    "WORLD_XYZ_RECOVERED": "NO",
+    "HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+    "CURSOR_SOURCE_MEDIUM": "UNKNOWN",
+    "CANONICAL_GATE_EFFECT": "NONE",
+    "new_identity_relevant_facts": [
+      "the {0x66,A}-shaped request pair travels as a dense 8-byte 2-DWORD entry array inside an ESI-queue with cursor [+4] / limit [+8]; consumer of that queue NOT identified in-window",
+      "006C3640 is a GENERIC per-element enqueue loop (no literal 0x66 in-window); its use for the {0x66,A} transport is caller-context (cited P07) + navigation census (2 call sites)"
+    ]
+  }
+}

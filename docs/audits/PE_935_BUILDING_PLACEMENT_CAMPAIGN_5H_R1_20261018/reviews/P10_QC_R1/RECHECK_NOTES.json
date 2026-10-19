@@ -1,0 +1,120 @@
+{
+  "qc_run_id": "PE935_CAMPAIGN_P10_QC_R1_20261018T234830Z",
+  "target_package": "P10_EXEC_R1",
+  "method": "fresh independent reviewer; line-numbered re-derivations from the pinned source (sha256 642CC29A... re-hashed at QC start) and the pack's verbatim extract (sha256 1E7091F73667448A622C10D0E99E0C6EAFDC352842DBBE97565E8E7340D76645, re-hashed); PLUS the parent-authorized re-check of the already-admitted P07 extract SR1_745BF0.txt (sha256 re-hashed; parity re-verified) for the B1 settlement; no delegation; NO_NESTED_TASKS",
+  "source_parity_check": {
+    "p10_extract": {
+      "claim": "extract rows verbatim = source lines L809770-L809826 (57 rows, VA 0x00745A70-0x00745AFF)",
+      "method": "independent PowerShell ReadAllLines slice; per-row comparison of extract row bodies ('SRCLN <n> | <body>') against source lines",
+      "result": "PARITY_MISMATCHES=0; EXTRACT_ROW_COUNT=57; first row 809770=00745a70 MOV EAX,[ESP+0x4]; last row 809826=00745aff RET; boundary line 809827 (0x00745B00) NOT included",
+      "verdict": "CONFIRMED"
+    },
+    "p07_sr1_extract_recheck": {
+      "authorization": "parent QC instruction: 'YOU MAY settle B1 by re-reading the ALREADY-ADMITTED P07 extract SR1_745BF0.txt ... re-checking an existing admitted extract does not create a new uncounted front'",
+      "claim": "SR1 rows verbatim = source lines L809928-L809959 (32 rows, VA 0x00745BF0-0x00745C3D)",
+      "result": "PARITY_MISMATCHES=0; SR1_ROWS=32; first row 809928=00745bf0 MOV EDX,[ESP+0x4]; last row 809959=00745c3d RET 0x4",
+      "note": "the two source rows immediately before the P07 window (L809926=00745bec POP ESI, L809927=00745bed RET) were incidentally visible in the parity slice head; used ONLY to confirm 0x00745BF0 is a true function entry (previous body ends RET @00745bed); no semantic analysis of them",
+      "verdict": "CONFIRMED"
+    }
+  },
+  "rederivations": [
+    {
+      "id": "RDER-P10-01-callee-stack-arithmetic",
+      "claim_under_test": "P10-2 slot mapping (the parent-flagged frame arithmetic): S1=[entry+0x4]->EAX, S2=[entry+0x8]->EDI, S4=[entry+0x10]->ESI, S6=[entry+0x18]->EDX; S3/S5 never read",
+      "line_trace": [
+        "L809770 (00745a70) MOV EAX,[ESP+0x4] — 0 pushes so far -> [ESP_entry+0x4] = S1 (scan start cursor) [OK]",
+        "L809771 (00745a74) MOV EDX,[ESP+0x18] — STILL 0 pushes (PUSH EBX is at L809772/00745a78) -> [entry+0x18] = S6 (match value) [OK - no correction needed, and none applied]",
+        "L809772-809773: PUSH EBX, PUSH ESI -> 2 pushes (ESP = entry-8)",
+        "L809774 (00745a7a) MOV ESI,[ESP+0x18] -> [entry-8+0x18] = [entry+0x10] = S4 (additive base term) [OK - 2-push correction correct]",
+        "L809775: PUSH EDI -> 3 pushes (ESP = entry-0xC)",
+        "L809776 (00745a7f) MOV EDI,[ESP+0x14] -> [entry-0xC+0x14] = [entry+0x8] = S2 (scan end) [OK - 3-push correction correct]",
+        "no other [ESP+imm] read exists in the 57 rows; remaining memory operands are [ESI+EAX(+0x8)] (7 MOVZX) and the 3 epilogue POPs"
+      ],
+      "verdict": "CONFIRMED — the worker's stack arithmetic is exactly correct on all four consumed slots; S3/S5 dead confirmed by census"
+    },
+    {
+      "id": "RDER-P10-02-scan-mechanics",
+      "claim_under_test": "P10-3: 4-way unrolled scan over 0x20 blocks + residual 1/2/3; first-match return = entry start; no-match return = S2",
+      "line_trace": [
+        "L809777-809781: ECX = EDI-EAX = S2-S1; SAR ECX,5 -> 0x20-block count; TEST; JLE 00745ac6 (skip if empty)",
+        "main loop L809782-809801: 4 checks at [ESI+EAX], [ESI+EAX+8], [ESI+EAX+8], [ESI+EAX+8] with ADD EAX,8 BEFORE each compare from check 2 on (L809787, L809791, L809795) -> EAX at each match JZ = entry start [OK on all 4 sites]; block tail: SUB ECX,1; ADD EAX,8; TEST; JG back to 00745a90",
+        "residual L809802-809810: ECX = ((EDI-EAX)>>3)-1; JZ->00745af2 (1 left, single check); SUB,JZ->00745ae7 (2 left: ae7+aef+af2); SUB,JNZ->00745afa (0 or >=4 -> fail; fall-through = 3 left: adc+ae7+af2) [enumeration re-derived; matches worker exactly]",
+        "no-match: L809822 MOV EAX,EDI (EDI = S2, never written after L809776; MOV EDI,EDI @L809782 is a 2-byte no-op) -> return S2",
+        "match sites: 7 total (a96, aa2, aae, aba, ae2, aed, af8) -> all JZ to 00745afc epilogue with EAX = entry start [OK]"
+      ],
+      "verdict": "CONFIRMED_as_instruction (std::find-shaped contract: match->position, miss->end)"
+    },
+    {
+      "id": "RDER-P10-03-single-byte-key",
+      "claim_under_test": "P10-4: only comparison = MOVZX byte (0..255) vs S6 full DWORD; S6>255 always-fail; immediate census {0x1,0x3,0x4,0x5,0x8,0x14,0x18}, no 20006/6/2",
+      "independent_check": "compare census: 7 CMP sites, all CMP EBX,EDX or CMP ECX,EDX with the left operand from MOVZX byte (7 MOVZX total: 4 main + 3 residual); EDX written once (L809771) and never rewritten (verified by def-use scan); independent immediate census over all 57 rows: 0x1 x11, 0x3 x1, 0x4 x1, 0x5 x1, 0x8 x9, 0x14 x1, 0x18 x2 (plus in-window branch-target code addresses 0x00745a90/ac6/ae7/af2/afa/afc which are control-flow targets, not data) — NO 0x4E26/20006, NO 6, NO 2. Control calculation: S6=20006 -> no zero-extended byte equals 20006 -> all 12 branch paths converge to fail -> EAX=S2 -> caller CMP EAX,[this+8] equal -> fail exit.",
+      "verdict": "CONFIRMED_as_instruction; the >255 always-fail implication is arithmetically forced"
+    },
+    {
+      "id": "RDER-P10-04-region-integrity-and-abi",
+      "claim_under_test": "P10-1/P10-9: single entry, all 6 branch targets in-window, single RET, 3/3 push-pop balance, RET without immediate, EAX/ECX/EDX clobbered",
+      "independent_check": "VA-delta scan over 57 rows: all consecutive deltas positive (strictly increasing addresses, no gaps/jumps in listing); branch target set = {0x00745a90, 0x00745ac6, 0x00745afc, 0x00745af2, 0x00745ae7, 0x00745afa} — exactly 6 distinct, all in-window [matches P10-1]; CALL census = 0; RET census = 1 (00745aff, last row, no immediate follows in-window); PUSH EBX/ESI/EDI vs POP EDI/ESI/EBX balanced; region bytes 0x00745B00-0x00745A70 = 0x90 = 144 [matches COUNTERS].",
+      "verdict": "CONFIRMED_as_instruction; 6-argument reading correctly graded PLAUSIBLE not CONFIRMED (slot-count inference from read scope)"
+    },
+    {
+      "id": "RDER-P10-05-scoped-negatives",
+      "claim_under_test": "P10-7: no VFS-record-fed source in-window (0 calls, no absolute/global data address, no I/O); FAMILY-P/T NOT_DECIDABLE at this level",
+      "independent_check": "operand census: memory forms are only [ESP+imm] (4 arg reads) and [ESI+EAX*1(+0x8)] (7 byte reads); no [absolute] data operand, no CALL/INT/IN/OUT, no FPU; all immediates are small scalars or in-window code targets. The negative is correctly window-bounded (the populator edge B2 stays open).",
+      "verdict": "CONFIRMED_as_scoped_negative"
+    },
+    {
+      "id": "RDER-P10-06-B1-SETTLEMENT",
+      "claim_under_test": "PARENT-ASSIGNED B1: which key DWORD of the 4-DWORD key tuple actually reaches the byte-compare — via the authorized P07-extract re-check (SR1_745BF0, parity-verified)",
+      "caller_frame_trace": [
+        "745BF0 entry ESP = E; [E]=ret, [E+4]=ARG1_caller (745BF0's first stack arg), [E+8]=ARG2_caller, ...",
+        "L809928 (00745bf0) MOV EDX,[ESP+0x4] -> EDX = ARG1_caller [ESP=E, no pushes yet]",
+        "L809929 SUB ESP,0x10 -> ESP = E-0x10 (local block 1, 16 bytes; no in-window write to it)",
+        "L809930-809931 PUSH EBX; MOV EBX,[ESP+0x4] -> EBX = [E-0x14+4] = [E-0x10] = local-block-1 bottom slot (never written in-window; stale/caller-of-745BF0 leftover) -> key[0] source",
+        "L809932-809933 PUSH ESI, PUSH EDI -> ESP = E-0x1C",
+        "L809934-809935 MOV EAX,0x4; MOV EDI,EAX -> EDI = 4 (the constant)",
+        "L809936 (00745c05) LEA EAX,[ESP+0x20] -> EAX = (E-0x1C)+0x20 = E+0x4 = &ARG1_caller",
+        "L809937 PUSH EAX -> [E-0x20] = &ARG1_caller; L809938 SUB ESP,0x10 -> ESP = E-0x30 (local block 2 = the key tuple buffer)",
+        "L809939 MOV EAX,ESP -> EAX = E-0x30 (tuple base)",
+        "L809941 (00745c11) MOV ECX,[ESP+0x24] -> ECX = [E-0x30+0x24] = [E-0x0C] = local-block-1 slot 2 (never written in-window) -> key[2] source",
+        "L809942-809946 tuple writes: [EAX+0x0]=EBX (key[0]); [EAX+0x4]=EDI=4 (key[1]); [EAX+0x8]=ECX (key[2]); [EAX+0xc]=EDX (key[3] = ARG1_caller)",
+        "L809945/809947: ECX = [ESI+0x8]; EDX = [ESI+0x4] (ESI = this per L809940 MOV ESI,ECX)",
+        "L809948-809950 PUSH ECX ([this+8]); PUSH EDX ([this+4]); CALL 0x00745a70 -> callee entry ESP = E-0x3C"
+      ],
+      "callee_slot_mapping": [
+        "callee [entry+0x04] = [E-0x38] = [this+4] -> S1 = scan start [matches P10]",
+        "callee [entry+0x08] = [E-0x34] = [this+8] -> S2 = scan end [matches P10; and the post-call CMP EAX,[ESI+0x8] @L809952 confirms S2 = [this+8]]",
+        "callee [entry+0x0C] = [E-0x30] = key[0] -> S3 (dead in callee)",
+        "callee [entry+0x10] = [E-0x2C] = key[1] = THE CONSTANT 4 -> S4 = additive base term (ESI = 4)",
+        "callee [entry+0x14] = [E-0x28] = key[2] -> S5 (dead in callee)",
+        "callee [entry+0x18] = [E-0x24] = key[3] = 745BF0's ARG1_caller -> S6 = THE MATCH VALUE",
+        "callee [entry+0x1C] = [E-0x20] = &ARG1_caller -> S7 (pushed by 00745c09; never read by the callee — dead)"
+      ],
+      "b1_answer": "THE BYTE-COMPARE RECEIVES key[3] — the FOURTH DWORD of the 4-DWORD key tuple, i.e. the value 745BF0 itself received as ITS first stack argument ([ESP+0x4] @00745bf0). NOT key[1]: the constant 4 lands in S4 and acts as the scan's additive base (ESI=4), which (a) makes every compared byte sit at [cursor+4] — the tag byte at entry offset +4 of each 8-byte entry — and (b) leaves the returned cursor an ABSOLUTE ENTRY POINTER, consistent with the caller's success-path deref MOV EAX,[EAX] @00745c35 (P07 window) reading the payload DWORD at entry+0. key[0]/key[2] land in S3/S5 and are dead in the callee (their in-window provenance: reads of 745BF0's own never-written local block — stale/caller-leftover values, harmless because never consumed).",
+      "consistency_with_prior_qc": "the P07_QC_R1 review (reviews/P07_QC_R1/QC_REPORT.md) independently recorded the same mapping ('callee 745A70 receives [this+4], [this+8], &arg1 and the key by value; 4-DWORD key (const 4 at +0x4)') — QC re-derivation agrees slot-for-slot.",
+      "consequences": [
+        "P10-5 CONFIRMED with slot precision: the composite key is NOT consumed as a composite; exactly one tuple DWORD (key[3]) reaches the compare, and only its low byte can match (0..255);",
+        "P10-8/B4 RESOLVED by the authorized re-check: S4 = 4 (nonzero) and the cursor is an absolute entry pointer (caller derefs the raw return); the '+4' is a fixed tag-offset inside the 8-byte entry, not a base-pointer/offset duality;",
+        "id2/class-20006 falsifier now slot-exact: if 745BF0's caller ever feeds 20006 into 745BF0's ARG1, then key[3]=S6=20006 > 255 -> guaranteed always-fail -> JZ 0x00745c40 fail exit taken;",
+        "remaining edges unchanged: B2 (array populator — still no VA in any admitted window) and the value semantics of 745BF0's ARG1 (caller-of-745BF0 window, never admitted)."
+      ],
+      "verdict": "B1 SETTLED: key[3] (the tuple slot written at 00745c20 from 745BF0's ARG1) reaches the byte-compare; constant 4 (key[1]) reaches the base term; key[0]/key[2] dead"
+    },
+    {
+      "id": "RDER-P10-07-denied-region-non-read",
+      "claim_under_test": "parent check: P10 did not read the denied front-A region 0x007B6C4B-0x007B6E4B (events 000011 DENY BAD_FRONT / 000012 DENY FRONT_A_TIME_CAP)",
+      "independent_check": "P10 extract (verbatim-verified) contains only VA 00745a70-00745aff rows; no 7B6Cxx content anywhere in the pack's extract; HANDOFF explicitly lists 0x007B6C4B as DENIED/stays-in-backlog; GATES G8 denies any read; SOURCE_PINS explicit_non_pins lists it. The two navigation disclosures (line 809950 address+mnemonic; line 809827 address-only) concern 745BF0/745B00 territory, not the denied region.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "RDER-P10-08-citation-accuracy",
+      "claim_under_test": "P10's P07 citations",
+      "independent_check": "P07 REPORT.md L4 contains verbatim: 'keyed map-lookup helper (4-DWORD key incl. constant 4; callee 745A70 performs the actual read; success returns *[EAX]; fail path exits window at 0x00745C40)' and 'id2/tag-6 hypothesis NOT confirmed in-window - moved to 745A70' — 5 of the 6 cited elements are literally there. The sixth element ('called 745A70 with [this+4]/[this+8] pushes') appears not in P07's REPORT.md but in the P07 QC review (reviews/P07_QC_R1/QC_REPORT.md, P07-C1 row). The FACT is true (verified independently from the parity-verified P07 extract: PUSH ECX=[this+8] @L809948, PUSH EDX=[this+4] @L809949), but P10's SOURCE_PINS attributes it to P07 REPORT.md — a citation-SOURCE imprecision, not a factual error.",
+      "verdict": "CONFIRMED with one P3 citation-source imprecision (see QC_REPORT corrections)"
+    }
+  ],
+  "full_read_log": {
+    "pack_files_read_to_eof": ["REPORT.md", "EXTRACT_745A70_745B00.txt", "CLAIMS.json", "COUNTERS.json", "MANIFEST.json", "HANDOFF.md", "GATES.json", "MEMORY_AND_IDENTITY.json", "BARRIER_BACKLOG.json", "SOURCE_PINS.json", "RUN_STARTED.json", "CONTRACT.json (hash + content, CONTROL copy)", "artifact_index.csv (hash only - enumerated in MANIFEST verification)"],
+    "external_files_read": ["CONTROL/EVENTS/000011_DENY.json, 000012_DENY.json, 000013_ADMIT.json (chronology)", "CONTROL/CONTRACTS/P10.json (hash)", "pinned source L809770-809826 (parity) + L809926-809960 (SR1 parity + entry-boundary confirmation)", "packages/P07_EXEC_R1/extracts/SR1_745BF0.txt (AUTHORIZED re-check, full 32 rows)", "packages/P07_EXEC_R1/REPORT.md (grep: L4-5, L7)", "reviews/P07_QC_R1/QC_REPORT.md (grep: L29, L36 - cross-check of B1 mapping)"],
+    "read_mode": "FULL_READ of all pack files; BOUNDED_INSPECTION of external files; NOT_CHECKED: artifact_index.csv row-level content beyond hash match (its hashes equal MANIFEST's, which were all re-verified); wider P07 QC report body beyond grep hits"
+  }
+}

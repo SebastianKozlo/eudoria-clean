@@ -1,0 +1,43 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P10",
+  "front": "C",
+  "subject": "0x00745A70 (body), region 0x00745A70-0x00745B00, source listing lines 809770-809826",
+  "identity_statements": [
+    {
+      "id": "P10-ID-1",
+      "statement": "0x00745A70 is a std::find-shaped first-match linear scanner over 8-byte entries with a 1-byte discriminator at entry offset 0. It is NOT a hash map probe (no multiply/modulo/hash arithmetic in-window), NOT a tree walk (no child-pointer dereferences), NOT an RTTI/typeinfo consumer (no indirect calls, no vtable reads), NOT a serializer/parser (no stream cursor operations).",
+      "evidence_level": "CONFIRMED (machine-behavior level); the 'std::find-shaped' label is STRONGLY_SUPPORTED (returns end-value on failure, begin-position on success)",
+      "renaming_rule": "safe working label: 'byte-tag linear entry scan (stride 8)'. Do NOT canonize names like 'PropertyMap::find', 'id2_lookup', 'class_20006_finder' - those carry caller-side semantics not present in this window."
+    },
+    {
+      "id": "P10-ID-2",
+      "statement": "The 'map read behind 745BF0' (P07 phrasing) is at this level a flat array scan bounded by two values pushed by the caller as [this+4] and [this+8] (P07-cited) with an additive base term S4 and a match byte S6. The 'map' word is caller/context vocabulary, not an in-window container-type fact.",
+      "evidence_level": "CONFIRMED for the flat-scan mechanics; the [this+4]/[this+8] provenance is CITED from P07, not re-derived here",
+      "renaming_rule": "keep the distinction between in-window facts and P07 citations explicit in every downstream artifact."
+    },
+    {
+      "id": "P10-ID-3",
+      "statement": "Entry payload (bytes 1..7 of each 8-byte unit) is UNKNOWN in this window. Candidate payload models that all remain PLAUSIBLE: (a) tag byte + inline id/flags; (b) tag byte + pointer/index; (c) 8-byte scalar whose first byte is compared; (d) tagged-pointer scheme. None is preferred by in-window evidence; do not promote any without the populator/consumer window.",
+      "evidence_level": "PLAUSIBLE (all four), by construction from P10-6",
+      "renaming_rule": "the word 'tag' for byte 0 is a convenience label for 'the compared first byte' - it is PLAUSIBLE, not CONFIRMED, that it is a type/tag field."
+    },
+    {
+      "id": "P10-ID-4",
+      "statement": "This body cannot decide FAMILY-P/T merge: it contains no VFS/parser/record-feeding operations at all (P10-7). Any downstream text must NOT say 'the property map is (or is not) VFS-fed' based on P10 alone.",
+      "evidence_level": "CONFIRMED (as a scoped negative)",
+      "renaming_rule": "phrase downstream as: '745A70 is a pure in-memory scan; the array's origin was not visible in its window'."
+    }
+  ],
+  "premises_preserved": [
+    "identical names/shapes do not prove common semantics - applied in P10-ID-1/P10-ID-2 (no name-based container typing)",
+    "definition registry != instance source - applied in P10-7 countermodel (even a definition-table reading would not identify instances)",
+    "scoped negatives keep window bounds - applied in P10-6/P10-7 (unread/unfed-in-window != meaningless/not-fed in program)",
+    "no direct caller != exclusively virtual - applied in P10-9 (single known direct caller at 0x00745C28 does not preclude other callers)"
+  ],
+  "do_not_confuse": [
+    "0x00745A70 (this scanner) vs 0x00745BF0 (caller wrapper, P07 window) - different bodies, different windows",
+    "the caller's 4-DWORD key (P07-cited construct) vs this callee's 1-byte match criterion - the key is built and consumed caller-side; only its slot landing matters here",
+    "region end 0x00745B00 (next body's start, NOT read) vs this body's RET at 0x00745AFF"
+  ]
+}

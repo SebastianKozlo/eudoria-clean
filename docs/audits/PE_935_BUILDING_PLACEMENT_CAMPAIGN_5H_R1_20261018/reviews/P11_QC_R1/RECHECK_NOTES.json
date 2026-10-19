@@ -1,0 +1,100 @@
+{
+  "qc_run_id": "PE935_CAMPAIGN_P11_QC_R1_20261018T234830Z",
+  "target_package": "P11_EXEC_R1",
+  "method": "fresh independent reviewer; line-numbered re-derivations from the pinned source (sha256 642CC29A... re-hashed at QC start) and the pack's verbatim extract (sha256 CDA76004453D5CA7A6390E6BEE969079168C2E25F58C0E9A4D8838C61987CFAE, re-hashed); no delegation; NO_NESTED_TASKS",
+  "source_parity_check": {
+    "claim": "extract rows verbatim = source lines L632937-L632981 (45 rows, VA 0x006B6C1B-0x006B6C9D)",
+    "method": "independent PowerShell ReadAllLines slice; per-row comparison (address+instruction) against source lines",
+    "result": "PARITY_MISMATCHES=0; ROW_COUNT=45; first row L632937=006b6c1b PUSH 0x1; last row L632981=006b6c9d PUSH 0x1; VA sequence strictly increasing (no gaps: 6c1b..6c9d contiguous instruction stream)",
+    "verdict": "CONFIRMED"
+  },
+  "rederivations": [
+    {
+      "id": "RDER-P11-01-append-buffer-state-machine",
+      "claim_under_test": "P11-C1: stack-local DWORD-stride append buffer (cursor [ESP+0x38], bound [ESP+0x3c]); store-at-cursor when cursor!=bound; equality redirect A->B / B->pump",
+      "line_trace": [
+        "stage A: L632948 MOV ECX,[ESP+0x38]; L632949 CMP ECX,[ESP+0x3c]; L632950 MOV [ESP+0x14],EAX (no EFLAGS effect -> JZ tests the CMP); L632951 JZ 0x006b6c5c",
+        "L632954 MOV [ECX],EAX (store at cursor); L632956 ADD ECX,0x4; L632957 MOV [ESP+0x38],ECX (cursor+=4); L632958 JMP 0x006b6c74 (A success -> B producer step, skipping B re-init)",
+        "stage B mirror: L632970/632971/632972/632973 (JZ 0x006b6c9d = PUMP ENTRY); L632976 store; L632978 ADD 4; L632979 cursor writeback; L632980 JMP 0x006b6cb9 (out-of-window success exit)",
+        "stride 4 = DWORD elements; both JZ equality gates confirmed"
+      ],
+      "verdict": "CONFIRMED_as_instruction (mechanics); [ESP+0x3c] as static-capacity vs dynamic-end correctly graded STRONGLY_SUPPORTED not CONFIRMED"
+    },
+    {
+      "id": "RDER-P11-02-container-field-producers",
+      "claim_under_test": "P11-C2: elements = returns of method calls on [EDI+0x8] (A: CALL 0x006C27A0 @L632947; B: CALL 0x006C27F0 @L632969); pending stash [ESP+0x14] before append; [EDI+0x8] only object-field read, receiver-only",
+      "line_trace": [
+        "L632946 MOV ECX,[EDI+0x8]; L632947 CALL 0x006c27a0 (stage A); L632968 MOV ECX,[EDI+0x8]; L632969 CALL 0x006c27f0 (stage B)",
+        "[EDI+0x8] appears exactly twice (L632946, L632968) - independent census matches; no other EDI offset read; the loaded value is used solely as ECX receiver",
+        "stash: L632950 and L632972 MOV [ESP+0x14],EAX before the append gate"
+      ],
+      "verdict": "CONFIRMED_as_instruction (call shape, receiver, append-of-return); producer semantics UNKNOWN (out-of-window) - correctly split"
+    },
+    {
+      "id": "RDER-P11-03-helper-call-and-ecx-flow",
+      "claim_under_test": "P11-C3: helper 0x006B4120 on this=[ESP+0x48], args (incoming ECX, &[ESP+0x20], &[ESP+0x58], 1, 1), callee-cleans (no ADD ESP after call); on the A->B overflow path the incoming ECX = stage-A cursor",
+      "line_trace": [
+        "stage A: L632937-632944 PUSH 0x1; PUSH 0x1; LEA EAX,[ESP+0x58]; PUSH EAX; LEA EDX,[ESP+0x20]; PUSH EDX; PUSH ECX; LEA ECX,[ESP+0x48]; L632945 CALL 0x006b4120; L632946 MOV ECX,[EDI+0x8] immediately follows (NO ADD ESP -> callee-cleans shape)",
+        "stage B re-init mirror: L632959-632967 identical block",
+        "ECX flow on the overflow path: L632948 MOV ECX,[ESP+0x38] (cursor) -> L632951 JZ -> stage B -> L632965 PUSH ECX pushes that cursor (no ECX writer between L632948 and L632965 on this path - verified row by row)",
+        "arg ordering note: the pushes occur BEFORE each LEA-recomputed pointer is taken, so the pushed &[ESP+0x58]/&[ESP+0x20] values are enclosing-frame slots computed relative to post-push ESP (E0+0x50 / E0+0x14 if E0 = stage-entry ESP); the worker's claim records the arg SHAPE only, which is correct; the frame-exact slot identities are caller-context (out-of-window) and unclaimed"
+      ],
+      "verdict": "CONFIRMED_as_instruction (call shape, no-cleanup, ECX flow); helper role UNKNOWN - correctly split"
+    },
+    {
+      "id": "RDER-P11-04-pump-entry-condition",
+      "claim_under_test": "P11-C4: pump 0x006B6C9D entered exactly when stage-B cursor==bound (JZ @L632973); overflow/fallback arm, not per-element walker; window's last row = pump entry PUSH 0x1 declared in-region; continuation >=0x006B6C9F not read",
+      "line_trace": [
+        "L632971 CMP ECX,[ESP+0x3c]; L632972 stash; L632973 JZ 0x006b6c9d; L632981 006b6c9d PUSH 0x1 (window end = region end)",
+        "only in-window in-edge to 0x006b6c9d is the JZ (verified: no other branch targets 6c9d); the pump body itself is out-of-window (only entry row in-window)"
+      ],
+      "verdict": "CONFIRMED_as_instruction (entry condition); no claim about pump internals beyond cited standing - correctly bounded"
+    },
+    {
+      "id": "RDER-P11-05-scoped-negative",
+      "claim_under_test": "P11-C5: zero global/absolute refs and zero registry/pump-machinery calls in the 45-row window",
+      "independent_check": "my census: ABS_CONST_ROWS(non-branch)=0; CALL census: 0x006b4120 x2, 0x006c27a0 x1, 0x006c27f0 x1 (4 total, 3 distinct); no 0x0072F580/0x007CE1E0/0x0043C700/0x0040B070/0x0043E5B0/0x006C3640/0x008BD720 anywhere in the extract; memory operands only [ESP+imm], [EDI+0x8], [ECX].",
+      "verdict": "CONFIRMED_as_scoped_negative (window-bounded)"
+    },
+    {
+      "id": "RDER-P11-06-skip-slot-behavior",
+      "claim_under_test": "P11-C7: cursor==EBP => store skipped, cursor still advances; EBP role UNKNOWN",
+      "line_trace": [
+        "stage A: L632952 CMP ECX,EBP; L632953 JZ 0x006b6c53 (= the ADD ECX,0x4 row) - skips L632954 store and L632955 reload; ECX at jump = cursor (loaded L632948) -> advances via L632956/632957",
+        "stage B mirror: L632974/632975 JZ 0x006b6c94 (= ADD row)",
+        "EBP never written in-window; role/value UNKNOWN - correctly split"
+      ],
+      "verdict": "CONFIRMED_as_instruction (skip-advance); EBP role UNKNOWN"
+    },
+    {
+      "id": "RDER-P11-07-stack-census-arithmetic-slip-correction",
+      "claim_under_test": "parent-assigned: the disclosed in-run arithmetic slip (stack-slot census 26 -> 16) corrected pre-finalization - VERIFY",
+      "independent_check": "my independent [ESP+imm] access census over all 45 rows: 16 accesses (LEA [ESP+0x58] x2, LEA [ESP+0x20] x2, LEA [ESP+0x48] x2, MOV [ESP+0x14],EAX W x2, [ESP+0x38] R x4 / W x2, [ESP+0x3c] R x2 = 6+2+6+2 = 16). The FINAL value 16 in COUNTERS.json/REPORT.md/MEMORY_AND_IDENTITY.json is CORRECT; the slip (26) does not survive anywhere in the final artifacts; the worker DISCLOSED the correction in REPORT SELF_CHECK and in the MANIFEST origin note for COUNTERS.json ('stack census corrected 26->16 in-run').",
+      "verdict": "CORRECTION VERIFIED: final census value 16 is exact; disclosure honest"
+    },
+    {
+      "id": "RDER-P11-08-retry-attribution",
+      "claim_under_test": "parent-assigned: attempt 1 empty (CONTRACT/RUN_STARTED preserved), retry 1 completed",
+      "independent_check": "RUN_STARTED.json (prior session, started 23:32:58Z, sha256 8c0203a3... preserved byte-identical - re-hashed by QC, matches manifest); CONTRACT.json (prior session, sha256 369059f6... = CONTROL contract, byte-identical - re-hashed by QC); RUN_STARTED_RETRY1.json marker (23:36:51Z) added WITHOUT overwriting; GATES G11 covers the preservation. Chronology: event 000014 ADMIT 23:32:39Z -> first start 23:32:58Z (session died, only 2 files) -> retry marker 23:36:51Z -> pins 23:39:29Z -> counters recorded 23:42:00Z -> gates 23:47:00Z -> manifest 23:41:30Z... [see COUNTERS_RECHECK chronology note: manifest_generated_utc 23:41:30Z vs GATES evaluated_utc 23:47:00Z - see QC_REPORT finding P11-QC-F1]",
+      "verdict": "CONFIRMED (attribution honest); one chronology anomaly recorded as finding P11-QC-F1"
+    },
+    {
+      "id": "RDER-P11-09-citation-accuracy",
+      "claim_under_test": "P11-C6 STANDING_INHERITED citations (P07 REPORT + bridge DRAFT_FINAL_REPORT)",
+      "independent_check": "P07 REPORT.md re-hashed by QC: 80ca78b951f3aa9d3cd668b14e1810585a512ec72bc41d55a2f96d020decd9f4 (matches manifest external_reference and P11 SOURCE_PINS); its L5 contains the pump chain (72FCE0 -> 7CE1E0 -> 43C700 -> 40B070 -> 43E5B0; callback 8BD720) - citation ACCURATE. Bridge DRAFT_FINAL_REPORT.md re-hashed: 2910289f0e9180b9ecc3e8022fbc76d45bbe1bb20cce2c5738493b1b7c1b3974 (matches pins); bridge attribution of templates.vfs as definition registry consistent with the bridge files grepped in the P12 QC (RUN_PLAN L18, SELECTION L15).",
+      "verdict": "CONFIRMED (citation hashes and content accurate)"
+    },
+    {
+      "id": "RDER-P11-10-denied-region-non-read",
+      "claim_under_test": "parent check: P11 did not read the denied front-A region 0x007B6C4B-0x007B6E4B",
+      "independent_check": "P11's extract contains only VA 006b6c1b-006b6c9d rows (45/45 parity-verified); no 7B6Cxx content; HANDOFF/BARRIER_BACKLOG list only 6B/6C-family targets; the denied region belongs to the P10 front-A story and is disjoint from P11's window.",
+      "verdict": "CONFIRMED"
+    }
+  ],
+  "full_read_log": {
+    "pack_files_read_to_eof": ["REPORT.md", "EXTRACT_REGION_006B6C1B_006B6C9D.txt", "RUN_STARTED.json", "RUN_STARTED_RETRY1.json", "COUNTERS.json", "MANIFEST.json", "GATES.json", "HANDOFF.md", "CLAIMS.json", "MEMORY_AND_IDENTITY.json", "SOURCE_PINS.json", "BARRIER_BACKLOG.json", "CONTRACT.json (via byte-identical CONTROL copy, hash re-verified both sides)"],
+    "hash_verified_only_not_row_parsed": ["artifact_index.csv (sha256 matches manifest; it duplicates the manifest's 13-file list which was fully re-verified; no claim cites it)"],
+    "external_files_read": ["CONTROL/EVENTS/000014_ADMIT.json (chronology)", "pinned source L632937-632981 (parity) + head sample (P12 QC step)", "P07 REPORT.md (hash + grep L5)", "bridge DRAFT_FINAL_REPORT.md (hash only)"],
+    "read_mode": "FULL_READ of all load-bearing pack files; BOUNDED_INSPECTION of externals; NOT_CHECKED: artifact_index.csv row content (hash-verified only, justification above)"
+  }
+}

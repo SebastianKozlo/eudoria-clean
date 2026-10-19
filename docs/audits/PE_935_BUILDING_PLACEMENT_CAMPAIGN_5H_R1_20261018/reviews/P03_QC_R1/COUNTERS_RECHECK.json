@@ -1,0 +1,35 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_P03_QC_R1_20261018",
+  "target_pack": "P03_EXEC_R1",
+  "reserved_vs_actual_vs_reviewer": {
+    "bodies": {"reserved": 1, "worker_actual": 1, "reviewer_count": 1, "note": "single logical entry 0x007B6C30; continuation 0x007B6C4B = same body per frame-ownership inference (see QC-P03-D1 wording note); no double-count instruction. ACCEPTED."},
+    "instruction_rows": {"reserved": 14, "worker_actual": 14, "reviewer_count": 14, "note": "source lines 959600-959613; line parity byte-verified by reviewer; full decode-length continuity check PASS (RET 0x4 ends exactly at region end-exclusive boundary 0x007B6C4B)."},
+    "edges": {"reserved": 2, "worker_actual": 2, "reviewer_count": 2, "note": "E1 JNZ@007b6c41 -> 0x007B6C4B (recorded, NOT read - reviewer confirms no read of the target); E2 fall-through -> RET 0x4."},
+    "call_sites": {"reserved_field_rendering": "edges:2 rendered as '2 CALL' in the parent cap-note; contract main_question itself states '0 CALL'", "worker_actual": 0, "reviewer_count": 0, "no_refund_handling_assessment": "CORRECT - reservation kept in ledger per parent contract section 6 (no refund), actual CALL contribution to Front A = 0, discrepancy surfaced explicitly (COUNTERS call_sites note + HANDOFF + REPORT). The CALL/edges naming mix originates in the parent dispatch framing, not the worker."},
+    "candidates": {"reserved": 2, "worker_actual": 2, "note": "CAND-P3a lookup vs CAND-P3b get-or-create/register; both properly kept live (NOT_ESTABLISHED)."},
+    "front_A_after_P03": {"worker": "6/16, 386/1800, 42/64 CALL, 8/12", "reviewer_arithmetic": "5+1=6; 372+14=386; 42+0=42; 6+2=8 - MATCH. Campaign 6/96, 386/12000, 42/320, 8/48 - MATCH, within caps."}
+  },
+  "key_claims_recheck": {
+    "thiscall_key_at_ESP_plus_0x10_by_value": "RE-DERIVED: 3 pushes (EBX,EBP,EDI = -0xC) => [ESP+0x10] = entry [ESP+4] = ARG1 = the single key DWORD; RET 0x4 pops retaddr+4 = balanced. Cross-checked against the P02 caller shape (PUSH 0x00A85460; CALL; no ADD ESP) - caller/callee agree. CONFIRMED.",
+    "unconditional_read_this_plus_0x18": "row 959604 precedes the key test row 959607; single straight-line block, no earlier branch. CONFIRMED.",
+    "register_decrement_minus1_no_store_back": "SUB EDI,0x1 @row 959606 operates on the register copy; no store to [this+0x18] anywhere in the 14 rows. CONFIRMED.",
+    "zero_memory_writes_in_region": "reviewer enumeration: no memory-destination instruction in any of the 14 rows; only stack traffic = 3 PUSH/3 POP + CALL/RET implicit (convention disclosed by worker). CONFIRMED.",
+    "JNZ_continuation_at_0x007B6C4B": "in-region operand (row 959608) + decode arithmetic (007b6c43+8=007b6c4b). Target recorded, NOT read. CONFIRMED as a fact about the in-region edge; target semantics NOT_ESTABLISHED.",
+    "both_candidates_NOT_ESTABLISHED": "in-region contains no table access at all; no predicate discriminates lookup vs register. CONFIRMED (properly not established).",
+    "P03_C5_fast_path_dead_for_P02_callsites": "0x00A85460 != 0 (arithmetic) + P02 callsites push that constant (reviewer-verified in P02 region). CONFIRMED.",
+    "P03_C9_navigation_census_32_call_rows": "reviewer grep '007b6c30': 33 matches = 32 CALL rows + 1 entry row. CONFIRMED (count only)."
+  },
+  "boundary_incident_assessment": {
+    "worker_disclosure": "3 boundary rows (0x007b6c4b/c4d/c4e) incidentally returned by the region-locating Grep (pattern '007b6c3|007b6c4', 49 rows = 32 CALL + 14 in-region + 3 boundary)",
+    "reviewer_verdict": "ACCEPTED - no semantic analysis performed on them by the worker; NO claim (C1-C9 checked individually) depends on their content; jump-target VA derives from the in-region JNZ operand; continuation size explicitly declared unknown (not bounded by the exposed rows). Disclosure present in COUNTERS/REPORT/GATES/MANIFEST. Reviewer's own incidental exposure (grep match line 959614 '007b6c4b TEST EDI,EDI') is disclosed in RECHECK_NOTES.json with the same non-use guarantee."
+  },
+  "manifest_bijection_recheck": {"files_on_disk": 13, "manifest_censused": 12, "manifest_self_excluded": true, "hashes_matching_reviewer_rehash": 12, "mismatches": 0, "strays": 0},
+  "contract_copy_identity": {"package_CONTRACT_json_sha256": "BFF9E307BDC4799FE55A54FA10CAA418D2E3AE04EA02CF49238BAA9DBBE7D171", "control_contract_sha256": "BFF9E307BDC4799FE55A54FA10CAA418D2E3AE04EA02CF49238BAA9DBBE7D171", "byte_identical_by_hash": true},
+  "source_pin_recheck": {"sha256_reviewer_recomputed": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB", "matches_pin": true, "size_bytes": 50780146},
+  "events_chronology_recheck": {"000005_ADMIT_vs_package": "region/reserve/body_entries/admission_id all match", "timestamp_order": "monotonic (ADMIT 21:37:21.668 -> contract 21:37:26 -> RUN_STARTED 21:37:39 -> re-verify 21:37:49 -> extract 21:39:20 -> manifest 21:40:27-43)", "hash_chain_0003_0004_0005": "re-hashed by reviewer, both links MATCH"},
+  "defects_found": [
+    {"id": "QC-P03-D1", "severity": "P2 (wording/evidence-level tightening)", "where": "COUNTERS.json bodies note, HANDOFF.md, MEMORY_AND_IDENTITY E1 ('SAME body' stated flatly)", "what": "'continuation 0x007B6C4B is the SAME logical function' is a strong frame-ownership inference (3 pushed callee-saved regs balanced only within this frame; live-in EBP/EDI/EBX; guard-jump-over-early-return shape; target = next instruction boundary), not a byte-verified fact of the unread target", "impact": "none on counters (1 body is correct either way); none on claims (P03-C4/C6 already hedge the unread-continuation parts); wording should keep the inference graded STRONGLY_SUPPORTED so the parent's continuation admission does not inherit an unearned CONFIRMED"}
+  ],
+  "rejected_overclaims": "none found - all claims carry correct evidence levels, countermodels and premises-preserved checks; 'cannot write a binding' is properly scoped to in-region explicit-store level",
+  "verdict": "PASS_WITH_CORRECTIONS"
+}

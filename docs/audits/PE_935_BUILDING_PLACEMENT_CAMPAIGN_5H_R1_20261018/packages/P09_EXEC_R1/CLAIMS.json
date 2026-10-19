@@ -1,0 +1,89 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P09",
+  "admission_id": "A14f4207636e3",
+  "taxonomy_note": "evidence_level uses project taxonomy CONFIRMED/STRONGLY_SUPPORTED/PLAUSIBLE/UNVERIFIED/REJECTED; claim_resolution uses CONDITIONAL/NOT_ESTABLISHED/REJECTED_WITH_EVIDENCE; run_status separate.",
+  "claims": [
+    {
+      "claim_id": "P09-C1",
+      "statement": "The admitted window (0x006C3640-0x006C3678, 23 rows) is the PREFIX of one logical function body starting at 0x006C3640 (preceded by RET 0xc at 006c363c of the previous body; body continues beyond 0x006C3678). The window loads four stack arguments into registers via fixed ESP-offset reads after each PUSH: stack_arg[1]->EDI, stack_arg[2]->EBP, stack_arg[3]->ESI, stack_arg[4]->EBX (stack_arg[k] = DWORD at [ESP_entry+4+4k]); stack_arg[0] is never read in-window; entry ECX is never used before being overwritten at 006c3658.",
+      "evidence": ["EXTRACT rows 006c3640-006c3654: PUSH EBP; MOV EBP,[ESP+0x10]; PUSH EDI; MOV EDI,[ESP+0x10]; PUSH EBX; MOV EBX,[ESP+0x20]; PUSH ESI; MOV ESI,[ESP+0x20] with ESP bookkeeping: after 1/2/3/4 pushes the offsets resolve to entry slots [E0+0x0C],[E0+0x08],[E0+0x14],[E0+0x10] = stack_arg[2],[1],[4],[3]"],
+      "premises": ["ESP-offset arithmetic assumes standard x86 push semantics (no implicit ESP manipulation in-window) - CONFIRMED by rows", "Role labels (which arg is begin/end/queue/callback) are ARG-SHAPE INFERENCE, established by downstream usage (C2/C3), not by the loads themselves", "Calling-convention class (cdecl vs thiscall) and total stack-arg count NOT determinable in-window: epilogue/RET is out-of-window"],
+      "countermodel": "If this were thiscall with ECX=unused this, the stack slots would still be read identically; no in-window row distinguishes. If an out-of-window prologue existed before 006c3640, PUSH EBP at 006c3640 would be mid-body - REFUTED in-window by the preceding RET 0xc at 006c363c (adjacent-row boundary check, disclosed in NAVIGATION_CENSUS N5).",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONDITIONAL",
+      "condition": "mechanical loads CONFIRMED; role labels conditional on usage claims P09-C2/P09-C3"
+    },
+    {
+      "claim_id": "P09-C2",
+      "statement": "ENQUEUE SEMANTICS (core answer): the body iterates over an element range [stack_arg[1], stack_arg[2]) held in EDI..EBP (exit when EDI==EBP, checked at entry via CMP/JZ to out-of-window 0x006C369C). Per iteration it (a) calls the indirect callback in EBX with ECX = current element (MOV ECX,EDI; CALL EBX), (b) takes the callback's EAX result as a pointer to a 2-DWORD payload pair and, at the queue write-cursor ECX=[ESI+4], stores the pair as one 8-byte entry ([ECX]<-[EAX]; [ECX+4]<-[EAX+4]), then (c) advances the cursor by one entry: [ESI+4] += 8. Branch structure: if [ESI+4]==[ESI+8] -> JZ out-of-window capacity-event path 0x006C3678; else if [ESI+4]==NULL -> JZ 0x006C3672 skip-store count-only advance; else full store+advance.",
+      "evidence": ["EXTRACT rows 006c364a/006c364c (CMP EDI,EBP; JZ 006c369c)", "rows 006c3658-006c365a (MOV ECX,EDI; CALL EBX)", "rows 006c365c-006c3666 (cursor load, limit compare, JZ 006c3678, TEST, JZ 006c3672)", "rows 006c3668-006c366f (pair copy [EAX]->[ECX], [EAX+4]->[ECX+4])", "row 006c3672 (ADD [ESI+4],0x8)", "row 006c3676 (JMP 006c368a)", "NAVIGATION_CENSUS N4: back-edge 006c368f JNZ 0x006c3658 exists (loop head is in-window row 006c3658)"],
+      "premises": ["ARG-SHAPE INFERENCE (labeled): EDI/EBP = element range begin/end - supported by entry equality check and loop re-entry; element STRIDE is NOT determinable in-window (stride arithmetic is in out-of-window loop tail)", "callback returns its payload-pointer in EAX (standard EAX-return premise; first iteration has no in-window EAX init, so the store path requires the callback to produce EAX)", "the callback is invoked thiscall-shaped with ECX=current element (from MOV ECX,EDI immediately before CALL EBX) - ABI INFERENCE, callee body out-of-window", "identical names/shapes do not prove common semantics: the 2-DWORD pair is mechanically copied; its semantic identity ({0x66,A} request) is inherited from cited P07 caller context, not proven here"],
+      "countermodel": "If the callback clobbers ESI (callee-saved violation) or returns non-EAX, the pair store would read a wrong pointer; in-window rows cannot exclude this - callback body out-of-window. If [ESI+4] were a byte-count rather than pointer, direct dereference at 006c366a would fault; pointer interpretation is dominant but rests on code-correctness premise.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONDITIONAL",
+      "condition": "mechanics CONFIRMED in-window; payload semantic identity and callback behavior conditional on out-of-window/cited-P07 context"
+    },
+    {
+      "claim_id": "P09-C3",
+      "statement": "QUEUE OBJECT AND FIELDS WRITTEN (core answer): the queue object is stack_arg[3] (4th stack DWORD), held in ESI. In-window field census: [ESI+0x0] NEVER touched in-window (role unknown - possible head/base/other, no evidence); [ESI+0x4] is the write/tail cursor POINTER into an entry array (read at 006c365c, written ONLY at 006c3672 as +=8) - it is the ONLY queue-object field written in-window; [ESI+0x8] is a limit/end value compared for equality with the cursor (read at 006c365f, NEVER written in-window). There is NO count-field update, NO head-field update and NO entry-pointer store into the object in-window. The 'entry pointer store' of the transport is the in-place 2-DWORD payload write at the cursor target ([ECX],[ECX+4]) - entry memory, not object fields. The enqueue commits an entry purely by advancing [ESI+4] by 8.",
+      "evidence": ["EXTRACT rows 006c365c, 006c365f, 006c366a, 006c366f, 006c3672", "direct dereference of ECX loaded from [ESI+4] at 006c366a/006c366f proves pointer interpretation of [+4]"],
+      "premises": ["[+8] interpreted as end/limit pointer (or comparable bound) by equality with a proven pointer - PLAUSIBLE, its dereference never occurs in-window so pointer-ness of [+8] is weaker than [+4]", "class identity of the queue object is UNKNOWN in-window (no RTTI, no names; identical shape to any append-buffer does not prove semantics)"],
+      "countermodel": "A different object field could serve as head/count outside the window; a consumer may drain entries and repair [+4] out-of-window. The NULL-skip path degeneracy: after cursor==NULL the ADD makes [+4]=8, a non-null invalid pointer; unless the out-of-window capacity-event path at 0x006C3678 (reachable whenever [+4]==[+8], including NULL==NULL) re-establishes the buffer, a subsequent iteration with cursor=8 would fault at [ECX] - in-window rows cannot exclude that the code relies on out-of-window repair or single-element ranges in counting mode.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONDITIONAL",
+      "condition": "field-write census is CONFIRMED for the 23 in-window rows only; object-class identity and out-of-window field roles remain open"
+    },
+    {
+      "claim_id": "P09-C4",
+      "statement": "ENTRY LAYOUT (core answer): one queue entry = 8 bytes = 2 DWORDs: entry[+0x0] = payload dword0 (copied from [EAX]), entry[+0x4] = payload dword1 (copied from [EAX+4]). Entries are appended densely (cursor += 8 per entry); no per-entry header/tag/size field appears in-window.",
+      "evidence": ["EXTRACT rows 006c3668-006c366f (two 4-byte copies), 006c3672 (advance by 0x8)"],
+      "premises": ["payload pointer = callback EAX result (see C2 premise)", "pair semantic identity ({type,id}-shaped {0x66,A} per P07) is CITED, not proven in-window"],
+      "countermodel": "If the callback returns a pointer to a larger record, only the first 8 bytes are transported here; no in-window evidence about payload beyond the two DWORDs.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONDITIONAL",
+      "condition": "layout CONFIRMED as transported pair; semantics of the two DWORDs inherited from cited P07 context"
+    },
+    {
+      "claim_id": "P09-C5",
+      "statement": "CANDIDATES (2, within reserve) for the out-of-window capacity-event path reached when [ESI+4]==[ESI+8] (JZ 0x006C3678): CAND-A = grow/extend-on-full (bounded linear append buffer; equal means exhausted; handler reallocates/extends, then enqueue continues); CAND-B = lazy-allocate-or-flush (equal state includes empty/unallocated buffer, e.g. NULL==NULL on first use; handler establishes or drains the buffer). Both are consistent with all in-window rows; they are NOT distinguishable in-window.",
+      "evidence": ["in-window: only the equality compare and the JZ exist (rows 006c365f-006c3662); the handler body at 0x006C3678 is out-of-window and NOT analyzed"],
+      "premises": ["both candidates preserve the in-window mechanics unchanged", "no preference between A/B is claimed"],
+      "countermodel": "any third behavior (e.g., drop-on-full, error path) also fits in-window rows; the candidate set is a reserve-bounded pair, not an exhaustive proof of two",
+      "evidence_level": "UNVERIFIED",
+      "claim_resolution": "NOT_ESTABLISHED",
+      "condition": "distinguishing evidence = out-of-window body at 0x006C3678 (and its callee), requires separate admission"
+    },
+    {
+      "claim_id": "P09-C6",
+      "statement": "TRANSPORT POSITION (cited P07 + navigation, no re-derivation): the saved listing contains EXACTLY 2 call sites targeting 0x006C3640 (006c3fcd and 006d4501), consistent with P07's statement that caller clusters 006C3F98 and 006D44A4 each call 40B070 (sites 006c3fb5 / 006d44ed by navigation) and then 006C3640 - the second enqueue path of the {0x66,A} request, with callback 8BD720 (P07) passed as the per-element callback (EBX=stack_arg[4]) and the queue object (ESI=stack_arg[3]) supplied by those callers. 006C3640 itself is a generic per-element enqueue loop; it contains no {0x66} literal and no model/instance identity data.",
+      "evidence": ["NAVIGATION_CENSUS N1 (call-site census), N2 (40B070 sites)", "P07_EXEC_R1/REPORT.md (cited: pump 006B6C9D, sites 006C3F98/006D44A4, callback 8BD720, first path via 43E5B0)"],
+      "premises": ["navigation facts only; caller bodies NOT read", "whether 0x0043E5B0 (first path, P07) is the same enqueue helper as 006C3640 is NOT determinable: 43E5B0 body absent from saved listing (data barrier), and identical shapes do not prove common semantics"],
+      "countermodel": "call-site adjacency does not prove argument identity of the callers (their bodies out-of-window); the pair in the queue could be produced by any callback, 8BD720 is cited context.",
+      "evidence_level": "STRONGLY_SUPPORTED",
+      "claim_resolution": "CONDITIONAL",
+      "condition": "the 2-site census is CONFIRMED navigation; the callback identity and argument wiring rest on cited P07"
+    },
+    {
+      "claim_id": "P09-C7",
+      "statement": "CORPUS-COVERAGE BARRIER (independent re-verification of parent's navigation finding): 0x0040B070, 0x0043E5B0, 0x0043C700 have ZERO body rows in the saved main listing GHIDRA_H5_VTABLE2.txt; they appear only as CALL operands (17 / 1 / 10 reference sites respectively). The transport chain's three callee bodies are therefore a DATA BARRIER for any future semantic close-out from this listing.",
+      "evidence": ["NAVIGATION_CENSUS N2: pattern '^0040b070\\s+\\S+' etc. = no matches for all three; operand references enumerated"],
+      "premises": ["navigation-level address search only; no semantic read of any of the three bodies", "first rg attempt failed with CommandNotFoundException - disclosed, results discarded, redone with working Grep tool"],
+      "countermodel": "presence of call operands does NOT imply presence of bodies - verified directly by the anchored-pattern search.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONDITIONAL",
+      "condition": "barrier statement scoped to GHIDRA_H5_VTABLE2.txt; a separate saved corpus file (GHIDRA_GATE_00407270.txt) was incidentally observed to contain a decompiled FUN_0040b070 signature - recorded in BARRIER_BACKLOG, NOT analyzed in this package"
+    },
+    {
+      "claim_id": "P09-C8",
+      "statement": "SCOPED NEGATIVE (window bounds preserved): within 0x006C3640-0x006C3678 there is NO float math, NO coordinate/transform data, NO model-resource ID, NO instance-ID binding and NO VFS-record access. The window contributes only the transport mechanism (loop + callback + 8-byte pair append into the ESI queue). No identity edge and no historical placement value can be sourced from this window.",
+      "evidence": ["full 23-row extract: only PUSH/MOV/CMP/JZ/TEST/CALL/ADD/JMP instructions; the only memory writes are [ECX]/[ECX+4] (entry payload) and [ESI+4] (cursor)"],
+      "premises": ["scoped negative is bounded to the admitted window; it does NOT claim absence of such data in out-of-window code"],
+      "countermodel": "a callback (out-of-window) could itself carry identity data; that would be outside this window's evidence.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "NOT_ESTABLISHED",
+      "condition": "negative scoped to window; identity/transform questions remain open campaign-wide"
+    }
+  ],
+  "run_status": "COMPLETED_IN_WINDOW"
+}

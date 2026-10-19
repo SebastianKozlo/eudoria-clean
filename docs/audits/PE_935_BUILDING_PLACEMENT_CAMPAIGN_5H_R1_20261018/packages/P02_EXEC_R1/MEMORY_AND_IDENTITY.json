@@ -1,0 +1,64 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P02",
+  "front": "A",
+  "identity_map_in_region": {
+    "EBX_roles": [
+      "006b1e00-006b1e44: current node/leaf element (holds NiTArray count at +0xD4, member container at +0x24)",
+      "006b1ec6-006b1f20: 007558a0 result = node-list HOLDER (list head sentinel for the walk: ESI=[EBX+8], loop until ESI==EBX)",
+      "006b1f34-006b1f82: [ESP+0x3c] result-array base (freed in epilogue)"
+    ],
+    "ESI_roles": [
+      "006b1e1d-006b1e28: child INDEX (incremented, compared against [EBX+0xD4])",
+      "006b1e3b-006b1ec1: 007b6c30 lookup RESULT (processed element)",
+      "006b1ec8-006b1f20: node-list NODE cursor (data at node+0x10, field at node+0x28, next via [0x00A75854])"
+    ],
+    "EBP_roles": [
+      "006b1e3d-006b1e52: lookup EMPTY sentinel (compared against lookup results)",
+      "006b1e6c-006b1ea7: EBP_L1 = 006ae840(retain(008bd720(found)))",
+      "006b1ea7-006b1eb3: EBP_L2 = 006ae310(retain([006aded0(retain([006c64d0(EBP_L1)+0x4]))]))",
+      "006b1f26: zeroed before exit cleanup compare"
+    ],
+    "EDI_roles": [
+      "006b1e00-006b1e19: worklist deque insert cursor ([ESP+0x2c] spill)",
+      "006b1ed0-006b1ee6: per-node data pointer (node+0x10)"
+    ],
+    "distinct_values_kept_separate": [
+      "EBP_L1 != EBP_L2 by construction (L2 derived through 006c64d0/+0x4/006aded0/[result]/006ae310; both independently null-checked; never assumed equal)",
+      "lookup result ESI (before derive) != EBP_L1 != EBP_L2",
+      "the two 007b6c30 results (receiver=EBX vs receiver=[EBX+0x24]) are separate values; only the used one flows on"
+    ]
+  },
+  "frame_slot_map_steady_esp": {
+    "0x14_or_0x18_receiver": "M[steady+0x18] (under callee-pops premise; steady+0x14 under the counter-convention) = 007b4170 receiver; origin OPEN (0043ca60 byref channel @006B1E0B block, or P01-window init, un-itemized in cited P01 outputs)",
+    "0x17": "result flag byte returned in AL; only the failure write (0) is in-region",
+    "0x1c": "worklist drain/end cursor (CMP EDI,EAX @006b1f2c)",
+    "0x28_0x38_0x3c_0x40": "array of pointers to 0x80-byte chunks (begin/end/base/count) — fully freed in-epilogue",
+    "0x2c": "deque insert cursor (P01-C4 pinning continues)",
+    "0x40": "scratch dword passed as 3rd arg to 006f2940 (callee-visible)",
+    "0x44": "per-node local container receiver for [0x00A75A00] insert and [0x00A75A5C] cleanup",
+    "0x48": "stack cookie (XOR ECX,ESP; CALL 0095d3ca)",
+    "0x60": "SEH save restored to FS:[0]",
+    "0x68": "multi-state local: byte 1 (pre-006f2940), byte 0 (pre-cleanup), dword -1 (exit cleanup)",
+    "0x70": "ARG1 by-value root (P01 QC frame arithmetic)",
+    "note": "slot names assume the callee-pops convention derived in P02-C2; VA-anchored facts (which instruction targets which ESP-relative offset) are convention-independent."
+  },
+  "v_q_actualS_non_implications": [
+    "This region does not read or write V, Q, VT, outslot, actualS, 296445, 0x42/66 or the 0x00BA7220 flag; no claim here touches the CAND4 chain values.",
+    "The constant key 0x00A85460 being adjacent to the factory vtable 0x00A85454 does NOT make the lookup result actualS or the factory instance: vtable/class match is type identity only (preserved premise), and the lookup's receiver is the LEAF element, not the factory.",
+    "004152f0 occurrences are retain-shaped by call pattern (push ptr; call; MOV ECX,EAX; call method) — consistent with the P01-C7 retain/refcount discipline but NOT a proof of refcount semantics; no V/Q lifetime claim is derived from them."
+  ],
+  "new_offsets_observed": [
+    "leaf elem +0x24: fallback keyed-lookup receiver (new; not part of the NiTArray +C8/+CC/+D4 map)",
+    "list holder +0x8: node-list head with holder-as-sentinel (READ only — no +8 store anywhere in region)",
+    "node +0x10 (data passed to 006f2940), node +0x28 (field passed to [0x00A75A00])",
+    "derive-chain loads [result+0x4] and [result] — consistent with P01's '[result+4] parent chains' observation (continuity support)"
+  ],
+  "unknowns_left_opaque": [
+    "007b6c30, 008bd720, 004152f0, 006ae840, 006eb320, 006c64d0, 006aded0, 006ae310, 006b0680, 007558a0, 006f2940, 007b4170, 0043ca60 bodies",
+    "indirect targets stored at 0x00A75A00, 0x00A75A5C, 0x00A75854, 0x00A759FC",
+    "datum at 0x00A85460 (key target) and length of vtable 0x00A85454",
+    "out-of-region targets 0x006B1FB4 and 006b1faa fall-through (starts 0x006b1faf)",
+    "origin of M[steady+0x18]; site that sets result flag steady[0x17]=1"
+  ]
+}

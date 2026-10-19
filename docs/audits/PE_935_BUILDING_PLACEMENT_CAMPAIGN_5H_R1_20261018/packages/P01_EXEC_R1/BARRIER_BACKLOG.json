@@ -1,0 +1,43 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P01",
+  "front": "A",
+  "first_missing_edge": {
+    "id": "P01_FME",
+    "front": "A",
+    "statement": "The concrete identity bridge — a keyed registration or store binding a resource/definition identifier to a receiver (e.g., [elem+8]=receiver, factory-instance registry insert, or a (type66, ID A)-keyed lookup) — was NOT found in either admitted window. Region 0x006B1C60-0x006B1E00 contains only class-bootstrap (vtable 00A85454 install + flag 0xBA7220=1) and a type-directed traversal; region 0x007D27B0-0x007D291E is NiStream teardown. The join type66+ID A -> 296445 remains NOT_ESTABLISHED; no new evidence for or against its sufficiency was found in these windows.",
+    "exact_unknown": "WHERE the resource-ID->element->receiver binding is stored: the code that inserts the factory/cache element carrying the receiver (the [elem+8] store or equivalent), and any (type,id)-keyed lookup on the load path. Candidate un-admitted locations, in priority order: (1) the tail of body 006B1C80 beyond 0x006B1E00 (up to its exits at 006b1f28/006b1f34, incl. leaf path 006b1e2f) — the walker's leaf/exit processing is the natural place a keyed action would live; (2) the caller of 006B1C60 (who installs the factory object at [ECX] and what reads flag 0xBA7220); (3) the registry/cache (W1) code outside this package's windows."
+  },
+  "required_evidence_for_next_step": {
+    "admission_needed": "Region 0x006B1E00-0x006B1F40 (continuation of body 006B1C80: leaf path 006b1e2f, exit paths 006b1f28/006b1f34, and the [EDI]=EAX continuation at 006b1e00) from GHIDRA_H5_VTABLE2.txt, est. ~90 rows, 1 body.",
+    "expected_resolution": "Either a keyed store/lookup in the walker's leaf/exit processing (closes the bridge question positively or negatively for this path), or confirmation that the walker is pure traversal (shifts the bridge search to the 006B1C60 caller / W1 registry).",
+    "falsifier": "If the tail contains no keyed logic, the 'registration area 006B1C60' hypothesis is fully rejected for this code family and Front A's A1 priority moves to the factory caller and W1 cache regions."
+  },
+  "backlog_items": [
+    {
+      "id": "P01-B1",
+      "item": "Caller of 006B1C60: who passes ECX (the factory object) and who reads flag 0xBA7220. Would close the 'factory singleton bootstrap vs registration' question at class level.",
+      "cost_estimate": "1 admission, 1-2 bodies, ~60 rows",
+      "value": "medium-high for A1 (class-level identity of registration initiator)"
+    },
+    {
+      "id": "P01-B2",
+      "item": "Leaf path 006b1e2f and exits of body 006B1C80 (see first_missing_edge) — highest priority continuation.",
+      "cost_estimate": "1 admission, 1 body (tail), ~90 rows",
+      "value": "high for A1 (only unexplored part of the admitted-region's own body)"
+    },
+    {
+      "id": "P01-B3",
+      "item": "Track 'retain-before-teardown' premise: verify on the 0082E750 success path that the retain of V occurs BEFORE the 007D27B0 teardown call (holder free). Requires 0082E750 region admission (not granted in P01).",
+      "cost_estimate": "1 admission, 1 body, ~150 rows",
+      "value": "high for Q0/Q1/VT preservation chain; would convert P01-C7's CONDITIONAL refinement into a closed premise"
+    },
+    {
+      "id": "P01-B4",
+      "item": "00A8EC28 (NiStream vtable slot1, = 00A8EC24+4) static availability remains the A3-class barrier; note that 007D27B0 confirms 00A8EC24 is the NiStream vptr value but the slot1 CELL content is still absent from saved sources checked.",
+      "cost_estimate": "catalog availability check only (no new region)",
+      "value": "low-medium (A3 priority, not granted in this package)"
+    }
+  ],
+  "scoped_note": "FIRST_MISSING_EDGE here is the LOCAL closure of this package, not a global HARD STOP of the campaign (parent contract section 11)."
+}

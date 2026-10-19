@@ -1,0 +1,98 @@
+{
+  "run_id": "PE_935_PLACEMENT_P08_QC_R1_20261018",
+  "target_pack": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\packages\\P08_EXEC_R1",
+  "reviewer": "pe-master-auditor (fresh independent child session; NO_NESTED_TASKS)",
+  "method_statement": "Every check below was re-executed from PRIMARY evidence (disk files, catalog JSON, CONTROL events), never from the worker's derived artifacts alone. Worker package files were read to EOF in full. Source documents were verified claim-anchored (targeted line-range reads plus full-document pattern sweeps for every load-bearing topic); TRANSFORM_TABLE_CORRECTED.csv was re-censused in full.",
+  "hash_verifications": {
+    "package_manifest_rehash": "11/11 rows match fresh Get-FileHash SHA256 (artifact_index.csv A9E8D2E9..., BARRIER_BACKLOG.json 6557256D..., CHECKED_SOURCES.json DCBF2102..., CLAIMS.json D603A7E7..., CONTRACT.json 12092315..., COUNTERS.json 63DE334E..., GATES.json EA4615B9..., HANDOFF.md 0B0EA7EA..., MEMORY_AND_IDENTITY.json B2EBA433..., REPORT.md D925A8BC..., RUN_STARTED.json 1F848B2C...); sizes match manifest on all 11",
+    "bijection": "disk = 12 files = 11 manifest rows + MANIFEST.json (self-excluded) - HOLDS; zero unmanifested files, zero missing rows",
+    "contract_identity": "CONTROL\\CONTRACTS\\P08.json SHA256 12092315AF035249DD11DBA2319B7F03A6290007B0281836155BDE02881ABF4A == package CONTRACT.json (byte-identical copy) == RUN_STARTED.contract_sha256 == MANIFEST.contract_sha256",
+    "catalog": "SAVED_TEXT_CATALOG.json: scope=CLOSED_SAVED_TEXT_ONLY; original game files and live runtime forbidden; file_count=967 (recounted)",
+    "source_pin_recheck": {
+      "S1_DRAFT_FINAL_REPORT.md": "fresh 2910289F0E9180B9ECC3E8022FBC76D45BBE1BB20CCE2C5738493B1B7C1B3974 (15,414 B) == catalog pin == worker CHECKED_SOURCES.sha256_fresh",
+      "S2a_HANDOFF.md": "fresh 0F3082FBF39714A534C910212E144E5447E018E3977B40C7C31F52E389E19C67 (14,053 B) == catalog pin == worker value",
+      "S2b_FINAL_REPORT.md": "fresh 8DC5C3CB89372026FAF99307FD969315A4FDC75414E93D6C5FDA77B514498E60 (51,369 B) == catalog pin == worker value",
+      "S3a_TRANSFORM_TABLE_CORRECTED.csv": "fresh 4802B9BC980B524288CF16298ACCE2B3EB643D04CD5AD485D504FA42DA18664B (10,095 B) == catalog pin == worker value",
+      "S3b_00_RAPORT_CORRECTED.md": "fresh 4B37E2E0EA4A4D224809C17A474DD3F4544472E866CDF656D25354A8FF3E9380 (37,893 B) == catalog pin == worker value",
+      "result": "5/5 SHA_MATCH independently reproduced; census '5/5 pin_verified' claim CONFIRMED"
+    }
+  },
+  "document_verification_notes": {
+    "S1_PE_935_PLACEMENT_RECORD_BRIDGE_GAMEBRYO_R1_DRAFT_FINAL_REPORT.md_(238_lines)": {
+      "L108-110": "PLACEMENT_XYZ_RECOVERED = NO - no placement XYZ recovered for any world instance from a physical record; record 4508's list2 is empty; the only payload-derived vec3 feeds a slot-position computation of unknown class - VERBATIM as quoted in P08-CL1",
+      "L66-69": "PHYSICAL_RECORD_IDENTITY = CONFIRMED: record id2=4508, file_offset 96,496, header {id=4508,size=28,ver=1,crc=AFF5797C}, payload 28 B {id2=4508, A=296445, B=296446, C=0, D_f32=124.94100189208984, list1_count=0, list2_count=0, f11=0} - matches worker P-PAYLOAD-NONPLACEMENT and MEMORY_AND_IDENTITY exactly",
+      "L46-47": "'physical record bytes 4508@96,496 incl. A bytes fd 85 04 00 @96,516' - resolves the 96,496 (record header) vs 96,516 (A field) offset pair consistently with S3b L200",
+      "L81": "setters (+0x08/+0x14/+0x20/+0x24) and by-name registration - matches worker R-MECHANISM-NO-VALUES",
+      "L83": "registry structure {id2 -> A (model nif id), B (collision bvi id), C, D_f32, name-list1, u32-list2} - matches worker MEMORY_AND_IDENTITY bridge_2026_10_03",
+      "L91": "model-side named instance = NiControllerSequence (identity CORRECTED this run, R-1) - matches worker S1 key_extracted_standing_values[5]",
+      "L94-96": "TRANSFORM_EDGE = placement-record setters CONFIRMED as runtime transport (record is not a NiAVObject: +0x08/+0x14 vs m_kLocal@+0x38/m_kWorld@+0x6C); template payload list2 (3 x vec3) -> runtime slot-position lerp CONFIRMED (slot object class UNKNOWN) - matches worker S1 role_in_package",
+      "L102-105": "PERSISTENT_PLACEMENT_EDGE = NOT ESTABLISHED (drivers message-dispatched types 0xA2..0xC7, attribute-sourced class-20006 property tag 6, hardcoded PUSH 0x3ED3 etc. - none reads templates.vfs; only file reader is the registry loader, 1 caller) - matches P08-CL5 evidence item 5",
+      "L114,L127-128,L216-217": "CONTROL-4 PASS (962/962 bytes + 113/113 targets recomputed without Ghidra) - matches P08-CL4",
+      "L15": "Models.bnt C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0 pinned - matches P08-CL4 shared-source identity"
+    },
+    "S2a_SCENE_INSPECTION_HANDOFF.md_(120_lines)": {
+      "L52": "MODEL_GEOMETRY_MATCHES = 0; NO_MATCH_IN_SELECTED_INPUTS (1 comparison of max 3: 218757 vs 423020; 14 vs 102...) - matches worker S2a",
+      "L53": "PE_WORLD_ROOT_IDENTITY = NOT_ESTABLISHED - VERBATIM",
+      "L54": "WORLD_XYZ_RECOVERED = NO - VERBATIM (worker cited lines 52-54: exact)",
+      "L57": "post-load/post-Update native state NOT_MEASURED for all PE inputs (natively impossible without forbidden dummy factories) - matches worker S2a key_extracted_standing_values[4]",
+      "L49-51": "218757 coverage 62+4/66; compound candidates 423020 (closure-verified) + 496633/512126 (MEASURED closure failures) - matches worker MEMORY_AND_IDENTITY studied_objects"
+    },
+    "S2b_SCENE_INSPECTION_FINAL_REPORT.md_(715_lines,_partial-read_adjudication)": {
+      "L306-308": "composed FILE...SPACE transforms computed for 28 blocks through complete chains ONLY, cross-checked 5/5 against the independent s2 parser (e.g. B_Outpost_me01_Ext_sign:0 -> world translate (0, -1030, 820)) - matches worker M2-WORLD-COMPOSED and S2b role exactly",
+      "L317-322": "Model extents [2500, 3350, 1250] recorded as a SEPARATE bounds measurement - NO historical location derived from them, from native pointer values or from the zero root transform; classification SINGLE_MODEL; NO_WORLD_PLACEMENT_EVIDENCE_FOUND - VERBATIM as assimilated",
+      "L359-363": "section 5 ceiling block: MODEL_218757_TO_CMO_JOIN = NOT_ESTABLISHED; HISTORICAL_WORLD_INSTANCE = NOT_ESTABLISHED; PE_WORLD_ROOT_IDENTITY = NOT_ESTABLISHED; PE_AXES_AND_UNITS = UNVERIFIED; WORLD_XYZ_RECOVERED = NO - VERBATIM (worker cited lines 358-364 = the fenced block; accurate)",
+      "L71-72": "Models.bnt SHA C950A8C2... re-verified unchanged BEFORE and AFTER the phase - matches P08-CL4 evidence item 4",
+      "L437-443": "final status block inside the disclosed read range 420-456: MODEL_218757_NATIVE_RESULT = NATIVE_LOAD_REJECTED; MODEL_GEOMETRY_MATCHES = 0; PE_WORLD_ROOT_IDENTITY = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO - consistent",
+      "read_mode_adjudication": "contract says 'FINAL_REPORT.md sections on WORLD_XYZ/PE_WORLD_ROOT_IDENTITY'; worker read the disclosed section ranges (scope notes 30-54; status block 56-64; section 4.6 295-333; section 4.7 335-354; section 5 356-369; final block 420-456); every quoted value was re-located inside those ranges; the 51,369 B document was NOT re-read wholesale by this reviewer either (claim-anchored verification) - worker's partial-read disclosure is ACCURATE and contract-compliant"
+    },
+    "S3a_TRANSFORM_TABLE_CORRECTED.csv_(full_independent_census)": {
+      "structure": "1 header + 30 data rows (31 lines); columns mesh_idx,mesh_name,parent,local_T,local_S,world_T,world_T_r1_superseded,changed_vs_r1,bbox_local_min,bbox_local_max,bbox_world_min,bbox_world_max,nverts,ntris,props",
+      "changed_vs_r1_recount": "True on EXACTLY 14 rows: mesh_idx 32, 66, 72, 75, 82, 90, 94, 115, 121, 127, 133, 139, 145, 151 - matches S3b L160 list and worker P08-CL3 item 4 EXACTLY",
+      "zero_rows_recount": "EXACTLY 16 rows with local_T=[0.0,0.0,0.0] AND world_T=[0.0,0.0,0.0]: Bip01_item:0, B_Eu_Slum_Building_b047_01:0..7, B_Eu_b047_gloss:0, B_Eu_b047_Galler:0, dPVS_occ01:0, dPVS_occ04:0, dPVS_occ05:0, dPVS_occ06:0, dPVS_occ07:0 - matches worker Z-DEFAULT list EXACTLY",
+      "local_S_recount": "all 30 rows local_S=1.0 (0 rows otherwise) - matches worker S3a key value 'local_S (all 1.0)'",
+      "example_local_T_recheck": "GeoTexanim01:0 [-513.236328125, 36.73770523071289, -1053.3555908203125]; B_Eu_b047_glowsak:0 [401.14190673828125, -1611.4522705078125, -368.0000305175781]; B_Eu_b047_Object06:0 [-10591.814453125, -839.7012939453125, 1536.7515869140625]; B_Eu_b047_DoorComputer:0 [14.190637588500977, 0.0, -229.7109832763672]; B_Eu_b047_Object07:0 [-2039.11669921875, 3.0517578125e-05, -65.0]; 7x lens rows all [0.0, 0.0, -534.6338500976562]; dPVS_occ02 z=4420.0, dPVS_occ03 z=7720.0 - ALL match worker M1-LOCAL examples",
+      "aggregate_recount": "sum(nverts)=2415, sum(ntris)=1030 - matches worker MEMORY_AND_IDENTITY 296445 identity ('30 meshes; 2,415 vertices; 1,030 triangles')"
+    },
+    "S3b_00_RAPORT_CORRECTED.md_(311_lines)": {
+      "L13": "ustalenie 1: 155/155 blocks, byte accounting exact (49+2795+106024+8 = 108,876 B, 0 unaccounted; full byte-range coverage not proof of full semantics [E-D3]) - matches P08-CL3 evidence item 3",
+      "L21": "ustalenie 9 VERBATIM: bounded negative u32LE full corpus + u32BE full Data (audytor PE-MASTER: 0 BE hits for 296445/296446) [E-F10] + ASCII + decompressed terrain + decoded 2003 scripts + VFS both eras; NOT searched: Strings/*.bnt encrypted interiors (bounds in section 6/8); PE2/2003 canon FUN_005977b0 records 0x1C + f32 XYZ @+0x2c/+0x30/+0x34, SetPosition vtable[0x50] [E-A1]; 9.3.5 mechanism UNVERIFIED (transfer hypothesis only) - matches worker assimilation EXACTLY",
+      "L22": "ustalenie 10 VERBATIM: historical position unreachable from corpus (MindArk servers unavailable; no saved session - FIRST_PEINST 0/6; no cache on this machine) - matches P08-CL5",
+      "L24": "one-sentence verdict incl. NOT_FOUND_IN_SEARCHED_SCOPE [E-D1]; network delivery path byte-evidenced in PE2/2003, records absent from corpus; network path proves existence of such a path, NOT exclusivity [E-D2] - matches worker remaining-edge wording",
+      "L33-35": "Models.bnt SHA256 C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0; 296445.nif entry offset 57,936,887, 108,876 B, CRC 0xCFAC1D3B = crc32(payload); payload RAW SHA256 656795d8b3dddf8f9192ee41c4710d592894860f6959b53b2c08036977e7b862",
+      "L44-46": "296445.nif BYTE-IDENTICAL across CD-2003 Models.ark (f660d055.), BNT_Models (1322adf2.) and pcg_install 9.3.5 (c950a8c2.) - matches worker MEMORY_AND_IDENTITY",
+      "L87": "importer tail 7xf32 = [-3447.685, -2500.0, -3543.212, 12593.814, 3743.970, 15620.0, 0.0]",
+      "L93-96": "[E-B4] corrected interpretation: raw-vertex extrema from DIFFERENT local frames, NOT a composed scene bbox; composed bbox = 5000x5000x15620 MODEL units; 7th float semantics UNKNOWN (retracted closure) - matches worker M4-BOUNDS",
+      "L160": "section 3B: convention world[i] = parent_world (circ) local_i WITH the mesh's own transform, root parent = identity; R1 bug affected 14 of 30 meshes; 'Zmienione world_T: dokladnie 14 meshy (32, 66, 72, 75, 82, 90, 94, 115, 121, 127, 133, 139, 145, 151); pozostale 16 identycznych (kontrola negatywna bramki G1 erraty)'; MODEL units not game meters - matches P08-CL3",
+      "L162": "section 3C VERBATIM: 'PoLozenie instancji w swiecie gry: BRAK W PLIKU. Zaden blok nie niesie transformacji instancji swiata; korzen jest tozsamosciowy; world w grafie NIF = przestrzen modelu; Macierz world NIF != placement swiata - potwierdzone empirycznie (brak jakiegokolwiek kandydata na wspolrzedne globalne wewnatrz pliku)' + model-units conversion requires a SEPARATE source + PARAM is not a coordinate pair - matches worker S3b key value [0]",
+      "L200": "raw scan: u32 296445 ONLY in Parameters/templates.vfs ofs 96,516 (field A_model); ASCII '296445' only in Models.bnt index; independent errata reproduction rawscan.py gate G2: 8/8 offset-exact [E-G2] - matches P08-CL4",
+      "L201": "decompressed terrain: 0 hits 296445/126740/278453 (coincidences classified as noise) - matches bounds",
+      "L203": "decoded 2003 scripts: 1,936 .obj.dec; u32 296445/296446 ONLY in 4508.obj.dec (@664/@580 VM immediates) - definition-model linkage reinforcement, NOT placement [E-C] - matches worker bounds item 1",
+      "L214": "Portals.bnt 276x.prt: binary payload NOT decoded in that run; no .prt named 296445; no ASCII/u32 references - supports unsearched-class bound",
+      "L217": "EnvironmentZones.vfs 126 records (84 canonical + 42 tail; centers +/-30k; r=rec32+26.0); coordinate pairs only for canonical settlements; 0 template<->zone links (verified, remains) - matches worker E-ZONE-COORDS",
+      "L260,L276": "explicit searched/not-searched bounds: all pcg_install/Data (u32LE+u32BE, decompressed terrain LE+BE), VFS+scripts decoded, template records both eras; NOT searched: Strings/*.bnt payloads (encrypted blob-448, location class, decoder exists as a lead), media interiors (pattern-only), .prt, UNKNOWN fields - matches worker negative bounds 1-2",
+      "L274": "PE_PLACEMENT_ENCODING_CENSUS_R1 supported: 23 kodowania x 29 kotwic x 5 korpusow - PASS-NEGATIVE na pary wspolrzednych; no spawn table in 2,712-position scripts - matches P08-CL5 evidence item 4",
+      "L280,L284": "section 9 'POPRAWIONY [E-V2R007]': P0 design PE_935_TEMPLATE_CONSUMER_TRACE_R1 - static Ghidra on Entropia.exe 9.3.5 with own SHA/VA verification, NO auto-transfer of PE2 addresses; results split A/B/C/D; placement search remains OPEN - matches worker remaining-edge citation",
+      "L302-304": "instruments: R1 analyze_tree.py contains bug B1 (superseded); corrected copy errata 00_CONTROL/analyze_tree_v2.py (convention world=parent circ local, gate G1 asserted); ERRATA rawscan.py independent reproduction (gate G2) - matches P08-CL3 provenance chain",
+      "L18,L19,L20": "collision companion 296446.bvi (Volumes.bnt offset 993,420, 760 B, local volumes only); family b047 = {126740 (T4752), 278453 (T2249), 296445 (T4508)}; hierarchy 201->477->4751->4508 - match worker MEMORY_AND_IDENTITY definition_chain"
+    }
+  },
+  "no_body_read_verification": {
+    "control_events": "EVENTS 000001-000010 enumerated: START + ADMITs for P01(x2),P02,P03,P04,P05,P06,P07,P09 - NO admission event for P08 (consistent with admitted_regions=[])",
+    "event_chain_integrity": "all 9 previous_event_sha256 links verified CHAIN_OK (full hash-chain walk)",
+    "package_artifact_census": "12 package files contain NO binary/listing extract, NO tools, NO EXE/VFS/BNT/NIF payload references; only document-assimilation outputs",
+    "forbidden_counters": "exe_read_bytes=0, game_payload_files_opened=0, vfs_bnt_parsing_runs=0, ghidra_exports=0, old_writer_scripts_executed=0, runtime_client_actions=0, git_operations=0, config_changes=0, skills_changes=0, frozen_root_writes=0, parent_control_writes=0 - no positive counter-evidence found anywhere in the pack",
+    "verdict": "ZERO body admission and ZERO body reads CONFIRMED"
+  },
+  "chronology": {
+    "contract_now_utc": "2026-10-18T23:02:13Z",
+    "run_started": "2026-10-18T23:02:25Z (after contract; real clock)",
+    "manifest_generated": "2026-10-18T23:05:54Z (last)",
+    "hard_stop": "2026-10-19T00:00:00Z respected (57.6 min margin at start = RUN_STARTED '58' rounded)",
+    "campaign_start": "event 000001 START 2026-10-18T21:13:23Z; P08 executed after P07 admission (22:42:27Z) and before P09 admission (23:06:48Z) - consistent with a serial campaign order"
+  },
+  "negative_controls_applied": {
+    "what_would_falsify": "a census entry absent from the catalog or with hash mismatch; an admission event for P08; any binary-read artifact in the package; any quote not locatable verbatim in a pinned source; any transform value in the 5 documents carrying world-instance identity + world frame",
+    "tested": "all five falsifiers actively tested (hashes 5/5, events enumerated, artifact census, quote-by-quote line-anchored verification, full CSV re-census); NONE triggered",
+    "why_non_circular": "all comparisons were made against primary disk files and the catalog JSON, never against worker-generated intermediates; the worker's CLAIMS.json was used only as the list of claims under test"
+  }
+}

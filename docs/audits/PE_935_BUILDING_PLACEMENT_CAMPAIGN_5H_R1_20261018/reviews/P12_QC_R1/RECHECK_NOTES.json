@@ -1,0 +1,151 @@
+{
+  "qc_run_id": "PE935_CAMPAIGN_P12_QC_R1_20261018T234830Z",
+  "target_package": "P12_EXEC_R1",
+  "method": "fresh independent reviewer; line-numbered re-derivations from the pinned source (sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, freshly re-hashed at QC start) and the pack's verbatim extract (sha256 0CC0F24F1066BA3BF32C5D8435B263486F2536BF4E84062BD2B48F46BDDEF640, freshly re-hashed); no delegation; NO_NESTED_TASKS",
+  "source_parity_check": {
+    "claim": "extract rows verbatim = source lines L648033-L648080",
+    "method": "independent PowerShell slice of [System.IO.File]::ReadAllLines(pinned source); per-row byte comparison of extract row bodies (after 'line:') against source lines",
+    "result": "PARITY_MISMATCHES=0; EXTRACT_ROW_COUNT=48; line numbers contiguous 648033..648080; first row '648033:006c27a0  PUSH ESI'; last row '648080:006c282f  POP EDI'",
+    "verdict": "CONFIRMED"
+  },
+  "rederivations": [
+    {
+      "id": "RDER-P12-01-register-arithmetic-body1-key",
+      "claim_under_test": "P12-C3/P12-C9 body 1 key: EDX = M32[0xA857C8 + (w1 + idx1*10)*4]",
+      "line_trace": [
+        "L648037 (006c27a6) CALL 0x0070ed80 -> EAX = ret_70ED80",
+        "L648038 (006c27ab) MOVSX EDI,word ptr [EAX + 0xe] -> EDI = sign_extend16(word[ret_70ED80 + 0x0E]) = w1",
+        "L648044 (006c27bd) CALL 0x006b22d0 -> EAX = idx1 (second call; first call's EAX at L648040 is dead - see RDER-P12-04)",
+        "L648045 (006c27c2) LEA EAX,[EAX + EAX*0x4] -> EAX = idx1*5",
+        "L648046 (006c27c5) LEA ECX,[EDI + EAX*0x2] -> ECX = w1 + (idx1*5)*2 = w1 + idx1*10",
+        "L648047 (006c27c8) MOV EDX,dword ptr [ECX*0x4 + 0xa857c8] -> EDX = M32[0xA857C8 + (w1 + idx1*10)*4]"
+      ],
+      "independent_check": "arithmetic re-derived step by step; 5*2=10 = claimed row stride 10 DWORDs; scaled-index*4 = DWORD addressing. No step writes EDI/EAX inconsistently with the formula.",
+      "verdict": "CONFIRMED_as_arithmetic"
+    },
+    {
+      "id": "RDER-P12-02-register-arithmetic-body2-key",
+      "claim_under_test": "P12-C3/P12-C9 body 2 key: EDX = M32[0xA85804 + (w2 + idx2*15)*4]",
+      "line_trace": [
+        "L648063 (006c27f6) CALL 0x0070ed80 -> EAX = ret_70ED80",
+        "L648064 (006c27fb) MOVSX EDI,word ptr [EAX + 0xc] -> EDI = w2",
+        "L648070 (006c280d) CALL 0x006b22d0 -> EAX = idx2 (second call; first at L648066 dead)",
+        "L648071 (006c2812) MOV ECX,EAX -> ECX = idx2",
+        "L648072 (006c2814) SHL ECX,0x4 -> ECX = idx2*16",
+        "L648073 (006c2817) SUB ECX,EAX -> ECX = idx2*16 - idx2 = idx2*15",
+        "L648074 (006c2819) ADD ECX,EDI -> ECX = idx2*15 + w2",
+        "L648075 (006c281b) MOV EDX,dword ptr [ECX*0x4 + 0xa85804] -> EDX = M32[0xA85804 + (w2 + idx2*15)*4]"
+      ],
+      "independent_check": "16-1=15 = claimed stride 15; base delta 0xA85804-0xA857C8 = 0x3C = 60 B = 15 DWORDs (recomputed) = body 2 row byte-size; consistent with P12-C9.",
+      "verdict": "CONFIRMED_as_arithmetic"
+    },
+    {
+      "id": "RDER-P12-03-movsx-jnc-bounds",
+      "claim_under_test": "P12-C10: sign-extended word bounded unsigned via CMP imm + JNC; negative words take the fail arm; valid ranges [0,10) body 1, [0,15) body 2",
+      "line_trace": [
+        "L648038 MOVSX EDI,word ptr [EAX+0xe] (sign extension); L648041 CMP EDI,0xa; L648042 JNC 0x006c27df",
+        "L648064 MOVSX EDI,word ptr [EAX+0xc]; L648067 CMP EDI,0xf; L648068 JNC 0x006c2832 (target out-of-window)",
+        "semantics: x86 CMP sets CF as in unsigned subtraction; JNC (CF=0) taken when EDI >= imm UNSIGNED; a negative sign-extended word (e.g. -1 = 0xFFFFFFFF) is >= imm unsigned -> fail arm"
+      ],
+      "independent_check": "control calculation: w=-1 -> 0xFFFFFFFF >= 0xA unsigned -> JNC taken -> fail arm (claim 'negative words take the fail arm' correct); w=9 -> 9 < 0xA -> CF=1 -> fall through (valid); w=10 -> JNC taken (fail); w=14 body 2 -> valid; w=15 -> fail.",
+      "verdict": "CONFIRMED_as_instruction"
+    },
+    {
+      "id": "RDER-P12-04-dead-first-6B22D0-call",
+      "claim_under_test": "P12-C7: first 0x006B22D0 return EAX dead in both bodies",
+      "line_trace": [
+        "body 1: L648040 CALL 0x006b22d0 (EAX=ret1) -> L648041 CMP EDI,0xa (reads EDI,flags only) -> L648042 JNC (flags only) -> L648043 MOV ECX,ESI (ECX, not EAX) -> L648044 CALL 0x006b22d0 (EAX overwritten); no instruction between L648040 and L648044 reads EAX",
+        "body 2: L648066 CALL 0x006b22d0 -> L648067 CMP EDI,0xf -> L648068 JNC -> L648069 MOV ECX,ESI -> L648070 CALL 0x006b22d0; same def-use result"
+      ],
+      "independent_check": "full def-use scan of all intervening rows performed; confirmed no EAX consumer before the overwrite. Side-effect role of the first call remains UNKNOWN (callee out-of-window) - worker's UNVERIFIED grade for P12-H1 is honest.",
+      "verdict": "CONFIRMED (def-use); side effects NOT_ESTABLISHED (matches worker)"
+    },
+    {
+      "id": "RDER-P12-05-return-value-body1",
+      "claim_under_test": "P12-C2 body 1: function returns ret(0x0072F580) on the success path; 0xBA5800 on the bound-fail path",
+      "line_trace": [
+        "L648051 (006c27d7) CALL 0x0072f580 -> EAX = ret_72F580 (x86 ABI: EAX is the return register)",
+        "L648052 POP EDI (no EAX effect); L648053 POP ESI (no EAX effect); L648054 RET -> returns with EAX = ret_72F580",
+        "fail arm: L648055 POP EDI; L648056 MOV EAX,0xba5800; L648057 POP ESI; L648058 RET -> returns 0xBA5800"
+      ],
+      "independent_check": "no EAX-writing instruction exists between L648051 and L648054 or between L648056 and L648058; POP/RET do not modify EAX. Worker's CONFIRMED grade for body 1 is correct.",
+      "verdict": "CONFIRMED_as_instruction"
+    },
+    {
+      "id": "RDER-P12-06-return-value-body2-stack-forcing",
+      "claim_under_test": "P12-C2 body 2: return STRONGLY_SUPPORTED via stack-forced POP+RET-class tail (not CONFIRMED)",
+      "line_trace": [
+        "L648059-L648061: PUSH ESI, PUSH EDI, PUSH 0x20 (3 explicit pushes)",
+        "L648063 CALL 0x0070ed80 with pushed 0x20 (sole stack arg at callsite); L648076 PUSH EDX; L648077 CALL 0x0043a550 with pushed EDX (sole stack arg)",
+        "L648079 (006c282a) CALL 0x0072f580 -> EAX = ret_72F580; L648080 (006c282f) POP EDI (in-window, no EAX effect)",
+        "VA arithmetic: 006c282f + 1 byte (POP EDI = 0x5F) = 006c2830; claimed tail POP ESI@006c2830 (1 byte) + RET@006c2831 (1 byte); JNC target 006c2832 = 006c2831+1 - self-consistent with 1-byte tail instructions",
+        "stack balance: at L648080 the outstanding stack (assuming callees 0x0070ED80/0x0043A550 pop their single args, forced by body 1's fixed epilogues - see RDER-P12-07) is exactly [saved ESI][return address]; a working RET therefore requires exactly one more pop before RET; the tail CANNOT be e.g. two pops (would unbalance) or zero pops (RET would return to saved ESI)"
+      ],
+      "independent_check": "forcing argument re-derived independently and confirmed: the tail is constrained to consume exactly [saved ESI][ret]. HOWEVER the forcing constrains the stack effect, not the opcodes: an unread tail row could still write EAX (e.g. MOV EAX,imm) between the final pop and RET while consuming the same slots... actually no: only ONE stack slot may be consumed (saved ESI) plus the RET pop; any EAX-writer without stack effect would still fit (e.g. 'POP ESI; MOV EAX,x; RET' or 'MOV EAX,x; POP ESI; RET'). Therefore EAX-preservation at body 2's RET is NOT in-window provable -> STRONGLY_SUPPORTED (not CONFIRMED) is the correct grade. Worker's countermodel in P12-C2 states exactly this.",
+      "verdict": "CONFIRMED (grading correctness); body 2 return stands as STRONGLY_SUPPORTED"
+    },
+    {
+      "id": "RDER-P12-07-stack-balance-abi-forcing",
+      "claim_under_test": "P12-C5: 0x0070ED80 and 0x0043A550 each take exactly one pushed DWORD and pop it themselves (ret-4 class); forced by the fixed epilogues",
+      "line_trace": [
+        "callsite forms (in-window): L648035 PUSH 0x1f; L648036 MOV ESI,ECX; L648037 CALL 0x0070ed80 (no other push between); L648061 PUSH 0x20; L648062 MOV ESI,ECX; L648063 CALL 0x0070ed80; L648048 PUSH EDX; L648049 CALL 0x0043a550; L648076 PUSH EDX; L648077 CALL 0x0043a550 -> each callee sees exactly ONE pushed DWORD",
+        "0x006B22D0 callsites: L648039/L648043/L648065/L648069 MOV ECX,ESI immediately before CALL - zero pushed stack args; 0x0072F580 callsites: L648050/L648078 MOV ECX,EAX immediately before CALL - zero pushed stack args",
+        "forcing: body 1 fail arm entered at JNC (L648042) after only 0x0070ED80 has run; its epilogue POP EDI/POP ESI/RET (L648055-L648058) balances only if 0x0070ED80 popped the 0x1F (otherwise RET would pop the stale 0x1F as return address on a working client); body 1 success epilogue (L648052-L648054) additionally forces 0x0043A550 to pop EDX; body 2's in-window POP EDI (L648080) gives the same forcing for its own tail"
+      ],
+      "independent_check": "re-derived: the argument is valid GIVEN the client's epilogues return to the true return address (i.e., the binary works), which is the standing evidence-first convention for a shipped client; graded STRONGLY_SUPPORTED (not CONFIRMED) because callee bodies are out-of-window - correct epistemics.",
+      "verdict": "CONFIRMED (reasoning valid); ABI stands as STRONGLY_SUPPORTED"
+    },
+    {
+      "id": "RDER-P12-08-receiver-plumbing",
+      "claim_under_test": "P12-C11: ECX = entry this at every 0x0070ED80 call; ESI = this; ECX reloaded from ESI before each 0x006B22D0",
+      "line_trace": [
+        "L648036 MOV ESI,ECX (copy: reads ECX, writes ESI; ECX unchanged); L648037 CALL with ECX still = entry ECX; pushes at L648033-L648035 do not touch ECX",
+        "L648039/L648043 MOV ECX,ESI reloads before 0x006B22D0; body 2 mirrors at L648062/L648065/L648069",
+        "between L648040 (first CALL 0x006b22d0) and L648043 there is no ECX writer (CMP/JNC read EDI/flags)"
+      ],
+      "independent_check": "no ECX-writing instruction intervenes; plumbing claim CONFIRMED at instruction level; whether 0x0070ED80 consumes ECX stays UNKNOWN (callee out-of-window) - worker grades this split correctly.",
+      "verdict": "CONFIRMED_as_instruction"
+    },
+    {
+      "id": "RDER-P12-09-va-delta-coherence",
+      "claim_under_test": "listing internal coherence of the 48 rows (instruction lengths)",
+      "independent_check": "recomputed consecutive VA deltas for all 48 rows: all deltas strictly positive, min=1 max=10 bytes; e.g. body 1: 27a0->27a1 (PUSH=1B), ->27a2 (1B), ->27a4 (PUSH imm8=2B), ->27a6 (MOV r32,r32=2B), ->27ab (CALL rel32=5B), ->27af (MOVSX=4B), ->27b1 (2B), ->27b6 (5B), ->27b9 (CMP r32,imm8=3B), ->27bb (JNC rel8=2B), ->27bd (2B), ->27c2 (5B), ->27c5 (LEA 3B), ->27c8 (3B), ->27cf (MOV disp32 scaled=7B), ->27d0 (1B), ->27d5 (5B), ->27d7 (2B), ->27dc (5B), ->27dd (1B), ->27de (1B), ->27df (fail arm) - all consistent with x86 encodings; body 2 mirrors; last in-window VA 006c282f (POP EDI, 1B) with claimed continuation 006c2830/31 self-consistent.",
+      "verdict": "CONFIRMED (no listing-internal contradiction)"
+    },
+    {
+      "id": "RDER-P12-10-citation-accuracy",
+      "claim_under_test": "cited standing used by P12: (a) bridge 0x0072F580 = templates.vfs RB-tree keyed lookup; (b) P06 element #6 idiom; (c) P04 callsite 0x0067C8A8; (d) P07 pump chain; (e) P11 stage A/B producers",
+      "independent_check": [
+        "(a) CONFIRMED: bridge 00_CONTROL/RUN_PLAN.md L18 'templates.vfs registry RB-tree DAT_00BA1824, lookup FUN_0072F580'; 02_ANALYSIS/SELECTION.md L15 'FUN_0072F580 = map-find idiom returning node+0x14 (template object)'; multiple bridge QC files re-confirm.",
+        "(b) CONFIRMED: P06 REPORT.md line 103 (element #6 of the 4.1 table) contains 'CALL 0x0043a550; MOV ECX,EAX; CALL 0x0072f580' with 'CONFIRMED structure' and the label explicitly marked inherited-from-bridge; P12 cites the line number correctly.",
+        "(c) CONFIRMED WITH NUANCE: P04 REPORT.md line 35 (callsite 0x0067C8A8 row) reads 'arg2 -> [arg2] -> 43a550 -> 72F580 -> 72fce0 lookup'; P12's C8a omits the intermediate '[arg2]' deref when quoting the chain. No P12 claim depends on the deref step; idiom identity unaffected. P3-grade citation compression.",
+        "(d) CONFIRMED: P07 REPORT.md line 5: '0x006B6C9D is the {0x66,A}-forming pump: valid check 72FCE0 -> A-read getter 7CE1E0 -> const 0x66 pair build 43C700 -> callback registration via 40B070 -> enqueue via 43E5B0' - matches P12's citation verbatim in content.",
+        "(e) see P11 QC (separate pack): P11 REPORT attribution of producers 0x006C27A0/0x006C27F0 to stages A/B on [EDI+0x8]."
+      ],
+      "verdict": "CONFIRMED (one P3 compression nuance noted)"
+    },
+    {
+      "id": "RDER-P12-11-data-barrier-support",
+      "claim_under_test": "P12-B5: table contents at 0xA857C8/0xA85804 not recoverable from the saved text corpus",
+      "independent_check": "pinned source head inspected: pure instruction listing (first rows are VA + mnemonics, e.g. '0048aef0  XOR EAX,EAX'); no data-dump section markers found in the file head; the addresses 0xA857C8/0xA85804 occur exactly ONCE each in the whole 50.7 MB listing (as the L648047/L648075 instruction operands), never as dumped contents; 0xBA5800 occurs 9x (all as instruction operands - other bodies outside P12's window reference the same constant; P12 did not read them and claims nothing about them). Contents of .data would require EXE/.data access = FORBIDDEN. Barrier claim CONSISTENT with the corpus's nature.",
+      "verdict": "STRONGLY_SUPPORTED (consistent; absence verified within the pinned corpus; no other corpus file was opened by the worker, and QC did not survey the wider catalog - catalog check remains a parent option per P12-B5)"
+    },
+    {
+      "id": "RDER-P12-12-out-of-window-claim-independence",
+      "claim_under_test": "P12-C12/G04: zero claims derive from out-of-window rows (navigation over-display incident)",
+      "independent_check": "all evidence_rows fields in CLAIMS.json inspected: every citation is in L648033-L648080; the only out-of-window VAs appearing anywhere in the pack are (i) recorded HANDOFF admission targets (0x0043A550, 0x0070ED80, 0x006B22D0, 0x0072F580, 0x006C2830/31/32, family entries, P11 leftovers) - recorded as NOT-read targets per contract; (ii) the B8 barrier's family hypothesis marked UNVERIFIED/not-read. The 0xA855D0/0xA85778 VA mentions in HANDOFF are explicitly labeled as over-display VA mentions with no details quoted and no claims attached. No science claim cites an out-of-window row.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "RDER-P12-13-denied-region-non-read",
+      "claim_under_test": "parent check: P12 did not read the denied front-A region 0x007B6C4B-0x007B6E4B",
+      "independent_check": "P12's extract (verbatim-verified) contains only VA 006c27a0-006c282f rows; no 7B6C4x-7B6Exx content; HANDOFF/REPORT/CLAIMS mention no 0x007B6Cxx address; the denied region belongs to the P10 front-A story and P12's window is disjoint from it.",
+      "verdict": "CONFIRMED"
+    }
+  ],
+  "full_read_log": {
+    "pack_files_read_to_eof": ["REPORT.md", "CONTRACT.json", "EXTRACT_REGION_006C27A0_006C2830.txt", "CLAIMS.json", "COUNTERS.json", "GATES.json", "MANIFEST.json", "HANDOFF.md", "SOURCE_PINS.json", "RUN_STARTED.json", "MEMORY_AND_IDENTITY.json", "BARRIER_BACKLOG.json", "artifact_index.csv"],
+    "external_files_read": ["CONTROL/CONTRACTS/P12.json (hash check)", "CONTROL/EVENTS/000015_ADMIT.json", "pinned source: head sample + hash + L648033-L648080 slice + address-occurrence greps", "bridge 00_CONTROL/RUN_PLAN.md L18 region (grep)", "bridge 02_ANALYSIS/SELECTION.md L15 region (grep)", "P06 REPORT.md (grep hits L103, L229-230)", "P04 REPORT.md (grep hit L35)", "P07 REPORT.md (grep hit L5)"],
+    "read_mode": "FULL_READ of all pack files; BOUNDED_INSPECTION (grep/slice) of external files for citation verification; NOT_CHECKED: full bridge/QC file bodies beyond grep hits, P11 REPORT (verified separately in the P11 QC), wider saved-corpus catalog for .data exports (P12-B5 parent option)"
+  }
+}

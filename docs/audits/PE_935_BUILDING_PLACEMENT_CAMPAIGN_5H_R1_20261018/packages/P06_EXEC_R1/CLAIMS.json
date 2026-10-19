@@ -1,0 +1,140 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P06",
+  "front": "C",
+  "evidence_taxonomy_note": "evidence_level in {CONFIRMED, STRONGLY_SUPPORTED, PLAUSIBLE, UNVERIFIED, REJECTED} per parent CONTRACT section 12; claim_resolution in {ANSWERED, CONDITIONAL, NOT_ESTABLISHED, REJECTED_WITH_EVIDENCE}",
+  "claims": [
+    {
+      "id": "CLAIM-P06-C1",
+      "subject": "question (a): 0x008BD720 thunk dispatch",
+      "statement": "The complete body of 0x008BD720 is exactly two instructions: LEA EAX,[ECX+0x18] (VA 0x008BD720) followed by RET (VA 0x008BD723). It contains NO jump and NO call. There is NO dispatch target VA: the function does not transfer control anywhere except back to its caller.",
+      "answer_to_question_a": "NO dispatch target exists. The premise 'callback thunk dispatches to a target' is rejected. The body is a leaf that returns the interior pointer ECX+0x18 in EAX.",
+      "evidence": [
+        "EXTRACT_SUBREGION_A_008BD720_008BD740.txt rows 1-2 (source lines 1282626-1282627; VA 008BD720 LEA EAX,[ECX + 0x18]; VA 008BD723 RET)",
+        "Direct source re-read cross-check (Read tool, source lines 1282626-1282629) - extract is verbatim",
+        "Body completeness: RET at 0x008BD723 terminates the body; next listed instruction in window is 0x008BD730 (a separate body, INCIDENT-P06-I1); no JMP/CALL instruction exists anywhere in the admitted window A"
+      ],
+      "premises": [
+        "The pinned listing (SHA256 642CC29A...CC1D8DB, verified twice) is the frozen scientific corpus for this package",
+        "RET terminates the basic block; the body cannot 'continue' after RET",
+        "VA-delta consistency: LEA (3 bytes) + RET (1 byte) ends at 0x008BD724; gap to 0x008BD730 is consistent with inter-body padding, not with hidden instructions"
+      ],
+      "countermodel_considered": "A dispatch could hide after RET or in the 0x008BD724-0x008BD72F gap: rejected - the window contains no listed instruction there, and any real thunk would need a JMP/CALL instruction inside its own body; the body as listed contains none. The gap bytes are not listed in the corpus; treating them as hidden code would be speculation outside saved evidence.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "REJECTED_WITH_EVIDENCE (the dispatch premise); ANSWERED (the question: target VA = NONE)"
+    },
+    {
+      "id": "CLAIM-P06-C2",
+      "subject": "question (a): operational meaning of 0x008BD720 as the pinned {0x66,A} request callback",
+      "statement": "When invoked, 0x008BD720 computes EAX = ECX + 0x18 and returns. As the pinned request callback it yields the address of the +0x18 sub-object/field of whatever object the scheduler passes in ECX. The continuation of the {0x66,A} chain therefore lies CONSUMER-SIDE: in the code that invokes this callback and uses the returned pointer (22 direct CALL sites and 3 imm32 registration-shaped sites exist in the pinned listing), and/or in the +0x18 sub-object itself - not in any callee of 0x008BD720 (it has none).",
+      "evidence": [
+        "CLAIM-P06-C1 body semantics (register-pure, unconditional, no memory access)",
+        "Bridge standing (cited, not re-derived): 0x008BD720 pinned as the {0x66,A} request's callback via imm32 - DRAFT_FINAL_REPORT.md L185-186, HANDOFF.md L16, PE_MASTER_REVIEW.md L29",
+        "Navigation-only address search in the pinned listing (no caller region read): 22 direct CALL sites (0054F7BB, 0055000F, 00556FAD, 00556FC5, 00557030, 00557912, 0055792A, 0055794E, 005CB73A, 006B1E5A, 006B6DB9, 006C88C6, 006C88D5, 006D3BAE, 006D3BC8, 006D3BD7, 006D3CD6, 006D3CFE, 006D3D26, 006D3D3A, 006D4441, 006E68A8) and 3 imm32 load sites (006B6D05 MOV EBX,0x8bd720; 006C3FB0 MOV EBX,0x8bd720; 006D44E8 MOV EDI,0x8bd720)"
+      ],
+      "premises": [
+        "Bridge premise inherited (cited): ECX at callback invocation is the request/scheduler-side object; NOT re-derived here",
+        "Premise preserved: 'no direct caller != exclusively virtual' - 0x008BD720 has 22 direct callers AND is address-taken (3 imm32 sites in listing), so it is NOT exclusively virtual",
+        "Data-section (vtable) references are not visible in the instruction listing; absence in-listing is not proof of absence in binary"
+      ],
+      "countermodel_considered": "The callback imm32 might be stored as data and never invoked, or invoked with a different register convention. Neither changes the in-window fact: the body is register-pure pointer arithmetic and cannot dispatch. If the callback is invoked, its whole observable effect is 'return &arg+0x18'.",
+      "evidence_level": "CONFIRMED (body semantics and register-purity); NOT_ESTABLISHED (which caller/registration site is the {0x66,A} scheduler, and what the +0x18 sub-object is)",
+      "claim_resolution": "CONDITIONAL on the inherited bridge premise; the experiment-design consequence is unconditional: the bridge's designed step 'decode FUN_008BD720 and the type-0x66 provider chain' cannot continue through a callee - it must continue through the consumer/registration side."
+    },
+    {
+      "id": "CLAIM-P06-C3",
+      "subject": "question (b): flag-dispatch structure of 0x00848EA0",
+      "statement": "0x00848EA0 begins with an MSVC SEH prologue (PUSH -0x1; PUSH handler 0x00A28300; MOV EAX,FS:[0x0]; ...; MOV FS:[0x0],EAX), loads its first stack argument into EDI (MOV EDI,[ESP+0x80]) and queries it: PUSH 0x1; MOV ECX,EDI; CALL 0x00745540; TEST AL,AL; MOV ECX,EDI; JZ 0x00848FEC. Non-zero result (flag 1 TRUE) falls through into the in-window lookup/compose chain; zero result jumps OUT of the window to 0x00848FEC. This instruction-level confirms the bridge's AMEND-4/AMEND-5 corrected standing that the lerp chain executes under FUN_00745540(1)!=0, and locates the flag-2 path (per bridge: the per-slot {u16@+0xC, float@+0x10} stores) at >= 0x00848FEC, i.e. OUTSIDE this admitted window.",
+      "evidence": [
+        "EXTRACT_SUBREGION_B rows 7-29 (source lines 1145803-1145825): prologue, arg load at 1145817, flag query at 1145820-1145822, TEST/JZ at 1145823-1145825",
+        "JZ target 0x00848FEC > window end 0x00848FC4-exclusive: recorded VA, NOT read",
+        "Bridge AMEND_LOG_R1.md AMEND-4 (cited): 'the id2 -> lookup -> FUN_0072FE30 -> FUN_006C1F90 lerp -> slot-position chain executes under FUN_00745540(1) != 0 (flag 1), while the per-slot {u16@+0xC, float@+0x10} stores execute under FUN_00745540(2) (flag 2)'"
+      ],
+      "premises": [
+        "TEST AL,AL + JZ = boolean-false branch idiom (x86 convention)",
+        "The flag-2 content attribution is INHERITED from the bridge C3 decompile (cited); this package verified only the branch STRUCTURE in-window, not the content at 0x00848FEC"
+      ],
+      "countermodel_considered": "The JZ target 0x00848FEC could hold loop machinery or something else rather than the flag-2 stores - possible; the bridge's full-body decompile (cited) attributes the stores to the FUN_00745540(2) path; this package makes no claim about the target region's content.",
+      "evidence_level": "CONFIRMED (branch structure, in-window); PLAUSIBLE (flag-2 attribution at 0x00848FEC, inherited)",
+      "claim_resolution": "ANSWERED (structure); the flag-2 field-access question is NOT_ESTABLISHED in-window (gap VA recorded: 0x00848FEC)"
+    },
+    {
+      "id": "CLAIM-P06-C4",
+      "subject": "question (b): slot-object interface and class semantics",
+      "statement": "The slot(-container) object consumed by 0x00848EA0 is its FIRST STACK ARGUMENT (MOV EDI,[ESP+0x80]; the function is not thiscall-on-the-slot - it receives the object by stack and then uses it as 'this' by loading ECX=EDI before each method call). In-window it uses exactly three direct (non-virtual in-window) methods on this object, all in the 0x00745xxx family: (1) 0x00745540(this,1) -> boolean AL (kind-of-slot predicate); (2) 0x00745BF0(this) -> pointer EAX, null-checked with TEST EAX,EAX + JZ 0x00848FC6 early exit (this is the in-window entry point of the bridge's id2/property channel); (3) 0x00745690(this,0) -> x87 float returned in st0 and consumed via PUSH ECX;FSTP [ESP]. In-window 0x00848EA0 performs NO direct object-field read: every field access is delegated to these callees or lives on the out-of-window flag-2 path. The slot object's CLASS is NOT established in-window (no vtable dereference, no RTTI, no constructor visible).",
+      "evidence": [
+        "EXTRACT_SUBREGION_B rows: arg load (1145817), flag query (1145820-1145822), null-checked getter (1145824-1145833), float getter + st0 consume idiom (1145871-1145875)",
+        "Direct-call (static target) form of all three CALLs - no CALL [reg]/CALL EDX dispatch in-window",
+        "Exhaustive in-window direct-dereference census: [ESP+0x80] (arg), [0x00A7B25C] (float const), [0x00B9D8D0] (MSVC security cookie), FS:[0x0] (SEH chain), [EAX]/[EAX+0x4]/[EAX+0x8] (the 0x006C1F90 result triple); NO other memory read in-window"
+      ],
+      "premises": [
+        "Idiom-level return interpretation (TEST AL,AL=boolean; TEST EAX,EAX=null-check; PUSH ECX+FSTP [ESP] immediately after CALL=x87 st0 float return) - x86/MSVC conventions, strongly supported, not byte-proven",
+        "Premise preserved: identical lookup shapes or parameter names do not prove common semantics - the 0x00745xxx family shape suggests one class but does NOT establish the bridge's class-20006 attribution"
+      ],
+      "countermodel_considered": "(a) The 0x745xxx entries might be free functions that merely take ECX by convention - possible in principle; in-window they are this-called on EDI (the slot object), so at minimum they form the slot object's in-window interface. (b) AL/EAX/st0 might carry non-bool/non-ptr/non-float values - does not change the interface shape. (c) The class-20006 property tag 6 hypothesis: UNVERIFIED in-window - the property read is inside 0x00745BF0 and deeper callees (not admitted). This package neither confirms nor refutes it.",
+      "evidence_level": "CONFIRMED (call structure, this-object wiring, no-direct-field-read census); STRONGLY_SUPPORTED (return-type idioms); NOT_ESTABLISHED (slot object class identity)",
+      "claim_resolution": "ANSWERED (interface semantics); NOT_ESTABLISHED (class identity); UNVERIFIED (class-20006/tag-6 hypothesis - outside window)"
+    },
+    {
+      "id": "CLAIM-P06-C5",
+      "subject": "question (b): in-window data flow and produce of the flag-1 path",
+      "statement": "In-window flag-1 chain: P = 0x00745BF0(slot); L = 0x00843D60(&frame5C, P); obj1 = 0x00844660(L); obj2 = 0x0043A550(obj1); EBP = 0x0072F580(obj2) [the bridge's keyed-lookup chain, cited]; the lookup chain is exception-guarded (MSVC __try: local trylevel [ESP+0x78] set 0 before 0x00844660->0x0043A550->0x0072F580 and -1 after; SEH handler imm 0x00A28300 recorded, NOT read); a frame local at [ESP+0x58] is passed to 0x008E0110 (callee, NOT read); guard 0x0072FCE0(EBP) -> boolean (FALSE -> JZ 0x00848FC4, outside window); 0x0072FE30(EBP, buf1, buf2, buf3) fills three 12-byte float3 frame buffers that were zero-initialized in-window (FLDZ + 7 FST/FSTP stores) - out-parameter idiom; t = 0x00745690(slot, 0) -> float; R = 0x006C1F90(ptr_a, ptr_b, ptr_c, t) (4 cdecl dwords, caller-cleans via ADD ESP,0x10) -> EAX -> 12-byte float triple ([EAX], [EAX+4], [EAX+8]) copied into frame locals; JMP 0x00848FC6 (epilogue, outside window). In-window writes are ONLY frame-local: FS:[0] (SEH install) and ESP-relative locals; NO heap object field and NO global is written in-window. The bridge's semantic labels ('lookup', 'lerp', 'store to slot+0x00', 'R08 loop over 3 slots') are inherited standing from their full-body C3 decompile (cited); the store-to-slot+0x00 and the loop are NOT in this window (they lie in the epilogue/flag-2 regions >= 0x00848FC4/0x00848FEC).",
+      "evidence": [
+        "EXTRACT_SUBREGION_B full 88 rows; sequence as listed",
+        "VA-delta encoding consistency control: all 88 rows are contiguous and every next-VA delta fits a standard x86 encoding length for the listed mnemonic+operands (documented per-instruction in REPORT.md section Controls); no undefined-byte gap inside the window",
+        "Bridge citations: AMEND_LOG_R1.md AMEND-4/AMEND-5 (chain + flag semantics), DRAFT_FINAL_REPORT.md L95-110 (list2 3xvec3 -> slot-position lerp, payload-derived), HANDOFF.md L84-86 (experiment 2 wording)"
+      ],
+      "premises": [
+        "Zero-fill-then-pass = out-parameter contract for 0x0072FE30 (idiom-level, strongly supported)",
+        "The 12-byte result's semantic identity (slot position) and the three buffers' provenance (template payload list2) are INHERITED bridge standing (cited) - NOT re-derived in this window; in-window they are just float3 values produced by unadmitted callees",
+        "The final store target (frame local [ESP+0x2C]-region) is a stack slot; where this value goes after the epilogue is outside the window"
+      ],
+      "countermodel_considered": "(a) Buffers could be in/out rather than pure-out - possible, does not change the structural flow. (b) The 12-byte triple could be any vec3, not necessarily a position - the 'slot-position' label is bridge standing; this package states only the in-window dataflow. (c) The __try scope might swallow expected exceptions - handler unread; recorded VA 0x00A28300.",
+      "evidence_level": "CONFIRMED (in-window instruction-level structure and dataflow); STRONGLY_SUPPORTED (out-param and float-return idioms); inherited labels unchanged from bridge (not re-audited here)",
+      "claim_resolution": "ANSWERED within scope (in-window consume/produce); the post-epilogue store (slot+0x00) and the loop remain bridge standing, NOT re-derived"
+    },
+    {
+      "id": "CLAIM-P06-C6",
+      "subject": "question (b): FAMILY-P/T merge - does any VFS-record-fed channel reach 0x00848EA0 in-window?",
+      "statement": "NO. In-window, no VFS-record-fed channel reaches 0x00848EA0's data flow. The complete in-window data-source census: (1) the stack argument arg1 (slot object) - provenance is the single in-listing direct caller 0x004E55F7 (CALL 0x00848ea0), NOT read; (2) float constant [0x00A7B25C] (.data static); (3) MSVC security cookie [0x00B9D8D0]; (4) FS:[0] SEH chain; (5) return values of the 11 direct callees (all outside the admitted window). No file/registry/record-reader call, no record-array dereference, and no VFS handle appears in-window. This is a SCOPED negative: it does NOT prove end-to-end absence - a VFS-fed channel, if real, enters through (i) the id2/property provenance inside 0x00745BF0 and its callees (the class-20006 tag-6 read), (ii) the class-20006 property-tag-6 WRITERS (bridge proposal), or (iii) the arg1 slot-object provenance at caller 0x004E55F7.",
+      "evidence": [
+        "Exhaustive CALL census in-window: 11 direct CALLs with static targets (0x00745540, 0x00745BF0, 0x00843D60, 0x00844660, 0x0043A550, 0x0072F580, 0x008E0110, 0x0072FCE0, 0x0072FE30, 0x00745690, 0x006C1F90); zero indirect calls in-window",
+        "Exhaustive direct-dereference census (as in CLAIM-P06-C4)",
+        "Navigation: exactly 1 in-listing reference to 0x00848EA0 (CALL at 0x004E55F7); no imm32/address-taken use of 0x00848EA0 anywhere in the pinned instruction listing (caveat: data sections are not part of the instruction listing, so a data-section reference cannot be excluded from listing evidence alone)"
+      ],
+      "premises": [
+        "Scoped-negative discipline: the claim is about IN-WINDOW visibility only",
+        "Bridge standing (cited, DRAFT_FINAL_REPORT L172-178): within the censused construction machinery, drivers' inputs come from message dispatch, runtime attributes, or hardcoded immediates; templates.vfs is consumed as a DEFINITION registry only; the only file reader is the registry loader with census 1 caller",
+        "Premise preserved: definition-source registry is NOT promoted to instance-source"
+      ],
+      "countermodel_considered": "Any of the 11 callees (most plausibly the 0x00745BF0 property chain or 0x0043A550) might ultimately read VFS-fed data - cannot be excluded in-window and is NOT claimed to be excluded. The merge question stays OPEN with exactly narrowed edges.",
+      "evidence_level": "CONFIRMED (in-window visibility negative); NOT_ESTABLISHED (end-to-end merge question)",
+      "claim_resolution": "SCOPED ANSWER: merge NOT decidable in-window; exact gap edges recorded (0x00745BF0 property provenance; class-20006 tag-6 writers; caller 0x004E55F7)"
+    },
+    {
+      "id": "CLAIM-P06-C7",
+      "subject": "navigation facts (address search only; no caller/callee region read)",
+      "statement": "In the pinned listing: 0x008BD720 is referenced by 22 direct CALL sites and 3 imm32 loads (registration-shaped); 0x00848EA0 is referenced by exactly 1 direct CALL site (0x004E55F7) and no imm32 load. Additionally, within admitted window A there exists an UNFORESEEN second body 0x008BD730 (MOV AL,byte ptr [ECX+0x64]; RET) - see INCIDENT-P06-I1.",
+      "evidence": [
+        "Reproducible address greps of the pinned file: pattern '8bd720' -> 26 rows (22 CALL sites + 3 imm32 + 1 body); pattern '848ea0' -> 2 rows (1 CALL site + 1 body)",
+        "EXTRACT_SUBREGION_A row 3 (source line 1282628, VA 0x008BD730)"
+      ],
+      "premises": [
+        "These are listing-level counts; the listing contains code rows, not data sections",
+        "No caller or callee region was read; these VAs are recorded for future admission decisions only"
+      ],
+      "countermodel_considered": "Data-section (vtable/function-table) references to either address are invisible in an instruction listing; in-listing absence is not binary absence.",
+      "evidence_level": "CONFIRMED (as listing-level navigation counts)",
+      "claim_resolution": "ANSWERED (navigation); no semantic use made"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INCIDENT-P06-I1",
+      "type": "UNFORESEEN_BODY_IN_ADMITTED_WINDOW",
+      "description": "Window A (0x008BD720-0x008BD740, admitted by VA range) contains a second logical body at 0x008BD730 (MOV AL,byte ptr [ECX+0x64]; RET - a 2-instruction byte-getter leaf) that was NOT declared in the contract body_entries (which listed only 0x008BD720 and 0x00848EA0). Per parent CONTRACT section 6, this is reported as an incident; the extract preserves the raw content; NO claims and NO further analysis are built on 0x008BD730; no region beyond the admitted VA ranges was opened.",
+      "counters_effect": "bodies_in_window=3 vs reserved=2 (the reservation covered the VA range; the extra body lies fully inside the same admitted range); rows=92<=98; CALL sites=11<=14; candidates=4<=4",
+      "disposition": "disclosed to parent for adjudication; package marked COMPLETED_WITH_PROCEDURAL_INCIDENT"
+    }
+  ]
+}

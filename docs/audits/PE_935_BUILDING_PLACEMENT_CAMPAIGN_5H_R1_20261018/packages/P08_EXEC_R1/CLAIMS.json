@@ -1,0 +1,165 @@
+{
+  "package_id": "P08",
+  "front": "D",
+  "question": "D1: does the saved corpus contain HISTORICAL world-instance placement values (transform values with concrete instance identity + byte/source provenance) for the studied objects?",
+  "scoped_verdict": "SCOPED_NEGATIVE_WITH_BOUNDS: NO historical world-instance placement values exist in the assimilated saved-evidence corpus for any studied object. Every transform-like value found classifies as model-internal NIF node transform, tool-composed file-scene-space value, default identity/zeros, synthetic SDK control, mechanism-knowledge-without-values, or non-placement payload field. None carries a concrete world-instance identity together with a world frame/origin/scale.",
+  "claims": [
+    {
+      "claim_id": "P08-CL1",
+      "claim": "The three assimilated runs carry standing negatives on historical placement values: PLACEMENT_XYZ_RECOVERED=NO (bridge 2026-10-03), WORLD_XYZ_RECOVERED=NO + PE_WORLD_ROOT_IDENTITY=NOT_ESTABLISHED + MODEL_GEOMETRY_MATCHES=0 (scene inspection 2026-10-09), NOT_FOUND_IN_SEARCHED_SCOPE for world-instance placement of 296445/family (errata 2026-09-12, corrected).",
+      "evidence": [
+        "S1 DRAFT_FINAL_REPORT.md line 108-110: 'PLACEMENT_XYZ_RECOVERED = NO — no placement XYZ recovered for any world instance from a physical record'",
+        "S2a HANDOFF.md lines 52-54: MODEL_GEOMETRY_MATCHES = 0; PE_WORLD_ROOT_IDENTITY = NOT_ESTABLISHED; WORLD_XYZ_RECOVERED = NO",
+        "S2b FINAL_REPORT.md section 5 (lines 358-364): MODEL_218757_TO_CMO_JOIN = NOT_ESTABLISHED; HISTORICAL_WORLD_INSTANCE = NOT_ESTABLISHED; PE_WORLD_ROOT_IDENTITY = NOT_ESTABLISHED; PE_AXES_AND_UNITS = UNVERIFIED; WORLD_XYZ_RECOVERED = NO",
+        "S3b 00_RAPORT_CORRECTED.md ustalenie 9: 'Placement instancji świata: NIE ZNALEZIONO W ZBADANYM ZAKRESIE … NOT_FOUND_IN_SEARCHED_SCOPE (negatyw placementu BOUNDED)'",
+        "S3b ustalenie 10: 'Konkretna pozycja historyczna budynku: nieosiągalna z istniejącego korpusu … FIRST_PEINST 0/6; brak cache' — UNKNOWN / NOT_FOUND_IN_SEARCHED_SCOPE"
+      ],
+      "premises": [
+        "each status is the run's own measured/scoped conclusion, quoted verbatim from catalog-pinned documents (SHA-verified); no status was re-derived or promoted by this package"
+      ],
+      "countermodel": "A corpus document containing a concrete historical XYZ for a named world instance with byte provenance would falsify this claim; none of the five assimilated documents contains such a value, and each run's own searched-scope negative (S3b section 5/6) independently reports its absence in the searched data",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_AS_STANDING (document-level assimilation; no new measurement)"
+    },
+    {
+      "claim_id": "P08-CL2",
+      "claim": "Every transform-like value present in the assimilated documents falls into one of the classes below; NONE qualifies as a historical world-instance placement value under the 4-part test of parent contract section 10 (concrete instance identity; concrete model identity; byte/source provenance; transform type local/world + parent/origin/scale + what remains unknown).",
+      "evidence": "classification table (also in REPORT.md):",
+      "classification_table": [
+        {
+          "class": "M1-LOCAL",
+          "what": "296445.nif per-mesh local_T (parent-relative serialized NIF transforms), 30 rows",
+          "examples": "GeoTexanim01:0 (-513.24, 36.74, -1053.36); B_Eu_b047_glowsak:0 (401.14, -1611.45, -368.00); B_Eu_b047_Object06:0 (-10591.81, -839.70, 1536.75); DoorComputer:0 (14.19, 0, -229.71); Object07:0 (-2039.12, ~0, -65.0); 7x lens (0,0,-534.63); dPVS_occ02/03 z=4420/7720",
+          "provenance": "serialized in the 296445.nif payload (108,876 B, SHA 656795d8…), read by the run's own parser with Gb12-source-verified layouts; recomputed mechanically in the errata (analyze_tree_v2.py) from BLOCKMAP_V2.json",
+          "classification": "MODEL-INTERNAL NIF node transform (rest-pose, parent-relative); identity = mesh name within the model; frame = parent node; NOT world-instance placement"
+        },
+        {
+          "class": "M2-WORLD-COMPOSED",
+          "what": "296445.nif per-mesh world_T column (30 rows) and 218757.nif composed transforms (28 blocks, e.g. B_Outpost_me01_Ext_sign:0 -> (0, -1030, 820))",
+          "provenance": "COMPUTED by our own tools (analyze_tree_v2.py; s17_scene_structure) from serialized local transforms under the stated convention world[i] = parent_world ∘ local_i (mesh's own transform included; root parent = identity; 218757: FILE_SCENE_SPACE, cross-checked 5/5 vs independent s2 parser)",
+          "classification": "MODEL-INTERNAL tool-composed value in FILE SCENE SPACE (root-relative); explicitly 'NOT a placement, NOT world XYZ' (S2b); 'Macierz world NIF ≠ placement świata' (S3b 3C); NOT SDK runtime values, NOT client-runtime values, NOT world-instance placement"
+        },
+        {
+          "class": "M3-SUPERSEDED",
+          "what": "world_T_r1_superseded column (R1 values) in TRANSFORM_TABLE_CORRECTED.csv",
+          "provenance": "R1 analyze_tree.py bugged convention (world = parent transform only); superseded by errata B1-B3; retained for provenance",
+          "classification": "MODEL-INTERNAL, superseded tool artifact; neither placement nor current-best composed value"
+        },
+        {
+          "class": "M4-BOUNDS",
+          "what": "bbox_local/bbox_world per mesh; composed scene bbox ~5000x5000x15620 model units (296445); extents [2500,3350,1250] game units (218757); importer 7-float tail (-3447.685…15620.0, 0.0)",
+          "provenance": "byte-derived extrema of raw vertex arrays (importer tail: bit-identity CONFIRMED but from DIFFERENT local frames — not a composed scene bbox, not placement); bounds computed from byte-verified geometry",
+          "classification": "MODEL-INTERNAL geometry metadata; 'NO historical location derived from them' (S2b); 7th float semantics UNKNOWN (retracted closure [E-B4]); NOT placement"
+        },
+        {
+          "class": "Z-DEFAULT",
+          "what": "Scene Root identity transform (296445, 218757 'zero root transform'); 16/30 mesh rows with local_T=[0,0,0] and world_T=[0,0,0] (building core, gloss, Galler, dPVS_occ01/04..07, Bip01_item)",
+          "provenance": "serialized identity/default zeros in the NIF payload",
+          "classification": "DEFAULT ZEROS / identity — not placement evidence (zero local transform is also not evidence of never having been placed, per SDK source NiOptimization — but in the file it is simply a default)"
+        },
+        {
+          "class": "I-SYNTHETIC-CONTROL",
+          "what": "SDK synthetic transform controls (e.g. TRANSLATED_PARENT local (1,2,3) vs composed world (101,202,303)); SDK TUTORIAL_WORLD/DESERT_TOWN parsed values",
+          "provenance": "invented test values of the SDK qualification package; SDK-controlled parse evidence in ITS scope only",
+          "classification": "SYNTHETIC CONTROL VALUES — not PE data at all; saved evidence only for tool-capability qualification; NOT client-runtime values, NOT placement"
+        },
+        {
+          "class": "R-MECHANISM-NO-VALUES",
+          "what": "placement-record field offsets +0x08/+0x14/+0x20/+0x24 (bridge, runtime transport setters; record is not a NiAVObject); movable channel rec+38/rot+44/+50..58 (parent contract section 10, version/class-scoped); PE2/2003 network create-object handler FUN_005977b0 records 0x1C + f32 XYZ @+0x2c/+0x30/+0x34, SetPosition vtable[0x50]",
+          "provenance": "byte-evidenced static RE: the bridge chain in Entropia.exe 9.3.5 (this campaign's census context), the PE2/2003 canon byte-evidenced in PE2_unpacked_out.exe SHA 561789… (era-scoped)",
+          "classification": "MECHANISM KNOWLEDGE WITHOUT VALUES: transport fields exist but their runtime values come from message channel / runtime attributes / hardcoded immediates (bridge: none reads templates.vfs); PE2/2003 session values do not exist in corpus (FIRST_PEINST 0/6); 9.3.5 mechanism UNVERIFIED (transfer hypothesis [E-A1]); movable rec+38/rot+44 channel is NOT static-building evidence (parent premise)"
+        },
+        {
+          "class": "P-PAYLOAD-NONPLACEMENT",
+          "what": "template 4508 PARAM D_f32=124.94100189208984; template payload list2 (3 x vec3) -> runtime slot-position lerp mechanism",
+          "provenance": "physical record bytes: templates.vfs record 4508 @ofs 96,496, 28 B payload {id2=4508, A=296445, B=296446, C=0, D_f32=124.941…, list1_count=0, list2_count=0, f11=0} (bridge C1 own walk; errata E-F10 LE+BE scans)",
+          "classification": "NOT PLACEMENT: PARAM semantics UNKNOWN (candidate scale/radius; 'PARAM template'u nie jest parą współrzędnych' S3b 3C); list2->slot-position lerp is CONFIRMED machinery of UNKNOWN slot class (bridge) but record 4508's own list2 is EMPTY — no vec3 values exist for the studied object, and the mechanism carries no world-instance identity"
+        },
+        {
+          "class": "E-ZONE-COORDS",
+          "what": "EnvironmentZones.vfs zone records (126 records, 84 canonical + 42 tail; centers ±30k; radius r=rec32+26.0 per canon)",
+          "provenance": "PE_PLACEMENT_ENCODING_CENSUS_R1 (canon, supported-not-repeated in S3b section 5)",
+          "classification": "COORDINATE-LIKE BUT NOT INSTANCE PLACEMENT: 0 template<->zone links verified; zone centers are environment-zone definitions, not placements of the studied objects"
+        }
+      ],
+      "premises": [
+        "transform values without instance identity + frame/origin/scale are not historical placement — applied to every class above",
+        "SDK-controlled parse values are saved evidence only in their scope, not client-runtime values — applied to I-SYNTHETIC-CONTROL and to the tool-composed M2 class",
+        "movable rec+38/rot+44 channel is not static-building evidence — applied to R-MECHANISM-NO-VALUES"
+      ],
+      "countermodel": "a value would falsify the classification if any corpus document attached a concrete world-instance identity (e.g. a named/numbered instance of 296445 or any world object) to a transform with world frame provenance; the assimilated documents contain no such attachment — the strongest candidates (296445 world_T column; 218757 composed (0,-1030,820); PARAM 124.941) all fail at identity or frame",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED (for the assimilated document set; classification of listed classes is exhaustive for those documents)"
+    },
+    {
+      "claim_id": "P08-CL3",
+      "claim": "The provenance of TRANSFORM_TABLE_CORRECTED.csv values is: own-parser byte data (R1 BLOCKMAP_V2.json, full 155-block byte-exact map of 296445.nif) mechanically recomputed by the errata's own analyze_tree_v2.py under the corrected convention world[i] = parent_world ∘ local_i (with the mesh's own transform; root parent = identity); it is NOT an SDK-controlled parse and NOT a client-runtime observation; the corrected-convention gate G1 used the 16 unchanged rows as a negative control (14/30 changed exactly).",
+      "evidence": [
+        "S3b section 3B: 'konwencja world[i] = parent_world ∘ local_i (z WŁASNĄ transformacją mesha), parent korzenia = identity (poprawka buga R1…)' and 'Zmienione world_T: dokładnie 14 meshy (32, 66, 72, 75, 82, 90, 94, 115, 121, 127, 133, 139, 145, 151); pozostałe 16 identycznych (kontrola negatywna bramki G1 erraty)'",
+        "S3b section 10: 'ERRATA 00_CONTROL/analyze_tree_v2.py — poprawiony instrument (konwencja world = parent∘local; bramka G1 assertowana)'",
+        "S3b ustalenie 1: 155/155 blocks, byte accounting exact (49+2795+106024+8 = 108,876 B, 0 unaccounted; full byte-range coverage, not proof of full semantics [E-D3])",
+        "S3a CSV: changed_vs_r1=True exactly on rows for mesh_idx 32, 66, 72, 75, 82, 90, 94, 115, 121, 127, 133, 139, 145, 151 (14 rows) — matches the report's G1 statement"
+      ],
+      "premises": [
+        "SDK-controlled parse values are saved evidence only in their scope — here not even an SDK parse was used for the table; the values derive from our own byte-exact block map plus a stated arithmetic convention"
+      ],
+      "countermodel": "if the CSV were an SDK/native parse output, its values could carry post-load semantics; it is not — the stock GB 1.2 toolchain cannot even load 296445.nif-family inputs (NiArk blocks; S2b measured native rejection), so no native/SDK transform values for these assets exist anywhere in the corpus",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED"
+    },
+    {
+      "claim_id": "P08-CL4",
+      "claim": "The three runs are separate instruments, but their overlapping negatives are not three independent confirmations: they share the same underlying evidence sources (296445.nif payload bytes 656795d8…; Models.bnt C950A8C2…; templates.vfs record 4508; the same client binary era). Their agreement is CORROBORATION, not multiplication. The independent lines inside the corpus are: the errata's independent scan reproductions (rawscan.py G2 8/8 offset-exact; BE-scan by PE-MASTER auditor), the bridge's CONTROL-4 (962/962 bytes + 113/113 targets recomputed without Ghidra), and the scene inspection's s17-vs-s2 5/5 transform cross-check.",
+      "evidence": [
+        "S1: 'the A value (296445) is measured from the physical templates.vfs file (C1), not from the binary' + CONTROL-4 PASS",
+        "S3b section 5/7: independent reproductions with reverse-conversion assertion (lesson from the retracted wrong-pattern scan)",
+        "S2b section 4.6: composed transforms 'cross-checked 5/5 against the independent s2 parser's world transforms'",
+        "shared source identities: Models.bnt C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0 pinned in S1, S2b (re-verified unchanged before/after), S3b; 296445.nif payload SHA 656795d8… identical across eras (S3b section 1)"
+      ],
+      "premises": [
+        "three documents copying one source are not three independent confirmations — applied directly"
+      ],
+      "countermodel": "if the three runs had measured disjoint physical sources and still agreed on the negative, the corroboration would be stronger than it is; the overlap is documented, so the negative's weight rests on the within-run independent reproductions, which are cited",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED (epistemic-weight qualification, not a new measurement)"
+    },
+    {
+      "claim_id": "P08-CL5",
+      "claim": "BOUNDED REMAINING EDGE: within the closed corpus, historical world-instance placement VALUES for the studied objects are not recoverable because (a) per the PE2/2003 canon the placement source is SERVER-DELIVERED (network session stream; PLACEMENT_SOURCE=SERVER-DELIVERED byte-evidenced in PE2_unpacked_out.exe only), (b) session records do not exist in the corpus (FIRST_PEINST 0/6, no client cache on this host, MindArk servers unreachable), (c) the 9.3.5 mechanism is UNVERIFIED (transfer hypothesis), and (d) the corpus-level file searches (u32LE+u32BE full Data, decompressed terrain, decoded scripts, VFS both eras, placement-encoding census 23x29x5 PASS-NEGATIVE) found no instance-placement record. Unsearched value-carrier classes remain: Strings/*.bnt encrypted interiors (location class; decoder exists as a lead), .prt interiors undecoded, media interiors pattern-only — none is a known placement carrier for 296445.",
+      "evidence": [
+        "S3b section 5 confirmed-references chain: 'sieciowa ścieżka dostarczania pozycji jest byte-evidenced w RE klienta PE2/2003, a jej zapisy nie istnieją w korpusie'",
+        "S3b ustalenie 10: FIRST_PEINST 0/6; brak cache; serwery niedostępne",
+        "S3b section 6/8: explicit searched/not-searched bounds incl. Strings/*.bnt (szyfrowane blob-448, klasa lokalizacyjna), .prt niezdekodowane",
+        "S3b section 8: PE_PLACEMENT_ENCODING_CENSUS_R1 supported: 23 kodowania x 29 kotwic x 5 korpusów — PASS-NEGATIVE na pary współrzędnych; brak tabeli spawn w skryptach 2,712 pozycji",
+        "S1: construction drivers are message-dispatched (0xA2..0xC7), attribute-sourced (class-20006 tag 6), or hardcoded (PUSH 0x3ED3) — none reads templates.vfs; the only file reader is the registry loader (1 caller)"
+      ],
+      "premises": [
+        "SDK-controlled parse values / mechanism knowledge do not substitute for values (applied to (c): even a completed 9.3.5 consumer RE would establish the mechanism, not the historical values)",
+        "the negative is scoped: 'nie znaleziono w zbadanym zakresie', not 'lokalizacji nie ma'"
+      ],
+      "countermodel": "falsifiers: (1) a decoded Strings/*.bnt payload containing a 296445-linked instance transform; (2) a decoded .prt containing instance placements; (3) an external historical record (e.g. archived server session) — all outside the closed corpus or in the unsearched classes; none is known to exist",
+      "evidence_level": "STRONGLY_SUPPORTED",
+      "claim_resolution": "NOT_ESTABLISHED (the historical values themselves: absent from corpus = measured negative; their existence outside the corpus = not establishable from the corpus)"
+    },
+    {
+      "claim_id": "P08-CL6",
+      "claim": "Campaign standing statuses are preserved unchanged by this package: WORLD_XYZ_RECOVERED=NO, HISTORICAL_PLACEMENT=NOT_ESTABLISHED, CURSOR_SOURCE_MEDIUM=UNKNOWN, CANONICAL_GATE_EFFECT=NONE; no candidate XYZ was found, so no CANDIDATE_HISTORICAL_TRANSFORM_PENDING_POSTAUDIT promotion is warranted.",
+      "evidence": [
+        "parent contract section 16 standing list; assimilation produced no counter-value",
+        "S2b section 5 ceiling preserved verbatim; S1 PLACEMENT_XYZ_RECOVERED=NO standing; S3b NOT_FOUND_IN_SEARCHED_SCOPE"
+      ],
+      "premises": [
+        "do not promote global WORLD_XYZ / HISTORICAL_PLACEMENT without identity/provenance/coordinate-frame closure (parent contract section 16)"
+      ],
+      "countermodel": "a corpus value with instance identity + frame would trigger the CANDIDATE_HISTORICAL_TRANSFORM_PENDING_POSTAUDIT label; none exists in the assimilated set",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED (no change to standing)"
+    }
+  ],
+  "premises_preserved": [
+    "three documents copying one source are not three independent confirmations -> P08-CL4",
+    "SDK-controlled parse values are saved evidence only in their scope - not client-runtime values -> P08-CL2 (I-SYNTHETIC-CONTROL), P08-CL3",
+    "movable rec+38/rot+44 channel is not static-building evidence -> P08-CL2 (R-MECHANISM-NO-VALUES)",
+    "transform values without instance identity + frame/origin/scale are not historical placement -> P08-CL2 (all classes)"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P02",
+  "front": "A",
+  "barrier_backlog": [
+    {
+      "id": "P02-B1",
+      "priority": 1,
+      "edge": "SEMANTICS OF 007b6c30 (the constant-key 0x00A85460 lookup) — including whether it is lookup vs get-or-create/register, what the key matches (vtable slot / class-info datum at 0x00A85460), which container field of the leaf elem and of [leaf+0x24] it searches, and (registration side) which code INSERTED an element under that key. This is now the exact missing link for the walker-side of the resource-ID/element/receiver binding question.",
+      "required_proof": "admission of 007b6c30 body region in GHIDRA_H5_VTABLE2.txt (parent REQUEST_*.json + campaign_control admit); est. 1 body, ~40-120 rows, ~5-15 CALL, 1-2 candidates",
+      "cost_benefit": "highest: single small body can flip CAND-P2a from PLAUSIBLE to CONFIRMED and either localize the registration site or prove the leaf action is a pure property lookup"
+    },
+    {
+      "id": "P02-B2",
+      "priority": 2,
+      "edge": "ORIGIN/IDENTITY OF RECEIVER SLOT M[steady+0x18] (007b4170 receiver). Candidate channels: 0043ca60 byref write (needs 0043ca60 body or a container-helper family analysis) or P01-window/prologue initialization (needs P01-window store itemization — belongs to the P01 owner/corrigendum, NOT to P02: P02 is forbidden from re-reading P01's region).",
+      "required_proof": "either 0043ca60 body admission OR a P01 corrigendum itemizing frame stores incl. steady[0x18]; est. 1 body ~30-80 rows",
+      "cost_benefit": "medium: decides whether the conditional hand-off is a receiver binding or local bookkeeping"
+    },
+    {
+      "id": "P02-B3",
+      "priority": 3,
+      "edge": "OUT-OF-REGION EXIT TAIL: continuation of block 006b1faa (starts 0x006b1faf) and bail block 0x006B1FB4. Needed only for exit-shape completeness (likely a JMP back to 006b1f28 drain check / an early-exit variant).",
+      "required_proof": "small admission 0x006B1FAC-0x006B1FE0-ish (~15-30 rows); low science value unless exit shape matters for a caller-side claim",
+      "cost_benefit": "low: cosmetic CFG closure"
+    },
+    {
+      "id": "P02-B4",
+      "priority": 4,
+      "edge": "LEAF-CHAIN CALLEE SEMANTICS (008bd720, 006ae840, 006eb320, 006c64d0, 006aded0, 006ae310, 006b0680, 007558a0, 006f2940, 007b4170). Only pursue the subset that an identity edge actually requires (contract section 7 condition: names/shapes without identity edges are not enough).",
+      "required_proof": "per-body admissions; each ~30-150 rows; do not open all ten",
+      "cost_benefit": "conditional: only after P02-B1 resolves the key semantics"
+    },
+    {
+      "id": "P01-B3_cited",
+      "priority": "carried",
+      "edge": "UNCHANGED from P01 HANDOFF: retain-before-teardown ordering in 0082E750 (converts P01-C7 CONDITIONAL refinement into a closed premise). P02 adds no new evidence.",
+      "required_proof": "as per P01 backlog (own package)",
+      "cost_benefit": "as per P01"
+    }
+  ],
+  "first_missing_edge_after_P02": "007b6c30 lookup/registration semantics (P02-B1): the walker-side binding question is now fully localized — the walker's complete body (P01 window + P02 tail, 006B1C80 through RET 0x4 @006b1fa7) contains no resource-ID/element/receiver binding store; the only keyed construct is the constant class-key 0x00A85460 lookup whose semantics and registration side live in 007b6c30 and its insert path."
+}

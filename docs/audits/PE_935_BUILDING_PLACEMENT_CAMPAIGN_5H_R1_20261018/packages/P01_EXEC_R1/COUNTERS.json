@@ -1,0 +1,78 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P01",
+  "counters_reported_utc": "2026-10-18T21:19:41.592Z (original materialization mtime; field corrected for clock honesty at 21:21Z without counter value changes)",
+  "actual_vs_reserved": {
+    "bodies": {
+      "reserved_total": 6,
+      "reserved_per_region": {"Adc52ad119303": 5, "Ab6ebb24f3a07": 1},
+      "actual_logical_bodies_semantically_used": 3,
+      "actual_detail": [
+        "0x006B1C60 — complete in window (4 rows, RET 006b1c72)",
+        "0x006B1C80 — partial in window (122 of its rows; body extends beyond 0x006B1E00; NOT read beyond)",
+        "0x007D27B0 — complete in window (110 rows, RET 007d291d)"
+      ],
+      "correction": "Contract body entries 006B1D15/006B1D49/006B1DC6 are in-window branch targets of 006B1C80, not function entries (claim P01-C8). Reserve remains conservative upper bound; no new body opened."
+    },
+    "instruction_rows": {
+      "reserved_total": 236,
+      "reserved_per_region": {"Adc52ad119303": 126, "Ab6ebb24f3a07": 110},
+      "actual_rows_read_and_semantically_analyzed": 236,
+      "actual_detail": "Region 1: source lines 626420-626545 (126 rows, VA 006b1c60-006b1dfe). Region 2: source lines 995327-995436 (110 rows, VA 007d27b0-007d291d). 100% of read rows were used in the store census, CFG map, and write-set analysis."
+    },
+    "call_sites": {
+      "reserved_total": 19,
+      "reserved_per_region": {"Adc52ad119303": 5, "Ab6ebb24f3a07": 14},
+      "actual_call_sites_in_windows": 19,
+      "actual_detail": {
+        "region1": [
+          "006b1ce6 CALL 0x0043ba10 (container ctor; opaque)",
+          "006b1d1e CALL 0x0043ca60 (container grow/insert; opaque)",
+          "006b1d57 CALL dword ptr [0x00a759fc] (indirect free-like on own 0x80 chunk)",
+          "006b1d8e CALL EDX (virtual elem->vtable+8, typeinfo-style)",
+          "006b1da9 CALL EAX (virtual elem->vtable+8, second dispatch)"
+        ],
+        "region2": [
+          "007d27f7 CALL EDX (virtual release member+0x15C)",
+          "007d2809 CALL EDX (virtual release member+0x160)",
+          "007d280d CALL 0x007d1d70 (internal, this)",
+          "007d2829 CALL EDX (virtual destroy member+0x194)",
+          "007d2845 CALL EDX (virtual release member+0x128)",
+          "007d2860 CALL EDX (virtual destroy member+0x194, second pass)",
+          "007d286d CALL 0x007d16b0 (this+0x184 array destroy)",
+          "007d2879 CALL 0x0095db40 (free buffer +0x174)",
+          "007d2885 CALL 0x0095db40 (free buffer +0x164)",
+          "007d28b5 CALL 0x0095dd6c (4-arg, +0x148 path)",
+          "007d28bb CALL 0x0095db40 (free +0x148 holder)",
+          "007d28eb CALL 0x0095dd6c (4-arg, +0x130 path)",
+          "007d28f1 CALL 0x0095db40 (free +0x130)",
+          "007d2904 CALL 0x0095db40 (free +0x8)"
+        ]
+      },
+      "unique_direct_targets": ["0x0043ba10", "0x0043ca60", "0x007d1d70", "0x007d16b0", "0x0095db40", "0x0095dd6c"],
+      "indirect_sites": ["[0x00a759fc]", "EDX x4 (region2 virtuals)", "EDX x1 + EAX x1 (region1 virtuals)"]
+    },
+    "candidates": {
+      "reserved_total": 4,
+      "reserved_per_region": {"Adc52ad119303": 2, "Ab6ebb24f3a07": 2},
+      "actual_candidates_evaluated": 4,
+      "actual_detail": [
+        "CAND-R1a: 006B1C60 vtable-install + 0xBA7220 flag as factory registration -> EVALUATED: class bootstrap only, no key/receiver (P01-C1, P01-C2).",
+        "CAND-R1b: type-node static area {0xBA7210, 0xBA7218, flag 0xBA7220} as a registration/keyed table -> EVALUATED: RTTI-style type nodes for walker dispatch, no ID keys (P01-C2, P01-C3).",
+        "CAND-R1c: vtable+8 typeinfo virtual + [+4] parent-chain walk as a (type,id) join channel -> EVALUATED: type identity only, no resource ID (P01-C3).",
+        "CAND-R2a: 007D27B0 as an outslot/V-writing post-store hazard -> EVALUATED: explicit-store channel closed; instead found +0x148 holder free, a lifetime premise refinement (P01-C5, P01-C6, P01-C7)."
+      ]
+    }
+  },
+  "union_vas": {
+    "region1_union": "0x006B1C60-0x006B1DFF (last in-window instruction 006b1dfe)",
+    "region2_union": "0x007D27B0-0x007D291D (RET 007d291d)",
+    "package_union": "0x006B1C60-0x006B1DFF + 0x007D27B0-0x007D291D"
+  },
+  "front_a_caps_check": {
+    "front_a_wall_cap_utc": "2026-10-18T21:58:31Z",
+    "package_handoff_target_utc": "2026-10-18T21:49:25Z",
+    "status_at_counters": "within cap",
+    "front_a_total_budget_note": "P01 consumed 3/16 bodies, 236/1800 rows, 19/64 CALL, 4/12 candidates of the Front A total caps."
+  }
+}

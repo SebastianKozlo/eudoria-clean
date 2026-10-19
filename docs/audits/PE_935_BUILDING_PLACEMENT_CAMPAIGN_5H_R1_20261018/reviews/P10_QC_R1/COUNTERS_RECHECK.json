@@ -1,0 +1,46 @@
+{
+  "qc_run_id": "PE935_CAMPAIGN_P10_QC_R1_20261018T234830Z",
+  "target_package": "P10_EXEC_R1",
+  "method": "independent re-computation from the parity-verified extract; no reuse of the worker's counting code",
+  "reserved_vs_actual_recheck": {
+    "bodies": { "reserved": 1, "recheck_actual": 1, "detail": "single body 0x00745A70, prologue/epilogue complete in-window; MATCH" },
+    "instruction_rows": { "reserved": 57, "recheck_actual": 57, "detail": "extract rows 57 = source lines 809770-809826; parity mismatches 0; boundary line 809827 (0x00745B00) excluded; MATCH" },
+    "call_sites": { "reserved": "edges:4 per CONTRACT (prompt paraphrase said '4 CALL'; contract authoritative; disclosed by the worker)", "recheck_actual_calls": 0, "detail": "independent CALL census = 0; no CALL budget consumed under either reading; worker's disclosure of the prompt/contract discrepancy is honest and accurate" },
+    "candidate_variants": { "reserved": 2, "recheck_actual": 2, "detail": "B1 (key-to-slot mapping, now SETTLED by QC) and B2 (array populator) — 2 follow-up candidates identified in HANDOFF/BARRIER_BACKLOG; MATCH" }
+  },
+  "additional_counters_recheck": {
+    "conditional_branch_instructions": { "worker": 12, "recheck": "JLE x1 + JZ x9 + JG x1 + JNZ x1 = 12; site list matches the worker's list exactly (a8c, a96, aa2, aae, aba, ac4, ad0, ad5, ada, ae2, aed, af8); MATCH" },
+    "unconditional_jumps": { "worker": 0, "recheck": "no JMP row; MATCH" },
+    "ret_instructions": { "worker": 1, "recheck": "single RET @00745aff, last in-window row, no immediate; MATCH" },
+    "loop_back_edges": { "worker": 1, "recheck": "JG 00745a90 <- 00745ac4 single back-edge; all VA deltas positive otherwise; MATCH" },
+    "branch_target_set": { "recheck": "exactly 6 distinct in-window targets {0x00745a90, 0x00745ac6, 0x00745afc, 0x00745af2, 0x00745ae7, 0x00745afa}; matches P10-1" },
+    "byte_read_sites": { "worker_P10-8_evidence_says": "10", "recheck": "7 MOVZX byte-read sites (4 main loop + 3 residual). The '10' does not correspond to any correct byte-read census (7 MOVZX + 3 POP = 10 total memory-read instructions, but POPs are not [ESI+EAX] byte reads). Claim statement unaffected (all byte reads ARE [ESI+cursor] — verified for all 7). FINDING P10-QC-F1 (P3)." },
+    "immediate_census": { "worker": "{0x1, 0x3, 0x4, 0x5, 0x8, 0x14, 0x18}", "recheck": "identical value set (0x1 x11, 0x3 x1, 0x4 x1, 0x5 x1, 0x8 x9, 0x14 x1, 0x18 x2; branch-target code addresses excluded as control flow); NO 20006/0x4E26, NO 6, NO 2; MATCH" },
+    "stack_slots": { "worker": "read 4 (S1,S2,S4,S6), unused 2 (S3,S5)", "recheck": "4 [ESP+imm] arg reads; independent frame arithmetic (RDER-P10-01) confirms each slot; S3/S5 never referenced; MATCH" },
+    "region_bytes": { "worker": 144, "recheck": "0x00745B00-0x00745A70 = 0x90 = 144; MATCH" },
+    "push_pop_balance": { "worker": "3 push / 3 pop callee-saved", "recheck": "PUSH EBX/ESI/EDI vs POP EDI/ESI/EBX; MATCH" },
+    "op_census_total": { "recheck": "ADD=6, CMP=7, JG=1, JLE=1, JNZ=1, JZ=9, MOV=8, MOVZX=7, POP=3, PUSH=3, RET=1, SAR=2, SUB=6, TEST=2; sum=57 (every row classified exactly once)" }
+  },
+  "process_counters_recheck": {
+    "navigation_events_disclosed": { "worker": 2, "recheck": "both disclosed in extract header + REPORT §5 + GATES G5 (line 809950 address+mnemonic hit inside 745BF0; line 809827 address-only boundary scan); neither constitutes a semantic read; MATCH" },
+    "out_of_window_semantic_reads": { "worker": 0, "recheck": "all claim citations L809770-809826; the denied 7B6C4B region untouched (RDER-P10-07); MATCH" }
+  },
+  "chronology_check": {
+    "event_000011_DENY_utc": "2026-10-18T23:26:19Z (BAD_FRONT, front A+C merge attempt incl. the 7B6C4B region)",
+    "event_000012_DENY_utc": "2026-10-18T23:26:25Z (FRONT_A_TIME_CAP, 0x007B6C4B continuation alone)",
+    "event_000013_ADMIT_utc": "2026-10-18T23:26:31Z (front C only, region 0x00745A70-0x00745B00)",
+    "run_started_utc": "2026-10-18T23:26:50Z",
+    "contract_verified_utc": "2026-10-18T23:26:44Z",
+    "extract_created_utc": "2026-10-18T23:29:53Z",
+    "manifest_created_utc": "2026-10-18T23:31:27Z",
+    "package_hard_stop_utc": "2026-10-19T00:40:00Z",
+    "verdict": "MONOTONIC: DENY, DENY, ADMIT -> verify -> start -> extract -> manifest; all before hard stop; the two DENY events are correctly characterized by the worker as the denied front-A admits"
+  },
+  "manifest_recheck": {
+    "hashes_recomputed": 12,
+    "hashes_match": 12,
+    "sizes_match": 12,
+    "bijection": "13 files on disk = 12 manifest artifacts + self-excluded MANIFEST.json; no extra/missing files",
+    "control_contract_hash": "CONTROL/CONTRACTS/P10.json sha256 87095d9a64664c3cf0d1b70439e67f0f808ca51105cfefad3c6932b4bc34b51b = package CONTRACT.json; MATCH"
+  }
+}

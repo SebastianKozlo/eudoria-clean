@@ -1,0 +1,49 @@
+{
+  "qc_run_id": "PE935_CAMPAIGN_P12_QC_R1_20261018T234830Z",
+  "target_package": "P12_EXEC_R1",
+  "method": "independent re-computation from the verbatim extract (itself parity-verified against the pinned source); no reuse of the worker's counting code",
+  "reserved_vs_actual_recheck": {
+    "bodies": { "reserved": 2, "recheck_actual": 2, "detail": "0x006C27A0 @L648033 and 0x006C27F0 @L648059 - both present as PUSH ESI prologues at exactly those VAs; MATCH" },
+    "instruction_rows": { "reserved": 48, "recheck_actual": 48, "detail": "extract rows = 48 (L648033-L648080 contiguous); source parity mismatches = 0; MATCH" },
+    "call_sites": { "reserved": 10, "recheck_actual": 10, "detail": "independent census: 0x0043a550 x2, 0x006b22d0 x4, 0x0070ed80 x2, 0x0072f580 x2; total 10, distinct 4; MATCH" },
+    "candidate_variants": { "reserved": 2, "recheck_actual": 2, "detail": "the two bodies as the two candidates; MATCH (question-level bookkeeping)" }
+  },
+  "additional_counters_recheck": {
+    "branch_instructions": { "worker": "total 2 (jnc 2, jmp 0, back_edges 0, out_of_window_targets 1 @0x006C2832)", "recheck": "JNC census: exactly 2 (006c27b9 -> 006c27df in-window; 006c2809 -> 006c2832 out-of-window); no JMP; no back-edge (all VA deltas positive); MATCH" },
+    "ret_instructions_in_window": { "worker": 2, "recheck": "RET at 006c27de and 006c27e6 only; MATCH" },
+    "absolute_constant_references": { "worker": "3 (0xA857C8, 0xA85804, 0xBA5800)", "recheck": "whole-source grep: 0xA857C8 exactly 1 occurrence (the L648047 operand), 0xA85804 exactly 1 (L648075), 0xBA5800 1 in-window (L648056; 8 other occurrences elsewhere in the listing are OUTSIDE P12's window and were not read/claimed by P12); MATCH for the in-window count" },
+    "global_memory_reads": { "worker": 2, "recheck": "the two MOV EDX,[ECX*4+disp32] rows; MATCH" },
+    "object_word_field_reads": { "worker": 2, "recheck": "the two MOVSX EDI,word ptr [EAX+0x0E/0x0C] rows; MATCH" },
+    "memory_writes": { "worker": 0, "recheck": "independent store-form scan over all 48 rows: zero memory-store forms (no [..], operand in first position); MATCH" },
+    "float_instructions": { "worker": 0, "recheck": "no FPU/SSE mnemonics; MATCH" },
+    "virtual_indirect_calls": { "worker": 0, "recheck": "no CALL [reg]/CALL [mem] forms; all 10 CALLs are direct rel32; MATCH" },
+    "function_entries_in_window": { "worker": 2, "recheck": "exactly the 2 declared entries; no other PUSH-ESI/PUSH-EBP-style entry row inside the window other than the two declared bodies' prologues; no unforeseen in-window body; MATCH" },
+    "op_census_total": { "recheck": "ADD=1, CALL=10, CMP=2, JNC=2, LEA=2, MOV=12, MOVSX=2, POP=5, PUSH=8, RET=2, SHL=1, SUB=1; sum=48 (every row classified exactly once)" }
+  },
+  "counter_findings": [
+    {
+      "id": "P12-QC-F1",
+      "severity": "P2 (documentation precision)",
+      "finding": "COUNTERS.json push_count_body1=5 and push_count_body2_in_window=5 are NOT the explicit PUSH-instruction counts. Independent census: explicit PUSH mnemonics per body = 4 (PUSH ESI, PUSH EDI, PUSH imm, PUSH EDX), 8 total across both bodies. The value 5 is consistent only under a frame-slot accounting that includes the caller's implicit CALL-pushed return address (retaddr + ESI + EDI + arg + EDX = 5); that interpretation is not stated in COUNTERS.json. pop_count_body1_per_arm=3 is consistent with the same accounting (POP EDI + POP ESI + RET-pops-retaddr).",
+      "effect": "no claim depends on this counter; the stack-balance claims (P12-C5) cite instruction rows directly and are unaffected",
+      "correction": "in any future P12 corrigendum: define push_count as 'stack-growing events attributable to the body frame incl. the implicit caller return-address push' or restate as explicit_push_instructions=4 per body",
+      "revalidation": "re-run the OP census: PUSH=8 total (4 per body)"
+    }
+  ],
+  "chronology_check": {
+    "event_000015_admit_utc": "2026-10-18T23:42:00Z",
+    "contract_now_utc": "2026-10-18T23:42:04Z",
+    "run_started_utc": "2026-10-18T23:42:40Z",
+    "extract_built_utc": "2026-10-18T23:45:30Z",
+    "manifest_finalized_utc": "2026-10-18T23:47:20Z",
+    "package_hard_stop_utc": "2026-10-19T01:10:00Z",
+    "verdict": "MONOTONIC and CONSISTENT (admit -> contract -> start -> extract -> manifest; all well before hard stop)"
+  },
+  "manifest_recheck": {
+    "hashes_recomputed": 12,
+    "hashes_match": 12,
+    "sizes_match": 12,
+    "bijection": "13 files on disk = 12 manifest artifacts + MANIFEST.json itself (self-excluded); no extra files, no missing files",
+    "control_contract_hash": "CONTROL/CONTRACTS/P12.json sha256 7F092BD5B125063728748804B4E6A790980745BE498F904B987522B5536E9CCB = package CONTRACT.json (byte-identical copy re-hashed); MATCH"
+  }
+}

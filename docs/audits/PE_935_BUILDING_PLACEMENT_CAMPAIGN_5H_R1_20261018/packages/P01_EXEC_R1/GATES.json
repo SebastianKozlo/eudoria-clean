@@ -1,0 +1,70 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P01",
+  "evaluated_utc": "2026-10-18T21:20:14.366Z (original materialization mtime; field corrected for clock honesty at 21:21Z without gate verdict changes)",
+  "gates": [
+    {
+      "gate": "G1_CONTRACT_SHA_MATCH",
+      "check": "P01.json SHA256 equals contract pin 42ee114c6ebb64bac3b40f5745e99f7a55335c253c7a74ee5cb74685e5300d75",
+      "result": "PASS",
+      "evidence": "Get-FileHash before start (output in session log), CONTRACT.json copied verbatim into package."
+    },
+    {
+      "gate": "G2_SOURCE_PIN_VERIFIED",
+      "check": "GHIDRA_H5_VTABLE2.txt SHA256 = 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, size 50780146",
+      "result": "PASS",
+      "evidence": "Get-FileHash at 2026-10-18T21:15:12Z (recorded in SOURCE_PINS.json)."
+    },
+    {
+      "gate": "G3_REGION_SCOPE_RESPECTED",
+      "check": "Semantic reads confined to the two admitted regions; boundary rows outside windows not semantically read",
+      "result": "PASS",
+      "evidence": "Region 1 = source lines 626420-626545 (VA 006b1c60-006b1dfe); line 626546 (VA 006b1e00) used only as end-exclusive boundary marker, not analyzed. Region 2 = source lines 995327-995436 (VA 007d27b0-007d291d); next body 007d2920 (line 995437) not read. No other region opened."
+    },
+    {
+      "gate": "G4_EXTRACT_INTEGRITY",
+      "check": "Extracts are verbatim with line numbers, source SHA, admission IDs, and have computed SHAs",
+      "result": "PASS",
+      "evidence": "EXTRACT_REGION1: 126 rows, SHA256 71B83F5C188AFF27A515FC7E55B6E49FB068F41339053E21223F244C7B2E7F21. EXTRACT_REGION2: 110 rows, SHA256 D783257F9DC897FD4F00CCEBCBB2FF234AF5049E469AA6CDF7EBB85CCC47862E. First/last row spot-checks passed in session log."
+    },
+    {
+      "gate": "G5_BUDGET_COMPLIANCE",
+      "check": "Actual usage within package reservation AND Front A caps",
+      "result": "PASS",
+      "evidence": "Actual 3 bodies/236 rows/19 CALL/4 candidates vs reserved 6/236/19/4; Front A caps 3/16, 236/1800, 19/64, 4/12. No overlap, no new admission requested inside package."
+    },
+    {
+      "gate": "G6_TIME_CAP",
+      "check": "Package complete before Front A wall cap 2026-10-18T21:58:31Z and handoff target 21:49:25Z",
+      "result": "PASS",
+      "evidence": "RUN_STARTED 21:14:37Z; all artifacts materialized by ~21:31Z (see MANIFEST.json write times / this gate's evaluated_utc)."
+    },
+    {
+      "gate": "G7_NO_FORBIDDEN_ACCESS",
+      "check": "No EXE/payload/runtime/debugger/Ghidra-export/old-script/frozen-root/config/skill/repo access",
+      "result": "PASS",
+      "evidence": "Only files touched: P01.json (read), CONTRACT.md (read), REPORT.md + SCIENCE_CHECKPOINT.json context docs (read), GHIDRA_H5_VTABLE2.txt (read, two windows), package dir writes. No repository operations; publication not assigned."
+    },
+    {
+      "gate": "G8_NEGATIVE_RESULTS_HONEST",
+      "check": "A1 negative result reported as scoped absence with preserved countermodels; no default-success fallback",
+      "result": "PASS",
+      "evidence": "P01-C1 CONFIRMED-absence scoped to window; P01-C3 NOT_ESTABLISHED globally; countermodels enumerated per claim; FIRST_MISSING_EDGE recorded instead of bridge claim."
+    },
+    {
+      "gate": "G9_PREMISES_PRESERVED",
+      "check": "All six contract premises preserved and applied",
+      "result": "PASS",
+      "evidence": "V_first/V_reload/Q0/Q1/VT never equated (no such claim made); no-direct-caller and vtable-match distinctions kept (class identity vs receiver identity separated in P01-C1/C2); explicit-store vs final-value distinction kept (A2/A2b conclusions explicit-store-scoped with opaque residuals); heap/stack disjointness labeled premise in P01-C4/C6 countermodels; NiTArray +C8/+CC/+D4 cross-confirmed in P01-C2/C7 usage."
+    },
+    {
+      "gate": "G10_REQUIRED_OUTPUTS_PRESENT",
+      "check": "Contract section-12 minimum worker pack complete; MANIFEST written last and self-excluded",
+      "result": "PASS",
+      "evidence": "CONTRACT.json, RUN_STARTED.json (first), SOURCE_PINS.json, 2 extracts, ANALYSIS_NOTES.md, CLAIMS.json, MEMORY_AND_IDENTITY.json, COUNTERS.json, BARRIER_BACKLOG.json, REPORT.md, HANDOFF.md, GATES.json, artifact_index.csv present; MANIFEST.json enumerates all others with SHA256 and is not itself listed in its own file table (self-excluded, written last)."
+    }
+  ],
+  "overall_run_status": "COMPLETED",
+  "failed_gates": [],
+  "notes": "Self-check performed by the executing worker (SELF_CHECK label), not an independent MASTER audit. Independent QC remains the parent's/reviewer's task per contract section 12."
+}

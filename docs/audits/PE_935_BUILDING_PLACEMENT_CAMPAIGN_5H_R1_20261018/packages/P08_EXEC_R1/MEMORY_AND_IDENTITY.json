@@ -1,0 +1,32 @@
+{
+  "package_id": "P08",
+  "front": "D",
+  "purpose": "identity and memory facts a future consumer of P08 must retain; era-labelled; no promotion beyond evidence",
+  "era_context": "PCG 9.3.5 (Entropia.exe SHA256 E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31, EU 9.3.5.6746 pcg_install) is the current campaign target; PE2/2003 canon (PE2_unpacked_out.exe SHA256 56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650) is era-scoped reference only",
+  "studied_objects": {
+    "296445.nif": {
+      "identity": "B_Eu_Slum_Building_b047_01 slum building; 30 meshes; 2,415 vertices; 1,030 triangles; NIF 4.1.0.12; 155 blocks; 108,876 B; payload SHA256 656795d8b3dddf8f9192ee41c4710d592894860f6959b53b2c08036977e7b862; byte-identical across CD-2003 Models.ark, BNT_Models and pcg_install 9.3.5",
+      "definition_chain": "template 4508 (templates.vfs ofs 96,496; payload 28 B {id2=4508, A=296445, B=296446, C=0, D_f32=124.941…, lists empty, f11=0}) -> A=296445 -> Models.bnt entry '296445.nif' + collision 296446.bvi (Volumes.bnt ofs 993,420, 760 B, local volumes only); hierarchy 201->477->4751->4508; family b047 = {126740 (T4752), 278453 (T2249), 296445 (T4508)}",
+      "transform_facts": "Scene Root identity; all intra-file transforms are parent-relative locals; corrected composed scene bbox ~5000x5000x15620 MODEL units; model->game-meters conversion NOT established; NO world-instance placement values in file (empirically confirmed, no global-coordinate candidate in any block)"
+    },
+    "218757.nif": {
+      "identity": "B_Outpost outpost asset (66 blocks; 62 semantic + 4 opaque NiArk); SINGLE_MODEL classification; NO_WORLD_PLACEMENT_EVIDENCE_FOUND; composed FILE_SCENE_SPACE transforms for 28 blocks (e.g. B_Outpost_me01_Ext_sign:0 -> (0, -1030, 820)) are NOT placement, NOT world XYZ; MODEL_GEOMETRY_MATCHES=0 vs 423020",
+      "note": "studied by the 20261009 scene inspection; NOT the 296445 resource; its transforms are a different model's internal values"
+    },
+    "423020.nif / 496633.nif / 512126.nif": "compound scene candidates; 423020 closure-verified typed graph (COMPOUND-OBJECT/SCENE-CANDIDATE rank, NOT a proven world scene); 496633/512126 measured closure failures; no placement values"
+  },
+  "mechanism_memory": {
+    "bridge_2026_10_03": "templates.vfs = static DEFINITION registry {id2 -> A(model nif id), B(collision bvi id), C, D_f32, name-list1, u32-list2}; consumed as definition source only; placement records built at runtime from message (types 0xA2..0xC7) / attribute (class-20006 tag 6) / hardcoded drivers with position/rotation setters into record fields +0x08/+0x14/+0x20/+0x24; record is not a NiAVObject (+0x08/+0x14 vs m_kLocal@+0x38/m_kWorld@+0x6C); model-side named instance = NiControllerSequence '<A>__<name>' (CORRECTED identity, bridge R-1); template payload list2 (3xvec3) -> runtime slot-position lerp CONFIRMED as payload-derived transform data, slot object class UNKNOWN (FUN_00848EA0 slots)",
+    "movable_channel": "recognized-structure channel rec+38 position / rot+44 rotation / +50..58 another vector — MOVABLE-object channel, version/class-scoped, NOT static-building evidence (parent contract section 10 premise; not re-measured in this package)",
+    "pe2_2003_canon_era_scoped": "network create-object handler FUN_005977b0: records 0x1C + sub-record transform f32 XYZ @+0x2c/+0x30/+0x34, SetPosition via vtable[0x50]; PLACEMENT_SOURCE=SERVER-DELIVERED byte-evidenced in PE2_unpacked_out.exe ONLY; session records do not exist in corpus (FIRST_PEINST 0/6); 9.3.5 equivalent mechanism UNVERIFIED (transfer hypothesis [E-A1])"
+  },
+  "cross_run_identity_overlap": "Models.bnt C950A8C26F2063F4DD748D88C95BD769AAC77A2F5F76FACE7E969BE0B3D3BEE0 (395,412,868 B) and 296445.nif payload 656795d8… are shared source identities across the bridge, scene-inspection and errata runs — their negatives corroborate but do not triple-count",
+  "future_consumer_rules": [
+    "do not cite TRANSFORM_TABLE_CORRECTED.csv world_T as game-world coordinates — it is file scene space (model root-relative), model units, tool-composed",
+    "do not cite the 218757 composed (0,-1030,820) or the 296445 composed bbox as placement — both runs explicitly deny placement semantics",
+    "do not treat PARAM D_f32=124.941 as a coordinate — semantics UNKNOWN (candidate scale/radius)",
+    "do not treat the list2->slot-position lerp as instance placement — slot class UNKNOWN, no instance identity, record 4508's list2 is empty",
+    "do not transfer PE2/2003 handler addresses/offsets (+0x2c/+0x30/+0x34, FUN_005977b0, vtable[0x50]) to Entropia.exe 9.3.5 — transfer hypothesis only",
+    "the corrected-report P0 next experiment (PE_935_TEMPLATE_CONSUMER_TRACE_R1 design, [E-V2R007]) targets the 9.3.5 consumer MECHANISM — even full success would not produce historical VALUES (server-delivered, no session records)"
+  ]
+}

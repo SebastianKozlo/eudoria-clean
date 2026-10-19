@@ -1,0 +1,81 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_P02_QC_R1_20261018",
+  "target_pack": "P02_EXEC_R1 (admission A0f2d2522b464, region 0x006B1E00-0x006B1FAC end-exclusive)",
+  "method": "Independent re-derivation from the pinned saved source (SHA256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, re-hashed by reviewer = pin, 50780146 B). Region re-read directly from source lines 626546-626681. All line numbers below are GHIDRA_H5_VTABLE2.txt listing lines. Address search outside the region = navigation only.",
+  "line_parity_check": {
+    "source_lines": [626546, 626681],
+    "row_count": 136,
+    "result": "PASS - reviewer's direct source read of lines 626546-626681 is row-for-row identical to worker EXTRACT_006B1E00_006B1FAC_L.txt (same 136 VAs, same mnemonic/operand text); 626681-626546+1=136 consecutive lines, no interleaved blank/label rows.",
+    "decode_consistency_spot_checks": "Instruction-length arithmetic confirms listing self-consistency: 006b1e52 JZ 0x006b1fb4 must be the 6-byte rel32 form (target -0x160 beyond rel8) => next row 006b1e58 MATCHES; 006b1e70 JZ 0x006b1faa 6-byte form => next 006b1e76 MATCHES; 006b1e7f JZ 0x006b1ea9 rel8 (0x28) => next 006b1e81 MATCHES; 006b1e2a JMP 0x006b1f28 5-byte rel32 => next 006b1e2f MATCHES; 006b1e3f JNZ 0x006b1e58 rel8 (0x17) => next 006b1e41 MATCHES."
+  },
+  "store_census_rederivation": {
+    "rule": "explicit memory-destination instructions in the 136 in-region rows (worker's P01 census convention, disclosed in COUNTERS premises: PUSH/POP/CALL/RET stack-machine traffic and implicit return-address writes excluded)",
+    "count": 7,
+    "items": [
+      {"line": 626546, "va": "006b1e00", "instr": "MOV dword ptr [EDI],EAX", "class": "worklist deque insert (register-indirect, not a global-addressed store)"},
+      {"line": 626548, "va": "006b1e05", "instr": "MOV dword ptr [ESP + 0x2c],EDI", "class": "frame: insert-cursor spill"},
+      {"line": 626621, "va": "006b1ee8", "instr": "MOV byte ptr [ESP + 0x74],0x1", "class": "frame: flag=1 (executes at ESP=steady-0xC => steady[0x68])"},
+      {"line": 626630, "va": "006b1f07", "instr": "MOV byte ptr [ESP + 0x68],0x0", "class": "frame: steady[0x68]=0"},
+      {"line": 626645, "va": "006b1f3a", "instr": "MOV dword ptr [ESP + 0x68],0xffffffff", "class": "frame: steady[0x68]=-1"},
+      {"line": 626670, "va": "006b1f8d", "instr": "MOV dword ptr FS:[0x0],ECX", "class": "TEB SEH-frame restore"},
+      {"line": 626681, "va": "006b1faa", "instr": "MOV byte ptr [ESP + 0x17],0x0", "class": "frame: result flag steady[0x17]=0 (failure path; row-start VA in-region)"}
+    ],
+    "verdict": "EXACTLY 7 - matches worker census 1:1 (same VAs, same classes). No 8th memory-destination store found in full 136-row scan (falsifier for the census would be any additional [mem]:= operand; none exists).",
+    "stack_traffic_separately_enumerated": "18 PUSH (lines 626551, 626560, 626567, 626574, 626588, 626593, 626600, 626601, 626614, 626618, 626619, 626620, 626627, 626632, 626655, 626656, 626664, 626665), 5 POP (626671-626675), 5 ADD ESP (626623 +0xc, 626635 +0x4, 626658 +0x8, 626667 +0x8, 626679 +0x58), 23 CALL, 1 RET 0x4, 1 RET-adjacent JMP set; all convention-excluded, convention disclosed by worker."
+  },
+  "store_census_negatives_reverified": {
+    "no_elem_plus_8_store": "PASS - the only +0x8 access in region is the LOAD 'MOV ESI,dword ptr [EBX + 0x8]' @006b1ec8 (line 626608); no store to [..+0x8] anywhere.",
+    "no_receiver_or_registration_or_global_store": "PASS - all 7 stores are frame/TEB/queue-cursor writes; no absolute-data store (contrast P01 [0x00BA7220]); no store of key 0xA85460 (it only appears as PUSH immediate, lines 626560/626567).",
+    "no_id_values": "PASS with correction - full immediate scan of 136 rows: constants present are 0xa85460(x2), 0x80, 0xffffffff, 0/1 flag bytes, small offsets (0x4,0x8,0x10,0x17,0x18,0x24,0x28,0x2c,0x38,0x3c,0x40,0x44,0x48,0x58,0x60,0x68,0x70,0x74,0xc,0xd4), indirect cells 0x00a75a00/0x00a75a5c/0x00a75854/0x00a759fc, FS:[0]. No 0x42/66. No 296445: correct hex of 296445 is 0x485FD (NOT 0x4861D as written in worker COUNTERS.json line 59; 0x4861D=296477); NEITHER 0x485FD NOR 0x4861D appears in any row, so the absence claim is true under both encodings."
+  },
+  "call_census_rederivation": {
+    "direct_18": [
+      "626553 006b1e14 -> 0043ca60", "626562 006b1e36 -> 007b6c30", "626568 006b1e49 -> 007b6c30",
+      "626575 006b1e5a -> 008bd720", "626576 006b1e60 -> 004152f0", "626578 006b1e67 -> 006ae840",
+      "626582 006b1e78 -> 006eb320", "626586 006b1e83 -> 006c64d0", "626589 006b1e8c -> 004152f0",
+      "626591 006b1e93 -> 006aded0", "626594 006b1e9b -> 004152f0", "626596 006b1ea2 -> 006ae310",
+      "626602 006b1eb3 -> 004152f0", "626604 006b1eba -> 006b0680", "626606 006b1ec1 -> 007558a0",
+      "626622 006b1eed -> 006f2940", "626628 006b1efe -> 007b4170", "626678 006b1f9f -> 0095d3ca"
+    ],
+    "indirect_5": [
+      "626616 006b1edb -> [0x00a75a00]", "626631 006b1f0c -> [0x00a75a5c]", "626633 006b1f13 -> [0x00a75854]",
+      "626657 006b1f5f -> [0x00a759fc]", "626666 006b1f7c -> [0x00a759fc]"
+    ],
+    "total": 23,
+    "verdict": "PASS - 18 direct (incl. 4x 004152f0, 2x 007b6c30) + 5 indirect (incl. 2x [0x00A759FC]) = 23, identical to worker's per-VA detail list; 23 = reserve (parent's cap-note framing '23 CALL')."
+  },
+  "leaf_action_and_frame_rederivation": {
+    "constant_key_lookup": "lines 626560-626568 and 626566-626568: PUSH 0x00A85460; MOV ECX,EBX (receiver = leaf elem, role cited from P01); CALL 007b6c30; result ESI compared to EBP; on equal: MOV ECX,[EBX+0x24] (receiver = [elem+0x24]); PUSH 0x00A85460; CALL 007b6c30; on equal again: JZ 0x006b1fb4 (out-of-region bail, recorded not read). Key 0x00A85460 = 0x00A85454+0xC arithmetic PASS; 'factory vtable' identity of 0x00A85454 is cited P01/parent-contract GA3 (not re-derivable in-region; worker hedges this correctly in P02-C4).",
+    "sentinel_guards": "CMP ESI,EBP @626564/626570 + JNZ/JZ - in-region facts; 'EBP=empty sentinel' role cited from P01 window (worker premise, honest).",
+    "callee_pops_premise_RECHECKED": "Node loop 006b1ed0-006b1f20: per iteration 4 PUSH (EAX@626614, ECX@626618, EDI@626619, EBP@626620) + CALL [0x00A75A00] (1 pushed arg) + CALL 006f2940 (3 pushed args) + ADD ESP,0xc (caller cleans 006f2940's 3 args @626623). Net per-iteration balance REQUIRES [0x00A75A00] to callee-pop its single 4-byte arg; otherwise the JNZ back-edge @626637 leaks -4 bytes/iteration in shipped loop code. Reviewer re-derivation: premise SOUND (per-iteration stack-balance necessity). Under it: ESP=steady-0xC at 006b1ee8 (4 pushes - callee-popped arg) => store target = steady+0x68 (matches worker); ESP=steady after ADD ESP,0xc => 006b1ef9 'MOV ECX,[ESP+0x18]' loads receiver M[steady+0x18] (matches worker); counter-convention slot shifts preserved by worker in CLAIMS P02-C2 countermodel (honest).",
+    "byref_channel": "block 006B1E0B: LEA EAX,[ESP+0x18] (=&steady[0x18] at ESP=steady) @626550; PUSH EAX; LEA ECX,[ESP+0x20] (=&steady[0x1c] after the push) @626552; CALL 0043ca60 @626553 - callee receives byref to the frame slot later used as 007b4170 receiver. Arithmetic PASS; opaque write channel preserved by worker.",
+    "outbound_handoff": "TEST EAX,EAX @626624; JZ skip @626625; MOV ECX,[ESP+0x18] @626626; PUSH EAX @626627; CALL 007b4170 @626628 - conditional hand-off with ECX=M[steady+0x18]. PASS (CAND-P2b semantics properly PLAUSIBLE/open).",
+    "ret_balance": "RET 0x4 @006b1fa7 (line 626680) = callee pops retaddr + 4 bytes = exactly one by-value stack arg (standard RET imm16 semantics). Epilogue self-consistent: 5 POP (0x14) + ADD ESP,0x58 => ESP=steady+0x78=retaddr slot, RET 0x4 => ARG1 at steady+0x7C; consistent with cited P01 QC frame arithmetic ([ESP+0x70]=ARG1 at P01's body ESP). Caller-side confirmation is cited (P01 window), not re-derived here (outside reviewer's admitted regions).",
+    "exit_mechanics": "cleanup frees every non-null 0x80 chunk (loop 626652-626661, guarded null-checks) + chunk-pointer array (626662-626667) via [0x00A759FC]; SEH restore @626670; cookie XOR+0095d3ca @626676-626678; ADD ESP,0x58; RET 0x4; AL=steady[0x17] loaded @626668. PASS."
+  },
+  "premise_challenge": {
+    "scoped_negatives_keep_bounds": "PASS - all absence claims carry 'in-region / explicit-store level' scoping; callee-opaque channels enumerated (COUNTERS opaque_write_channels_preserved); get-or-create countermodel live against 'pure processing' (CLAIMS P02-C3 countermodel).",
+    "vtable_match_ne_receiver_identity": "PASS - applied in MEMORY_AND_IDENTITY v_q_actualS_non_implications (key proximity = class/type identity only; lookup result not promoted to actualS).",
+    "no_direct_caller_ne_exclusively_virtual": "PASS - no caller-census/virtual-dispatch claim made in P02.",
+    "explicit_store_ne_final_value": "PASS - C1 countermodel + opaque channel list.",
+    "NiTArray_layout_premise": "PASS - [EBX+0xD4] count read @626555 consistent with the contract premise (count +D4).",
+    "P01_C7_same_instance_premise": "PASS - no V/Q claim made; retain-shaped thunks noted as consistent-not-proof."
+  },
+  "read_scope_verification": {
+    "in_region_only": "PASS - extract contains exactly rows with start VA in [0x006B1E00, 0x006B1FAC); out-of-region targets 0x006B1FB4 and 0x006B1FAF+ recorded as addresses only, not read (worker SOURCE_PINS boundary_note documents the row-admission rule).",
+    "boundary_observation": "Region end 0x006B1FAC is end-exclusive and cuts mid-instruction: last admitted row starts 006b1faa (5-byte 'MOV byte ptr [ESP+0x17],0x0' spans 006b1faa-006b1fae, i.e. 3 bytes beyond 0x006B1FAC). Row-start convention keeps it in-region; reserve pinned 136 rows and extract = 136 rows exactly; no claim depends on the straddling bytes; worker disclosed the rule explicitly. NOT a violation; recorded as a boundary observation for the parent.",
+    "reviewer_own_incidental_exposure": "Reviewer's navigation greps returned line 626546 content (in-region, used for parity) only; no out-of-region listing row was exposed to the reviewer for P02 (jump-target addresses were taken from in-region operands)."
+  },
+  "chronology_vs_events": {
+    "EVENT_000004_ADMIT": "utc 2026-10-18T21:30:55.085Z, P02, region 0x006B1E00 va_end_exclusive 0x006B1FAC, body_entries [0x006B1E0B,0x006B1E2F], reserve {bodies 2, instructions 136, edges 23, candidates 2}, admission A0f2d2522b464 - matches package contract.",
+    "order": "ADMIT 21:30:55 -> contract now_utc 21:30:59 -> source hash 21:31:09 -> RUN_STARTED 21:31:17.749 -> extract/re-verify 21:34:47 -> MANIFEST 21:36:36.291 - monotonic, consistent.",
+    "hash_chain": "000003->000004->000005 previous_event_sha256 links re-hashed by reviewer: BOTH MATCH (EVENT003 SHA256 = F16876...3F60 = 000004.prev; EVENT004 SHA256 = F8320ABE...5751C7 = 000005.prev). PASS."
+  },
+  "manifest_rehash": {
+    "method": "reviewer re-hashed all 13 on-disk files of P02_EXEC_R1 (Get-FileHash SHA256) and compared to MANIFEST.json artifacts[] and artifact_index.csv",
+    "result": "ALL 12 listed entries match reviewer hashes exactly (CONTRACT.json A0435DB2...976D = CONTROL/CONTRACTS/P02.json hash => package copy byte-identical, verified by hash equality); bijection 12 listed + self-excluded MANIFEST = 13 disk files, no strays, no missing. PASS.",
+    "manifest_identity_vs_source_unchanged": "both hold: files unchanged since worker seal AND manifest identity correct."
+  },
+  "full_read_log": "Reviewer read to EOF: CONTROL/CONTRACTS/P02.json, parent CONTRACT.md (222 lines), all 13 P02_EXEC_R1 files, EVENTS 000004_ADMIT.json, EVENTS 000005_ADMIT.json, source lines 626546-626681 (in-region). Navigation-only greps: 006b1e00/006b1fac/007b6c30/007b6c4b address searches.",
+  "not_checked": "EVENTS 000001-000003 contents (hash-chain links only), CONTROL/REQUESTS/*, CONTROL/CHECKPOINTS/*, P01_EXEC_R1 package contents (cited context only; P01 has its own QC), out-of-region code (0x006B1FB4, 0x006B1FAF+, 0x006B1D33/0x006B1DDA back-edges into P01 window), vtable 0x00A85454 datum, callee bodies. None of these is load-bearing for P02's claims (each is either cited-with-hedge, opaque-by-design, or already covered by the P01 QC dependency chain)."
+}

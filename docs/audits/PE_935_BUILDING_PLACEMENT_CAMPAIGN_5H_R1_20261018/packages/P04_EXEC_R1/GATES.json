@@ -1,0 +1,67 @@
+{
+  "package_id": "P04",
+  "gates": [
+    {
+      "gate_id": "G1_contract_integrity",
+      "check": "P04.json SHA256 equals contract-declared A42CBDFB6399461F842E400A9AB87C08271CA6DC9C80DD1A60CB6F5C940232E9; local CONTRACT.json copy re-hashed identical.",
+      "result": "PASS",
+      "evidence": "Get-FileHash at 2026-10-18T21:49:20Z (contract) and post-copy hash A42CBDFB…232E9."
+    },
+    {
+      "gate_id": "G2_source_pin",
+      "check": "GHIDRA_H5_VTABLE2.txt SHA256 equals admission-declared 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB.",
+      "result": "PASS",
+      "evidence": "Get-FileHash at 2026-10-18T21:49:26Z."
+    },
+    {
+      "gate_id": "G3_admission_scope",
+      "check": "Semantic read ONLY inside the five admitted subregions; navigation-only operations logged; un-admitted callsites/bodies NOT read.",
+      "result": "PASS",
+      "evidence": "Extraction tool enforces VA-range membership (end-exclusive); grep outputs recorded as navigation inventory in SOURCE_PINS.json; no other region opened."
+    },
+    {
+      "gate_id": "G4_budget_counters",
+      "check": "Actual counters vs reservation: bodies 5/5, rows 291/291, CALL 47/47, candidates 4/4; no overrun; no unforeseen body consumed.",
+      "result": "PASS",
+      "evidence": "COUNTERS.json; extraction row counts; per-region CALL counts 0+6+11+11+19=47."
+    },
+    {
+      "gate_id": "G5_forbidden_list",
+      "check": "No EXE/game payload/runtime access; no new Ghidra export; no old writer scripts; no config/skills/frozen-root/repo edits.",
+      "result": "PASS",
+      "evidence": "All file operations limited to: pinned listing (read), package dir (write), contract copy. No other process started beyond PowerShell hashing/extraction in this session's own task."
+    },
+    {
+      "gate_id": "G6_output_isolation",
+      "check": "Writes only to fresh packages/P04_EXEC_R1; no writes to parent CONTROL, other packages, reviews, or any frozen run.",
+      "result": "PASS",
+      "evidence": "All write paths enumerated in artifact_index.csv are under packages\\P04_EXEC_R1."
+    },
+    {
+      "gate_id": "G7_run_started_first",
+      "check": "RUN_STARTED.json materialized before any semantic extraction; real clock from tool.",
+      "result": "PASS",
+      "evidence": "RUN_STARTED.json written 2026-10-18T21:49:38Z; extraction executed afterward in same session."
+    },
+    {
+      "gate_id": "G8_negative_controls",
+      "check": "Meaningful negative controls performed and documented.",
+      "result": "PASS",
+      "evidence": "REPORT.md section 7: rotation-constant falsification scan (FLDZ-only), writer-signature falsification test (pointer-deref vs scalar-args), stale-frame variant V3 honestly kept open."
+    },
+    {
+      "gate_id": "G9_premises_preserved",
+      "check": "All four contract premises preserved verbatim in CLAIMS.json and enforced in claim wording.",
+      "result": "PASS",
+      "evidence": "CLAIMS.json premises_preserved block; no XYZ-provenance, no update-mechanism promotion, no virtual-dispatch exclusion claim."
+    },
+    {
+      "gate_id": "G10_deadline",
+      "check": "Package completes before 2026-10-18T22:25:00Z hard stop.",
+      "result": "PASS",
+      "evidence": "All artifacts written in-session; completion timestamp recorded in MANIFEST.json generation time."
+    }
+  ],
+  "overall": "PASS_ALL_GATES",
+  "self_check_note": "SELF_CHECK by executor only — NOT an independent MASTER audit. Parent QC/review remains required per contract section 12."
+}

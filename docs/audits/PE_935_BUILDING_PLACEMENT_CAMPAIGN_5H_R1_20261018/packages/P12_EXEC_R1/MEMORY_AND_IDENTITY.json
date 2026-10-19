@@ -1,0 +1,59 @@
+{
+  "bodies": {
+    "0x006C27A0": {
+      "in_window": "complete (L648033-L648058, 26 rows, VA 0x006C27A0-0x006C27E6, both arms + both RETs)",
+      "role": "worklist producer, stage-A target (cited P11: called by append stage A on [EDI+0x8])",
+      "receives": "ECX = this = [EDI+0x8] value of the P11 enclosing object (cited standing); no stack args at entry beyond the return address",
+      "returns": "success: EAX = ret(0x0072F580); bound-fail (word>=10 unsigned): EAX = 0xBA5800",
+      "callee_saved_regs": "ESI, EDI (pushed/popped); EBX, EBP untouched in-window"
+    },
+    "0x006C27F0": {
+      "in_window": "partial (L648059-L648080, 22 of 24 rows, VA 0x006C27F0-0x006C282F; terminal POP ESI 0x006C2830 + RET 0x006C2831 and fail arm 0x006C2832+ OUT-OF-WINDOW)",
+      "role": "worklist producer, stage-B target (cited P11: called by append stage B on [EDI+0x8])",
+      "receives": "ECX = this (same receiver class as body 1 per P11 citation; identity UNKNOWN)",
+      "returns": "success: EAX at window cut = ret(0x0072F580) (terminal transfer out-of-window, stack-forced POP+RET-class tail, see CLAIMS P12-C2); bound-fail (word>=15 unsigned): out-of-window, value NOT claimed"
+    }
+  },
+  "register_map_in_window": {
+    "ECX": "entry=this; unmodified at CALL 0x0070ED80 (copy-only MOV ESI,ECX precedes); re-loaded from ESI before each 0x006B22D0; loaded with ret(0x0043A550) before 0x0072F580; in body 2 also carries the flattened index arithmetic (SHL/SUB/ADD)",
+    "ESI": "= this (saved receiver), consumed by 0x006B22D0 calls",
+    "EDI": "= column word index: MOVSX(word[ret(0x0070ED80)+0x0E]) body 1 / +0x0C body 2; unsigned-bounded 10/15; callee-saved",
+    "EAX": "staging: ret(0x0070ED80) -> MOVSX source; ret(0x006B22D0) #1 DEAD (P12-C7); ret(0x006B22D0) #2 = row index (body 1 multiplies by 5 then uses *2 = *10; body 2 builds ECX=*15); ret(0x0043A550); ret(0x0072F580) = final value",
+    "EDX": "= table DWORD: M32[base + flat_index*4] (0xA857C8 body 1 / 0xA85804 body 2); pushed as arg to 0x0043A550",
+    "EBP": "unused in-window", "EBX": "unused in-window", "ESP": "frame only", "EFLAGS": "set by CMP EDI,imm; consumed by JNC"
+  },
+  "stack_layout_per_body": {
+    "entry": "[ESP+0x0]=return address",
+    "after_prologue": "[ESP-0x4]=saved ESI; [ESP-0x8]=saved EDI; [ESP-0xC]=pushed DWORD arg (0x1F body 1 / 0x20 body 2) - consumed by 0x0070ED80 (callee-pops, P12-C5)",
+    "success_arm_extra": "[ESP-0xC]=pushed EDX (table DWORD) - consumed by 0x0043A550 (callee-pops, P12-C5)",
+    "balance_proof": "body 1: both arms end POP EDI/POP ESI/RET against the same post-call stack state; body 2: in-window POP EDI at 0x006C282F forces [saved EDI][saved ESI][ret] remainder"
+  },
+  "call_inventory": {
+    "0x0070ED80": "x2 (L648037, L648063); args: 1 pushed DWORD (0x1F / 0x20) + ECX=this at call; returns pointer whose word fields +0x0C/+0x0E are read; identity/ABI-use UNKNOWN (out-of-window)",
+    "0x006B22D0": "x4 (L648040, L648044, L648066, L648070); thiscall-shape (ECX=this, no stack args); returns row index; FIRST call per body has dead EAX (P12-C7); statefulness UNKNOWN",
+    "0x0043A550": "x2 (L648049, L648077); args: 1 pushed DWORD (table DWORD), callee-pops; returns the ECX argument for 0x0072F580; semantics UNKNOWN (cited idiom: key/object-resolution stage, P06 element #6)",
+    "0x0072F580": "x2 (L648051, L648079); ECX = ret(0x0043A550), no stack args; bridge standing: templates.vfs RB-tree keyed lookup (definition registry); walk mechanics out-of-window"
+  },
+  "global_absolute_references": {
+    "0xA857C8": "body 1 table base (DWORD entries, row stride 10, column bound 10 unsigned)",
+    "0xA85804": "body 2 table base (DWORD entries, row stride 15, column bound 15 unsigned); delta from body 1 base = 0x3C = 60 B = body 2 row size (relationship UNKNOWN, P12-C9)",
+    "0xBA5800": "constant returned by body 1 fail arm; sentinel-shaped; semantics UNKNOWN",
+    "note": "First global/absolute references in the C1 chain: P11's pump-adjacent window had ZERO global refs; the producers introduce exactly 3 absolute constants."
+  },
+  "identity_known_vs_unknown": {
+    "KNOWN": "producers' receiver = [EDI+0x8] value (cited P11); success-path return = 0x0072F580 product; key = table DWORD via 0x0043A550; indices = 0x006B22D0 row + 0x0070ED80 column word",
+    "UNKNOWN": [
+      "this object's class/identity (no RTTI/shape evidence in-window)",
+      "0x0070ED80's returned object (fields +0xC/+0x0E read as words; what object it is, what args 0x1F/0x20 select)",
+      "0x006B22D0's index semantics and statefulness (dead first call)",
+      "0x0043A550's transformation (DWORD -> lookup handle?)",
+      "0x0072F580's internal walk (bridge-cited only)",
+      "table contents at 0xA857C8/0xA85804 (DWORD payload NOT in saved corpus; reading them would require EXE/.data access = FORBIDDEN)",
+      "0xBA5800 sentinel semantics",
+      "body 2 fail-arm behavior (0x006C2832+ out-of-window)",
+      "whether the two tables are one logical array",
+      "enclosing loop structure of the P11 stages (no back-edge here either)"
+    ]
+  },
+  "era_scope": "PE 9.3.5 saved-evidence corpus (GHIDRA_H5_VTABLE2.txt listing, 2026-09-05 aggregate); all claims era-labelled to that corpus; no runtime/EXE evidence."
+}

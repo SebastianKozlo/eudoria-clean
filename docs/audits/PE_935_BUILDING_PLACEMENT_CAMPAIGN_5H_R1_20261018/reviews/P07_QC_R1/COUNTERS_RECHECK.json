@@ -1,0 +1,71 @@
+{
+  "run_id": "P07_QC_R1_20261018",
+  "attribution": "independent recheck by pe-master-auditor (fresh child, NO_NESTED_TASKS)",
+  "method": "All counters recomputed from the four extracts AND from direct reads of the pinned source lines (148/148 rows verified); unique-callee union recomputed by hand from the CALL rows; manifest re-hashed independently",
+
+  "rows": {
+    "published_actual": 148,
+    "recomputed": 148,
+    "breakdown": { "SR1": 32, "SR2": 54, "SR3": 29, "SR4": 33 },
+    "match": true
+  },
+
+  "bodies": {
+    "published_actual": 4,
+    "recomputed": 4,
+    "basis": "4 declared body_entries (0x00745BF0, 0x006B6C9D, 0x006C3F98, 0x006D44A4); each window contains exactly one single-body fragment (no unforeseen in-window body; no mid-window prologue/RET boundary)",
+    "fragment_note": "SR1 = complete body (prologue+epilogue in-window); SR2/SR4 = head-fragments (exits out-of-window: JZ 6B6D3E / JZ 6D450E+JZ 6D4510); SR3 = tail-fragment (epilogue POP EDI/ESI/EBX + ADD ESP,8 + RET with no in-window matching prologue) - no claim depends on entry ABI",
+    "match": true
+  },
+
+  "call_sites": {
+    "published_actual": 10,
+    "published_breakdown": { "SR1": 1, "SR2": 8, "SR3": 3, "SR4": 2 },
+    "recomputed_call_rows_per_window": { "SR1": 1, "SR2": 6, "SR3": 3, "SR4": 3, "total": 13 },
+    "recomputed_unique_targets_union": 10,
+    "unique_target_list": ["0x00745a70", "0x006b4120", "0x0072fce0", "0x007ce1e0", "0x0043c700", "0x0040b070", "0x0043e5b0", "0x006c2e00", "0x006c3640", "0x00733650"],
+    "verdict_total": "MATCH under the unique-CALL-sites metric (CONTRACT section 6 'unikalne CALL sites'); equals reserved 10",
+    "verdict_breakdown": "DEFECT - see finding QC-P07-1: published SR2:8 and SR4:2 match neither CALL rows (6/3) nor per-window unique targets (6/3); the breakdown sums to 14, contradicting its own total 10; no consistent counting rule reproduces it from the frozen extracts"
+  },
+
+  "candidates": {
+    "published_actual": 4,
+    "reserved": 4,
+    "recomputed": 4,
+    "definition_in_package_docs": "ABSENT - inferred meaning: the four admitted body candidates; numeric consistency holds; flagged as observation QC-P07-5",
+    "match": "numeric yes; definition undocumented"
+  },
+
+  "reserved_vs_actual": {
+    "reserved": { "bodies": 4, "instructions": 133, "edges_call_sites": 10, "candidates": 4 },
+    "actual": { "bodies": 4, "instruction_rows": 148, "unique_call_sites": 10, "candidates": 4 },
+    "rows_overshoot": "+15, entirely SR2, entirely INSIDE the admitted window [0x006B6C9D,0x006B6D3E) - max extract VA 0x006b6d3c; NO out-of-admission row",
+    "implied_sr2_reserve": "39 (arithmetic inference: 133-32-29-33)",
+    "package_caps": "148 << 2400 package rows cap; 4 <= 20 bodies; 10 <= 64 CALL; campaign-level totals are the parent ledger's obligation - carry ACTUAL 148",
+    "admission_integrity": "INTACT - ADMIT 22:42:27Z precedes extraction 22:43:29Z; no retroactive authorization needed"
+  },
+
+  "decisive_chain_rechecks": {
+    "0x66_store": "CONFIRMED - source line 633010, VA 006b6cf3, 'MOV dword ptr [ESP + 0x24],0x66' (C7 44 24 24 66 00 00 00, 8 bytes; VA delta 006b6cf3->006b6cfb verifies the imm32 form); effective frame slot pairs with the A-value slot (E0+0x1c / E0+0x20)",
+    "0x8bd720_immediates": "CONFIRMED at all three sites - 006b6d05 'MOV EBX,0x8bd720' (BB imm32; delta to 006b6d0a = 5B), 006c3fb0 'MOV EBX,0x8bd720' (delta to 006c3fb5 = 5B), 006d44e8 'MOV EDI,0x8bd720' (BF imm32; delta to 006d44ed = 5B); identical to P06 REPORT section 9 navigation list",
+    "call_census": "13 CALL rows / 10 unique targets - census tables above; encoding/tiling of all 148 rows verified (all JZ/JMP targets recomputed exact: 745c40, 6b6d3e, 6b6d39, 6b6cc5, 6d4510, 6d450e, 6d44e0)"
+  },
+
+  "manifest_recheck": {
+    "entries": 15,
+    "sha256_matches": 15,
+    "size_matches": 15,
+    "bijection": "HOLDS - disk census = 15 manifest entries + MANIFEST.json (self-excluded by design); zero unmanifested files, zero missing entries",
+    "contract_copy_identity": "packages/P07_EXEC_R1/CONTRACT.json SHA256 = CONTROL/CONTRACTS/P07.json SHA256 = 8043D73392FC32F680EF1FDD2687C0C32CB7F24921D7ECDB225621A2B260C7D2 (byte-identical)",
+    "missing_required_output": "artifact_index.csv ABSENT from the package and from the manifest - required by P07.json required_outputs and parent CONTRACT.md section 12 minimum worker pack (finding QC-P07-2); MANIFEST.json functionally covers the index role for this pack but does not satisfy the named contract output"
+  },
+
+  "gates_recheck": {
+    "G1_extracts_line_parity": "PASS - exceeded: 148/148 full parity (pack claims spot checks)",
+    "G2_no_semantic_read_beyond_subregions": "PASS - all extract rows in-window; analysis docs cite only in-window rows + inherited citations",
+    "G3_row_overshoot_disclosed": "PASS - 148 vs 133 disclosed; wording imprecision registered (QC-P07-3)",
+    "G4_premises_and_citations": "PASS - premises present in CLAIMS; all inherited-bridge citations verified accurate (7CE1E0, 72FCE0, 8BD720-per-P06, 3 imm32 sites); receiver-type nuance registered (QC-P07-4)",
+    "G5_child_failure attribution honest": "PASS - fallback attribution in all package docs; attempt-1 artifacts preserved",
+    "G6_actual_vs_reserved_reported": "PASS with defect - headline counters correct and reported; call_breakdown data defective (QC-P07-1); artifact_index.csv missing (QC-P07-2)"
+  }
+}

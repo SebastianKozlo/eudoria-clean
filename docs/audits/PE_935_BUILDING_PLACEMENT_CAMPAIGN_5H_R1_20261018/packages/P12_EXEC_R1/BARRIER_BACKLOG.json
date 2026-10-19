@@ -1,0 +1,78 @@
+{
+  "barriers": [
+    {
+      "id": "P12-B1",
+      "barrier": "0x0043A550 semantics: what transformation it applies to the table DWORD to produce the 0x0072F580 ECX argument (key object builder? handle resolver?).",
+      "required_evidence": "admitted read of body 0x0043A550 (not in current admission); out-of-window VA recorded in HANDOFF.",
+      "impact_on_building_placement": "closes the exact key type carried into the templates.vfs registry lookup; needed before any claim about WHAT the tables' DWORDs represent (resource IDs, handles, indices)."
+    },
+    {
+      "id": "P12-B2",
+      "barrier": "0x0072F580 internal walk mechanics: the RB-tree traversal itself (bridge standing attributes it as the templates.vfs keyed lookup; this package only confirms the CALL).",
+      "required_evidence": "admitted read of 0x0072F580 (large body; needs its own admission); alternatively keep as cited standing.",
+      "impact": "low for C1 closure (attribution already cited); high only if the bridge attribution is challenged."
+    },
+    {
+      "id": "P12-B3",
+      "barrier": "0x0070ED80: identity of the returned object (word fields at +0x0C/+0x0E), meaning of args 0x1F/0x20, and whether ECX=this is consumed.",
+      "required_evidence": "admitted read of 0x0070ED80.",
+      "impact": "defines what selects the worklist element category (the column index source)."
+    },
+    {
+      "id": "P12-B4",
+      "barrier": "0x006B22D0: row-index semantics; whether the dead first call per body is a stateful cursor advance (iterator hypothesis P12-H1, UNVERIFIED).",
+      "required_evidence": "admitted read of 0x006B22D0.",
+      "impact": "determines whether producer calls iterate (cursor) or re-read (pure); shapes any worklist-ordering model."
+    },
+    {
+      "id": "P12-B5",
+      "barrier": "Table contents at 0xA857C8/0xA85804 are NOT in the saved text corpus; recovering the DWORD values would require EXE/.data access = FORBIDDEN in this campaign. Data barrier, not an admission gap.",
+      "required_evidence": "none obtainable under campaign rules; the barrier is permanent for saved-only work unless a prior saved export elsewhere in the catalog documents .data around 0xA85xxx (parent may check the catalog; P12 did not open any file beyond the pinned source and cited reports).",
+      "impact": "the actual key values feeding the registry lookups stay unknown; only the indexing arithmetic is established."
+    },
+    {
+      "id": "P12-B6",
+      "barrier": "0xBA5800 sentinel semantics (returned by body 1 fail arm).",
+      "required_evidence": "would require payload dereference (FORBIDDEN) or a saved export documenting the object at 0xBA5800.",
+      "impact": "low; only affects fail-path modeling."
+    },
+    {
+      "id": "P12-B7",
+      "barrier": "Body 2 fail arm (0x006C2832+) and terminal rows (0x006C2830/0x006C2831) are out-of-window; body 2's fail return value is NOT claimed.",
+      "required_evidence": "parent admission of VA 0x006C2830-0x006C2839 (10-byte window would cover POP ESI/RET + fail arm).",
+      "impact": "completes body 2's return contract (success-path return already STRONGLY_SUPPORTED by stack forcing)."
+    },
+    {
+      "id": "P12-B8",
+      "barrier": "Sibling producer family (navigation over-display showed same-shape bodies at 0x006C2700, 0x006C2750, 0x006C2840, 0x006C2870, and further entries >=0x006C28A0) - NOT read, NOT claimed; recorded as VAs only.",
+      "required_evidence": "parent admission per body if the family's other tables/columns matter.",
+      "impact": "if the family shares the 0x0043A550->0x0072F580 tail (plausible, UNVERIFIED), the [EDI+0x8] object exposes a whole getter family over adjacent global tables; relevant to mapping which resource categories feed worklists."
+    },
+    {
+      "id": "P12-B9",
+      "barrier": "P11's remaining out-of-window targets still unadmitted and unread by P12: 0x006B4120 (helper), 0x006B6CB9+ (stage-B success exit), 0x006B6C9F+ (pump continuation), enclosing function head (<0x006B6C1B).",
+      "required_evidence": "parent admissions; unchanged from P11 HANDOFF.",
+      "impact": "as in P11 (enclosing loop structure, pump consumer)."
+    }
+  ],
+  "backlog_next_experiments": [
+    {
+      "rank": 1,
+      "experiment": "Admit 0x0043A550 (P12-B1): smallest decisive edge - establishes the key type entering the registry lookup and likely identifies the table DWORDs' role (resource-ID vs handle vs index).",
+      "required_input": "saved listing region around 0x0043A550 (admission request to parent); expected small body.",
+      "falsifier": "if 0x0043A550 turns out to be a pure passthrough wrapper, the 'key transform' reading collapses and the registry key is the raw table DWORD."
+    },
+    {
+      "rank": 2,
+      "experiment": "Admit 0x0070ED80 + 0x006B22D0 (P12-B3/B4): identifies the column selector object and the row-index source - the two state inputs of the producers.",
+      "required_input": "saved listing regions; two small bodies expected.",
+      "falsifier": "iterator hypothesis P12-H1 dies if 0x006B22D0 is stateless (then the dead first call is redundancy, and worklist rows are selected by unchanged state)."
+    },
+    {
+      "rank": 3,
+      "experiment": "Parent catalog check (no new body admission): search the saved corpus catalog for any prior export documenting .data around 0xA857C8/0xA85804 or the object at 0xBA5800 (P12-B5/B6).",
+      "required_input": "SAVED_TEXT_CATALOG.json query only.",
+      "falsifier": "absence confirms the permanent data barrier; presence would allow key-value semantics without EXE access."
+    }
+  ]
+}

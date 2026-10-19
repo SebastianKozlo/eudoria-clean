@@ -1,0 +1,22 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_P02_QC_R1_20261018",
+  "target_pack": "P02_EXEC_R1",
+  "reserved_vs_actual_vs_reviewer": {
+    "bodies": {"reserved": 2, "worker_actual": 2, "reviewer_count": 2, "note": "both contract body_entries (0x006B1E0B, 0x006B1E2F) are in-function branch-target blocks of walker 006B1C80, not separate logical functions; worker states this explicitly (0 new logical functions). Walker body completed in-region (epilogue RET 0x4 @006b1fa7). ACCEPTED."},
+    "instruction_rows": {"reserved": 136, "worker_actual": 136, "reviewer_count": 136, "note": "source lines 626546-626681; line parity re-verified byte-for-byte by reviewer. ACCEPTED."},
+    "call_sites": {"reserved": 23, "worker_actual": 23, "reviewer_count": 23, "note": "reviewer recount: 18 direct + 5 indirect = 23, identical per-VA detail. Reserve field in EVENT/CONTRACT is 'edges: 23' rendered by the parent cap-note as '23 CALL'; actual CALL sites are 23 (coincides with the reserve). ACCEPTED."},
+    "candidates": {"reserved": 2, "worker_actual": 2, "note": "CAND-P2a keyed lookup; CAND-P2b conditional hand-off. ACCEPTED."},
+    "front_A_running_totals_after_P02": {"worker": "5/16 bodies, 372/1800 rows, 42/64 CALL, 6/12 candidates", "reviewer_arithmetic": "P01 QC-confirmed 3/236/19/4 + P02 2/136/23/2 = 5/372/42/6 - MATCH. Campaign 5/96, 372/12000, 42/320, 6/48 - MATCH, all within caps."}
+  },
+  "store_census_recheck": {"worker_count": 7, "reviewer_count": 7, "detail_match": "identical 7 VAs and classes (006b1e00, 006b1e05, 006b1ee8, 006b1f07, 006b1f3a, 006b1f8d, 006b1faa)", "negatives": "no [elem+8] store (only +8 access = LOAD @006b1ec8) - reviewer-verified; no global store - reviewer-verified; no 0x42/66; no 296445 (see hex correction in QC_REPORT)"},
+  "manifest_bijection_recheck": {"files_on_disk": 13, "manifest_listed": 12, "manifest_self_excluded": true, "artifact_index_listed": 11, "index_self_exclusion": "index excludes itself + manifest (worker MANIFEST censuses the index separately)", "hashes_matching_reviewer_rehash": 12, "mismatches": 0, "strays": 0},
+  "contract_copy_identity": {"package_CONTRACT_json_sha256": "A0435DB202469FE047921B0795BA0BD7F16D9A4D8D8FB2E3BA9863A2F249976D", "control_contract_sha256": "A0435DB202469FE047921B0795BA0BD7F16D9A4D8D8FB2E3BA9863A2F249976D", "byte_identical_by_hash": true},
+  "source_pin_recheck": {"sha256_reviewer_recomputed": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB", "matches_pin": true, "size_bytes": 50780146},
+  "events_chronology_recheck": {"000004_ADMIT_vs_package": "region/reserve/body_entries/admission_id all match", "timestamp_order": "monotonic (ADMIT 21:30:55 -> contract 21:30:59 -> hash 21:31:09 -> RUN_STARTED 21:31:17 -> re-verify 21:34:47 -> manifest 21:36:36)", "hash_chain_0003_0004_0005": "re-hashed by reviewer, both links MATCH"},
+  "defects_found": [
+    {"id": "QC-P02-D1", "severity": "P2", "where": "COUNTERS.json store_census_negatives (line 59)", "what": "hex rendering of decimal 296445 written as 0x4861D; correct value is 0x485FD (0x4861D = 296477)", "impact": "none on the absence claim - neither 0x485FD nor 0x4861D occurs in the 136 rows (reviewer full-immediate scan); documentation-level transcription defect only"},
+    {"id": "QC-P02-D2", "severity": "P2", "where": "CLAIMS.json P02-C3 claim_resolution parenthetical", "what": "'REJECTED_WITH_EVIDENCE (binding store present in region)' can be misread as asserting presence; P02-C1 uses the opposite, correct convention '(binding store absent in region)'", "impact": "wording inconsistency in the resolution field; claim statement/evidence/countermodel are unambiguous (absence); no scientific impact"}
+  ],
+  "rejected_overclaims": "none found - headline and all sub-claims are scoped, hedged and countermodeled correctly",
+  "verdict": "PASS_WITH_CORRECTIONS"
+}

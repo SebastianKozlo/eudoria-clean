@@ -1,0 +1,32 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P03",
+  "reserved_vs_actual": {
+    "bodies": {"reserved": 1, "actual": 1, "note": "single logical function entry 0x007B6C30 (admitted window = its entry guard; continuation 0x007B6C4B is the SAME body, unadmitted)"},
+    "instruction_rows": {"reserved": 14, "actual": 14, "note": "listing lines 959600-959613; line parity exact; region end-exclusive at 0x007B6C4B"},
+    "edges": {"reserved": 2, "actual": 2, "note": "E1 = JNZ 0x007b6c41 -> 0x007B6C4B (recorded, not read); E2 = fall-through epilogue -> RET 0x4 normal return"},
+    "call_sites": {"reserved_as_edges": 2, "actual": 0, "note": "the contract reserve field is 'edges: 2'; the task prompt and front-A cap note rendered it as '2 CALL', but the region contains ZERO CALL instructions (contract main_question itself states '0 CALL'). Actual CALL-site contribution to Front A's 64-CALL budget = 0. Per parent contract section 6 reservations are not refunded after the fact; the conservative 2-slot reservation stands in the ledger, actual is 0."},
+    "candidates": {"reserved": 2, "actual": 2, "note": "CAND-P3a pure keyed lookup; CAND-P3b get-or-create/register (both live, see CLAIMS P03-C7)"}
+  },
+  "front_A_running_totals": {
+    "before_P03": "5/16 bodies, 372/1800 rows, 42/64 CALL, 6/12 candidates (P01 + P02)",
+    "after_P03": "6/16 bodies, 386/1800 rows, 42/64 CALL (P03 adds 0 CALL sites), 8/12 candidates",
+    "note": "bodies 5+1=6; rows 372+14=386; CALL 42+0=42; candidates 6+2=8. Cap-note arithmetic 'P03 adds 1/14/2/2' reconciled as bodies/rows/edges-reserve/candidates; the edges-reserve does not convert into CALL sites (actual 0)."
+  },
+  "campaign_totals_after_P03": "6/96 bodies, 386/12000 rows, 42/320 CALL, 8/48 candidates",
+  "regions_read": {
+    "semantically_analyzed": ["0x007B6C30-0x007B6C4A (14 rows, admitted, admission A6963eee83a5f)"],
+    "recorded_not_read": ["0x007B6C4B (JNZ continuation target, same function)"],
+    "incidental_navigation_exposure": {
+      "what": "the Grep address search used to LOCATE the region (navigation) returned 49 matching rows: 32 direct-CALL reference rows elsewhere in the listing (single rows, no surrounding context opened), the 14 in-region rows, and 3 boundary/continuation rows (0x007b6c4b, 0x007b6c4d, 0x007b6c4e) that sit at/just past the end-exclusive boundary because the search pattern '007b6c4' matches them",
+      "handling": "NO semantic analysis was performed on the 3 boundary/continuation rows and NO claim in this package depends on their content; they are disclosed here for audit honesty. The jump-target report (0x007B6C4B) derives from the in-region JNZ operand (row 959608), not from the exposed rows. The 32 CALL-row census is reported only as navigation context (P03-C9).",
+      "classification": "disclosed side effect of permitted address-search navigation; flagged for parent QC; not a semantic read of the target region"
+    }
+  },
+  "clock": {
+    "started_utc": "2026-10-18T21:37:39Z",
+    "extract_created_utc": "2026-10-18T21:39:20Z",
+    "package_hard_stop_utc": "2026-10-18T21:58:31Z",
+    "clock_tool": "powershell Get-Date ToUniversalTime (real clock)"
+  }
+}

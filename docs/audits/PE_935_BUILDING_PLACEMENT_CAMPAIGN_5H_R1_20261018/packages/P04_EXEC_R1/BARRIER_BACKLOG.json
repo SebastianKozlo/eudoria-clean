@@ -1,0 +1,60 @@
+{
+  "package_id": "P04",
+  "front": "B",
+  "first_missing_edge": {
+    "edge": "Byte-level provenance of the position record: the read/write semantics of producer getters 0x0085BFA0 (R2/R3/R4 dominant witness R4), 0x0085C0C0 (R5) and the R2/R3 alternates 0x0085C280/0x00862850 - what field of their receiver they read, how many bytes they write at their out-param, and whether the record triple is a matrix translation row or a direct field copy.",
+    "blocking_reason": "Bodies lie outside admission A0af4119f1ccf; reading them requires a new parent admission.",
+    "required_input": "Admission of 0x0085BFA0 (approx 0x0085BFA0..next ret) and 0x0085C0C0/0x0085C0F0 (paired, adjacent) from the same pinned listing.",
+    "estimated_cost": "2-3 bodies, ~60-120 rows, ~10-20 CALL rows - one small package.",
+    "value": "Closes producer variants V1/V2/V3/V4 for the position bytes; decides whether the source is a NiAVObject local/world field (scene-graph internal) or a message/descriptor field (external intake)."
+  },
+  "backlog": [
+    {
+      "id": "B-P04-1",
+      "item": "0x00509070 body: SF method called as this=SF-receiver with a getter-returned pointer (R2: ret(85C280); R3/R4: ret(862850)). Candidate SF+30 / NiNode-link setter.",
+      "why_it_matters": "Would qualify WHICH node the feeder points at - the identity edge for the node-role question (root vs internal) and for resource->instance linkage.",
+      "required_input": "Admission of 0x00509070 region.",
+      "cost": "1 body, small."
+    },
+    {
+      "id": "B-P04-2",
+      "item": "0x00509510 body: rotation setter paired with the writer (this=SF receiver). Confirms rotation field layout and whether the R2/R3/R4 zero-writes are identity/rotation resets.",
+      "required_input": "Admission of 0x00509510 region.",
+      "cost": "1 body, small."
+    },
+    {
+      "id": "B-P04-3",
+      "item": "R5 continuation 0x0067C921.. (JMP 0x0067C923 and epilogue) + 0x006C0D50 (0x130-byte record constructor with lookup result) + callers of 0x0067C7C0.",
+      "why_it_matters": "R5 is the only admitted callsite with a REAL (non-zero) rotation source and a fresh receiver - the best candidate for an instance-spawn/copy path; its arg1/arg2 provenance is the next identity rung.",
+      "required_input": "New admission for 0x0067C7C0 continuation and 0x006C0D50; caller identification of 0x0067C7C0 via listing navigation.",
+      "cost": "1-2 bodies, medium."
+    },
+    {
+      "id": "B-P04-4",
+      "item": "Un-admitted writer callsites: 0x004B335E (in 0x004B31E0), 0x00527BA8, 0x00527BF0, 0x00528317, 0x00529020, 0x005F62EA (in 0x005F61F0), 0x0067B8E8, 0x006A3A2D.",
+      "why_it_matters": "One of these may pass an ID-bearing or descriptor-shaped record to the writer (the admitted four do not). Also tests 'no direct caller != exclusively virtual' - 12 static callsites now inventoried, 8 unread.",
+      "required_input": "Per-callsite admission (parent's choice; 0x004B31E0 and 0x005F61F0 were explicitly named by the parent as un-admitted).",
+      "cost": "1-2 bodies each."
+    },
+    {
+      "id": "B-P04-5",
+      "item": "R2/R3/R4 shared-family semantics: 0x0096CD10 (method on the 85BFA0 buffer with {0,0,0}), 0x006A34A0 (R3/R4 tail, this=[caller+8]), 0x00509190 (R5, arg=0), 0x004150F0/0x008B7210 (ID+distance pair).",
+      "why_it_matters": "Qualifies the update-mechanism class and the [caller+0xC] ID-hint; none feeds the position record, so lower priority than B-P04-1/B-P04-2.",
+      "required_input": "Admissions as listed.",
+      "cost": "4 small bodies."
+    },
+    {
+      "id": "B-P04-6",
+      "item": "Data constants referenced but unread (out of scope by design): qword [0x00A7AF80] (distance scaling), 0xA7957B (R5 factory argument), function-pointer slots [0x00A75A38]/[0x00A75A44]/[0x00A75A5C]/[0x00A75A40].",
+      "why_it_matters": "[0x00A7AF80] value would confirm/refute the 0.01 meter-conversion reading of the known context; slots would identify R5's factory chain.",
+      "required_input": "These are DATA addresses - the pinned listing is code-only; resolving them needs a corpus document that contains them, or remains a barrier (NOT the EXE).",
+      "cost": "corpus lookup only."
+    }
+  ],
+  "negative_results_persisted": [
+    "R2/R3/R4 rotation is written as constant {0,0,0} (FLDZ) - these callsites do NOT restore historical rotation (C8).",
+    "The position record contains NO ID/parent/rotation channel in any admitted callsite (C6).",
+    "No attach/parent evidence in-window; node role UNDETERMINED (C9).",
+    "The writer has 12 static callsites in the pinned listing (navigation); the 'exclusively virtual' question is narrowed: at least 12 direct static callsites exist, 4 analyzed, 8 unread (premise 'no direct caller != exclusively virtual' remains preserved)."
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P02",
+  "front": "A",
+  "main_question": "Does the 006B1C80 walker tail (bodies 0x006B1E0B, 0x006B1E2F, region 0x006B1E00-0x006B1FAC) contain a resource-ID/element/receiver binding (registration key, [elem+8] store, type/ID-keyed logic joining actualS or 296445), or is it pure processing?",
+  "claims": [
+    {
+      "id": "P02-C1",
+      "statement": "Full store census over all 136 region rows: exactly 7 explicit memory stores (1 worklist deque insert @006b1e00, 4 frame stores @006b1e05/006b1ee8/006b1f07/006b1f3a, 1 TEB/SEH restore @006b1f8d, 1 result-flag clear @006b1faa). NONE is an [elem+8] store, a receiver-pointer store, a registration-key store, or a resource-ID store. No global store exists in the region.",
+      "evidence": "EXTRACT_006B1E00_006B1FAC_L.txt rows 1-136 (source lines 626546-626681), every memory-writing instruction enumerated in COUNTERS.json store_census_explicit_in_region; only +8 access is the LOAD at extract row 63 (006b1ec8 MOV ESI,[EBX+0x8]).",
+      "premises": [
+        "PUSH arguments are frame-transient and not counted as stores (P01 census convention, P01 QC section 3)",
+        "Callee-internal writes are a separate opaque channel, not explicit in-region stores"
+      ],
+      "countermodel": "A callee among the 23 CALL sites may internally perform the binding (opaque channel) — this claim is explicit-store-scoped and does not cover callee internals.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "REJECTED_WITH_EVIDENCE (binding store absent in region, at the explicit-store level)"
+    },
+    {
+      "id": "P02-C2",
+      "statement": "Leaf-path mechanics (block 0x006B1E2F, reached per P01 leaf dispatch 0xBA7210): (1) PUSH 0x00A85460; MOV ECX,EBX; CALL 007b6c30 -> ESI; if ESI==EBP (sentinel) retry with ECX=[EBX+0x24]; if still ==EBP, bail to 006b1fb4 (out-of-region). (2) Derive chain: 008bd720(ESI) -> 004152f0 -> 006ae840 -> EBP_L1; if null -> failure flag (006b1faa). (3) 006eb320(EBP_L1) bool test; if false: 006c64d0(EBP_L1) -> [result+0x4] -> 004152f0 -> 006aded0 -> [result] -> 004152f0 -> 006ae310 -> EBP_L2; if null -> failure flag. (4) 004152f0(EBP_L2,EBX) -> 006b0680. (5) 007558a0(ESI) -> list holder EBX_H; walk nodes from [EBX_H+0x8] to sentinel EBX_H: per node, [0x00A75A00](&steady[0x44], node+0x28), 006f2940(EBP, node+0x10, &steady[0x40]) and if result nonzero 007b4170(ECX=M[steady+0x18], arg=result); [0x00A75A5C](&steady[0x44]); [0x00A75854](node) -> next. (6) Exit: drain-check loop back to 006b1d33 or cleanup: free every non-null 0x80-byte chunk in the [ESP+0x28] array + the array itself via [0x00A759FC], restore SEH, cookie check 0095d3ca, ADD ESP,0x58, RET 0x4 with AL=steady[0x17].",
+      "evidence": "EXTRACT rows 15-136; stack-balance derivation: [0x00A75A00] must callee-pop its single 4-byte arg (otherwise the node loop leaks 4 bytes/iteration, impossible for shipped code); with that convention ESP=steady inside the loop, so flag stores target steady[0x68] (006b1ee8 executes at ESP=steady-0xC), 006f2940's third arg is &steady[0x40], [0x00A75A00]/'[0x00A75A5C]' receiver is &steady[0x44], and the 007b4170 receiver is the POINTER VALUE stored at steady[0x18].",
+      "premises": [
+        "callee-pops convention for [0x00A75A00] derived from per-iteration stack-balance necessity (falsifiable premise, see countermodel)",
+        "007b6c30/004152f0/007b4170 pop their visible pushed args (no intervening ADD ESP and no per-iteration leak is otherwise consistent)",
+        "EBP is the lookup 'empty' sentinel at block entry (role established in P01 window; cited, not re-derived)",
+        "006b1d33/006b1dda back-edges land in P01's admitted window (cite-only)"
+      ],
+      "countermodel": "If [0x00A75A00] is caller-pops instead, ESP is steady-4 in the loop and the slot addresses shift (flag=steady[0x64], 006f2940 arg3=&steady[0x40] unchanged in name only, receiver=steady[0x14]) — this would not change the VA-anchored store census nor the binding-absence result, but the derived slot identities would be wrong. Premise flagged for QC re-check.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "factual (mechanics)"
+    },
+    {
+      "id": "P02-C3",
+      "statement": "MAIN ANSWER: the leaf action contains NO resource-ID/element/receiver binding. It is pure processing PLUS one constant class-keyed element SELECTION: PUSH 0x00A85460 lookup via 007b6c30 against the leaf elem (EBX) and, on empty, its [+0x24] member. The key is a compile-time constant, not a per-resource ID; no resource-ID variable and no numeric ID (0x42/66, 296445/0x4861D) occurs anywhere in the 136 rows; no registration key is stored and no [elem+8] store exists. Therefore the region neither contains nor can refute the join of the keyed element to actualS or 296445: MODEL_INSTANCE_BINDING remains NOT_ESTABLISHED, and the exact missing link is (a) the lookup/registration semantics of 007b6c30 (what key 0x00A85460 matches, and which code REGISTERED an element under that key into the leaf elem / [+0x24] containers), and (b) the origin/identity of the 007b4170 receiver slot M[steady+0x18].",
+      "evidence": "EXTRACT rows 15-27 (PUSH 0xa85460 twice, 007b6c30 twice, sentinel compares, bail JZ 006b1fb4); rows 1-136 constant/immediate scan (only constants: 0xa85460, 0x80, 0xffffffff, 0/1 flag bytes, offsets 0x4/0x8/0x10/0x18/0x24/0x28/0x2c/0x38/0x3c/0x40/0x44/0x48/0x58/0x60/0x68/0x70/0x74/0xd4, indirect cells 0x00A75A00/0x00A75A5C/0x00A75854/0x00A759FC, FS:[0]); COUNTERS store_census_negatives.",
+      "premises": [
+        "absence claims are scoped to the admitted region only (not promoted to a global negative)",
+        "callee-internal binding channels remain open (opaque)",
+        "vtable/class-key proximity does not establish instance identity (vtable match != runtime receiver identity)"
+      ],
+      "countermodel": "If 007b6c30 is a registration API (not a lookup), the PUSH 0xa85460 pair could itself be a binding-side write into the leaf elem's container — the in-region instruction facts cannot distinguish lookup vs insert vs get-or-create; this is exactly why 007b6c30's body is the missing link, and why the 'pure processing' verdict is explicitly processing+selection, not an absolute no-binding claim.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "NOT_ESTABLISHED (global join) / REJECTED_WITH_EVIDENCE (binding store present in region)"
+    },
+    {
+      "id": "P02-C4",
+      "statement": "The constant key 0x00A85460 = 0x00A85454 + 0x0C (arithmetic fact). 0x00A85454 is the factory-class vtable installed by stub 006B1C60 (P01-C2, CONFIRMED, cited). Therefore the key is statically the ADDRESS of the slot at +0xC inside (or immediately after) that vtable region. Two readings preserved: (i) slot index 3 of the factory vtable, passed by address as a type/class marker to a keyed lookup; (ii) a separate static datum (e.g. class-info object) laid out after a shorter vtable. The VALUE at 0x00A85460 is not read in-region and the vtable's length is not established from the admitted corpus.",
+      "evidence": "EXTRACT rows 15 and 22 (PUSH 0xa85460); P01 REPORT headline ('[ECX]=0xa85454 vtable install'); parent contract section 5 (GA3: vtable 00A85454 slot1 = 006B1FD0).",
+      "premises": [
+        "static layout adjacency is an address-arithmetic fact only",
+        "no read of the datum at 0x00A85460 was performed (out of region)"
+      ],
+      "countermodel": "Reading (ii): if the vtable has only 3 slots, 0x00A85460 is a different static object and the 'factory-class key' interpretation collapses to 'some static constant'; the keyed-lookup fact (P02-C2) is unaffected.",
+      "evidence_level": "CONFIRMED (arithmetic and vtable install, cited) / PLAUSIBLE (interpretation i vs ii)",
+      "claim_resolution": "CONDITIONAL (interpretation depends on un-admitted vtable length / datum at 0xA85460)"
+    },
+    {
+      "id": "P02-C5",
+      "statement": "Exit/result structure: the walker returns AL = steady[0x17] (single BOOL result, RET 0x4 = one by-value stack arg, consistent with P01 QC frame arithmetic). In-region only the FAILURE write (0 @006b1faa, fed by the two null-checks at 006b1e70/006b1eab) is visible; the success write site is NOT in this region and is NOT itemized in the cited P01 REPORT/QC (presumably in P01's window; NOT_ESTABLISHED from admitted corpus). The function's visible in-region footprint is transient: the accumulated array of pointers to 0x80-byte chunks ([ESP+0x28]/[ESP+0x38]/[ESP+0x3c]/[ESP+0x40]) is fully deallocated in-epilogue (per-entry [0x00A759FC](entry,0x80) then [0x00A759FC](base,count*4)). The 006b1faa block's fall-through continuation (starts 0x006b1faf) is OUT-OF-REGION and unread; most plausibly it jumps back to the common drain/exit (006b1f28) — PLAUSIBLE, NOT confirmed.",
+      "evidence": "EXTRACT rows 95-136 (cleanup loop, free calls, epilogue), rows 35/54 (JZ 006b1faa), row 136 (006b1faa store); RET 0x4 @006b1fa7; no global store and no heap-escape store in census.",
+      "premises": [
+        "the 0x80-size argument to [0x00A759FC] matches the P01-QC-confirmed chunk-free pattern",
+        "success-flag site 'presumably in P01 window' is an expectation, not an established fact"
+      ],
+      "countermodel": "If ownership of the 0x80 chunks was transferred into callee objects before the epilogue, the frees would target stale pointers — rejected as unlikely (frees are guarded null-checks and match P01's confirmed pattern) but the ownership-transfer countermodel is kept premise-level for the callees.",
+      "evidence_level": "CONFIRMED (in-region mechanics) / PLAUSIBLE (006b1faa continuation shape, success-flag site expectation)",
+      "claim_resolution": "factual (in-region) + CONDITIONAL (out-of-region continuation)"
+    },
+    {
+      "id": "P02-C6a",
+      "statement": "CANDIDATE CAND-P2a: 007b6c30 is a keyed dictionary/map-style lookup (this=holder, key=0x00A85460 stack arg) returning an element or an 'empty' sentinel, used to select, for each LEAF element, an element registered under the constant class key — first from the leaf elem itself, then from its [+0x24] member.",
+      "evidence": "EXTRACT rows 15-27: PUSH const; MOV ECX,holder; CALL; MOV ESI,EAX; CMP ESI,EBP; JNZ/JZ; identical shape at both receivers; result feeds the entire derive/process chain.",
+      "premises": [
+        "EBP is the 'empty' sentinel at block entry (P01-window role, cited)",
+        "two-receiver fallback is a lookup idiom (premise, not proof)"
+      ],
+      "countermodel": "007b6c30 may instead be get-or-create/register (then the leaf action WRITES a binding into the leaf elem's container through the callee — the in-region facts cannot distinguish); or a plain property getter unrelated to any registration.",
+      "evidence_level": "STRONGLY_SUPPORTED (keyed-lookup call shape and result flow) / PLAUSIBLE (dictionary semantics, selected-element identity)",
+      "claim_resolution": "CONDITIONAL (resolves only with 007b6c30 body admission)"
+    },
+    {
+      "id": "P02-C6b",
+      "statement": "CANDIDATE CAND-P2b: 007b4170 is a conditional hand-off (add/notify) of a per-node derived element (006f2940 result) to the receiver pointer stored at steady[0x18] — a frame-derived receiver whose origin is NOT established in-region (candidates: written by 0043ca60 through the &steady[0x18] byref at the 006B1E0B block, or initialized in the P01 window / prologue, un-itemized in cited P01 outputs).",
+      "evidence": "EXTRACT rows 81-84 (TEST EAX,EAX; JZ skip; MOV ECX,[ESP+0x18]; PUSH EAX; CALL 007b4170) and rows 5-8 (0043ca60 receives &steady[0x18] as LEA EAX,[ESP+0x18]; PUSH EAX).",
+      "premises": [
+        "thiscall receiver pattern (ECX=this, 1 pushed arg) inferred from stack balance",
+        "[ESP+0x18] at 006b1ef9 resolves to steady+0x18 under the callee-pops convention (P02-C2 premise)"
+      ],
+      "countermodel": "M[steady+0x18] may be a container the walker itself owns (then the hand-off is bookkeeping, not a receiver binding) — e.g. a second results accumulator; or 007b4170 may be a query/notification with no retained state. Receiver identity is open; do not equate it with the walker's this, ARG1, or any game object.",
+      "evidence_level": "PLAUSIBLE",
+      "claim_resolution": "CONDITIONAL (receiver identity open)"
+    }
+  ],
+  "preserved_premises_from_contract": [
+    "no direct caller != exclusively virtual",
+    "vtable match != runtime receiver identity (applied: 0xA85454/0xA85460 proximity gives class/type identity only, not instance identity; the keyed-lookup result is not thereby actualS)",
+    "explicit store != final memory value after opaque calls (applied to the store census: callee channels enumerated separately)",
+    "NiTArray at +C8, data +CC, count +D4 (applied: [EBX+0xD4] read @006b1e1d consistent with P01 cross-confirmation)",
+    "P01-C7 same-instance premise: V/Q survival depends on retain/refcount, not holder liveness (this region adds no V/Q claim; the 004152f0 retain-shaped thunks around the leaf chain are consistent with, but do not prove, that discipline)"
+  ]
+}

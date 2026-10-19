@@ -1,0 +1,20 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P02",
+  "front": "A",
+  "gates": [
+    {"id": "G1", "name": "contract_identity", "check": "CONTRACT.json copy byte-identical to CONTROL/CONTRACTS/P02.json; SHA256 A0435DB202469FE047921B0795BA0BD7F16D9A4D8D8FB2E3BA9863A2F249976D matches assignment", "result": "PASS", "evidence": "Get-FileHash at 21:31:09Z (control) and post-copy re-hash equal"},
+    {"id": "G2", "name": "source_pin", "check": "GHIDRA_H5_VTABLE2.txt SHA256 == 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, size 50,780,146 B, re-verified after extraction", "result": "PASS", "evidence": "hash checks 21:31:09Z and 21:34:47Z"},
+    {"id": "G3", "name": "scope_admission", "check": "only region 0x006B1E00-0x006B1FAC (admission A0f2d2522b464) semantically read; out-of-region targets recorded as addresses only; P01 regions cited, not re-read; no corpus expansion", "result": "PASS", "evidence": "extraction filter [0x6B1E00,0x6B1FAC]; single full-file scan used for in-range row collection only"},
+    {"id": "G4", "name": "extract_integrity", "check": "136 rows = 136 consecutive source lines 626546-626681; line numbers included; extract SHA recorded; no in-range rows outside the run", "result": "PASS", "evidence": "EXTRACT_006B1E00_006B1FAC_L.txt SHA256 EDB9E41549F8961C1860F9FFFB845F74DF05D7D5F6DCA3FED078013DC05AC86A, 4708 B"},
+    {"id": "G5", "name": "budget", "check": "actual <= reserve: 2/2 bodies, 136/136 rows, 23/23 CALL, 2/2 candidates; Front A totals 5/16, 372/1800, 42/64, 6/12 within caps", "result": "PASS", "evidence": "COUNTERS.json; actuals equal reservations exactly"},
+    {"id": "G6", "name": "time", "check": "RUN_STARTED 21:31:17Z; package hard stop 21:58:31Z; all writes before wall; real clock tools used", "result": "PASS", "evidence": "RUN_STARTED.json + tool timestamps"},
+    {"id": "G7", "name": "no_forbidden_access", "check": "no EXE/game payload/runtime/debugger, no new Ghidra exports, no old writer scripts, no frozen-root/config/skills/repo edits", "result": "PASS", "evidence": "only reads: P02.json, parent CONTRACT.md, source listing (admitted region), P01 REPORT/QC (cite-only); only writes: P02_EXEC_R1 package files"},
+    {"id": "G8", "name": "honest_negatives", "check": "absence claims scoped to region and explicit-store level; callee-opaque channels and countermodels preserved; no global-negative promotion; get-or-create countermodel recorded against the 'pure processing' headline", "result": "PASS", "evidence": "CLAIMS.json P02-C1/P02-C3 countermodels"},
+    {"id": "G9", "name": "premises_preserved", "check": "all 5 contract premises preserved and applied (see CLAIMS preserved_premises_from_contract); V/Q/actualS non-implications recorded", "result": "PASS", "evidence": "CLAIMS.json, MEMORY_AND_IDENTITY.json"},
+    {"id": "G10", "name": "outputs_bijection", "check": "12 artifacts + self-excluded MANIFEST; RUN_STARTED first, MANIFEST last; artifact_index covers every file", "result": "PASS", "evidence": "artifact_index.csv, MANIFEST.json"}
+  ],
+  "run_status": "COMPLETED",
+  "qc_origin": "SELF_CHECK",
+  "note": "Independent review (pe-master-auditor) is the parent's separate QC step; this package's own checks are SELF_CHECK only."
+}

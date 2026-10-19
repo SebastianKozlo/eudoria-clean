@@ -1,0 +1,164 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P01",
+  "front": "A",
+  "priorities": ["A1", "A2", "A2b"],
+  "taxonomy_note": "evidence_level uses exactly the five canonical values (CONFIRMED/STRONGLY_SUPPORTED/PLAUSIBLE/UNVERIFIED/REJECTED). Separate claim_resolution field uses CONDITIONAL/NOT_ESTABLISHED/REJECTED_WITH_EVIDENCE where the scoped claim resolves a question rather than a fact level.",
+  "claims": [
+    {
+      "claim_id": "P01-C1",
+      "priority": "A1",
+      "question": "Does region 0x006B1C60-0x006B1E00 contain a concrete factory/resource->actualS identity bridge (registration key, receiver pointer, elem+8 store)?",
+      "statement": "The admitted window contains NO concrete factory/resource->actualS identity bridge. Complete store census of all 126 rows: the only non-frame stores are [EAX]=0xa85454 (vtable install, 006b1c62), [0x00BA7220]=0x1 (flag, 006b1c68), [EDI]=EAX (deque insert into local container storage, 006b1d0a) and container-field saves. There is NO store to any [elem+8], no receiver-pointer store, no resource-ID/key comparison, and no keyed lookup anywhere in the window. The only +8 accesses are vtable-slot READS ([EAX+8] @006b1d89, [EDX+8] @006b1da4) feeding virtual calls.",
+      "evidence": {
+        "region": "0x006B1C60-0x006B1E00",
+        "admission_id": "Adc52ad119303",
+        "source_lines": "626420-626545",
+        "extract": "EXTRACT_REGION1_006B1C60_006B1E00.txt",
+        "extract_sha256": "71B83F5C188AFF27A515FC7E55B6E49FB068F41339053E21223F244C7B2E7F21",
+        "key_rows": ["626421 (006b1c62 MOV [EAX],0xa85454)", "626422 (006b1c68 MOV [0x00ba7220],0x1)", "626466 (006b1d0a MOV [EDI],EAX)", "626504 (006b1d89 MOV EDX,[EAX+8] read-only)", "626515 (006b1da4 MOV EAX,[EDX+8] read-only)"]
+      },
+      "premises": [
+        "Window is end-exclusive at 0x006B1E00; body 006B1C80 continues beyond the window (in-window JZ targets 006b1f28/006b1f34 prove body extent).",
+        "GA3 premise (postaudit): vtable 00A85454 = ArkModelResourceItemFactory class; vtable install is class identity, not receiver identity.",
+        "vtable match != runtime receiver identity (preserved distinction)."
+      ],
+      "countermodel": "The bridge (a keyed registration, [elem+8]=receiver store, or resource-ID lookup) could exist in the un-admitted tail of 006B1C80 (0x006B1E00 onward, incl. 006b1e2f leaf path and 006b1f28/006b1f34 exits), in the caller of 006B1C60, or in W1/cache code. This package cannot exclude those locations; the absence claim is scoped to the window.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "REJECTED_WITH_EVIDENCE (bridge-absent-in-window; scoped to admitted region)"
+    },
+    {
+      "claim_id": "P01-C2",
+      "priority": "A1",
+      "question": "What IS in the region 0x006B1C60-0x006B1E00?",
+      "statement": "The region contains: (a) a 4-row vtable-install/flag stub 006B1C60 (installs factory class vtable 00A85454 into [ECX], sets global flag [0xBA7220]=1) — a class-bootstrap, not resource registration; (b) a worklist-based type-directed scene-graph walker 006B1C80 (partial in window) that seeds one stack argument (a root pointer, by value) into a locally-constructed deque, pops elements, calls elem->vtable+8 (typeinfo-style virtual), walks [result+4] parent chains, matches static type node 0xBA7218 to take the branch path (children iterated via [elem+0xCC] data pointer and [elem+0xD4] count, 4-byte stride) and pushes each child back into the worklist; matches node 0xBA7210 to take a leaf path at 006b1e2f (beyond window); frees its own 0x80-byte deque chunks via indirect [0x00A759FC](chunk,0x80) as it advances.",
+      "evidence": {
+        "region": "0x006B1C60-0x006B1E00",
+        "admission_id": "Adc52ad119303",
+        "source_lines": "626420-626545",
+        "extract": "EXTRACT_REGION1_006B1C60_006B1E00.txt",
+        "extract_sha256": "71B83F5C188AFF27A515FC7E55B6E49FB068F41339053E21223F244C7B2E7F21",
+        "key_rows": ["626420-626423 (006B1C60 stub)", "626455 (006b1ce6 CALL 0043ba10 container ctor)", "626470-626473 (006b1d15-006b1d1e CALL 0043ca60 grow)", "626503-626506 (006b1d87-006b1d8e virtual typeinfo call)", "626509-626510 (006b1d94/006b1d99 CMP 0xba7218 -> 006b1dc6)", "626526-626535 (006b1dc6-006b1de5 +D4 count / +CC data / [ECX+ESI*4] child)"]
+      },
+      "premises": [
+        "NiTArray layout premise (+C8 object, +CC data pointer, +D4 count) — independently cross-confirmed here on branch elements (see P01-C7).",
+        "Deque/worklist implementation inference (0x80-byte chunks, map pointer, insert cursor, capacity) is pattern-based from explicit dataflow; std-library naming is NOT asserted.",
+        "The walker's single stack argument (ARG1=[ESP+0x70]) is passed by value; which pointer the caller (006B1FD0 context) passes is outside the window — postaudit premise places 006B1C80 between V_first @006B201A and arg reload @006B206C."
+      ],
+      "countermodel": "006B1C80 could be a non-scene traversal (any graph walk with type-tagged nodes); the 'scene-graph' reading follows from the +CC/+D4 children layout matching the known NiTArray children premise and from postaudit context that this body sits on the model-load path. The traversal mechanics themselves are explicit in-window dataflow.",
+      "evidence_level": "CONFIRMED (mechanics scoped to window; 'scene-graph walker' naming STRONGLY_SUPPORTED)",
+      "claim_resolution": "CONDITIONAL (naming) / factual mechanics CONFIRMED"
+    },
+    {
+      "claim_id": "P01-C3",
+      "priority": "A1",
+      "question": "Does type66+ID A suffice to join 296445?",
+      "statement": "The admitted windows provide NO evidence that type66+ID A suffices to join 296445: no (type,id)-keyed logic exists in either window (no 66/0x42 immediate, no ID comparisons, no keyed table access). Identity logic in region 1 is exclusively vtable-dispatch + static type-node chain matching (0xBA7218/0xBA7210), which carries no resource ID. The (type,id)->resource->receiver join mechanism remains unaddressed by this package.",
+      "evidence": {
+        "region": "both admitted windows",
+        "admissions": ["Adc52ad119303", "Ab6ebb24f3a07"],
+        "source_lines": "626420-626545 and 995327-995436",
+        "method": "immediate-value and comparison census over all 236 in-window rows; only integer immediates present are container sizes (0x4c,0x4,0x80,0x8,0x1,0x6,0x5,0x0), RTTI node addresses (0xba7210,0xba7218), vtable addresses (0xa85454,0xa8ec24,0xa8ea78,0xa8e9e8), SEH constants (0xa02761,0xa1fbdf,0x00b9d8d0), allocator tokens (0x79fc70,0x00a759fc). No 66 (0x42) and no resource-ID-like compares."
+      },
+      "premises": [
+        "Preserved distinction: identical lookup shapes / vtable matches do not prove common semantics.",
+        "Front C context (parent contract): type66 and ID A are definition-side identifiers; their join to resource 296445 requires a keyed registry/lookup channel that this package did not find in its windows."
+      ],
+      "countermodel": "A (type,id)-keyed join could exist elsewhere (definition/registry code, W1 cache, resource table); nothing in this package rules it in or out — the windows simply contain no such logic.",
+      "evidence_level": "CONFIRMED (absence of keyed logic in windows)",
+      "claim_resolution": "NOT_ESTABLISHED (global join question unchanged; no new supporting evidence)"
+    },
+    {
+      "claim_id": "P01-C4",
+      "priority": "A2",
+      "question": "Scoped write-set/alias analysis of 006B1C80: can it write the outslot or V, changing Q preservation premises?",
+      "statement": "Within the admitted window, 006B1C80's explicit stores are frame-local or local-deque-internal only. The previously-open store [EDI]=EAX (006b1d0a) is now pinned: EDI = [ESP+0x2c], the insert-cursor field of the locally-constructed deque whose 10-dword header is zero-initialized in-frame (006b1cbe-006b1ce2) and managed by 0043ba10/0043ca60; EAX = ARG1 = [ESP+0x70] = the single by-value stack argument. The store therefore writes the caller-supplied root value into the walker's own worklist storage, not into the caller's frame. No explicit store in the window reaches the caller's outslot or V cell, and the body receives no pointer to either (only ARG1 by value).",
+      "evidence": {
+        "region": "0x006B1C60-0x006B1E00",
+        "admission_id": "Adc52ad119303",
+        "source_lines": "626456-626462 (006b1ceb-006b1d00 cursor/arg loads), 626466-626468 (006b1d0a-006b1d13 fast insert), 626470-626473 (006b1d15-006b1d23 grow path)",
+        "frame_arithmetic": "prologue consumes 0x6C below entry ESP => [ESP+0x70] = first stack arg = [entryESP+4]; PUSH EBP at 006b1cb4 is the 0-argument to CALL 0043ba10 (callee-popped), not a this-save."
+      },
+      "premises": [
+        "Postaudit open point being resolved: 'EDI comes from a local container; without EDI origin no guarantee of not affecting another slot' — origin now pinned to the local deque cursor field.",
+        "Heap/stack disjointness remains a PREMISE, not runtime fact: if 0043ba10/0043ca60 could return chunk storage overlapping the caller's live frame, the [EDI]=EAX store could hit a caller slot; this is excluded only by the allocator premise.",
+        "Explicit CFG store != final memory value after opaque calls (preserved)."
+      ],
+      "countermodel": "Residual opaque channels that could still write outslot/V (none syntactically argument-reachable, all premise-level): (a) 0043ba10/0043ca60 allocator aliasing (see premise above); (b) the two virtual elem->vtable+8 calls (006b1d8e CALL EDX, 006b1da9 CALL EAX) receive ECX=elem only, where elements derive from caller-supplied ARG1 — a member-internal alias (e.g., a global holding a stack address) remains unexcluded at premise level; (c) indirect [0x00A759FC] free of the deque's own chunks.",
+      "evidence_level": "STRONGLY_SUPPORTED",
+      "claim_resolution": "REJECTED_WITH_EVIDENCE for explicit-store write of outslot/V (scoped to window); premise-level countermodels preserved and enumerated"
+    },
+    {
+      "claim_id": "P01-C5",
+      "priority": "A2b",
+      "question": "What is callee 007D27B0 (admitted region 0x007D27B0-0x007D291E), called after *out stores in 0082E750?",
+      "statement": "007D27B0 is a NiStream teardown/destructor-class body, complete in window (110 rows, plain RET): installs vptr 0x00A8EC24 at [this] on entry (007d27d9 — same vptr the postaudit observed on the NiStream in 0082E750); releases members at +0x15C/+0x160/+0x128 via virtual slot0 calls with argument 1 (release pattern); refcount-decrements and conditionally destroys the member at +0x194 (twice, second pass also nulls the field); calls internal 007d1d70(this) and 007d16b0(this+0x184); frees owned buffers at +0x174, +0x164, +0x148, +0x130, +0x8 via 0095db40 (with [ptr-4] prefix reads and 0095dd6c(0x79fc70,[ptr-4],4,ptr) calls for +148/+130); resets sub-vptr fields [this+0x144]=0xA8EA78, [this+0x12C]=0xA8EA78, [this+0x4]=0xA8E9E8.",
+      "evidence": {
+        "region": "0x007D27B0-0x007D291E",
+        "admission_id": "Ab6ebb24f3a07",
+        "source_lines": "995327-995436",
+        "extract": "EXTRACT_REGION2_007D27B0_007D291E.txt",
+        "extract_sha256": "D783257F9DC897FD4F00CCEBCBB2FF234AF5049E469AA6CDF7EBB85CCC47862E",
+        "key_rows": ["995341 (007d27d9 MOV [ESI],0xa8ec24)", "995346-995349 (release +15C)", "995363-995368 (refcount +194)", "995394-995408 (+148 free path)", "995410-995424 (+130 free path)", "995425-995428 (+8 free + [ESI+4]=0xa8e9e8)"]
+      },
+      "premises": [
+        "Postaudit premise: NiStream object in 0082E750 carries vptr 00A8EC24 and is a local on the producer's stack (explains plain RET without self-free).",
+        "Dtor-class interpretation rests on: redundant derived-vptr install at entry + base sub-vptr resets + free-all-members pattern. Whether it is the final dtor or a Close()/Shutdown() on an object about to die does not change the write-set conclusion."
+      ],
+      "countermodel": "It could be a reset/reuse function rather than a final dtor; either way the body leaves the object with all owned buffers freed and sub-vptrs reset, and the write-set analysis (P01-C6) is unaffected.",
+      "evidence_level": "CONFIRMED (body mechanics scoped to window; dtor-class naming STRONGLY_SUPPORTED)",
+      "claim_resolution": "CONDITIONAL (dtor vs Close naming); mechanics CONFIRMED"
+    },
+    {
+      "claim_id": "P01-C6",
+      "priority": "A2b",
+      "question": "Can 007D27B0 write the outslot or V (alias/argument), changing Q preservation premises?",
+      "statement": "No explicit store or argument of 007D27B0 can reach the 0082E750 outslot or V cell: its only argument is ECX=this (no stack args; PUSH ECX at entry is a slot allocation); its complete explicit write set is this-relative ([this], [this+4], [this+12C], [this+144], [this+194], [member+4] refcount decrements) plus frame/SEH. No pointer to the outslot or V cell is passed in. Therefore the explicit-store channel from 0082E750's post-store opaque call 007D27B0 to outslot/V is closed (scoped: explicit stores).",
+      "evidence": {
+        "region": "0x007D27B0-0x007D291E",
+        "admission_id": "Ab6ebb24f3a07",
+        "source_lines": "995327-995436 (complete store census; all MOV-to-memory targets enumerated in ANALYSIS_NOTES R3)"
+      },
+      "premises": [
+        "Heap/stack disjointness and live-local disjointness are PREMISES: the countermodel 'outslot or V cell lies inside [this..this+0x194] of the destructed NiStream' is excluded only by the assumption that distinct live locals do not overlap in the producer's frame.",
+        "Explicit CFG store != final memory value after opaque calls (preserved)."
+      ],
+      "countermodel": "Premise-level residual channels (unproven negatives, preserved): (a) outslot/V cell inside the NiStream's own field range (excluded by frame-layout premise only); (b) member virtual releases (+15C/+160/+128/+194), internal 007d1d70/007d16b0, or free-family 0095db40/0095dd6c writing through member-internal or allocator-internal aliases — no syntactic channel passes a caller-frame pointer to any of them.",
+      "evidence_level": "STRONGLY_SUPPORTED",
+      "claim_resolution": "REJECTED_WITH_EVIDENCE for explicit-store/argument write of outslot/V; premise-level countermodels preserved"
+    },
+    {
+      "claim_id": "P01-C7",
+      "priority": "A2b",
+      "question": "Does 007D27B0 change Q preservation premises in any other way?",
+      "statement": "YES — a lifetime premise refinement: 007D27B0 FREES the [this+0x148] holder buffer (007d288a MOV EAX,[ESI+0x148]; TEST; free path 007d28a6-007d28c0). Per the postaudit dataflow premise, +0x148 is the exact holder dereferenced in the post-load read V=M32[M32[obj+0x148]]. After 007D27B0 runs, the V-holder is dangling. Therefore: (1) any later re-read of the holder would be use-after-free/dangling — invalid; (2) survival of the V value (and hence *out/Q) after 0082E750 depends on the retain (refcount) performed in 0082E750 ('store *out=V and retain' premise), NOT on holder liveness. Q0/Q1/VT preservation arguments must not assume the +0x148 holder outlives the NiStream teardown.",
+      "evidence": {
+        "region": "0x007D27B0-0x007D291E",
+        "admission_id": "Ab6ebb24f3a07",
+        "source_lines": "995394-995409 (007d288a-007d28c0)",
+        "cited_premise": "PE_935_CAND4_Q_DEEP_POSTAUDIT_R1_20261018/REPORT.md: 'Po sukcesie AL następuje odczyt V=M32[M32[obj+148h]], przetwarzanie V, store *out=V i retain.'"
+      },
+      "premises": [
+        "The +0x148 field identity between this body's `this` and the V-read `obj` rests on both carrying the NiStream vptr 00A8EC24 (postaudit premise; same class).",
+        "Whether the retain fully protects V on ALL paths of 0082E750 is outside both windows — not claimable here."
+      ],
+      "countermodel": "If some path stores *out without the retain, V's object could be released by later refcount drops (including possibly inside member teardown) — this package cannot rule that out; it only pins that the HOLDER itself is freed here.",
+      "evidence_level": "STRONGLY_SUPPORTED (the +0x148 free is CONFIRMED in-window; its bearing on V/Q uses the cited postaudit dataflow premise)",
+      "claim_resolution": "CONDITIONAL refinement of Q-preservation premises: holder-liveness premise must be dropped; retain-dependence premise must be tracked"
+    },
+    {
+      "claim_id": "P01-C8",
+      "priority": "A1",
+      "question": "Body-entry map correction for region 1",
+      "statement": "The contract's listed body entries 0x006B1D15, 0x006B1D49, 0x006B1DC6 are branch targets INSIDE body 0x006B1C80 (targets of JZ @006b1d04, JZ @006b1d42, JZ @006b1d99 respectively), NOT separate function entries. Actual logical bodies semantically used in region 1: 2 (006B1C60 complete; 006B1C80 partial-window). Region 2: 1 (007D27B0 complete). Package total actual bodies: 3, versus reserved 6.",
+      "evidence": {
+        "source_lines": "626463 (JZ 0x006b1d15), 626483 (JZ 0x006b1d49), 626510 (JZ 0x006b1dc6)",
+        "note": "No new body was opened; all analyzed rows lie inside the two admitted windows. The reserve remains a conservative upper bound."
+      },
+      "premises": ["Parent contract section 6: reviewer checks actual content vs declared body_entries."],
+      "countermodel": "None for the in-window CFG facts; whether 006B1C80's beyond-window tail contains additional distinct bodies is unknown and NOT read.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "factual correction recorded"
+    }
+  ]
+}

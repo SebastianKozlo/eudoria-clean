@@ -1,0 +1,49 @@
+{
+  "package_id": "P04",
+  "admission_id": "A0af4119f1ccf",
+  "source_pins": [
+    {
+      "role": "primary_semantic_source",
+      "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIGHT_AGGREGATE_20260905_160000\\GHIDRA_H5_VTABLE2.txt",
+      "sha256": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "sha256_verified_utc": "2026-10-18T21:49:26Z",
+      "size_bytes_note": "50780146 (per parent contract section 2)",
+      "usage": "address navigation (grep for callsites/body entries) + semantic read ONLY inside the five admitted subregions",
+      "admitted_subregions_va": [
+        {"region_id": "R1", "range": "0x005094C0-0x005094DC", "end_exclusive": true, "body_entry": "0x005094C0"},
+        {"region_id": "R2", "range": "0x006A36F0-0x006A375C", "end_exclusive": true, "body_entry": "0x006A36F0"},
+        {"region_id": "R3", "range": "0x0067B4F0-0x0067B5D3", "end_exclusive": true, "body_entry": "0x0067B4F0"},
+        {"region_id": "R4", "range": "0x0067C560-0x0067C649", "end_exclusive": true, "body_entry": "0x0067C560"},
+        {"region_id": "R5", "range": "0x0067C7C0-0x0067C921", "end_exclusive": true, "body_entry": "0x0067C7C0", "note": "window ends MID-BODY at 0x0067C91F JMP 0x0067C923 (target outside admission)"}
+      ]
+    },
+    {
+      "role": "package_contract",
+      "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\CONTROL\\CONTRACTS\\P04.json",
+      "sha256": "A42CBDFB6399461F842E400A9AB87C08271CA6DC9C80DD1A60CB6F5C940232E9",
+      "sha256_verified_utc": "2026-10-18T21:49:20Z",
+      "local_copy": "CONTRACT.json",
+      "local_copy_sha256": "A42CBDFB6399461F842E400A9AB87C08271CA6DC9C80DD1A60CB6F5C940232E9"
+    }
+  ],
+  "navigation_only_facts": {
+    "writer_005094C0_total_static_callsites_in_listing": 12,
+    "callsites_inside_admitted_regions": [
+      {"va": "0x006A3727", "caller_body": "0x006A36F0", "region": "R2"},
+      {"va": "0x0067B52E", "caller_body": "0x0067B4F0", "region": "R3"},
+      {"va": "0x0067C584", "caller_body": "0x0067C560", "region": "R4"},
+      {"va": "0x0067C8A8", "caller_body": "0x0067C7C0", "region": "R5"}
+    ],
+    "callsites_outside_admitted_regions_NOT_read": [
+      {"va": "0x004B335E", "caller_body": "0x004B31E0"},
+      {"va": "0x00527BA8", "caller_body": "unidentified (near 0x00527BA8)"},
+      {"va": "0x00527BF0", "caller_body": "unidentified"},
+      {"va": "0x00528317", "caller_body": "0x00528317"},
+      {"va": "0x00529020", "caller_body": "0x00529020"},
+      {"va": "0x005F62EA", "caller_body": "0x005F61F0"},
+      {"va": "0x0067B8E8", "caller_body": "unidentified (between R3 and R4 windows)"},
+      {"va": "0x006A3A2D", "caller_body": "unidentified (after R2 window)"}
+    ],
+    "note": "Navigation greps returned the CALL target address lines as hits; no further semantic read of these un-admitted regions was performed. Their instruction content beyond the callsite address is unknown to this package."
+  }
+}

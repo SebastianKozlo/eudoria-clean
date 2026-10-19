@@ -1,0 +1,62 @@
+{
+  "package_id": "P04",
+  "scope": "memory layout, aliasing, lifetime and identity-relevant observations inside the five admitted subregions only",
+  "writer_memory_model": {
+    "function": "0x005094C0",
+    "write_set": ["this+0x34 (dword)", "this+0x38 (dword)", "this+0x3C (dword)", "this+0x28 (byte, value 1)"],
+    "read_set": ["[arg+0]", "[arg+4]", "[arg+8]"],
+    "aliasing_analysis": "Receiver (ECX) and record (arg) are caller-supplied. In all four admitted callsites the receiver is an object pointer from a caller field (R2: [caller+0x18]; R3/R4: [caller+4]; R5: [caller+4] freshly created) while the record is either a caller frame slot (R2/R3/R4: &F+0x3C) or a callee-returned pointer (R5). Frame slot vs heap object field: disjoint. No in-window path can pass receiver==record.",
+    "lifetime": "Writer reads the record fully before returning; R2/R3/R4 then pass the SAME buffer region's base (&F+0x18) to 0x0096CD10 - consume-then-operate ordering; no in-window hazard to the writer's already-completed read."
+  },
+  "stack_frame_layouts": {
+    "R2_0x006A36F0": {
+      "prologue": "SUB ESP,0x4c; PUSH ESI",
+      "baseline_esp": "F-4 (F = ESP after SUB)",
+      "slots": {"F-4": "saved ESI", "F+0x00..F+0x0B": "zero-triple {0,0,0} (post-writer, args to 96CD10 and 509510)", "F+0x0C..": "85C280 out-buffer (extent unknown)", "F+0x18..": "85BFA0 out-buffer (extent unknown; 96CD10's this)", "F+0x3C..F+0x47": "WRITER RECORD SLOT (no in-body producer)"},
+      "ret": "RET 0x4 -> 1 stack arg"
+    },
+    "R3_0x0067B4F0": {
+      "prologue": "SUB ESP,0x4c; PUSH ESI; PUSH EDI (post-guard)",
+      "baseline_esp": "F-8",
+      "slots": {"F-8": "saved EDI", "F-4": "saved ESI", "F+0x00..F+0x0B": "zero-triple (post-writer)", "F+0x0C..": "862850 out-buffer (extent unknown; also distance-vector source)", "F+0x18..": "85BFA0 out-buffer (96CD10's this)", "F+0x3C..F+0x47": "WRITER RECORD SLOT", "F+0x50": "caller arg1 slot, reused as ||v|| scratch"},
+      "ret": "RET 0x8 -> 2 stack args (arg1 = getter source object in EDI)"
+    },
+    "R4_0x0067C560": {
+      "prologue": "SUB ESP,0x4c; PUSH ESI; PUSH EDI (post-writer, in [caller+0xC] tail)",
+      "baseline_esp_pre_writer": "F-4",
+      "slots": {"F-4": "saved ESI", "F+0x00..F+0x0B": "zero-triple", "F+0x18..": "85BFA0 out-buffer", "F+0x3C..F+0x47": "WRITER RECORD SLOT", "F+0x0C..": "862850 out-buffer (post-writer only here)"},
+      "ret": "RET 0x8 -> 2 stack args"
+    },
+    "R5_0x0067C7C0": {
+      "prologue": "SEH setup (PUSH -1, PUSH 0x009F9784, PUSH FS:[0]); SUB ESP,0xd8; cookie [0x00B9D8D0] at P+0xD4; PUSH EBX/EBP/ESI/EDI; second cookie; FS:[0] := P+0xDC",
+      "baseline_esp": "P-20 (P = ESP after SUB ESP,0xd8); P = entry ESP - 0xE4",
+      "slots": {"P-0x14 (P+0x00)": "0x130-allocation pointer (post-lookup)", "P+0x03": "local1 (indirect-call receiver [0x00A75A38], destructed via [0x00A75A40])", "P+0x08": "local2 (85C0C0/85C0F0 out-param; [0x00A75A44] receiver; 0x00401360 arg)", "P+0x14": "slot holding `this` (written 0067C80F), later LEA'd as 0x00733340 receiver (wrapper-object shape, +0 = this)", "P+0xE0": "SEH state byte (0,1,2,3)", "P+0xD4": "stack cookie", "P+0xE8": "caller arg1 -> stored to this+0", "P+0xEC": "caller arg2 -> EDI"},
+      "ret": "UNKNOWN - window truncated at 0x0067C91F JMP 0x0067C923; epilogue un-admitted",
+      "exceptional_exits": ["JZ 0x0067CA60 (receiver-null guard)", "JZ 0x0067C974 (0x0072FCE0 bool false)", "JZ 0x0067C921 (0x130 alloc failed)", "SEH handler 0x009F9784 (unwind)"],
+      "unwind_note": "All three JZ targets and the JMP continuation lie OUTSIDE the admitted window; unwind/exceptional-exit completeness NOT established for R5 in this package."
+    }
+  },
+  "identity_observations": {
+    "receiver_identity_per_callsite": {
+      "R2": "[caller+0x18] - pre-existing field of the caller object (SF-shaped receiver)",
+      "R3": "[caller+0x4] - pre-existing field",
+      "R4": "[caller+0x4] - pre-existing field",
+      "R5": "[caller+0x4] - CREATED IN THIS FUNCTION by factory chain [0x00A75A38] -> 0x00401360 -> 0x00485050 -> 0x0048CBB0 -> 0x005247C0; fresh object at write time"
+    },
+    "source_object_identity_per_callsite": {
+      "R2": "[caller+0x4] - receiver of both 85C280 and 85BFA0",
+      "R3": "arg1 (caller's stack arg 1) for 862850; [caller+0x0] for 85BFA0",
+      "R4": "[caller+0x0] for 85BFA0; arg1 for post-writer 862850",
+      "R5": "arg1 (-> this+0) for 85C0C0 and 85C0F0"
+    },
+    "id_shaped_values_observed": [
+      {"where": "R3/R4", "value": "[caller+0xC]", "use": "arg1 of 0x004150F0 together with f32(||v|| * qword[0x00A7AF80]) - AFTER the writer; NOT in the record", "semantics": "UNVERIFIED (numeric; ID-shaped by use)"},
+      {"where": "R5", "value": "arg2 and [arg2]", "use": "0x0043A550 -> 0x0072F580 -> 0x0072FCE0 guarded lookup chain - AFTER the writer; NOT in the record", "semantics": "UNVERIFIED (lookup-key-shaped)"},
+      {"where": "R5", "value": "constant 0xA7957B pushed before CALL [0x00A75A44]", "use": "factory-chain argument; address in data region; NOT read", "semantics": "UNVERIFIED (likely string/constant pointer)"}
+    ],
+    "record_identity_content": "NONE. The 12-byte record carries no resource ID, instance ID, parent or rotation channel. Rotation is a separate method call with a separate argument. (C6)",
+    "parent_attach_evidence": "NONE in-window (C9). Candidates for next admission: 0x00509070 (SF method receiving getter-returned pointer - candidate SF+30/NiNode link setter), 0x00509190 (R5, arg=0), 0x006A34A0 (R3/R4 tail, this=[caller+8]).",
+    "resource_vs_instance_separation": "Not observable in this package: no admitted instruction separates a resource ID from an instance ID. The only instance-shaped construction (R5's 0x130-byte record via 0x006C0D50 with lookup result) happens AFTER the position/rotation copy and its body is un-admitted."
+  },
+  "stale_frame_variant_note": "For R2/R3/R4 the record slot F+0x3C..F+0x47 has no in-body writer. If ALL preceding out-callees write fewer bytes than needed to reach the slot, the writer consumes stale frame bytes from a previous invocation of the same frame region. A shipped client feeding the SF position from garbage on every guard-taken path is functionally implausible, but this remains static variant V3 (not excluded by in-window evidence)."
+}

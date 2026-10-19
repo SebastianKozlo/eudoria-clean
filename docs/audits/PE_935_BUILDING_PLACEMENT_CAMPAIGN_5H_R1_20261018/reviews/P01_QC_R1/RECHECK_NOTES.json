@@ -1,0 +1,130 @@
+{
+  "run_id": "PE_935_P01_QC_R1_20261018",
+  "reviewer": "pe-master-auditor (independent internal QC; no delegation; NO_NESTED_TASKS)",
+  "method_statement": "Independent re-derivation performed by re-reading the pinned saved listing directly (NOT from the worker's extracts): lines 626419-626546 and 995326-995437 were pulled from GHIDRA_H5_VTABLE2.txt (SHA256 re-verified first: 642cc29a01b8ad6f783e82e14da4a61fa00ba6a3ec6df98edff28ac25cc1d8db, 50780146 B). The two boundary lines on each side of each window were read ONLY as VA/boundary-integrity checks (end-exclusive cut verification); no semantic analysis of out-of-window bodies was performed. All instruction references below cite the SOURCE LINE numbers of the pinned listing.",
+  "source_pin_reverified": {
+    "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIGHT_AGGREGATE_20260905_160000\\GHIDRA_H5_VTABLE2.txt",
+    "sha256_recomputed": "642cc29a01b8ad6f783e82e14da4a61fa00ba6a3ec6df98edff28ac25cc1d8db",
+    "matches_contract_pin": true,
+    "size_bytes": 50780146
+  },
+  "region1_rederivations": [
+    {
+      "id": "R1-01_WINDOW_BIJECTION",
+      "result": "PASS",
+      "detail": "Worker extract lines 626420-626545 are byte-identical to the source listing, row-for-row, including the '<line>|' prefixes (126 rows: 626545-626420+1=126). First row VA 006b1c60 = contract va_begin; last row VA 006b1dfe < 0x006B1E00. Boundary integrity: line 626419 = '006b1c55 RET 0x8' (previous body ends OUTSIDE window); line 626546 = '006b1e00 MOV dword ptr [EDI],EAX' (first instruction at/after the end-exclusive boundary — window cut is exact, no mid-instruction cut). The worker's SOURCE_PINS boundary_note discloses line 626546's VA/address honestly as boundary marker only."
+    },
+    {
+      "id": "R1-02_STUB_006B1C60_CENSUS",
+      "result": "PASS",
+      "detail": "Lines 626420-626423: MOV EAX,ECX / MOV [EAX],0xa85454 / MOV [0x00ba7220],0x1 / RET. 4 rows, complete, plain RET, no stack-arg cleanup. Write set = [*ECX]=0xA85454 (vtable install; EAX=ECX copied at first instruction) + global DWORD [0x00BA7220]=1. No key, no ID, no receiver pointer, no [elem+8] store, no CALL. Matches P01-C1/C2."
+    },
+    {
+      "id": "R1-03_FRAME_ARITHMETIC",
+      "result": "PASS (worker arithmetic reproduced independently)",
+      "detail": "Prologue of 006B1C80: PUSH -1 (L626424), PUSH 0xa02761 (L626425), PUSH old-FS (L626427) = 0xC; SUB ESP,0x4c (L626428) -> 0x58; PUSH EBX/EBP/ESI/EDI (L626432-626435) = 0x10 -> 0x68; PUSH cookie (L626438) = 0x4 -> 0x6C; PUSH EBP (L626442, EBP=0 from XOR EBP,EBP L626441) = 0x4 -> 0x70; CALL 0043ba10 (L626455) pushes RET and the callee pops the single stack arg (no ADD ESP between L626455 and L626456; subsequent [ESP+0x34]/[ESP+0x2c]/[ESP+0x70] offsets are only consistent with ESP = entryESP-0x6C). Therefore [ESP+0x70] = entryESP+0x4 = FIRST STACK ARGUMENT (by value). PUSH EBP at L626442 is indeed the 0-argument to CALL 0043ba10, not a this-save (this = LEA ECX,[ESP+0x20] at L626443). Worker claim P01-C4 frame_arithmetic VERIFIED by independent recomputation."
+    },
+    {
+      "id": "R1-04_DEQUE_HEADER_LOCALITY",
+      "result": "PASS",
+      "detail": "Ten-dword local header zero-initialized at [ESP+0x20..0x44] (L626445-626454: 006b1cbe..006b1ce2, EBP=0) + byte flag [ESP+0x1b]=1 (L626444). The container object passed to CALL 0043ba10 as ECX = LEA ECX,[ESP+0x20] (L626443) — the container is INSIDE this body's frame. Instruction-fact."
+    },
+    {
+      "id": "R1-05_EDI_PINNING_CHAIN",
+      "result": "PASS — the postaudit-open [EDI]=EAX store is pinned exactly as claimed",
+      "detail": "Chain: L626443 LEA ECX,[ESP+0x20] (container this) -> L626455 CALL 0043ba10 (ctor, opaque) -> L626457 (006b1cef) MOV EDI,[ESP+0x2c] (EDI = container field at +0x2c = insert cursor, zero-initialized at L626448 and maintained by the ctor/helpers) -> L626458 (006b1cf3) MOV EAX,[ESP+0x70] (EAX = ARG1, the single by-value stack argument) -> L626466 (006b1d0a) MOV [EDI],EAX. Capacity guard: L626456/626459-626460 ([ESP+0x34]-4) and NULL guard L626464-626465; fast insert advances cursor L626467-626468 ([ESP+0x2c]=EDI+4); slow path L626470-626473 calls 0043ca60 with this=[ESP+0x20] container and arg=&[ESP+0x18] (pointer to the walker's OWN frame slot holding the ARG1 copy, L626462). The store therefore writes the caller-supplied by-value argument into the walker's own worklist storage. VERIFIED."
+    },
+    {
+      "id": "R1-06_FULL_126_ROW_STORE_CENSUS",
+      "result": "PASS — census reproduced; no [elem+8] store, no receiver store, no keyed lookup",
+      "detail": "All memory-writing instructions in the 126-row window, enumerated: stub: L626421 [EAX]=0xa85454; L626422 [0x00BA7220]=1. walker (all frame/SEH/container-local except [EDI]): L626431 [ESP+0x48] (cookie), L626440 FS:[0] (SEH), L626444 byte [ESP+0x1b]=1 (SEH state), L626445-626454 [ESP+0x20..0x44]=EBP (10 header dwords), L626461 [ESP+0x68]=EBP, L626462 [ESP+0x18]=EAX (ARG1 copy), L626466 [EDI]=EAX (deque chunk slot), L626468 [ESP+0x2c]=EDI (cursor), L626482 [ESP+0x18]=EBX (pop), L626495 [ESP+0x28]=EAX (map advance), L626498 [ESP+0x20]=EAX, L626499 [ESP+0x24]=EDX, L626501 [ESP+0x1c]=EAX, L626542 [ESP+0x18]=EAX (child insert). Total 2 stub + 23 walker explicit memory writes. PUSH/SUB-ESP stack adjustments (12 PUSH rows + SUB 0x4c) are stack-pointer mechanics, not outslot/V channels. The ONLY non-frame, non-container store targets are the stub's [*ECX] vtable install and the global flag [0x00BA7220]=1. NO store to any [reg+8]; the only +8 accesses are READS: L626504 (006b1d89) MOV EDX,[EAX+8] and L626515 (006b1da4) MOV EAX,[EDX+8] (vtable slot loads feeding CALL EDX L626506 / CALL EAX L626517). Census CONFIRMS P01-C1."
+    },
+    {
+      "id": "R1-07_IMMEDIATE_CENSUS_NO_TYPE66_NO_ID",
+      "result": "PASS",
+      "detail": "All integer immediates in the 126 rows: -0x1, 0xa02761, 0x4c, frame offsets (0x18,0x1b,0x1c,0x20,0x24,0x28,0x2c,0x30,0x34,0x38,0x3c,0x40,0x44,0x48,0x60,0x68,0x70), -0x4, 0x4, 0x80, 0x8, 0xa85454, 0x00ba7220, 0x00a759fc, 0x00b9d8d0, 0xba7218, 0xba7210, 0xcc, 0xd4. NO 0x42/66 immediate, NO 296445/0x4861D, NO ID-like compare. CONFIRMS P01-C3's window-scoped absence of (type,id)-keyed logic."
+    },
+    {
+      "id": "R1-08_CALL_CENSUS_REGION1",
+      "result": "PASS — 5 sites, matches reserve edges=5 and worker detail",
+      "detail": "L626455 CALL 0x0043ba10 (container ctor); L626473 CALL 0x0043ca60 (grow/insert); L626491 CALL [0x00a759fc] (chunk free, args (chunk,0x80), caller-cleaned ADD ESP,0x8 L626492); L626506 CALL EDX (virtual vtable+8, ECX=EBX=elem); L626517 CALL EAX (virtual vtable+8, ECX=EBX=elem). 5 sites. Both virtual dispatches receive ONLY ECX=elem (elements derive from caller-supplied ARG1) — residual opaque channels correctly preserved by worker."
+    },
+    {
+      "id": "R1-09_BODY_ENTRY_CORRECTION_C8",
+      "result": "PASS",
+      "detail": "L626463 (006b1d04) JZ 0x006b1d15; L626483 (006b1d42) JZ 0x006b1d49; L626510 (006b1d99) JZ 0x006b1dc6. All three contract-listed 'body entries' are in-window branch targets of 006B1C80 (deque grow path, chunk-advance path, branch-node path respectively); each is mid-body (preceded by straight-line code of the same body, no prologue/RET boundary at those VAs). Body extent beyond window proven by in-window jump targets 006b1f28/006b1f34/006b1e2f/006b1e02 (L626477, 626501-626502, 626521, 626543-626545). P01-C8 CONFIRMED."
+    },
+    {
+      "id": "R1-10_WALKER_MECHANICS_C2",
+      "result": "PASS (mechanics instruction-fact; scene-graph naming stays hedged)",
+      "detail": "Type dispatch: L626503 MOV EAX,[EBX] (elem vptr); L626504 MOV EDX,[EAX+8]; L626505 MOV ECX,EBX; L626506 CALL EDX. Result walk: L626507-626513 CMP EAX,EBP / CMP EAX,0xba7218 / JZ 006b1dc6 / MOV EAX,[EAX+4] parent-chain loop. Second dispatch L626514-626517 (same +8 slot), walk for 0xba7210 -> JZ 006b1e2f (L626521), else parent chain L626522-626524, JMP 006b1f28 (L626525). Branch path L626526-626545: EAX=[EBX+0xd4] (count, L626526); ECX=[EBX+0xcc] (data, L626532); child=[ECX+ESI*4] (L626533, 4-byte stride); child select SBB/AND (L626537-626539); insert-back pattern continues to the window edge (JZ 006b1e0b grow / JZ 006b1e02, L626543-626545; the [EDI]=EAX continuation itself sits at 006b1e00, first row BEYOND the window — boundary line only). All P01-C2 mechanics VERIFIED. NiTArray +CC/+D4 layout independently observed here on branch elements (cross-confirmation of the cited premise)."
+    }
+  ],
+  "region2_rederivations": [
+    {
+      "id": "R2-01_WINDOW_BIJECTION",
+      "result": "PASS",
+      "detail": "Worker extract lines 995327-995436 are byte-identical to the source listing (110 rows: 995436-995327+1=110). First row VA 007d27b0 = contract va_begin; last row VA 007d291d (RET) < 0x007D291E. Boundary: line 995326 = '007d27ab RET 0x4' (previous body, outside window); line 995437 = '007d2920 PUSH ESI' (next body starts at 0x007D2920 > end-exclusive 0x007D291E). Exact cut; 007D27B0 complete in window."
+    },
+    {
+      "id": "R2-02_VPTR_INSTALL_FACT",
+      "result": "PASS — INSTRUCTION-FACT",
+      "detail": "L995339 (007d27d3) MOV ESI,ECX (this); L995341 (007d27d9) MOV dword ptr [ESI],0xa8ec24. Vptr 0x00A8EC24 installed at [this] on entry. Instruction-fact; identification with the NiStream class vptr is the cited postaudit premise (verified at citation level: postaudit REPORT.md L9 states 'obiekt NiStream z vptr 00A8EC24')."
+    },
+    {
+      "id": "R2-03_RELEASE_PATTERNS",
+      "result": "PASS",
+      "detail": "+0x15C: L995342-995349 (load, TEST, JZ skip, vptr, slot0, PUSH 0x1, CALL EDX). +0x160: L995350-995356 (same pattern). +0x128: L995369-995375 (same pattern). Three release-style virtual dispatches with argument 1, all on members loaded from [ESI+off]."
+    },
+    {
+      "id": "R2-04_194_REFCOUNT_PASSES_CORRECTED",
+      "result": "DEFECT FOUND IN WORKER WORDING (P2); mechanics otherwise PASS",
+      "detail": "Independent CFG order: FIRST +0x194 block L995359-995368 (load, OR EDI,-1, TEST, JZ skip, ADD [ECX+0x4],EDI, JNZ 007d282b, conditional virtual destroy [vtable+4], then UNCONDITIONAL MERGE STORE L995368 (007d282b) MOV [ESI+0x194],0x0) -> +0x128 release (L995369-995375) -> SECOND +0x194 block L995376-995384 (re-load, TEST, JZ 007d2862, ADD [ECX+0x4],EDI, JNZ, conditional virtual destroy) with NO null store. CORRECT READING: the FIRST pass nulls [this+0x194]; the second pass re-tests the field (normally reads 0 and skips; can act only if the intervening +0x128 release re-populated the field — an opaque channel). WORKER ERROR: CLAIMS P01-C5 and ANALYSIS_NOTES R3 say 'second pass also nulls the field' — pass attribution is swapped. No impact on the write-set census (the store exists either way), on P01-C6 or P01-C7."
+    },
+    {
+      "id": "R2-05_INTERNAL_AND_FREE_CALLS",
+      "result": "PASS",
+      "detail": "L995358 (007d280d) CALL 0x007d1d70 with ECX=ESI=this. L995385-995387 (007d2862-007d286d) LEA ECX,[ESI+0x184]; CALL 0x007d16b0. Frees: +0x174 L995388-995390 (PUSH EAX; CALL 0x0095db40, no prefix read); +0x164 L995391-995393 (same); +0x148 L995394-995409 (see R2-06); +0x130 L995410-995424 (same pattern as +0x148); +0x8 L995425-995428 (PUSH [ESI+8]; MOV [ESI+4],0xa8e9e8; CALL 0x0095db40; ADD ESP,4). Stack balance: two 1-arg db40 calls cleaned by single ADD ESP,0x8 (L995395); the two 4-arg dd6c+1-arg db40 pairs cleaned by ADD ESP,0x4 each (L995409, L995424)."
+    },
+    {
+      "id": "R2-06_148_HOLDER_FREE_INSTRUCTION_FACT",
+      "result": "PASS — INSTRUCTION-FACT (guarded); 'holder of the post-load V read' is INFERENCE via cited premise",
+      "detail": "Path: L995394 (007d288a) MOV EAX,[ESI+0x148]; L995396 (007d2893) TEST EAX,EAX; L995399 (007d28a4) JZ 0x007d28c3 (NULL GUARD — free is conditional); free path L995400-995409: MOV ECX,[EAX-4] and LEA EDI,[EAX-4] (allocation-base prefix), PUSH 0x79fc70 / PUSH ECX / PUSH 4 / PUSH EAX, CALL 0x0095dd6c (L995406), PUSH EDI, CALL 0x0095db40 (L995408) — 0095db40 receives the [ptr-4] allocation base. The +0x148 FIELD ITSELF is NOT nulled anywhere in region 2 (no [ESI+0x148]=0 store; field retains the dangling pointer value). INSTRUCTION-FACTS: guarded free of the +0x148 buffer exists at 007d288a-007d28c0. INFERENCE (premise-level, correctly labeled by worker): identification of this buffer as the holder of V=M32[M32[obj+0x148]] uses the postaudit premise (verified at citation level, postaudit L9) + same-class vptr identity; worker's C7 evidence_level STRONGLY_SUPPORTED with the free CONFIRMED in-window is correctly split. See QC corrections for the same-instance premise that must be added."
+    },
+    {
+      "id": "R2-07_SUB_VPTR_RESETS_AND_WRITE_SET",
+      "result": "PASS",
+      "detail": "Sub-vptr resets: L995398 (007d289a) MOV [ESI+0x144],0xa8ea78; L995413 (007d28d0) MOV [ESI+0x12c],0xa8ea78; L995427 (007d28fd) MOV [ESI+0x4],0xa8e9e8. Complete explicit write-set census (independent): [ESI] (vptr), [ESI+4], [ESI+12C], [ESI+144], [ESI+194], ADD [ECX+4] refcount (ECX from [ESI+0x194], member-relative), [ESP+0xc] (this-save), byte/word [ESP+0x18] SEH-state stores (L995344, 995378, 995386, 995397, 995412), FS:[0] install (L995338) and restore (L995431). NOTHING else. All this-relative or frame/SEH. Argument census: only ECX=this; prologue PUSH ECX (L995331) is a slot allocation reused as the this-save ([ESP+0xc], L995340); epilogue POP ECX/POP EDI/POP ESI + ADD ESP,0x10 (L995432-995435) balances the prologue pushes exactly — NO caller stack arguments, plain RET (L995436), no self-free. P01-C6 write-set/argument census VERIFIED."
+    },
+    {
+      "id": "R2-08_CALL_CENSUS_REGION2_CORRECTED",
+      "result": "DEFECT FOUND IN WORKER SUMMARY BREAKDOWN (P2); site list PASS",
+      "detail": "14 CALL sites, independently enumerated: CALL EDX x5 (L995349 007d27f7, L995356 007d2809, L995367 007d2829, L995375 007d2845, L995384 007d2860); CALL 0x007d1d70 (L995358); CALL 0x007d16b0 (L995387); CALL 0x0095db40 x5 (L995390, 995393, 995408, 995423, 995428); CALL 0x0095dd6c x2 (L995406, 995421). Total 5+1+1+5+2=14. The worker's COUNTERS actual_detail list is CORRECT (same 14 addresses); the worker's own summary fields are WRONG: REPORT.md says '6 virtual releases/destroys ... 6x 0095db40' (actual 5 and 5; sums to 16 vs the true 14) and COUNTERS indirect_sites says 'EDX x4 (region2 virtuals)' (actual x5). Totals (19 package, 14 region2) are correct everywhere. No scientific impact."
+    }
+  ],
+  "citation_verification": [
+    {
+      "cited_doc": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_CAND4_Q_DEEP_POSTAUDIT_R1_20261018\\REPORT.md",
+      "sha256_at_review": "c4288e8386d68802bb46a3a651b5abb47d9b0e91d6cf9eeccf9516d30e3f3e3c",
+      "verified_citations": [
+        "L9: 'Po sukcesie AL nastepuje odczyt V=M32[M32[obj+148h]], przetwarzanie V, store *out=V i retain. NiStream jest tu obiektem lokalnym na stosie producenta' — the +0x148 dataflow premise, the *out store + retain premise and the NiStream-local premise all exist as cited.",
+        "L9: 'obiekt NiStream z vptr 00A8EC24' — the vptr class premise as cited.",
+        "L19: 'Pierwszy odczyt V@006B201A i arg reload@006B206C sa z tej samej komorki, lecz dziela je 006B1C80 i alokator' + '006B1C80 jest czesciowo otwarte i zawiera juz zapis [EDI]=EAX, gdzie EDI pochodzi z lokalnego kontenera; ... Nie mozna bez pochodzenia EDI zamienic tego na gwarancje niewplywania na cudzy slot' — the open EDI-origin point and the 006B1C80 placement premise exist exactly as cited in P01-C1/C2/C4 premises."
+      ],
+      "level": "CITATION_VERIFIED (premises verified to exist as cited; not re-derived from 0082E750/0082E580 bytes — those regions remain outside both windows)"
+    }
+  ],
+  "countermodel_spot_checks_requested_by_worker": [
+    "(a) allocator-alias countermodel for [EDI]=EAX: worker labeled it PREMISE-EXCLUDED, not disproven — CONFIRMED appropriate (heap/stack disjointness remains a premise; 0043ba10/0043ca60 unopened).",
+    "(b) this-relative-only store census of 007D27B0: CONFIRMED by my independent census (R2-07).",
+    "(c) 'outslot or V cell inside [this..this+0x194]' countermodel: CONFIRMED premise-excluded only (live-local disjointness premise, not runtime fact).",
+    "jump recheck at source lines 626463, 626483, 626510 requested by worker HANDOFF: performed — all three are JZ branch targets inside 006B1C80 (R1-09)."
+  ],
+  "not_checked": [
+    "No region beyond the two admitted windows was semantically read by this review (006B1C80 tail 0x006B1E00-0x006B1F40, 0082E750, 006B1FD0, helpers 0043ba10/0043ca60/007d1d70/007d16b0/0095db40/0095dd6c, [0x00A759FC] target — all remain premise-level opaque exactly as the worker scoped them).",
+    "Worker session-log tool outputs (G1 'output in session log') were not replayed; the underlying facts were verified directly instead (contract hash, source hash).",
+    "campaign_control.py was NOT re-run by this reviewer (read-only QC; parent owns the clock and admission tooling).",
+    "Postaudit/SCIENCE_CHECKPOINT context documents were read at citation-verification level only (grep of cited premises), not fully re-analyzed.",
+    "RTTI/type-node semantics (0xBA7210/0xBA7218 identity as RTTI nodes), 'deque' std-library identity, and 'scene-graph'/'NiStream dtor' naming remain at the worker's hedged levels (STRONGLY_SUPPORTED/PLAUSIBLE) — this review does not promote them."
+  ]
+}

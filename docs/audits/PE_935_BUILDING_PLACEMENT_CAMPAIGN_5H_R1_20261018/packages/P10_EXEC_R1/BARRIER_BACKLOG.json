@@ -1,0 +1,52 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P10",
+  "front": "C",
+  "first_missing_edge": "The caller-side key-to-slot mapping at the 0x00745C28 callsite (which key DWORD lands in S6 = match byte, what S4 is, and what [this+4]/[this+8] bound) plus the identity of the populator of the scanned array. Together these decide (a) whether the runtime tag byte can be 6 or 4 at this callsite and (b) whether the array is VFS-record-fed (FAMILY-P/T merge).",
+  "barriers": [
+    {
+      "id": "B1",
+      "edge": "Which DWORD of 745BF0's 4-DWORD key (P07-cited, incl. constant 4) lands in slot S6 of this callee, and what values S1/S2/S4 take at the callsite.",
+      "why_blocked": "0x00745BF0 body is outside P10's admitted region (P07's window); new semantic analysis of those instructions requires a fresh admission per parent contract section 6.",
+      "required_input": "re-admission of 0x00745BF0 body (or reviewer re-check of P07's existing extract under reviewer rules) with the specific question: map the caller's stack writes/pushes to callee slots S1..S6.",
+      "decision_value": "settles whether the runtime match byte at this callsite can be 6 (tag-6 reading) or 4 (constant-4-as-tag reading) or another byte; also settles P10-8 duality if the caller dereferences the raw return.",
+      "estimated_cost": "1 body, ~100-200 rows, few CALL sites, 1-2 candidates"
+    },
+    {
+      "id": "B2",
+      "edge": "Who populates the scanned array (the memory bounded by the caller-pushed [this+4]/[this+8] values, byte-addressed via S4) - the FAMILY-P/T VFS-record-fed merge decision point.",
+      "why_blocked": "No VAs for the writer are visible in P10's window (0 calls, 0 global data references); the writer must be found via object-field writer analysis (stores to [this+4]/[this+8] of the parent object) in a future admitted region.",
+      "required_input": "admission for a writer-search region of the parent object type (currently unknown VA); candidate discovery via saved listings' xref-like tables if present in the catalog.",
+      "decision_value": "decides whether this map is VFS/parser-fed (FAMILY-P merge) or registry/static-fed; would also reveal entry payload semantics if the writer initializes bytes 1..7.",
+      "estimated_cost": "1-2 bodies, ~100-400 rows, moderate CALL census"
+    },
+    {
+      "id": "B3",
+      "edge": "Entry payload semantics (bytes 1..7 of each 8-byte entry) - consumer side.",
+      "why_blocked": "In-window unread (P10-6); consumer is 745BF0 post-call (P07 window, needs admission) or the B2 writer.",
+      "required_input": "same as B1 (post-call portion of 745BF0) or B2.",
+      "decision_value": "settles whether entries carry id2/class/tag fields (property-record reading) or are a different structure entirely.",
+      "estimated_cost": "covered by B1/B2 admission if scoped together"
+    },
+    {
+      "id": "B4",
+      "edge": "Cursor addressing duality: is the returned EAX an absolute pointer (S4=0 at callsite) or an offset from a nonzero base S4?",
+      "why_blocked": "Both models fit the 57 rows exactly (P10-8); resolution requires caller-side S4 value or caller post-processing.",
+      "required_input": "B1 admission covers this.",
+      "decision_value": "correct pointer arithmetic for any downstream dereference claims; guards against a wrong-address dereference claim if S4!=0.",
+      "estimated_cost": "covered by B1"
+    }
+  ],
+  "backlog_untouched": [
+    {
+      "id": "BACKLOG-FRONT-A-1",
+      "item": "007B6C4B continuation",
+      "status": "DENIED by helper (FRONT_A_TIME_CAP, events 000011/000012) - stays in backlog",
+      "p10_action": "NOT attempted, NOT read, per contract explicit instruction"
+    }
+  ],
+  "candidates_for_next_package": [
+    "CAND-P10-1: re-admission of 0x00745BF0 body for key-to-slot mapping (B1+B3+B4 in one window; P07 already admitted this body once, so the parent must decide whether reviewer-rules re-check suffices)",
+    "CAND-P10-2: array-populator discovery (B2) - requires a new anchor; the exact VA is unknown at this time (no xref tool authorized in this campaign beyond saved listings)"
+  ]
+}

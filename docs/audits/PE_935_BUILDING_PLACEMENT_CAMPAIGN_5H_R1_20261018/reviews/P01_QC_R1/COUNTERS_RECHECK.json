@@ -1,0 +1,89 @@
+{
+  "run_id": "PE_935_P01_QC_R1_20261018",
+  "method": "Independent census recomputed from my own extraction of the pinned source lines (626420-626545; 995327-995436), not from worker files.",
+  "manifest_recheck": {
+    "disk_files_in_package": 15,
+    "manifest_listed_artifacts": 14,
+    "manifest_self_excluded": "MANIFEST.json (correctly not listed in its own table)",
+    "bijection": "PASS — 14 listed + 1 self = 15 disk files; every listed name exists on disk exactly once; no duplicate rows; no case-alias collisions (all names compared lowercased); no unlisted strays.",
+    "all_14_hashes_recomputed_and_match": true,
+    "contract_copy_identity": "PASS — packages\\P01_EXEC_R1\\CONTRACT.json SHA256 42ee114c6ebb64bac3b40f5745e99f7a55335c253c7a74ee5cb74685e5300d75 == CONTROL\\CONTRACTS\\P01.json SHA256 (verbatim copy verified).",
+    "pinned_source_rehash": "PASS — GHIDRA_H5_VTABLE2.txt SHA256 642cc29a01b8ad6f783e82e14da4a61fa00ba6a3ec6df98edff28ac25cc1d8db, 50780146 B, equals contract pin.",
+    "manifest_self_hash_recomputed_by_reviewer": "a1d114e590e37d60bc099224fa09b916417b1a9d225abf1c208adbfd9c02940a (7143 B) — for the parent's records; the manifest cannot contain its own hash (self-exclusion precedent)."
+  },
+  "row_counts": {
+    "region1_claimed": 126,
+    "region1_recomputed": 126,
+    "region1_line_range": "626420-626545 (VA 006b1c60-006b1dfe, end-exclusive cut at 0x006B1E00 verified exact: line 626546 = 006b1e00)",
+    "region2_claimed": 110,
+    "region2_recomputed": 110,
+    "region2_line_range": "995327-995436 (VA 007d27b0-007d291d; next body at 007d2920 = line 995437, outside window)",
+    "total_claimed": 236,
+    "total_recomputed": 236,
+    "verdict": "PASS — 236/236 rows, 100% of reserved rows read; line parity worker-extract vs source byte-identical row-for-row."
+  },
+  "body_counts": {
+    "reserved": 6,
+    "reserved_per_region": {"Adc52ad119303": 5, "Ab6ebb24f3a07": 1},
+    "actual_claimed": 3,
+    "actual_recomputed": 3,
+    "detail": "006B1C60 complete (4 rows, RET 006b1c72); 006B1C80 partial (122 of 126 region rows; extent beyond window proven by in-window jump targets 006b1f28/006b1f34/006b1e2f); 007D27B0 complete (110 rows, RET 007d291d). 4+122=126, 126+110=236 — arithmetically consistent.",
+    "c8_verification": "PASS — contract body entries 0x006B1D15/0x006B1D49/0x006B1DC6 are branch targets of 006B1C80 (JZ at source lines 626463/626483/626510), not function entries; actual bodies 3 < reserved 6; no new body opened; no retroactive authorization needed.",
+    "verdict": "PASS"
+  },
+  "call_site_counts": {
+    "reserved": 19,
+    "reserved_per_region": {"Adc52ad119303": 5, "Ab6ebb24f3a07": 14},
+    "actual_claimed": 19,
+    "actual_recomputed": 19,
+    "region1_recomputed": 5,
+    "region1_detail": "0043ba10 (L626455), 0043ca60 (L626473), [0x00a759fc] indirect (L626491), CALL EDX virtual (L626506), CALL EAX virtual (L626517) — matches worker detail exactly.",
+    "region2_recomputed": 14,
+    "region2_detail": "CALL EDX x5 (L995349, 995356, 995367, 995375, 995384), 007d1d70 (L995358), 007d16b0 (L995387), 0095db40 x5 (L995390, 995393, 995408, 995423, 995428), 0095dd6c x2 (L995406, 995421).",
+    "unique_direct_targets_recomputed": ["0x0043ba10", "0x0043ca60", "0x007d1d70", "0x007d16b0", "0x0095db40", "0x0095dd6c"],
+    "verdict": "TOTAL PASS; BREAKDOWN DEFECTS in two worker summary fields (see defects below)."
+  },
+  "candidate_counts": {
+    "reserved": 4,
+    "reserved_per_region": {"Adc52ad119303": 2, "Ab6ebb24f3a07": 2},
+    "actual_claimed": 4,
+    "actual_recomputed": 4,
+    "detail": "CAND-R1a (factory-flag registration — evaluated: class bootstrap only), CAND-R1b (type-node table — evaluated: RTTI-style nodes, no ID keys), CAND-R1c (typeinfo-walk join — evaluated: type identity only), CAND-R2a (outslot/V hazard — evaluated: explicit-store channel closed, +0x148 holder free found instead). All four carry dispositions tied to claims; none promoted as an identity bridge.",
+    "verdict": "PASS"
+  },
+  "front_a_cap_consumption_recheck": {
+    "claimed": {"bodies": "3/16", "instruction_rows": "236/1800", "call_sites": "19/64", "candidates": "4/12"},
+    "recomputed": "identical (3 bodies used, 236 rows, 19 CALL, 4 candidates against Front A totals from parent contract section 7)",
+    "verdict": "PASS"
+  },
+  "admission_chronology_recheck": {
+    "event_000002": "ADMIT Adc52ad119303 at 2026-10-18T21:14:13.42Z — region 0x006B1C60-0x006B1E00, body_entries [006B1C60, 006B1C80, 006B1D15, 006B1D49, 006B1DC6], reserve 5/126/5/2 — matches P01.json region 1 EXACTLY.",
+    "event_000003": "ADMIT Ab6ebb24f3a07 at 2026-10-18T21:14:15.19Z — region 0x007D27B0-0x007D291E, body_entries [007D27B0], reserve 1/110/14/2 — matches P01.json region 2 EXACTLY.",
+    "worker_run_started": "2026-10-18T21:14:37.929Z — AFTER both admissions; semantic-extract mtimes (21:18:12Z) after admissions; no pre-admission semantic read.",
+    "completion": "All artifacts materialized 21:14:25Z-21:21:16Z (disk mtimes), inside handoff target 21:49:25Z and wall cap 21:58:31Z.",
+    "verdict": "PASS — admissions precede execution; reserves match contract; no retroactive authorization."
+  },
+  "defects_found_in_worker_counters": [
+    {
+      "id": "QC-CNT-1",
+      "severity": "P2",
+      "where": "REPORT.md line 43 (COUNTERS section of the report)",
+      "defect": "Breakdown says region2 has '6 virtual releases/destroys + ... + 6x 0095db40 + 2x 0095dd6c' — actual: 5 virtual CALL EDX sites and 5x 0095db40 (the stated breakdown sums to 16, contradicting both the true region2 count of 14 and the report's own correct totals of 19).",
+      "impact": "None on totals, gates, or scientific conclusions; COUNTERS.json actual_detail list is correct.",
+      "correction": "Change to '5 virtual releases/destroys + 007d1d70 + 007d16b0 + 5x 0095db40 + 2x 0095dd6c'."
+    },
+    {
+      "id": "QC-CNT-2",
+      "severity": "P2",
+      "where": "COUNTERS.json call_sites.indirect_sites",
+      "defect": "'EDX x4 (region2 virtuals)' — actual EDX x5 in region 2 (007d27f7, 007d2809, 007d2829, 007d2845, 007d2860).",
+      "impact": "None on the 14/19 totals; detail list correct.",
+      "correction": "Change to 'EDX x5 (region2 virtuals)'."
+    }
+  ],
+  "cosmetic_notes_p3": [
+    "GATES.json G6 and HANDOFF.md state artifacts 'by ~21:31Z'/'~21:30Z'; actual final mtime 21:21:16Z (conservative-direction overestimate; gate results unaffected).",
+    "MANIFEST.json declares manifest_written_utc 21:21:01Z vs actual final write mtime 21:21:16Z (disclosed post-correction refresh; all content claims verified correct).",
+    "CONTRACT.json (copy) mtime 21:14:25Z precedes RUN_STARTED.json 21:14:49Z — benign input-receipt ordering; the worker's own analysis outputs start with RUN_STARTED as required."
+  ]
+}

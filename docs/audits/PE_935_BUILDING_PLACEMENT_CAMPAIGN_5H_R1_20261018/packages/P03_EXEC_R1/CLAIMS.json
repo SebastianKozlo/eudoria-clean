@@ -1,0 +1,94 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P03",
+  "question": "Semantics of lookup stub 0x007B6C30 (region 0x007B6C30-0x007B6C4B): pure property lookup vs get-or-create/register; what it does with key 0x00A85460 and receivers [elem]/[elem+0x24]; jump target VA if any",
+  "evidence_level_taxonomy": "CONFIRMED / STRONGLY_SUPPORTED / PLAUSIBLE / UNVERIFIED / REJECTED (project taxonomy; claim_resolution separate: CONDITIONAL / NOT_ESTABLISHED / REJECTED_WITH_EVIDENCE / factual)",
+  "claims": [
+    {
+      "claim_id": "P03-C1",
+      "statement": "Structure census of the admitted region: exactly 14 instruction rows (0x007b6c30-0x007b6c48, listing lines 959600-959613), single logical function with entry 0x007B6C30, 0 CALL sites in-region, 2 control-flow edges out of the window (E1: conditional JNZ to 0x007B6C4B; E2: fall-through epilogue to normal return via RET 0x4), 3 callee-saved register PUSH/POP pairs (EBX,EBP,EDI), and ZERO memory writes (the only stack writes are the 3 register saves; no store to receiver, globals, or any keyed table).",
+      "evidence_level": "CONFIRMED",
+      "evidence": "EXTRACT_007B6C30_REGION.txt rows 959600-959613 (verbatim, SHA 40516D35...7A3C); single-entry structure supported by 32 direct CALL rows in the saved listing targeting 0x007b6c30 (address-index navigation census).",
+      "premises": ["pinned saved-listing fidelity for this region", "direct CALL target implies function entry (address-index navigation, not ABI proof)"],
+      "countermodel": "mis-decompiled listing row (would falsify all row-level claims); none observable in-region; listing is the frozen pinned source, not re-derived.",
+      "claim_resolution": "factual"
+    },
+    {
+      "claim_id": "P03-C2",
+      "statement": "Calling convention (arithmetic-derived, in-region): thiscall - receiver/this arrives in ECX (MOV EBP,ECX @0x007b6c33 after saving caller EBP); exactly ONE by-value DWORD stack argument (the key), located at [ESP+0x10] after the 3 PUSHes (CMP dword ptr [ESP+0x10],EBX @0x007b6c3d), and popped by the callee via RET 0x4 @0x007b6c48. Stack-balance derivation: entry [ESP]=retaddr,[ESP+4]=key; +3 pushes => key at [ESP+0x10]. Epilogue POPs restore EDI,EBP,EBX in reverse order; XOR EAX,EAX sets NULL return before final POP/RET.",
+      "evidence_level": "CONFIRMED",
+      "evidence": "EXTRACT rows 959600-959613; per-instruction stack arithmetic (MEMORY_AND_IDENTITY.json stack map).",
+      "premises": ["x86 32-bit stack semantics", "MSVC-style thiscall for ECX-receiver + callee-pops-one-DWORD (RET 0x4) shape"],
+      "countermodel": "a second stack argument hidden below the first would break the [ESP+0x10] identification; refuted by RET 0x4 popping exactly 4 bytes (one DWORD) - the epilogue is stack-balanced against a single 4-byte argument.",
+      "claim_resolution": "factual"
+    },
+    {
+      "claim_id": "P03-C3",
+      "statement": "Null-key fast path: if key==0, the function returns EAX=0 (NULL) immediately via the in-region epilogue, with NO table access, NO create, NO receiver write. The receiver member [this+0x18] is dereferenced UNCONDITIONALLY BEFORE the key test (MOV EDI,[EBP+0x18] @0x007b6c35 precedes CMP @0x007b6c3d), so even a null-key call requires a valid receiver object (caller must pass non-null, at least 0x1C-readable receiver; consistent with P02's sentinel-guarded receivers).",
+      "evidence_level": "CONFIRMED",
+      "evidence": "EXTRACT rows 959604 (load before test), 959607-959608 (test+branch), 959609-959613 (NULL epilogue).",
+      "premises": ["instruction order in the listing = execution order on this path (single straight-line block, no other branches in-region)"],
+      "countermodel": "none in-region; the unconditional-load ordering is directly visible.",
+      "claim_resolution": "factual"
+    },
+    {
+      "claim_id": "P03-C4",
+      "statement": "Receiver member read and register pre-computation: EDI = M[this+0x18] - 1, computed register-only (SUB EDI,0x1 @0x007b6c3a operates on the register copy; NO store back to [this+0x18]). EBX=0 (XOR EBX,EBX). These plus EBP=this are carried LIVE-INTO the continuation at 0x007B6C4B on the non-null-key path.",
+      "evidence_level": "CONFIRMED (read/sub/zeroing rows) / PLAUSIBLE (continuation actually consumes EDI/EBX)",
+      "evidence": "EXTRACT rows 959603-959606; register liveness into the JNZ target.",
+      "premises": ["register semantics of MOV/XOR/SUB", "PLAUSIBLE part: a standard optimizing compiler would dead-code-eliminate an unused load+sub, so the continuation uses EDI; this is a compiler-behavior premise, not an in-region fact"],
+      "countermodel": "continuation ignores EDI/EBX (then load+sub would be dead code - unlikely under DCE but not in-region refutable); no claim below depends on the PLAUSIBLE part being true except the hedged interpretation of [this+0x18] as a continuation-consumed count.",
+      "claim_resolution": "factual (rows) + CONDITIONAL (continuation-use inference)"
+    },
+    {
+      "claim_id": "P03-C5",
+      "statement": "Derived per-callsite dispatch: the two P02 leaf-action callsites pass the compile-time constant key 0x00A85460 (cited P02: PUSH 0x00A85460; MOV ECX,EBX; CALL 0x007b6c30, and the [elem+0x24] fallback form). Since 0x00A85460 != 0, the JNZ @0x007b6c41 is ALWAYS TAKEN at those callsites: both lookup calls ALWAYS enter the continuation at 0x007B6C4B. The in-region null-key fast path is DEAD for the P02 leaf action; the entire semantic outcome (lookup result, and any binding write) is produced by the unadmitted continuation.",
+      "evidence_level": "CONFIRMED",
+      "evidence": "EXTRACT rows 959607-959608 (CMP/JNZ); key constant cited from P02 REPORT (P02-C4: key=0x00A85460=0x00A85454+0xC, arithmetic CONFIRMED in P02).",
+      "premises": ["key value at those callsites is the pushed constant (P02 admitted-region fact, cited)", "0x00A85460 is non-zero (arithmetic)"],
+      "countermodel": "key somehow null at those callsites - refuted by the constant PUSH cited from P02's admitted region.",
+      "claim_resolution": "factual (for the cited P02 callsites)"
+    },
+    {
+      "claim_id": "P03-C6",
+      "statement": "MAIN CLAIM (scoped answer): (a) IN-REGION, 0x007B6C30 is a pure GUARD + IN-FUNCTION DISPATCH, not a registrar: zero memory writes, key passed by value, null key returns NULL - the 14 admitted rows CANNOT write a binding through any channel (no store instruction exists other than register saves). (b) FULL-FUNCTION semantics (pure property lookup vs get-or-create/register) are NOT_ESTABLISHED from the admitted region: the decision lives entirely in the same function's continuation at 0x007B6C4B (jump/fall-through target VA = 0x007B6C4B; single logical function, not a separate callee). A get-or-create/register continuation would write the binding (entry insert + possibly count update at M[this+0x18]) - this countermodel remains live and is exactly P02-B1 unresolved.",
+      "evidence_level": "CONFIRMED (in-region guard characterization, P03-C1..C5) / UNVERIFIED (full-function lookup-vs-register semantics)",
+      "evidence": "full in-region store census (P03-C1); dispatch analysis (P03-C3, P03-C5); P02 context citation for the countermodel motivation.",
+      "premises": ["absence of store instructions in the admitted 14 rows is provable for the region (explicit-store level)", "premises preserved: no direct caller != exclusively virtual; vtable-derived key != receiver identity; explicit store != final value after opaque continuation"],
+      "countermodel": "CAND-P3b (get-or-create/register through the continuation) is NOT refuted by in-region facts; CAND-P3a (pure lookup) is NOT confirmed beyond the entry guard. Discriminator (out-of-region): continuation's store census on the lookup-MISS path.",
+      "claim_resolution": "factual for (a); NOT_ESTABLISHED for (b)"
+    },
+    {
+      "claim_id": "P03-C7",
+      "statement": "Candidate interpretations (contract reserve 2, actual 2): CAND-P3a: 0x007B6C30 (full function) = pure keyed property/entry LOOKUP - continuation searches receiver-owned entries sized/counted by M[this+0x18], miss returns NULL, no writes. CAND-P3b: 0x007B6C30 (full function) = get-or-create/REGISTER - continuation inserts an entry on miss, writing a binding through the callee (possibly updating count M[this+0x18]); under CAND-P3b the P02 leaf action itself WRITES the binding via this call.",
+      "evidence_level": "CAND-P3a: STRONGLY_SUPPORTED for the in-region entry-guard shape, PLAUSIBLE for full-function semantics. CAND-P3b: UNVERIFIED, not excluded by in-region facts.",
+      "evidence": "P03-C1..C5 for the guard shape; neither candidate decidable from the admitted region.",
+      "premises": ["both candidates must remain live until the continuation is admitted"],
+      "countermodel": "each candidate is the other's countermodel; resolution requires new admission at 0x007B6C4B (parent decision).",
+      "claim_resolution": "CONDITIONAL (both)"
+    },
+    {
+      "claim_id": "P03-C8",
+      "statement": "Hedged pattern note: M[this+0x18] is PLAUSIBLY an entry COUNT (the -1 pre-computation matches a last-index/capacity idiom), implying an adjacent data-pointer member (typically count-4, e.g. at +0x14) - a {data,count}-pair layout shape consistent with the NiTArray-shaped layout family documented in parent contract section 5 for the walker children array (data ptr and count 4 bytes apart). This is a LAYOUT-SHAPE analogy only, NOT a class identity claim; the receiver's class is unknown.",
+      "evidence_level": "PLAUSIBLE",
+      "evidence": "EXTRACT rows 959604/959606 (load [this+0x18], SUB 1); parent contract section 5 layout note (cited).",
+      "premises": ["idiom reading of count-1", "4-byte-apart data/count pair is a common container shape in this codebase (cited parent note)"],
+      "countermodel": "M[this+0x18] could be a hash, a flags word, a size in bytes, or an unrelated member; -1 could be a bias/offset rather than last-index. No in-region discrimination.",
+      "claim_resolution": "CONDITIONAL"
+    },
+    {
+      "claim_id": "P03-C9",
+      "statement": "Navigation census (address-index, no bodies opened): the saved listing contains 32 direct CALL rows referencing 0x007b6c30, including the two P02 leaf-action callsites (006b1e36, 006b1e49). This establishes the address is a widely shared direct-call helper entry in the saved corpus. It does NOT establish receiver identity at any callsite, the ABI beyond the in-region convention, or class membership.",
+      "evidence_level": "CONFIRMED (as a count of matching address-index rows) / no semantic weight beyond navigation",
+      "evidence": "Grep address search output (pattern 007b6c3|007b6c4, 49 matching rows total: 32 CALL rows + 14 in-region rows + 3 boundary/continuation rows).",
+      "premises": ["parent contract section 6: index/address search is navigation, not proof of ABI, class or instructions"],
+      "countermodel": "n/a (navigation-level fact only).",
+      "claim_resolution": "factual (navigation census)"
+    }
+  ],
+  "premises_preserved_check": {
+    "no_direct_caller != exclusively virtual": "preserved - P03 makes no virtual-dispatch claim; the stub is entered by direct CALLs (P03-C9) and P03 does not claim the receiver is or is not of the vtable class",
+    "vtable match != runtime receiver identity": "preserved - key 0x00A85460 (=0x00A85454+0xC, P02-C4 cited) is treated as a by-value constant; no receiver identity inferred from it (P03-C6/C7 hedges)",
+    "explicit store != final value after opaque calls": "preserved - in-region there are no stores at all; the continuation is explicitly opaque and no final-value claim is made (P03-C6b)"
+  }
+}

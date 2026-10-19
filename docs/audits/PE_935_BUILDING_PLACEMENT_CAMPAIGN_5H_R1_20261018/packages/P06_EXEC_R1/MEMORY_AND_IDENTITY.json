@@ -1,0 +1,51 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P06",
+  "purpose": "memory/write-set and identity ledger for the two admitted windows; separates what is proven in-window from what remains NOT_ESTABLISHED",
+  "memory_analysis": {
+    "0x008BD720": {
+      "writes_in_window": "NONE. The body writes no memory at all (LEA computes a pointer into EAX; RET returns).",
+      "reads_in_window": "ECX only (register input). No memory read.",
+      "write_set_qualification": "empty; no aliasing question exists for this body",
+      "return_value": "EAX = ECX + 0x18 (interior pointer into the callback argument object)",
+      "identity_of_arg": "NOT_ESTABLISHED (bridge standing, cited: the {0x66,A} request/scheduler-side object; this package did not re-derive it)",
+      "identity_of_plus18_subobject": "NOT_ESTABLISHED - the +0x18 target of the returned pointer was NOT read (outside window, no admission)",
+      "lifetime_notes": "the body is side-effect-free and allocates nothing; any lifetime question belongs to its callers (unread)"
+    },
+    "0x008BD730": {
+      "note": "UNFORESEEN body (INCIDENT-P06-I1); no claims built on it; raw content in EXTRACT_SUBREGION_A row 3-4: reads byte [ECX+0x64], writes nothing, returns AL.",
+      "disposition": "incident-only record; per parent CONTRACT section 6 not used further"
+    },
+    "0x00848EA0": {
+      "writes_in_window": "FS:[0x0] (SEH frame install) and ESP-relative frame locals ONLY: float3 out-buffers (zero stores + float-const stores), trylevel local [ESP+0x78] (0/-1 transitions), argument slots, the 12-byte result local ([ESP+0x2C]-region stores at 1145884-1145889). NO heap object field, NO global variable is written in-window.",
+      "reads_in_window": "[ESP+0x80] (first stack argument = slot object), [0x00A7B25C] (float const, twice), [0x00B9D8D0] (MSVC security cookie), FS:[0x0] (SEH chain, twice), [EAX]/[EAX+0x4]/[EAX+0x8] (the 0x006C1F90 result triple). NO slot-object field is read directly in-window (all field access is delegated to the three 0x745xxx callees and the out-of-window flag-2 path).",
+      "alias_qualification": "in-window stores are all ESP-relative; callee-side aliasing (any of the 11 callees may read/write anything) is UNRESOLVED and is the honest boundary of the write-set claim. The claim 'no heap write in-window' is proven only for the window's own instructions.",
+      "se_handler": "0x00A28300 (imm32 in prologue; NOT read; recorded VA). __try scope (trylevel 0) wraps the 0x00844660 -> 0x0043A550 -> 0x0072F580 lookup chain.",
+      "identity_of_slot_object_arg1": "NOT_ESTABLISHED. Provenance chain: constructed/passed by caller at 0x004E55F7 (the only in-listing direct caller; NOT read). Class NOT_ESTABLISHED (no vtable/RTTI/ctor in-window).",
+      "identity_of_EBP_lookup_result": "NOT_ESTABLISHED in-window. Bridge standing (cited): the keyed lookup by id2; the bridge's NiControllerSequence correction (their R-1) concerned a DIFFERENT object and is NOT attached to EBP here.",
+      "identity_of_0x745BF0_return": "NOT_ESTABLISHED in-window: a non-null pointer that feeds the lookup chain; the bridge's class-20006 property tag 6 hypothesis lives at/behind this callee (UNVERIFIED here).",
+      "world_instance_identity": "NOT_ESTABLISHED - unchanged from bridge standing; this window contributes NO world-instance evidence (definition-source registry is NOT promoted to instance-source)"
+    }
+  },
+  "premise_register": {
+    "preserved": [
+      "identical parameter names or lookup shapes do not prove common semantics (applied in CLAIM-P06-C4 countermodel)",
+      "definition-source registry not promoted to instance-source (applied in CLAIM-P06-C6)",
+      "no direct caller != exclusively virtual (applied in CLAIM-P06-C2: 008BD720 has 22 direct callers + 3 address-taken uses; 00848EA0 has 1 direct caller and 0 in-listing address-taken uses)"
+    ],
+    "inherited_standing_not_re_derived": [
+      "record 4508 -> parse -> RB-tree registry -> keyed lookup -> A-read -> request pair {0x66=MODEL, A=296445} -> queue/scheduler",
+      "0x008BD720 pinned as the {0x66,A} request's callback (imm32 pin, bridge byte evidence)",
+      "flag-2 path holds the per-slot {u16@+0xC, float@+0x10} stores; flag-1 path holds the id2->lookup->0x0072FE30->0x006C1F90 lerp->slot+0x00 chain (bridge C3 + AMEND-4/5)",
+      "R08 loops over 3 slots; store to slot+0x00 (bridge full-body decompile; outside this window)",
+      "templates.vfs consumed as DEFINITION registry only within censused machinery; only file reader = registry loader, census 1 caller"
+    ],
+    "new_this_run": [
+      "0x008BD720 has no dispatch and no memory effects; it returns &arg+0x18",
+      "0x00848EA0 flag-1 branch structure confirmed at instruction level; flag-2 path located at >= 0x00848FEC (outside window)",
+      "0x00848EA0 in-window interface of the slot object: {0x745540(bool,1), 0x745BF0(ptr), 0x745690(float,0)}, direct calls, no in-window field reads",
+      "0x00848EA0 in-window sources contain no VFS/file/record channel (scoped negative)"
+    ]
+  },
+  "placement_xyz_status": "PLACEMENT_XYZ_RECOVERED=NO - unchanged; no coordinate value, instance identity, or transform provenance was recovered in this package"
+}

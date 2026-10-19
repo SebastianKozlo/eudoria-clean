@@ -1,0 +1,83 @@
+{
+  "run_id": "P06_QC_R1_20261018",
+  "reviewer_role": "pe-master-auditor (fresh child session, dispatched directly by PE-MASTER, NO_NESTED_TASKS, no delegation)",
+  "target_pack": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\packages\\P06_EXEC_R1",
+  "pinned_source": {
+    "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIGHT_AGGREGATE_20260905_160000\\GHIDRA_H5_VTABLE2.txt",
+    "sha256_recomputed_by_reviewer": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+    "size_bytes": 50780146,
+    "line_count": 1743929,
+    "use_rule_honored": "semantic read confined to the two admitted subregions; address searches outside = navigation only"
+  },
+  "files_read_to_eof": [
+    "REPORT.md", "CLAIMS.json", "COUNTERS.json", "GATES.json", "HANDOFF.md", "SOURCE_PINS.json",
+    "MEMORY_AND_IDENTITY.json", "BARRIER_BACKLOG.json", "CONTRACT.json", "RUN_STARTED.json",
+    "EXTRACT_META.json", "artifact_index.csv", "MANIFEST.json", "tools/extract_p06_subregions.py",
+    "EXTRACT_SUBREGION_A_008BD720_008BD740.txt", "EXTRACT_SUBREGION_B_00848EA0_00848FC4.txt"
+  ],
+  "parent_control_read": [
+    "CONTROL\\EVENTS\\000008_ADMIT.json",
+    "AUTHORING CONTRACT.md (D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_5H_AUTHORING_R1_20261018\\CONTRACT.md) sections 4/6/12"
+  ],
+  "method": [
+    "M1: independent re-hash of all 15 manifest entries (script; SHA256 + size)",
+    "M2: single-pass scan of the pinned listing capturing (a) the 92 claimed source lines, (b) every listing row whose VA falls in the two admitted windows, (c) every row matching '8bd720'/'848ea0' (navigation)",
+    "M3: byte-level line parity extract-vs-source for all 92 rows",
+    "M4: manual instruction-level VA-delta and encoding verification of all 92 rows",
+    "M5: manual semantics rederivation of window A (body of 0x008BD720) and window B (flag-1 chain of 0x00848EA0) from the pinned listing",
+    "M6: call census + navigation classification (22 CALL sites / 3 imm32 of 008BD720; 1 CALL site of 00848EA0)",
+    "M7: chronology check vs CONTROL/EVENTS/000008_ADMIT.json and file mtimes",
+    "M8: generator-lineage check: tools/extract_p06_subregions.py read to EOF (read-only, pin-verified, VA-filtered)"
+  ],
+  "window_A_rederivation": {
+    "captured_source_lines": "1282626-1282629",
+    "line_parity": "4/4 rows byte-identical to pinned source",
+    "completeness": "reviewer window scan found exactly 4 listing rows with VA in [0x008BD720,0x008BD740); extract contains exactly these 4; nothing else is listed in-window (0x008BD724-0x008BD72F has no listing rows = inter-body padding)",
+    "va_delta_encoding_check": "008bd720 LEA EAX,[ECX+0x18] = 8D 41 18 (3B) -> 008bd723 RET = C3 (1B) -> 008bd724; 008bd730 MOV AL,[ECX+0x64] = 8A 41 64 (3B) -> 008bd733 RET (1B) -> 008bd734; all deltas fit standard x86 encodings; body of 008bd720 ends at 008bd724 inside the window",
+    "claim_C1_rederivation": "CONFIRMED: body of 0x008BD720 is exactly {LEA EAX,[ECX+0x18]; RET}; no JMP, no CALL, no memory access; register-pure; returns ECX+0x18. The 'dispatches to a target VA' premise has no in-window support and the body structurally cannot dispatch - REJECTED_WITH_EVIDENCE (worker claim upheld)",
+    "unforeseen_body_008bd730": "present in-window at source lines 1282628-1282629 (MOV AL,[ECX+0x64]; RET); dependency check: NONE of the 7 claims (CLAIM-P06-C1..C7) derives any conclusion from 0x008BD730's semantics; its only occurrences in the pack are disclosure-level (incident record, extract rows, navigation facts) - worker claim 'no claims built on it' UPHELD"
+  },
+  "window_B_rederivation": {
+    "captured_source_lines": "1145803-1145890",
+    "line_parity": "88/88 rows byte-identical to pinned source",
+    "completeness": "reviewer window scan found exactly 88 listing rows with VA in [0x00848EA0,0x00848FC4); extract contains exactly these 88; zero missing, zero extra",
+    "va_delta_encoding_check": "all 88 consecutive-VA deltas fit standard x86 encodings; decisive cases independently recomputed: MOV EAX,FS:[0x0] = 64 A1 + disp32 (6B); MOV FS:[0x0],EAX = 64 A3 + disp32 moffs form (6B) - the ONLY encoding that makes the 00848ec1->00848ec7 delta consistent (worker's 6.3 control upheld); JZ @00848edf (target 00848fec, beyond rel8) = near 0F 84 (6B) -> 00848ee5 consistent; JZ @00848eff (target 00848fc6) = near (6B) -> 00848f05 consistent; JZ @00848f47 (target 00848fc4, rel8=0x7B) = short 74 (2B) -> 00848f49 consistent; FSTP [ESP] = D9 1C 24 (3B) -> 00848f97 consistent; MOV [ESP+0x78],imm32 = C7 44 24 78 + imm32 (8B) -> 00848f19 and 00848f39 consistent",
+    "prologue_argument_derivation": "[ESP+0x80] = first stack argument: 3 SEH pushes (12) + SUB ESP,0x5C (92) + 5 pushes EBX/EBP/ESI/EDI/cookie (20) + return address (4) = 128 = 0x80 - CONFIRMED (claim C4)",
+    "flag_query_rederivation": "PUSH 0x1; MOV ECX,EDI; CALL 0x00745540; TEST AL,AL; MOV ECX,EDI; JZ 0x00848FEC - CONFIRMED verbatim (claim C3); JZ target outside window (window end 0x00848FC4 < 0x00848FEC)",
+    "slot_interface_rederivation": "0x00745540(slot,1)->bool AL; 0x00745BF0(slot)->ptr EAX null-checked (ECX=EDI held from 00848edd across the FLD/PUSH ESI/FST/FSTP group); 0x00745690(slot,0)->x87 float consumed via PUSH ECX; FSTP [ESP] - CONFIRMED (claim C4); all three are direct (static) CALLs; no CALL [reg] in window",
+    "memory_read_census_rederivation": "[ESP+0x80] (arg), [0x00A7B25C] (x2), [0x00B9D8D0] (cookie), FS:[0x0] (x2), [EAX]/[EAX+0x4]/[EAX+0x8] (0x006C1F90 result) - NO other in-window memory read; no slot-object field read; no vtable dereference of the slot object - CONFIRMED (claim C4 census exact)",
+    "zero_group_correction": {
+      "worker_statement": "REPORT 4.1 row 9 / CLAIM-P06-C5: 'FLDZ + 7 zero-stores' and 'three 12-byte float3 frame buffers, zero-initialized in-window'",
+      "reviewer_row_census": "6 FST/FSTP stores in the FLDZ group (00848f4f, 00848f54, 00848f5c, 00848f61, 00848f69, 00848f70) - the '7' is wrong (FLDZ + 6 stores = 7 instructions total, miscounted as stores)",
+      "buffer_arithmetic": "6 dwords = 24 bytes = exactly TWO 12-byte buffers (frame [Q+0x28..0x33] and [Q+0x34..0x3F] under the thiscall callee-clean model); the THIRD out-arg pointer (LEA EDX,[ESP+0x24] @00848f65 -> Q+0x1C) resolves to the region the FIRST const-vec group initialized to (c,c,c) ([Q+0x1C],[Q+0x20],[Q+0x24] written at 00848eec/00848ef0/00848ef4 after PUSH ESI); 6 stores < 9 dwords, so 'three zero-initialized' is internally impossible - CORRECTION REQUIRED (two zeroed + one (c,c,c)-filled in-window; under a non-callee-clean model the third would be partially unwritten)",
+      "materiality": "LOW-MEDIUM: out-param idiom and all downstream structure claims unaffected (callee overwrites the buffers); no other claim depends on the store count"
+    },
+    "produce_chain_rederivation": "0x006C1F90(3 pointers + 1 float) - the 4 caller-pushed dwords (PUSH EAX/PUSH ECX/PUSH EDX + PUSH ECX;FSTP [ESP] float slot) are cleaned by ADD ESP,0x10 @00848fbb - CONFIRMED; result EAX -> 12-byte triple copied to frame locals @00848fab-00848fbe; JMP 0x00848FC6 (epilogue OUTSIDE window) - CONFIRMED (claim C5 in-window part)",
+    "merge_negative_rederivation": "in-window data-source census contains no file/registry/record reader, no VFS handle, no record-array dereference; the only in-listing reference to 0x00848EA0 is the single CALL site 004E55F7 (not read) - scoped negative CONFIRMED at window scope (claim C6); gap edges (0x00745BF0 property provenance, class-20006 tag-6 writers, caller 004E55F7) correctly recorded as OPEN"
+  },
+  "navigation_recheck": {
+    "pattern_8bd720": "26 matching rows = 1 body definition (source line 1282626) + 22 direct CALL sites + 3 imm32 loads + 0 other; call-site VA list IDENTICAL to REPORT section 9 (0054f7bb, 0055000f, 00556fad, 00556fc5, 00557030, 00557912, 0055792a, 0055794e, 005cb73a, 006b1e5a, 006b6db9, 006c88c6, 006c88d5, 006d3bae, 006d3bc8, 006d3bd7, 006d3cd6, 006d3cfe, 006d3d26, 006d3d3a, 006d4441, 006e68a8); imm32 sites: 006b6d05 (MOV EBX,0x8bd720), 006c3fb0 (MOV EBX,0x8bd720), 006d44e8 (MOV EDI,0x8bd720) - worker navigation claims CONFIRMED by independent scan",
+    "pattern_848ea0": "2 matching rows = 1 body definition (source line 1145803) + 1 direct CALL site 004e55f7; 0 imm32 - CONFIRMED",
+    "no_reading_violation": "all 22+3+1 navigation rows were recorded but the reviewer performed NO semantic read of any caller/callee/registration region; window reads confined to the 92 admitted rows"
+  },
+  "generator_lineage_check": {
+    "tool": "tools/extract_p06_subregions.py",
+    "finding": "read to EOF (94 lines): verifies source SHA256 before any extraction (exit 2 PIN_MISMATCH on mismatch), streams the pinned file read-only, parses VA from chars 0-8 with the 9th char required to be a space (prevents mid-text address matches), emits only rows with VA in [lo,hi) of the two regions, writes header+rows+trailer with line numbers; no game/payload access; no out-of-range emission; lineage clean - no circularity"
+  },
+  "manifest_recheck": {
+    "entries": 15,
+    "sha256_match": "15/15",
+    "bytes_match": "15/15",
+    "bijection": "HOLDS: every disk file maps to exactly one manifest entry and vice versa; the only on-disk file absent from the manifest is MANIFEST.json itself, which is self-excluded BY DESIGN (contract section 12 'manifest LAST self-excluded') - not a defect"
+  },
+  "chronology_recheck": {
+    "admit": "CONTROL/EVENTS/000008_ADMIT.json: seq 8, 2026-10-18T22:20:52.721315Z, admission A912213023006, reserve bodies 2 / instructions 98 / edges 14 / candidates 4",
+    "observed_order_utc": "ADMIT 22:20:52.7 -> CONTRACT.json 22:21:04 (now_utc field matches) -> RUN_STARTED 22:21:29.355 (mtime 22:21:29) -> extractor 22:21:54 -> extracts 22:21:56 -> MEMORY 22:26:19 -> CLAIMS 22:26:11 -> BARRIER_BACKLOG 22:26:39 -> correction pass (COUNTERS 22:28:01, GATES 22:28:03, REPORT 22:28:04, HANDOFF 22:28:05, SOURCE_PINS 22:28:06) -> artifact_index 22:28:12 -> MANIFEST 22:28:12.493 LAST",
+    "verdict": "strictly ordered; admission precedes every pack action; no pre-admission extraction; RUN_STARTED precedes extraction; manifest is the final write",
+    "event_region_note": "the ADMIT event records a combined VA span [0x00848EA0,0x008BD740) while the question/CONTRACT define the two narrow subregions; the worker applied the NARROW interpretation - conservative and compliant; not a violation (observation only)",
+    "timestamp_disclosures": {
+      "honest_bound_staleness": "COUNTERS.json and GATES.json state 'this file's final edit occurred between real-clock readings 22:27:38.348Z and 22:27:52.985Z', but the corrected files' mtimes are 22:28:01Z / 22:28:03Z - the sentence is true for the PRE-correction content and stale for the corrected files (the correction pass that embedded the sentence happened after the upper bound). REPORT 6.9 and the MANIFEST note disclose the correction pass itself, so the provenance chain remains honest; wording correction recommended",
+      "gates_g3_time": "GATES G3 says 'extraction began 22:23Z' but extract mtimes are 22:21:54-56Z; gate OUTCOME unaffected (RUN_STARTED 22:21:29Z still precedes extraction); figure inaccurate"
+    }
+  }
+}

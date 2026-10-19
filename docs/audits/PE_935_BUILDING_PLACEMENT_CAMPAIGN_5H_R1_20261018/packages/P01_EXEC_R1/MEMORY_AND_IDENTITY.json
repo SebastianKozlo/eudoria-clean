@@ -1,0 +1,32 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P01",
+  "identity_notes": {
+    "worker_role": "pe-reconstruction (executor child of PE-MASTER; no delegation used, NO_NESTED_TASKS respected)",
+    "model": "nask-glm/glm-5-3 (per environment; session identity not separately pinned by tooling)",
+    "session_scope": "Bounded package P01, Front A priorities A1+A2+A2b only",
+    "memory_discipline": [
+      "All semantic reads restricted to the two admitted regions of GHIDRA_H5_VTABLE2.txt (Adc52ad119303, Ab6ebb24f3a07); address greps used only for window boundary location (navigation).",
+      "Context documents read for premises and cited, not re-analyzed.",
+      "No EXE/payload/runtime/Ghidra/old-script/frozen-root access. No config/skill/repo edits. No new regions read; the un-admitted tail of 006B1C80 was NOT read (only in-window jump-target addresses recorded)."
+    ],
+    "identity_handling": [
+      "Preserved: V_first @006B201A vs V_reload @006B206C vs Q0 (ctor-stored) vs Q1 (from actualS) vs VT (at disposal) kept distinct throughout; no equality assumed across opaque calls.",
+      "Preserved: no direct caller != exclusively virtual; vtable match != runtime receiver identity; explicit CFG store != final memory value after opaque calls; heap/stack disjointness treated as premise, not runtime fact.",
+      "New identity facts (scoped): 006B1C60 installs class vtable 00A85454 + flag 0xBA7220=1 (class identity only); 006B1C80 traverses type-tagged node graphs via vtable+8 typeinfo virtuals and static nodes 0xBA7218/0xBA7210 with children at +CC/+D4; 007D27B0 installs/possesses NiStream vtable 00A8EC24 and frees the +0x148 holder.",
+      "Not claimed: actualS identity, 296445 binding, unique-root status, factory receiver binding, any world transform."
+    ]
+  },
+  "premise_ledger_changes": [
+    {
+      "premise": "006B1C80's [EDI]=EAX store origin unknown (postaudit open point)",
+      "change": "RESOLVED to local-deque cursor [ESP+0x2c]; store targets the walker's own worklist storage; explicit-store channel to outslot/V closed at STRONGLY_SUPPORTED with premise-level countermodels enumerated.",
+      "claim_refs": ["P01-C4"]
+    },
+    {
+      "premise": "V-holder liveness after 0082E750",
+      "change": "REFINED: holder at obj+0x148 is FREED by 007D27B0; *out/Q survival depends on the retain (refcount), not holder liveness. Any premise assuming holder validity after teardown must be dropped.",
+      "claim_refs": ["P01-C7"]
+    }
+  ]
+}

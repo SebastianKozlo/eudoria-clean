@@ -1,0 +1,29 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P03",
+  "backlog": [
+    {
+      "item_id": "P03-B1",
+      "title": "Continuation 0x007B6C4B of function 0x007B6C30: lookup-vs-get-or-create/register decision point",
+      "status": "OPEN - the precise remaining edge of P03 (sharpens P02-B1)",
+      "required_evidence": "(a) store census of the continuation, especially on the lookup-MISS path: insert/create (binding write, possible count update M[this+0x18]) vs return NULL; (b) structure the key is matched against (entry array shape, whether key is compared as pointer/integer/hash); (c) any further jump/call to yet another implementation (report targets, do not read without admission); (d) exit paths and return-value provenance.",
+      "required_input": "new parent admission for region starting at 0x007B6C4B in GHIDRA_H5_VTABLE2.txt (SHA 642CC29A...C1D8DB); SAME logical body as 0x007B6C30 - per parent contract section 6 do not double-count the body; count added rows/CALL per actual.",
+      "estimated_cost": "unknown from the admitted window (continuation size not visible in-region; the 3 incidentally-exposed navigation rows do not bound it and were not analyzed). Parent should reserve conservatively before opening.",
+      "expected_gain": "closes P02-B1/P03-B1: decides whether the P02 leaf action's constant-key call can WRITE a binding (CAND-P3b) or is read-only class-keyed selection (CAND-P3a); directly conditions any resource/instance-identity inference built on the 006B1C80 walker.",
+      "falsifier": "a store to the matched table / count member on the miss path falsifies CAND-P3a (pure lookup) for this function; absence of any miss-path store in the whole continuation falsifies CAND-P3b."
+    },
+    {
+      "item_id": "P02-B1",
+      "title": "007b6c30 lookup/registration semantics (carried from P02)",
+      "status": "PARTIALLY RESOLVED by P03: the admitted 14-row entry guard CANNOT itself write a binding (zero memory writes, key by value, NULL on null key - P03-C6a); both P02 callsites always dispatch to the continuation (P03-C5). Remaining open part = continuation semantics = P03-B1.",
+      "resolution_note": "P02's 'exact missing link (a)' is now precisely localized to 0x007B6C4B+."
+    },
+    {
+      "item_id": "P02-B2",
+      "title": "Origin/identity of receiver slot M[steady+0x18] for 007b4170 in the 006B1C80 walker (carried from P02, unchanged)",
+      "status": "OPEN - out of P03 scope; candidate channels per P02: 0043ca60 byref @006B1E0B or P01-window init (un-itemized)",
+      "required_input": "P01/P02 region re-admission or a purpose-scoped new admission by parent decision; NOT pursued in P03 (scope discipline)."
+    }
+  ],
+  "front_A_note": "After P03 Front A stands at 6/16 bodies, 386/1800 rows, 42/64 CALL, 8/12 candidates; time-box per parent contract section 7 governs; P03-B1 is the natural single next edge for Front A if the parent admits 0x007B6C4B+."
+}

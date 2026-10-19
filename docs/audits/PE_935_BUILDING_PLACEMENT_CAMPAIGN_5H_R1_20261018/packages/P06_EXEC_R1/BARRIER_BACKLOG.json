@@ -1,0 +1,56 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P06",
+  "front": "C",
+  "scope": "barriers hit by this package and the exact remaining edges with the input each needs (for parent admission planning); FIRST_MISSING_EDGE per front is the parent's adjudication",
+  "merge_question_status": "OPEN - this package closed the two smallest designed discriminator parts and narrowed the merge gap to three concrete edges",
+  "barriers": [
+    {
+      "id": "BARRIER-P06-1",
+      "name": "type-0x66 provider chain continuation (bridge HANDOFF experiment 1)",
+      "state_after_p06": "0x008BD720 is decoded: it is NOT a dispatch - it is a side-effect-free leaf returning &arg+0x18. The chain cannot continue through a callee (it has none).",
+      "exact_gap": "WHO consumes the returned &arg+0x18 pointer, and which registration site belongs to the {0x66,A} scheduler queue. Candidate anchors (navigation only, unread): the 3 imm32 load sites 0x006B6D05, 0x006C3FB0, 0x006D44E8 (registration-shaped: MOV EBX/EDI,0x8bd720) and the 22 direct CALL sites.",
+      "input_needed": "admission of the registration-site regions (smallest: the three ~0x20-byte windows around 006B6D05 / 006C3FB0 / 006D44E8) to identify the queue/scheduler object that stores 0x008BD720 as its callback, then the consumer of the +0x18 pointer",
+      "estimated_cost": "3 small windows, ~60-120 rows total; or 1 window if the {0x66,A} imm32 site is already known from the bridge byte-pin (C10 byte pins may already localize it - check parent's bridge C10 artifacts first)",
+      "falsifier": "if none of the three imm32 sites stores 0x008BD720 into a queue object, the callback registration lives in a data section or a site outside the listing's code coverage - the chain continuation then needs a different listing artifact"
+    },
+    {
+      "id": "BARRIER-P06-2",
+      "name": "id2/property provenance of the slot consumer (bridge HANDOFF experiment 2, part 1)",
+      "state_after_p06": "0x00848EA0's in-window entry to the id2/property channel is exactly the null-checked return of 0x00745BF0(slot); the class-20006 property tag 6 hypothesis is UNVERIFIED (the read is inside that callee).",
+      "exact_gap": "does 0x00745BF0 (and its callees) read a class-20006 tag-6 property, and where does that property's value come from at runtime?",
+      "input_needed": "admission of 0x00745BF0 body (size unknown - needs a REQUEST with conservative reservation) and, depending on result, the class-20006 property-tag-6 WRITERS census (bridge proposal 2)",
+      "estimated_cost": "1 body for the getter; writer-side census is larger (the bridge estimated it as 'bigger, only worth it if 848EA0 shows a file-fed channel' - note: P06 did NOT find a file-fed channel in-window, so per the contract's cost-benefit the writer census is worth it ONLY if the getter shows record-backed provenance)",
+      "falsifier": "if 0x00745BF0 does not read a property tagged 6 of class 20006, the bridge hypothesis is wrong at this edge and the id2 enters some other way (e.g., a plain field of the slot object)"
+    },
+    {
+      "id": "BARRIER-P06-3",
+      "name": "slot-object provenance (who constructs arg1 and fills its slots)",
+      "state_after_p06": "arg1 = first stack argument; the only in-listing direct caller is 0x004E55F7 (unread, navigation only); 0x00848EA0 is not address-taken in the instruction listing.",
+      "exact_gap": "where the slot object is constructed and what feeds it (message channel? runtime attributes? hardcoded? VFS record?)",
+      "input_needed": "admission of the caller region around 0x004E55F7 (one window covering the calling function body)",
+      "estimated_cost": "1 body; the bridge's C2 census (cited) may already describe this caller - check parent's C2_CALLER_CENSUS.json before admitting",
+      "falsifier": "if the caller passes a locally-constructed object whose data originates from the message channel (bridge standing for drivers), the FAMILY-P/T merge stays negative for this path"
+    },
+    {
+      "id": "BARRIER-P06-4",
+      "name": "flag-2 path and epilogue of 0x00848EA0 (loop, per-slot stores, final return)",
+      "state_after_p06": "located at >= 0x00848FEC (flag-2 machinery incl. per-slot {u16@+0xC, float@+0x10} stores per bridge standing), 0x00848FC4 and 0x00848FC6 (epilogue entries), 0x00A28300 (SEH handler); none read.",
+      "exact_gap": "the loop over 3 slots, the store to slot+0x00 (bridge), and the function's return value construction",
+      "input_needed": "admission of 0x00848FC4-0x00849040-ish (end unknown until opened; request with conservative reservation covering the epilogue + flag-2 block)",
+      "estimated_cost": "1 window, est. 60-150 rows",
+      "falsifier": "if the epilogue merely returns without storing the computed 12-byte triple anywhere persistent, the 'slot-position' label (bridge standing) weakens to 'computed then discarded' for this call shape"
+    }
+  ],
+  "negative_controls_recorded": [
+    "CONTROL-P06-N1 (performed): scoped negative on in-window VFS reach - exhaustive CALL + dereference census of the admitted window shows no file/registry/record channel; recorded as CLAIM-P06-C6 with explicit scope limits",
+    "CONTROL-P06-N2 (performed): the dispatch premise of question (a) was treated as falsifiable and falsified in-window (no JMP/CALL exists in the body)",
+    "CONTROL-P06-N3 (performed): flag-2-fields-in-window hypothesis rejected by window arithmetic (JZ target 0x00848FEC > window end)"
+  ],
+  "standing_unchanged": [
+    "PLACEMENT_XYZ_RECOVERED=NO",
+    "world-instance identity NOT_ESTABLISHED",
+    "CURSOR_SOURCE_MEDIUM=UNKNOWN (untouched by this package)",
+    "templates.vfs = DEFINITION registry only (within censused machinery)"
+  ]
+}

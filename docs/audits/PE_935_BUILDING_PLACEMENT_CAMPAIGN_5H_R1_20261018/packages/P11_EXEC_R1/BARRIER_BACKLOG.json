@@ -1,0 +1,65 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P11",
+  "front": "C",
+  "attempt": "RETRY 1 of 1",
+  "barrier_backlog": [
+    {
+      "id": "P11-B1",
+      "priority": 1,
+      "target_va": "0x006C27A0",
+      "kind": "out-of-window CALL target (stage-A producer on receiver [EDI+0x8])",
+      "what_it_would_resolve": "Worklist element semantics: registry-backed (walk of templates.vfs RB-tree / any registry) vs instance/container-backed vs other. THE primary discriminator for the provenance question.",
+      "admission_needed": "parent admission of region containing 0x006C27A0",
+      "in_window_status": "called, not read; shape: ECX receiver = [EDI+0x8], return EAX appended as DWORD element",
+      "counter_reserve_hint": "treat as 1 body; reserve per parent policy"
+    },
+    {
+      "id": "P11-B2",
+      "priority": 1,
+      "target_va": "0x006C27F0",
+      "kind": "out-of-window CALL target (stage-B producer on receiver [EDI+0x8])",
+      "what_it_would_resolve": "same as P11-B1; second producer, 0x50 bytes above 0x006C27A0 (shape fact only); if both are registry walkers the worklist is registry-fed; if neither, worklist feed is non-registry",
+      "admission_needed": "parent admission of region containing 0x006C27F0 (single admission covering both producers may be efficient: 0x006C27A0..0x006C27F0 gap = 0x50)",
+      "in_window_status": "called, not read"
+    },
+    {
+      "id": "P11-B3",
+      "priority": 2,
+      "target_va": "0x006B4120",
+      "kind": "out-of-window CALL target (helper, called twice; this=[ESP+0x48]; args: incoming ECX, &[ESP+0x20], &[ESP+0x58], 1, 1; callee-cleans)",
+      "what_it_would_resolve": "helper role (iterator/position/context init vs debug-check vs other); explains why stage B re-inits it on the overflow path and what the incoming-ECX (cursor) argument means",
+      "admission_needed": "parent admission of region containing 0x006B4120",
+      "in_window_status": "called twice, not read"
+    },
+    {
+      "id": "P11-B4",
+      "priority": 2,
+      "target_va": "0x006B6CB9",
+      "kind": "out-of-window JMP target (stage-B append-success exit)",
+      "what_it_would_resolve": "enclosing flow after successful append: continuation vs loop latch (P11-H3); may reveal buffer flush/dispatch and EDI provenance",
+      "admission_needed": "parent admission of region containing 0x006B6CB9",
+      "in_window_status": "branch target recorded, not read"
+    },
+    {
+      "id": "P11-B5",
+      "priority": 3,
+      "target_va": "0x006B6C9F onward (pump body continuation after in-window entry row 0x006B6C9D)",
+      "kind": "out-of-window continuation; ALREADY covered by P07-C3 standing (0x0072FCE0 -> 0x007CE1E0 -> 0x0043C700 -> 0x0040B070 -> 0x0043E5B0; callback 0x008BD720)",
+      "what_it_would_resolve": "P11-H1: whether the pump consumes the stashed pending element [ESP+0x14] as its input; and whether the pump is a third structurally-similar stage (P11-H2)",
+      "admission_needed": "already in P07 window/standing; re-admission only if the parent wants [ESP+0x14]-consumption proof",
+      "in_window_status": "single entry row 0x006B6C9D PUSH 0x1 read; continuation not read"
+    },
+    {
+      "id": "P11-B6",
+      "priority": 2,
+      "target_va": "enclosing function head (< 0x006B6C1B; VA not located in-window)",
+      "kind": "out-of-window context (before window start)",
+      "what_it_would_resolve": "EDI provenance and object class; [ESP+0x38]/[ESP+0x3c] buffer initialization (list identity: capacity/end, buffer base); EBP role (sentinel value); whether stages A/B are loop bodies",
+      "admission_needed": "parent admission of the region from the enclosing function start to 0x006B6C1B",
+      "in_window_status": "not read; function start VA unknown"
+    }
+  ],
+  "recommended_next_admission": "P11-B1 + P11-B2 (producers 0x006C27A0/0x006C27F0, one window likely covering both given 0x50 delta) - the direct discriminator for the worklist-provenance question; secondarily P11-B6 (enclosing head) for buffer/EDI/EBP identity.",
+  "note": "No barrier was read in this package; all VAs above are recorded for parent admission only."
+}

@@ -1,0 +1,24 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P11",
+  "front": "C",
+  "attempt": "RETRY 1 of 1",
+  "evaluated_utc": "2026-10-18T23:47:00Z",
+  "gates": [
+    { "id": "G1_contract_sha", "check": "CONTRACT.json sha256 equals contract pin", "expected": "369059f6cbd181033b10d84c8276c28e4cf539cba392354c69cdfef2c9f191a0", "observed": "369059f6cbd181033b10d84c8276c28e4cf539cba392354c69cdfef2c9f191a0", "verdict": "PASS" },
+    { "id": "G2_source_pin_sha", "check": "authorized source sha256 matches pin at read time", "expected": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB", "observed": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB (computed 2026-10-18T23:36Z before read)", "verdict": "PASS" },
+    { "id": "G3_window_compliance", "check": "semantic read only inside 0x006B6C1B-0x006B6C9D (source lines 632937-632981)", "observed": "semantic read = exactly 45 rows; navigation = 2 boundary greps + 15-line format header peek (no code semantics); no other source content read", "verdict": "PASS" },
+    { "id": "G4_counters_within_reserve", "check": "bodies/rows/CALL/candidates vs reserve", "observed": "bodies 2/2 AT_RESERVE; rows 45/60 UNDER; CALL 4/8 UNDER; candidates 2/2 AT_RESERVE; no overshoot anywhere", "verdict": "PASS" },
+    { "id": "G5_premises_preserved", "check": "all four premises cited and applied per claim", "observed": "CLAIMS.json premise_compliance section + per-claim premises_applied fields; PUSH-0x1 mirror and twin stages treated as shape-only", "verdict": "PASS" },
+    { "id": "G6_out_of_window_discipline", "check": "out-of-window targets recorded with exact VAs and NOT read", "observed": "5 targets recorded (0x006B4120, 0x006C27A0, 0x006C27F0, 0x006B6CB9, 0x006B6C9F.. + unlocated enclosing head) in HANDOFF.md and BARRIER_BACKLOG.json; none read", "verdict": "PASS" },
+    { "id": "G7_no_forbidden_actions", "check": "no EXE/payload/runtime, no new Ghidra exports, no old writer scripts, no frozen roots/config/skills/repo writes", "observed": "only reads: contract, source pin (within window), 2 context docs, own package files; only writes: this package root", "verdict": "PASS" },
+    { "id": "G8_real_clock", "check": "all timestamps from real clock tools", "observed": "every stamp PowerShell [DateTime]::UtcNow; no estimated times", "verdict": "PASS" },
+    { "id": "G9_hard_stop", "check": "package completes before 2026-10-19T00:55:00Z", "observed": "run active 23:36:51Z-~23:50Z, well before stop", "verdict": "PASS" },
+    { "id": "G10_unforeseen_in_window_bodies", "check": "any in-window body beyond the two declared stages must be disclosed as incident with extract preserved and no claims", "observed": "none found: all 45 rows inside declared stages + the declared in-region pump entry row; 0 incidents", "verdict": "PASS" },
+    { "id": "G11_prior_session_preservation", "check": "CONTRACT.json and RUN_STARTED.json from failed prior session preserved untouched", "observed": "both present and byte-identical to their prior-session hashes (369059f6…, 8c0203a3…); retry marker RUN_STARTED_RETRY1.json added instead of overwriting", "verdict": "PASS" },
+    { "id": "G12_extract_verbatim", "check": "extract rows byte-faithful to source window", "observed": "programmatic ReadLines window copy + independent executor Read-back comparison of all 45 rows: identical", "verdict": "PASS" }
+  ],
+  "failed_gates": [],
+  "waived_gates": [],
+  "self_check_note": "This GATES.json is the executor's own gate evaluation (SELF_CHECK), not an independent PE-MASTER audit."
+}

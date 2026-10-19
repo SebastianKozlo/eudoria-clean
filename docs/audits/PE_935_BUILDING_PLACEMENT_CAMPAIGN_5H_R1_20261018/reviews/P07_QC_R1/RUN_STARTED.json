@@ -1,0 +1,60 @@
+{
+  "run_id": "P07_QC_R1_20261018",
+  "run_type": "INDEPENDENT_INTERNAL_QC_REVIEW",
+  "reviewer_role": "pe-master-auditor",
+  "reviewer_origin_note": "Fresh child session dispatched directly by PE-MASTER (NO_NESTED_TASKS). No delegation performed. No Task tool invoked. This reviewer did NOT author the P07 specification, extracts or claims.",
+  "started_utc": "2026-10-18T22:52:30Z",
+  "deadline_utc": "2026-10-18T23:30:00Z",
+  "parent_run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "parent_contract": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_5H_AUTHORING_R1_20261018\\CONTRACT.md",
+  "parent_contract_sections_in_force_for_this_review": ["5", "6", "9", "12"],
+  "package_contract": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\CONTROL\\CONTRACTS\\P07.json",
+  "package_contract_sha256_recomputed": "8043D73392FC32F680EF1FDD2687C0C32CB7F24921D7ECDB225621A2B260C7D2",
+  "package_contract_admission_id": "A0c76e3cc1494",
+  "target_pack": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\packages\\P07_EXEC_R1",
+  "target_pack_provenance": "DIRECT_ANALYST_FALLBACK of the PE-MASTER parent (parent CONTRACT.md section 4) after two incomplete child executions (attempt 1 preserved on disk: CONTRACT.json, RUN_STARTED.json, tools\\extract_p07_subregions.py, 4 extracts; attempt 2 added nothing). Reviewer must verify honest fallback attribution in ALL package docs.",
+  "pinned_source": {
+    "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIGHT_AGGREGATE_20260905_160000\\GHIDRA_H5_VTABLE2.txt",
+    "expected_sha256": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+    "recomputed_sha256_at_boot": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+    "size_bytes": 50780146,
+    "use_rule": "Semantic read ONLY inside the four admitted subregions (0x00745BF0-0x00745C40, 0x006B6C9D-0x006B6D3E, 0x006C3F98-0x006C3FDC, 0x006D44A4-0x006D450E; admission A0c76e3cc1494). Address search outside those windows = navigation only. Out-of-window targets (0x00745A70, 0x0072FCE0, 0x007CE1E0, 0x0043C700, 0x0040B070, 0x0043E5B0, 0x006C3640, callback 0x008BD720 and others) are NOT semantically re-derived here; only citation accuracy of inherited bridge claims is checked against the cited prior QC/report documents.",
+    "known_disclosure_at_dispatch": "Parent disclosed a +15 row overshoot in extract SR2_6B6C9D.txt (54 rows) beyond the function-map window end 0x006B6D3E (loop tail). This review must (a) verify whether overshoot rows stay within the ADMITTED subregion 0x006B6C9D-0x006B6D3E or disclose out-of-admission rows, (b) adjudicate against parent CONTRACT.md section 6 (no retroactive authorization; incident/PARTIAL/NONCOMPLIANT marking rules)."
+  },
+  "admitted_regions_recheck": {
+    "SR1": "0x00745BF0-0x00745C40 (body entry 0x00745BF0)",
+    "SR2": "0x006B6C9D-0x006B6D3E (body entry 0x006B6C9D) - overshoot adjudication required",
+    "SR3": "0x006C3F98-0x006C3FDC (body entry 0x006C3F98)",
+    "SR4": "0x006D44A4-0x006D450E (body entry 0x006D44A4)"
+  },
+  "accepted_scope": [
+    "Full re-hash + bijection of pack MANIFEST.json (15 artifacts incl. preserved attempt files) vs pack directory census",
+    "Line parity of the four extracts (SR1-SR4) vs pinned source lines",
+    "Independent re-derivation of P07-C1 (0x00745BF0 keyed map-lookup helper; 4-DWORD key incl. constant 4; CALL 0x00745A70; success path *[EAX]; sentinel CMP [this+8]; fail-path JZ -> 0x00745C40 window end; id2/tag-6 property hypothesis NOT confirmed in-window)",
+    "Independent re-derivation of P07-C2 (scoped negative: no VFS/record-fed source in the 745BF0 window; bounds kept)",
+    "Independent re-derivation of P07-C3 (0x006B6C9D {0x66,A}-forming registration pump: loop; 0x0072FCE0 valid check; 0x007CE1E0 A-read getter inherited-bridge-CONFIRMED citation accuracy; const 0x66 pair build via 0x0043C700; callback 0x008BD720 registered via 0x0040B070; enqueue via 0x0043E5B0)",
+    "Independent re-derivation of P07-C4 (0x006C3F98 and 0x006D44A4 register the SAME callback 0x008BD720 via 0x0040B070 + 0x006C3640 second enqueue path)",
+    "Independent re-derivation of P07-C5 (consumer chain bounded; exact gap = bodies 0x0040B070/0x0043E5B0/0x006C3640 + callback invocation)",
+    "Instruction-level verification of decisive chains: the 0x66 store, the 0x8bd720 immediates, the CALL census",
+    "SR2 overshoot adjudication vs CONTRACT section 6 (no retroactive authorization)",
+    "Scoped-negative bounds and premise preservation (identical names/shapes != common semantics; definition registry != instance source; no direct caller != exclusively virtual; scoped negatives keep window bounds)",
+    "Actual vs reserved counters (claimed: 4 bodies / 148 rows actual vs 133 reserved instructions / 10 CALL / 4 candidates)",
+    "Honest fallback attribution (DIRECT_ANALYST_FALLBACK) present in ALL package docs",
+    "Manifest bijection gap check: artifact_index.csv presence (required output per package CONTRACT required_outputs and parent CONTRACT.md section 12 minimum worker pack)"
+  ],
+  "forbidden_in_this_review": [
+    "No EXE/payload/runtime/config/repo actions",
+    "No semantic read beyond the four admitted subregions",
+    "No writes outside reviews\\P07_QC_R1",
+    "No edits to the frozen pack P07_EXEC_R1 or parent CONTROL",
+    "No new Ghidra exports, no old writer scripts, no reading of out-of-window target regions beyond navigation"
+  ],
+  "planned_outputs": [
+    "RUN_STARTED.json (this file, first write)",
+    "RECHECK_NOTES.json",
+    "COUNTERS_RECHECK.json",
+    "QC_REPORT.md",
+    "MANIFEST.json (LAST, self-excluded)"
+  ],
+  "status": "RUN_STARTED"
+}

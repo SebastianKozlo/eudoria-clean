@@ -1,0 +1,107 @@
+{
+  "run_id": "PE_935_P04_QC_R1_20261018",
+  "role": "independent internal QC (pe-master-auditor, fresh session, NO_NESTED_TASKS)",
+  "target_pack": "packages/P04_EXEC_R1 (immutable, read-only)",
+  "pinned_source_sha256_reverified": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB (recomputed at 2026-10-18T21:57Z; size 50780146 B)",
+  "semantic_read_scope": "ONLY inside the five admitted subregions of A0af4119f1ccf (same authorization class as the worker); address grep = navigation only",
+  "naming_map_note": "Dispatch naming R1-R4 (callsites) maps to worker naming: dispatch R1=worker R2 (0x006A36F0/0x006A3727), dispatch R2=worker R3 (0x0067B4F0/0x0067B52E), dispatch R3=worker R4 (0x0067C560/0x0067C584), dispatch R4=worker R5 (0x0067C7C0/0x0067C8A8). Worker R1 = writer body 0x005094C0.",
+  "independent_rederivations": {
+    "A_line_parity_all_five_extracts": {
+      "method": "read the exact pinned-source line ranges declared in artifact_index.csv and compared byte-for-byte against each extract file",
+      "R1": "source lines 145735-145743 vs extracts/R1_WRITER_005094C0.txt (9 rows) - IDENTICAL",
+      "R2": "source lines 607713-607747 vs extracts/R2_CALLER_006A36F0.txt (35 rows) - IDENTICAL",
+      "R3": "source lines 564107-564180 vs extracts/R3_CALLER_0067B4F0.txt (74 rows) - IDENTICAL",
+      "R4": "source lines 565392-565467 vs extracts/R4_CALLER_0067C560.txt (76 rows) - IDENTICAL",
+      "R5": "source lines 565584-565680 vs extracts/R5_CALLER_0067C7C0.txt (97 rows) - IDENTICAL",
+      "verdict": "LINE_PARITY_PASS_5/5; no out-of-region rows in any extract; all in-window addresses monotonic and inside admitted ranges"
+    },
+    "B_writer_signature_C1": {
+      "lines": "145735-145743",
+      "rederivation": "005094c0 MOV EAX,[ESP+4] (single 4-byte stack arg at [ret+4]); 005094c4/c6: SF+34 <- [arg+0]; 005094c9/cc: SF+38 <- [arg+4]; 005094cf/d2: SF+3C <- [arg+8]; 005094d5: byte SF+28 <- 1; 005094d9 RET 0x4 (callee pops exactly 1 DWORD => thiscall, 1 stack arg). Deref chain +0/+4/+8 from one pointer register (EAX) rules out three-scalar-args model. No other write; no ID/parent/scale/rotation logic. EAX clobbered by last load => no return value.",
+      "cross_check": "each of the 4 callers pushes exactly ONE arg before CALL 0x005094C0 (607731 PUSH EDX; 564127 PUSH EDX; 565402 PUSH ECX; 565642 PUSH EAX) - RET 0x4 balanced at every admitted callsite",
+      "verdict": "C1 CONFIRMED accepted"
+    },
+    "C_R2_callsite_0x006A3727": {
+      "frame": "SUB ESP,0x4c -> F; PUSH ESI -> ESP=F-4 (unambiguous baseline; verified against LEA [ESP+0x10]=F+0xC @607719, LEA [ESP+0x1c]=F+0x18 @607725, LEA [ESP+0x40]=F+0x3C @607730)",
+      "receiver": "MOV ECX,[ESI+0x18] @607729 = [caller+0x18]; guard CMP [ESI+0x18],0 JZ epilogue @607716-607717 => writer executes iff [caller+0x18]!=0",
+      "record": "LEA EDX,[ESP+0x40] = &F+0x3C, 12-byte in-frame slot; NO in-body store to F+0x3C..F+0x47 (independently scanned all 35 rows; only FLDZ stores to F+0/F+4/F+8 @607733-607739)",
+      "getters": "85C280(this=[caller+4], out=&F+0xC) @607721; 85BFA0(this=[caller+4], out=&F+0x18) @607728; record slot = &F+0xC+0x30 OR &F+0x18+0x24 - BOTH geometries fit exactly => producer ambiguity structural, correctly reported",
+      "after_writer": "96CD10(this=&F+0x18, arg=&F+0 zeros) @607740; 509510(this=[caller+0x18], arg=&F+0) rotation constant zeros @607744",
+      "verdict": "C2 CONFIRMED accepted"
+    },
+    "D_R3_callsite_0x0067B52E": {
+      "frame": "F-8 baseline after PUSH ESI + PUSH EDI (post-guard @564112); arg1 = [ESP+0x58] = F+0x50 -> EDI @564113; verified LEA [ESP+0x14]=F+0xC @564114, LEA [ESP+0x20]=F+0x18 @564121, LEA [ESP+0x44]=F+0x3C @564126",
+      "receiver": "MOV ECX,[ESI+4] @564125 = [caller+4]; guard [ESI+4]!=0 @564110",
+      "record": "&F+0x3C, no in-body producer; getters 862850(this=EDI=arg1, out=&F+0xC) @564117 and 85BFA0(this=[ESI+0]=[caller+0], out=&F+0x18) @564124 - ambiguity structural (4x4-row +0x30 vs 12-float-tail +0x24 both fit)",
+      "after_writer_FPU_chain_rederived": "second 862850 @564144 returns vector v=[ret+0],[ret+4],[ret+8]; FLD v4/FLD v0/FLD v8 @564145-564147; FLD ST1/FMULP ST2/FLD ST2/FMULP ST3/FXCH/FADDP ST2/FMUL ST0/FADDP @564148-564155 computes v0^2+v4^2+v8^2 (independently re-walked FPU stack states); FSTP [ESP+0x58]=F+0x50 @564156; sqrt 0x0095DA2E @564158; scale FMUL qword [0x00A7AF80] @564165; EAX=[ESI+0xC]=[caller+0xC] @564161; CALL 0x004150F0(arg1=[caller+0xC], arg2=f32(||v||*q)) @564170 - ALL AFTER writer @564128; result -> 8B7210 thiscall @564172; tail 6A34A0(this=[caller+8]) if nonzero @564174-564178",
+      "verdict": "C3 CONFIRMED accepted (ID-flow claim is flow-only, ID semantics honestly UNVERIFIED)"
+    },
+    "E_R4_callsite_0x0067C584_discriminating_witness": {
+      "frame": "baseline F-4 at writer (PUSH EDI is post-writer @565419); LEA [ESP+0x1c]=F+0x18 @565398, LEA [ESP+0x40]=F+0x3C @565401",
+      "receiver": "MOV ECX,[ESI+4] @565403 = [caller+4]",
+      "discriminating_property": "the ONLY call preceding the writer in this body is 85BFA0(this=[ESI+0]=[caller+0], out=&F+0x18) @565400 (first instructions: SUB/PUSH/MOV/CMP/JZ/MOV/LEA/PUSH/CALL 85bfa0; writer @565404). 862850/509070/4150F0 calls all occur AFTER the writer + zero-rotation @565424-565459 => for THIS invocation, if any admitted-observed getter produced the record bytes, it must be 85BFA0. Stale-frame variant V3 not excluded (no in-body store to F+0x3C..F+0x47; extent of 85BFA0 writes un-admitted) - correctly kept open",
+      "verdict": "C4 CONFIRMED accepted; C7 dominance hypothesis appropriately PLAUSIBLE/CONDITIONAL (extent premise flagged)"
+    },
+    "F_R5_callsite_0x0067C8A8": {
+      "frame_rederived": "3 SEH pushes (0xC) + SUB 0xd8 => P = entry ESP - 0xE4; 5 register/cookie pushes (EBX,EBP,ESI,EDI,EAX @565592-565598) => operative ESP = P-0x14. Verified: cookie [ESP+0xd4]@565591 at ESP=P -> P+0xD4; args [ESP+0xfc]/[ESP+0x100] @565601-565602 -> P+0xE8/P+0xEC; local1 LEA [ESP+0x17] @565608 -> P+3; local2 LEA [ESP+0x24] @565613 at ESP=P-0x1c (2 extra pushes) -> P+8; state byte [ESP+0xf4]/[ESP+0xfc]/[ESP+0x100] consistently P+0xE0 (values 0,1,2,3); factory chain calls and 85C0C0/85C0F0/509510/509190/43a550 all callee-pop under the package's own premise (no in-window ADD ESP cleanup except cdecl 0x0095D3C4 @565667)",
+      "receiver": "[ESI+4] written @0067c86d from factory chain CALL [0x00a75a38] @565610 -> CALL [0x00a75a44] @565615 -> 0x00401360 @565621 -> 0x00485050 @565623 -> 0x0048CBB0 @565625 -> 0x005247C0 @565627 - CREATED IN THIS FUNCTION, confirmed",
+      "record": "MOV ECX,[ESI]=arg1-stored-at-this+0 @565637; LEA EDX,[ESP+0x1c]=&P+8 @565638; CALL 0x0085C0C0 @565640; MOV ECX,[ESI+4]; PUSH EAX; CALL 0x005094C0 @565643 - record = CALLEE-RETURNED pointer, confirmed",
+      "rotation": "85C0F0(this=[ESI], out=&P+8) @565647 -> PUSH EAX -> 509510(this=[ESI+4]) @565650 - REAL data (no FLDZ in R5), confirmed",
+      "after_writer_ID_chain": "[EDI]=[arg2] deref @565654 -> 43a550 @565656 -> 72f580 @565658 -> EDI=ret -> 72fce0 @565661 -> TEST AL/JZ 0x0067C974 -> PUSH 0x130 -> 95d3c4 cdecl + ADD ESP,4 @565665-565667 -> EBP=ret; alloc-fail JZ 0x0067C921 (boundary) @565671; 733340(this=LEA [ESP+0x38]) @565672-565673 -> 6C0D50(this=EBP, args: EDI lookup, EBX 0, EAX ret) @565678 - ALL AFTER writer, chain order confirmed; all callee bodies un-admitted and NOT read (no out-of-region content in any extract/claim)",
+      "qc_correction_of_frame_annotations": {
+        "this_slot": "worker claims slot 'P+0x14 holding this (written 0067C80F)'. REDERIVED: [ESP+0x34] @0067C80F at ESP=P-0x14 (deterministic - zero intervening calls after the 5 prologue pushes) => slot = P+0x20, NOT P+0x14. Worker subtracted 0x20 (double-counting the 3 pre-SUB SEH pushes) instead of 0x14.",
+        "seh_node": "worker claims 'SEH node at P+0xDC' / 'FS:[0] := P+0xDC'. REDERIVED: LEA EAX,[ESP+0xEC] @0067C7EE at ESP=P-0x14 => node base = P+0xD8; P+0xDC is the handler FIELD within the node (PUSH 0x009F9784 lands at P+0xDC; PUSH old-FS lands at P+0xD8 - field layout confirms node base P+0xD8). Worker used a 4-push baseline here (forgot the 2nd cookie PUSH EAX @0067C7ED).",
+        "alloc_pointer_slot": "worker labels 'P-0x14 (P+0x00): 0x130-allocation pointer'. REDERIVED: MOV [ESP+0x18],EBP @0067C8FA at ESP=P-0x14 => slot = P+4 (label also internally contradictory: P-0x14 and P+0x00 are different addresses).",
+        "733340_receiver": "worker claims '0x00733340(this=&(P+0x14) slot holding this)' i.e. the SAME slot as the this-store ('wrapper-object shape, +0 = this'). REDERIVED: LEA ECX,[ESP+0x38] @0067C90A at ESP=P-0x14 (package's own callee-pops premise) => receiver = P+0x24 - a DIFFERENT slot, 4 bytes above the this-store slot P+0x20. The '+0 = this wrapper-object' speculation has a false premise and must be withdrawn; nothing in-window is stored at P+0x24 before the call.",
+        "impact": "none of the four errors flips any claim verdict; C5's load-bearing content (factory chain, 85C0C0/85C0F0 returns, ordering, guards, truncation) is extract-verified correct"
+      },
+      "verdict": "C5 CONFIRMED for its core statement; frame-map annotations corrected per above"
+    },
+    "G_counters_independent_recount": {
+      "rows": "R1=9, R2=35, R3=74, R4=76, R5=97 => 291 = reserved 291 (exact)",
+      "call_sites_recounted_from_extracts": "R1=0; R2=6 (85c280,509070,85bfa0,5094c0,96cd10,509510); R3=11 (862850,509070,85bfa0,5094c0,96cd10,509510,862850,95da2e,4150f0,8b7210,6a34a0); R4=11 (85bfa0,5094c0,96cd10,509510,862850,509070,862850,95da2e,4150f0,8b7210,6a34a0); R5=19 ([0xa75a38],[0xa75a44],401360,485050,48cbb0,5247c0,[0xa75a5c],[0xa75a40],85c0c0,5094c0,85c0f0,509510,509190,43a550,72f580,72fce0,95d3c4,733340,6c0d50) => 47 = reserved 47 (exact)",
+      "unique_targets": "24 direct (recounted: 6 R2-only + 5 R3-new + 0 R4-new + 13 R5-new) + 4 indirect slots = 28 = worker claim",
+      "bodies": "5/5; R5 truncated at window boundary (JMP 0x0067C923 target outside; epilogue un-admitted) - correctly reported",
+      "candidates": "V1/V2/V3/V4 = 4/4",
+      "navigation_recheck": "independent grep 'CALL 0x005094c0' over pinned source = 12 hits: 0x004B335E, 0x00527BA8, 0x00527BF0, 0x00528317, 0x00529020, 0x005F62EA, 0x0067B52E*, 0x0067B8E8, 0x0067C584*, 0x0067C8A8*, 0x006A3727*, 0x006A3A2D (* = admitted). EXACTLY matches SOURCE_PINS inventory: 4 admitted + 8 un-admitted NOT read",
+      "verdict": "COUNTERS_PASS (all exact; no overrun; no unforeseen body inside windows)"
+    },
+    "H_negative_controls_independently_reproduced": {
+      "sf30_negative": "grep '+0x30]' store over all 5 extracts = ZERO matches; receiver writes in-window are only SF+34/+38/+3C/+28 (writer) - C9 window-scoped negative INDEPENDENTLY CONFIRMED (scope honestly stated: window-only, not program-wide)",
+      "rotation_zeros": "FLDZ appears exactly once per R2/R3/R4 writing 0.0f to F+0/F+4/F+8 (the 509510 argument); R5 has NO FLDZ (rotation arg = 85C0F0 return) - falsification scan reproduced",
+      "writer_signature_falsifier": "pointer-deref model vs scalar-args model - deref chain confirmed; scalar model rejected by evidence",
+      "stale_frame_V3": "no in-body store to F+0x3C..F+0x47 in R2/R3/R4 (all FST/FSTP targets resolve to F+0..F+8 or the F+0x50/F+0x4C distance scratch) - V3 legitimately remains open"
+    },
+    "I_manifest_rehash_bijection": {
+      "disk_non_manifest_files": 17,
+      "manifest_entries_excluding_manifest": 17,
+      "rehash_result": "all 17 size+SHA256 pairs IDENTICAL to MANIFEST.json/artifact_index.csv (recomputed 2026-10-18T21:58Z); CONTRACT.json copy hash A42CBDFB...232E9 == CONTROL/CONTRACTS/P04.json re-hash - identical",
+      "verdict": "BIJECTION_PASS"
+    },
+    "J_chronology_vs_events_000006": {
+      "admit_utc": "2026-10-18T21:49:18Z (admission_id A0af4119f1ccf; body_entries match contract; reserve 5/291/47/4)",
+      "run_started": "2026-10-18T21:49:38Z (20s after ADMIT - correct order)",
+      "source_pin_verifications": "contract hash 21:49:20Z, source hash 21:49:26Z (both pre-RUN_STARTED, consistent)",
+      "manifest_generated": "2026-10-18T21:56:35Z < hard stop 22:25:00Z",
+      "finding": "EVENTS 000006 payload encodes region as single range va_begin 0x005094C0 / va_end_exclusive 0x0067C921 which does NOT cover admitted subregion 0x006A36F0-0x006A375C (0x006A36F0 > 0x0067C921). The worker's read of 0x006A36F0 IS authorized by P04.json admitted_regions + the event's own body_entries + question text; the single-range field is a lossy parent-side helper encoding. Recorded so a future mechanical audit does not misfire an out-of-admission violation against R2."
+    },
+    "K_alias_lifetime_counterexamples": {
+      "receiver_vs_record": "R2/R3/R4: record = &F+0x3C (the callee's own fresh frame); receiver = pre-existing object field value ([caller+0x18]/[caller+4]) - no pre-existing pointer can address a frame created after the pointer was stored, and no in-window instruction writes the receiver field to F+0x3C => receiver==record impossible in R2/R3/R4 (worker's disjointness claim RIGOROUS here). R5: record = ret(85C0C0) - equality with receiver [ESI+4] is not provable in-window; it rests on the V4 premise (85C0C0 returns &P+8 or an arg1-internal pointer) and arg1 != receiver. The worker's flat sentence 'No in-window path can pass receiver==record' is rigorous for R2/R3/R4 but premise-dependent for R5 - flagged as a P2 refinement (no claim depends on it).",
+      "receiver_vs_getter_source": "[caller+0x18] vs [caller+4] (R2) could alias at the object level; no claim depends on their distinctness - tested, neutral.",
+      "lifetime": "writer fully consumes record before any post-writer buffer reuse (96CD10 on &F+0x18 occurs after writer) - ordering confirmed; consume-then-clear pattern consistent with a matrix-like stack object"
+    }
+  },
+  "full_read_log": {
+    "worker_pack_files_read_to_eof": ["CONTRACT.json", "RUN_STARTED.json", "SOURCE_PINS.json", "extracts/R1_WRITER_005094C0.txt", "extracts/R2_CALLER_006A36F0.txt", "extracts/R3_CALLER_0067B4F0.txt", "extracts/R4_CALLER_0067C560.txt", "extracts/R5_CALLER_0067C7C0.txt", "CLAIMS.json", "MEMORY_AND_IDENTITY.json", "COUNTERS.json", "BARRIER_BACKLOG.json", "REPORT.md", "HANDOFF.md", "GATES.json", "artifact_index.csv", "MANIFEST.json", "tools/extract_subregions.ps1"],
+    "parent_files_read_to_eof": ["CONTROL/CONTRACTS/P04.json", "PE_935_BUILDING_PLACEMENT_5H_AUTHORING_R1_20261018/CONTRACT.md (222 lines, all sections; 5/6/8/12 in scope)", "CONTROL/EVENTS/000006_ADMIT.json"],
+    "pinned_source_semantic_reads_inside_admission": ["145735-145743", "607713-607747", "564107-564180", "565392-565467", "565584-565680"],
+    "navigation_only": ["grep 'CALL 0x005094c0' = 12 hit lines (addresses only, no context bodies read)"]
+  },
+  "not_checked": [
+    "EVENTS 000001-000005 (chronology check scoped to 000006 per dispatch)",
+    "FRONTIER_QUEUE.json (context doc, not needed for this QC verdict)",
+    "all un-admitted bodies (85BFA0/85C280/862850/85C0C0/85C0F0/509070/509510/509190/96CD10/6A34A0/401360/485050/48CBB0/5247C0/43A550/72F580/72FCE0/733340/6C0D50/4150F0/8B7210/95DA2E/95D3C4 + 8 un-admitted writer callsites) - by admission design",
+    "data addresses 0x00A7AF80 / 0xA7957B / slots 0x00A75A38/44/5C/40 (data, code-only listing)",
+    "worker-session execution logs (not persisted; tool executed-ness is inferred from byte-identical extract outputs + pinned tool hash, not from an independent execution log - recorded as a provenance limitation, not a defect)"
+  ]
+}

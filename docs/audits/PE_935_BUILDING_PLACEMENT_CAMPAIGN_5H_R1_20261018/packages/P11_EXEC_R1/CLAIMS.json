@@ -1,0 +1,155 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P11",
+  "front": "C",
+  "attempt": "RETRY 1 of 1",
+  "question": "C1 pump upstream: where does the element list constructed/held by bodies 0x006B6C1B and 0x006B6C5C (admitted region 0x006B6C1B-0x006B6C9D) come from (registry? template objects? container field)? Is the {0x66,A} pump 0x006B6C9D driven by the definition registry (templates.vfs RB-tree per bridge standing) or another source?",
+  "evidence_base": {
+    "extract_path": "EXTRACT_REGION_006B6C1B_006B6C9D.txt",
+    "extract_sha256": "cda76004453d5ca7a6390e6bee969079168c2e25f58c0e9a4d8838c61987cfae",
+    "source_sha256": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+    "source_lines": "632937-632981 (45 rows, all in-window)",
+    "citation_convention": "src:<line> = source line in GHIDRA_H5_VTABLE2.txt; VA = instruction address"
+  },
+  "evidence_levels_used": [
+    "CONFIRMED-as-instruction: proven from in-window listing rows alone",
+    "STRONGLY_SUPPORTED: in-window structure admits one dominant reading but at least one micro-alternative is not excluded",
+    "STANDING_INHERITED: cited from P07 REPORT / bridge DRAFT_FINAL_REPORT; NOT re-derived in this window",
+    "UNKNOWN: not decidable in-window; recorded as barrier/admission candidate",
+    "SCOPED_NEGATIVE: window-bounded absence statement; explicitly NOT a claim about out-of-window code"
+  ],
+  "claims": [
+    {
+      "id": "P11-C1",
+      "statement": "The worklist constructed by the two admitted bodies is a STACK-LOCAL, DWORD-stride append buffer: write cursor at [ESP+0x38], bound at [ESP+0x3c]; an element EAX is appended by 'store EAX at cursor; cursor += 4' exactly when cursor != bound, and the equality cursor == bound redirects control (stage A -> stage B re-init; stage B -> pump entry 0x006B6C9D).",
+      "evidence": [
+        "src:632948 (0x006B6C3B) MOV ECX,[ESP+0x38] | src:632949 (0x006B6C3F) CMP ECX,[ESP+0x3c] | src:632951 (0x006B6C47) JZ 0x006B6C5C",
+        "src:632954 (0x006B6C4D) MOV [ECX],EAX | src:632956 (0x006B6C53) ADD ECX,0x4 | src:632957 (0x006B6C56) MOV [ESP+0x38],ECX",
+        "src:632970 (0x006B6C7C) MOV ECX,[ESP+0x38] | src:632971 (0x006B6C80) CMP ECX,[ESP+0x3c] | src:632973 (0x006B6C88) JZ 0x006B6C9D",
+        "src:632976 (0x006B6C8E) MOV [ECX],EAX | src:632978 (0x006B6C94) ADD ECX,0x4 | src:632979 (0x006B6C97) MOV [ESP+0x38],ECX",
+        "JZ/append guarded by the CMP: the interleaved MOV [ESP+0x14],EAX (src:632950, src:632972) does not modify EFLAGS, so each JZ tests its preceding CMP",
+        "4-byte stride (ADD ECX,0x4 at src:632956 and src:632978) => list elements are DWORD-sized"
+      ],
+      "premises_applied": [
+        "identical names/shapes do not prove common semantics: the two append blocks are shape-identical; no semantic identity of their producers is inferred from that"
+      ],
+      "countermodel": "If a future admitted read of the enclosing function head shows [ESP+0x38]/[ESP+0x3c] initialized as two independent traversal iterators (e.g. read cursor + separate stop pointer of a copy loop) rather than cursor + storage bound of one list, the 'append buffer' reading falls; the store-at-cursor + stride-4 + equality-redirect mechanics themselves are instruction-level and unaffected.",
+      "evidence_level": "CONFIRMED-as-instruction (mechanics: store-at-cursor, stride 4, equality-gated redirect); STRONGLY_SUPPORTED (reading of [ESP+0x3c] as the list bound: static capacity vs dynamic end not distinguishable in-window)"
+    },
+    {
+      "id": "P11-C2",
+      "statement": "List elements are produced by METHOD CALLS ON THE CONTAINER FIELD [EDI+0x8] of an object held in EDI (object provenance out-of-window): stage A producer = CALL 0x006C27A0 at 0x006B6C36, stage B producer = CALL 0x006C27F0 at 0x006B6C77; each produced value is also stashed to the pending slot [ESP+0x14] before the append attempt. [EDI+0x8] is the ONLY object-field read in the window and is used solely as a call receiver, never dereferenced as data in-window.",
+      "evidence": [
+        "src:632946 (0x006B6C33) MOV ECX,[EDI+0x8] -> src:632947 (0x006B6C36) CALL 0x006C27A0",
+        "src:632968 (0x006B6C74) MOV ECX,[EDI+0x8] -> src:632969 (0x006B6C77) CALL 0x006C27F0",
+        "src:632950 (0x006B6C43) MOV [ESP+0x14],EAX and src:632972 (0x006B6C84) MOV [ESP+0x14],EAX (pending-element stash)",
+        "register census: [EDI+0x8] appears exactly twice (src:632946, src:632968); no other field offset of EDI and no other object register is read in-window"
+      ],
+      "premises_applied": [
+        "definition registry != instance source: even if producers 0x006C27A0/0x006C27F0 turn out to read the definition registry, that would make it the DEFINITION source of elements, not automatically an instance source",
+        "no direct caller != exclusively virtual: the producers are reached by direct CALL; nothing in-window supports or excludes virtual dispatch inside them"
+      ],
+      "countermodel": "If admitted reads of 0x006C27A0/0x006C27F0 show they do not return list elements (e.g. they return status/flags appended incidentally), the 'elements = producer returns' reading falls to the alternative that [ESP+0x14] is the true handoff slot and the appended values are byproducts.",
+      "evidence_level": "CONFIRMED-as-instruction (call shape, receiver [EDI+0x8], return-value append, pending stash); producer semantics UNKNOWN (targets out-of-window)"
+    },
+    {
+      "id": "P11-C3",
+      "statement": "Both stages wrap their producer call with an identical helper call 0x006B4120 on a stack-local 'this' at [ESP+0x48] with five stack/this arguments: incoming ECX register value, &[ESP+0x20], &[ESP+0x58], 1, 1 (thiscall-like shape, no caller-side stack cleanup after the call => callee-cleans). When stage B is entered from stage A's overflow JZ, the 'incoming ECX' passed to the helper is stage A's cursor value ([ESP+0x38] loaded at 0x006B6C3B), i.e. the helper receives a position/cursor on that path.",
+      "evidence": [
+        "src:632937-632944 (0x006B6C1B-0x006B6C2A): PUSH 0x1; PUSH 0x1; LEA EAX,[ESP+0x58]; PUSH EAX; LEA EDX,[ESP+0x20]; PUSH EDX; PUSH ECX; LEA ECX,[ESP+0x48]",
+        "src:632945 (0x006B6C2E) CALL 0x006B4120; next instruction at 0x006B6C33 with no ADD ESP (callee-cleans)",
+        "src:632959-632966 (0x006B6C5C-0x006B6C6B) and src:632967 (0x006B6C6F) CALL 0x006B4120: identical arg block",
+        "ECX flow: src:632948 (0x006B6C3B) loads ECX=[ESP+0x38]; src:632951 (0x006B6C47) JZ 0x006B6C5C; at 0x006B6C5C the value pushed at src:632965 (0x006B6C6a PUSH ECX) is that cursor"
+      ],
+      "premises_applied": [
+        "identical names/shapes do not prove common semantics: helper identity across both stages is by identical VA (0x006B4120), not merely shape"
+      ],
+      "countermodel": "If an admitted read of 0x006B4120 shows it is e.g. a memory/iterator debug-check helper whose arguments are unrelated to the list, the 'context/iterator init' framing falls; the call shape itself is instruction-level fact.",
+      "evidence_level": "CONFIRMED-as-instruction (call shape and ECX flow); helper role UNKNOWN (0x006B4120 out-of-window)"
+    },
+    {
+      "id": "P11-C4",
+      "statement": "PUMP ENTRY CONDITION: the {0x66,A}-forming pump 0x006B6C9D is entered as the JZ target of 0x006B6C88 exactly when the local append buffer's cursor == bound at the stage-B check ([ESP+0x38] == [ESP+0x3c] after stage B's producer ran and its value was stashed to [ESP+0x14] but NOT appended). Within the window the pump is therefore the overflow/fallback arm of the stack-local append state machine, NOT a per-element registry walker. The stage-B success path leaves the window via JMP 0x006B6CB9 (out-of-window, not read). The window's last row 0x006B6C9D (PUSH 0x1) is the pump entry instruction declared in-region; its continuation >=0x006B6C9F was NOT read.",
+      "evidence": [
+        "src:632971 (0x006B6C80) CMP ECX,[ESP+0x3c] | src:632972 (0x006B6C84) MOV [ESP+0x14],EAX | src:632973 (0x006B6C88) JZ 0x006B6C9D",
+        "src:632981 (0x006B6C9D) PUSH 0x1 (window end; matches P07-C3 '0x006B6C9D is the {0x66,A}-forming pump')",
+        "src:632980 (0x006B6C9B) JMP 0x006B6CB9 (stage-B success exit, out-of-window target recorded)",
+        "stage-A overflow JZ: src:632951 (0x006B6C47) JZ 0x006B6C5C -> stage-B re-init path; stage-A success joins stage B after its helper at src:632958 (0x006B6C5A) JMP 0x006B6C74"
+      ],
+      "premises_applied": [
+        "scoped negatives keep window bounds: no claim about what the pump DOES after entry (out-of-window); only its entry condition is claimed"
+      ],
+      "countermodel": "If an admitted read of the pump body shows 0x006B6C88's JZ is not the sole in-edge to 0x006B6C9D that matters (e.g. the pump loops independently), the 'fallback arm' characterization of the ENTRY remains true but the pump's independence grows; entry condition itself is instruction-level.",
+      "evidence_level": "CONFIRMED-as-instruction"
+    },
+    {
+      "id": "P11-C5",
+      "statement": "SCOPED NEGATIVE (window-bounded): the 45-instruction window contains ZERO absolute/global memory references and ZERO calls into the known registry/pump machinery (no 0x0072F580 lookup, no 0x007CE1E0 getter, no 0x0043C700 pair build, no 0x0040B070/0x0043E5B0/0x006C3640, no 0x008BD720). All memory operands are stack-relative ([ESP+...]) or object-relative ([EDI+0x8] receiver load, [ECX] append store). Therefore the WORKLIST CONSTRUCTION visible in-window is entirely stack-local + [EDI+0x8]-producer-fed; the definition registry can only enter through out-of-window code (producers 0x006C27A0/0x006C27F0, helper 0x006B4120, or the pump body).",
+      "evidence": [
+        "full 45-row census in EXTRACT_REGION_006B6C1B_006B6C9D.txt: memory operands observed = [ESP+0x14] W2, [ESP+0x20] LEA2, [ESP+0x38] R4/W2, [ESP+0x3c] R2, [ESP+0x48] LEA2, [ESP+0x58] LEA2, [EDI+0x8] R2, [ECX] W2; no dword ptr [absolute] operand anywhere",
+        "CALL target census (in-window): 0x006B4120 x2 (src:632945, src:632967), 0x006C27A0 (src:632947), 0x006C27F0 (src:632969); none is a P07-C3/bridge registry-machinery VA"
+      ],
+      "premises_applied": [
+        "scoped negatives keep window bounds: this is a statement about the 45-row window ONLY, NOT about producers/pump internals"
+      ],
+      "countermodel": "Any admitted read showing producers 0x006C27A0/0x006C27F0 internally walk the registry would not falsify this claim (they are out-of-window); it would only close the provenance question at the next level.",
+      "evidence_level": "SCOPED_NEGATIVE (CONFIRMED-as-instruction for the window census)"
+    },
+    {
+      "id": "P11-C6",
+      "statement": "STANDING-INHERITED (cited, NOT re-derived in this window): the pump 0x006B6C9D forms {0x66,A} pairs via valid check 0x0072FCE0 -> A-read getter 0x007CE1E0 ([ECX+0x08], ECX = keyed-lookup result) -> const-0x66 pair build 0x0043C700 -> callback 0x008BD720 registration 0x0040B070 -> enqueue 0x0043E5B0 (P07-C3), with the keyed lookup on the templates.vfs RB-tree definition registry per bridge standing. P11's NEW, in-window contribution: the pump's TRIGGER/entry is governed by the local append state machine (P11-C4), and the worklist feeding the machinery is [EDI+0x8]-producer-fed (P11-C2), NOT by any in-window registry access.",
+      "evidence": [
+        "P07 REPORT.md (sha256 80ca78b951f3aa9d3cd668b14e1810585a512ec72bc41d55a2f96d020decd9f4), section 'Scoped result' (b)",
+        "bridge DRAFT_FINAL_REPORT.md (sha256 2910289f0e9180b9ecc3e8022fbc76d45bbe1bb20cce2c5738493b1b7c1b3974): OBSERVED_OPERATION and FINAL_SEMANTIC_ROLE blocks"
+      ],
+      "premises_applied": [
+        "definition registry != instance source: even the standing 'pump reads registry record for A' is DEFINITION-data consumption; no instance-source claim is made or inherited",
+        "identical names/shapes do not prove common semantics: the pump entry row PUSH 0x1 (src:632981) mirrors the stage-entry PUSH 0x1 rows (src:632937, src:632959) - SHAPE ONLY, no 'third twin stage' semantics claimed"
+      ],
+      "countermodel": "If the parent later admits the pump body and finds its A-read getter is NOT reached with a lookup result, the inherited standing itself would need retraction at P07/bridge level; P11 would be unaffected except the split 'trigger vs data source' which is instruction-level here.",
+      "evidence_level": "STANDING_INHERITED for the pump internals; CONFIRMED-as-instruction for the entry-condition and zero-registry-in-window parts (P11-C4/P11-C5)"
+    },
+    {
+      "id": "P11-C7",
+      "statement": "SKIP-SLOT BEHAVIOR: in both stages, if cursor == EBP at the moment of the append, the STORE is skipped but the cursor still advances by 4 (CMP ECX,EBP; JZ -> ADD ECX,0x4 path). EBP's role/value is NOT determinable in-window (candidate: FPO-style general-purpose register holding a sentinel/poison slot value, e.g. a skip marker or null; alternative roles not excluded).",
+      "evidence": [
+        "src:632952 (0x006B6C49) CMP ECX,EBP | src:632953 (0x006B6C4B) JZ 0x006B6C53 | src:632956 (0x006B6C53) ADD ECX,0x4",
+        "src:632974 (0x006B6C8A) CMP ECX,EBP | src:632975 (0x006B6C8C) JZ 0x006B6C94 | src:632978 (0x006B6C94) ADD ECX,0x4"
+      ],
+      "premises_applied": [
+        "no over-interpretation of register roles without in-window provenance"
+      ],
+      "countermodel": "An admitted read of the enclosing function head that initializes EBP would resolve it directly; no in-window claim to falsify beyond the instruction-level skip behavior.",
+      "evidence_level": "CONFIRMED-as-instruction (skip-store-but-advance behavior); EBP role UNKNOWN"
+    },
+    {
+      "id": "P11-C8",
+      "statement": "ANSWER SYNTHESIS (window-bounded): Of the three provenance options in the question - (registry / template objects / container field) - the in-window evidence supports ONLY 'container field': the element list is built by appending return values of two method calls on the container field [EDI+0x8] into a stack-local DWORD-stride buffer. Registry or template-object provenance for those elements is UNDECIDABLE in-window and lives entirely inside the two producer bodies 0x006C27A0 / 0x006C27F0 (the 2 admission candidates). Is the {0x66,A} pump driven by the definition registry or another source? Split answer: (i) pump TRIGGER = the local append state machine (cursor==bound at stage B; CONFIRMED-as-instruction) - in-window this is 'another source' than the registry; (ii) pump A-DATA = per standing (P07-C3 + bridge, cited) the keyed registry lookup + [record+0x08] read, NOT re-proven here; (iii) the worklist feeding this machinery is [EDI+0x8]-producer-fed with zero in-window registry access.",
+      "evidence": [
+        "P11-C1..P11-C7 above"
+      ],
+      "premises_applied": [
+        "all four premises (names/shapes, registry != instance source, no direct caller, scoped negatives)"
+      ],
+      "countermodel": "Admitted reads of 0x006C27A0/0x006C27F0 (and 0x006B4120 + enclosing head) are the falsification route: e.g. producers returning registry-walk results would move the answer from 'container field' to 'registry via container field'; producers returning message/attribute-derived values would confirm a non-registry feed.",
+      "evidence_level": "CONFIRMED-as-instruction for the container-field call shape and stack-local list; UNKNOWN (candidate pair) for the producers' internal source; STANDING_INHERITED for the pump's A-data path"
+    }
+  ],
+  "hypotheses_not_claimed": [
+    {
+      "id": "P11-H1",
+      "statement": "The pump may consume the stashed pending element at [ESP+0x14] (the produced value that could not be appended) as its lookup key/input - suggested by the stash-before-JZ placement (src:632972) but DECIDABLE ONLY in the pump body (out-of-window).",
+      "status": "CANDIDATE/UNVERIFIED - recorded, not claimed"
+    },
+    {
+      "id": "P11-H2",
+      "statement": "The pump entry PUSH 0x1 mirrors the stage-entry PUSH 0x1 rows, suggesting a possible third structurally-similar stage with helper/producer roles re-cast (per P07-C3 standing, the pump's first post-entry call is the valid check 0x0072FCE0). Shape observation ONLY - no semantic identity claimed.",
+      "status": "SHAPE OBSERVATION ONLY (premise 1 explicitly applied)"
+    },
+    {
+      "id": "P11-H3",
+      "statement": "Stage A and stage B may be loop bodies of an enclosing iteration whose latch lies beyond 0x006B6CB9 (out-of-window). In-window they are branch-connected straight-line stages; the loop question is undecidable in-window.",
+      "status": "UNKNOWN in-window"
+    }
+  ]
+}

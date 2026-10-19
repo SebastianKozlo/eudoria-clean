@@ -1,0 +1,81 @@
+{
+  "run_id": "P05_QC_R2_20261018",
+  "recheck_method": "independent single-pass scan of the pinned listing (window census for all six windows + line capture) + independent re-parse of all six extracts + manual instruction census",
+  "counters_recheck": {
+    "bodies": { "worker_claim": 6, "reviewer_recomputed": 6, "verdict": "MATCH", "note": "one per window; five end exactly at their window end with RET 0x4; R5's logical body extends past the window (see FINDING P05-QC-F1)" },
+    "instruction_rows": { "worker_claim": 164, "reviewer_recomputed": 164, "breakdown": { "R1": 8, "R2": 79, "R3": 17, "R4": 23, "R5": 29, "R6": 8 }, "verdict": "MATCH" },
+    "call_sites": { "worker_claim": 8, "reviewer_recomputed": 8, "breakdown": { "R1": 0, "R2": 3, "R3": 1, "R4": 2, "R5": 2, "R6": 0 }, "verdict": "MATCH (per-subregion split identical)" },
+    "candidates": { "worker_claim": 4, "reserved": 4, "reviewer_note": "count matches reserve but the four variants are NOT enumerated in the pack (FINDING P05-QC-F3)" }
+  },
+  "reserve_vs_actual": {
+    "bodies": "6 vs 6 reserved - OK",
+    "instruction_rows": "164 = 164 reserved - exactly consumed, no overrun",
+    "call_sites": "8 <= 12 reserved - OK (no refund, per section 6)",
+    "candidates": "4 = 4 reserved - OK"
+  },
+  "line_parity_vs_pinned_source": { "rows_checked": 164, "verbatim_ok": 164, "failures": 0 },
+  "window_completeness": {
+    "R1_0x00509070_0x00509091": { "scan_rows": 8, "extract_rows": 8, "missing": 0, "extra": 0 },
+    "R2_0x0085BFA0_0x0085C0B7": { "scan_rows": 79, "extract_rows": 79, "missing": 0, "extra": 0 },
+    "R3_0x0085C0C0_0x0085C0ED": { "scan_rows": 17, "extract_rows": 17, "missing": 0, "extra": 0 },
+    "R4_0x0085C0F0_0x0085C12E": { "scan_rows": 23, "extract_rows": 23, "missing": 0, "extra": 0 },
+    "R5_0x0085C280_0x0085C2D1": { "scan_rows": 29, "extract_rows": 29, "missing": 0, "extra": 0 },
+    "R6_0x00862850_0x00862868": { "scan_rows": 8, "extract_rows": 8, "missing": 0, "extra": 0 }
+  },
+  "manifest_recheck": {
+    "entries": 15,
+    "sha256_match": "15/15",
+    "bytes_match": "15/15",
+    "bijection_ok_intended_sense": true,
+    "self_exclusion": "MANIFEST.json not in its own list (by design)",
+    "attempt_markers": "RUN_STARTED.json + RUN_STARTED_RETRY1.json present, hashed, preserved; RETRY1's recorded prior-state hash of RUN_STARTED.json matches the manifest entry (case-insensitive)"
+  },
+  "chronology_recheck": {
+    "admit_event": "CONTROL/EVENTS/000007_ADMIT.json seq 7, 2026-10-18T22:04:24.594390Z, admission A6929aee83fa4, reserve 6/164/12/4",
+    "order_utc": "ADMIT 22:04:24 -> CONTRACT 22:04:34 -> RUN_STARTED (child1) 22:04:55 -> RUN_STARTED_RETRY1 (child2) 22:08:35 -> fallback extracts 22:12:28 -> claims/counters/gates/report/handoff 22:13:06 -> MANIFEST 22:13:09 LAST",
+    "verdict": "compliant; no pre-admission action; fallback attribution disclosed in every status surface"
+  },
+  "corrections_and_findings": [
+    {
+      "id": "P05-QC-F1",
+      "severity": "P2",
+      "title": "85C280 un-taken branches target OUTSIDE the admitted window; 'none truncated' counters note contradicted; C5 disposition sub-claim not provable in-window",
+      "evidence": "extract R5 rows 1171148 (JZ 0x0085c2d1 @0085c28a) and 1171155 (JNZ 0x0085c2d1 @0085c2a0); window end-exclusive = 0x0085C2D1; on both paths the frame is uncleaned (ESP=E-0x10, saved ESI pushed) so 0x0085C2D1+ contains further body instructions that were NOT read",
+      "contradicted": "COUNTERS.json note 'all six logical functions fully in-window, none truncated'; CLAIM P05-C5 sentence 'Un-taken paths leave the record untouched'",
+      "correction": "C5 disposition sub-claim downgraded CONFIRMED -> PLAUSIBLE (window-scoped fact: the un-taken paths jump out immediately and write nothing in-window); counters note corrected to 'five bodies end exactly at window end; 85C280 has out-of-window CFG targets at 0x0085C2D1'; record gap VA 0x0085C2D1 for parent admission",
+      "materiality": "C7 dominant-route conclusion unaffected (flag-1 path fully in-window, ends RET 0x4); the 'stale-frame variant remains live' argument must not cite the un-taken-path disposition as established",
+      "revalidation_predicate": "admit [0x0085C2D1, ~0x0085C2E0) and verify the shared tail writes nothing to arg1"
+    },
+    {
+      "id": "P05-QC-F2",
+      "severity": "P2 (procedural; attributed to the parent's fallback execution)",
+      "title": "pack does not meet CONTRACT section 12 minimum artifact set nor its own required_outputs",
+      "evidence": "missing MEMORY_AND_IDENTITY.json, missing SOURCE_PINS.json as dedicated artifact, missing artifact_index.csv (explicitly listed in the pack CONTRACT.required_outputs); extracts lack per-extract headers (source SHA, admission ID - section 6); pin data present only inside RUN_STARTED.json/MANIFEST.json",
+      "correction": "parent corrigendum note (new R2/corrigendum, never a frozen-pack edit); science unaffected - this review independently verified the claims from the extracts + pinned source",
+      "revalidation_predicate": "corrigendum lists the deviations and the missing-artifact decision by the parent"
+    },
+    {
+      "id": "P05-QC-F3",
+      "severity": "P3",
+      "title": "the four 'candidates' are not enumerated",
+      "evidence": "COUNTERS.json 'candidates: 4' with no V1-V4 list (unlike P06); reconstruction from CLAIMS is possible but not traceable",
+      "correction": "enumerate in the corrigendum (e.g. V1 509070=SF+30 link-setter -> REJECTED; V2 dominant route computed -> adopted; V3 862850 raw-field candidate -> adopted, semantics UNVERIFIED; V4 85C0F0 derived vs stored rotation -> derived)"
+    },
+    {
+      "id": "P05-QC-F4",
+      "severity": "P3",
+      "title": "C2 '3x3 transpose-like shuffle' wording vs net permutation",
+      "evidence": "reviewer re-derivation of the 21 FLD/FSTP pairs (12-dword column-major scatter with 0x10 stride + 9-dword descending regroup) shows the NET permutation of the nine matrix floats into the pre-0x0096cb20 argument area is IDENTITY (dest[i] = [EAX+4i], i=0..8); the strided pattern is transpose-LIKE as a code pattern, not a proven net transpose",
+      "correction": "keep 'reordered via strided scatter/regroup'; do not cite a proven transpose; C2's load-bearing conclusion (computed, virtual-delegated) is unaffected and honestly scoped by its own countermodel",
+      "revalidation_predicate": "0x0096cb20 body admission would settle the arg-layout question"
+    }
+  ],
+  "gates_recheck": {
+    "G1_line_parity": "PASS upheld (164/164 by reviewer)",
+    "G2_region_discipline": "PASS upheld - no out-of-window semantic read found; NOTE: reviewer adds that R5's window END choice left the un-taken-path tail unread (F1) - discipline itself was not violated (the tail was simply not admitted)",
+    "G3_computed_vs_raw": "PASS upheld per-producer (C2/C3/C4/C5 computed; C6 raw; all verified instruction-level)",
+    "G4_premises": "PASS upheld (update mechanism != source; scoped negatives bounded; vtable match != receiver identity; three float-shaped DWORDs != XYZ provenance - all preserved)",
+    "G5_counters": "PASS upheld numerically; the 'none truncated' NOTE inside COUNTERS is corrected by F1 (note text, not the counters themselves)",
+    "G6_attribution": "PASS upheld - fallback disclosure honest, attempt markers preserved, both child failures recorded"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "run_id": "PE_935_PLACEMENT_P09_QC_R1_20261018",
+  "target_pack": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\packages\\P09_EXEC_R1",
+  "reviewer": "pe-master-auditor (fresh independent child session; NO_NESTED_TASKS)",
+  "method_statement": "Every load-bearing claim was re-derived from the pinned primary source GHIDRA_H5_VTABLE2.txt (re-hashed by this reviewer) and from CONTROL/EVENTS, never from the worker's derived artifacts alone. All 13 package files were read to EOF. The independent census used a DIFFERENT tool path from the worker's (streaming PowerShell line-scan vs the worker's Grep tool), making the barrier verification triple-sourced (parent navigation, worker Grep, this review's scan). Semantic analysis was confined to the admitted window 0x006C3640-0x006C3678; boundary rows were displayed for window pinning only, mirroring the worker's own N5 disclosure.",
+  "hash_verifications": {
+    "pinned_source_rehash": "GHIDRA_H5_VTABLE2.txt fresh SHA256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, size 50,780,146 B == contract pin == event 000010 pin == worker SOURCE_PINS/MANIFEST values - MATCH",
+    "package_manifest_rehash": "13/13 rows match fresh Get-FileHash SHA256 (artifact_index.csv 4c0cee4a..., BARRIER_BACKLOG.json 73c03234..., CLAIMS.json 1ec3addb..., CONTRACT.json 7c9bcc86..., COUNTERS.json 4432111a..., EXTRACT 2b9196be..., GATES.json afb5039f..., HANDOFF.md b0fb2475..., MEMORY_AND_IDENTITY.json 23694e2f..., NAVIGATION_CENSUS.txt 98e5c77c..., REPORT.md 1498d5bc..., RUN_STARTED.json 20982546..., SOURCE_PINS.json 326751d3...); sizes match on all 13",
+    "bijection": "disk = 14 files = 13 manifest rows + MANIFEST.json (self-excluded) - HOLDS; zero unmanifested files",
+    "contract_identity": "CONTROL\\CONTRACTS\\P09.json SHA256 7C9BCC869C91789443F0D3B77C94E15D62C5425900AC57365CF5511168FACAC8 == package CONTRACT.json (byte-identical) == GATES G3 pin",
+    "artifact_index_vs_manifest": "artifact_index.csv rows (12 files, excluding itself and MANIFEST) all match manifest hashes; manifest additionally covers artifact_index.csv itself. Presentational difference from P08's index (which carries a self-note row) - registered as P3, not a data defect"
+  },
+  "line_parity_verification": {
+    "method": "direct source line read 649385-649407 and character-level comparison against EXTRACT_006C3640_006C3678.txt rows",
+    "result": "23/23 rows byte-identical (VA + mnemonic + operands); zero mismatches; zero gaps",
+    "boundary_checks": {
+      "preceding_row": "line 649384: 006c363c RET 0xc - confirms the previous body ends at 006c363c and 006c3640 starts a new body (worker countermodel in P09-C1 verified: no out-of-window prologue)",
+      "next_row": "line 649408: VA 006c3678 (out-of-window) - confirms the end-exclusive boundary 0x006C3678",
+      "window_end_encoding": "last in-window row 006c3676 JMP is a 2-byte short jump ending exactly at 006c3678"
+    },
+    "address_continuity_rederivation": "all 23 consecutive-VA deltas consistent with standard x86 encodings: 006c3640 PUSH(1) -> 3641 MOV EBP,[ESP+0x10](4) -> 3645 PUSH(1) -> 3646 MOV EDI(4) -> 364a CMP(2) -> 364c JZ rel8(2) -> 364e PUSH(1) -> 364f MOV EBX(4) -> 3653 PUSH(1) -> 3654 MOV ESI(4) -> 3658 MOV ECX,EDI(2) -> 365a CALL EBX(2) -> 365c MOV ECX,[ESI+4](3) -> 365f CMP(3) -> 3662 JZ(2) -> 3664 TEST(2) -> 3666 JZ(2) -> 3668 MOV EDX,[EAX](2) -> 366a MOV [ECX],EDX(2) -> 366c MOV EAX,[EAX+4](3) -> 366f MOV [ECX+4],EAX(3) -> 3672 ADD [ESI+4],0x8(4) -> 3676 JMP rel8(2) -> 3678. Total = 56 = 0x38 bytes == window size == COUNTERS.region_bytes - EXACT"
+  },
+  "instruction_level_rederivations": {
+    "stack_argument_loads": {
+      "claim": "P09-C1: stack_arg[1]->EDI, [2]->EBP, [3]->ESI, [4]->EBX; [0] never read; entry ECX unused before 006c3658",
+      "rederivation": "entry ESP=E0 (return addr @E0; args: [E0+4]=arg0, +8=arg1, +0xC=arg2, +0x10=arg3, +0x14=arg4). PUSH EBP (ESP=E0-4): MOV EBP,[ESP+0x10]=[E0+0xC]=arg2. PUSH EDI (ESP=E0-8): MOV EDI,[ESP+0x10]=[E0+8]=arg1. PUSH EBX (ESP=E0-0xC): MOV EBX,[ESP+0x20]=[E0+0x14]=arg4. PUSH ESI (ESP=E0-0x10): MOV ESI,[ESP+0x20]=[E0+0x10]=arg3. No row reads [E0+4] (arg0). No ECX-touching row before 006c3658 MOV ECX,EDI. Worker's slot resolution [E0+0x0C],[E0+0x08],[E0+0x14],[E0+0x10] = arg[2],[1],[4],[3] - MATCHES EXACTLY",
+      "verdict": "CONFIRMED (mechanics); role labels correctly flagged ARG-SHAPE INFERENCE in the pack"
+    },
+    "enqueue_loop": {
+      "claim": "P09-C2: exit when EDI==EBP via CMP/JZ->0x006C369C (out-of-window); per iteration MOV ECX,EDI; CALL EBX; cursor=ECX=[ESI+4]; CMP ECX,[ESI+8]; JZ 0x006C3678 (capacity event, out-of-window); TEST ECX,ECX; JZ 0x006C3672 (null-skip); else copy [EAX]->[ECX] (via EDX) and [EAX+4]->[ECX+4]; ADD [ESI+4],0x8; JMP 0x006C368A",
+      "rederivation": "rows 649389/649390 (CMP EDI,EBP; JZ 006c369c), 649395/649396 (MOV ECX,EDI; CALL EBX - the ONLY in-window CALL, indirect register target), 649397-649401 (MOV ECX,[ESI+4]; CMP ECX,[ESI+8]; JZ 006c3678; TEST ECX,ECX; JZ 006c3672), 649402-649405 (MOV EDX,[EAX]; MOV [ECX],EDX; MOV EAX,[EAX+4]; MOV [ECX+4],EAX), 649406 (ADD [ESI+4],0x8), 649407 (JMP 006c368a) - ALL MATCH",
+      "null_skip_countermodel_check": "the pack's disclosed degeneracy is real: after cursor==NULL the ADD makes [+4]=8; a subsequent iteration would dereference 8 unless the out-of-window capacity-event path re-establishes the buffer - correctly recorded as countermodel in P09-C3, not resolved in-window",
+      "verdict": "CONFIRMED (mechanics); callback-EAX-return and ECX-thiscall ABI correctly labeled premise/ABI INFERENCE"
+    },
+    "queue_object_fields": {
+      "claim": "P09-C3: [+0] never touched; [+4] cursor pointer, read @006c365c, written ONLY @006c3672 (+=8); [+8] limit read @006c365f, never written; no count update, no head update, no entry-pointer store into object fields in-window",
+      "rederivation": "all ESI-memory rows in-window: 006c365c MOV ECX,[ESI+0x4] (read), 006c365f CMP ECX,[ESI+0x8] (read), 006c3672 ADD [ESI+0x4],0x8 (read-modify-write). No [ESI+0x0] access anywhere in the 23 rows; no write to [ESI+0x8]; entry writes go to [ECX]/[ECX+4] where ECX=[ESI+4] (entry memory, not object fields). Pointer-ness of [+4] proven by direct dereference at 006c366a/006c366f - MATCHES",
+      "verdict": "CONFIRMED (field census, 23 rows only, as claimed)"
+    },
+    "entry_layout": {
+      "claim": "P09-C4: entry = 8 bytes = 2 DWORDs (entry[+0]<-[EAX], entry[+4]<-[EAX+4]); dense append (+8); no per-entry header/tag/size in-window",
+      "rederivation": "two 4-byte copies + advance 0x8 - MATCHES; no other entry-memory writes in-window",
+      "verdict": "CONFIRMED (as transported pair; semantic identity of the DWORDs correctly cited-not-proven from P07)"
+    },
+    "edge_inventory": {
+      "claim": "COUNTERS.edges_detail: JZ 006c369c (006c364c), JZ 006c3678 (006c3662), JZ 006c3672 (006c3666), JMP 006c368a (006c3676); in-window targets 1 (006c3672); out-of-window 3",
+      "rederivation": "the 23 rows contain exactly 3 JZ + 1 JMP = 4 edges with exactly those targets; 006c3672 is in-window (the ADD row); 006c369c/006c3678/006c368a out-of-window - MATCHES",
+      "dispatch_wording_observation": "the QC dispatch prose said 'the three JZ targets (0x006C3678, 0x006C368A, 0x006C369C out-of-window)' - 0x006C368A is the JMP target, and the third JZ target 0x006C3672 is IN-window. The worker's enumeration is the byte-accurate one; the parent's synthesis should use the worker's edges_detail (observation on dispatch wording, not a worker defect)"
+    },
+    "no_ret_in_window": "zero RET rows in the 23 rows - consistent with 'prefix of one body; epilogue out-of-window; ABI unknown'; unforeseen in-window bodies = 0 CONFIRMED (no other body can start inside a window with no RET)"
+  },
+  "independent_barrier_census": {
+    "method": "streaming PowerShell scan of GHIDRA_H5_VTABLE2.txt (different tool from worker's Grep; line-numbered), classifying every line whose first VA token equals the target (body row) vs lines containing 'CALL 0x<target>' (operand site) vs any other reference to the target address",
+    "0x0040B070": {
+      "body_rows": 0,
+      "call_operand_sites": 17,
+      "sites": ["00528b6a@L182102", "005c4a95@L359334", "005c4b40@L359393", "006b6d0a@L633015", "006c3fb5@L650198", "006c88a1@L656215", "006d3cac@L670831", "006d44ed@L671423", "0085b2ac@L1169834", "0085b2c4@L1169842", "0085b2dc@L1169850", "0085b2f1@L1169857", "0085b306@L1169864", "008b690d@L1273709", "008b6a04@L1273766", "00933a85@L1429407", "00933beb@L1429485"],
+      "other_operand_references": 0,
+      "match_with_worker": "EXACT (same 17 VAs as NAVIGATION_CENSUS N2)"
+    },
+    "0x0043E5B0": {
+      "body_rows": 0,
+      "call_operand_sites": 1,
+      "sites": ["006b6d2b@L633029"],
+      "other_operand_references": 0,
+      "match_with_worker": "EXACT (same site + same listing line 633029)"
+    },
+    "0x0043C700": {
+      "body_rows": 0,
+      "call_operand_sites": 10,
+      "sites": ["006b6cfb@L633011", "006c87f4@L656162", "006c88e4@L656234", "00735648@L790399", "00736813@L791861", "00736838@L791875", "0082381a@L1098900", "008264d7@L1102281", "0082861a@L1104935", "008c3b4e@L1290898"],
+      "other_operand_references": 0,
+      "match_with_worker": "EXACT (same 10 VAs)"
+    },
+    "0x006C3640": {
+      "body_rows": 1,
+      "body_row": "L649385 006c3640 PUSH EBP (the window start)",
+      "call_operand_sites": 2,
+      "sites": ["006c3fcd@L650209", "006d4501@L671433"],
+      "other_operand_references": 0,
+      "match_with_worker": "EXACT (N1: same 2 sites + lines)"
+    },
+    "back_edge": {
+      "claim": "N4: line 649418: 006c368f JNZ 0x006c3658",
+      "recount": "exactly 1 'JNZ 0x006c3658' row in the entire listing, at 006c368f line 649418 - MATCH"
+    },
+    "falsifier_note": "'appears ONLY as CALL operand' was tested with the other-reference sweep (0 hits for all four targets) - the barrier is confirmed by paired positive (operands) / negative (no body rows, no other refs) patterns, not by absence of search"
+  },
+  "ghidra_gate_00407270_backlog_check": {
+    "existence": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIGHT_AGGREGATE_20260905_160000\\GHIDRA_GATE_00407270.txt exists, 1,269 B",
+    "worker_observed_match_lines_recheck": "confirmed at grep level: L24 'FUN_0040b070();', L60 '-> FUN_0040b070 @0040b070', L66 '=== GATE-CALLEE @0x40b070 : FUN_0040b070', L69 'int __fastcall FUN_0040b070(int param_1)' - the worker's N3 observation is accurate (4 of 4 lines present); content NOT read by this review beyond these match lines",
+    "catalog_membership_check": "NOT a member of the campaign's closed SAVED_TEXT_CATALOG.json (967 files; checked by this reviewer) - the worker honestly marked membership as 'NOT verified in this package'; this review closes that gap: any future use of this file for P09-B3 requires an explicit corpus-boundary decision by PE-MASTER in addition to a region admission"
+  },
+  "p07_citation_check": {
+    "cited_context": "P07 REPORT line 5(b): 'ALL THREE imm32 sites register the SAME callback 0x008BD720. 0x006B6C9D is the {0x66,A}-forming pump... 43C700 -> callback registration via 40B070 -> enqueue via 43E5B0. 006C3F98 and 006D44A4 register the same callback via 40B070 + 006C3640 (second enqueue path).'",
+    "adjudication": "P09's C6 citations match P07's published statements; P09 correctly labels them cited-not-re-derived and does NOT assert 43E5B0==006C3640 equivalence (data barrier + shape-inequality premise respected)"
+  },
+  "timestamp_repair_consistency_check": {
+    "worker_disclosure": "REPORT section 5: several non-load-bearing stamps were initially written as estimates; SELF_CHECK caught it; invented stamps replaced with real tool-clock anchors (23:07:05.746Z run start; 23:12:08.533Z first post-write clock check; 23:12:29.117Z stamped re-hash) or explicit bounded windows; artifact_index.csv and MANIFEST.json regenerated over the corrected files; no scientific content altered",
+    "final_state_consistency": "anchors strictly ordered: RUN_STARTED 23:07:05.746Z < post-write check 23:12:08.533Z < re-hash 23:12:29.117Z < MANIFEST 23:12:51.034Z; EXTRACT/NAVIGATION_CENSUS use honest bounded windows with no invented single stamps; all 13 final hashes verified against current disk; artifact_index == MANIFEST hashes",
+    "no_scientific_content_altered": "verifiable content independently re-verified against the primary source (23/23 row parity; all censuses re-derived; instruction semantics re-derived) - any alteration of scientific content would have surfaced as a parity/census mismatch; NONE found. Residual: pre-repair intermediate states were not preserved, so 'only timestamp lines changed' is accepted as consistent-with-all-checkable-evidence rather than directly provable; the 'identical value first computed in 23:07:05.746Z run-start batch' claim is not independently verifiable but is non-load-bearing (the hash VALUE is verified against the current file)"
+  },
+  "chronology_vs_control_events": {
+    "event_000010": "ADMIT P09, admission_id A14f4207636e3, region 0x006C3640-0x006C3678 (end-exclusive), body_entries [0x006C3640], reserve {bodies 1, instructions 23, edges 4, candidates 2}, utc 2026-10-18T23:06:48.333546Z, previous_event_sha256 chain CHAIN_OK (full 10-event chain walk verified)",
+    "ordering": "ADMIT 23:06:48.33Z -> CONTRACT now_utc 23:06:52Z -> RUN_STARTED 23:07:05.746Z -> census/extract window -> re-hash 23:12:29.117Z -> MANIFEST 23:12:51.034Z - no pre-admission body read; hard stop 2026-10-19T00:20:00Z respected",
+    "reserve_vs_actual": "reserved 1/23/4/2 == actual 1 body (prefix) / 23 rows / 4 edges / 2 candidates; in-window CALL = 1 (CALL EBX) - the dispatch-prose '4 CALL' vs contract-field 'edges: 4' discrepancy is real and the worker's reconciliation (edges=4, CALL=1, matching the question's '1 call') is CORRECT"
+  },
+  "boundary_read_disclosure_of_this_review": "to pin the window, this reviewer displayed listing lines 649380-649420 once (41 lines): covers 5 pre-window rows, the 23 in-window rows, and 13 post-window rows. Out-of-window rows (006c3630-006c363c, 006c3678-006c369f range shown) were used ONLY for boundary/back-edge/RET-0xc verification mirroring the worker's N5 disclosure; NO semantic claims are made on them by this review."
+}

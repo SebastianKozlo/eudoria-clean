@@ -1,0 +1,58 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P06",
+  "front": "C",
+  "counters_recorded_at_utc": "2026-10-18T22:27:45Z (honest bound: this file's final edit occurred between real-clock readings 2026-10-18T22:27:38.348Z and 2026-10-18T22:27:52.985Z; earlier stamps in this field were estimates, disclosed)",
+  "clock_source": "PowerShell Get-Date UTC (real clock)",
+  "reserved": { "bodies": 2, "instruction_rows": 98, "call_sites": 14, "candidate_variants": 4 },
+  "actual": {
+    "bodies_in_window": 3,
+    "bodies_declared": 2,
+    "bodies_unforeseen": 1,
+    "bodies_used_for_claims": 2,
+    "instruction_rows": 92,
+    "instruction_rows_subregion_A": 4,
+    "instruction_rows_subregion_B": 88,
+    "call_sites": 11,
+    "call_sites_subregion_A": 0,
+    "call_sites_subregion_B": 11,
+    "unique_call_targets": 11,
+    "indirect_calls": 0,
+    "candidate_variants_evaluated": 4
+  },
+  "va_accounting": {
+    "window_A": "0x008BD720-0x008BD740 (32 VA range, 4 listed rows, va_max=0x008BD733)",
+    "window_B": "0x00848EA0-0x00848FC4 (292 VA range, 88 listed rows, va_max=0x00848FC2)",
+    "va_union_bytes": 324,
+    "va_sum_bytes": 324,
+    "window_overlap": "none"
+  },
+  "bodies": [
+    "0x008BD720 (declared; used)",
+    "0x008BD730 (UNFORESEEN in-window; INCIDENT-P06-I1; NOT used for claims)",
+    "0x00848EA0 (declared; body extends past window end - epilogue at 0x00848FC6 outside)"
+  ],
+  "candidate_variants_evaluated": [
+    "V1: '0x008BD720 is a dispatching thunk (JMP/CALL to a target)' -> REJECTED_WITH_EVIDENCE",
+    "V2: '0x008BD720 is a pointer-returning leaf (this+0x18 getter, side-effect-free)' -> CONFIRMED (adopted)",
+    "V3: 'a VFS-record-fed channel is visible in-window at 0x00848EA0' -> REJECTED (scoped negative; no file/record read in-window)",
+    "V4: 'the per-slot {u16@+0xC, float@+0x10} accesses are inside the admitted window' -> REJECTED (flag-2 path is at >=0x00848FEC, outside window)"
+  ],
+  "out_of_window_targets_recorded_not_read": {
+    "control_flow": ["0x00848FEC", "0x00848FC4", "0x00848FC6"],
+    "callees": ["0x00745540", "0x00745BF0", "0x00843D60", "0x00844660", "0x0043A550", "0x0072F580", "0x008E0110", "0x0072FCE0", "0x0072FE30", "0x00745690", "0x006C1F90"],
+    "data": ["0x00A28300 (SEH handler imm)", "0x00A7B25C (float const)", "0x00B9D8D0 (MSVC security cookie - standard runtime datum)"],
+    "callers_navigation_only": [
+      "22 direct CALL sites of 0x008BD720 (see REPORT.md navigation appendix)",
+      "3 imm32 sites of 0x008BD720: 006B6D05, 006C3FB0, 006D44E8",
+      "1 direct CALL site of 0x00848EA0: 004E55F7"
+    ]
+  },
+  "budget_check": {
+    "bodies": "3 vs 2 reserved - DEVIATION (unforeseen in-window body; window-contained; disclosed as INCIDENT-P06-I1)",
+    "instruction_rows": "92 vs 98 - OK",
+    "call_sites": "11 vs 14 - OK",
+    "candidate_variants": "4 vs 4 - OK"
+  },
+  "campaign_shared_budget_note": "P06 stayed within its package reservation for rows/CALL/candidates; the bodies counter shows 3 in-window logical bodies vs 2 declared (window-contained, disclosed). Package cap (<=20 bodies / 2400 rows / 64 CALL / 12 variants) respected with large margin."
+}

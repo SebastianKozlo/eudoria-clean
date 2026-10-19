@@ -1,0 +1,50 @@
+{
+  "manifest_type": "qc_review_manifest",
+  "run_id": "P07_QC_R1_20261018",
+  "parent_run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "target_pack": "packages/P07_EXEC_R1 (frozen, unmodified by this review)",
+  "admission_id": "A0c76e3cc1494",
+  "reviewer": "pe-master-auditor (fresh child session, direct PE-MASTER dispatch, NO_NESTED_TASKS, no delegation)",
+  "manifest_written_utc": "2026-10-18T22:59:38Z",
+  "artifacts": [
+    {
+      "path": "RUN_STARTED.json",
+      "size_bytes": 5777,
+      "sha256": "5e25f6c1933b9df391855d372451f8c87b41ac17f71dd94091c43c58b0430cc2",
+      "note": "first write of this review (2026-10-18T22:52:30Z)"
+    },
+    {
+      "path": "RECHECK_NOTES.json",
+      "size_bytes": 19063,
+      "sha256": "b961d5eea9dbaa15e886a5585fc96f4c5e1aef360f381c1baca299930b12ab31",
+      "note": "line-numbered independent rederivations, citation verification, overshoot adjudication, full read log"
+    },
+    {
+      "path": "COUNTERS_RECHECK.json",
+      "size_bytes": 5424,
+      "sha256": "01dbe52cf6dbb8aff3e81f6f10f0aaf69e39cc286866b5f72834752bbde7520b",
+      "note": "recomputed counters, decisive-chain rechecks, manifest re-hash results, gates recheck"
+    },
+    {
+      "path": "QC_REPORT.md",
+      "size_bytes": 16812,
+      "sha256": "d0ae8295be3c7b74f2a677b1133393a7c6ada378e680d5ebf128cf84ee7a2c91",
+      "note": "main report: accepted claims, corrections, rejected overclaims (none), overshoot adjudication, remaining edge"
+    }
+  ],
+  "self_excluded": "MANIFEST.json (this file) - self-exclusion precedent; its own hash cannot be contained in itself",
+  "qc_verdict": "QC_PASS",
+  "process_verdict": "PASS_WITH_CORRECTIONS",
+  "claims_accepted": ["P07-C1 STRONGLY_SUPPORTED", "P07-C2 CONFIRMED (scoped negative)", "P07-C3 CONFIRMED (in-window structure; arg-shape labels premise-flagged)", "P07-C4 CONFIRMED (pattern identity; 'register' arg-shape wording)", "P07-C5 STRONGLY_SUPPORTED"],
+  "claims_rejected": [],
+  "findings": {
+    "P0": 0,
+    "P1": ["QC-P07-1 COUNTERS.json call_breakdown defective (sums 14 vs total 10; SR2:8/SR4:2 unverifiable; correct rows 1/6/3/3, unique union 10)", "QC-P07-2 artifact_index.csv missing (required output per P07.json required_outputs + parent CONTRACT section 12)"],
+    "P2": ["QC-P07-3 overshoot wording 'beyond the function-map window 0x006B6D3E' physically wrong - no row beyond 0x006B6D3E; +15 is vs RESERVED 133, all rows in-admission", "QC-P07-4 'register the SAME callback' + A-getter receiver-type wording nuances (premise-flagged arg-shape)"],
+    "P3": ["QC-P07-5 body-fragment/entry-ABI nuance + candidates metric undefined", "QC-P07-6 '10 CALL' unique-vs-rows ambiguity"]
+  },
+  "overshoot_adjudication": "NO admission violation; NO out-of-admission row; NO retroactive authorization needed (ADMIT 22:42:27Z precedes extraction 22:43:29Z); parent must book ACTUAL 148 rows in the campaign ledger",
+  "target_pack_integrity": "MANIFEST of P07_EXEC_R1 re-hashed independently: 15/15 SHA+size match, bijection holds; pinned source SHA recomputed and matching; package CONTRACT.json byte-identical to CONTROL/CONTRACTS/P07.json",
+  "source_pin": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+  "scope_discipline": "Semantic read confined to the four admitted subregions; out-of-window targets recorded-not-read; inherited bridge claims verified at citation level only; no EXE/payload/runtime/config/repo actions; no writes outside reviews/P07_QC_R1"
+}

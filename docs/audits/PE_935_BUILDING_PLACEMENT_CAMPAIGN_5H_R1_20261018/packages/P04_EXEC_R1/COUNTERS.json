@@ -1,0 +1,57 @@
+{
+  "package_id": "P04",
+  "reserved": {
+    "bodies": 5,
+    "instruction_rows": 291,
+    "call_sites": 47,
+    "candidates": 4,
+    "source": "P04.json admission A0af4119f1ccf reserve block"
+  },
+  "actual": {
+    "bodies_opened": 5,
+    "bodies_opened_detail": [
+      {"body": "0x005094C0", "region": "R1", "rows": 9, "complete": true},
+      {"body": "0x006A36F0", "region": "R2", "rows": 35, "complete": true},
+      {"body": "0x0067B4F0", "region": "R3", "rows": 74, "complete": true},
+      {"body": "0x0067C560", "region": "R4", "rows": 76, "complete": true},
+      {"body": "0x0067C7C0", "region": "R5", "rows": 97, "complete": false, "note": "window truncated at admission boundary 0x0067C921; body continues at JMP 0x0067C923 (un-admitted); epilogue/RET convention unknown"}
+    ],
+    "instruction_rows_extracted": 291,
+    "instruction_rows_detail": {"R1": 9, "R2": 35, "R3": 74, "R4": 76, "R5": 97},
+    "call_sites": 47,
+    "call_sites_detail": {"R1": 0, "R2": 6, "R3": 11, "R4": 11, "R5": 19},
+    "unique_call_targets": 28,
+    "unique_call_targets_detail": {
+      "direct": 24,
+      "direct_list": ["0x0085C280", "0x00509070", "0x0085BFA0", "0x005094C0", "0x0096CD10", "0x00509510", "0x00862850", "0x0095DA2E", "0x004150F0", "0x008B7210", "0x006A34A0", "0x00401360", "0x00485050", "0x0048CBB0", "0x005247C0", "0x0085C0C0", "0x0085C0F0", "0x00509190", "0x0043A550", "0x0072F580", "0x0072FCE0", "0x0095D3C4", "0x00733340", "0x006C0D50"],
+      "indirect_via_slot": 4,
+      "indirect_list": ["[0x00A75A38]", "[0x00A75A44]", "[0x00A75A5C]", "[0x00A75A40]"]
+    },
+    "candidates_analyzed": 4,
+    "candidates_detail": [
+      "V1: 0x0085BFA0 out-buffer tail at +0x24 (R2/R3/R4; R4 = discriminating witness)",
+      "V2: 0x0085C280 (R2) / 0x00862850 (R3) 4x4-translation-row at +0x30 from &F+0xC",
+      "V3: stale-frame / uninitialized record (if all extents fall short)",
+      "V4: 0x0085C0C0 returned pointer - internal arg1 field vs out-buffer &P+8 (R5)"
+    ]
+  },
+  "budget_check": {
+    "rows_reserved_vs_actual": "291 = 291 (exact)",
+    "calls_reserved_vs_actual": "47 = 47 (exact)",
+    "bodies_reserved_vs_actual": "5 = 5 (exact; R5 partial within window)",
+    "candidates_reserved_vs_actual": "4 = 4 (exact)",
+    "overrun": "NONE",
+    "unforeseen_bodies_inside_windows": "NONE (all JZ/JMP targets outside windows; none read)"
+  },
+  "admission_compliance": {
+    "regions_read": 5,
+    "regions_declared": 5,
+    "navigation_operations": "grep for callsites of 0x005094C0 (12 hits) + grep for body entries (4 hits) + 1-line format sample read of first 5 lines of source file (format identification only)",
+    "semantic_reads_outside_admission": "NONE",
+    "un_admitted_regions_touched": "NONE"
+  },
+  "clock": {
+    "run_started_utc": "2026-10-18T21:49:38Z",
+    "package_hard_stop_utc": "2026-10-18T22:25:00Z"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P09",
+  "gates": [
+    {"gate": "G1_RUN_STARTED_FIRST", "status": "PASS", "evidence": "RUN_STARTED.json materialized 2026-10-18T23:07:05Z (powershell DateTime.UtcNow) before any semantic read of the region"},
+    {"gate": "G2_SOURCE_PIN", "status": "PASS", "evidence": "GHIDRA_H5_VTABLE2.txt re-hash 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB == pinned SHA (stamped 2026-10-18T23:12:29.117Z; identical value first computed in 23:07:05.746Z run-start batch)"},
+    {"gate": "G3_CONTRACT_SHA", "status": "PASS", "evidence": "CONTROL/CONTRACTS/P09.json SHA256 7C9BCC869C91789443F0D3B77C94E15D62C5425900AC57365CF5511168FACAC8 matches prompt pin; package copy CONTRACT.json byte-identical (re-hash match)"},
+    {"gate": "G4_WINDOW_COMPLIANCE", "status": "PASS_WITH_DISCLOSURE", "evidence": "semantic claims restricted to 23 in-window rows (listing 649385-649407); boundary read block disclosed (NAVIGATION_CENSUS N5); adjacent rows unused"},
+    {"gate": "G5_RESERVE_RECONCILIATION", "status": "PASS", "evidence": "actual 1 body / 23 rows / 4 edges / 2 candidates == reserved; prose '4 CALL' vs CONTRACT.json 'edges:4' reconciled (actual CALL=1, matches question '1 call')"},
+    {"gate": "G6_BARRIER_REVERIFICATION", "status": "PASS", "evidence": "0x0040B070/0x0043E5B0/0x0043C700: zero body rows in main listing (anchored patterns); operand censuses 17/1/10; rg tool failure disclosed and redone with Grep tool"},
+    {"gate": "G7_NO_OUT_OF_WINDOW_READS", "status": "PASS", "evidence": "targets 0x006C3678/0x006C368A/0x006C369C recorded in HANDOFF, not analyzed; incidentally displayed rows disclosed with no claims"},
+    {"gate": "G8_FORBIDDEN_OPS", "status": "PASS", "evidence": "no EXE/payload/runtime, no new Ghidra exports, no old scripts, no frozen roots/config/skills/repo edits, no installs"},
+    {"gate": "G9_UNFORESEEN_BODY", "status": "NOT_APPLICABLE", "evidence": "0 unforeseen in-window bodies; 0 incidents; no PARTIAL/NONCOMPLIANT needed"},
+    {"gate": "G10_DEADLINE", "status": "PASS", "evidence": "package complete before hard stop 2026-10-19T00:20:00Z"},
+    {"gate": "G11_OUTPUT_ROOT", "status": "PASS", "evidence": "all writes under packages\\P09_EXEC_R1 only; fresh package dir; no other package or CONTROL touched"},
+    {"gate": "G12_MANIFEST_LAST", "status": "PASS", "evidence": "MANIFEST.json written last, self-excluded"}
+  ],
+  "run_status": "COMPLETED_IN_WINDOW",
+  "qc_origin": "SELF_CHECK (worker); independent QC by parent's reviewer pending",
+  "self_check_note": "SELF_CHECK performed: reserve vs actual counters reconciled; all 4 edges and 1 call accounted; barrier verified with two independent patterns (operand + anchored body-row); premises labeled; no default-success fallbacks"
+}

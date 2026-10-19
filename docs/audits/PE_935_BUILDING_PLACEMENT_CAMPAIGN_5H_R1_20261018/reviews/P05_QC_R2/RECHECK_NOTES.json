@@ -1,0 +1,122 @@
+{
+  "run_id": "P05_QC_R2_20261018",
+  "reviewer_role": "pe-master-auditor (fresh child session, dispatched directly by PE-MASTER, NO_NESTED_TASKS, no delegation; predecessor marker P05_QC_R1 left untouched)",
+  "target_pack": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\packages\\P05_EXEC_R1",
+  "target_pack_attribution": "DIRECT_ANALYST_FALLBACK by the PE-MASTER parent (CONTRACT section 4) after two incomplete child executions; full adversarial standard applied identically to any executor's pack",
+  "pinned_source": {
+    "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIGHT_AGGREGATE_20260905_160000\\GHIDRA_H5_VTABLE2.txt",
+    "sha256_recomputed_by_reviewer": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+    "size_bytes": 50780146,
+    "line_count": 1743929,
+    "use_rule_honored": "semantic read confined to the six admitted subregions; the writer 0x005094C0 was NOT read (not admitted); address searches = navigation only"
+  },
+  "files_read_to_eof": [
+    "REPORT.md", "CLAIMS.json", "COUNTERS.json", "GATES.json", "HANDOFF.md", "CONTRACT.json",
+    "RUN_STARTED.json", "RUN_STARTED_RETRY1.json", "BARRIER_BACKLOG.json", "MANIFEST.json",
+    "extracts/R1_509070_509091.txt", "extracts/R2_85BFA0_85C0B7.txt", "extracts/R3_85C0C0_85C0ED.txt",
+    "extracts/R4_85C0F0_85C12E.txt", "extracts/R5_85C280_85C2D1.txt", "extracts/R6_862850_862868.txt"
+  ],
+  "parent_control_read": [
+    "CONTROL\\EVENTS\\000007_ADMIT.json",
+    "AUTHORING CONTRACT.md sections 4/6/12"
+  ],
+  "method": [
+    "M1: independent re-hash of all 15 manifest entries (script; SHA256 + size)",
+    "M2: single-pass scan of the pinned listing capturing the 164 claimed source lines + every listing row whose VA falls in the six admitted windows",
+    "M3: byte-level line parity extract-vs-source for all 164 rows",
+    "M4: manual instruction-level VA-delta and encoding verification of all 164 rows",
+    "M5: manual semantics rederivation of each claim C1-C8 from the extracts and the pinned listing",
+    "M6: chronology check vs CONTROL/EVENTS/000007_ADMIT.json, file mtimes, and the preserved child-attempt markers",
+    "M7: pack-completeness check vs CONTRACT section 12 minimum artifact set and the pack's own required_outputs"
+  ],
+  "per_window_rederivation": {
+    "R1_0x00509070": {
+      "captured_source_lines": "145443-145450 (8 rows)",
+      "line_parity": "8/8 byte-identical",
+      "completeness": "scan rows 8 = extract rows 8; body ends RET 0x4 at 0050908e -> 00509091 = window end exactly",
+      "va_delta_encoding_check": "MOV EAX,[ESP+4] (4B) -> MOV EDX,[EAX] (2B) -> MOV [ECX+0x80],EDX (6B) -> MOV EDX,[EAX+4] (3B) -> MOV [ECX+0x84],EDX (6B) -> MOV EAX,[EAX+8] (3B) -> MOV [ECX+0x88],EAX (6B) -> RET 0x4 (3B); all deltas exact",
+      "claim_C1_rederivation": "CONFIRMED: thiscall 3-DWORD setter copying [arg1+0]/[arg1+4]/[arg1+8] to [ECX+0x80/0x84/0x88]; RET 0x4 cleans the single stack arg; NO SF+30 access in window (window-scoped negative upheld); 'NOT a link/attach setter' for THIS body - upheld"
+    },
+    "R2_0x0085BFA0": {
+      "captured_source_lines": "1170926-1171004 (79 rows)",
+      "line_parity": "79/79 byte-identical",
+      "completeness": "scan 79 = extract 79; body ends RET 0x4 at 0085c0b4 -> 0085c0b7 = window end exactly",
+      "claim_C2_rederivation": {
+        "virtual_call": "CONFIRMED: MOV ECX,[ECX+0x2c] (object); MOV EAX,[ECX] (vtable); MOV EAX,[EAX+0x24] (slot +0x24 = index 9); LEA EDX,[ESP+0x78]; PUSH EDX (out-arg); CALL EAX (indirect) - 3 call sites total in R2 (CALL EAX + 0x0096cb20 + 0x0096cf80), matches counter R2=3",
+        "twelve_floats": "CONFIRMED: FLD [EAX+0x00]..[EAX+0x2c] = 12 float loads from the virtual call's returned EAX; 12 FSTP scatter + 9 FLD/FSTP regroup = 21 shuffle pairs",
+        "shuffle_net_effect_observation": "P3 nuance: the scatter is column-major with 0x10 stride ([EAX+0]->P1+0x38, [EAX+4]->P1+0x48, [EAX+8]->P1+0x58, [EAX+c]->P1+0x3c, [EAX+10]->P1+0x4c, [EAX+14]->P1+0x5c, [EAX+18]->P1+0x40, [EAX+1c]->P1+0x50, [EAX+20]->P1+0x60, [EAX+24]->P1+0x68, [EAX+28]->P1+0x6c, [EAX+2c]->P1+0x70; first store pre-SUB at P0+0x14=P1+0x38) and the regroup reads back in row-major-descending order, giving a NET IDENTITY permutation of the 9 matrix floats into [ESP+0x00..0x20] (dest[i] = [EAX+4i]); 'reordered / transpose-like' is accurate as a code-PATTERN description (strided scatter + strided regroup), but the net permutation into the pre-0x0096cb20 argument area is identity - not a proven net transpose. C2's load-bearing conclusion (computed, virtual-delegated, not raw) does NOT rest on the transpose label, as its own countermodel states.",
+        "final_store_chain": "CONFIRMED verbatim: CALL 0x0096cb20 (0085c058); LEA ECX,[ESP+0x54]; CALL 0x0096cf80 (0085c061); FLD [ESP+0x44]; MOV EAX,[ESP+0xac] (arg1); FSTP [ESP+8]; FLD [ESP+0x48]; MOV ECX,0x9; FSTP [ESP+0xc]; MOV EDX,[ESP+0xc]; FLD [ESP+0x4c]; LEA ESI,[ESP+0x54]; MOV EDI,EAX; FSTP [ESP+0x10]; FLD1 (0085c094); MOVSD.REP ES:EDI,ESI with ECX=9 (0085c096) - 9 dwords from the 96cf80 output [ESP+0x54] to arg1; MOV [EAX+0x24],ECX / MOV [EAX+0x28],EDX / MOV [EAX+0x2c],ECX from stack; FSTP [EAX+0x30] stores the FLD1 constant = [out+0x30]=1.0; ADD ESP,0xa0; RET 0x4 - ALL DECISIVE ELEMENTS UPHELD",
+        "verdict": "ACCEPTED - CONFIRMED (with the P3 transpose-wording nuance)"
+      }
+    },
+    "R3_0x0085C0C0": {
+      "captured_source_lines": "1171005-1171021 (17 rows)",
+      "line_parity": "17/17 byte-identical",
+      "completeness": "scan 17 = extract 17; body ends RET 0x4 -> 0085c0ed = window end exactly",
+      "claim_C3_rederivation": "CONFIRMED: MOV ECX,[ECX+0x2c]; MOV EAX,[ECX]; MOV EAX,[EAX+0x28] (slot +0x28 = index 10); SUB ESP,0xc; LEA EDX,[ESP]; PUSH EDX (out-arg); CALL EAX (indirect, 1 call site = R3 counter); 3 floats [EAX]/[EAX+4]/[EAX+8] copied to arg1 (ECX=[ESP+0x10] resolves to arg1 under callee-clean of the virtual arg); returns record pointer (MOV EAX,ECX); RET 0x4 - virtual pass-through UPHELD"
+    },
+    "R4_0x0085C0F0": {
+      "captured_source_lines": "1171022-1171044 (23 rows)",
+      "line_parity": "23/23 byte-identical",
+      "completeness": "scan 23 = extract 23; body ends RET 0x4 -> 0085c12e = window end exactly",
+      "claim_C4_rederivation": "CONFIRMED structure: SUB ESP,0x58; PUSH ESI; PUSH EDI; LEA EAX,[ESP+0x2c]; PUSH EAX; CALL 0x0085bfa0 (out-record on frame); FLDZ; MOV ESI,EAX (record ptr); MOV ECX,0x9; LEA EDI,[ESP+0x8]; REP MOVSD - copies the 3x3 part ([ESI..ESI+0x24)) to [ESP+0x8] (frame top, verified disjoint from the saved-register slots); MOV ESI,[ESP+0x64] = arg1; PUSH ESI; LEA ECX,[ESP+0xc] = the copied 3x3 (address arithmetic verified: (E-0x64)+0xc = E-0x58 = (E-0x60)+0x8); FST [ESI]; FST [ESI+4]; FSTP [ESI+8] - zeros {0,0,0} to arg1 from FLDZ; CALL 0x0096cd10 (ECX=&3x3, arg=record); POP EDI; MOV EAX,ESI; POP ESI; ADD ESP,0x58; RET 0x4 - stack arithmetic fully consistent (saved ESI at E-0x5c, saved EDI at E-0x60, no overlap with the 3x3 copy at E-0x58..E-0x34); 'derived, not a raw stored rotation' UPHELD; evidence_level STRONGLY_SUPPORTED (semantics of 96cd10 un-admitted) - level appropriate"
+    },
+    "R5_0x0085C280": {
+      "captured_source_lines": "1171144-1171172 (29 rows)",
+      "line_parity": "29/29 byte-identical",
+      "completeness": "scan 29 = extract 29; LAST in-window row is RET 0x4 at 0085c2ce -> 0085c2d1 = window end exactly",
+      "claim_C5_rederivation": {
+        "in_window_structure": "CONFIRMED: SUB ESP,0xc; PUSH ESI; MOV ESI,ECX; CMP byte ptr [ESI+0x24],0x0 (gate byte [this+0x24]); JZ 0x0085c2d1; MOV ECX,[ESI+0x2c]; MOV EAX,[ECX]; MOV EDX,[EAX+0x160]; PUSH 0x80; CALL EDX (slot +0x160 with 0x80); TEST AL,AL; JNZ 0x0085c2d1; MOV ECX,[ESI+0x2c]; MOV EAX,[ECX]; MOV EAX,[EAX+0xdc]; LEA EDX,[ESP+0x4]; PUSH EDX (out-arg); CALL EAX (slot +0xdc, 2nd call site = R5 counter); 3 floats copied to arg1 (ECX=[ESP+0x14] -> [E+4] under callee-clean, verified); mid-sequence POP ESI at 0085c2b4; ADD ESP,0xc; RET 0x4 - all deltas exact (JZ short rel8=0x45, JNZ short rel8=0x2f, both targets = 0x0085c2d1)",
+        "defect_found": {
+          "id": "P05-QC-F1",
+          "what": "BOTH conditional branches (JZ @0085c28a and JNZ @0085c2a0) target 0x0085C2D1 - the FIRST byte OUTSIDE the admitted window [0x0085C280,0x0085C2D1). On those un-taken-gate paths the frame is NOT yet cleaned (ESP = E-0x10, saved ESI pushed), so 0x0085C2D1+ necessarily contains further instructions of 85C280's logical body (at minimum a shared cleanup/return), i.e. the body's control flow extends beyond the window",
+          "contradicted_claims": "(a) COUNTERS.json note 'all six logical functions fully in-window, none truncated' - FALSE for R5 (its CFG has out-of-window targets; R1/R2/R3/R4/R6 end exactly at their window ends with RET 0x4, verified); (b) C5 sentence 'Un-taken paths leave the record untouched' - NOT_ESTABLISHED in-window: what the code at 0x0085C2D1+ does to the record and to EAX is outside the admitted window and was not read",
+          "correction": "downgrade the sub-claim to PLAUSIBLE (window-scoped fact: the un-taken paths jump out immediately and their in-window prefixes write nothing to arg1); record gap VA 0x0085C2D1 for parent admission; correct the COUNTERS note to 'five bodies end exactly at window end; 85C280's un-taken paths branch to 0x0085C2D1, outside the window - body NOT fully covered'",
+          "materiality": "MEDIUM: the dominant-route conclusion (C7) is unaffected (the flag-1 path IS fully in-window and ends RET 0x4), but the 'stale-frame variant remains live' argument now rests on an unread region and must be marked as such"
+        },
+        "verdict": "core structure CONFIRMED; disposition sub-claim corrected to PLAUSIBLE"
+      }
+    },
+    "R6_0x00862850": {
+      "captured_source_lines": "1178571-1178578 (8 rows)",
+      "line_parity": "8/8 byte-identical",
+      "completeness": "scan 8 = extract 8; body ends RET 0x4 -> 00862868 = window end exactly",
+      "claim_C6_rederivation": "CONFIRMED: MOV EDX,[ECX+0x3c]; MOV EAX,[ESP+4] (arg1); MOV [EAX],EDX; MOV EDX,[ECX+0x40]; MOV ECX,[ECX+0x44]; MOV [EAX+4],EDX; MOV [EAX+8],ECX; RET 0x4 - RAW FIELD COPY from receiver +0x3C/+0x40/+0x44 to arg1; no calls (R6 counter 0), no computation; premises honestly keep field semantics unknown"
+    }
+  },
+  "synthesis_claims_rederivation": {
+    "C7": "composition of C2+C3+C5+C6: the in-window producers feeding the 12-byte record are computed/virtual-delegated (85BFA0, 85C0C0, 85C0F0, 85C280) with one raw alternate (862850); the boundary moves to the vtable slots of [this+0x2C] and helper bodies - STRONGLY_SUPPORTED is the CORRECT level (writer-link 005094C0 is inherited P04 standing, not re-derived here; slots un-admitted; countermodel 'slot +0x28 may return a raw stored local translation' honestly recorded). ACCEPTED.",
+    "C8": "window-scoped negative upheld: no admitted subregion reads/writes SF+30; 509070 (C1) writes [this+0x80..0x88] - rejected as THE SF+30 link-setter for this body; root-vs-internal-node remains UNDETERMINED. ACCEPTED - CONFIRMED (window-scoped)."
+  },
+  "manifest_recheck": {
+    "entries": 15,
+    "sha256_match": "15/15",
+    "bytes_match": "15/15",
+    "bijection": "HOLDS in the intended sense (only MANIFEST.json itself absent from its own list - self-excluded by design)",
+    "attempt_marker_integrity": "RUN_STARTED.json (child 1 marker) sha 3dd4eda8... matches MANIFEST and RETRY1's recorded prior-state hash (case-insensitive) - preserved untouched"
+  },
+  "chronology_recheck": {
+    "admit": "CONTROL/EVENTS/000007_ADMIT.json: seq 7, 2026-10-18T22:04:24.594390Z, admission A6929aee83fa4, reserve bodies 6 / instructions 164 / edges 12 / candidates 4",
+    "observed_order_utc": "ADMIT 22:04:24.6 -> CONTRACT.json 22:04:34 (now_utc field) -> RUN_STARTED.json 22:04:55 (child 1; returned nothing per RETRY1 record) -> RUN_STARTED_RETRY1.json 22:08:35 (child 2; returned nothing) -> fallback execution by parent: extracts 22:12:28 -> CLAIMS/COUNTERS/GATES/REPORT/HANDOFF/BARRIER_BACKLOG 22:13:06 -> MANIFEST 22:13:09Z LAST",
+    "verdict": "admission precedes every pack action; fallback chronology consistent; attribution disclosed in REPORT header, MANIFEST.attribution, CLAIMS.attribution, COUNTERS.attribution, GATES.G6, HANDOFF - HONEST (contract section 4 requirement met)",
+    "event_region_note": "ADMIT event records combined span [0x00509070,0x00862868); CONTRACT.json defines the six narrow subregions; narrow interpretation used - compliant"
+  },
+  "pack_completeness_recheck": {
+    "contract_section12_minimum_gaps": {
+      "finding_id": "P05-QC-F2",
+      "missing_artifacts": [
+        "MEMORY_AND_IDENTITY.json (section 12 minimum requires a memory/identity ledger; absent)",
+        "SOURCE_PINS.json as a dedicated artifact (pin recorded only inside RUN_STARTED.json and MANIFEST.json)",
+        "artifact_index.csv (listed in the pack's OWN CONTRACT.required_outputs and section 12 minimum; absent)"
+      ],
+      "extract_header_metadata": "the 6 extracts carry line numbers + VA but no per-extract header with source SHA / admission ID (section 6 'Kazdy ekstrakt podaje source SHA, numery linii, VA, package/admission ID i SHA ekstraktu'); the per-file SHAs exist only in MANIFEST.json; filenames encode the VA ranges",
+      "attribution_note": "the pack was produced by the PE-MASTER parent itself under DIRECT_ANALYST_FALLBACK; the gap is a procedural deviation of the fallback execution, not of a child worker; science claims remain independently verifiable (this review verified them from the extracts + pinned source)",
+      "recommended_disposition": "parent corrigendum note on the pack (new R2/corrigendum, not a frozen-pack edit); no science retraction needed"
+    },
+    "candidate_enumeration_gap": {
+      "finding_id": "P05-QC-F3 (P3)",
+      "what": "COUNTERS 'candidates: 4' matches the reserve but the four variants are not enumerated anywhere in the pack (unlike P06's V1-V4 with verdicts); they are only reconstructible from CLAIMS (e.g. 509070=SF+30 setter -> rejected; dominant-route computed -> adopted; 862850 raw-field candidate -> adopted with unknown semantics; 85C0F0 derived vs stored rotation -> derived)",
+      "recommended_disposition": "enumerate the four evaluated variants in the corrigendum"
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P03",
+  "subject": "register-role and stack-slot identity map for 0x007B6C30 admitted region (0x007B6C30-0x007B6C4A end-exclusive)",
+  "calling_convention": "thiscall (MSVC x86 shape): this in ECX, one by-value DWORD stack argument, callee pops the argument (RET 0x4). Return value in EAX (NULL on fast path).",
+  "stack_map": [
+    {
+      "state": "function entry (after CALL pushed retaddr)",
+      "layout": "[ESP+0x00]=return address; [ESP+0x04]=stack arg 1 = KEY (caller: PUSH 0x00A85460 at P02 leaf-action callsites)"
+    },
+    {
+      "state": "after PUSH EBX (0x007b6c30)",
+      "layout": "[ESP]=saved EBX; retaddr at [ESP+0x04]; key at [ESP+0x08]"
+    },
+    {
+      "state": "after PUSH EBP (0x007b6c31)",
+      "layout": "retaddr at [ESP+0x08]; key at [ESP+0x0C]"
+    },
+    {
+      "state": "after PUSH EDI (0x007b6c32)",
+      "layout": "retaddr at [ESP+0x0C]; key at [ESP+0x10]  <-- consumed by CMP at 0x007b6c3d"
+    },
+    {
+      "state": "epilogue (0x007b6c43-0x007b6c48)",
+      "layout": "POP EDI, POP EBP, POP EBX restore in reverse; XOR EAX,EAX (NULL); RET 0x4 pops return address then 4 bytes = the key argument. Fully balanced: 3 pushes + retaddr popped by RET, 1 arg DWORD popped by RET 0x4."
+    }
+  ],
+  "register_roles": [
+    {"register": "ECX", "role": "on entry: receiver/this (thiscall); immediately copied to EBP at 0x007b6c33", "live_range": "entry only"},
+    {"register": "EBP", "role": "repurposed as THIS after caller's EBP saved at 0x007b6c31; used as base for [this+0x18] read", "live_range": "0x007b6c33 until return; LIVE-IN to continuation 0x007B6C4B"},
+    {"register": "EDI", "role": "loaded M[this+0x18] then SUB 0x1 => EDI = M[this+0x18] - 1 (count-minus-one candidate, P03-C8); register-only, no memory store", "live_range": "0x007b6c35 until return; LIVE-IN to continuation 0x007B6C4B"},
+    {"register": "EBX", "role": "zeroed (XOR EBX,EBX) = the null/zero constant for the key test", "live_range": "0x007b6c38 until return; LIVE-IN to continuation 0x007B6C4B"},
+    {"register": "EAX", "role": "return value; XOR EAX,EAX sets NULL on the fast path; produced by continuation on the main path (out-of-region)", "live_range": "set at 0x007b6c45 on fast path"},
+    {"register": "ESI", "role": "NOT touched in the admitted region (callee-saved by convention; the continuation is expected to save it itself - NOT verified in-region)", "live_range": "n/a in-region"}
+  ],
+  "identity_map": [
+    {
+      "symbol": "this / receiver",
+      "in_region": "ECX on entry; EBP thereafter; member [this+0x18] read unconditionally",
+      "from_P02_context_cited": "first call receiver = leaf elem (EBX in P02's frame); fallback call receiver = [elem+0x24]; both sentinel-guarded in P02's caller before the CALL",
+      "runtime_identity_status": "UNKNOWN - class of receiver not established; vtable-derived key does NOT identify the receiver (premise preserved)"
+    },
+    {
+      "symbol": "key",
+      "in_region": "single by-value DWORD stack arg at [ESP+0x10] after prologue; compared against 0; popped by RET 0x4",
+      "from_P02_context_cited": "value 0x00A85460 = 0x00A85454+0xC (factory vtable 0x00A85454 +0xC, P01/P02 arithmetic), compile-time constant at both P02 leaf-action callsites",
+      "consumption": "in-region only the null test; the continuation at 0x007B6C4B consumes the key value (out-of-region)"
+    },
+    {
+      "symbol": "M[this+0x18]",
+      "in_region": "unconditional load, register-decrement by 1, carried in EDI; NO write in-region",
+      "interpretation": "PLAUSIBLE entry count (count-1 = last index idiom), adjacent data-pair shape (P03-C8); class layout unknown"
+    },
+    {
+      "symbol": "return value EAX",
+      "in_region": "NULL on the fast path (key==0)",
+      "continuation": "produced out-of-region at/after 0x007B6C4B; NOT established - lookup-hit value, created entry, or NULL on miss all remain possible (CAND-P3a vs CAND-P3b)"
+    }
+  ],
+  "control_flow_edges": [
+    {"edge_id": "E1", "type": "conditional JNZ", "site": "0x007b6c41", "target_va": "0x007B6C4B", "condition": "key != 0 (M[ESP+0x10] != 0)", "status": "ALWAYS TAKEN at the two P02 leaf-action callsites (constant non-null key 0x00A85460, P03-C5)", "target_read": "NO - recorded as jump target VA for parent admission; same logical function (continuation), not a separate callee"},
+    {"edge_id": "E2", "type": "fall-through epilogue -> normal return", "path": "0x007b6c43 POP EDI; 0x007b6c44 POP EBP; 0x007b6c45 XOR EAX,EAX; 0x007b6c47 POP EBX; 0x007b6c48 RET 0x4", "condition": "key == 0", "status": "dead for the P02 callsites; live for any null-key caller (unknown/none established)"}
+  ],
+  "exceptional_exits": "none in-region: no SEH setup, no INT/UD2, no calls that could unwind; the only exit instructions are RET 0x4 (both paths converge on it in-region for the fast path; the continuation's exits are out-of-region and uncharacterized).",
+  "clock_note": "register/stack derivations use standard x86 32-bit semantics; no runtime execution performed (EXE_READ_BYTES=0, RUNTIME_ACTIONS=0)."
+}

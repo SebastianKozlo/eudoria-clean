@@ -1,0 +1,81 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_P03_QC_R1_20261018",
+  "target_pack": "P03_EXEC_R1 (admission A6963eee83a5f, region 0x007B6C30-0x007B6C4B end-exclusive, 14 rows = source lines 959600-959613)",
+  "method": "Independent re-derivation from the pinned saved source (SHA256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, re-hashed by reviewer = pin, 50780146 B). Region re-read directly from source lines 959600-959613. Address searches outside the region = navigation only. All line numbers below are GHIDRA_H5_VTABLE2.txt listing lines.",
+  "line_parity_check": {
+    "source_lines": [959600, 959613],
+    "row_count": 14,
+    "result": "PASS - reviewer's direct source read of lines 959600-959613 is row-for-row identical to worker EXTRACT_007B6C30_REGION.txt (same 14 VAs, same mnemonic/operand text).",
+    "decode_consistency": "Full decode-length check of all 14 rows: PUSH(1)x3 -> 007b6c33; MOV EBP,ECX(2) -> 007b6c35; MOV EDI,[EBP+0x18](3) -> 007b6c38; XOR EBX,EBX(2) -> 007b6c3a; SUB EDI,1(3) -> 007b6c3d; CMP [ESP+0x10],EBX(4) -> 007b6c41; JNZ rel8(2, target 007b6c4b = 007b6c43+8) -> 007b6c43; POP EDI(1) -> 007b6c44; POP EBP(1) -> 007b6c45; XOR EAX,EAX(2) -> 007b6c47; POP EBX(1) -> 007b6c48; RET 0x4(3, C2 04 00) ends 007b6c4a == region end-exclusive boundary 0x007B6C4B. PERFECT continuity - confirms both the row set and that the JNZ target 0x007B6C4B is exactly the next instruction boundary (continuation)."
+  },
+  "per_row_rederivation": [
+    {"line": 959600, "va": "007b6c30", "instr": "PUSH EBX", "role": "callee-saved reg save 1/3 (stack write; convention-excluded from store census)"},
+    {"line": 959601, "va": "007b6c31", "instr": "PUSH EBP", "role": "save 2/3"},
+    {"line": 959602, "va": "007b6c32", "instr": "PUSH EDI", "role": "save 3/3"},
+    {"line": 959603, "va": "007b6c33", "instr": "MOV EBP,ECX", "role": "this = ECX (thiscall receiver)"},
+    {"line": 959604, "va": "007b6c35", "instr": "MOV EDI,dword ptr [EBP + 0x18]", "role": "UNCONDITIONAL read M[this+0x18], BEFORE key test"},
+    {"line": 959605, "va": "007b6c38", "instr": "XOR EBX,EBX", "role": "EBX = 0"},
+    {"line": 959606, "va": "007b6c3a", "instr": "SUB EDI,0x1", "role": "EDI = M[this+0x18] - 1, REGISTER-ONLY (no store back to [this+0x18])"},
+    {"line": 959607, "va": "007b6c3d", "instr": "CMP dword ptr [ESP + 0x10],EBX", "role": "key (ARG1) null test"},
+    {"line": 959608, "va": "007b6c41", "instr": "JNZ 0x007b6c4b", "role": "E1: key != 0 -> continuation (target OUT of admitted region, taken from in-region operand)"},
+    {"line": 959609, "va": "007b6c43", "instr": "POP EDI", "role": "fast path (key==0): restore"},
+    {"line": 959610, "va": "007b6c44", "instr": "POP EBP", "role": "restore"},
+    {"line": 959611, "va": "007b6c45", "instr": "XOR EAX,EAX", "role": "return NULL"},
+    {"line": 959612, "va": "007b6c47", "instr": "POP EBX", "role": "restore"},
+    {"line": 959613, "va": "007b6c48", "instr": "RET 0x4", "role": "E2 path end: callee pops retaddr + 4-byte key arg"}
+  ],
+  "stack_arithmetic_key_slot_RECHECKED": {
+    "derivation": "entry ESP=E: [E]=retaddr, [E+4]=ARG1(key). PUSH EBX -> ESP=E-4; PUSH EBP -> E-8; PUSH EDI -> E-0xC. [ESP+0x10] = [E-0xC+0x10] = [E+4] = ARG1 = the single key argument. Matches worker MEMORY_AND_IDENTITY stack_map step-by-step.",
+    "ret_balance_cross_check": "RET 0x4 pops retaddr + 4 bytes => balanced iff exactly one 4-byte stack arg. CROSS-CHECK FROM P02 CALLER (independently verified by reviewer in P02's region rows 626560-626562/626567-626568): PUSH 0x00A85460; MOV ECX,EBX; CALL 0x007b6c30 with NO ADD ESP after the call => caller pushes exactly 1 arg and expects callee cleanup => RET 0x4 REQUIRED. Caller-side and callee-side agree. CONFIRMED.",
+    "refutation_of_second_hidden_arg": "a hidden second stack arg would sit at [E+8]=[ESP+0x14], untested in-region and NOT popped by RET 0x4 => would break balance on every call; caller-side P02 shape confirms single arg. Worker's P03-C2 countermodel refutation ACCEPTED."
+  },
+  "write_census_rederivation": {
+    "rule": "explicit memory-destination instructions (same disclosed convention as P02/P01: PUSH/POP/CALL/RET stack traffic excluded)",
+    "count": 0,
+    "verdict": "PASS - zero memory-destination stores in all 14 rows; only stack writes are the 3 register saves (worker P03-C1 discloses exactly this); reads: [EBP+0x18] @959604, [ESP+0x10] @959607, stack reads by 3 POP + RET. 'Cannot write a binding in-region' HOLDS at the explicit-store level."
+  },
+  "edges": {
+    "E1": "JNZ @007b6c41 (line 959608) -> 0x007B6C4B, condition key != 0; at the two P02 callsites key = constant 0x00A85460 != 0 => ALWAYS TAKEN there (P03-C5 arithmetic PASS; callsites independently verified by reviewer in P02 region rows 15/22).",
+    "E2": "fall-through 007b6c43-007b6c48 -> RET 0x4 normal return (dead for the P02 callsites; live for any null-key caller).",
+    "reserved_2_actual_2": "PASS."
+  },
+  "candidates_and_remaining_edge": {
+    "CAND_P3a_lookup_vs_CAND_P3b_register": "in-region facts are consistent with BOTH: the 14 rows contain no table access at all (only [this+0x18] read + key null test); decision lives entirely in the continuation 0x007B6C4B (unread). NOT_ESTABLISHED for the full function - CORRECT and properly preserved. Reviewer agrees: no in-region predicate discriminates the candidates.",
+    "same_body_inference_grade": "'continuation 0x007B6C4B is the SAME logical function' is an INFERENCE (very strong: the 3 pushed callee-saved regs are balanced only within this function's frame; live-in EBP=this/EDI/EBX; guard-jump-over-early-return shape; JNZ target is the immediately-next instruction boundary per decode check), but it is NOT a byte-verified fact of the unread target. Worker hedges the continuation-use part (P03-C4 PLAUSIBLE) and full-function semantics (P03-C6b UNVERIFIED), but states 'SAME body' flatly in COUNTERS/HANDOFF. Reviewer grade: STRONGLY_SUPPORTED (see correction QC-P03-D1)."
+  },
+  "boundary_incident_assessment": {
+    "worker_disclosure": "Grep navigation (pattern '007b6c3|007b6c4') returned 49 rows: 32 direct-CALL reference rows elsewhere + 14 in-region rows + 3 boundary/continuation rows (0x007b6c4b, 0x007b6c4d, 0x007b6c4e).",
+    "reviewer_cross_census": "reviewer grep '007b6c30' -> 33 matches = 32 'CALL 0x007b6c30' rows + 1 entry row; grep '007b6c4b' -> 2 matches (in-region JNZ operand row 959608 + row 959614 at 007b6c4b). Consistent with the worker's 49-row decomposition (32+14+3) and with rows existing at c4b/c4d/c4e just past the boundary.",
+    "no_claim_depends_on_boundary_rows": "VERIFIED - checked all P03 claims C1-C9: jump-target VA derives from the in-region JNZ operand (line 959608), not from the exposed rows; continuation size explicitly 'unknown from the admitted window' (BARRIER_BACKLOG P03-B1: 'the 3 incidentally-exposed navigation rows do not bound it and were not analyzed'); P03-C9 uses only the 32 CALL-row count (navigation). Incident properly disclosed (COUNTERS.regions_read.incidental_navigation_exposure, REPORT Honest Limits 3, GATES G4 PASS_WITH_DISCLOSURE, MANIFEST disclosures). Classification ACCEPTED: disclosed side effect of permitted address-search navigation; not a semantic read.",
+    "reviewer_own_incidental_exposure": "DISCLOSED: reviewer's navigation grep for '007b6c4b' returned line 959614 ('007b6c4b TEST EDI,EDI') as a match line. Reviewer performed NO semantic analysis on it and no claim in this QC depends on its content (jump-target identity was already established from the in-region operand and decode arithmetic). Same incident class the worker disclosed."
+  },
+  "counters_recheck": {
+    "bodies": {"reserved": 1, "worker_actual": 1, "reviewer_count": 1, "note": "single entry 0x007B6C30; continuation is not a new entry; per parent contract section 6 a continuation admission must not double-count the body - worker said exactly this. ACCEPTED."},
+    "instruction_rows": {"reserved": 14, "worker_actual": 14, "reviewer_count": 14, "note": "lines 959600-959613, line parity PASS"},
+    "edges": {"reserved": 2, "worker_actual": 2, "reviewer_count": 2},
+    "call_sites": {"reserved_field": "edges: 2 (rendered as '2 CALL' in the parent dispatch cap-note; contract main_question itself states '0 CALL')", "worker_actual": 0, "reviewer_count": 0, "note": "ZERO CALL instructions in the 14 rows (reviewer scan). No-refund handling ASSESSED CORRECT: worker kept the 2-slot reservation in the ledger per section 6, reported actual 0, did not refund, flagged the prompt's '2 CALL' rendering as a dispatch-side artifact, and kept Front A CALL at actual 42/64 with the reservation encumbrance disclosed. The CALL-vs-edges rendering inconsistency originates in the parent's cap-note ('P03 adds 1/14/2/2'), not in the worker."},
+    "candidates": {"reserved": 2, "worker_actual": 2},
+    "front_A_after_P03": {"worker": "6/16 bodies, 386/1800 rows, 42/64 CALL, 8/12 candidates", "reviewer_arithmetic": "5+1=6, 372+14=386, 42+0=42, 6+2=8 - MATCH; campaign 6/96, 386/12000, 42/320, 8/48 - MATCH, within caps."}
+  },
+  "premise_challenge": {
+    "no_direct_caller_ne_exclusively_virtual": "PASS - P03-C9 is navigation-only; no virtual-dispatch claim.",
+    "vtable_match_ne_receiver_identity": "PASS - key treated as by-value constant; no receiver identity inferred (P03-C6/C7 hedges; premises_preserved_check).",
+    "explicit_store_ne_final_value_after_opaque_calls": "PASS - no store in-region; continuation explicitly opaque; no final-value claim (P03-C6b).",
+    "scoped_negatives_keep_bounds": "PASS - 'cannot write a binding' scoped to in-region explicit-store level; get-or-create countermodel live (P03-B1)."
+  },
+  "chronology_vs_events": {
+    "EVENT_000005_ADMIT": "utc 2026-10-18T21:37:21.668Z, P03, region 0x007B6C30 va_end_exclusive 0x007B6C4B, body_entries [0x007B6C30], reserve {bodies 1, instructions 14, edges 2, candidates 2}, admission A6963eee83a5f - matches package contract.",
+    "order": "ADMIT 21:37:21.668 -> contract now_utc 21:37:26 -> RUN_STARTED 21:37:39 -> source re-verify 21:37:49 -> extract 21:39:20 -> MANIFEST 21:40:27-43 (bounded timestamp honestly recorded, not fabricated) - monotonic, consistent.",
+    "hash_chain": "000003->000004->000005 previous_event_sha256 links re-hashed by reviewer: BOTH MATCH (EVENT003 = F16876...3F60 = 000004.prev; EVENT004 = F8320ABE...5751C7 = 000005.prev). PASS."
+  },
+  "manifest_rehash": {
+    "method": "reviewer re-hashed all 13 on-disk files of P03_EXEC_R1 (Get-FileHash SHA256) and compared to MANIFEST.json artifact_census and artifact_index.csv",
+    "result": "ALL 12 censused entries match reviewer hashes exactly (CONTRACT.json BFF9E307...7D171 = CONTROL/CONTRACTS/P03.json hash => package copy byte-identical, verified by hash equality); bijection 12 censused + self-excluded MANIFEST = 13 disk files, no strays, no missing. PASS."
+  },
+  "read_scope_verification": {
+    "in_region_only": "PASS - Read offset=959600 limit=14 exact (reviewer replicated the same discipline); row at 0x007B6C4B NOT read (end-exclusive; it is the recorded-not-read JNZ target).",
+    "no_extra_bodies": "PASS - no body beyond the admitted region was opened; 32 CALL rows were navigation context only."
+  },
+  "full_read_log": "Reviewer read to EOF: CONTROL/CONTRACTS/P03.json, parent CONTRACT.md (222 lines), all 13 P03_EXEC_R1 files, EVENTS 000004_ADMIT.json, EVENTS 000005_ADMIT.json, source lines 959600-959613 (in-region) plus P02 region lines 626546-626681 (P02 leg of the same review assignment). Navigation-only greps: 006b1e00/006b1fac/007b6c30/007b6c4b address searches.",
+  "not_checked": "EVENTS 000001-000003 contents (hash-chain links only), CONTROL/REQUESTS/*, CONTROL/CHECKPOINTS/*, P01/P02 package contents beyond P02's REPORT (cited context; P02 has its own QC leg), the continuation 0x007B6C4B+ (out of admitted regions BY DESIGN - required parent admission), P03 callee bodies (none in-region). None load-bearing for P03's claims (all are opaque-by-design or cited-with-hedge)."
+}

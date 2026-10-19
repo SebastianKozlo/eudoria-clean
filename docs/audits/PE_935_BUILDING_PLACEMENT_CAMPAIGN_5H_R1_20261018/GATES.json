@@ -1,0 +1,104 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "gates_file": "GATES.json",
+  "generated_by": "pe-master-auditor closing materialization under PE-MASTER dispatch",
+  "evidence_sources": [
+    "CONTROL/EVENTS/000001_START.json .. 000015_ADMIT.json (read-only)",
+    "campaign_control.py status (live tool output)",
+    "BODY_ADMISSION_EVENTS.jsonl / BODY_ADMISSION_LEDGER.json (root exports)",
+    "packages/P01_EXEC_R1 .. P12_EXEC_R1 (COUNTERS.json, GATES.json, MANIFEST.json)",
+    "reviews/P01_QC_R1 .. P12_QC_R1 (+ P05_QC_R2) (QC_REPORT.md, COUNTERS_RECHECK.json, MANIFEST.json)"
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "name": "event_chain_integrity",
+      "check": "All 15 CONTROL/EVENTS files exist; each event's previous_event_sha256 equals the SHA256 of the preceding event file (14 links); SHA256(000015_ADMIT.json) equals the tool status previous_sha",
+      "result": "PASS",
+      "evidence": "Independent re-hash by this materialization: 14/14 links MATCH; SHA256(000015_ADMIT.json)=691BE254CF1B96CF219179E5EE7D729114CAA5E51E5C3A2D686DA2772BE04E67 = tool status previous_sha; START event previous_event_sha256 is the null hash (chain origin)."
+    },
+    {
+      "id": "G2",
+      "name": "ledger_exports_present_and_consistent",
+      "check": "BODY_ADMISSION_EVENTS.jsonl and BODY_ADMISSION_LEDGER.json exist at the campaign root, exported from CONTROL/EVENTS, with line/file counts consistent with 12 ADMIT + 2 DENY (START is not an admission event)",
+      "result": "PASS",
+      "evidence": "BODY_ADMISSION_EVENTS.jsonl: 17188 B, 14 lines (12 ADMIT + 2 DENY), SHA256 C9D9FC495C7A4DBDC72856FA22BFED271166240B63B9671CA16E0F08146507CB; BODY_ADMISSION_LEDGER.json: 37243 B, SHA256 3FC05CAAB19B6151459B3261442B5CDD8B2BBBBF4FD6B2F0F707FD116380BD71; ledger origin note: 'CONTROL/EVENTS, not independent time attestation'."
+    },
+    {
+      "id": "G3",
+      "name": "reserved_budgets_within_limits",
+      "check": "reserved.bodies<=96 AND reserved.instructions<=12000 AND reserved.edges<=320 AND reserved.candidates<=48 (campaign limits, contract section 6)",
+      "result": "PASS",
+      "evidence": "Tool status + ledger: reserved 32/1260/153/32 vs limits 96/12000/320/48. All respected. 12 admissions; no package exceeded package limits 20/2400/64/12 at reservation time."
+    },
+    {
+      "id": "G4",
+      "name": "actual_counters_vs_reserved_and_limits",
+      "check": "Per-package actual counters (QC-rechecked) summed and compared: actual <= campaign limits on every axis; deviations from reserve disclosed and adjudicated",
+      "result": "PASS_WITH_DISCLOSED_DEVIATIONS",
+      "evidence": "Actual sum (re-summed independently by this materialization from packages/*/COUNTERS.json + reviews QC COUNTERS_RECHECK.json): 30 bodies / 1254 rows / 133 CALL sites / 32 candidate variants — all <= limits 96/12000/320/48. Deviations: (a) P06: 3 bodies in window vs 2 declared (INCIDENT-P06-I1, unforeseen in-window body 0x008BD730, window-contained, NOT used for claims, adjudicated compliant); (b) P07: 148 rows vs 133 reserved (+15 loop-tail rows ALL inside the admitted window, adjudicated no admission breach, QC-P07-3); (c) P03/P09/P10 reserve-field 'edges' vs actual CALL-site counts reconciled in the packages (0/1/0 actual CALL). No refund sought (contract section 6)."
+    },
+    {
+      "id": "G4b",
+      "name": "dispatch_prose_counter_discrepancy_disclosed",
+      "check": "Closing dispatch prose aggregate claims must not silently override per-package QC-rechecked counters",
+      "result": "PASS_WITH_P2_FINDING_DISCLOSED",
+      "evidence": "Dispatch prose said '136 CALL sites, 30 candidates'; per-package QC-rechecked counters sum to 133 CALL / 32 candidates (1254 rows and 30 bodies match). No gate outcome changes under either reading (133<=320 and 136<=320; 30<=48 and 32<=48). Correction applied in REPORT.md section 9 and this file: counter-verified actuals 133 CALL / 32 candidates. Revalidation: re-sum packages/*/COUNTERS.json actual fields."
+    },
+    {
+      "id": "G5",
+      "name": "admit_deny_compliance",
+      "check": "Every semantic extraction happened inside a tool-issued ADMIT region; every DENY respected and NOT converted to ADMIT",
+      "result": "PASS",
+      "evidence": "12 ADMIT events (000002-000010, 000013-000015); extractions inside admitted regions per package QC admission-compliance checks (e.g. P04 admission_compliance: semantic_reads_outside_admission NONE; P07 QC ruling: no out-of-admission row, no retroactive authorization needed). 2 DENY events respected: 000011_DENY reason BAD_FRONT (combined A+C request), 000012_DENY reason FRONT_A_TIME_CAP (0x007B6C4B continuation) -> BACKLOG, not re-admitted under a different front this campaign; the 0x00745A70 part of the denied combined request was re-scoped and separately admitted as P10 with a corrected front field (event 000014) - a new request, not a conversion."
+    },
+    {
+      "id": "G6",
+      "name": "package_seal_integrity",
+      "check": "All 12 science packages sealed with MANIFEST.json; QC re-hash/bijection PASS for each",
+      "result": "PASS",
+      "evidence": "packages/P01..P12 each contain MANIFEST.json; QC reports record full re-hash + bijection PASS (e.g. P02 12/12 + self-excluded; P11 13/13 'all CONTENT hashes verify'; P12 12/12, bijection 13=12+MANIFEST self-excluded). Sealed packages immutable from STOP; any future fix is a corrigendum (P11-QC-F1 stamp-ordering finding registered for corrigendum, content hashes verify)."
+    },
+    {
+      "id": "G7",
+      "name": "qc_coverage_and_verdicts",
+      "check": "Every package has fresh independent pe-master-auditor QC; all verdicts QC_PASS or QC_PASS_WITH_CORRECTIONS; zero rejected overclaims; zero claims promoted to canonical standing",
+      "result": "PASS",
+      "evidence": "QC dirs: P01_QC_R1, P02_QC_R1+P03_QC_R1 (joint), P04_QC_R1, P05_QC_R2 (R1 session unavailable - recorded; reviews/P05_QC_R1 holds only the preserved attempt marker), P06_QC_R1+P05_QC_R2 (joint), P07_QC_R1, P08_QC_R1+P09_QC_R1 (joint), P10_QC_R1+P11_QC_R1+P12_QC_R1 (joint). Verdict lines verified in all 12 QC reports: QC_PASS or QC_PASS_WITH_CORRECTIONS (P08 process PASS); zero rejected overclaims; zero canonical promotions."
+    },
+    {
+      "id": "G8",
+      "name": "standing_label_stability",
+      "check": "Campaign standing labels unchanged from contract section 16 baseline: WORLD_XYZ_RECOVERED=NO, HISTORICAL_PLACEMENT=NOT_ESTABLISHED, CURSOR_SOURCE_MEDIUM=UNKNOWN, CANONICAL_GATE_EFFECT=NONE",
+      "result": "PASS",
+      "evidence": "REPORT.md section 12; no package claim promotes any global label; MODEL_INSTANCE_BINDING reported only as scoped DEFINITION_SIDE_CONFIRMED_STATIC / INSTANCE_SIDE_NOT_ESTABLISHED; final independent Desktop postaudit PENDING."
+    },
+    {
+      "id": "G9",
+      "name": "payload_and_boundary_compliance",
+      "check": "EXE_READ_BYTES=0; RUNTIME_ACTIONS=0; CONFIG_CHANGES=0; no original game payload/VFS/BNT/NIF opened; frozen roots, repo, agents, skills, config untouched",
+      "result": "PASS",
+      "evidence": "All 12 packages' boundary counters (e.g. P08: exe_read_bytes 0, game_payload_files_opened 0, vfs_bnt_parsing_runs 0, ghidra_exports 0, old_writer_scripts_executed 0, runtime_client_actions 0, git_operations 0, config_changes 0, skills_changes 0, frozen_root_writes 0, parent_control_writes 0); QC manifests record repo_untouched/canonical_state_untouched true; no new Ghidra import/export; the 50.7 MB saved listing used only within admitted windows."
+    },
+    {
+      "id": "G10",
+      "name": "clock_compliance",
+      "check": "Science phase completed before the 270-min science cutoff; STOP executed within the 300-min window; all times from the tool/real clock, no manual dates",
+      "result": "PASS",
+      "evidence": "T0=2026-10-18T21:13:23.544925Z (event 000001_START); science cutoff 2026-10-19T01:43:23.544925Z; last science seal: P12 MANIFEST finalized 2026-10-18T23:47:20Z (P12 QC chronology MONOTONIC and CONSISTENT), final joint QC session started 23:48:30Z - science complete ~2 hours before cutoff. STOP executed by campaign_control.py after this file and CAMPAIGN_ARTIFACT_INDEX.csv were finalized; definitive elapsed/remaining: tool-written FINAL_STOP.json snapshot (STOP reason SCIENCE_QUEUE_EXHAUSTED)."
+    },
+    {
+      "id": "G11",
+      "name": "publication_status_recorded_honestly",
+      "check": "Publication status recorded as PUBLICATION_PENDING (contract section 15 variant (b): local seal first, then sanitized projection publication; receipt outside the sealed root); no publication SHA appended into sealed files",
+      "result": "PASS",
+      "evidence": "REPORT.md section 13; HANDOFF.md resume step 1; receipt dir designated 99_Audits/PE_935_BUILDING_PLACEMENT_5H_PUBLICATION_RECEIPT_R1_20261018 (outside the sealed OUTPUT_ROOT). No GitHub operation was attempted inside the sealed root; publication is a separate sequential package per contract section 14."
+    }
+  ],
+  "overall": {
+    "campaign_gates_result": "PASS (all gates PASS; G4 PASS_WITH_DISCLOSED_DEVIATIONS - both deviations adjudicated compliant and in-window; G4b P2 finding disclosed with correction applied)",
+    "run_status": "COMPLETED_SCIENCE_SEALED_STOP_EXECUTED",
+    "hard_stop_reason": "SCIENCE_QUEUE_EXHAUSTED",
+    "note": "GATES.json was finalized BEFORE CAMPAIGN_ARTIFACT_INDEX.csv hashed it and BEFORE the STOP; the parent MANIFEST.json is written LAST by PE-MASTER, self-excluded, and is not listed here or in the index."
+  }
+}

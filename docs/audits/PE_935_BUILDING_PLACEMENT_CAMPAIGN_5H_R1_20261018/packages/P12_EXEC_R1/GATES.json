@@ -1,0 +1,23 @@
+{
+  "gates": [
+    { "id": "G01_RUN_STARTED_FIRST", "status": "PASS", "evidence": "RUN_STARTED.json materialized at 2026-10-18T23:42:40Z (real clock) before any semantic read; package root was fresh (Test-Path=False before creation)." },
+    { "id": "G02_CONTRACT_HASH_VERIFIED", "status": "PASS", "evidence": "P12.json sha256 7F092BD5...36E9CCB verified before start; byte-identical copy re-hashed in package as CONTRACT.json." },
+    { "id": "G03_SOURCE_PIN_VERIFIED_PRE_READ", "status": "PASS", "evidence": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A...C1D8DB + size 50780146 verified before any read; re-checked after extraction." },
+    { "id": "G04_WINDOW_COMPLIANCE_SEMANTIC_READ", "status": "PASS_WITH_DISCLOSED_INCIDENT", "evidence": "All claim citations are lines L648033-L648080 (VA 0x006C27A0-0x006C282F); extract contains only these 48 rows. INCIDENT (disclosed): boundary-location navigation search over-displayed out-of-window rows in the terminal (0x006C2700-0x006C2796, 0x006C2830-0x006C28FF); zero claims derive from out-of-window rows; body 2 fail-arm value and terminal opcodes explicitly NOT claimed; over-displayed VAs listed in HANDOFF." },
+    { "id": "G05_EXTRACT_VERBATIM_READBACK", "status": "PASS", "evidence": "Independent re-read: 48/48 rows byte-identical to source lines (mismatches=0); extract sha256 0CC0F24F...DEF640, 2435 B." },
+    { "id": "G06_COUNTERS_HONEST", "status": "PASS", "evidence": "Actual = reserved on all four axes (2/2 bodies, 48/48 rows, 10/10 CALL, 2/2 candidates); boundary arithmetic (end-exclusive 48 rows) documented in REPORT; additional measured counters reported separately." },
+    { "id": "G07_NO_UNFORESEEN_IN_WINDOW_BODIES", "status": "PASS", "evidence": "Row census: exactly the 2 declared entries in-window; 0 unforeseen in-window bodies; 0 in-window incidents." },
+    { "id": "G08_OUT_OF_WINDOW_RECORDED_NOT_READ", "status": "PASS", "evidence": "HANDOFF.md records all out-of-window targets with exact VAs (4 callees, branch target 0x006C2832, tail 0x006C2830/0x006C2831, sibling family entries, P11 leftovers); none semantically read by P12." },
+    { "id": "G09_PREMISES_PRESERVED", "status": "PASS", "evidence": "All 4 contract premises cited per claim in CLAIMS.json; shape-identity not used for semantic transfer (body 2 fail arm NOT claimed); definition-registry != instance-source preserved in verdict P12-C8b." },
+    { "id": "G10_FORBIDDEN_ACTIONS_ABSENT", "status": "PASS", "evidence": "EXE_READ_BYTES=0; no payload/VFS/BNT/NIF/dumps opened; no new Ghidra exports; no old scripts; no frozen-root/config/skill/repo writes; writes confined to fresh package root; no installs; no runtime/debugger." },
+    { "id": "G11_REAL_CLOCK_TIMESTAMPS", "status": "PASS", "evidence": "Every stamp via PowerShell [DateTime]::UtcNow / ToFileTime; no estimated times; monotonic file-time recorded at start." },
+    { "id": "G12_HARD_STOP_RESPECTED", "status": "PASS", "evidence": "Package hard stop 2026-10-19T01:10:00Z; all science and materialization completed well before stop (start 23:42:40Z)." },
+    { "id": "G13_CLAIM_SCHEMA_COMPLETE", "status": "PASS", "evidence": "Every claim carries evidence rows, evidence_level (project taxonomy), claim_resolution, premises, countermodel; verdict split into in-window (CONFIRMED) and composite (STRONGLY_SUPPORTED) parts." },
+    { "id": "G14_NO_NESTED_TASKS", "status": "PASS", "evidence": "No agent/Task dispatches by P12; single-executor bounded package; no CONTROL/EVENTS writes; no milestone/loop-state actions." },
+    { "id": "G15_MANIFEST_LAST_SELF_EXCLUDED", "status": "PASS", "evidence": "MANIFEST.json materialized as the last artifact, self-excluded, after all other files finalized and hashed (see artifact_index.csv)." }
+  ],
+  "run_status": "COMPLETED_WITH_DISCLOSED_NAVIGATION_OVERDISPLAY",
+  "science_verdict": "C1 discriminator closed at window scope: worklist producers are registry-lookup (0x0072F580) callers keyed by global-table DWORDs; registry-fed worklist (definition-source, not instance).",
+  "process_verdict": "All gates PASS; one disclosed process incident (navigation over-display) with zero semantic contamination.",
+  "qc_origin": "SELF_CHECK (executor's own; independent PE-MASTER audit pending per campaign flow)"
+}

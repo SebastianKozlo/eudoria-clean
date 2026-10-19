@@ -1,0 +1,137 @@
+{
+  "question": "P12 / C1 final discriminator (P11 remaining edge): what do bodies 0x006C27A0 and 0x006C27F0 (admitted region 0x006C27A0-0x006C2830, 48 rows, 10 calls) return and from where: registry walk (templates.vfs RB-tree machinery, bridge standing: lookup FUN_0072F580, getter FUN_007CE1E0) vs container data vs other?",
+  "row_citation_convention": "L<n> = source listing line n of GHIDRA_H5_VTABLE2.txt (sha256 642CC29A...); VA in text. All citations are inside the admitted window L648033-L648080 = VA 0x006C27A0-0x006C282F (region end-exclusive at 0x006C2830).",
+  "claims": [
+    {
+      "id": "P12-C1",
+      "claim": "Both bodies are same-family keyed-table producers with an identical 5-call chain shape: 0x0070ED80(one DWORD stack arg: 0x1F body 1 / 0x20 body 2, ECX=this unmodified) -> MOVSX word field from the returned pointer (+0x0E body 1 / +0x0C body 2) -> unsigned bound check (0xA / 0xF, JNC to fail arm) -> 0x006B22D0(this) [EAX dead] -> 0x006B22D0(this) again -> flatten to table index -> MOV EDX,[global table + index*4] -> PUSH EDX; CALL 0x0043A550 -> MOV ECX,EAX; CALL 0x0072F580 -> epilogue.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_as_instruction",
+      "evidence_rows": ["L648033-L648054 (body 1, complete: 0x006C27A0-0x006C27DE)", "L648055-L648058 (body 1 fail arm 0x006C27DF-0x006C27E6)", "L648059-L648080 (body 2 in-window portion 0x006C27F0-0x006C282F)"],
+      "key_instructions": {
+        "body1": "L648035 PUSH 0x1f; L648037 CALL 0x0070ed80; L648038 MOVSX EDI,word ptr [EAX+0xe]; L648041 CMP EDI,0xa; L648042 JNC 0x006c27df; L648044 CALL 0x006b22d0; L648045 LEA EAX,[EAX+EAX*0x4]; L648046 LEA ECX,[EDI+EAX*0x2]; L648047 MOV EDX,dword ptr [ECX*0x4+0xa857c8]; L648049 CALL 0x0043a550; L648051 CALL 0x0072f580",
+        "body2": "L648061 PUSH 0x20; L648063 CALL 0x0070ed80; L648064 MOVSX EDI,word ptr [EAX+0xc]; L648067 CMP EDI,0xf; L648068 JNC 0x006c2832 (target OUT-OF-WINDOW); L648070 CALL 0x006b22d0; L648071-648074 MOV ECX,EAX; SHL ECX,0x4; SUB ECX,EAX; ADD ECX,EDI; L648075 MOV EDX,dword ptr [ECX*0x4+0xa85804]; L648077 CALL 0x0043a550; L648079 CALL 0x0072f580"
+      },
+      "premises_applied": ["identical names/shapes do not prove common semantics: each body's claims are derived from its own rows; shape-identity is NOT used to transfer any semantic fact between the bodies"],
+      "countermodel": "If decompilation row order/content were mis-listed the chain reading fails; controlled by read-back-verified verbatim extract and VA-delta consistency. Shape-identity alone would NOT establish the chain for body 2 from body 1 - the chain is read independently in both bodies' rows."
+    },
+    {
+      "id": "P12-C2",
+      "claim": "The success-path return value of both producers is the return of CALL 0x0072F580. Body 1: CONFIRMED at instruction level - final in-window rows L648051 CALL 0x0072f580; L648052 POP EDI; L648053 POP ESI; L648054 RET, with no in-window EAX writer after the CALL; EAX at RET = ret(0x0072F580). Body 2: STRONGLY_SUPPORTED - in-window chain ends L648079 CALL 0x0072f580; L648080 POP EDI (EAX untouched by POP); terminal rows 0x006C2830/0x006C2831 are OUT-OF-WINDOW (recorded, not read); the remaining stack at the window cut must be exactly [saved ESI][return address] (stack-balance, see P12-C5), forcing a POP+RET-class tail that transfers EAX unchanged unless the unread tail writes EAX; no in-window writer of EAX exists after the final CALL.",
+      "evidence_level": "CONFIRMED (body 1) / STRONGLY_SUPPORTED (body 2)",
+      "claim_resolution": "CONFIRMED_as_instruction (body 1); CONDITIONAL_on_out_of_window_tail (body 2, epilogue-forced)",
+      "evidence_rows": ["L648051-L648054", "L648079-L648080", "prologue L648033-L648035 / L648059-L648061"],
+      "premises_applied": ["scoped negatives keep window bounds: body 2's tail is explicitly NOT claimed beyond the forced balance"],
+      "countermodel": "An unread out-of-window terminal row could in principle overwrite EAX before RET (e.g., a zeroing epilogue on some path); stack balance constrains the tail to consume exactly [saved ESI][ret] but does not prove the opcode is POP ESI. This is why body 2's return is graded STRONGLY_SUPPORTED, not CONFIRMED."
+    },
+    {
+      "id": "P12-C3",
+      "claim": "The lookup key material is a DWORD fetched from a global absolute table, not the returned value itself. Body 1: EDX = M32[0xA857C8 + (w1 + idx1*10)*4] where w1 = MOVSX(word[EAX_70ED80_ret + 0x0E]) and idx1 = ret(0x006B22D0)(this). Body 2: EDX = M32[0xA85804 + (w2 + idx2*15)*4] where w2 = MOVSX(word[EAX_70ED80_ret + 0x0C]) and idx2 = ret(0x006B22D0)(this). The table DWORD is PUSHed as the sole visible argument to 0x0043A550, whose return becomes ECX for 0x0072F580. The table DWORD never reaches the producer's return register directly.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_as_instruction",
+      "evidence_rows": ["L648045-L648048, L648050 (body 1)", "L648071-L648076, L648078 (body 2)"],
+      "premises_applied": ["definition registry != instance source: even fully registry-backed, the tables/registry are DEFINITION-side inputs; no instance-record claim is made"],
+      "countermodel": "If 0x0043A550 is a passthrough/identity and 0x0072F580 a direct M32-deref rather than a tree lookup, the 'key' reading would collapse to a pointer-deref idiom; in-window instructions cannot distinguish these (both callees out-of-window). The DWORD-is-input (not return) fact stands regardless."
+    },
+    {
+      "id": "P12-C4",
+      "claim": "Body 1's bound-fail arm (JNC 0x006C27DF, taken when MOVSX'd word >= 10 unsigned) returns the constant 0xBA5800 (absolute-address-shaped DWORD; semantics UNKNOWN, candidate sentinel/empty object - no dereference in-window). Body 2's bound-fail arm jumps to 0x006C2832 which is OUT-OF-WINDOW: body 2's fail-arm return value is NOT claimed (recorded in HANDOFF for parent admission). The hypothesis that body 2's fail arm also returns 0xBA5800 is UNVERIFIED shape-parallelism only.",
+      "evidence_level": "CONFIRMED (body 1 arm) / NOT_ESTABLISHED (body 2 arm)",
+      "claim_resolution": "CONFIRMED_as_instruction (body 1); NOT_ESTABLISHED (body 2)",
+      "evidence_rows": ["L648042 JNC 0x006c27df", "L648055-L648058 POP EDI; MOV EAX,0xba5800; POP ESI; RET", "L648068 JNC 0x006c2832 (target out-of-window)"],
+      "premises_applied": ["identical names/shapes do not prove common semantics: body 1's fail value is NOT transferred to body 2"],
+      "countermodel": "0xBA5800 could be a null-equivalent handle, an error sentinel, or a static empty-record pointer; in-window evidence ends at 'constant is returned'."
+    },
+    {
+      "id": "P12-C5",
+      "claim": "Stack-balance ABI inference: 0x0070ED80 receives exactly one pushed DWORD argument (0x1F/0x20) and pops it itself, and 0x0043A550 receives exactly one pushed DWORD argument (the table DWORD) and pops it itself; both facts are forced because the fixed epilogues (body 1: POP EDI/POP ESI/RET on BOTH arms; body 2: in-window POP EDI at 0x006C282F) only balance if the callees clean their own single argument. 0x006B22D0 and 0x0072F580 are called with no pushed stack arguments (ECX-carried receiver).",
+      "evidence_level": "STRONGLY_SUPPORTED",
+      "claim_resolution": "CONDITIONAL (forced by stack balance; callee bodies not read)",
+      "evidence_rows": ["L648033-L648035 (3 pushes)", "L648052-L648054 + L648055-L648057 (both arms' POP EDI/POP ESI)", "L648048 PUSH EDX", "L648059-L648061, L648080 (body 2 prologue + in-window POP EDI)"],
+      "premises_applied": ["scoped negatives keep window bounds"],
+      "countermodel": "A callee could in principle clean a different amount (RET n with n != 4) - but then the fixed in-window epilogue would return to a wrong stack slot on a working client, so the reading is forced for correct code; graded STRONGLY_SUPPORTED because no runtime proof exists in the saved corpus."
+    },
+    {
+      "id": "P12-C6",
+      "claim": "Scoped negative (window-bounded): the 48 in-window rows contain exactly 10 CALL sites with 4 distinct targets (0x0070ED80 x2, 0x006B22D0 x4, 0x0043A550 x2, 0x0072F580 x2) and ZERO references to the getter 0x007CE1E0, valid-check 0x0072FCE0, pair-builder 0x0043C700, callback registrar 0x0040B070, enqueuers 0x0043E5B0 / 0x006C3640, callback 0x008BD720, or the pump 0x006B6C9D. The producers therefore use the lookup half of the bridge registry machinery (0x0072F580) and none of the pump/callback machinery.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_as_instruction (window-bounded negative)",
+      "evidence_rows": ["all 48 rows L648033-L648080 (census)"],
+      "premises_applied": ["scoped negatives keep window bounds: this negative says nothing about the out-of-window callees' internals"],
+      "countermodel": "None in-window; the census is exhaustive over the verbatim extract."
+    },
+    {
+      "id": "P12-C7",
+      "claim": "Def-use: in BOTH bodies the first 0x006B22D0(this) call's return EAX is dead - it is overwritten by the second 0x006B22D0 call before any in-window use (the intervening CMP/JNC consume EDI and flags only). Whether the first call has side effects (e.g., iterator advance) is UNKNOWN; callee out-of-window.",
+      "evidence_level": "CONFIRMED (def-use) with UNKNOWN side-effect role",
+      "claim_resolution": "CONFIRMED_as_instruction (dead EAX); NOT_ESTABLISHED (side effects)",
+      "evidence_rows": ["L648040 CALL 0x006b22d0 -> L648041 CMP EDI,0xa -> L648044 CALL 0x006b22d0 (EAX overwritten)", "L648066 CALL 0x006b22d0 -> L648067 CMP EDI,0xf -> L648070 CALL 0x006b22d0"],
+      "premises_applied": ["identical names/shapes do not prove common semantics"],
+      "countermodel": "If 0x006B22D0 is stateless and pure, the first call is redundant (compiler artifact or defensive re-read); if stateful (cursor advance), the two calls return different indices and only the second is used. In-window data cannot discriminate; hypothesis recorded in BARRIER_BACKLOG."
+    },
+    {
+      "id": "P12-C8a",
+      "claim": "C1 discriminator, in-window part (CONFIRMED): the success path of BOTH producers terminates in the campaign-standing object-resolution idiom PUSH value; CALL 0x0043A550; MOV ECX,EAX; CALL 0x0072F580 - the identical call pair that P06 confirmed in its own window as the keyed object-resolution chain and that P04 recorded as arg2 -> 43a550 -> 72f580 -> 72fce0. The producers' returned worklist elements are therefore 0x0072F580-call products, keyed by 0x0043A550-transformed table DWORDs.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_as_instruction",
+      "evidence_rows": ["L648048-L648051 (body 1)", "L648076-L648079 (body 2)"],
+      "cited_standing": ["P06 REPORT.md section 4.1 element #6 (same call pair, CONFIRMED structure there)", "P04 REPORT.md per-callsite table, 0x0067C8A8 row (same idiom)", "bridge: FUN_0072F580 = templates.vfs RB-tree keyed lookup"],
+      "premises_applied": ["identical names/shapes do not prove common semantics: the idiom match is CORROBORATION, not proof - P12's chain facts stand on P12's own rows"],
+      "countermodel": "If 0x0043A550/0x0072F580 in THIS context had different semantics than in P06's context (different receiver types), the 'resolution' reading would be wrong; in-window the call pair is fixed, the semantics are inherited standing."
+    },
+    {
+      "id": "P12-C8b",
+      "claim": "C1 discriminator verdict (composite): the worklist feeding the {0x66,A} pump is REGISTRY-FED - the producers return registry-lookup products (0x0072F580, templates.vfs RB-tree definition-registry lookup per bridge standing) keyed by DWORDs from two global row-indexed tables (0xA857C8 / 0xA85804) whose indices come from object state (0x006B22D0 row index; 0x0070ED80-returned column word). 'Container data' is REJECTED as the direct return source in-window (the table DWORD is an intermediate input to 0x0043A550, never the returned EAX); it is the KEY source. 'Other' applies only to body 1's fail-arm constant 0xBA5800 (returned on bounds failure) and to body 2's out-of-window fail arm.",
+      "evidence_level": "STRONGLY_SUPPORTED (composite: in-window CONFIRMED chain + cited bridge attribution)",
+      "claim_resolution": "CONDITIONAL on bridge standing for 0x0072F580; the in-window facts (P12-C1..C7) are unconditional",
+      "evidence_rows": ["L648047, L648075 (table reads)", "L648049/L648051, L648077/L648079 (resolution pair)", "L648056 (fail constant)"],
+      "premises_applied": ["definition registry != instance source: the worklist elements are DEFINITION-registry products; NO instance-source or instance-record claim is made", "identical names/shapes do not prove common semantics"],
+      "countermodel": "If the bridge's attribution of 0x0072F580 as the templates.vfs RB-tree lookup were wrong, the verdict degrades to 'worklist = 0x0072F580-call products keyed by global-table DWORDs' - the registry label would fall, the call-chain facts would stand. Falsifier: an admitted read of 0x0072F580 showing non-registry semantics."
+    },
+    {
+      "id": "P12-C9",
+      "claim": "Table geometry (arithmetic observation): body 1 flattens its index as w1 + idx1*10 with w1 unsigned-bounded < 10 (row stride 10 DWORDs = 40 B, table base 0xA857C8); body 2 as w2 + idx2*15 with w2 unsigned-bounded < 15 (row stride 15 DWORDs = 60 B, table base 0xA85804); base2 - base1 = 0x3C = 60 B = exactly body 2's row byte-size. The two bases are DISTINCT absolute addresses; whether they are sections of one logical array is UNKNOWN (no table bounds/extent in-window).",
+      "evidence_level": "CONFIRMED (arithmetic) / NOT_ESTABLISHED (table relationship)",
+      "claim_resolution": "CONFIRMED_as_arithmetic; array-relationship NOT_ESTABLISHED",
+      "evidence_rows": ["L648041 CMP EDI,0xa; L648045 LEA EAX,[EAX+EAX*0x4]; L648046 LEA ECX,[EDI+EAX*0x2]; L648047 [ECX*0x4+0xa857c8]", "L648067 CMP EDI,0xf; L648071-L648074 SHL/SUB/ADD; L648075 [ECX*0x4+0xa85804]"],
+      "premises_applied": ["scoped negatives keep window bounds"],
+      "countermodel": "The 60 B delta equaling body 2's row size could suggest adjacency in one array, but that is numerology without extent evidence; recorded as UNKNOWN."
+    },
+    {
+      "id": "P12-C10",
+      "claim": "Index sign discipline: both column words are SIGN-extended (MOVSX) yet bounds-checked UNSIGNED (CMP imm + JNC) - a negative word becomes a large unsigned value and takes the fail arm; valid range is [0,10) for body 1 and [0,15) for body 2.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED_as_instruction",
+      "evidence_rows": ["L648038 MOVSX EDI,word ptr [EAX+0xe]; L648041 CMP EDI,0xa; L648042 JNC", "L648064 MOVSX EDI,word ptr [EAX+0xc]; L648067 CMP EDI,0xf; L648068 JNC"],
+      "premises_applied": [],
+      "countermodel": "None in-window."
+    },
+    {
+      "id": "P12-C11",
+      "claim": "Receiver plumbing: ECX at every 0x0070ED80 call equals the entry ECX (the producer's this): the only intervening instruction is MOV ESI,ECX (a copy; PUSH does not touch ECX). The this is saved to ESI and re-loaded into ECX before each 0x006B22D0 call. Per cited P11 standing, this = the [EDI+0x8] value of the P11 enclosing object. Whether 0x0070ED80 actually consumes ECX (thiscall) or ignores it is UNKNOWN.",
+      "evidence_level": "CONFIRMED (register plumbing) / UNKNOWN (0x0070ED80 ABI use)",
+      "claim_resolution": "CONFIRMED_as_instruction; callee ABI NOT_ESTABLISHED",
+      "evidence_rows": ["L648036 MOV ESI,ECX; L648037 CALL 0x0070ed80", "L648039/L648043 MOV ECX,ESI; CALL 0x006b22d0", "L648062 MOV ESI,ECX; L648063 CALL 0x0070ed80", "L648065/L648069 MOV ECX,ESI; CALL 0x006b22d0"],
+      "premises_applied": ["definition registry != instance source"],
+      "countermodel": "None in-window for the plumbing facts."
+    },
+    {
+      "id": "P12-C12",
+      "claim": "Window discipline result: the 48 in-window rows contain EXACTLY the 2 declared body entries (0x006C27A0 at L648033, 0x006C27F0 at L648059) and NO unforeseen in-window body; body 2's terminal rows (0x006C2830/0x006C2831) and fail-arm target (0x006C2832) fall outside the end-exclusive window boundary and are recorded, not read. A separate NAVIGATION OVER-DISPLAY incident (terminal output of the boundary-location search showing rows outside the region) is disclosed in REPORT.md; zero claims derive from those rows.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "CONFIRMED (row census); incident DISCLOSED",
+      "evidence_rows": ["L648033-L648080 census", "first row L648033 = 006c27a0 PUSH ESI (entry), second entry L648059 = 006c27f0 PUSH ESI"],
+      "premises_applied": ["scoped negatives keep window bounds"],
+      "countermodel": "None."
+    }
+  ],
+  "verdict_summary": {
+    "registry_walk_vs_container_data_vs_other": {
+      "registry_walk": "YES for the success path - both producers terminate in CALL 0x0072F580 (bridge: templates.vfs RB-tree keyed lookup) and return its product; the tree walk itself lives inside the out-of-window callee (cited standing, not re-derived).",
+      "container_data": "REJECTED as the direct return source (in-window: the table DWORD is input to 0x0043A550, never the returned value); ACCEPTED as the KEY/index source (global tables 0xA857C8/0xA85804 + object state via 0x006B22D0/0x0070ED80).",
+      "other": "PARTIAL - body 1's fail arm returns constant 0xBA5800 (semantics UNKNOWN); body 2's fail arm out-of-window (value not claimed).",
+      "getter_007CE1E0": "NOT consulted in-window (scoped negative P12-C6)."
+    },
+    "p11_edge_closure": "P11's undecidable edge ('whether the producers internally consult the definition registry') is now decided within this window: YES - via CALL 0x0072F580. The worklist feeding the {0x66,A} pump consists of registry-lookup products keyed by global-table DWORDs. Definition-registry premise preserved: these are DEFINITION-source elements, NOT instance records."
+  }
+}

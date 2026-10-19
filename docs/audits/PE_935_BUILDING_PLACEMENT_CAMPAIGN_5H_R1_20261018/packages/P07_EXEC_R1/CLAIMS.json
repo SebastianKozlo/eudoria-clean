@@ -1,0 +1,61 @@
+{
+ "attribution": "DIRECT_ANALYST_FALLBACK by PE-MASTER parent (contract section 4) after two incomplete child executions (attempt 1 preserved extracts; attempt 2 added nothing)",
+ "claims": [
+  {
+   "id": "P07-C1",
+   "claim": "0x00745BF0 is a keyed MAP LOOKUP helper, not a property getter: thiscall ECX=this; builds a 4-DWORD key tuple on stack (incl. constant 4 at +0x4 slot); calls 0x00745A70 with this fields [this+4]/[this+8] and key; on success (EAX != [this+8] sentinel) returns *[EAX]; on sentinel-equality jumps to 0x00745C40 (first byte OUTSIDE window). The id2/class-20006-tag-6 property-read hypothesis is NOT confirmed in-window - the actual read is inside callee 0x00745A70 (un-admitted)",
+   "evidence": "SR1 lines 809928-809959: key construction 00745c15-00745c20, CALL 00745A70 @00745c28, CMP EAX,[ESI+8] @00745c30, JZ 00745c40, MOV EAX,[EAX] @00745c35, RET 0x4",
+   "premises": [
+    "745A70 semantics un-admitted",
+    "map ownership/layout hypothesis from arg shapes only",
+    "fail-path body outside window"
+   ],
+   "countermodel": "745A70 could be a hash function over something else; key meaning (type/subkey tuple) is hypothesis",
+   "evidence_level": "STRONGLY_SUPPORTED"
+  },
+  {
+   "id": "P07-C2",
+   "claim": "No VFS/record-fed source visible in 745BF0 window (scoped negative; the record->slot merge question moves to callee 0x00745A70 and slot-object provenance)",
+   "evidence": "SR1 full 32-row census",
+   "premises": [
+    "window-scoped only"
+   ],
+   "countermodel": "callee may read a VFS-fed structure",
+   "evidence_level": "CONFIRMED"
+  },
+  {
+   "id": "P07-C3",
+   "claim": "0x006B6C9D is a {0x66,A}-forming registration pump: loops a worklist; per element EDI=[EBX]: CALL 0x0072FCE0 (valid check); if valid CALL 0x007CE1E0 (bridge-CONFIRMED [ECX+0x08] A-read getter), result to [ESP+0x20]; const 0x66 to [ESP+0x24]; CALL 0x0043C700 (request-pair build); then registers callback 0x008BD720 via 0x0040B070 and enqueues {ESI,request-field} via 0x0043E5B0",
+   "evidence": "SR2 lines 632981-633034: CALL 72FCE0 @006b6cd3, CALL 7CE1E0 @006b6cde, MOV [ESP+0x24],0x66 @006b6cf3, MOV EBX,0x8bd720 @006b6d05, CALL 40b070 @006b6d0a, CALL 43e5b0 @006b6d2b",
+   "premises": [
+    "43C700/40B070/43E5B0 semantics un-admitted (arg-shape inference: pair build / queue object / enqueue)",
+    "72FCE0/7CE1E0 semantics inherited from bridge standing (CONFIRMED there), cited not re-derived",
+    "worklist source un-admitted"
+   ],
+   "countermodel": "40B070 could be something other than a queue accessor; enqueue interpretation is arg-shape level",
+   "evidence_level": "CONFIRMED"
+  },
+  {
+   "id": "P07-C4",
+   "claim": "The other two imm32 sites (0x006C3F98 via CALL 0040B070 + CALL 006C3640; 0x006D44A4 same pattern in a loop) register the SAME callback 0x008BD720; 0x006C3640 is a second enqueue path parallel to 0x0043E5B0",
+   "evidence": "SR3 line 650197 MOV EBX,0x8bd720 @006c3fb0; SR4 line 671422 MOV EDI,0x8bd720 @006d44e8; both CALL 0040B070 then CALL 006C3640",
+   "premises": [
+    "006C3640 semantics un-admitted",
+    "the three contexts may serve different request classes sharing the callback"
+   ],
+   "countermodel": "none in-window",
+   "evidence_level": "CONFIRMED"
+  },
+  {
+   "id": "P07-C5",
+   "claim": "Consumer chain of the {0x66,A} request now statically bounded: pair formed at 006B6CE3-006B6CFB -> callback 8BD720 (leaf, returns &req+0x18 per P06) registered via 40B070 -> enqueued via 43E5B0/006C3640. The consumer/dispatcher body (who invokes the callback, what reads req+0x18) is NOT in any admitted window - exact gap: bodies of 0040B070, 0043E5B0, 006C3640",
+   "evidence": "P06-C1 + P07-C3/C4 composition",
+   "premises": [
+    "composition of independently-derived windows",
+    "bridge standing for request-pair semantics"
+   ],
+   "countermodel": "dispatcher may be reached elsewhere entirely",
+   "evidence_level": "STRONGLY_SUPPORTED"
+  }
+ ]
+}

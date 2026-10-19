@@ -1,0 +1,42 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P02",
+  "front": "A",
+  "pins": [
+    {
+      "role": "primary_source",
+      "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_NIGHT_AGGREGATE_20260905_160000\\GHIDRA_H5_VTABLE2.txt",
+      "sha256": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "sha256_contract_pin": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "size_bytes": 50780146,
+      "verified_utc": ["2026-10-18T21:31:09Z", "2026-10-18T21:34:47Z"],
+      "admitted_region": "0x006B1E00-0x006B1FAC",
+      "admission_id": "A0f2d2522b464",
+      "body_entries": ["0x006B1E0B", "0x006B1E2F"],
+      "boundary_note": "Row-admission rule: instruction rows whose START VA is in [0x006B1E00, 0x006B1FAC]. First row VA=006b1e00 == P01 window end-exclusive boundary (P01 QC section 3 confirms line 626546/VA 006b1e00 as its end-exclusive cut). Last admitted row starts VA=006b1faa (5-byte 'MOV byte ptr [ESP + 0x17],0x0'); its fall-through instruction starts at 006b1faf which is OUTSIDE the region and was NOT read. Out-of-region jump targets visible from in-region rows (not read): 0x006B1FB4 (JZ @006b1e52), 0x006B1FAF+ (fall-through of 006b1faa). Back-edges into P01's admitted window (cited only, not re-read): 006b1dda (JA @006b1e28), 006b1d33 (JNZ @006b1f2e). No out-of-region semantic read was performed."
+    }
+  ],
+  "extracts": [
+    {
+      "file": "EXTRACT_006B1E00_006B1FAC_L.txt",
+      "sha256": "EDB9E41549F8961C1860F9FFFB845F74DF05D7D5F6DCA3FED078013DC05AC86A",
+      "size_bytes": 4708,
+      "format": "<source_line_number>|<verbatim listing row: VA + instruction text>",
+      "source_line_range": [626546, 626681],
+      "row_count": 136,
+      "va_start": "0x006b1e00",
+      "va_last_row_start": "0x006b1faa",
+      "line_parity": "All 136 admitted rows are 136 CONSECUTIVE source lines (626681-626546+1=136): the region is one contiguous VA-sorted run with no interleaved blank/label lines. Single full-file streaming scan (1,743,930 lines) found exactly 136 in-range rows, none outside lines 626546-626681 (no duplicate/second listing of the region elsewhere in the file)."
+    }
+  ],
+  "context_docs_cited_not_reanalyzed": [
+    {
+      "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\packages\\P01_EXEC_R1\\REPORT.md",
+      "use": "P01-C1..C8, [EDI]=EAX deque-insert pinning ([ESP+0x2c] cursor), container helpers 0043ba10/0043ca60, indirect free [0x00A759FC], branch/leaf dispatch 0xBA7218/0xBA7210, exits 006b1f28/006b1f34, FIRST_MISSING_EDGE tail scoping"
+    },
+    {
+      "path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018\\reviews\\P01_QC_R1\\QC_REPORT.md",
+      "use": "Independent frame arithmetic (prologue 0x6C, [ESP+0x70]=ARG1, RET 0x4=1 by-value arg), NiTArray +CC data/+D4 count cross-confirmation, boundary confirmation at source line 626546, premise additions 5.3 (same-instance premise), P01-B3 backlog"
+    }
+  ]
+}

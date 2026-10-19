@@ -1,0 +1,145 @@
+{
+  "package_id": "P04",
+  "front": "B",
+  "question": "B1: writer 0x005094C0 signature and argument/record provenance in admitted callers 0x006A36F0, 0x0067B4F0, 0x0067C560, 0x0067C7C0; record discrimination (resource ID / instance ID / parent / position / rotation); attach/parent evidence for root-instance vs internal NIF node.",
+  "taxonomy_note": "evidence_level uses project taxonomy CONFIRMED / STRONGLY_SUPPORTED / PLAUSIBLE / UNVERIFIED / REJECTED. claim_resolution uses CONDITIONAL / NOT_ESTABLISHED / REJECTED_WITH_EVIDENCE where applicable. run_status is procedural and reported separately.",
+  "premises_preserved": [
+    "three float-shaped DWORDs != XYZ provenance",
+    "parent composition may convert local->world without revealing historical source",
+    "update mechanism != recovered data source",
+    "no direct caller != exclusively virtual"
+  ],
+  "claims": [
+    {
+      "claim_id": "C1",
+      "title": "Writer 0x005094C0 signature: thiscall copy-setter of a 3-DWORD record into SF local-translation fields with dirty flag",
+      "statement": "0x005094C0 is thiscall: receiver in ECX (the SF-shaped object), exactly ONE 4-byte stack argument (RET 0x4) which is a POINTER to a contiguous 12-byte record. It performs: SF+34 <- [arg+0]; SF+38 <- [arg+4]; SF+3C <- [arg+8]; SF+28 <- 1 (byte dirty flag). No other writes. No return value (EAX clobbered by last load). No ID, parent, scale or rotation logic in the body.",
+      "evidence": "R1 extract rows 145735-145743 (extracts/R1_WRITER_005094C0.txt): 005094c0 MOV EAX,[ESP+4]; 005094c4 MOV EDX,[EAX]; 005094c6 MOV [ECX+0x34],EDX; 005094c9 MOV EDX,[EAX+4]; 005094cc MOV [ECX+0x38],EDX; 005094cf MOV EAX,[EAX+8]; 005094d2 MOV [ECX+0x3c],EAX; 005094d5 MOV byte [ECX+0x28],1; 005094d9 RET 0x4.",
+      "premises": [
+        "thiscall convention assumed from ECX-receiver pattern + callee-cleaned single 4-byte arg (RET 0x4)",
+        "SF+34/+38/+3C semantics (local translation) is KNOWN CONTEXT supplied by parent, not re-derived here",
+        "byte +28 named 'dirty' per parent-provided writer designation, not proven semantic"
+      ],
+      "countermodel": "If the writer were stdcall-with-pointer-return or took three scalar args, the [EAX] deref pattern would be absent and RET 0x4 would not match exactly one pushed DWORD; the observed deref at arg+0/+4/+8 rules out three separate scalar args.",
+      "evidence_level": "CONFIRMED"
+    },
+    {
+      "claim_id": "C2",
+      "title": "Callsite R2 @0x006A3727 (in 0x006A36F0): record = caller's own stack frame slot &F+0x3C with no in-body producer",
+      "statement": "Receiver = [caller+0x18]; record argument = LEA [ESP+0x40] = &F+0x3C (F = frame base after SUB ESP,0x4c), a 12-byte in-frame slot. No instruction in the admitted body stores to F+0x3C..F+0x47 before the call. Preceding out-parameter callees: 0x0085C280(this=[caller+4], out=&F+0xC) and 0x0085BFA0(this=[caller+4], out=&F+0x18); the record slot equals &F+0x18+0x24 (12-float buffer tail) or &F+0xC+0x30 (16-float buffer translation row) - either geometry fits exactly. After the writer: 0x0096CD10(this=&F+0x18, arg=&F+0={0,0,0}) then 0x00509510(this=[caller+0x18], arg=&F+0) writes rotation as CONSTANT ZEROS.",
+      "evidence": "R2 extract rows 607713-607747 with stack arithmetic: baseline ESP=F-4 after PUSH ESI; LEA [ESP+0x10]->F+0xC; LEA [ESP+0x1c]->F+0x18; LEA [ESP+0x40]->F+0x3C; zeros at F+0/F+4/F+8 via FLDZ/FST/FST/FSTP; 96CD10 this=&F+0x18 (LEA [ESP+0x20] at ESP=F-8); 509510 arg=&F+0.",
+      "premises": [
+        "out-callees are assumed to consume their pushed args (RET n) since no in-body ADD ESP cleanup appears",
+        "extent of writes by 85C280/85BFA0 into their out-buffers is UNKNOWN (bodies not admitted)"
+      ],
+      "countermodel": "If 85C280 and 85BFA0 both write fewer than 0x30 bytes, the record slot holds stale frame data from previous invocations (garbage-in) - a real static variant recorded as V2 in BARRIER_BACKLOG; it is not excluded within this package.",
+      "evidence_level": "CONFIRMED"
+    },
+    {
+      "claim_id": "C3",
+      "title": "Callsite R3 @0x0067B52E (in 0x0067B4F0): record = &F+0x3C; preceding getters 862850(arg1) and 85BFA0([caller+0]); rotation := constant zeros; ID-shaped [caller+0xC] flows AFTER the writer",
+      "statement": "Receiver = [caller+4]. Record = LEA [ESP+0x44] = &F+0x3C (same geometry as R2; baseline ESP=F-8 after PUSH ESI+PUSH EDI). Preceding out-callees: 0x00862850(this=arg1(stack arg 1, in EDI), out=&F+0xC) whose RETURN goes to 0x00509070(this=[caller+4], arg=ret); then 0x0085BFA0(this=[caller+0], out=&F+0x18). After the writer + zero-rotation (509510): second 862850(this=arg1, out=&F+0xC); its returned 3-float vector [ret+0/+4/+8] is length-computed (sqrt via 0x0095DA2E) => ||v||; then f32(||v|| * qword[0x00A7AF80]) and [caller+0xC] are passed to 0x004150F0, its result to 0x008B7210; finally tail CALL 0x006A34A0 with ECX=[caller+8] if nonzero.",
+      "evidence": "R3 extract rows 564107-564180; FPU chain decoded: FLD[ret+4]/FLD[ret]/FLD[ret+8], FLD ST1, FMULP ST2, FLD ST2, FMULP ST3, FXCH, FADDP ST2, FMUL ST0 (squares ST0=v8), FADDP => v0^2+v4^2+v8^2 stored, sqrt'd, reloaded, scaled by qword [0x00A7AF80], pushed with EAX=[ESI+0xC] to CALL 0x004150F0.",
+      "premises": [
+        "0x0095DA2E interpreted as CRT sqrt from the load/call/store pattern and its 0x0095xxxx CRT region address; body not read",
+        "qword at 0x00A7AF80 value NOT read (data address, not in code listing); known context contains a 0.01 factor in the position path but this package does not assert equality",
+        "[caller+0xC] described as numeric/ID-shaped only from its use as 004150F0 argument; semantics unknown"
+      ],
+      "countermodel": "If [caller+0xC] were zero or a non-ID value, the ID-hint would be void - but the claim only asserts the FLOW (value passed after the writer), which is directly evidenced; the ID interpretation is explicitly UNVERIFIED and not part of the confirmed statement.",
+      "evidence_level": "CONFIRMED"
+    },
+    {
+      "claim_id": "C4",
+      "title": "Callsite R4 @0x0067C584 (in 0x0067C560): record = &F+0x3C; the ONLY preceding out-callee is 85BFA0([caller+0], out=&F+0x18) - discriminating witness for the record-producer hypothesis",
+      "statement": "Receiver = [caller+4]. Record = LEA [ESP+0x40] with baseline ESP=F-4 (only PUSH ESI) = &F+0x3C. Before the writer this body performs exactly one out-parameter call: 0x0085BFA0(this=[caller+0], out=&F+0x18). The record slot = &F+0x18+0x24 - the tail three floats of a 12-float buffer hypothesis. Rotation := constant zeros via 509510 after 96CD10(this=&F+0x18, &zeros). THEN (post-writer): if [caller+0xC] != 0: 862850(arg1, out=&F+0xC) -> 509070([caller+4], ret) -> 862850 again -> ||v|| -> 004150F0([caller+0xC], f32(||v||*q[0x00A7AF80])) -> 008B7210. Tail: 006A34A0(this=[caller+8]) if nonzero.",
+      "evidence": "R4 extract rows 565392-565467; sequence 85BFA0@0067C577 -> writer@0067C584 -> zeros/96CD10@0067C5A0 -> 509510@0067C5AD -> guard [ESI+0xC]@0067C5B2 -> 862850@0067C5C4 -> 509070@0067C5CD -> 862850@0067C5D9 -> FPU length -> 004150F0@0067C629 -> 008B7210@0067C630.",
+      "premises": [
+        "85BFA0 must write >= 0x30 bytes past &F+0x18 to cover the record slot - extent UNVERIFIED (body un-admitted)",
+        "post-writer calls cannot be the producer for THIS invocation (ordering), but stale-frame variant remains"
+      ],
+      "countermodel": "If 85BFA0 writes < 0x30 bytes, R4's record = stale frame bytes; the consume-then-clear pattern (96CD10 on the same buffer with zeros AFTER the writer) would then be a coincidence of slot reuse. Neither direction proven inside this package.",
+      "evidence_level": "CONFIRMED"
+    },
+    {
+      "claim_id": "C5",
+      "title": "Callsite R5 @0x0067C8A8 (in 0x0067C7C0): record = RETURN VALUE of getter 0x0085C0C0(this=arg1, out=&local P+8); receiver = FRESHLY CREATED object; rotation from paired getter 0x0085C0F0",
+      "statement": "0x0067C7C0 is SEH-protected (handler 0x009F9784, cookie [0x00B9D8D0], frame 0xD8, state var at P+0xE0). arg1 -> this+0; arg2 -> EDI. Receiver of the writer = [this+4], which was CREATED IN THIS FUNCTION by the chain: CALL [0x00A75A38](this=&P+3 local) -> PUSH ret, PUSH 0xA7957B (unread constant, likely rdata string ptr) -> CALL [0x00A75A44](this=&P+8) -> 0x00401360(1, 0, &P+8) -> 0x00485050 -> 0x0048CBB0 -> 0x005247C0 -> stored to this+4 at 0067C86D. Writer argument = EAX = return of 0x0085C0C0(this=[this+0]=arg1, arg=&P+8 local2) - a CALLEE-RETURNED POINTER, not a frame address; the writer derefs ret+0/+4/+8. Rotation: 0x00509510(this=[this+4], arg=ret(0x0085C0F0(this=arg1, out=&P+8))) - REAL data, NOT zeros. Then 0x00509190(this=[this+4], arg=0). Then arg2-based lookup: [arg2] -> 0x0043A550 -> 0x0072F580 -> 0x0072FCE0(bool; JZ 0x0067C974 outside window) -> alloc 0x130 via 0x0095D3C4 (cdecl, ADD ESP,4) -> 0x00733340(this=&(P+0x14) slot holding this) -> 0x006C0D50(this=alloc, args: lookup, 0, ret) -> JMP 0x0067C923 (outside window). Admitted window ENDS MID-BODY at 0x0067C91F; epilogue/RET unknown.",
+      "evidence": "R5 extract rows 565584-565680 with frame arithmetic: P = entry ESP - 0xE4; SEH node at P+0xDC (LEA [ESP+0xEC] at ESP=P-20); args at P+0xE8/P+0xEC; local1 at P+3, local2 at P+8; state byte updates at P+0xE0 (values 0,1,2,3); guard [this+4]@0067C88F JZ 0x0067CA60 (outside window); alloc-fail JZ 0x0067C921 (window boundary).",
+      "premises": [
+        "0x0085C0C0/0x0085C0F0 are sibling getters 0x30 bytes apart, both on arg1, both with out=&P+8 - PAIRING is structural observation only",
+        "whether 85C0C0's return is &local2 (callee-filled) or an internal arg1 pointer is UNDETERMINED (body un-admitted)",
+        "un-admitted exit targets 0x0067CA60, 0x0067C974, 0x0067C921, 0x0067C923 NOT read"
+      ],
+      "countermodel": "If 85C0C0 returns null on some path, the writer would deref null - the window shows no null-test between CALL and PUSH, meaning either the getter cannot return null on this path or the caller tolerates the fault under SEH (handler 0x009F9784 present). Both variants open; recorded in backlog.",
+      "evidence_level": "CONFIRMED"
+    },
+    {
+      "claim_id": "C6",
+      "title": "The position record does NOT distinguish resource ID / instance ID / parent / position / rotation - it is a bare 12-byte transform-shaped triple in all four callsites",
+      "statement": "In every admitted callsite the writer receives exactly a 12-byte triple. No ID, parent pointer, resource handle, rotation or scale field is present in or adjacent to the record. Rotation is written by a SEPARATE method (0x00509510) receiving a SEPARATE argument ({0,0,0} constants in R2/R3/R4; ret(85C0F0) in R5). ID-shaped values exist in the callers but never enter the record: [caller+0xC] (R3/R4 -> 004150F0 with scaled distance, AFTER the writer), arg2's field (R5 -> 43a550/72f580/72fce0 lookup, AFTER the writer), arg1 (R3/R4: 862850 receiver; R5: 85C0C0/85C0F0 receiver - the SOURCE OBJECT, identity unexamined).",
+      "evidence": "C2/C3/C4/C5 call sequences; R1 write-set; absence of any ID read in the writer path across all five extracts.",
+      "premises": [
+        "12 bytes cannot encode a NiNode parent pointer plus a triple without overlap; the writer consumes exactly [arg],[arg+4],[arg+8]",
+        "premise preserved: three float-shaped DWORDs != XYZ provenance - the triple is transform-SHAPED only"
+      ],
+      "countermodel": "If one of the three DWORDs were an ID/flag rather than a float, the writer would still copy it identically - the writer cannot distinguish. This is exactly why XYZ provenance is NOT asserted; the claim is about the RECORD'S FIELD CONTENTS (no separate ID/parent channel), which is directly evidenced by the call ABI.",
+      "evidence_level": "STRONGLY_SUPPORTED"
+    },
+    {
+      "claim_id": "C7",
+      "title": "Dominant record-producer hypothesis: 0x0085BFA0's out-buffer at &F+0x18 with the record at buffer offset +0x24 (translation-row geometry of a 12-float buffer)",
+      "statement": "R2/R3/R4 all call 85BFA0(this=<source object>, out=&F+0x18) immediately before the writer, and the record slot is exactly &F+0x18+0x24 in all three. R4 is the discriminating witness (only 85BFA0 precedes). The post-writer 0x0096CD10(this=&F+0x18, arg={0,0,0}) operating on the SAME buffer is consistent with a consume-then-clear/SetTranslation(0) pattern on a matrix-like stack object. In R2/R3 an alternate geometry also fits exactly: 85C280/862850(out=&F+0xC) writing a 16-float 4x4 would place its translation row at &F+0xC+0x30 = &F+0x3C.",
+      "evidence": "C2/C3/C4 sequences and slot arithmetic; consistency of the &F+0x18 buffer as 96CD10's this in R2/R3/R4.",
+      "premises": [
+        "85BFA0 extent >= 0x30 bytes REQUIRED for the hypothesis - NOT VERIFIED (body un-admitted)",
+        "row-major 12/16-float matrix layout is a structural hypothesis from slot geometry, not a read layout"
+      ],
+      "countermodel": "Falsified if 85BFA0's body writes < 0x30 bytes at its out-param (then R4's record is stale/garbage), or if 85C280 (R2) / 862850 (R3) turn out to own the record via 4x4 extent while 85BFA0 writes only e.g. 0x24 bytes. Requires admission of 0x0085BFA0 (and secondarily 0x0085C280/0x00862850) to resolve.",
+      "evidence_level": "PLAUSIBLE",
+      "claim_resolution": "CONDITIONAL"
+    },
+    {
+      "claim_id": "C8",
+      "title": "R2/R3/R4 are update/copy mechanisms, NOT historical data sources; R5 is a copy-initializer - the actual data source lies BEHIND the getters",
+      "statement": "R2/R3/R4 write rotation as constant {0,0,0} - no historical rotation restore shape; their position bytes come from in-frame buffers filled by getters. R5 creates a fresh receiver and copies BOTH position (85C0C0) and rotation (85C0F0) from source object arg1 - a spawn/duplicate shape. Per the preserved premise, none of these update/copy mechanisms is itself a recovered placement data source; the historical source, if any, is behind 85BFA0/85C0C0/85C0F0/862850's reads on their receivers ([caller+0], [caller+4], arg1).",
+      "evidence": "C2-C5 sequences; FLDZ-constant triples in R2/R3/R4; getter-fed rotation in R5.",
+      "premises": [
+        "premise preserved: do not promote an update mechanism to a recovered data source",
+        "R5's 0x130-record construction after the position/rotation copy suggests instance-record creation, but its semantics are un-admitted"
+      ],
+      "countermodel": "If 85BFA0/85C0C0 read directly from a world-message/descriptor (not from a scene node), R2/R3/R4/R5 could be intake paths of externally-provided transforms - that would CHANGE the classification from 'update mechanism' to 'intake'; not decidable in this window.",
+      "evidence_level": "STRONGLY_SUPPORTED",
+      "claim_resolution": "CONDITIONAL"
+    },
+    {
+      "claim_id": "C9",
+      "title": "NEGATIVE: no attach/parent evidence within admitted windows; root-instance vs internal NIF node UNDETERMINED",
+      "statement": "No instruction in the five admitted subregions writes SF+30 (the known NiNode-family link) or any parent field of the receiver. No NiNode attach/detach call is identified. The candidate link-setter is 0x00509070 (called as this=SF-receiver with a getter-returned pointer in R2/R3/R4) - body un-admitted, semantics unknown. R5's 0x00509190(receiver, 0) and R3/R4's tail 0x006A34A0(this=[caller+8]) are additional unqualified candidates. Therefore the written node's qualification as instance root vs internal NIF node CANNOT be established from this package.",
+      "evidence": "Absence verified across all 291 rows: receiver field writes in-window are only SF+34/+38/+3C/+28 (writer) and whatever 509510/509070/509190 do (bodies un-admitted, unread).",
+      "premises": [
+        "absence-of-write in the window does NOT mean absence in the program - only that this package cannot qualify the node role",
+        "known context SF+30->NiNode-family is parent-supplied; 509070-as-SF+30-setter is a hypothesis, not asserted"
+      ],
+      "countermodel": "If 509070's body writes SF+30 := arg, the fed node identity becomes resolvable next package; if it writes something else (e.g., SF+04 or a list append), the node-role question stays open. Either way this claim's negative stands for THIS window.",
+      "evidence_level": "CONFIRMED",
+      "claim_resolution": "NOT_ESTABLISHED"
+    },
+    {
+      "claim_id": "C10",
+      "title": "Scoped result: producer identified up to the getter boundary; exact data-route gap enumerated",
+      "statement": "The stored SceneFeeder position is, in all four admitted callsites, a copy of a 12-byte transform-shaped triple whose bytes are produced by getter callees OUTSIDE this admission: R2: 0x0085C280 or 0x0085BFA0 (ambiguous, both fit); R3: 0x00862850 or 0x0085BFA0 (ambiguous); R4: 0x0085BFA0 only (dominant witness); R5: 0x0085C0C0 return. The record itself carries no identity/parent/rotation discriminator. Remaining static variants: (V1) 85BFA0-buffer-tail [dominant], (V2) 85C280/862850-4x4-translation-row [R2/R3], (V3) stale-frame/garbage [if all extents < record offset], (V4) 85C0C0 internal-pointer vs out-buffer [R5]. Plus 8 un-admitted writer callsites that may contain ID-record paths.",
+      "evidence": "C1-C9; navigation inventory of 12 static callsites (4 admitted + 8 un-admitted).",
+      "premises": [
+        "no EXE/payload access; all un-admitted bodies unread; variants cannot be closed in this package"
+      ],
+      "countermodel": "Admitting 0x0085BFA0 + 0x0085C0C0 + 0x00509070 resolves V1/V4 and the node-link question; admitting 0x004B31E0/0x005F61F0-class callers tests whether ANY caller passes an ID-bearing record.",
+      "evidence_level": "CONFIRMED"
+    }
+  ],
+  "rejected_or_unverified": [
+    {"statement": "the three DWORDs are XYZ in world/meters/map orientation", "status": "NOT_ASSERTED (premise preserved)"},
+    {"statement": "R2/R3/R4 writers restore historical placement values", "status": "REJECTED_WITH_EVIDENCE for rotation (constant zeros); position producer unproven either way"},
+    {"statement": "the written node is the instance root (or an internal NIF node)", "status": "UNVERIFIED in this package (C9)"},
+    {"statement": "qword [0x00A7AF80] equals 0.01", "status": "UNVERIFIED (data address, not read)"}
+  ]
+}

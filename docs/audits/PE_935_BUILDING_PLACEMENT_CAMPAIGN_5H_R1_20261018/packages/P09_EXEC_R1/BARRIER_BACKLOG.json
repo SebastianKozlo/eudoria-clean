@@ -1,0 +1,38 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P09",
+  "barriers": [
+    {
+      "barrier_id": "P09-B1",
+      "kind": "CORPUS_COVERAGE_DATA_BARRIER (as required by package question)",
+      "statement": "Transport-chain callee bodies are NOT in the saved main listing GHIDRA_H5_VTABLE2.txt: 0x0040B070, 0x0043E5B0, 0x0043C700 have zero body rows and appear only as CALL operands (17 / 1 / 10 sites). Independently re-verified in this run (NAVIGATION_CENSUS N2); matches parent's prior navigation finding.",
+      "consequence": "No semantic close-out of the enqueue helpers 40B070/43E5B0 (callback registration and first-path enqueue) or pair builder 43C700 is possible from this listing; their bodies require another corpus source or new admission.",
+      "required_evidence": "saved body/decompilation of 0x0040B070, 0x0043E5B0, 0x0043C700",
+      "estimated_cost": "3 bodies, ~40-150 rows each (unknown), admission + 1 package"
+    },
+    {
+      "barrier_id": "P09-B2",
+      "kind": "ADMISSION_WINDOW_BARRIER (scope, not data)",
+      "statement": "The capacity-event path at 0x006C3678 (JZ target when [ESI+4]==[ESI+8]) and the loop tail 0x006C368A-0x006C369A (incl. back-edge 006c368f JNZ 006c3658 and empty-range exit 0x006C369C) are OUT of the admitted window. CAND-A (grow) vs CAND-B (lazy-alloc/flush) is not distinguishable without them; element stride and full epilogue (RET width -> caller stack-arg count) also live there.",
+      "consequence": "Queue full-lifecycle (grow/wrap/flush) and exact element size remain open.",
+      "required_evidence": "admission for region 0x006C3678-0x006C36A0 (+ possibly callee 0x006C2E00 observed as out-of-window call operand)",
+      "estimated_cost": "1 body continuation, ~10-20 rows + 1 callee if opened, admission + 1 small package"
+    },
+    {
+      "barrier_id": "P09-B3",
+      "kind": "CORPUS_OBSERVATION (backlog candidate, NOT verified here)",
+      "statement": "Incidental grep navigation matched a separate saved corpus file GHIDRA_GATE_00407270.txt (same PE_NIGHT_AGGREGATE_20260905_160000 directory) containing a decompiled FUN_0040b070 form ('int __fastcall FUN_0040b070(int param_1)' among observed match lines). Its catalog membership and content were NOT verified and NOT read in this package.",
+      "consequence": "If admissible, P09-B1 could be partially lifted for 0x0040B070 (the callback-registration helper of both enqueue paths) without new Ghidra work.",
+      "required_evidence": "parent admission on GHIDRA_GATE_00407270.txt region covering FUN_0040b070",
+      "estimated_cost": "1 body (decompiled form), small package"
+    },
+    {
+      "barrier_id": "P09-B4",
+      "kind": "OPEN_SEMANTIC_EDGE",
+      "statement": "The CONSUMER of the ESI queue (who drains the 8-byte pair entries; the queue object's class; role of [ESI+0x0]) was not addressable from this window; P07's missing consumer edge (callback invocation census) remains open. Whether entries are consumed as {type,id} requests (cited P07 context) or another protocol is unproven.",
+      "consequence": "Transport close-out is now mechanically complete on the producer side (both enqueue paths characterized at helper level), but the receiver side is unmapped.",
+      "required_evidence": "saved bodies of the queue consumer / drain sites referencing the queue object; identity of queue class",
+      "estimated_cost": "unknown until consumer VA identified (needs caller-body admission of 006C3F98/006D44A4 clusters to read the queue argument's origin)"
+    }
+  ]
+}

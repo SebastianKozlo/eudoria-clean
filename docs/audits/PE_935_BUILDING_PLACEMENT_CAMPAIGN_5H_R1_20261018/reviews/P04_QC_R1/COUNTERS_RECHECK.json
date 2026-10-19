@@ -1,0 +1,55 @@
+{
+  "run_id": "PE_935_P04_QC_R1_20261018",
+  "method": "independent recount from extract files (which are byte-identical to pinned source - verified separately) + independent navigation grep; NOT a re-parse of worker COUNTERS.json",
+  "reserved_from_admission_A0af4119f1ccf": {
+    "bodies": 5,
+    "instruction_rows": 291,
+    "call_sites": 47,
+    "candidates": 4
+  },
+  "independent_actual": {
+    "bodies": 5,
+    "bodies_detail": [
+      {"region": "R1", "body": "0x005094C0", "rows": 9, "complete": true, "evidence": "RET 0x4 @005094d9 = last byte 0x005094DC = region end"},
+      {"region": "R2", "body": "0x006A36F0", "rows": 35, "complete": true, "evidence": "RET 0x4 @006a3759 ends 0x006A375C = region end"},
+      {"region": "R3", "body": "0x0067B4F0", "rows": 74, "complete": true, "evidence": "RET 0x8 @0067b5d0 ends 0x0067B5D3 = region end"},
+      {"region": "R4", "body": "0x0067C560", "rows": 76, "complete": true, "evidence": "RET 0x8 @0067c646 ends 0x0067C649 = region end"},
+      {"region": "R5", "body": "0x0067C7C0", "rows": 97, "complete": false, "evidence": "window ends mid-body; last in-window instruction JMP 0x0067C923 @0067c91f (start-VA membership); JZ 0x0067C921 target = end-exclusive boundary; epilogue/RET un-admitted"}
+    ],
+    "instruction_rows": 291,
+    "instruction_rows_detail": {"R1": 9, "R2": 35, "R3": 74, "R4": 76, "R5": 97},
+    "call_sites": 47,
+    "call_sites_detail": {"R1": 0, "R2": 6, "R3": 11, "R4": 11, "R5": 19},
+    "unique_call_targets": 28,
+    "unique_call_targets_detail": {
+      "direct": 24,
+      "direct_recount": ["0x0085C280", "0x00509070", "0x0085BFA0", "0x005094C0", "0x0096CD10", "0x00509510", "0x00862850", "0x0095DA2E", "0x004150F0", "0x008B7210", "0x006A34A0", "0x00401360", "0x00485050", "0x0048CBB0", "0x005247C0", "0x0085C0C0", "0x0085C0F0", "0x00509190", "0x0043A550", "0x0072F580", "0x0072FCE0", "0x0095D3C4", "0x00733340", "0x006C0D50"],
+      "indirect_via_slot": 4,
+      "indirect_recount": ["[0x00A75A38]", "[0x00A75A44]", "[0x00A75A5C]", "[0x00A75A40]"]
+    },
+    "candidates": 4,
+    "candidates_recount": ["V1 85BFA0-tail+0x24", "V2 4x4-row+0x30", "V3 stale-frame", "V4 85C0C0-return"],
+    "writer_static_callsites_navigation": {
+      "total_hits_grep": 12,
+      "admitted": ["0x006A3727", "0x0067B52E", "0x0067C584", "0x0067C8A8"],
+      "un_admitted_not_read": ["0x004B335E", "0x00527BA8", "0x00527BF0", "0x00528317", "0x00529020", "0x005F62EA", "0x0067B8E8", "0x006A3A2D"],
+      "match_vs_source_pins": "EXACT (12/12 addresses identical)"
+    }
+  },
+  "budget_comparison": {
+    "rows": "291/291 exact",
+    "calls": "47/47 exact",
+    "bodies": "5/5 exact (R5 partial-within-window, correctly disclosed)",
+    "candidates": "4/4 exact",
+    "overrun": "NONE",
+    "unforeseen_bodies_inside_windows": "NONE (all JZ/JMP targets outside windows or at boundary; none read)"
+  },
+  "admission_compliance_recheck": {
+    "regions_read": 5,
+    "regions_declared": 5,
+    "semantic_reads_outside_admission": "NONE detected (extract line ranges map 1:1 to the five subregions; claims contain no out-of-region body content; all out-of-window callees/continuations reported as unread)",
+    "navigation_ops_logged": true,
+    "note_event_region_encoding": "EVENTS 000006 single-range field 0x005094C0-0x0067C921 (end-exclusive) does not cover admitted subregion 0x006A36F0-0x006A375C; authorized instead by contract admitted_regions + event body_entries; parent-side encoding artifact, no worker violation"
+  },
+  "verdict": "COUNTERS_RECHECK_PASS - worker COUNTERS.json fully reproduced independently"
+}

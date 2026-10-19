@@ -1,0 +1,42 @@
+{
+  "run_id": "PE_935_BUILDING_PLACEMENT_CAMPAIGN_5H_R1_20261018",
+  "package_id": "P11",
+  "front": "C",
+  "attempt": "RETRY 1 of 1",
+  "memory_operand_census_window_0x006B6C1B_0x006B6C9D": {
+    "stack_slots": {
+      "[ESP+0x14]": { "accesses": "W x2", "sites": "0x006B6C43, 0x006B6C84", "identity": "pending/current produced element stash (written before each append attempt; consumer out-of-window - pump-body hypothesis P11-H1)" },
+      "[ESP+0x20]": { "accesses": "LEA x2", "sites": "0x006B6C24, 0x006B6C65", "identity": "stack local passed as helper arg (address-of)" },
+      "[ESP+0x38]": { "accesses": "R x4 / W x2", "sites": "R:0x006B6C3B,0x006B6C4F,0x006B6C7C,0x006B6C90 W:0x006B6C56,0x006B6C97", "identity": "append-buffer write cursor (DWORD slots)" },
+      "[ESP+0x3c]": { "accesses": "R x2", "sites": "0x006B6C3F, 0x006B6C80", "identity": "append-buffer bound (list end/capacity; static-vs-dynamic not distinguishable in-window)" },
+      "[ESP+0x48]": { "accesses": "LEA x2", "sites": "0x006B6C2A, 0x006B6C6B", "identity": "stack-local object used as helper 0x006B4120 'this'" },
+      "[ESP+0x58]": { "accesses": "LEA x2", "sites": "0x006B6C1F, 0x006B6C60", "identity": "stack local passed as helper arg (address-of)" }
+    },
+    "object_registers": {
+      "EDI": { "accesses": "[EDI+0x8] R x2", "sites": "0x006B6C33, 0x006B6C74", "identity": "UNKNOWN object (provenance out-of-window, before 0x006B6C1B); field +0x8 = container passed as ECX receiver to producers 0x006C27A0 / 0x006C27F0" },
+      "ECX": { "accesses": "receiver/scratch; PUSH ECX x2 at 0x006B6C29/0x006B6C6A passes the incoming ECX value to helper 0x006B4120", "sites": "window-wide", "identity": "incoming ECX = stage-B cursor value when arriving via 0x006B6C47 JZ; otherwise out-of-window provenance" },
+      "EBP": { "accesses": "CMP ECX,EBP x2", "sites": "0x006B6C49, 0x006B6C8A", "identity": "UNKNOWN role; compared against cursor as skip-slot marker; value/initialization out-of-window (FPO general-register candidate)" },
+      "EAX": { "accesses": "producer returns; stored to [ECX] and [ESP+0x14]", "sites": "0x006B6C4D/0x006B6C8E, 0x006B6C43/0x006B6C84", "identity": "produced list element (DWORD)" }
+    },
+    "global_absolute_memory": "ZERO references in the 45-row window (scoped negative P11-C5)"
+  },
+  "identity_table": {
+    "stage_A": { "range": "0x006B6C1B-0x006B6C5A", "rows": "632937-632958", "identity": "append stage with producer 0x006C27A0 on [EDI+0x8], helper 0x006B4120" },
+    "stage_B": { "range": "0x006B6C5C-0x006B6C9B", "rows": "632959-632980", "identity": "append stage with producer 0x006C27F0 on [EDI+0x8], helper 0x006B4120; entered both as stage-A overflow fallback (JZ 0x006B6C47) and as straight continuation (JMP 0x006B6C74 lands at its producer step 0x006B6C74)" },
+    "pump_entry_0x006B6C9D": { "range": "0x006B6C9D (single in-window row PUSH 0x1)", "identity": "{0x66,A}-forming pump per P07-C3 (standing); entered from 0x006B6C88 JZ = stage-B cursor==bound" },
+    "enclosing_function": { "identity": "UNKNOWN - entry/start VA not located in-window (out-of-window; no read performed). The two stages are branch-connected within the window, hence same code region; no claim about function boundaries beyond that." },
+    "EDI_object": { "identity": "UNKNOWN (out-of-window)" },
+    "EDI_+0x8_container": { "identity": "UNKNOWN class; used only as call receiver in-window" },
+    "producer_A_0x006C27A0": { "identity": "UNKNOWN - admission candidate 1; note VA delta to producer B = 0x50 (shape fact only)" },
+    "producer_B_0x006C27F0": { "identity": "UNKNOWN - admission candidate 2" },
+    "helper_0x006B4120": { "identity": "UNKNOWN - called twice with identical shape; receives incoming ECX, &[ESP+0x20], &[ESP+0x58], 1, 1 on this=[ESP+0x48]" },
+    "worklist_buffer": { "identity": "stack-local DWORD-stride append buffer at [ESP+0x38]/[ESP+0x3c] - the ONLY list structure constructed/held in-window" },
+    "registry_templates_vfs_RB_tree": { "identity": "NOT referenced in-window (zero registry-machinery VAs: no 0x0072F580, no 0x007CE1E0, no 0x0043C700, no 0x0040B070/0x0043E5B0/0x006C3640/0x008BD720, no globals)" }
+  },
+  "premise_compliance": {
+    "identical_names_shapes_not_common_semantics": "applied - twin stages and PUSH-0x1 pump-entry mirror treated as shape facts only (P11-H2 explicitly not claimed)",
+    "definition_registry_ne_instance_source": "applied - even a future registry-backed producer finding would be DEFINITION-source, not instance-source",
+    "no_direct_caller_ne_exclusively_virtual": "applied - no virtual-dispatch claims in either direction for out-of-window targets",
+    "scoped_negatives_keep_window_bounds": "applied - P11-C5 worded strictly window-bounded"
+  }
+}
