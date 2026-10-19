@@ -1,0 +1,21 @@
+gate_id,gate,evaluation,evidence
+G01,extract_sha256_matches_contract,PASS,P01_EXTRACT sha256 156C26F6B81F740D2C8DBE8A0F8B45842E48C4591A16CA1C9C559EEBE60C28AB verified by worker Get-FileHash
+G02,source_pin_verified,PASS,GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB size 50780146 matches ADMIT 000002
+G03,full_raw_census,PASS,67/67 listing rows read; 66/66 VA deltas explained (byte-contiguous); 9/9 CALL sites classified
+G04,abi_reconstructed,PASS,thiscall ECX-this + 4 stack args + RET 0x10 + EAX return; caller-side cross-evidence (no ADD ESP after call)
+G05,exact_pointer_levels,PASS,arg3 = pointer-holder deref level 1 -> pair ptr; this = &ctx[2] with 4 field reads; ctx[0]/ctx[1] via arg2 level 1
+G06,literal_823c10_execution_proven,PASS,mechanism: CALL EAX @006C2A63 with EAX=M32[arg2]; value STRONGLY_SUPPORTED from closed prior + no-alias census (residual opacity recorded)
+G07,return_origin_identified,PASS,sole producer CALL EAX @006C2A63 -> ESI @006C2A69 -> EAX @006C2A99 -> RET 0x10; single normal path (zero branches)
+G08,return_kind_honesty,PASS (negative),kind NOT_ESTABLISHED; pump body unopened; no forced domain
+G09,exceptional_exits_enumerated,PASS,SEH handler 0x00A04804 data-pushed; states -1/0/2/3/2/0; no in-window catch; no EAX contract on unwind
+G10,visible_vs_opaque_separation,PASS,store census complete (states/FS/arg3-byte only); 9 opaque callees preserved UNKNOWN per C5
+G11,partial_store_pattern_resolved,PASS,only byte 0 of ctx[5] consumed; patched arg4 = (S+0x10)&~0xFF|1 exact; C3 upper bits never read
+G12,containment,PASS,byte-contiguous body; RET ends 006C2AAF < 006C2AB0; zero JMP/Jcc; no branch escapes window
+G13,no_new_body_reads_outside_extract,PASS,reads limited to extract + explicitly authorized closed priors (P06/P07 P10 STACK_REDERIVATION postaudit REPORT CORRECTIONS_APPLIED); read-only
+G14,no_original_game_or_runtime_ops,PASS,no Entropia.exe access/stat/hash; no Ghidra; no runtime capture
+G15,no_nested_tasks,PASS,none spawned
+G16,no_config_changes,PASS,writes only inside P01_ADAPTER
+G17,budget_within_caps,PASS,3 bodies + 3 candidates charged (no refund); 67 rows; 9 calls; 0 document lines; INCIDENT_DEBIT 0
+G18,corrections_c1_c8_preserved,PASS,C2/C3/C4 used as-is; C3 resolved in-adapter; C5 preserved UNKNOWN; C6 resolved by body proof with recorded conflict-resolution
+G19,no_default_success_fallback,PASS,UNVERIFIED/NOT_ESTABLISHED labels retained for return kind; wrapper class; world relation
+G20,parent_run_not_closed,PASS,HARD STOP at assignment boundary; no seal; no manifest written by worker

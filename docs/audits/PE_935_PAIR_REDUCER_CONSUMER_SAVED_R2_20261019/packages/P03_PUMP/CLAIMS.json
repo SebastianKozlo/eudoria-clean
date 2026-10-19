@@ -1,0 +1,21 @@
+﻿{
+  "attribution": "DIRECT_ANALYST_FALLBACK_BY_PE_MASTER",
+  "claims": [
+    {"id":"P03-K01","text":"ABI of 0x00823C10 is thiscall with 4 stack args, callee-clean (RET 0x10), 32-bit EAX return, SEH frame","status":"CONFIRMED","anchors":["00823C10","00823C12","00823E57"]},
+    {"id":"P03-K02","text":"EBP=arg1=pair_ptr @00823C3D; arg slots at ESP+0x40/+0x44/+0x48/+0x4C","status":"CONFIRMED","anchors":["00823C3D"]},
+    {"id":"P03-K03","text":"pair[0] read @00823C41, stored into arg1 slot, passed by address to 004D1430 (this=receiver+4)","status":"CONFIRMED","anchors":["00823C41","00823C53","00823C57"]},
+    {"id":"P03-K04","text":"receiver sub-object selection: EDI+0x1C or local+0x14 based on M32[ESP+0x18]","status":"CONFIRMED","anchors":["00823C5C","00823C62","00823C64","00823C69"]},
+    {"id":"P03-K05","text":"fast return origin: virtual [[EDI+0x24]]vtable+0x38 with arg pair_ptr; ESI=result; if non-null -> EAX=ESI after 00826760(this=ESI,arg2,arg3)","status":"CONFIRMED","anchors":["00823C84","00823C8B","00823E11","00823E3D","00823E42"]},
+    {"id":"P03-K06","text":"loop return origin: virtual [[entry+8]]vtable+0x4 with args (pair[1], &local); ESI=result used as this in 00826840 and passed to [[EDI+0x24]]vtable+0x3C","status":"CONFIRMED","anchors":["00823D16","00823D24","00823D33","00823D46"]},
+    {"id":"P03-K07","text":"null/exhaust paths return 0 (00823CAE, 00823DFF)","status":"CONFIRMED","anchors":["00823CAE","00823DFF"]},
+    {"id":"P03-K08","text":"returned value kind: OBJECT POINTER (used as this-arg in thiscalls) or 0; pointer/handle/id distinction beyond that NOT_ESTABLISHED","status":"CONFIRMED","anchors":["00823D31","00823E3B"]},
+    {"id":"P03-K09","text":"TLS flag: index 0x00BA8E6C, byte [TLS+8] set 1 on loop success, reset 0 on fast path","status":"CONFIRMED","anchors":["00823D5C","00823D74","00823E11","00823E21"]},
+    {"id":"P03-K10","text":"0095D3BE(0x80) allocates and 0095DB40(ptr) frees the same local (EH-scope pair 0040E160/0040E180)","status":"STRONGLY_SUPPORTED","anchors":["00823CC8","00823CDA","00823D7B","00823D83","00823D95","00823DF7"]},
+    {"id":"P03-K11","text":"containment: all jump targets in-window; body closed at RET 0x10 @00823E57; no new admission needed","status":"CONFIRMED","anchors":["16 targets listed in REPORT.md section7"]},
+    {"id":"P03-K12","text":"arg4 (context cursor word) never read by pump in-window","status":"CONFIRMED","anchors":["no read of [ESP+0x4C] in window"]},
+    {"id":"P03-K13","text":"DATA_DOMAIN of resolver/[EDI+0x24]/00826760/00826840 and object classes: NOT_ESTABLISHED (opaque)","status":"UNVERIFIED","anchors":["20 unopened CALL targets"]},
+    {"id":"P03-K14","text":"WORLD_INSTANCE_RELATION: NOT_ESTABLISHED; no RTTI/scene/transform evidence in-window","status":"NOT_ESTABLISHED","anchors":["window census"]},
+    {"id":"P03-K15","text":"consistency with closed CAND4 claim 'pump ABI four DWORDs'","status":"CONFIRMED","anchors":["RET 0x10","CAND4 closed scope"]},
+    {"id":"P03-K16","text":"both paths act on the result object via 00826760 before return (additional opaque effects possible, C5)","status":"CONFIRMED","anchors":["00823E3D"]}
+  ]
+}

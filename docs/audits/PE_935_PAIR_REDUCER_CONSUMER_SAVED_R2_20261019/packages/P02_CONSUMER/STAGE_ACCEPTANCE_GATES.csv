@@ -1,0 +1,23 @@
+gate_id,gate,evaluation,evidence
+G01,extract_sha256_matches_contract,PASS,P02_EXTRACT sha256 CBFAB8283853F3833EC36E498CA15502AE3465BEF29867C50ACBFA8754B23AE5 verified by worker Get-FileHash; matches P02_CONTRACT.json and admission Ad4f041c2ce70
+G02,admission_consistency,PASS,ADMIT 000003: 62 rows / 3 calls / 4 bodies / 3 candidates / region [006C4160,006C4220) - all match the physical extract and contract
+G03,full_raw_census,PASS,62/62 extract rows read and analyzed; 144 combined rows / 143 deltas byte-contiguous; 3/3 in-window CALL sites classified (11/11 body-wide with priors)
+G04,combined_body_closure,PASS,RET @006C41F0 is the sole body RET; all 8 branches target in-window; unlisted gaps [006C41F1,006C4200)/[006C4208,006C4210) unreachable by fall-through
+G05,seam_verification,PASS,seam 1: 006C40DF CALL rel32 (5 B) -> 006C40E4; seam 2: 006C415E MOV [ESP+0x50],imm0 (8 B) -> 006C4166; listing row numbers 650268-650411 strictly continuous
+G06,global_pair_semantics_proven,PASS,{begin@0xBA45E8, tail@0xBA45EC, limit@0xBA45F0} vector header: range args @006C415C/415D; loop bound @006C418E; append prior @006C36F6/F8; write @006C41AE
+G07,tail_reload_accounted,PASS,MOV ESI,[0x00BA45EC] @006C4192 on the loop path only; snapshot EDI @006C4166; growth SUB @006C419C; interpretation limited to in-window mechanics
+G08,global_element_kind_honesty,PASS,kind NOT_ESTABLISHED; established: 32-bit stride 4; zero-vs-nonzero is the only in-window interpretation; zero = removable at mechanism level; meaning of zero unknown
+G09,compaction_loop_reconstructed,PASS,forward in-place compaction; EAX write cursor / ECX read cursor; drop iff *ECX==0; element at returned position dropped unconditionally; no other value interpretation (census B08)
+G10,memmove_candidate_classification,PASS,(dst,src,count) block-copy fix-up STRONGLY_SUPPORTED structural (incl. return-dst dependence); memmove identity PLAUSIBLE only; tail write @006C41AE = bookkeeping NOT allocation growth
+G11,opaque_008D6D90_classified,PASS,OPAQUE body; in-window contract CONFIRMED (4 args enumerated; return consumed as position); find-first-zero hypothesis PLAUSIBLE only; append possibility preserved UNKNOWN (C5)
+G12,dealloc_candidate_classification,PASS,[0x00A759FC](M32[C],(M32[C+8]-M32[C])&~7) dealloc-class role STRONGLY_SUPPORTED (C+8=limit proven from prior P03 append; skip-if-null; epilog-time); identity PLAUSIBLE only
+G13,seh_state_store_resolved,PASS,[ESP+0x40]=0xFFFFFFFF @006C41B9 resolves to E1-0x04 (same slot as prolog PUSH -1 @006C4060 and state 0 @006C409F); MSVC epilog idiom; not a data flag
+G14,neighbors_marked_not_interpreted,PASS,006C4200 mechanism recorded identity NOT_ESTABLISHED; 006C4210 partial marked with window-cut note; no interpretation beyond window per Q6
+G15,deferred_cleanup_28,PASS,ADD ESP,0x28 = 5 cdecl calls x 2 args byte-exact (006C3FE0/006C4020 x2/006C3D40/006C2C90)
+G16,deferred_cleanup_38,PASS,ADD ESP,0x38 = ctx 0x18 + 006C36B0 4 + 008D6D90 4 byte-exact on both paths; conditional on 006C2C50 callee-clean RET 0xC - recorded as premise P4 with 3 independent falsifiers (labelled STRONGLY_SUPPORTED, not fact)
+G17,epilog_prolog_mirror,PASS,POP ECX/EDI/ESI/EBP/EBX (0x14) + ADD ESP,0x30 (0x24+0xC) = 0x44 = prolog frame; FS restore before pops; RET @006C41F0; cookie discarded with NO /GS check visible
+G18,depth_model_crosscheck,PASS,three fixed-offset writes at three depths resolve correctly ([ESP+0x48]@E1-0x4C -> state; [ESP+0x50]@E1-0x7C -> out-slot; [ESP+0x40]@E1-0x44 -> state); zero unexplained [ESP+x] offsets
+G19,first_real_consumer_identified,PASS,header-level: reads @006C4146/414C -> 008D6D90 @006C4168 + tail write @006C41AE; element-VALUE-level (first PROVEN): TEST EDX,EDX @006C4182; value-flow graph V1-V16 in FLOW.md
+G20,no_domain_naming_without_edges,PASS,DATA_DOMAIN unchanged hypothesis; no resource/world naming; world relation reported NONE-established-in-window; B08 negative census recorded
+G21,corrections_c1_c8_preserved,PASS,C1 single container C used throughout; C3 partial DWORD kept; C4 pointer-holder respected via P01 cross-check; C5 opaque effects UNKNOWN; no identity transfer from historical pump or layout similarity (P9/P10 premises)
+G22,scope_process_and_budgets,PASS,reads limited to extract + authorized closed priors (read-only); no original-game/runtime/Ghidra ops; no nested tasks; no config changes; bodies 4/4 candidates 3/3 charged no refund; rows 62; calls 3; document lines 0; INCIDENT_DEBIT 0; no PARTIAL_NONCOMPLIANT; parent run NOT closed by worker

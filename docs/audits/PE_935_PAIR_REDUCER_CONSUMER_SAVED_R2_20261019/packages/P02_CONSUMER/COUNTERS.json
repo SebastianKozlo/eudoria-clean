@@ -1,0 +1,55 @@
+{
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "package_id": "P02",
+  "actual_counters": {
+    "bodies_reserved": 4,
+    "bodies_unique_owners_recognized": 3,
+    "bodies_visible_in_window": [
+      "0x006C4060 continuation (same owner as closed priors P06/P07)",
+      "0x006C4200 (incidental neighbor, complete)",
+      "0x006C4210 (incidental neighbor, partial; its unknown continuation consumed the 4th reservation conservatively)"
+    ],
+    "bodies_charged_no_refund": 4,
+    "candidates_reserved": 3,
+    "candidates_opened": 0,
+    "candidates_charged_no_refund": 3,
+    "candidates_nominated_next_admission": [
+      "0x008D6D90 (primary: first consumer of the global range; value-level semantics; append behavior)",
+      "target of [0x00A753B4] (memmove-class identity)",
+      "target of [0x00A759FC] (dealloc-class identity)",
+      "0x006C2C50 (closes premise P4 into fact; dedupe fix-up semantics)",
+      "0x006C36B0 epilogue [0x006C3720,0x006C3740) (prior-run open edge; also closes premise P3 for this callee)",
+      "0x00823C10 (P01's primary nomination, still open: pump/producer of element values)"
+    ],
+    "listing_rows_consumed_new": 62,
+    "listing_rows_prior_windows_consulted_read_only": 82,
+    "call_sites_counted_in_window": 3,
+    "call_sites_body_wide_incl_priors": 11,
+    "body_document_lines_consumed": 0,
+    "incident_debit": 0,
+    "unexpected_bodies": 0,
+    "partial_noncompliant_incidents": 0,
+    "run_caps": {"bodies": 32, "listing_rows": 6000, "call_sites": 200, "candidates": 32, "body_document_lines": 1500}
+  },
+  "call_census": {
+    "0x006C4168": {"target": "0x008D6D90 (direct, body unopened)", "kind": "OPAQUE - position-returning consumer of the global range", "stack_args": ["begin=M32[0x00BA45E8]", "tail=M32[0x00BA45EC]", "&out_slot (content 0, zeroed @006C415E)", "&wrapper byte (uninitialized, E1-0x2D)"], "cleanup": "deferred into ADD ESP,0x38 @006C416D"},
+    "0x006C41A3": {"target": "M32[0x00A753B4] (indirect, unopened)", "kind": "OPAQUE - block-copy fix-up, memmove-class candidate (dst,src,count) returning dst", "stack_args": ["dst = EAX write cursor", "src = EDI tail snapshot", "count = ESI growth bytes"], "cleanup": "immediate ADD ESP,0xC @006C41A9"},
+    "0x006C41D4": {"target": "M32[0x00A759FC] (indirect, unopened)", "kind": "OPAQUE - dealloc-class call on local container C buffer (sized-free candidate)", "stack_args": ["buffer = M32[C]", "size = ((M32[C+8]-M32[C])>>3)<<3 bytes (allocated size; C+8=limit per prior P03)"], "cleanup": "immediate ADD ESP,0x8 @006C41DA", "guard": "TEST EAX,EAX / JZ 006C41DD (skip-if-null)"}
+  },
+  "deferred_cleanup_ledger": {
+    "ADD_ESP_0x28_@006C40E4": "5 cdecl calls x 2 args (006C3FE0, 006C4020, 006C4020, 006C3D40, 006C2C90) = 0x28 byte-exact",
+    "ADD_ESP_0x38_@006C416D": "ctx SUB ESP,0x18 + 006C36B0 args 4 + 008D6D90 args 4 = 0x38 byte-exact (both paths; requires 006C2C50 callee-clean RET 0xC - premise P4)",
+    "ADD_ESP_0xC_@006C41A9": "immediate cleanup of 3 args",
+    "ADD_ESP_0x8_@006C41DA": "immediate cleanup of 2 args",
+    "epilog": "POP ECX(cookie)/EDI/ESI/EBP/EBX (0x14) + ADD ESP,0x30 (locals 0x24 + SEH 0xC) = 0x44 = exact prolog mirror; RET @006C41F0"
+  },
+  "question_status": {
+    "Q1_full_normal_path_and_closure": "CONFIRMED (body closed at RET 006C41F0; no branch escapes; byte-contiguous 144 rows)",
+    "Q2_global_pair_vector_semantics": "CONFIRMED (begin/tail proven with anchors); GLOBAL_ELEMENT_KIND: DWORD stride 4, kind NOT_ESTABLISHED; zero-vs-nonzero established",
+    "Q3_compaction_loop": "CONFIRMED (forward in-place compaction; EAX write cursor, ECX read cursor; drop zeros; element at returned position dropped unconditionally; values never interpreted otherwise)",
+    "Q4_memmove_candidate_and_tail_write": "(dst,src,count) block-copy fix-up STRONGLY_SUPPORTED; memmove identity PLAUSIBLE; tail write = bookkeeping NOT allocation growth (CONFIRMED in-window)",
+    "Q5_008D6D90_and_A759FC_and_state_store": "008D6D90 OPAQUE (in-window contract CONFIRMED); [0x00A759FC] dealloc-class role STRONGLY_SUPPORTED, identity PLAUSIBLE; [ESP+0x40]=-1 = SEH state slot reset (CONFIRMED slot identity)",
+    "Q6_neighbors": "MARKED ONLY (006C4200 complete mechanism visible, identity NOT_ESTABLISHED; 006C4210 partial, uninterpreted)",
+    "Q7_deferred_cleanup_balance": "CONFIRMED byte-exact (0x28, 0x38, 0xC, 0x8) + epilog mirror; 006C2C50 callee-clean = STRONGLY_SUPPORTED premise P4 with 3 falsifiers"
+  }
+}

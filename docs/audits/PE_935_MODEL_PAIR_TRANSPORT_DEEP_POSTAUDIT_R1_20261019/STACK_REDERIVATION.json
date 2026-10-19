@@ -1,0 +1,66 @@
+{
+  "scope": "symbolic normal-exit x86 stack arithmetic on already admitted extracts",
+  "premise": "Normal returns and conventional stack/nonvolatile-register contract at opaque call boundaries; not a runtime capture",
+  "B_definition": "ESP immediately after PUSH EAX @006C407C",
+  "collection_pointer_expressions": [
+    {
+      "lea_va": "0x6c4095",
+      "esp_minus_B": 0,
+      "operand_offset": 28,
+      "result_minus_B": 28,
+      "callsite": "0x6c40a3"
+    },
+    {
+      "lea_va": "0x6c40a8",
+      "esp_minus_B": -8,
+      "operand_offset": 36,
+      "result_minus_B": 28,
+      "callsite": "0x6c40b2"
+    },
+    {
+      "lea_va": "0x6c40b7",
+      "esp_minus_B": -16,
+      "operand_offset": 44,
+      "result_minus_B": 28,
+      "callsite": "0x6c40c1"
+    }
+  ],
+  "init_header_slots_minus_B": [
+    28,
+    32,
+    36
+  ],
+  "result": "one shared 3-DWORD header, not three separately constructed containers",
+  "sort_inputs": {
+    "begin_minus_B": 28,
+    "end_minus_B": 32
+  },
+  "adjacent_scan_inputs": {
+    "begin_minus_B": 28,
+    "end_minus_B": 32
+  },
+  "after_ADD_ESP_28_minus_B": 0,
+  "sink_in_006C36B0": {
+    "entry_ESP_name": "S",
+    "ESI_read_at": "006C36BF",
+    "entry_offset": 16,
+    "one_based_arg": 4,
+    "literal_at_caller": "0x00BA45E8"
+  },
+  "context_last_dword": {
+    "write": "M8[B+0x34]=1 at 006C4125",
+    "copy": "M32[B+0x34] -> EBP -> sixth copied DWORD",
+    "proved": "low byte equals 1; upper 24 bits not fixed by admitted stores",
+    "counterexample": "0xaabbcc01"
+  },
+  "call_006C29D0": {
+    "callee_this": "S+0x1C",
+    "arg2": "S+0x14",
+    "arg3": "S+0x10",
+    "arg4": 0,
+    "cursor_slot": "S+0x10",
+    "cursor_slot_contents": "EDI, current pair address, stored @006C36DD",
+    "arg1": "M32[S+8] after M8[S+8]=0; semantic role unknown",
+    "warning": "arg3 points to a stack slot containing the current pair pointer; it is not directly the pair pointer"
+  }
+}

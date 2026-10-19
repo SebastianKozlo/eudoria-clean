@@ -1,0 +1,39 @@
+﻿{
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "package_id": "P03",
+  "worker": "pe-reconstruction",
+  "mode": "SAVED_ONLY_NO_NESTED_TASKS",
+  "task": "Producer level of adapter return value: pump body 0x00823C10",
+  "contract": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_AUTHORING_R1_20261019\\CONTRACT.md",
+  "full_worker_template": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_AUTHORING_R1_20261019\\WORKER_TEMPLATE.txt",
+  "admission_event": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\CONTROL\\EVENTS\\000004_ADMIT.json",
+  "extract_file": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P03_EXTRACT",
+  "extract_sha256": "675EF8D22740F91FC8ABA48B95DF42C6B789D6F86F5CA869EC9D7C435214423F",
+  "rows": 185,
+  "calls_in_window": 20,
+  "package_root": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P03_PUMP",
+  "read_only_context": [
+    "P01_ADAPTER (adapter 006C29D0: pump call target/receiver/args proven): D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P01_ADAPTER",
+    "P02_CONSUMER (vector globals + element kind constraints): same run root",
+    "closed prior PE_935_CAND4_P_RECEIVER_SLOT3_SAVED_R1_20261018 (frozen pump listing extract + its claims, within its scope)",
+    "closed priors PE_935_MODEL_PAIR_TRANSPORT_QUALIFICATION_SAVED_R1_20261019 and DEEP_POSTAUDIT (stack map, container C)"
+  ],
+  "pump_call_from_adapter": {
+    "target": "CALL EAX @006C2A63 with EAX=M32[arg2]=ctx[0]=0x00823C10",
+    "receiver": "ECX = ctx[1]+ctx[2] (ctx[1]=0 from XOR+nonvolatile; ctx[2] produced by 00415670 per P01)",
+    "stack_args": "(pair_ptr [deref of arg3 holder], &local_D, &local_B, (S+0x10)&~0xFF|1)",
+    "convention": "callee cleans 0x10 (thiscall, 4 stack args)"
+  },
+  "questions": [
+    "Reconstruct ABI and full normal paths of 0x00823C10: which registers/stack slots hold the 4 args; all EAX-producing return paths (there may be more than one); exceptional exits (SEH handler 0xA236F8?).",
+    "What does it do with arg1 (pair_ptr): does it read [pair] and [pair+4] (the two copied DWORDs)? At which VAs, at which pointer levels? This is the candidate bridge source-table-entry -> pair -> pump -> returned value.",
+    "RETURN ORIGIN: which instruction(s) produce the returned EAX on each normal path; is the returned value (a) one of the pair DWORDs, (b) a computed value (arithmetic on them), (c) a result of an opaque callee, or (d) a constant? Status per path.",
+    "Visible stores (to receiver fields, locals, globals?) vs opaque callee effects; enumerate the 20 CALL targets (direct VAs vs indirect); classify identified vs opaque.",
+    "Compare with the closed CAND4 run claims about 0x00823C10 ONLY within their stated scope (e.g. 'pump ABI has four DWORDs'); note agreements/conflicts explicitly.",
+    "Containment: any jump/exit beyond [00823C10,00823E58)? If yes STOP interpretation at that edge and report the exact next admission needed.",
+    "DATA_DOMAIN: given P02 constraint (element values only tested !=0 later), what does the pump establish about the KIND of the returned value? Do NOT promote to resource/world without an identity edge; do not substitute NiNode/NiTriShape without runtime vptr."
+  ],
+  "corrections_to_preserve": "C1..C8; opaque effects UNKNOWN; no RTTI-based unconditional typing",
+  "deliverables": "RUN_STARTED.json, REPORT.md, CLAIMS.json, HANDOFF.md, STAGE_ACCEPTANCE_GATES.csv, artifact_index.csv, STACK_MAP.md, FLOW.md (value graph extension: pair -> pump -> returned EAX), PREMISES.json, COUNTERS.json",
+  "forbidden": "no new body reads outside admitted extracts+closed priors, no original/runtime/Ghidra ops, no nested tasks, no Hermes, no config changes"
+}

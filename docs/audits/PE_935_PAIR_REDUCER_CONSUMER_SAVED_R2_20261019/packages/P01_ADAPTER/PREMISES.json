@@ -1,0 +1,59 @@
+{
+  "package_id": "P01",
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "premises": [
+    {
+      "id": "P1",
+      "premise": "The admitted H5 listing (P01_EXTRACT, source pin 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, 50780146 bytes, re-verified by worker) is faithful disassembly of the pinned saved source; rows are instruction-aligned and complete within [006C29D0,006C2AB0)",
+      "type": "evidence-contract",
+      "falsifier": "any row failing byte-length continuity (checked: all 66 deltas match x86 encodings)"
+    },
+    {
+      "id": "P2",
+      "premise": "Closed prior windows (P06/P07 = 006C4060 prolog/callsite, P10 = 006C36B0) are from the same binary/source and remain valid; used read-only as caller-frame ground truth",
+      "type": "cross-source provenance",
+      "falsifier": "source pin mismatch (none: same GHIDRA_H5_VTABLE2.txt pin)"
+    },
+    {
+      "id": "P3",
+      "premise": "x86 nonvolatile register contract (EBX/EBP/ESI/EDI preserved across opaque calls) on normal returns",
+      "type": "ABI premise",
+      "falsifier": "an opaque callee violating the ABI on some path would change ctx[1] (EDI of 006C4060) from 0 and thus the pump receiver",
+      "used_for": "ctx[1] = 0 (with XOR EDI,EDI @006C4087 from closed prior)"
+    },
+    {
+      "id": "P4",
+      "premise": "Opaque ctor/dtor callees clean their own stack args on normal return (thiscall-style RET n): the SEH-state-slot arithmetic at depths E0-0x54 and the post-pump LEA ECX,[ESP+0x10] @006C2A65 only cohere if ctor-B/D clean 8 bytes and the pump cleans 16",
+      "type": "ABI premise (normal return)",
+      "falsifier": "a cdecl callee would desynchronize every subsequent [ESP+x] state-slot write (states would hit wrong slots) and make the epilog unbalanced",
+      "used_for": "pump ABI = ECX-this + 4 stack args, callee-clean"
+    },
+    {
+      "id": "P5",
+      "premise": "The 6-DWORD context values established by closed priors: ctx[0]=0x00823C10 (MOV ESI,0x823C10 @006C40FB, store @006C410C), ctx[1]=EDI=0, ctx[2]=CALL 00415670 result, ctx[3]=ctx[4]=0xA7957B, ctx[5] low byte=1 (C3)",
+      "type": "closed-lemma reuse (C2/C3 + prior windows)",
+      "falsifier": "runtime divergence; per C3 the upper 24 bits of ctx[5] are explicitly NOT fixed by admitted stores (only byte 0 is consumed by this body, so the adapter's behavior is unaffected)"
+    },
+    {
+      "id": "P6",
+      "premise": "No aliasing writer to the context block exists between the copy in 006C4060 and the reads in 006C29D0: the visible census shows no pointer into S+0x14..S+0x28 passed to any opaque callee",
+      "type": "visible-census premise (normal flow)",
+      "falsifier": "an opaque callee could in principle write through an unshared global alias; this cannot be excluded without opening the callee - the pump-target VALUE is therefore STRONGLY_SUPPORTED, not runtime-CONFIRMED"
+    },
+    {
+      "id": "P7",
+      "premise": "Normal-return-only analysis: SEH exceptional paths are enumerated but their unwind semantics (scopetable contents of handler 0xA04804) are outside the window and stay opaque",
+      "type": "scope premise"
+    },
+    {
+      "id": "P8",
+      "premise": "Runtime stack alignment is not assumed anywhere; S is a symbolic entry value and the patched_slot expression (S+0x10 with low byte 1) is reported symbolically, not as a concrete address",
+      "type": "methodology premise"
+    },
+    {
+      "id": "P9",
+      "premise": "No assumption that the literal 0x00823C10 was executed was made BEFORE the body proof; the body proof (CALL EAX @006C2A63 with EAX=M32[arg2]) now establishes the mechanism, upgrading C6's caution for this call only",
+      "type": "correction-compliance statement"
+    }
+  ]
+}

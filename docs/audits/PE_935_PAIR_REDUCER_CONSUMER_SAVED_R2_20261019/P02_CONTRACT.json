@@ -1,0 +1,30 @@
+﻿{
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "package_id": "P02",
+  "worker": "pe-reconstruction",
+  "mode": "SAVED_ONLY_NO_NESTED_TASKS",
+  "task": "Etap B consumer 006C4060 continuation + first real use of global 0x00BA45E8",
+  "contract": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_AUTHORING_R1_20261019\\CONTRACT.md",
+  "full_worker_template": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_AUTHORING_R1_20261019\\WORKER_TEMPLATE.txt",
+  "admission_event": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\CONTROL\\EVENTS\\000003_ADMIT.json",
+  "extract_file": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P02_EXTRACT",
+  "extract_sha256": "CBFAB8283853F3833EC36E498CA15502AE3465BEF29867C50ACBFA8754B23AE5",
+  "rows": 62,
+  "package_root": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P02_CONSUMER",
+  "read_only_context": [
+    "P01_ADAPTER results (adapter ABI + pump call mechanism): D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P01_ADAPTER",
+    "closed prior extracts of 006C4060 start (P04/P05/P06/P07) in PE_935_MODEL_PAIR_TRANSPORT_QUALIFICATION_SAVED_R1_20261019 and STACK_REDERIVATION in PE_935_MODEL_PAIR_TRANSPORT_DEEP_POSTAUDIT_R1_20261019"
+  ],
+  "questions": [
+    "Reconstruct the FULL normal path of 006C4060 from prologue to RET @006C41F0 by combining closed prior extracts (start) with this extract (tail). Is the body closed at 006C41F0? Any reachable exit outside both windows?",
+    "Global pair 0x00BA45E8/0x00BA45EC: prove or disprove vector semantics (begin/tail) with exact instruction anchors; what is GLOBAL_ELEMENT_KIND (pointer/handle/bit-pattern)? Note 0x00BA45EC reload @006C4192 and write @006C41AE.",
+    "The loop @006C4180-4190: exact semantics (compaction? removal of zero elements? direction, in-place overwrite, EAX write cursor, ECX read cursor); what does element value TEST!=0 mean and what is NOT established (values never interpreted otherwise?).",
+    "CALL [0x00A753B4] @006C41A3 with args (EAX,EDI,ESI=tail-begin): candidate identity (memmove-like?) — classify evidence level; ADD EAX,ESI then [0x00BA45EC]=EAX — allocation growth semantics?",
+    "CALL 0x008D6D90 @006C4168 and CALL [0x00A759FC] @006C41D4 (with byte-count from SAR EDX,3 *8 arithmetic on [ESP+1C]/[ESP+24]): classify opaque vs identified; what does the [ESP+40]=-1 store mean?",
+    "Incidental neighbors in window (006C4200 full small function, 006C4210 partial): mark them, do NOT interpret beyond window.",
+    "Deferred cleanup balance for the whole body: all cdecl calls that leave args (ADD ESP amounts) accounted; epilogue POP ECX/EDI/ESI/EBP/EBX + ADD ESP,0x30 consistent with prologue from closed priors?"
+  ],
+  "corrections_to_preserve": "C1..C8 (CORRECTIONS_APPLIED.json in run root); one shared container C=B+1Ch; do not rename resource/world domain without proof",
+  "deliverables": "RUN_STARTED.json, REPORT.md, CLAIMS.json, HANDOFF.md, STAGE_ACCEPTANCE_GATES.csv, artifact_index.csv, STACK_MAP.md (full ESP balance of 006C4060), FLOW.md (value graph: source table entry->pair in C->adapter->EAX->global element->first real use), PREMISES.json, COUNTERS.json",
+  "forbidden": "no new body reads outside admitted extracts+closed priors, no original/runtime/Ghidra ops, no nested tasks, no Hermes, no config changes"
+}

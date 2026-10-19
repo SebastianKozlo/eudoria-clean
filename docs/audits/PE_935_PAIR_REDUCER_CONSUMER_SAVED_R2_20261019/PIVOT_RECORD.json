@@ -1,0 +1,27 @@
+﻿{
+  "record": "PIVOT_RECORD per CONTRACT.md section 8",
+  "primary_branch_state": "adapter 006C29D0 -> pump 0x00823C10 (object resolver) -> returned object pointer (or 0) -> global vector 0x00BA45E8/0xBA45EC (begin/tail) -> first real use = compaction TEST!=0 @006C4182 + relocation/dealloc maintenance. DATA_DOMAIN of resolver objects NOT_ESTABLISHED; WORLD_INSTANCE_RELATION NOT_ESTABLISHED; no qualified instance/transform join in the primary thread within available bodies.",
+  "exact_unresolved_edge": "kind and role of the resolver object produced by the pump and stored in the global vector; alternatively, whether any saved-evidence thread connects the pair-transport chain to a scene instance/transform",
+  "alternatives_compared": [
+    {
+      "name": "writer SF+30",
+      "status": "ALREADY_CLOSED_BY_CATALOG_SOURCE",
+      "evidence": "PE_935_SCENEFEEDER_LINK30_IDENTITY_R1_20260914 (catalog-pinned): SF+0x30 = refcounted NiNode heap block, RTTI .?AVNiNode@@, 2 proven writers, TRANSFORM_TO_MODEL NOT_DEMONSTRATED, next seam = NiNode vtable slot 17 (0x007B5390, undecoded).",
+      "decision": "no new admission needed; standing closed result"
+    },
+    {
+      "name": "receiver [this+2Ch] in 0085BFA0 / slot+24h",
+      "status": "OPEN - selected as the ONE concrete saved-only frontier for this run",
+      "source": "GHIDRA_H5_VTABLE2.txt (catalog source, sha 642CC29A...D8DB); callsite census from closed prior PIVOT_RECORD.json (9 callsites listed, e.g. 00527AF9)",
+      "cost": "one bounded body window [0x0085BFA0,~0x0085C160) with conservative reservations (4 bodies, 3 candidates); budget position before pivot: bodies 10/32, rows 314/6000, calls 32/200, candidates 9/32",
+      "hypotheses": [
+        "H-A: 0085BFA0 reads receiver [this+2Ch] and dispatches a vtable slot (+0x24) of an object; the receiver field belongs to a scene/graph container - would give an instruction-level candidate edge toward WORLD_INSTANCE",
+        "H-B: 0085BFA0 is unrelated bookkeeping (logging, counters, resource list) - negative result for the frontier question",
+        "H-C: the window shows an indirect dispatch whose class cannot be identified without runtime vptr - honest barrier, no domain promotion"
+      ],
+      "falsifier": "if the receiver [this+2Ch] access is limited to non-polymorphic field copies or the callee is a leaf utility with no object dispatch, H-A is rejected and the frontier closes negative",
+      "what_changes_outcome": "positive: an instruction-level edge from a SceneFeeder-side receiver to a polymorphic scene object would become the FIRST candidate WORLD_INSTANCE edge for future runs; negative: the branch stays resource/cache preprocessing with WORLD_INSTANCE_RELATION NOT_ESTABLISHED, and the standing LINK30 next-seam (slot 17) remains the strongest open frontier overall"
+    }
+  ],
+  "decision": "EXECUTE one bounded pivot admission P04 on the 0085BFA0 body window (per CONTRACT section 8: absence of guaranteed success is not a reason to reject; a resolvable catalog source exists). No nine-callsite population work: body window only, ONE concrete evidence pointer (receiver [this+2Ch] read), no caller windows unless the body proof requires one exact caller edge."
+}

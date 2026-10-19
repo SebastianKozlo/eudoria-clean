@@ -1,0 +1,29 @@
+﻿{
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "value_graph": [
+    {"edge":"source table entry -> pair {entry,value} in shared container C","source":"closed prior P04/P05 (C1 scope)","status":"standing"},
+    {"edge":"pair -> pair_ptr (cursor slot S+0x10, stored EDI @006C36DD)","anchor":"006C36DD","status":"CONFIRMED"},
+    {"edge":"pair_ptr holder (arg3) -> adapter args","anchor":"006C36E1; 006C29D0 prolog","status":"CONFIRMED"},
+    {"edge":"adapter -> pump: CALL 0x00823C10 (EAX=ctx[0]), receiver ECX=ctx[1]+ctx[2], args (pair_ptr, &local_D, &local_B, (S+0x10)&~0xFF|1)","anchor":"006C2A53-006C2A63","status":"CONFIRMED"},
+    {"edge":"pair[0] -> 004D1430(receiver+4) + sub-object selection","anchor":"00823C41/00823C53/00823C57/00823C5C","status":"CONFIRMED"},
+    {"edge":"pair[1] -> loop resolver vtable+0x4","anchor":"00823D16-00823D24","status":"CONFIRMED"},
+    {"edge":"pump FAST return: [[EDI+0x24]vtable+0x38](pair_ptr)","anchor":"00823C84","status":"CONFIRMED origin"},
+    {"edge":"pump LOOP return: [[entry+8]vtable+0x4](pair[1])","anchor":"00823D24","status":"CONFIRMED origin"},
+    {"edge":"pump null paths -> 0","anchor":"00823CAE/00823DFF","status":"CONFIRMED"},
+    {"edge":"pump result kind: object pointer or 0 (kind-by-use; unopened callee conventions = premise)","status":"STRONGLY_SUPPORTED"},
+    {"edge":"adapter EAX -> global vector element (begin 0x00BA45E8, tail 0x00BA45EC, limit 0x00BA45F0; tail+=4)","source":"closed prior P06/P07 fast path","status":"standing"},
+    {"edge":"global element -> first real use: TEST!=0 compaction @006C4182 -> drop-zeros -> relocation [0xA753B4] -> tail update @006C41AE -> dealloc [0xA759FC]","anchor":"006C4180-006C41F0","status":"CONFIRMED"},
+    {"edge":"frontier (separate thread): [this+0x2C] object -> vtable slot+0x24 -> 12 floats -> NiTransform-layout out {rot3x3,trans,1.0f}; slot+0x28 -> 3-float position; caller relative math","anchor":"0085BFA0/0085C0C0/0085C130","status":"CONFIRMED structural; class identity NOT_ESTABLISHED"},
+    {"edge":"frontier -> primary thread identity bridge","status":"REJECTED_AS_ESTABLISHED (no shared anchor; NOT the same as proven impossible)"}
+  ],
+  "budgets": {"bodies":"14/32","listing_rows":"449/6000","callsites":"39/200","candidates":"12/32","document_lines":"0/1500","incident_debits":"0","charging":"no refund; full reservations charged; sum=union"},
+  "premises": [
+    "normal returns + nonvolatile contract at opaque boundaries (static analysis, no runtime)",
+    "thiscall convention for ECX-receiver + RET imm16 functions",
+    "kind-by-use premise for 00826760/00826840 ECX receivers (unopened)",
+    "006C2C50 callee-clean RET 0xC (closed prior P02 package premise P4, 3 falsifiers, body unopened)",
+    "vtable dispatch pattern [obj]->[[obj]+slot]",
+    "TLS array FS:[0x2C]; index source 0x00BA8E6C",
+    "frontier: 0x34-byte layout equivalence with NiTransform is STRUCTURAL_ONLY"
+  ]
+}

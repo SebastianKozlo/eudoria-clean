@@ -1,0 +1,16 @@
+﻿{
+  "attribution": "DIRECT_ANALYST_FALLBACK_BY_PE_MASTER",
+  "claims": [
+    {"id":"P04-K01","text":"0085BFA0 is thiscall with one stack out-arg (RET 0x4), receiver field +0x2C read @0085BFA6","status":"CONFIRMED","anchors":["0085BFA0","0085BFA6","0085C0B4"]},
+    {"id":"P04-K02","text":"virtual dispatch slot+0x24 on [[this+0x2C]] returns pointer to 12 floats","status":"CONFIRMED","anchors":["0085BFA9","0085BFAB","0085BFB5"]},
+    {"id":"P04-K03","text":"output = 9-dword rotation + 3-dword translation + 1.0f scale dword (0x34 bytes); STRUCTURAL_ONLY match with Gamebryo NiTransform layout","status":"CONFIRMED","anchors":["0085C094","0085C09C","0085C0A3","0085C0A7","0085C0AB"]},
+    {"id":"P04-K04","text":"0085C0C0 = position getter: slot+0x28 returns pointer to 3 floats, copied to out-arg","status":"CONFIRMED","anchors":["0085C0C0","0085C0C5","0085C0D1","0085C0E4"]},
+    {"id":"P04-K05","text":"0085C0F0 builds a rotation-only transform (translation zeroed via FLDZ/FST/FST/FSTP) and calls 0096CD10","status":"CONFIRMED","anchors":["0085C0FA","0085C0FF","0085C117","0085C11C","0085C11F"]},
+    {"id":"P04-K06","text":"0085C130 (partial) subtracts receiver fields +0x54/+0x58 from transform translation (relative-position math)","status":"CONFIRMED","anchors":["0085C13B","0085C144","0085C157"]},
+    {"id":"P04-K07","text":"0085C130 continues beyond window end; live edge at 0x0085C160 (FLD [ESP+0x7C] cut); needs new admission if pursued","status":"CONFIRMED","anchors":["0085C15E"]},
+    {"id":"P04-K08","text":"receiver class and [this+2Ch] object class NOT_ESTABLISHED; layout match is STRUCTURAL_ONLY; no NiNode/NiAVObject substitution","status":"NOT_ESTABLISHED","anchors":["window census; no RTTI"]},
+    {"id":"P04-K09","text":"NO identity edge between this frontier and the primary thread (pump/global 0xBA45E8); slot-offset similarity is coincidence","status":"CONFIRMED","anchors":["no shared VA/data in admitted windows"]},
+    {"id":"P04-K10","text":"this frontier is the strongest structural TRANSFORM-candidate edge found in this run (candidate, not confirmed instance edge)","status":"STRONGLY_SUPPORTED","anchors":["P04-K02","P04-K03","P04-K06"]},
+    {"id":"P04-K11","text":"0096CB20/0096CF80/0096CD10 semantics UNKNOWN (unopened)","status":"UNVERIFIED","anchors":["CALL sites 0085C058","0085C061","0085C11F"]}
+  ]
+}

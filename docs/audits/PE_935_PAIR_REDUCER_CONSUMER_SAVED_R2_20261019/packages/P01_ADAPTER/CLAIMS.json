@@ -1,0 +1,163 @@
+{
+  "package_id": "P01",
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "subject": "adapter 006C29D0 (Etap A)",
+  "evidence_base": "P01_EXTRACT 67 rows, [006C29D0,006C2AB0), sha256 156C26F6B81F740D2C8DBE8A0F8B45842E48C4591A16CA1C9C559EEBE60C28AB, admission A81d30fbf331a; closed priors cited per claim",
+  "labels": ["CONFIRMED", "STRONGLY_SUPPORTED", "PLAUSIBLE", "UNVERIFIED", "REJECTED"],
+  "claims": [
+    {
+      "id": "A01_ABI",
+      "question": 1,
+      "claim": "006C29D0 uses ECX-this thiscall: receiver in ECX, no EDX argument register (EDX only scratch), 4 stack arguments, callee cleans 16 bytes (RET 0x10 @006C2AAC), 32-bit EAX return",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C29F5", "0x006C2AAC", "0x006C36E1"],
+      "evidence": "MOV ESI,ECX @006C29F5 (this consumed); RET 0x10 @006C2AAC; caller pushes exactly 4 DWORDs @006C36C3/C9/CE/D8 (closed prior P10 window) and performs NO post-call ADD ESP @006C36E6 (callee-clean); return relay MOV ESI,EAX @006C2A69 -> MOV EAX,ESI @006C2A99",
+      "assumptions": ["caller listing of P10 (closed prior) reflects the same binary", "standard x86 register conventions"]
+    },
+    {
+      "id": "A02_DEAD_ARGS",
+      "question": 2,
+      "claim": "callee arg1 (= begin&0xFFFFFF00) and arg4 (= 0) are DEAD: never read by the body",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C2A10", "0x006C2A2D", "0x006C36CF", "0x006C36D8", "0x006C36C3"],
+      "evidence": "exhaustive [ESP+x] census: no read of [E0+4] (would be [ESP+0x50] at depth E0-0x4C; the only +0x50 refs are writes at depth E0-0x54 hitting [E0-4]) and no [ESP+0x5C] reference exists at all",
+      "assumptions": ["prolog frame arithmetic: base depth E0-0x4C", "all 67 rows in window (full census)"]
+    },
+    {
+      "id": "A03_THIS_IS_CONTEXT_FIELD2",
+      "question": 2,
+      "claim": "this (ECX=S+0x1C) is NOT a heap object; it is the address of ctx[2] inside the caller-copied 6-DWORD context; the callee reads exactly four DWORD fields [this], [this+4], [this+8], [this+0xC] = ctx[2], ctx[3], ctx[4], ctx[5] and nothing else through this",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C2A3D", "0x006C2A24", "0x006C2A08", "0x006C2A34", "0x006C36D9"],
+      "evidence": "ECX=S+0x1C at callsite (LEA ECX,[ESP+0x38] @006C36D9, closed prior); ctx spans S+0x14..S+0x28 (closed priors P06/P07 + STACK_REDERIVATION); the four ESI-derefs are the only this-reads",
+      "assumptions": ["context copy layout of closed prior P06"]
+    },
+    {
+      "id": "A04_FIELD_USES",
+      "question": 2,
+      "claim": "field uses: [this]=ctx[2] -> receiver base addend; [this+4]=ctx[3] -> 1st stack arg of ctor-D; [this+8]=ctx[4] -> 1st stack arg of ctor-B; [this+0xC] low byte = ctx[5] low byte (=1 per C3) -> patch byte of own arg3 slot",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C2A3D", "0x006C2A24", "0x006C2A28", "0x006C2A08", "0x006C2A0B", "0x006C2A34", "0x006C2A3F"],
+      "evidence": "register-chain verification: no redefinition between each load and its use (PUSH/use adjacency checked row by row)",
+      "assumptions": ["C3 (ctx[5] low byte = 1) as closed lemma"]
+    },
+    {
+      "id": "A05_ARG3_POINTER_HOLDER",
+      "question": 2,
+      "claim": "arg3 is read as a POINTER-HOLDER exactly once: pair_ptr = M32[M32[arg3]] (level 2); the pair pointer is then passed as pump arg1",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C2A37", "0x006C2A3B", "0x006C2A52"],
+      "evidence": "MOV EDX,[ESP+0x58] @006C2A37 (arg3), MOV EAX,[EDX] @006C2A3B, PUSH EAX @006C2A52 with no EAX redefinition in between (verified row-by-row)",
+      "assumptions": ["C4 (arg3 = S+0x10 = &cursor slot, slot holds current pair pointer from @006C36DD)"]
+    },
+    {
+      "id": "A06_PUMP_CALL_MECHANISM",
+      "question": 3,
+      "claim": "the body really executes CALL EAX @006C2A63 where EAX = M32[arg2] = ctx[0]; the literal 0x00823C10 IS executed as the call target (mechanism CONFIRMED in body; value 0x00823C10 from closed prior). Receiver ECX = M32[arg2+4] + M32[this] = ctx[1] + ctx[2]",
+      "label": "CONFIRMED (mechanism); target value STRONGLY_SUPPORTED",
+      "va_anchors": ["0x006C2A53", "0x006C2A57", "0x006C2A5A", "0x006C2A5C", "0x006C2A63", "0x006C410C"],
+      "evidence": "MOV EAX,[ESP+0x64] @006C2A53 (= arg2 = S+0x14 = &ctx[0]); MOV ECX,[EAX+4] @006C2A57; MOV EAX,[EAX] @006C2A5A; ADD ECX,ESI @006C2A5C (ESI = M32[this] @006C2A3D); CALL EAX @006C2A63. Value: MOV [EAX],ESI @006C410C with ESI=0x823C10 @006C40FB (closed prior P06/P07 window). No pointer into the context block is passed to any opaque callee (census) and the window contains no writer to S+0x14 between copy and call; residual: opaque callees could in principle write through unshared aliases - cannot be excluded without opening them",
+      "assumptions": ["closed prior P06/P07 windows are the same binary", "context copy-by-value faithful (no caller-side aliasing writer visible)"],
+      "correction_note": "Resolves C6 for the mechanism: C6 forbade the assumption before body proof; the body now supplies the proof. 'Same target != same object/model' discipline retained"
+    },
+    {
+      "id": "A07_PUMP_ARGS",
+      "question": 3,
+      "claim": "pump call ABI: ECX receiver + 4 stack args, callee cleans 16 bytes; args in order: (pair_ptr, &local_D, &local_B, patched_slot) where patched_slot = (M32[arg3] & 0xFFFFFF00) | (ctx[5] & 0xFF) = (S+0x10) with low byte 1",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C2A47", "0x006C2A4C", "0x006C2A51", "0x006C2A52", "0x006C2A65", "0x006C2A3F", "0x006C2A43"],
+      "evidence": "push order @006C2A47 (patched) < 006C2A4C (&local_B) < 006C2A51 (&local_D) < 006C2A52 (pair_ptr, last = first arg); post-call LEA ECX,[ESP+0x10] @006C2A65 resolves to local_D (E0-0x3C) ONLY if the pump cleaned 16 bytes; same state-slot arithmetic consistency at @006C2A6B",
+      "assumptions": ["C3 low byte = 1"]
+    },
+    {
+      "id": "A08_PUMP_ABI_FOUR_DWORDS",
+      "question": 3,
+      "claim": "the reconstructed pump call passes FOUR stack DWORDs (+ECX this); this is numerically consistent with the historical pump-ABI correction ('four DWORDs, not three') in CONTRACT.md section 5",
+      "label": "PLAUSIBLE",
+      "va_anchors": ["0x006C2A63"],
+      "evidence": "A07; consistency observation only - no identity claim between this call and the historical pump object/model (contract: same target does not mean same object)",
+      "assumptions": []
+    },
+    {
+      "id": "A09_RETURN_ORIGIN",
+      "question": 4,
+      "claim": "the value returned in EAX to 006C36B0 is produced by CALL EAX @006C2A63 (the pump); relay: EAX -> ESI @006C2A69 -> EAX @006C2A99 -> RET 0x10. It is the ONLY normal EAX path: the window has zero branches, so no alternative zero/pointer/bit-pattern path exists in this body",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C2A63", "0x006C2A69", "0x006C2A99", "0x006C2AAC"],
+      "evidence": "mnemonic census: 67 rows contain no JMP/Jcc; single exit RET 0x10; cleanup calls' return values discarded (not read)",
+      "assumptions": []
+    },
+    {
+      "id": "A10_RETURN_KIND",
+      "question": 4,
+      "claim": "the KIND of the returned value (resource id / handle / pointer / bit-pattern / zero) is NOT determined by this window - it is the pump's return",
+      "label": "UNVERIFIED",
+      "va_anchors": ["0x006C2A63"],
+      "evidence": "pump body 0x00823C10 not opened (would need new admission); caller-side (closed prior P10) appends it as a DWORD to the global container 0xBA45E8, which constrains nothing about its semantics",
+      "assumptions": []
+    },
+    {
+      "id": "A11_EXCEPTIONAL_EXITS",
+      "question": 4,
+      "claim": "exceptional exits run exclusively through the SEH frame (handler 0x00A04804, data-pushed @006C29D2, frame installed @006C29EF, states -1/0/2/3/2/0); there is no in-window catch and no EAX-return contract on the exceptional path; caller 006C36B0 shows no handler in its admitted window",
+      "label": "CONFIRMED (frame mechanism); unwind semantics STRONGLY_SUPPORTED",
+      "va_anchors": ["0x006C29D0", "0x006C29D2", "0x006C29EF", "0x006C2A10", "0x006C2A2D", "0x006C2A5E", "0x006C2A6B", "0x006C2A84", "0x006C2A9F"],
+      "evidence": "listing; handler body and scopetable outside window (opaque)",
+      "assumptions": ["standard SEH OS dispatch"]
+    },
+    {
+      "id": "A12_VISIBLE_STORES",
+      "question": 5,
+      "claim": "visible stores in the callee: (a) SEH state slot [E0-4] (dword 0 @006C2A10; bytes 2/3/2/0 @006C2A2D/5E/6B/84); (b) FS:[0] install/restore @006C29EF/006C2A9F; (c) ONE byte store into the own incoming-arg3 slot @006C2A3F (M8[E0+0xC] := ctx[5]&0xFF); (d) push/pop frame writes. NO store to global 0x00BA45E8, NO store to the pair array, NO store to the context block (S+0x14..S+0x28)",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C2A10", "0x006C2A2D", "0x006C2A5E", "0x006C2A6B", "0x006C2A84", "0x006C29EF", "0x006C2A9F", "0x006C2A3F"],
+      "evidence": "exhaustive store census over 67 rows (stores enumerated; no other memory-write mnemonic)",
+      "assumptions": []
+    },
+    {
+      "id": "A13_PARTIAL_STORE_RESOLUTION",
+      "question": 5,
+      "claim": "the partial-store pattern resolves INSIDE the adapter: the callee consumes ONLY byte 0 of ctx[5] (MOV CL,[ESI+0xC] @006C2A34); its byte-store into the arg3 slot keeps bytes 1-3 of the ORIGINAL arg3 value (S+0x10), so patched_slot is EXACTLY (S+0x10)&0xFFFFFF00|1 - the C3 undefined upper 24 bits of ctx[5] are never read by this body and introduce no ambiguity here",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C2A34", "0x006C2A3F", "0x006C2A43"],
+      "evidence": "byte-granular analysis; no second write to [E0+0xC] between caller push and read-back",
+      "assumptions": ["C3"]
+    },
+    {
+      "id": "A14_OPAQUE_EFFECTS",
+      "question": 5,
+      "claim": "effects of all 9 indirect callees remain UNKNOWN (targets unopened): [0xA75A38] ctor-A/C helper (called 2x), [0xA75A44] ctor-B/D (2x), [0xA75A5C] dtor (2x), [0xA75A40] dtor (2x), pump 0x00823C10 (1x). No H1/H2 exclusion; request/queue effects possible per postaudit countermodel",
+      "label": "PRESERVED_UNKNOWN",
+      "va_anchors": ["0x006C29FB", "0x006C2A18", "0x006C2A1E", "0x006C2A32", "0x006C2A63", "0x006C2A70", "0x006C2A7A", "0x006C2A89", "0x006C2A93", "0x00A75A38", "0x00A75A40", "0x00A75A44", "0x00A75A5C"],
+      "evidence": "targets are memory-indirect through globals/pump; bodies outside admission",
+      "assumptions": ["C5"]
+    },
+    {
+      "id": "A15_CONTAINMENT",
+      "question": 6,
+      "claim": "the complete executable range of the body is CONTAINED in [006C29D0,006C2AB0): 67 rows are byte-contiguous (all 66 inter-row deltas equal the x86 encoding lengths of the previous instructions - dual check: manual encoding derivation + programmatic delta extraction); last instruction RET 0x10 @006C2AAC ends at 006C2AAF; the single trailing byte [006C2AAF,006C2AB0) is not an instruction start in the source listing and is unreachable by fall-through (RET is a control transfer). NO JMP/Jcc exists anywhere in the window; no branch can escape below 006C29D0 or above 006C2AB0",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C29D0", "0x006C2AAC", "0x006C2AAF", "0x006C2AB0"],
+      "evidence": "66-delta table (STACK_MAP + bash output captured in-session); mnemonic census",
+      "assumptions": ["H5 listing rows are complete instruction-aligned lines of the pinned source"]
+    },
+    {
+      "id": "A16_NEXT_EDGE",
+      "question": 6,
+      "claim": "no in-window continuation admission is needed; the PRECISE out-of-window next edge is the pump body 0x00823C10 (producer of the returned value). Secondary candidates: 0x00415670 (receiver object producer), targets of [0x00A75A38]/[0xA75A44] (wrapper constructors; would identify the wrapper class and the role of constant 0xA7957B)",
+      "label": "CONFIRMED (edge identification); candidate priorities are recommendations for the parent",
+      "va_anchors": ["0x00823C10", "0x00415670", "0x00A7957B", "0x00A75A38", "0x00A75A44"],
+      "evidence": "A06/A09/A14",
+      "assumptions": []
+    },
+    {
+      "id": "A17_WORLD_RELATION",
+      "question": 6,
+      "claim": "no WORLD_INSTANCE or TRANSFORM edge is established by this window; the adapter is a local functor-invocation mechanism returning the pump's value",
+      "label": "CONFIRMED (as a negative result within this window)",
+      "va_anchors": ["0x006C2A63"],
+      "evidence": "store census (no global 0xBA45E8 writes in callee); pump opaque",
+      "assumptions": ["C5"]
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "package_id": "P02",
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "subject": "consumer 006C4060 continuation [006C4166,006C4220) + global 0x00BA45E8/0x00BA45EC first real use (Etap B)",
+  "evidence_base": "P02_EXTRACT 62 rows, region [006C4160,006C4220) (first listed VA 006C4166), sha256 CBFAB8283853F3833EC36E498CA15502AE3465BEF29867C50ACBFA8754B23AE5, admission Ad4f041c2ce70; combined with closed priors P06 WINDOW_006C4057 (rows 650268-650308) + WINDOW_006C40E0 (rows 650309-650349); prior windows cited per claim",
+  "labels": ["CONFIRMED", "STRONGLY_SUPPORTED", "PLAUSIBLE", "UNVERIFIED", "NOT_ESTABLISHED", "PRESERVED_UNKNOWN", "REJECTED"],
+  "claims": [
+    {
+      "id": "B01_SEAM_AND_CONTIGUITY",
+      "question": 1,
+      "claim": "the combined 006C4060 listing (P06 two windows + P02 extract) is byte-contiguous: 144 rows with strictly continuous listing row numbers 650268-650411 and 143 inter-row VA deltas all equal to the x86 encoding length of the preceding instruction; both cross-window seams verified (006C40DF CALL rel32 -> 006C40E4 delta 5; 006C415E MOV [ESP+0x50],imm0 (C7 44 24 50 +imm32) -> 006C4166 delta 8); JMP 006C4180 @006C417B is 5 bytes (E9 rel32 rel=0, loop-head alignment at 16B-aligned 006C4180)",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C40DF", "0x006C40E4", "0x006C415E", "0x006C4166", "0x006C417B", "0x006C4180"],
+      "evidence": "programmatic delta extraction over all 144 rows + manual encoding-length check of every delta; listing row continuity 650268..650411",
+      "assumptions": ["H5 listing rows are complete instruction-aligned lines of the pinned source (same premise as P01 A15)"]
+    },
+    {
+      "id": "B02_BODY_CLOSED",
+      "question": 1,
+      "claim": "the body of 006C4060 is CLOSED at RET @006C41F0 on the normal path: it is the only RET of the body; all 9 branch instructions (JZ x7, JMP x1, JNZ x1: @006C40E9, @006C4172, @006C4179, @006C417B, @006C4184, @006C4190, @006C419A, @006C419E, @006C41C1) target addresses inside [006C4060,006C41F1]; no exit escapes the combined windows; the unlisted intervals [006C41F1,006C4200) (15 B) and [006C4208,006C4210) (8 B) contain no instruction start per the pinned listing and are unreachable by fall-through (each follows a RET)",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C40E9", "0x006C4172", "0x006C4179", "0x006C417B", "0x006C4184", "0x006C4190", "0x006C419A", "0x006C419E", "0x006C41C1", "0x006C41F0", "0x006C41F1", "0x006C4200"],
+      "evidence": "complete Jcc/JMP census over the combined 144 rows; RET census (only 006C41F0 inside the body range; 006C4207 belongs to the neighbor function)",
+      "assumptions": ["normal-return ABI at opaque call boundaries (premise P2/P3)", "SEH handler 0x00A04968 is data-referenced only (PUSH imm @006C4062) - exceptional dispatch is not a normal exit"]
+    },
+    {
+      "id": "B03_FULL_NORMAL_PATH",
+      "question": 1,
+      "claim": "the full normal path is: prolog/SEH -> zero C (B+0x1C) -> state 0 -> 3 collection calls (006C3FE0/006C4020 x2) -> ADD ESP,0x28 -> sort 006C3D40 -> dedupe-scan 006C2C90 -> conditional fix-up 006C2C50 (ECX=C) -> ctx {0x823C10, 0, 00415670-ret, 0xA7957B, 0xA7957B, partial lo=1} -> 006C36B0(&out, C.begin, C.end, 0xBA45E8) per-pair projection appending DWORDs to the global -> read global begin/tail -> 008D6D90(begin, tail, &out_slot=0, &wrapper) -> ADD ESP,0x38 -> global fix-up (3 cases incl. compaction @006C4180-4190, memmove-like relocation, tail write @006C41AE) -> local C dealloc via [0xA759FC] -> state -1 -> epilog -> RET @006C41F0",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C4060", "0x006C4089", "0x006C40A3", "0x006C40B2", "0x006C40C1", "0x006C40E4", "0x006C40D0", "0x006C40DF", "0x006C40F6", "0x006C40FB", "0x006C4141", "0x006C4146", "0x006C4168", "0x006C416D", "0x006C4180", "0x006C41AE", "0x006C41D4", "0x006C41F0"],
+      "evidence": "combined-window walk; per-step depth tracking (STACK_MAP.md); closed priors for the roles of 006C3FE0/006C4020 (P04/P05), 006C3D40 (P08), 006C2C90 (P09), 006C36B0 (P10), 006C29D0/00823C10 (P01)",
+      "assumptions": ["premises P1-P5 (PREMISES.json)"]
+    },
+    {
+      "id": "B04_VECTOR_SEMANTICS_GLOBAL",
+      "question": 2,
+      "claim": "the global pair is a std::vector-style header in .data: begin = M32[0x00BA45E8], tail = M32[0x00BA45EC], limit = M32[0x00BA45F0], over 4-byte DWORD elements: (a) (begin, tail) passed as range args (arg1, arg2) to 008D6D90; (b) tail value used as one-past-end bound of the 4-byte element walk; (c) append mechanism (prior P10) writes M32[tail] and advances tail += 4 under a limit guard M32[0x00BA45F0]; (d) tail is rewritten by this body after compaction; vector semantics PROVEN (begin/tail), not merely assumed",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C4146", "0x006C414C", "0x006C415C", "0x006C415D", "0x006C4170", "0x006C4177", "0x006C418E", "0x006C4190", "0x006C41AE", "0x006C36E6", "0x006C36E9", "0x006C36F6", "0x006C36F8", "0x00BA45E8", "0x00BA45EC", "0x00BA45F0"],
+      "evidence": "in-window range-pair consumption + loop bound + tail write; prior P10 append mechanism (CMP ECX,[ESI+8]; MOV [ECX],EAX; ADD [ESI+4],4 with ESI=0x00BA45E8)",
+      "assumptions": ["prior P10 window is the same binary (same source pin)"]
+    },
+    {
+      "id": "B05_TAIL_RELOAD_AND_SNAPSHOT",
+      "question": 2,
+      "claim": "tail is snapshotted to EDI (MOV EDI,ESI @006C4166, ESI loaded @006C4146 BEFORE the 008D6D90 call) and RELOADED after the compaction loop (MOV ESI,[0x00BA45EC] @006C4192, loop path only): the reload proves the caller expects the global tail to be movable shared state during the opaque call; growth = reloaded - snapshot is computed @006C419C and drives the relocation branch",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C4146", "0x006C4166", "0x006C4192", "0x006C419C"],
+      "evidence": "register-chain: ESI loaded @006C4146, preserved across CALL 008D6D90 (nonvolatile premise), copied to EDI @006C4166, loop bound @006C418E uses the snapshot; reload only on the fall-through path that completed the loop",
+      "assumptions": ["x86 nonvolatile ESI across opaque calls (premise P2)"]
+    },
+    {
+      "id": "B06_GLOBAL_ELEMENT_KIND",
+      "question": 2,
+      "claim": "GLOBAL_ELEMENT_KIND: elements are 32-bit DWORDs, stride 4; in the admitted windows element VALUES are interpreted ONLY as zero-vs-non-zero (TEST EDX,EDX @006C4182); they are never dereferenced as pointers, never compared as ids, never ordered; therefore the kind (pointer/handle/id/bit-pattern) is NOT_ESTABLISHED; what is established: zero is a removable/empty value at LOCAL_MECHANISM level (compaction drops it); the semantic meaning of zero (null handle / failed pump result / tombstone) is NOT established",
+      "label": "CONFIRMED (properties + negative census); kind NOT_ESTABLISHED",
+      "va_anchors": ["0x006C4180", "0x006C4182", "0x006C4184", "0x006C4186"],
+      "evidence": "store/load census of the compaction loop and whole P02 window: the value register EDX (from [ECX]) is only TESTed and stored; EAX/ECX are positions, not element values; P01 A09/A10 (pump return appended raw, kind opaque)",
+      "assumptions": []
+    },
+    {
+      "id": "B07_COMPACTION_LOOP",
+      "question": 3,
+      "claim": "loop @006C4180-4190 is a forward in-place compaction of [ret+4, tail_snapshot) into positions starting at ret: ECX = read cursor (init ret+4 @006C4174, +4 every iteration @006C418B, bound CMP ECX,ESI/JNZ @006C418E/4190); EAX = write cursor (init = 008D6D90 return, +4 only after a copy @006C4186/4188); element dropped iff value == 0 (MOV EDX,[ECX]; TEST; JZ skip-write); write cursor never passes read cursor (single safe left-to-right pass); the element AT the returned position is dropped UNCONDITIONALLY (never tested - overwritten or left below the new tail); net effect: erase returned position + all zero elements strictly after it; zeros before the returned position are untouched",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C4174", "0x006C4177", "0x006C417B", "0x006C4180", "0x006C4182", "0x006C4184", "0x006C4186", "0x006C4188", "0x006C418B", "0x006C418E", "0x006C4190"],
+      "evidence": "in-window instruction walk; cursor invariant EAX <= ECX-4 maintained inductively",
+      "assumptions": ["008D6D90 returns a valid position with EAX+4 <= tail (premise P6 - no in-window bounds guard exists)"]
+    },
+    {
+      "id": "B08_ELEMENT_VALUES_NEVER_DEREFERENCED",
+      "question": 3,
+      "claim": "negative control: nowhere in the P02 window (nor in the closed prior windows of this body) is a global element VALUE used as a pointer or compared as an identity - the only memory derefs are cursor positions; this window therefore does not advance DATA_DOMAIN",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C4180", "0x006C4186"],
+      "evidence": "exhaustive mnemonic census of the 62 rows: EDX (element value) participates only in MOV/TEST; no [EDX], no CMP EDX,imm, no arithmetic on EDX",
+      "assumptions": []
+    },
+    {
+      "id": "B09_MEMMOVE_CANDIDATE",
+      "question": 4,
+      "claim": "CALL [0x00A753B4] @006C41A3 is a 3-arg cdecl block-copy fix-up with signature (dst=EAX write cursor, src=EDI tail snapshot, count=ESI growth in bytes) - structural match to memmove(dst,src,count): push order @006C41A0/41A1/41A2, ADD ESP,0xC @006C41A9, dst<src always on this path, overlap possible, and the subsequent ADD EAX,ESI + tail store only cohere if the callee RETURNS dst; identity as memmove (vs memcpy/other copy) is PLAUSIBLE only",
+      "label": "STRONGLY_SUPPORTED (dst,src,count block-copy fix-up); memmove identity PLAUSIBLE",
+      "va_anchors": ["0x006C41A0", "0x006C41A1", "0x006C41A2", "0x006C41A3", "0x006C41A9", "0x006C41AC", "0x00A753B4"],
+      "evidence": "arg order/count/direction + return-dst dependence; target body unopened (M32[0x00A753B4]); observation without claim: slot lies in the same 0xA75xxx region as P01 wrapper-ctor/dtor slots 0xA75A38/0xA75A44",
+      "assumptions": ["callee returns dst in EAX (structural necessity of the following arithmetic)"]
+    },
+    {
+      "id": "B10_TAIL_WRITE_NOT_ALLOCATION",
+      "question": 4,
+      "claim": "ADD EAX,ESI @006C41AC then MOV [0x00BA45EC],EAX @006C41AE is NOT allocation growth: it is tail-pointer bookkeeping after in-place compaction (+ relocation of any block appended during the 008D6D90 call): new tail = compacted end + relocated block size; no allocation instruction exists in-window; begin M32[0x00BA45E8] and limit M32[0x00BA45F0] are never written here; relative to the pre-call tail the new tail may shrink (dropped elements) or grow (appended > dropped)",
+      "label": "CONFIRMED (in-window mechanics); 'allocation growth' reading REJECTED for this window",
+      "va_anchors": ["0x006C41AC", "0x006C41AE", "0x00BA45EC"],
+      "evidence": "global-store census of the window (single store @006C41AE); no CALL to an allocator between compaction and store (the only call is [0xA753B4] copy itself)",
+      "assumptions": []
+    },
+    {
+      "id": "B11_OPAQUE_008D6D90",
+      "question": 5,
+      "claim": "CALL 0x008D6D90 @006C4168 is OPAQUE (body never admitted; direct target VA known): in-window contract = args (begin=M32[0x00BA45E8], tail=M32[0x00BA45EC], &out_slot with content 0 (zeroed @006C415E), &wrapper_byte = uninitialized local E1-0x2D); return EAX consumed as a position in the global element array (== tail: no-op; == tail-4: erase-last; else: erase+drop-zeros via loop); best-fit hypothesis (PLAUSIBLE, falsifiable): position-returning query such as find-first-element-equal-to-M32[&slot]=0; side effects may include appending to the global (reload @006C4192); its computation and all other effects UNKNOWN",
+      "label": "OPAQUE (preserved unknown); in-window contract CONFIRMED",
+      "va_anchors": ["0x006C415E", "0x006C4168", "0x006C4170", "0x006C4174", "0x006C4180", "0x006C4192", "0x008D6D90"],
+      "evidence": "arg construction census @006C4146-006C415D; return consumption @006C4170+",
+      "assumptions": ["C5: opaque effects unknown", "P6: return is a valid in-array position (code has no bounds guard)"]
+    },
+    {
+      "id": "B12_DEALLOC_CANDIDATE",
+      "question": 5,
+      "claim": "CALL [0x00A759FC] @006C41D4 is a 2-arg cdecl call (arg1=EAX=M32[C] buffer begin, arg2=EDX=((M32[C+8]-M32[C])>>3)<<3 bytes) guarded by TEST EAX,EAX / JZ (skip-if-null), executed once at the end of the body after the last use of C: role = deallocation of the local container C's heap buffer, STRONGLY_SUPPORTED structurally (byte count measured from begin to the C+8 field = allocated size per B13; classic sized-free shape); specific identity (operator delete[](void*,size_t) vs custom free) PLAUSIBLE only",
+      "label": "STRONGLY_SUPPORTED (dealloc-class role); identity PLAUSIBLE",
+      "va_anchors": ["0x006C41B3", "0x006C41B7", "0x006C41C1", "0x006C41C3", "0x006C41C7", "0x006C41C9", "0x006C41CC", "0x006C41D4", "0x00A759FC"],
+      "evidence": "SAR EDX,3 then three ADD EDX,EDX (=*8) converts pair count to byte size; TEST/JZ null guard; single execution site; target body unopened",
+      "assumptions": ["B13 (C+8 = limit)"]
+    },
+    {
+      "id": "B13_C_FIELD_LAYOUT",
+      "question": 5,
+      "claim": "local container C (=B+0x1C, C1) field layout: C+0 = begin, C+4 = end (pairs), C+8 = limit/capacity - proven cross-window: the append mechanism in closed prior 006C3F50 (P03) writes at M32[C+4], guards against M32[C+8], grows via 006C2E00; 006C36B0 consumes (M32[C], M32[C+4]) as pair range; the P02 size computation measures M32[C+8]-M32[C] = allocated size",
+      "label": "CONFIRMED (cross-window)",
+      "va_anchors": ["0x006C3F80", "0x006C3F83", "0x006C3F8F", "0x006C3F96", "0x006C4121", "0x006C4136", "0x006C41C3"],
+      "evidence": "P03 WINDOW_006C3F50 rows 650177-650185 + P02 rows @006C41B3/41C3",
+      "assumptions": ["prior P03 window same binary"]
+    },
+    {
+      "id": "B14_SEH_STATE_STORE",
+      "question": 5,
+      "claim": "MOV [ESP+0x40],0xFFFFFFFF @006C41B9 writes the SEH state slot (E1-0x44+0x40 = E1-0x04, the same slot as prolog PUSH -1 @006C4060 and state 0 @006C409F): standard MSVC epilog state reset (state -1 = no further unwind objects); NOT a data flag, NOT a status code, NOT related to the -1 value flows elsewhere; MOV does not disturb the TEST flags used by the following JZ",
+      "label": "CONFIRMED (slot identity); MSVC-idiom reading STRONGLY_SUPPORTED",
+      "va_anchors": ["0x006C41B7", "0x006C41B9", "0x006C41C1", "0x006C4060", "0x006C409F"],
+      "evidence": "depth arithmetic; same-frame pattern as P01 adapter (state stores + FS restore + pop cookie)",
+      "assumptions": []
+    },
+    {
+      "id": "B15_NEIGHBOR_006C4200",
+      "question": 6,
+      "claim": "006C4200 is a complete 5-instruction separate function: returns EAX = (M32[ECX] != 0) as 0/1 (XOR EAX,EAX; CMP [ECX],EAX; SETNZ AL; RET); mechanism visible in-window; identity/domain/callers NOT established; marked, not interpreted",
+      "label": "CONFIRMED (mechanism); identity NOT_ESTABLISHED",
+      "va_anchors": ["0x006C4200", "0x006C4202", "0x006C4204", "0x006C4207"],
+      "evidence": "extract rows 650402-650405; body ends RET @006C4207; 8 B unlisted gap to 006C4210",
+      "assumptions": []
+    },
+    {
+      "id": "B16_NEIGHBOR_006C4210",
+      "question": 6,
+      "claim": "006C4210 is a PARTIAL function cut at the window end (006C4220): visible prefix saves ESI, takes ECX-this to ESI, stores arg1 ([ESP+8]) into [this+0x88], then double-dereferences arg1 ([arg1] then [that+0x44]); marked WITHOUT interpretation - body incomplete, callers/semantics outside scope; needs its own admission if ever analyzed",
+      "label": "CONFIRMED (marking only)",
+      "va_anchors": ["0x006C4210", "0x006C4211", "0x006C4213", "0x006C4217", "0x006C421D", "0x006C421F"],
+      "evidence": "extract rows 650406-650411; window boundary 006C4220",
+      "assumptions": []
+    },
+    {
+      "id": "B17_DEFERRED_CLEANUP_28",
+      "question": 7,
+      "claim": "ADD ESP,0x28 @006C40E4 exactly cleans the 10 arg-DWORDs of the 5 deferred cdecl calls 006C3FE0/006C4020/006C4020/006C3D40/006C2C90 (2 args each), all unconditional in this segment; no callee of this segment cleans its own args (prior windows show plain RET)",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C40A3", "0x006C40B2", "0x006C40C1", "0x006C40D0", "0x006C40DF", "0x006C40E4"],
+      "evidence": "byte-exact arithmetic + prior P04/P05/P08/P09 RETs without immediates",
+      "assumptions": []
+    },
+    {
+      "id": "B18_DEFERRED_CLEANUP_38_AND_2C50_PREMISE",
+      "question": 7,
+      "claim": "ADD ESP,0x38 @006C416D exactly cleans ctx (SUB ESP,0x18 = 6 DWORDs) + 006C36B0's 4 args + 008D6D90's 4 args = 14 DWORDs, on BOTH paths, IFF 006C2C50 (taken path only) cleans its own 3 args (thiscall-style RET 0xC) and 006C36B0/008D6D90 leave their args (cdecl); the cdecl-006C2C50 alternative is falsified by three independent fixed-offset facts (the 0x38 sum; the [ESP+0x38] reads @006C4121/006C4136 resolving to C+4/C+0 only at one depth; the [ESP+0x50] store @006C415E resolving to out-slot E1-0x2C, which would otherwise clobber saved EBP); 006C2C50's RET itself is NOT in evidence - callee-clean stays a labelled premise",
+      "label": "STRONGLY_SUPPORTED (arithmetic necessity + 3 falsifiers); callee-clean of 006C2C50 = premise P4, not fact",
+      "va_anchors": ["0x006C40F6", "0x006C4105", "0x006C4141", "0x006C4168", "0x006C416D", "0x006C4121", "0x006C4136", "0x006C415E"],
+      "evidence": "byte-exact arithmetic on both paths; depth-model cross-checks (STACK_MAP.md sections 3-5)",
+      "assumptions": ["binary correctness premise (the shipped code is stack-coherent on both paths)", "006C36B0/008D6D90 cdecl (args left) - their RETs outside admitted windows"]
+    },
+    {
+      "id": "B19_EPILOG_MIRROR",
+      "question": 7,
+      "claim": "the epilog is an exact mirror of the prolog: FS:[0] restored from [ESP+0x38] (=E1-0x0C) @006C41DD/41E1; POP ECX (cookie) / POP EDI / POP ESI / POP EBP / POP EBX @006C41E8-41EC = LIFO reversal of PUSH EBX/EBP/ESI/EDI/cookie (0x14 B); ADD ESP,0x30 = locals 0x24 + SEH trio 0xC; RET @006C41F0; total 0x14+0x30 = 0x44 = prolog frame; balance closes E1 -> caller ESP = E1+4 with zero residual on every path",
+      "label": "CONFIRMED",
+      "va_anchors": ["0x006C4071", "0x006C4074", "0x006C407C", "0x006C41DD", "0x006C41E1", "0x006C41E8", "0x006C41E9", "0x006C41EA", "0x006C41EB", "0x006C41EC", "0x006C41ED", "0x006C41F0"],
+      "evidence": "full ESP ledger (STACK_MAP.md section 6)",
+      "assumptions": ["premises P3/P4 for the two conditional-cleanup callees"]
+    },
+    {
+      "id": "B20_NO_COOKIE_CHECK",
+      "question": 7,
+      "claim": "the security cookie is popped into ECX @006C41E8 and discarded; NO /GS validation sequence (reload [0x00B9D8D0], XOR with ESP, compare) is visible anywhere in the body - the cookie is stored and restored but never checked in-window",
+      "label": "CONFIRMED (census)",
+      "va_anchors": ["0x006C4075", "0x006C407C", "0x006C41E8", "0x00B9D8D0"],
+      "evidence": "exhaustive mnemonic census of the combined 144 rows: no second read of [0x00B9D8D0], no XOR EAX,ESP after the prolog",
+      "assumptions": []
+    },
+    {
+      "id": "B21_FIRST_REAL_CONSUMER",
+      "question": 0,
+      "claim": "first real use of the global within the admitted chain: header-level = reads @006C4146/006C414C feeding 008D6D90 @006C4168 (range consumption) + tail write @006C41AE; first PROVEN element-VALUE consumer = MOV EDX,[ECX]; TEST EDX,EDX @006C4180/4182 (zero-vs-nonzero compaction predicate); a value-level consumer may exist inside opaque 008D6D90 (earlier in program order, unproven); everything before this in the chain (collect/sort/scan/projection/append) moves or appends DWORDs without interpreting them",
+      "label": "CONFIRMED (scoped to admitted windows)",
+      "va_anchors": ["0x006C4146", "0x006C414C", "0x006C4168", "0x006C4180", "0x006C4182", "0x006C41AE"],
+      "evidence": "value-graph over P01 + priors + P02 (FLOW.md)",
+      "assumptions": []
+    },
+    {
+      "id": "B22_WORLD_RELATION",
+      "question": 0,
+      "claim": "no WORLD_INSTANCE or TRANSFORM edge is established by this window: no scene/attach/transform instruction; no element dereferenced as an object pointer; the window is container maintenance (post-projection fix-up + cleanup)",
+      "label": "CONFIRMED (negative result within scope)",
+      "va_anchors": ["0x006C4180", "0x006C41D4"],
+      "evidence": "B08 census; full window walk",
+      "assumptions": ["C5 (opaque callees not excluded in principle)"]
+    },
+    {
+      "id": "B23_OPAQUE_EFFECTS",
+      "question": 0,
+      "claim": "effects of 008D6D90, [0x00A753B4], [0x00A759FC], 006C2C50, 00415670, 00823C10 (pump) and all prior-run opaque callees remain UNKNOWN; H1/H2 disjointness NOT asserted; the tail reload @006C4192 shows the caller is written for a callee that MAY mutate the global (H2-compatible shape) without proving any enqueue occurs",
+      "label": "PRESERVED_UNKNOWN",
+      "va_anchors": ["0x006C4168", "0x006C41A3", "0x006C41D4", "0x006C40F6", "0x006C4100", "0x008D6D90", "0x00A753B4", "0x00A759FC"],
+      "evidence": "unopened targets; C5",
+      "assumptions": ["C5"]
+    }
+  ]
+}

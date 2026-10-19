@@ -1,0 +1,26 @@
+﻿{
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "parent_authoring": "PE_935_PAIR_REDUCER_CONSUMER_AUTHORING_R1_20261019",
+  "package_id": "P01",
+  "worker": "pe-reconstruction",
+  "mode": "SAVED_ONLY_NO_NESTED_TASKS",
+  "task": "Etap A adapter 006C29D0",
+  "contract": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_AUTHORING_R1_20261019\\CONTRACT.md",
+  "full_worker_template": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_AUTHORING_R1_20261019\\WORKER_TEMPLATE.txt",
+  "admission_event": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\CONTROL\\EVENTS\\000002_ADMIT.json",
+  "extract_dir": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P01_EXTRACT",
+  "extract_sha256": "156C26F6B81F740D2C8DBE8A0F8B45842E48C4591A16CA1C9C559EEBE60C28AB",
+  "package_root": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P01_ADAPTER",
+  "questions": [
+    "Reconstruct the ABI of 006C29D0 from the admitted listing only: calling convention, register args (ECX/EDX thiscall-style?), stack args, return value width.",
+    "Establish whether the callee reads arg3 as a pair, a pointer-holder, or otherwise; track exact pointer levels.",
+    "How does it read the words of the passed 6-DWORD context, in particular the field 0x00823C10 and the field pointed to by ECX (S+1Ch)? Does it CALL 0x00823C10? Capture target/receiver/args if so.",
+    "Which call (if any) produces the value returned in EAX to 006C36B0; enumerate ALL normal EAX paths (zero / pointer / handle / bit-pattern) and exceptional exits separately.",
+    "Visible side effects (stores) vs effects still opaque (unopened callees). Do NOT assume the literal field is executed.",
+    "If the body has an exit/jump beyond the admitted range, STOP interpretation there and return the precise next edge for a new admission (parent decides)."
+  ],
+  "postaudit_corrections_to_preserve": "C1..C8 in CORRECTIONS_APPLIED.json (one container C, arg4 sink, partial DWORD, pointer-holder arg3, opaque effects preserved, no 0x823C10 assumption)",
+  "deliverables": "RUN_STARTED.json then REPORT.md, CLAIMS.json, HANDOFF.md, STAGE_ACCEPTANCE_GATES.csv, artifact_index.csv, flow/stack tables, actual counters; parent seals",
+  "forbidden": "no new body reads outside the extract, no original game operations, no Ghidra/runtime, no nested tasks, no Hermes, no config changes",
+  "attribution_rule": "if worker output incomplete after one retry, parent may use DIRECT_ANALYST_FALLBACK with attribution"
+}

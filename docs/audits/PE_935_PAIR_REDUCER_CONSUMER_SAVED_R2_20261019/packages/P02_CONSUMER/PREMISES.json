@@ -1,0 +1,66 @@
+{
+  "package_id": "P02",
+  "run_id": "PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019",
+  "premises": [
+    {
+      "id": "P1",
+      "premise": "The admitted H5 listing (P02_EXTRACT, source pin 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB per admission metadata; no original-game file operation performed by worker) is faithful disassembly; rows are instruction-aligned and complete within the region; combined with closed priors WINDOW_006C4057/WINDOW_006C40E0 it tiles the body with zero gaps",
+      "type": "evidence-contract",
+      "falsifier": "any inter-row delta failing byte-length continuity (checked: all 143 deltas match x86 encodings, both seams verified 5 and 8 bytes)"
+    },
+    {
+      "id": "P2",
+      "premise": "x86 nonvolatile register contract (EBX/EBP/ESI/EDI preserved across all opaque calls) on normal returns; used for ESI = pre-call tail surviving CALL 008D6D90 (loop bound), EDI snapshot, EBX = 00415670 result surviving to ctx store",
+      "type": "ABI premise",
+      "falsifier": "a callee violating the ABI would change the loop bound/snapshot values; visible evidence (006C2C90 PUSH ESI/POP ESI in prior window) supports preservation where visible"
+    },
+    {
+      "id": "P3",
+      "premise": "006C36B0 and 008D6D90 leave their stack arguments in place (cdecl-style) on normal return: required by ADD ESP,0x38 = ctx 0x18 + 4 + 4 (byte-exact) and by every fixed-offset read between the calls and the epilog; neither callee's RET is inside any admitted window (006C36B0 epilogue [006C3720,006C3740) never admitted; 008D6D90 body unopened)",
+      "type": "ABI premise (normal return)",
+      "falsifier": "a callee-clean RET 0x10 for either would make ADD ESP,0x38 over-pop by 0x10 and desynchronize [ESP+0x1C]/[ESP+0x24]/[ESP+0x38]/[ESP+0x40] reads and the epilog",
+      "label": "STRONGLY_SUPPORTED, not runtime-CONFIRMED"
+    },
+    {
+      "id": "P4",
+      "premise": "006C2C50 (called only on the duplicate-found branch, receiver ECX=C, 3 stack args) cleans its own 3 args (thiscall-style RET 0xC): required for path-B depth equality with path A; falsified-by-alternative: if 006C2C50 were cdecl, ADD ESP,0x38 would over-pop by 0xC, the [ESP+0x38] reads @006C4121/006C4136 would hit saved-EBX/locals instead of C+4/C+0, and the [ESP+0x50] store @006C415E would clobber saved EBP",
+      "type": "ABI premise (normal return) + binary-correctness premise",
+      "label": "STRONGLY_SUPPORTED by arithmetic necessity with 3 independent falsifiers; 006C2C50 body never opened"
+    },
+    {
+      "id": "P5",
+      "premise": "Closed prior windows (P04/P05/P06/P07/P08/P09/P10 of QUALIFICATION_SAVED_R1, P03 WINDOW_006C3F50, STACK_REDERIVATION.json, postaudit REPORT.md, P01_ADAPTER) are the same binary/source (same pin family) and remain valid; used read-only",
+      "type": "cross-source provenance",
+      "falsifier": "source pin mismatch (none: same GHIDRA_H5_VTABLE2.txt lineage; row numbers 650268-650411 strictly continuous)"
+    },
+    {
+      "id": "P6",
+      "premise": "008D6D90 returns a position EAX with EAX <= tail and EAX 4-aligned within the global element array (no in-window bounds guard exists; the loop would read out of bounds otherwise)",
+      "type": "callee-contract premise (opaque callee)",
+      "falsifier": "opening 008D6D90; any other return convention would make the compaction unsafe",
+      "note": "this is an assumption about an UNOPENED callee, kept explicit; the in-window facts are only how EAX is consumed"
+    },
+    {
+      "id": "P7",
+      "premise": "The relocation branch assumes current_tail >= snapshot_tail (SUB ESI,EDI >= 0): a shrink by 008D6D90 would produce a huge unsigned count for the copy call; likewise the erase-last path (@006C4179 JZ) does not reload the tail and assumes no growth in that case",
+      "type": "callee-contract premise (opaque callee)",
+      "falsifier": "opening 008D6D90 and observing tail shrink/grow behavior",
+      "note": "assumption structure of the code, not a proven invariant"
+    },
+    {
+      "id": "P8",
+      "premise": "Normal-return-only analysis: SEH exceptional paths are enumerated (handler 0x00A04968 data-pushed @006C4062, states -1/0/-1) but their unwind semantics are outside the window and stay opaque",
+      "type": "scope premise"
+    },
+    {
+      "id": "P9",
+      "premise": "C5 preserved: opaque callee effects are UNKNOWN; in particular nothing in this window proves or disproves that 008D6D90 appends to the global (the reload @006C4192 only proves the CALLER is written for that possibility), nor that the pump enqueues anything",
+      "type": "correction-compliance statement"
+    },
+    {
+      "id": "P10",
+      "premise": "No identity transfer: [0x00A753B4]/[0x00A759FC] are indirect pointer slots whose targets were never opened; memmove-class/dealloc-class labels describe the call STRUCTURE, not proven function identities; the 0xA75xxx address proximity to P01's ctor/dtor slots is an observation without claim",
+      "type": "correction-compliance statement"
+    }
+  ]
+}
