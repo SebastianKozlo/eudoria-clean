@@ -1,0 +1,42 @@
+{
+  "premises": [
+    {
+      "premise": "listing row order and mnemonics faithfully represent the saved disassembly",
+      "status": "standing corpus premise"
+    },
+    {
+      "premise": "callee-cleanup/ESP balance conclusions within admitted windows only; callee bodies unopened are not assumed",
+      "status": "upheld"
+    },
+    {
+      "premise": "ESI/EBX register bindings hold between the listed rows used (no evidence of intervening clobber in-window)",
+      "status": "checked per body"
+    }
+  ],
+  "countermodels_tested": [
+    {
+      "model": "store+C@ACE9 writes owner+0xC (B-to-R attach)",
+      "refuted_by": "ESP-relative addressing with PUSH shift accounting"
+    },
+    {
+      "model": "store+2C@BE70 writes provider pointer P",
+      "refuted_by": "value is a global float-constant dword; receiver is a stack temp"
+    },
+    {
+      "model": "OBJ (0085BD80 this) == R",
+      "refuted_by": "OBJ is stack-local temp of loader; R is persistent owner field value"
+    },
+    {
+      "model": "store+2C@C0A7 writes P",
+      "refuted_by": "float slot of 13-dword transform write"
+    },
+    {
+      "model": "ESI (0085CD17) == R by family adjacency",
+      "NOT refuted, NOT confirmed": "requires entry binding - kept open; no claim made"
+    },
+    {
+      "model": "P == T",
+      "kept_open": "per postaudit corrections, no equality/inequality assumption"
+    }
+  ]
+}

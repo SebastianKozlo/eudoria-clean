@@ -1,0 +1,34 @@
+{
+  "claims": [
+    {
+      "id": "P04-C1",
+      "text": "OBJ passed to the thunk as ARG2 is LEA ECX,[ESP+0x18] at 0048EDE8, i.e. a stack local of the 0048EDxx frame; ESI (ARG1) is the reader object used throughout (byte [ESI+0x11] flag tests).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, admission A07454ff97918",
+      "rows": [
+        "0048EDE8..0048EDFC"
+      ]
+    },
+    {
+      "id": "P04-C2",
+      "text": "OBJ is constructed in place at [ESP+0x18] by CALL 0085BBE0 (0048EDDF) immediately before the thunk call; callee body not opened.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "SEQUENCE_VERIFIED_BODY_UNOPENED",
+      "source_pin": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, admission A07454ff97918",
+      "rows": [
+        "0048EDDF..0048EDE8"
+      ]
+    },
+    {
+      "id": "P04-C3",
+      "text": "OBJ is NOT R: R=M32[B+0xC] is a persistent owner field value; OBJ is a fresh stack temporary of a stream loader. The 0085BD80 store+2C is therefore NOT the R-to-P provider writer (scoped negative for this chain).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "NEGATIVE_RESULT_CHAIN_SCOPED",
+      "source_pin": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, admission A07454ff97918",
+      "rows": [
+        "P04+P02 joint"
+      ]
+    }
+  ]
+}

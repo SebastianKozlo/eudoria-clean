@@ -1,0 +1,34 @@
+{
+  "claims": [
+    {
+      "id": "P06-C1",
+      "text": "The store at 0085CD17 writes the EAX result of a virtual call ([obj [ESI+0x28]] vtable slot +0x18, receiver ECX=[ESI+0x28]) into [ESI+0x2C], where ESI=[ESP+0x34] of the containing frame. This is a factory-product object-pointer store, the first store+2C candidate with object-pointer provenance.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, admission Af3c179f81dac",
+      "rows": [
+        "0085CD06..0085CD20"
+      ]
+    },
+    {
+      "id": "P06-C2",
+      "text": "The object at [ESI+0x2C] is later treated as a vtable-bearing receiver: slots +0x4C (result EDI int) and +0x50 (result EBX) called at 0085CD32..0085CD45 after null-check; in the head region slots +0xAC (float return, FCOM vs 0.0) and +0xB0 (3-float out via pointer arg) are called on it (0085CA5D..0085CA94) when [ESI+0x20]==3.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P06 extract admission Af3c179f81dac AND P07 extract admission A5742dd0b9845 (head-region rows 0085CA48..0085CA96 lie in the P07-admitted window); GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085CA48..0085CA96, 0085CD27..0085CD45"
+      ]
+    },
+    {
+      "id": "P06-C3",
+      "text": "Join ESI (the [ESP+0x34] object) == R (M32[B+0xC]) is NOT established: the serialize function entry and the initialization of [ESP+0x34] are outside all admitted windows.",
+      "evidence_status": "UNVERIFIED",
+      "claim_resolution": "NOT_ESTABLISHED_MISSING_ENTRY_BINDING",
+      "source_pin": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, admission Af3c179f81dac",
+      "rows": [
+        "frontier"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "claims": [
+    {
+      "id": "QC-P01-C1",
+      "text": "Store 0085ACE9: effective destination is ESP-relative stack local L1=ESP0-4 (after SUB ESP,8; PUSH ESI; PUSH EDX), not ECX-relative, not the return-address slot. Independently re-derived.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_INDEPENDENT_REDERIVATION",
+      "source_pin": "EXTRACTS/P01_EXTRACT.txt rows 0085ACD0..0085ACE9, admission A954d84cd8720",
+      "rows": [
+        "0085ACD0",
+        "0085ACD3",
+        "0085ACD9",
+        "0085ACDD",
+        "0085ACE4",
+        "0085ACE9"
+      ]
+    },
+    {
+      "id": "QC-P01-C2",
+      "text": "Value stored at 0085ACE9 is 0 (EDX zeroed at 0085ACD9, first redefinition LEA EDX @0085ACF2 after store); with 0085ACE5 zero-inits the 8-byte pair [ESP0-8,ESP0-4].",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_INDEPENDENT_REDERIVATION",
+      "source_pin": "EXTRACTS/P01_EXTRACT.txt rows 0085ACD9,0085ACE5,0085ACE9,0085ACF2",
+      "rows": [
+        "0085ACD9",
+        "0085ACE5",
+        "0085ACE9",
+        "0085ACF2"
+      ]
+    },
+    {
+      "id": "QC-P01-C3",
+      "text": "The zeroed pair is passed by address (LEA EAX,[ESP+0x8]; PUSH EAX) as arg5 of 6 to CALL 00730F00; out-buffer, not object storage. PUSH order independently verified (arg1=[ECX+0x74] pushed last).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_INDEPENDENT_REDERIVATION",
+      "source_pin": "EXTRACTS/P01_EXTRACT.txt rows 0085ACED..0085AD04",
+      "rows": [
+        "0085ACED",
+        "0085ACF1",
+        "0085ACF2",
+        "0085ACF5",
+        "0085ACF6",
+        "0085ACFC",
+        "0085AD00",
+        "0085AD01",
+        "0085AD02",
+        "0085AD04"
+      ]
+    },
+    {
+      "id": "QC-P01-C4",
+      "text": "0085ACE9 is not a B-to-R attach and not an object-field write; scoped negative for this body is justified.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "NEGATIVE_RESULT_SCOPED_VERIFIED",
+      "source_pin": "EXTRACTS/P01_EXTRACT.txt full window",
+      "rows": [
+        "0085ACD0",
+        "0085ACE9"
+      ]
+    },
+    {
+      "id": "QC-P06-ESPTRACE",
+      "text": "Full ESP trace 0085CD06..0085CD20: ESP=S at CD06 (prior FLD/SUB8/FSTP/CALL/ADD8 blocks balanced, S=ESP after CC90 ADD ESP,8); PUSH EBX at CD12 makes ESP=S-4 at the store; MOV [ESI+0x2C],EAX destination is field +0x2C of object ESI=[S+0x34] (frame-slot-derived pointer), not ECX-relative and not raw ESP.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_INDEPENDENT_REDERIVATION",
+      "source_pin": "EXTRACTS/P06_EXTRACT.txt rows 0085CC90..0085CD20, admission Af3c179f81dac",
+      "rows": [
+        "0085CC90",
+        "0085CD06",
+        "0085CD0A",
+        "0085CD0D",
+        "0085CD0F",
+        "0085CD12",
+        "0085CD13",
+        "0085CD15",
+        "0085CD17",
+        "0085CD1A",
+        "0085CD20"
+      ]
+    },
+    {
+      "id": "QC-P06-C1",
+      "text": "Store 0085CD17 writes the EAX retval of virtual slot +0x18 call on receiver [ESI+0x28] into [ESI+0x2C]; object-pointer provenance confirmed by downstream vtable use. Callee-cleanup of pushed EBX (RET 4) is STRONGLY_SUPPORTED only: required by path-join ESP consistency with P07-window paths at CA43/CA48 ([ESP+0x1E],[ESP+0x24..0x2C],[ESP+0x34] offsets), callee body unopened.",
+      "evidence_status": "STRONGLY_SUPPORTED",
+      "claim_resolution": "VERIFIED_TREEDIFF_ABI_INFERRED",
+      "source_pin": "EXTRACTS/P06_EXTRACT.txt + EXTRACTS/P07_EXTRACT.txt rows 0085CA43..0085CA96",
+      "rows": [
+        "0085CD06..0085CD20",
+        "0085CA43",
+        "0085CA48",
+        "0085CA53"
+      ]
+    },
+    {
+      "id": "QC-P06-C2",
+      "text": "P06-C2 substance verified: [ESI+0x2C] is a vtable-bearing receiver with slots +0x4C (EDI) / +0x50 (EBX) at 0085CD32..0085CD45 (P06 window) and +0xAC (float getter, FLDZ/FCOM vs 0.0) / +0xB0 (3-float out via PUSH &local) at 0085CA5D..0085CA94 when [ESI+0x20]==3 (P07 window). However its source_pin cites only admission Af3c179f81dac while head-region rows belong to P07 admission A5742dd0b9845.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_TREEDIFF_PIN_DEFECT_F2",
+      "source_pin": "EXTRACTS/P06_EXTRACT.txt admission Af3c179f81dac; EXTRACTS/P07_EXTRACT.txt admission A5742dd0b9845",
+      "rows": [
+        "0085CD27..0085CD45",
+        "0085CA48..0085CA96"
+      ]
+    },
+    {
+      "id": "QC-F1",
+      "text": "Out-of-vocabulary evidence_status values block PASS per CONTRACT sec.10: root R-C5,R-C7 'UNKNOWN'; P02-C5,P02-C7 'SUPPORTED'; P02-C6,P02-C9,P05-C2,P06-C3,P08-C2 'UNKNOWN'. Taxonomy is CONFIRMED/STRONGLY_SUPPORTED/PLAUSIBLE/UNVERIFIED/REJECTED. Root gates row children_packages=PASS verified parseability only, not vocabulary.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "REQUIRE_CORRECTIONS",
+      "source_pin": "CLAIMS.json + P02/P05/P06/P08 CLAIMS.json, programmatic scan 2026-10-20",
+      "rows": []
+    },
+    {
+      "id": "QC-F2",
+      "text": "P06-C2 source_pin misattributes P07-window rows (0085CA48..0085CA96, admission A5742dd0b9845) to P06 admission Af3c179f81dac; root R-C4 pins both correctly.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "REQUIRE_CORRECTIONS",
+      "source_pin": "P06_PROVIDER_FACTORY/CLAIMS.json P06-C2; CONTROL/EVENTS/000009_ADMIT.json",
+      "rows": []
+    },
+    {
+      "id": "QC-F3",
+      "text": "P01_OWNER_ATTACH/HANDOFF.md declares '1 body + 1 candidate reservation consumed' contradicting CONTROL P01 (body_reservation 3, candidate_reservation 3; event 000002 counts bodies=3, candidates=3; contract sec.6 '3body/3candidate'). CONTROL authoritative; child declaration wrong.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "REQUIRE_CORRECTIONS",
+      "source_pin": "P01_OWNER_ATTACH/HANDOFF.md; CONTROL/PLANS/P01.json; CONTROL/EVENTS/000002_ADMIT.json",
+      "rows": []
+    },
+    {
+      "id": "QC-F4",
+      "text": "P01_OWNER_ATTACH and P02_PROVIDER_FIELD lack a per-package STAGE_ACCEPTANCE_GATES.csv (present in P03..P08); root gates maps children collectively, acceptable as a mapped equivalent but inconsistent across packages.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "REQUIRE_CORRECTIONS_MINOR",
+      "source_pin": "package directory listings; root STAGE_ACCEPTANCE_GATES.csv",
+      "rows": []
+    },
+    {
+      "id": "QC-BUDGET",
+      "text": "All budgets within caps and internally consistent: charged 30/48 bodies, 652/9000 rows, 50/300 calls, 20/48 candidates, 0/3000 doc lines; reserved 26 bodies + 4 incident debits = 30; root HANDOFF remaining figures (18/8348/250/28) match; P06 calls 7 charged >= declared 6 per max rule; P07 charged 10 vs declared 20 (listing kind, max rule scoped to document_body) is an observation, not a violation.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED",
+      "source_pin": "CONTROL/EVENTS/000001..000011 + SEARCH_AND_BUDGET_LEDGER.json, independent sums",
+      "rows": []
+    },
+    {
+      "id": "QC-SCHEMA",
+      "text": "All 52 JSON files strict-parse with zero duplicate keys; all CSV files have fixed row widths and proper headers; CLAIMS schema {claim_id,text,evidence_status,claim_resolution,source_pin,rows} present everywhere; no duplicate claim_ids; no '~' as SIZE/SHA measurements.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED",
+      "source_pin": "programmatic strict parser + csv width scan over root and all child packages, 2026-10-20",
+      "rows": []
+    },
+    {
+      "id": "QC-FIRST-SUPERLATIVE",
+      "text": "The superlative in P06-C1/R-C4 'first store+2C candidate with object-pointer provenance' holds within this run's candidate set: P02 store 0085BE70 is a 3-dword global-constant copy (verified rows 0085BE62..0085BE79), P05 store 0085C0A7 is a float slot of a 13-dword transform write (verified rows 0085C066..0085C0B4); scope 'in this run' is only implicit in the wording.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_SCOPE_IMPLICIT",
+      "source_pin": "EXTRACTS/P02_EXTRACT.txt, EXTRACTS/P05_EXTRACT.txt cited rows",
+      "rows": [
+        "0085BE62",
+        "0085BE70",
+        "0085C0A7"
+      ]
+    }
+  ]
+}

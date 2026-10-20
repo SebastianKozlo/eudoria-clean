@@ -1,0 +1,100 @@
+{
+  "scope": "Synthetic arithmetic and pointer counterexamples, never executes original instructions or game runtime.",
+  "x87_primary_reference": "https://cdrdv2-public.intel.com/774492/325383-sdm-vol-2abcd.pdf",
+  "semantics": "FSUBP ST(i),ST0 subtracts ST0 from old ST(i), then pops.",
+  "endpoint_formula": "L2=A+S*(B-A), A=first helper output from R+30 stored transform; B=second helper output from fresh transform; formula conditional on helper out writes and ABI.",
+  "tests": [
+    {
+      "factor": "0",
+      "L1": [
+        "1",
+        "2",
+        "3"
+      ],
+      "L2": [
+        "11",
+        "22",
+        "33"
+      ],
+      "fpu_at_ret": 0,
+      "peak": 6,
+      "helper_bindings": [
+        {
+          "helper": "stored",
+          "this_address": "0x100030",
+          "out_address": "0x7fff90"
+        },
+        {
+          "helper": "fresh",
+          "this_address": "0x7fffcc",
+          "out_address": "0x7fff84"
+        }
+      ],
+      "result": "PASS"
+    },
+    {
+      "factor": "1",
+      "L1": [
+        "101",
+        "202",
+        "303"
+      ],
+      "L2": [
+        "41",
+        "52",
+        "63"
+      ],
+      "fpu_at_ret": 0,
+      "peak": 6,
+      "helper_bindings": [
+        {
+          "helper": "stored",
+          "this_address": "0x100030",
+          "out_address": "0x7fff90"
+        },
+        {
+          "helper": "fresh",
+          "this_address": "0x7fffcc",
+          "out_address": "0x7fff84"
+        }
+      ],
+      "result": "PASS"
+    },
+    {
+      "factor": "1/4",
+      "L1": [
+        "26",
+        "52",
+        "78"
+      ],
+      "L2": [
+        "37/2",
+        "59/2",
+        "81/2"
+      ],
+      "fpu_at_ret": 0,
+      "peak": 6,
+      "helper_bindings": [
+        {
+          "helper": "stored",
+          "this_address": "0x100030",
+          "out_address": "0x7fff90"
+        },
+        {
+          "helper": "fresh",
+          "this_address": "0x7fffcc",
+          "out_address": "0x7fff84"
+        }
+      ],
+      "result": "PASS"
+    }
+  ],
+  "pointer_countermodels": {
+    "B_plus_2C_not_R_plus_2C": "PASS",
+    "provider_not_returned_buffer": "PASS"
+  },
+  "limits": [
+    "Finite rational arithmetic; rounding, NaNs, exceptions, FP control word and runtime helper behavior unverified.",
+    "Frozen report u/v symbols must be bound explicitly before comparing endpoint formula."
+  ]
+}

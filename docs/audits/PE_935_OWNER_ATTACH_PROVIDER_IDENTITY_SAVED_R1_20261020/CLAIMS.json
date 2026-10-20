@@ -1,0 +1,91 @@
+{
+  "claims": [
+    {
+      "id": "R-C1",
+      "text": "Store+C@0085ACE9 is a stack-local zero-init (ESP-relative), part of an 8-byte out-buffer pair passed to CALL 00730F00; NOT a B-to-R attach (scoped negative for that body).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "NEGATIVE_RESULT_SCOPED_TO_THIS_BODY",
+      "source_pin": "P01 extract admission A954d84cd8720; GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085ACD0..0085AD10"
+      ]
+    },
+    {
+      "id": "R-C2",
+      "text": "0085BD80 store+2C@0085BE70 writes a 3-dword global float-constant trio into this+0x28/+0x2C/+0x30; this (OBJ) is a stack-local temporary of the 0048EDxx stream-loader constructed by CALL 0085BBE0 and passed via cdecl adapter 0085BF00; OBJ != R; NOT the provider-P writer.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "NEGATIVE_RESULT_CHAIN_SCOPED",
+      "source_pin": "P02/P03/P04 extracts admissions A48f4c758c48c/A9c13761e27e7/A07454ff97918; GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BE62..0085BE79",
+        "0048EDDF..0048EDFC"
+      ]
+    },
+    {
+      "id": "R-C3",
+      "text": "Store+2C@0085C0A7 is a float slot of a 13-dword transform write at [EAX..EAX+0x30] (9-dword REP MOVSD + 3 floats + FLD1); EAX=[ESP+0xAC], receiver identity unknown; not a provider pointer store.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "NEGATIVE_RESULT_SCOPED_TO_THIS_BODY",
+      "source_pin": "P05 extract admission A2aba7bef7da0; GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085C066..0085C0B4"
+      ]
+    },
+    {
+      "id": "R-C4",
+      "text": "NEW CANDIDATE: MOV [ESI+0x2C],EAX @0085CD17 stores the product of a virtual factory call (receiver ECX=[ESI+0x28], vtable slot +0x18) into ESI+0x2C, ESI=[ESP+0x34] of the containing serialize function; the stored object is a vtable receiver (slots +0xAC float getter, +0xB0 3-float out, +0x4C/+0x50). First store+2C with object-pointer provenance.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "CANDIDATE_QUALIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P06/P07 extracts admissions Af3c179f81dac/A5742dd0b9845; GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085CD06..0085CD20",
+        "0085CA48..0085CA96",
+        "0085CD27..0085CD45"
+      ]
+    },
+    {
+      "id": "R-C5",
+      "text": "Join ESI(of 0085CD17 store) == R (=M32[B+0xC]) is NOT established: serialize-function entry and [ESP+0x34] initialization are outside all admitted windows. No join by adjacency/layout.",
+      "evidence_status": "UNVERIFIED",
+      "claim_resolution": "NOT_ESTABLISHED_MISSING_ENTRY_BINDING",
+      "source_pin": "P08 extract admission A59633431247e; GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085C780..0085C912"
+      ]
+    },
+    {
+      "id": "R-C6",
+      "text": "B=owner in caller 00527AB0 (R=M32[B+0xC] receiver of 0085BFA0); P=M32[R+0x2C]; VT=M32[P]; F=M32[VT+0x24]; T=retval CALL F; floats read from T only after the call. P is not assumed equal or unequal to T.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "STANDING_PRIOR_FROZEN_CORRECTIONS_APPLIED",
+      "source_pin": "postaudit REPORT sec.2 + contract sec.3",
+      "rows": [
+        "0085BFA6..0085BFB7"
+      ]
+    },
+    {
+      "id": "R-C7",
+      "text": "T (transform buffer pointer returned by F) origin is UNKNOWN in this run: no new body of the slot+0x24 target was opened; Etap C not reached.",
+      "evidence_status": "UNVERIFIED",
+      "claim_resolution": "NOT_ESTABLISHED_FRONTIER",
+      "source_pin": "this run, no new evidence",
+      "rows": []
+    },
+    {
+      "id": "R-C8",
+      "text": "Two process incidents (pre-admission operand display of 3+1 bodies) were recorded as INCIDENT_DEBIT events with PARTIAL_NONCOMPLIANT classification; the regions were subsequently admitted properly (P03/P08); no retroactive authorization.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "PROCESS_INCIDENTS_DISCLOSED",
+      "source_pin": "CONTROL/EVENTS/000004 and 000010 INCIDENT_DEBIT",
+      "rows": []
+    },
+    {
+      "id": "R-C9",
+      "text": "Historical building XYZ not recovered; world placement not established; cursor source medium unknown; canonical gate effect none.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "STATUS_LINES_UPHELD",
+      "source_pin": "contract sec.12",
+      "rows": []
+    }
+  ]
+}

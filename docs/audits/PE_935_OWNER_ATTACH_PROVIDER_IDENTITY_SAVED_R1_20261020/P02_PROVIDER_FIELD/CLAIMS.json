@@ -1,0 +1,122 @@
+{
+  "claims": [
+    {
+      "id": "P02-C1",
+      "text": "Function 0085BD80 is a thiscall-style method: receiver ECX copied unmodified to EDI at 0085BD9D (no this-adjustment), one stack arg ARG1 (ESI, reader-like object), RET 0x4 at 0085BEDB; ESP balanced on observed paths.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BD80",
+        "0085BD9D",
+        "0085BD94",
+        "0085BEDB"
+      ]
+    },
+    {
+      "id": "P02-C2",
+      "text": "The candidate store at 0085BE70 is ECX-relative on the this-object: MOV [EDI+0x2C],ECX where the value was loaded from global [0x00BA9220] at 0085BE6A; it is the middle dword of a 3-dword global-constant copy [EDI+0x28]:=[0x00BA921C], [EDI+0x2C]:=[0x00BA9220], [EDI+0x30]:=[0x00BA9224].",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BE62",
+        "0085BE67",
+        "0085BE70",
+        "0085BE79"
+      ]
+    },
+    {
+      "id": "P02-C3",
+      "text": "The store at 0085BE70 executes only on the path where stream flag bit 0x10 is clear (JZ 0085BE62 from TEST BL,0x10 at 0085BE39/0085BE3C); on the bit-set path the same field region is written via CALL 0085BC10 with ECX=EDI+0x28.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BE39",
+        "0085BE3C",
+        "0085BE49",
+        "0085BE4D",
+        "0085BE55",
+        "0085BE62"
+      ]
+    },
+    {
+      "id": "P02-C4",
+      "text": "No vptr is written anywhere in the admitted body; 0085BD80 is not a vtable constructor in this window and the stored value at 0085BE70 is not a call result, not a factory product and not stream data — it is a static 3-dword global constant copy.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BE62",
+        "0085BE67",
+        "0085BE70",
+        "0085BE73",
+        "0085BE79"
+      ]
+    },
+    {
+      "id": "P02-C5",
+      "text": "ARG1 (ESI) is a reader-like object: [ESI]=buffer base, [ESI+0x8]=limit, [ESI+0xC]=position, byte [ESI+0x11]=active flag; helper 0040DE60(ECX=ESI, 1 or 4) advances the position; 0085BD80 structurally behaves as a stream-deserialization/update method (conditional FCHS of fields +0x1C/+0x20/+0x24, float reads into +0x38/+0x3C, flag clear at end). Reader semantics supported; class identity NOT claimed.",
+      "evidence_status": "STRONGLY_SUPPORTED",
+      "claim_resolution": "STRUCTURAL_NOT_CLASS_IDENTITY",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BDE5",
+        "0085BDE8",
+        "0085BDF5",
+        "0085BE03",
+        "0085BE97",
+        "0085BEB6",
+        "0085BEAE"
+      ]
+    },
+    {
+      "id": "P02-C6",
+      "text": "OBJ (this of 0085BD80) is NOT established as R (receiver of 0085BFA0): no caller census in evidence; address adjacency is not a join. OBJ and R remain separate values.",
+      "evidence_status": "UNVERIFIED",
+      "claim_resolution": "NOT_ESTABLISHED_MISSING_CALLER_CENSUS",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BD9D"
+      ]
+    },
+    {
+      "id": "P02-C7",
+      "text": "Conditional layout observation, not an identity claim: in this body +0x2C is the middle dword of a 3-float-like trio (+0x28/+0x2C/+0x30). If OBJ were R, the provider read M32[R+0x2C] (0085BFA0 @0085BFA6, frozen prior) would on this path be a float-cast constant, not an object pointer; a structural tension only — different object or different lifetime stage remain open. No pointer equality/inequality claimed.",
+      "evidence_status": "STRONGLY_SUPPORTED",
+      "claim_resolution": "CONDITIONAL_TENSION_NO_IDENTITY",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BE67",
+        "0085BE70",
+        "0085BE79"
+      ]
+    },
+    {
+      "id": "P02-C8",
+      "text": "The candidate store+2C@0085BE70 is rejected as a provider-P writer for this body: it writes a global-constant dword into a field of OBJ, not a provider pointer, not P=M32[R+0x2C]. Scoped negative for this body only.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "NEGATIVE_RESULT_SCOPED_TO_THIS_BODY",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BE62",
+        "0085BE70"
+      ]
+    },
+    {
+      "id": "P02-C9",
+      "text": "Next concrete edges: caller census of 0085BD80; bodies of 0085BC10 (alternative trio writer), 0085BD20 (3x consumer of 00864360 output), 00864360 (producer of +0x20/+0x24 floats). All are small, directly downstream of the candidate store.",
+      "evidence_status": "UNVERIFIED",
+      "claim_resolution": "FRONTIER_LISTED",
+      "source_pin": "P02_EXTRACT.txt rows (admission A48f4c758c48c), source sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+      "rows": [
+        "0085BDC5",
+        "0085BDCE",
+        "0085BDD7",
+        "0085BDE0",
+        "0085BE55"
+      ]
+    }
+  ]
+}

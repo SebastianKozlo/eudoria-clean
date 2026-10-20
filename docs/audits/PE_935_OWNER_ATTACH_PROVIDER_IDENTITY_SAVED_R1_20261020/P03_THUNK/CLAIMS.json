@@ -1,0 +1,34 @@
+{
+  "claims": [
+    {
+      "id": "P03-C1",
+      "text": "0085BF00 is cdecl, ignores entry ECX, loads ECX:=[ESP+8] (ARG2=OBJ) and pushes ESI:=[ESP+4] (ARG1=reader) for CALL 0085BD80; returns reader in EAX; plain RET (caller cleans both args).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, admission A9c13761e27e7",
+      "rows": [
+        "0085BF00..0085BF12"
+      ]
+    },
+    {
+      "id": "P03-C2",
+      "text": "0085BF20 and 0085BF50 operate on small POD receivers and write only int/float fields; no vptr write, no object-pointer store; unrelated to B/R/P chain in this body.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "NEGATIVE_RESULT_SCOPED_TO_THIS_BODY",
+      "source_pin": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, admission A9c13761e27e7",
+      "rows": [
+        "0085BF20..0085BF9D"
+      ]
+    },
+    {
+      "id": "P03-C3",
+      "text": "The single caller census target for binding OBJ is the unique CALL 0x0085BF00 site at 0x0048EDF7.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "CENSUS_FACT",
+      "source_pin": "GHIDRA_H5_VTABLE2.txt sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB, admission A9c13761e27e7",
+      "rows": [
+        "source grep: 1 unique callsite"
+      ]
+    }
+  ]
+}

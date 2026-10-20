@@ -1,0 +1,121 @@
+{
+  "claims": [
+    {
+      "id": "P01-C1",
+      "text": "The store at 0085ACE9 (MOV dword ptr [ESP+0xC],EDX) writes to the stack local L1 at ESP_entry-4, i.e. its effective destination is ESP-relative (after SUB ESP,8 and PUSHes of ESI and EDX), not ECX-relative and not the return-address slot.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P01_EXTRACT.txt rows 0085ACD0..0085ACE9 (admission A954d84cd8720)",
+      "rows": [
+        "0085ACD0",
+        "0085ACD3",
+        "0085ACDD",
+        "0085ACE4",
+        "0085ACE9"
+      ]
+    },
+    {
+      "id": "P01-C2",
+      "text": "The value stored at 0085ACE9 is zero: EDX was zeroed by XOR EDX,EDX at 0085ACD9 and is not redefined before the store (first redefinition is LEA EDX,[ECX+0x5C] at 0085ACF2). Together with the store at 0085ACE5 it zero-inits the 8-byte local pair [ESP_entry-8, ESP_entry-4].",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P01_EXTRACT.txt rows 0085ACD9, 0085ACE5, 0085ACE9, 0085ACF2",
+      "rows": [
+        "0085ACD9",
+        "0085ACE5",
+        "0085ACE9",
+        "0085ACF2"
+      ]
+    },
+    {
+      "id": "P01-C3",
+      "text": "The zeroed 8-byte stack pair is passed by address (LEA EAX,[ESP+0x8]; PUSH EAX) as argument 5 of 6 to CALL 00730F00, i.e. it functions as a caller-supplied out-buffer, not as object storage.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P01_EXTRACT.txt rows 0085ACED, 0085ACF1, 0085AD04",
+      "rows": [
+        "0085ACED",
+        "0085ACF1",
+        "0085AD04"
+      ]
+    },
+    {
+      "id": "P01-C4",
+      "text": "The store at 0085ACE9 is NOT a B-to-R attach and not an object-field write; the B-to-R attach candidate at 0085ACE9 is rejected for this body. (Scoped negative: no claim that no attach writer exists elsewhere.)",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "NEGATIVE_RESULT_SCOPED_TO_THIS_BODY",
+      "source_pin": "P01_EXTRACT.txt full window; derived from P01-C1/P01-C2/P01-C3",
+      "rows": [
+        "0085ACD0",
+        "0085ACE9"
+      ]
+    },
+    {
+      "id": "P01-C5",
+      "text": "Function 0085ACD0 uses an ECX receiver at entry (thiscall-style), takes exactly one dword stack argument (loaded into ESI from [ESP+0x10] after frame setup; epilogue RET 0x4), and returns that argument as EAX (MOV EAX,ESI at 0085AD09).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P01_EXTRACT.txt rows 0085ACD0, 0085ACDE, 0085AD09, 0085AD0F",
+      "rows": [
+        "0085ACD0",
+        "0085ACDE",
+        "0085AD09",
+        "0085AD0F"
+      ]
+    },
+    {
+      "id": "P01-C6",
+      "text": "The zeroing+call block at 0085ACE4..0085AD04 executes only when [ECX+0x88] equals zero (CMP [EAX],EDX with EAX=ECX+0x88, JNZ 0085AD12); the branch target 0085AD12 lies outside this admitted window and is unqualified.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P01_EXTRACT.txt rows 0085ACD3, 0085ACDB, 0085ACE2",
+      "rows": [
+        "0085ACD3",
+        "0085ACDB",
+        "0085ACE2"
+      ]
+    },
+    {
+      "id": "P01-C7",
+      "text": "At CALL 00730F00 the receiver is ECX=ESI=ARG1 of this function, and the caller passes 6 stack arguments in order arg1=[ECX+0x74], arg2=[ECX+0x78], arg3=ECX+0x44 (embedded address), arg4=ECX+0x5C (embedded address), arg5=&local8 (out buffer), arg6=0.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "VERIFIED_WITHIN_ADMITTED_BODY",
+      "source_pin": "P01_EXTRACT.txt rows 0085ACE4..0085AD04",
+      "rows": [
+        "0085ACE4",
+        "0085ACF1",
+        "0085ACF5",
+        "0085ACFC",
+        "0085AD00",
+        "0085AD01",
+        "0085AD02",
+        "0085AD04"
+      ]
+    },
+    {
+      "id": "P01-C8",
+      "text": "The caller expects callee cleanup of the 6 dword arguments (stdcall-like RET 0x18 in 00730F00): after the call the caller only removes its own frame (POP ESI; ADD ESP,0x8; RET 0x4) with no ADD ESP,0x18, and the stack balances only under callee cleanup. Callee body not opened, so this is inferred from caller-side balance, not from the callee's RET.",
+      "evidence_status": "STRONGLY_SUPPORTED",
+      "claim_resolution": "SUPPORTED_BY_CALLER_BALANCE; CALLEE_BODY_UNOPENED",
+      "source_pin": "P01_EXTRACT.txt rows 0085AD04..0085AD0F",
+      "rows": [
+        "0085AD04",
+        "0085AD09",
+        "0085AD0B",
+        "0085AD0C",
+        "0085AD0F"
+      ]
+    },
+    {
+      "id": "P01-C9",
+      "text": "Whether ARG1 (ESI, the receiver passed to 00730F00) is identical to B, R or any specific instance is UNVERIFIED in this window: this body contains no pointer-equality or lifetime evidence linking ESI to the contract symbols B (owner, caller thread first row 00527AB0) or R (M32[B+0xC], receiver 0085BFA0).",
+      "evidence_status": "UNVERIFIED",
+      "claim_resolution": "OPEN; REQUIRES_CALLER_PROVENANCE_OUTSIDE_THIS_WINDOW",
+      "source_pin": "P01_EXTRACT.txt full window; contract §3 symbol bindings",
+      "rows": [
+        "0085ACDE",
+        "0085AD02"
+      ]
+    }
+  ]
+}
