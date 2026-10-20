@@ -1,0 +1,19 @@
+{
+  "qc_package": "QC_R1",
+  "qc_author": "pe-master-auditor (fresh session ses_ea7e6b3a1ffeub5ZHVxoPB4csr)",
+  "verdict": "PASS_WITH_FINDINGS",
+  "findings_total": 9,
+  "dispositions": [
+    {"id":"F1","severity":"P1","finding":"P02 L1 slot mapping was +0x20/+0x28/+0x2C; correct is continuous +0x24/+0x28/+0x2C (first FLD before the PUSH)","disposition":"ACCEPTED_FINDING","resolution":"CORRECTED_IN_PLACE pre-seal in P02 CLAIMS/REPORT/FLOW/STACK_MAP (CORRECTED_PER_QC_F1 markers)"},
+    {"id":"F2","severity":"P1","finding":"P03-C13 merged receiver sets; 0085B0A0/B0B0/ACB0 receive ECX=owner, not [owner+0xC]","disposition":"ACCEPTED_FINDING","resolution":"CORRECTED_IN_PLACE (CORRECTED_PER_QC_F2 markers in CLAIMS/REPORT)"},
+    {"id":"F3","severity":"P2","finding":"overclaimed identical roles of +0xE0/E4/E8","disposition":"ACCEPTED_FINDING","resolution":"softened in P03-C03"},
+    {"id":"F4","severity":"P2","finding":"helper 005287E0 'no ECX use' wrong (ECX is loop counter)","disposition":"ACCEPTED_FINDING","resolution":"corrected in P03-C01"},
+    {"id":"F5","severity":"P2","finding":"P03 premise inventory gaps (0043AE80 RET4, float-return of 0041C740/0043AE80, FPU neutrality of opaque callees)","disposition":"ACCEPTED_FINDING","resolution":"recorded here as standing premise-inventory gaps; mechanical results unaffected"},
+    {"id":"F6","severity":"P2","finding":"P02 dangling 'full step list' reference and garbled FPU-peak line","disposition":"ACCEPTED_FINDING","resolution":"STACK_MAP FPU summary flagged; key depth-0-at-RET verdict independently recomputed by QC (PASS)"},
+    {"id":"F7","severity":"P2","finding":"P02-C05 this+0x30 content identity is a premise","disposition":"ACCEPTED_FINDING","resolution":"premise labeled in P02-C05"},
+    {"id":"F8","severity":"P2","finding":"P04-C06 mislabeled 'arg2' for the 4th stack arg","disposition":"ACCEPTED_FINDING","resolution":"corrected in P04-C06"},
+    {"id":"F9","severity":"P2","finding":"007105F0 ECX-clobber premise unlabeled","disposition":"ACCEPTED_FINDING","resolution":"recorded; no claim depends on 007105F0 receiver identity"}
+  ],
+  "positive_note": "0085B1B0 RET 0xC confirmed from admitted P09 hex (C2 0C 00); P04-C10 premise raised to CONFIRMED.",
+  "independence_note": "QC independently recomputed ESP walks, FPU depth traces, push-shift tables, budget sums, event chain and source pins; packages were byte-identical before/after QC (verified by hashes). This is internal QC, not an external postaudit."
+}

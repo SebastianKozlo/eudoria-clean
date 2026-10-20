@@ -1,0 +1,228 @@
+{
+  "run_id": "PE_935_SCENE_INSTANCE_TRANSFORM_JOIN_SAVED_R1_20261019",
+  "package": "P01_CALLER",
+  "worker": "pe-reconstruction",
+  "scope": "admitted window [0x00527AA0,0x00527B20), 37 rows (listing rows 180895-180931), 2 CALL sites; body 00527AA0 COMPLETE in-window (entry 0x00527AA0 .. RET 0x4 @0x00527B1D, end-exclusive 0x00527B20)",
+  "source": {
+    "extract": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_SCENE_INSTANCE_TRANSFORM_JOIN_SAVED_R1_20261019\\P01_EXTRACT",
+    "admission": "A27148d95e802",
+    "source_pin_sha256": "642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB",
+    "listing": "GHIDRA_H5_VTABLE2.txt (H5)"
+  },
+  "prior_evidence_read_only_frozen": [
+    "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\REPORT.md",
+    "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P04_FRONTIER\\REPORT.md",
+    "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P04_FRONTIER\\CLAIMS.json",
+    "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_PAIR_REDUCER_CONSUMER_SAVED_R2_20261019\\P04_EXTRACT"
+  ],
+  "claims": [
+    {
+      "id": "P01-C01",
+      "text": "00527AA0 is a thiscall method: ECX=this at entry, captured into EBX; prolog SUB ESP,0x34 + PUSH EBX + PUSH EDI; epilogue POP ESI/POP EDI/POP EBX + ADD ESP,0x34 + RET 0x4. RET 0x4 proves exactly ONE incoming stack argument (ARG1 at [E+4]) cleaned by this function.",
+      "source_row_vas": ["180895@0x00527ab0", "180896@0x00527ab3", "180897@0x00527ab4", "180898@0x00527ab6", "180927@0x00527b17", "180928@0x00527b18", "180929@0x00527b19", "180930@0x00527b1a", "180931@0x00527b1d"],
+      "premise": "x86 thiscall convention (ECX=this); RET imm16 pops imm16 bytes of caller stack (callee cleanup). Ghidra H5 listing rows are ground truth for mnemonic/operands.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE"
+    },
+    {
+      "id": "P01-C02",
+      "text": "EBX holds `this` (the owner) for the whole body; all owner field accesses use EBX (+0xC, +0x10, +0xE0/+0xE4/+0xE8). The caller uses EBX AFTER CALL 0085BFA0 (row 180925 @0x00527b0f), i.e. it relies on EBX being preserved across the call.",
+      "source_row_vas": ["180897@0x00527ab4", "180899@0x00527ab7", "180902@0x00527abe", "180905@0x00527ac6", "180925@0x00527b0f"],
+      "premise": "Register role is read directly from listing. Preservation of EBX INSIDE the callees is an ABI-convention premise, not proven in this window (callee bodies not opened here).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE (register role); callee-side preservation = premise"
+    },
+    {
+      "id": "P01-C03",
+      "text": "RECEIVER_POINTER_ORIGIN: the receiver passed to 0085BFA0 is EDI = M32[this+0xC], loaded once at entry (row 180899), guarded non-null (TEST EDI,EDI / JZ epilogue), moved to ECX unchanged at row 180917 (no instruction between 180899 and 180917 writes EDI). Exactly ONE dereference level: this -> [this+0xC] -> receiver object. The MOV load (not LEA) proves the receiver is the VALUE stored at owner+0xC, i.e. NOT an embedded subobject at this+0xC itself.",
+      "source_row_vas": ["180897@0x00527ab4", "180899@0x00527ab7", "180900@0x00527aba", "180901@0x00527abc", "180917@0x00527af7", "180918@0x00527af9"],
+      "premise": "MOV reg,[reg+disp] is a value load; an embedded subobject would be addressed with LEA. Row-by-row register-write audit between 180899 and 180917 shows no EDI reassignment.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE for origin-within-window; write-time/producer of [this+0xC] UNKNOWN (not in window)"
+    },
+    {
+      "id": "P01-C04",
+      "text": "Post-transform call (mechanical only): MOV ECX,[ESP+0x44] reads the function's own ARG1 (see P01-C08), PUSH ECX forwards it as the sole stack argument, MOV ECX,[EBX+0x10] loads the owner's second pointer field as receiver, CALL 00861150. So: 00861150(receiver=[this+0x10], arg1=ARG1 forwarded verbatim). The same field +0x10 was null-guarded at entry (rows 180902-180903). 00861150 semantics NOT in window.",
+      "source_row_vas": ["180902@0x00527abe", "180903@0x00527ac2", "180923@0x00527b0a", "180924@0x00527b0e", "180925@0x00527b0f", "180926@0x00527b12"],
+      "premise": "ESP at 0x00527b0a is E-0x40 (see STACK_MAP), so [ESP+0x44]=[E+4]=ARG1. Mechanical description only; no semantics invented for ARG1 or 00861150.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE (mechanical); 00861150 body semantics UNKNOWN"
+    },
+    {
+      "id": "P01-C05",
+      "text": "FPU block mechanics (working labels, no invented semantics): with both guards passed, owner float field +0xE0 := +0.0 (FLDZ; FST). Then if float@0x00A797C8 < owner float +0xE4 (strict, ordered) the copy block runs: owner float +0xE8 := owner float +0xE4 (FLD; FSTP). At the join point 0x00527aeb BOTH paths execute FSTP [EBX+0xE4] := +0.0. Net: field_E0 zeroed always; field_E4 old value moved to field_E8 only when the global float is smaller; field_E4 zeroed always. TEST AH,0x5 / JP is the MSVC jump-if-not-less idiom: JP taken when C0=C2 (both clear -> st0>src, st0==src via C3, or both set -> unordered/NaN), NOT taken only when st0<src.",
+      "source_row_vas": ["180904@0x00527ac4", "180905@0x00527ac6", "180906@0x00527acc", "180907@0x00527ad2", "180908@0x00527ad8", "180909@0x00527ada", "180910@0x00527add", "180911@0x00527adf", "180912@0x00527ae5", "180914@0x00527aec"],
+      "premise": "x87 condition codes after FCOMP: ST0>src -> C3,C2,C0=000; ST0<src -> C0=1; ST0==src -> C3=1,C0=C2=0; unordered -> C0=C2=C3=1. TEST AH,0x5 masks C0 (AH bit0) and C2 (AH bit2); PF=even parity of the masked result; JP taken iff (C0,C2) in {00,11}. FLDZ pushes +0.0; FST stores without pop; FSTP stores and pops.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE (mechanical); semantic meaning of the three float fields and of global 0x00A797C8: UNKNOWN (working labels owner_float_E0/E4/E8, global_float_A797C8; value of the global not in evidence)"
+    },
+    {
+      "id": "P01-C06",
+      "text": "FPU stack never leaks: depth trace - entry depth 0; FLDZ ->1; FST (no pop) ->1; FLD ->2; FCOMP ->1; FNSTSW/TEST/JP ->1 (no depth change); JP-taken path arrives at join 0x00527aeb with depth 1 (st0=+0.0); fall-through path FLD ->2 then FSTP ->1, also depth 1 at join. FSTP [EBX+0xE4] @0x00527aec pops to depth 0. No further FPU instructions; early-exit paths never touch the FPU (depth 0). Function returns with FPU depth 0 on ALL paths.",
+      "source_row_vas": ["180904@0x00527ac4", "180906@0x00527acc", "180907@0x00527ad2", "180910@0x00527add", "180911@0x00527adf", "180912@0x00527ae5", "180914@0x00527aec"],
+      "premise": "x87 push/pop depth accounting per instruction (FLD/FLDZ push; FST no pop; FSTP/FCOMP pop).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE"
+    },
+    {
+      "id": "P01-C07",
+      "text": "ARG at the CALL: LEA EAX,[ESP+0xC] with ESP=E-0x40 gives EAX=E-0x34, which is exactly the base of the 0x34-byte frame allocated by SUB ESP,0x34. The ENTIRE local allocation is the out-buffer: 0x34 bytes = 13 dwords, matching the 13-dword (0x34-byte) output shape of 0085BFA0 (prior R2 P04-K03). PUSH EAX passes &buffer as the sole stack argument of the thiscall CALL 0085BFA0 (ECX=receiver). The function has no other locals.",
+      "source_row_vas": ["180895@0x00527ab0", "180913@0x00527aeb", "180915@0x00527af2", "180916@0x00527af6", "180917@0x00527af7", "180918@0x00527af9"],
+      "premise": "ESP bookkeeping (STACK_MAP): E-0x40 + 0xC = E-0x34; frame spans [E-0x34,E). 13 dwords x 4 = 0x34 bytes.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE"
+    },
+    {
+      "id": "P01-C08",
+      "text": "Callee cleanup of 0085BFA0 (RET 0x4): after CALL @0x00527af9 there is no ADD ESP; the subsequent read [ESP+0x44] @0x00527b0a equals [E+4]=ARG1 ONLY IF ESP returned to E-0x40, i.e. the callee cleaned its one pushed dword. Cross-pinned by frozen prior evidence R2 P04-K01 (RET 0x4 @0x0085C0B4, CONFIRMED there). The alternative (0085BFA0 cdecl, ESP=E-0x44, [ESP+0x44]=[E]=saved return address forwarded as argument) was examined and REJECTED: semantically pathological and contradicted by the pinned prior body.",
+      "source_row_vas": ["180916@0x00527af6", "180918@0x00527af9", "180923@0x00527b0a"],
+      "premise": "ESP arithmetic; prior frozen body R2 P04_EXTRACT rows 1171003-1171004 (@0x0085c0ae ADD ESP,0xa0; @0x0085c0b4 RET 0x4).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE"
+    },
+    {
+      "id": "P01-C09",
+      "text": "Return-value dataflow (stated as dataflow, not class identity): EAX returned by 0085BFA0 is moved to ESI; EDI was first ADD'ed 0x30 (dest = receiver+0x30); MOV ECX,0xD; REP MOVSD copies 13 dwords (0x34 bytes) from [ESI] to [EDI]. Per frozen prior R2 P04 (rows 1170983@0x0085c06a MOV EAX,[ESP+0xAC] = caller out-pointer, EAX not clobbered through RET), EAX = &out-arg = &local buffer; therefore the copy is: local buffer (13-dword transform output) -> receiver region +0x30..+0x63. THE RECEIVER OBJECT RECEIVES A 13-DWORD (0x34-BYTE) COPY OF THE TRANSFORM OUTPUT AT receiver+0x30. Prior R2 P04-K03: output layout = 9-dword rotation + 3-dword translation + 1.0f dword (STRUCTURAL_ONLY NiTransform-layout match, no class identity).",
+      "source_row_vas": ["180918@0x00527af9", "180919@0x00527afe", "180920@0x00527b01", "180921@0x00527b03", "180922@0x00527b08"],
+      "premise": "Register dataflow in-window; return-value identity (EAX=out-pointer) from frozen prior body where MOV EAX,[ESP+0xAC] @0x0085c06a is the last EAX write before RET 0x4 (prior rows 1170983-1171004 contain no other EAX write).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE (dataflow); class identity of receiver and of the stored block: NOT claimed"
+    },
+    {
+      "id": "P01-C10",
+      "text": "Callee cleanup of 00861150 (one dword): after PUSH ECX (ESP=E-0x44) and CALL @0x00527b12, the POP ESI @0x00527b17 restores the saved ESI from [E-0x40] correctly ONLY IF ESP=E-0x40 at that point, i.e. the callee cleaned exactly 4 bytes of stack args. Proven within this package by epilogue coherence (given P01-C08 fixes ESP=E-0x40 after the 0085BFA0 call).",
+      "source_row_vas": ["180924@0x00527b0e", "180926@0x00527b12", "180927@0x00527b17", "180928@0x00527b18"],
+      "premise": "Full ESP walk (STACK_MAP): per-path pop pairing must restore the exact saved-register slots; a 4-byte leak would desynchronize POP EDI/POP EBX/ADD ESP,0x34/RET 0x4.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE"
+    },
+    {
+      "id": "P01-C11",
+      "text": "ESP is fully balanced on BOTH paths. Main path: E -> SUB 0x34 -> E-0x34; PUSH EBX -> E-0x38; PUSH EDI -> E-0x3C; PUSH ESI -> E-0x40; PUSH EAX -> E-0x44; CALL 0085BFA0 (callee cleans 4) -> E-0x40; PUSH ECX -> E-0x44; CALL 00861150 (callee cleans 4) -> E-0x40; POP ESI -> E-0x3C; POP EDI -> E-0x38; POP EBX -> E-0x34; ADD ESP,0x34 -> E; RET 0x4 -> E+4 (ARG1 slot consumed). Early-exit path (JZ @180901 or @180903, ESP=E-0x3C) -> target 0x00527b18: POP EDI -> E-0x38; POP EBX -> E-0x34; ADD ESP,0x34 -> E; RET 0x4 -> E+4. No leak, no double-pop, no missing-pop on either path.",
+      "source_row_vas": ["180895@0x00527ab0", "180896@0x00527ab3", "180898@0x00527ab6", "180901@0x00527abc", "180903@0x00527ac2", "180913@0x00527aeb", "180916@0x00527af6", "180918@0x00527af9", "180924@0x00527b0e", "180926@0x00527b12", "180927@0x00527b17", "180928@0x00527b18", "180929@0x00527b19", "180930@0x00527b1a", "180931@0x00527b1d"],
+      "premise": "Per-instruction ESP arithmetic; P01-C08 and P01-C10 for the two callee cleanups.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE"
+    },
+    {
+      "id": "P01-C12",
+      "text": "OWNER_IDENTITY = UNKNOWN. Evidence-based profile only: `this` (EBX) is an object with (a) pointer field +0xC holding the transform-receiver (null-guarded), (b) pointer field +0x10 holding the 00861150 receiver (null-guarded), (c) three consecutive float fields +0xE0/+0xE4/+0xE8 (dword stride). No vptr read of `this`, no RTTI, no constructor/writer of `this`, no caller/xref of 00527AA0 in the admitted window. Not established as SceneFeeder, wrapper, component or any named class.",
+      "source_row_vas": ["180897@0x00527ab4", "180899@0x00527ab7", "180902@0x00527abe", "180905@0x00527ac6", "180907@0x00527ad2", "180912@0x00527ae5", "180914@0x00527aec", "180925@0x00527b0f"],
+      "premise": "Only window evidence admitted. Missing information: (1) who calls 00527AA0 (caller census / xref listing region), or (2) a saved RTTI/vtable record for the class of this receiver, or (3) the constructor/writer of the owner fields.",
+      "evidence_status": "UNKNOWN",
+      "claim_resolution": "NOT_ESTABLISHED"
+    },
+    {
+      "id": "P01-C13",
+      "text": "Writer/producer of owner field +0xC (where the receiver pointer comes from) = UNKNOWN: no store to [this+0xC] exists in the admitted window; the receiver is only READ here. Write-time, writer instruction and whether the pointed-to object is embedded elsewhere in the owner's allocation or separately allocated are all outside evidence.",
+      "source_row_vas": ["180899@0x00527ab7"],
+      "premise": "Window contains only the load. Missing information: constructor or store body writing [owner+0xC] on this path (requires owner/caller census first).",
+      "evidence_status": "UNKNOWN",
+      "claim_resolution": "UNKNOWN"
+    },
+    {
+      "id": "P01-C14",
+      "text": "Receiver class identity = UNKNOWN. Structural profile only: receiver receives the 13-dword transform output at +0x30..+0x63 (this window); its field +0x2C is read by 0085BFA0 @0x0085BFA6 and provides the slot+0x24 transform-provider object (frozen prior R2 P04-K01/K02). The adjacency (provider pointer at +0x2C, transform copy destination at +0x30) is a mechanical layout observation, not a class identity.",
+      "source_row_vas": ["180919@0x00527afe", "180922@0x00527b08"],
+      "premise": "This window + frozen prior R2 P04 window. Missing information: receiver-identity census (who constructs the object stored at owner+0xC) and a pinned constructor/RTTI.",
+      "evidence_status": "UNKNOWN",
+      "claim_resolution": "NOT_ESTABLISHED"
+    },
+    {
+      "id": "P01-C15",
+      "text": "FIELD_2C_WRITER = UNKNOWN. The [receiver+0x2C] read happens inside 0085BFA0 @0x0085BFA6 (frozen prior R2 P04-K01), NOT in this caller window; neither this window nor the prior frontier window contains the WRITE of receiver+0x2C. Writer, write-time and lifetime of that field are not in any admitted evidence.",
+      "source_row_vas": ["180918@0x00527af9"],
+      "premise": "Prior frozen R2 P04_EXTRACT row 1170927 @0x0085bfa6 (MOV ECX,[ECX+0x2c]) is the only pinned access. Missing information: constructor/store into receiver+0x2C for the receiver class - requires receiver-identity census first.",
+      "evidence_status": "UNKNOWN",
+      "claim_resolution": "UNKNOWN"
+    },
+    {
+      "id": "P01-C16",
+      "text": "STORED_OBJECT_CLASS (the object stored at [receiver+0x2C], whose vtable slot+0x24 supplies the 12-float data) = UNKNOWN. Prior frozen R2 P04-K08: class NOT_ESTABLISHED, STRUCTURAL_ONLY NiTransform-layout match, slots +0x24/+0x28 interface observed structurally; no RTTI, no vtable identification. This package adds no identity evidence.",
+      "source_row_vas": ["180918@0x00527af9"],
+      "premise": "Frozen prior R2 P04 claims (K02/K03/K08). No new body opened here.",
+      "evidence_status": "UNKNOWN",
+      "claim_resolution": "NOT_ESTABLISHED"
+    },
+    {
+      "id": "P01-C17",
+      "text": "FIELD_PRESERVATION_AT_CALL = UNKNOWN for object fields across the two CALLs (callee bodies not opened here; no evidence whether 0085BFA0/00861150 write owner or receiver fields). Partial in-window facts: the CALLER's own frame is path-exact (per-path push/pop pairing, P01-C11); the caller assumes non-volatile EBX across calls (P01-C02). The contract's construction-to-read preservation for receiver+0x2C is not assessable: no construction event is in evidence.",
+      "source_row_vas": ["180918@0x00527af9", "180926@0x00527b12"],
+      "premise": "Absence of callee bodies; preservation can only be claimed from opened bodies or writer->storage->read chains.",
+      "evidence_status": "UNKNOWN",
+      "claim_resolution": "PARTIAL (caller-frame preservation CONFIRMED; cross-call field preservation NOT_ESTABLISHED)"
+    },
+    {
+      "id": "P01-C18",
+      "text": "SLOT24_TARGET: the slot+0x24 dispatch is NOT in this caller window (it is inside 0085BFA0). Frozen prior R2 P04-K02 (CONFIRMED there): vtable slot+0x24 on the object at [receiver+0x2C] returns a pointer to 12 floats (transform data), consumed by 0085BFA0 to build the 0x34-byte output. The identity of the slot+0x24 target function and its class remain UNKNOWN. Carried as standing prior context; no new in-window proof attempted (no new admission).",
+      "source_row_vas": ["180918@0x00527af9"],
+      "premise": "Frozen prior R2 P04_EXTRACT rows 1170928-1170934 (@0x0085bfa9 MOV EAX,[ECX]; @0x0085bfab MOV EAX,[EAX+0x24]; @0x0085bfb5 CALL EAX).",
+      "evidence_status": "UNKNOWN",
+      "claim_resolution": "PARTIAL (mechanism standing from prior frozen window; identity NOT_ESTABLISHED; not re-proven in this window)"
+    },
+    {
+      "id": "P01-C19",
+      "text": "SLOT28_TARGET: NOT exercised on this path - no slot+0x28 dispatch exists anywhere in the 00527AA0 window. Frozen prior R2 P04-K04: slot+0x28 is used by 0085C0C0 (position getter, 3 floats) on a DIFFERENT receiver path. For THIS caller path the slot+0x28 target is not involved; its identity is UNKNOWN regardless.",
+      "source_row_vas": ["180895@0x00527ab0", "180931@0x00527b1d"],
+      "premise": "Full 37-row census: only 2 CALL sites (0085BFA0, 00861150); no indirect/virtual dispatch in this window at all.",
+      "evidence_status": "UNKNOWN",
+      "claim_resolution": "NOT_ON_THIS_PATH (prior standing for 0085C0C0 only)"
+    },
+    {
+      "id": "P01-C20",
+      "text": "COUNTERMODEL (rejected): 'the owner is SceneFeeder / a SceneFeeder-like named class because transform data flows through its fields'. REJECTED: no evidence in this window links this owner to SceneFeeder; the closed LINK30 identity (SF+0x30 = NiNode) concerns a different owner and a different field path; class names cannot be transferred by thematic similarity.",
+      "source_row_vas": ["180899@0x00527ab7", "180918@0x00527af9"],
+      "premise": "Contract section 9 countermodel discipline; catalog LINK30 scope.",
+      "evidence_status": "REJECTED",
+      "claim_resolution": "REJECTED"
+    },
+    {
+      "id": "P01-C21",
+      "text": "COUNTERMODEL (rejected): 'receiver or the stored object is NiNode/NiAVObject because the copied block matches the NiTransform layout'. REJECTED as overclaim: prior frozen R2 P04-K08 already marks the layout match STRUCTURAL_ONLY; this window adds no RTTI/vptr/vtable identity; contract section 4 item 7 forbids the class substitution.",
+      "source_row_vas": ["180922@0x00527b08"],
+      "premise": "Frozen prior R2 P04-K08; contract corrections item 7.",
+      "evidence_status": "REJECTED",
+      "claim_resolution": "REJECTED"
+    },
+    {
+      "id": "P01-C22",
+      "text": "COUNTERMODEL (rejected): 'the FPU stack leaks on one branch of the JP at 0x00527add'. REJECTED by explicit depth trace (P01-C06): both directions arrive at the join 0x00527aeb with depth 1 and the final FSTP @0x00527aec pops to 0.",
+      "source_row_vas": ["180910@0x00527add", "180914@0x00527aec"],
+      "premise": "x87 depth arithmetic per instruction.",
+      "evidence_status": "REJECTED",
+      "claim_resolution": "REJECTED"
+    },
+    {
+      "id": "P01-C23",
+      "text": "COUNTERMODEL (rejected): 'the out-buffer is only part of the 0x34 frame (other locals exist)'. REJECTED: LEA EAX,[ESP+0xC] lands exactly at the frame base E-0x34 and the copy consumes exactly 13 dwords = 0x34 bytes = the whole SUB ESP,0x34 allocation; no other local slot is addressed anywhere in the window.",
+      "source_row_vas": ["180895@0x00527ab0", "180915@0x00527af2", "180921@0x00527b03", "180922@0x00527b08"],
+      "premise": "ESP arithmetic; full-window operand census (all [ESP+x] references mapped in STACK_MAP).",
+      "evidence_status": "REJECTED",
+      "claim_resolution": "REJECTED"
+    },
+    {
+      "id": "P01-C24",
+      "text": "Cross-window offset adjacency (observation, no unification): in THIS window the transform copy destination is receiver+0x30; in the frozen prior R2 P04 window a DIFFERENT caller (0085C130, rows 1171054-1171055 @0x0085c14b-4c) passes LEA ECX,[its_receiver+0x30] as a this-pointer to a call beyond that window. Both facts are mechanical and stand independently; they involve different receiver provenances with no proven same-object join, so NO claim is made that receiver+0x30 is a uniform subobject/method-target across callers.",
+      "source_row_vas": ["180919@0x00527afe", "180922@0x00527b08"],
+      "premise": "Frozen prior R2 P04_EXTRACT row 1171055 @0x0085c14c (LEA ECX,[ESI+0x30]). Same-layout/different-type countermodel discipline: offset equality is not type equality.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE (as two independent facts); unification NOT_ESTABLISHED"
+    },
+    {
+      "id": "P01-C25",
+      "text": "Early-exit behavior: if [this+0xC]==0 OR [this+0x10]==0 the function is a no-op apart from register save/restore - no fields written, no FPU executed, no calls made, ARG1 unused; returns via the common epilogue.",
+      "source_row_vas": ["180900@0x00527aba", "180901@0x00527abc", "180902@0x00527abe", "180903@0x00527ac2", "180928@0x00527b18", "180931@0x00527b1d"],
+      "premise": "Direct CFG reading: both JZ target 0x00527b18, bypassing the entire FPU/copy/call sequence.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE"
+    },
+    {
+      "id": "P01-C26",
+      "text": "REP MOVSD premises: the Ghidra 'MOVSD.REP ES:EDI,ESI' is REP MOVSD with source DS:ESI, dest ES:EDI; in the 32-bit flat memory model ES=DS=SS (segment display is annotation only). Direction Flag assumed clear (no STD anywhere in window; x86 ABI requires DF=0 across calls). Copy length ECX=0xD dwords; ESI/EDI are not reloaded between setup and the string op.",
+      "source_row_vas": ["180919@0x00527afe", "180920@0x00527b01", "180921@0x00527b03", "180922@0x00527b08"],
+      "premise": "x86 string-instruction semantics; DF-clear ABI convention stated as premise (not verifiable in-window).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "COMPLETE (with stated premises)"
+    }
+  ]
+}

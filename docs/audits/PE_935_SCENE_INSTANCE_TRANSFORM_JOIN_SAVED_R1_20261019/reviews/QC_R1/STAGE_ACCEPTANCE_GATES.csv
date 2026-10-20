@@ -1,0 +1,29 @@
+gate,predicate,result
+QG01_ITEM1_P01_RECOMPUTE,independent ESP walk of 00527AA0 (SUB 0x34/pushes/RET 0x4 both paths) + ECX=[EBX+0xC] at CALL 0085BFA0 + arg=&[ESP+0xC] + REP MOVSD 13 dwords EAX->EDI+0x30 (ADD first),PASS
+QG02_ITEM2_P02_ESP_BALANCE,independent ESP walk of 0085C130 with callee-cleanup premises (0085BFA0 RET4 evidence; CD10 RET4 x2; D7C0 RET8) balanced E->E+8 single path,PASS
+QG03_ITEM2_P02_S1_ARG2,S1=[E+8] verified via [ESP+0x8C]@0085C16D (ESP=E-0x84) and [ESP+0x88]@0085C21A (ESP=E-0x80),PASS
+QG04_ITEM2_P02_L1_SLOT_MAPPING,0085C140 FLD [ESP+0x70] at ESP=E-0x80 (pre-push) reads OUT+0x24 (E-0x10) not OUT+0x20 (E-0x14),FAIL (QC-F1; package claim wrong; corrected formula recorded in RECHECKS)
+QG05_ITEM2_P02_L2_FORMULA,leftover v-trio consumed by L2 block verified (FADDP ST3/FADD x2); L2=v+S1*(u-v) with u/v opaque CD10 out-trios; CONDITIONAL_ON_OPAQUE_CALLEE labeled,PASS
+QG06_ITEM2_P02_PUSH_SHIFT,0085C250-0085C268 two pushes interleave FPU ops; all operands re-based per-instruction; matches package table,PASS
+QG07_ITEM2_P02_D7C0_ARGS_RETURN,ECX=arg1=[E+4] (ESI reload @0085C243); [ESP]=&L2 [ESP+4]=&L1; EAX=ESI=arg1 @0085C271; RET 0x8 consistent,PASS
+QG08_ITEM2_P02_FPU_DEPTH_0,independent full x87 trace: peak 6 @0085C221; depth 0 at RET 0085C277; no imbalance found; conditional on opaque-callee FPU neutrality (premise unlabeled in package -> QC-F6),PASS
+QG09_ITEM3_P03_RECEIVERS,ECX=[ESI+0xC] at 00528870/00528A18/00528AC2 verified row-anchored,PASS
+QG10_ITEM3_P03_S1_ORIGINS,call#1 S1=[ESP+0x88]@00528A05 at ESP=E-0x80 = [E+8]; call#2 S1_2=[ESI+0xE0]/[ESI+0xE8] (min-clamp verified),PASS
+QG11_ITEM3_P03_GUARD_EXIT,guard exits (3x JZ) land at 00528BB4 with ESP=E-0x7C; POP ESI only; PUSH EDI@00528842 not on that path; both paths balanced,PASS
+QG12_ITEM3_P03_CALL_CENSUS,29/29 CALL rows independently classified: 7 on [ESI+0xC] + 12 on ESI + 4 on [ESI+0x10] + 6 helpers; C10 correct; C13 conflation -> QC-F2,PASS_WITH_DEFECT
+QG13_ITEM4_CTOR_VTABLES,00528E50 stores 0xA7DCB0 (P04 line 31 + P06 hex); 0085B1B0 stores 0xA91E4C (P09 hex C7 06 4C 1E A9 00); names not asserted (labels only),PASS
+QG14_ITEM4_FIELD_INIT_OVERLAP,ctor init set exactly covers all P01/P03-written fields (superset verified field-by-field; exact list in RECHECKS ITEM4),PASS
+QG15_ITEM4_BASECTOR_FIELDS,[this+8]=arg2 (type param); [+0xC]=0; [+0x10]=0 (P09 hex + P05 decomp agree); 007345C0(ECX=this+0x14) zeroes +0x18 = owner +0x2C,PASS
+QG16_ITEM4_B750_PREDICATE,0085B750 returns 1 iff [this+8] in {2..7} (P08 rows 69-85 = P09 hex),PASS
+QG17_ITEM4_BIT0_ON_C0_OBJECT,+0x2C bit0 or/and 1/~1 on [this+0xC0] object (ECX loaded pre-branch); NOT the receiver,PASS
+QG18_ITEM4_ARG_INDEX,00401360 receives the ctor 4th stack arg [E+0x10] (not 'arg2'),FAIL (QC-F8; minor)
+QG19_ITEM5_BUDGET_SUMS,reserved sums bodies=34 instructions=413 calls=35 candidates=34 document_lines=712; all match expected; all under limits,PASS
+QG20_ITEM5_NO_INCIDENTS,no INCIDENT events exist; charged=reserved; no debits,PASS
+QG21_ITEM5_ADMIT_VS_REQUEST,11/11 ADMIT payload.request == CONTROL/REQUESTS file; ADMIT counts == extract reality (rows and CALL counts re-grepped),PASS
+QG22_ITEM5_EVENT_CHAIN,12/12 previous_sha256 links recomputed and intact; chain ends E0CB445E4137986865638FD557744A355B7A748AD4D9DC7D82D618A20731F632,PASS
+QG23_ITEM5_SOURCE_PINS,11/11 catalog source files re-hashed: SHA256+size match ADMIT source_pin (H5 50780146 B = 642CC29A...),PASS
+QG24_ITEM6_NEGATIVE_SCOPE,no write to receiver+0x2C data-address in any admitted extract (scan verified); no [owner+0xC] attach writer; bounded denominators stated in packages (37-row/277-row/142-line/68-96-159-85-128-16-18-line),PASS
+QG25_ITEM7_PREMISE_INVENTORY,16 premise groups correctly labeled as premises/evidence (incl. RET4/RET8 cleanups 0096CD10 write-behavior float-return ST0 decompiler-label provenance DF-clear decode provenance); 5 unlabeled gaps (QC-F5/F6/F7/F9),PASS_WITH_GAPS
+QG26_NO_PACKAGE_MODIFICATION,QC wrote only QC_R1/*; target root files byte-identical before/after (hash baseline recorded),PASS
+QG27_NO_MANIFEST_CREATED,assignment forbids QC MANIFEST; none created,PASS
+QG28_QC_VERDICT,PASS_WITH_FINDINGS (2xP1 QC-F1/QC-F2; 7xP2; corrections listed with revalidation predicates in REPORT.md),SET

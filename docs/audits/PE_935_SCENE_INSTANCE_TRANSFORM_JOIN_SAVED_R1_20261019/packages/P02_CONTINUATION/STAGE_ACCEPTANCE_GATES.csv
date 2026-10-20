@@ -1,0 +1,11 @@
+gate,predicate,result
+G01_ESP_BALANCE,"SUB 0x7C+PUSH ESI == POP ESI+ADD 0x7C with 4 callee-cleaned inner pushes and RET 0x8 (2 args)",PASS
+G02_FPU_DEPTH_0_AT_RET,"full x87 trace: load/store pairs close all st slots incl. leftover v-trio consumed by L2 block",PASS
+G03_ARG_ENUMERATION,"entry args after RET 0x8 exactly {arg1=[E+4] dword, arg2=[E+8] float S1}; both consumed and verified",PASS
+G04_PUSH_SHIFT_TABLE,"all memory operands in [0085C250,0085C268] re-based against ESP at each instruction; no unexplained operand",PASS
+G05_CALLEE_CLEANUP_PREMISE,"no ADD ESP after any of 3 opaque CALLs; balance requires CD10 cleans 4 and D7C0 cleans 8; labelled PREMISE (bodies unopened)",PASS_AS_PREMISE
+G06_L1_FORMULA,"L1 = [ESI+0x54/58/5C] + S1*(bufslot(+0x20/+0x28/+0x2C) - field) with exact row evidence",PASS
+G07_L2_FORMULA,"L2 = v + S1*(u-v) with u,v opaque CD10 out-trios; content conditional on opaque writes",PASS_CONDITIONAL
+G08_RECEIVER_THREAD,"ECX unchanged from entry through CALL 0085BFA0 = same receiver as 0085C130 itself",PASS
+G09_NO_NEW_ADMISSIONS,"package consumed only P02_EXTRACT + frozen reads; zero new admissions",PASS
+G10_NO_INVENTED_SEMANTICS,"all names are working labels; no rotation/matrix/world-position naming asserted",PASS
