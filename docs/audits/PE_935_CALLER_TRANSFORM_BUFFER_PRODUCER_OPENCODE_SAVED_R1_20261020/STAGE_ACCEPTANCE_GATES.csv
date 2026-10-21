@@ -1,0 +1,11 @@
+gate_id,stage,measured_quantity,independent_source,predicate,result
+G1,model gate,MODEL_GATE.json verified by saved_guard start --proof (event 000001_START),OpenCode DB session rows + scoped merged registry + smoke/probe sessions,guard start --proof exits ok AND event chain begins START,EXECUTABLE_PASS
+G2,admission discipline,20+1 events (1 START 10 ADMIT 7 NAV 2 DENY 1 STOP) hash-chain intact,saved_guard event_list verification on every command,all reads gated by writable() and chain valid; DENYs recorded not suppressed,EXECUTABLE_PASS
+G3,budget,charged 21 bodies/313 rows/13 CALL/10 candidates union 311 rows/13 CALL,saved_guard status (derived from ADMIT events only),all <= caps 64/10000/400/64,EXECUTABLE_PASS
+G4,ETAP A frame,entry 85A1B0; F; S=F; source [F+0x60 F+0x94),worker W001 independent re-derivation + coordinator full-set push balance + literal callee cleanups,S=F and range with 13 explicit writers,EXECUTABLE_PASS
+G5,ETAP B census,13/13 slots with explicit writers; no other literal in-buffer write in continuous A1B0..A432,worker W002 (i9-i12) + J007 NO_ROWS probe + census denominator,all 13 mapped; bound-negative scoped to admitted denominator,EXECUTABLE_PASS
+G6,loop adjudication,LOOP_WRITES_SOURCE,callee 857830 both-exits literal body + ESI provenance (IAT thunk),NOT_ESTABLISHED (non-pass class; skippable path exists),RESOLVED_NOT_ESTABLISHED
+G7,ETAP C frontier,upstream = const angle + EBX fields; 85A1B0 zero direct callers,complete literal CALL census (metadata-only NAV),frontier documented FIRST_MISSING_EDGE; 4-level cap respected,EXECUTABLE_PASS
+G8,internal QC,QC001R QC_PARTIAL (L2/P1 CONFIRMED C1 STRONGLY_SUPPORTED L1-ESI-leg UNREVIEWED-in-packet),fresh pe-master-auditor session + coverage map,claims QC-adjudicated with explicit coverage map; empty first attempt saved,EXECUTABLE_PARTIAL
+G9,artifacts,required artifact set complete pre-seal,artifact_index.csv,all section-9 files present and validate_tree clean at seal,EXECUTABLE_PASS_PENDING_SEAL
+G10,publication,sanitized additive publication per section 11,PUBLICATION_TOOL.md pub_manifest create+verify,verify PASS before push else PUBLICATION_NOT_READY,PENDING

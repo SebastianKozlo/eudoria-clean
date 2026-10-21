@@ -1,0 +1,74 @@
+{
+  "symbols": [
+    {
+      "name": "S",
+      "def": "ESP immediately before PUSH EDI @85A421",
+      "observed": "= F (post-prolog ESP) on both paths; push-balance verified",
+      "premises": [
+        "7C3BB0 RET 0x4 (J005)",
+        "95D3C4/95D3BE cdecl cleaned by ADD ESP,4 (J003)",
+        "857830 RET 0x14 (J006/J008)"
+      ]
+    },
+    {
+      "name": "F",
+      "def": "ESP after prolog cookie PUSH @85A1D4",
+      "observed": "J002 prolog rows; absolute value runtime-dependent (AND ESP,-8)",
+      "premises": []
+    },
+    {
+      "name": "TRANSFORM_SOURCE",
+      "def": "[F+0x60..F+0x94) = [S+0x60,S+0x94), 13 dwords",
+      "observed": "13 explicit writers mapped",
+      "premises": [
+        "working name only - position in the known copy path, NOT a world-transform type claim"
+      ]
+    },
+    {
+      "name": "this",
+      "def": "ECX at entry of 85A1B0",
+      "observed": "spilled [F+0x14] @85A1E2; reloaded EBX @85A41D; passed ECX to 857F90",
+      "premises": []
+    },
+    {
+      "name": "EBX_object",
+      "def": "M32[[EBP+0xC]] - stack arg2 of 85A1B0",
+      "observed": "fields read at +0,+4,+0xC,+0x10",
+      "premises": [
+        "class UNKNOWN; function has no literal direct caller in H5"
+      ]
+    },
+    {
+      "name": "callee_of_A429",
+      "def": "0x00857F90 (prior label F858 REBOUND)",
+      "observed": "literal CALL @85A429; only direct call site of 857F90",
+      "premises": [
+        "85F858 has 0 literal direct callers in pinned H5"
+      ]
+    },
+    {
+      "name": "X",
+      "def": "prior-run receiver pointer (downstream, C3B0 copy target [X+30,X+64))",
+      "observed": "NOT re-verified this run",
+      "premises": [
+        "X_store=X_entry CONDITIONAL per prior postaudit"
+      ]
+    },
+    {
+      "name": "A",
+      "def": "prior-run CALL result @857FE3 (arg 80)",
+      "observed": "NOT re-verified this run",
+      "premises": [
+        "A==X / A!=X UNKNOWN"
+      ]
+    },
+    {
+      "name": "R",
+      "def": "prior-run M32[B+C]",
+      "observed": "NOT re-verified this run",
+      "premises": [
+        "class not established; X<->R UNKNOWN"
+      ]
+    }
+  ]
+}

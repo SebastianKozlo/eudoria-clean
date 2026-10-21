@@ -1,0 +1,11 @@
+# SELF REVIEW 2 - model roles / coverage / budget / schema / publication
+
+1. Model status algebra kept separate: CONFIGURED=medium (scoped registry); EFFECTIVE_CLIENT=medium (verified merged registry glm-5-3 + glm-5-3-default); REQUEST=NOT_OBSERVED; SERVER=UNKNOWN. No conflation in any artifact. VERIFIED.
+2. runtime_version=1.18.18 taken from DB session.version of ALL sessions (coordinator/smoke/probe/workers/QC) and CLI --version; correction 6 applied; no desktop label reused. VERIFIED.
+3. Budget reconciliation from guard status (not hand-counted): charged bodies 21, rows 313, CALL 13, candidates 10; union rows 311 (shared rows 1168622, 1165475), union CALL 13; caps respected; no refund; DENY events 000011/000016 recorded as failed admission attempts (not incidents; incident_count=0). REPORT numbers embedded from guard output. VERIFIED.
+4. Role ledger: 3 DELIVERED entries (W001, W002, QC001R) + 1 EMPTY_LENGTH_SAVED (QC001 attempt 1). Prompt parity handled via v2 files (byte-exact DB user text; errata preserved v1). All children depth 1, parent=coordinator, read-only; single writer (coordinator) throughout; no nested agents. VERIFIED.
+5. Coverage honesty: QC received J004/J006/J008 only (retry); its L1 ESI-origin leg marked UNREVIEWED in-packet; PACKET_COVERAGE.csv maps that leg to W002-delivered J003. No claim of independent QC over undelivered ranges. Claims not QC-adjudicated directly are grounded in worker packets or full-set coordinator admissions and labeled accordingly. VERIFIED.
+6. Schema discipline: no float-role or world-space semantics asserted; H_ROT_X/H_AABB PLAUSIBLE; H_NITRANSFORM NOT_ESTABLISHED; H_PADDING rejected-with-premises; WORLD/HISTORICAL/CURSOR statuses unchanged (NO/NOT_ESTABLISHED/UNKNOWN); CANONICAL_GATE_EFFECT=NONE. VERIFIED.
+7. Publication axis kept separate from science: G10 pending; additive predecessor revalidation + new result planned per section 11 with mandatory pub_manifest create+verify; historical REPORTs untouched; no excluded payload in any planned allowlist. Will not claim publication compliance before verify PASS.
+8. Corrections 1-6 from START_PROMPT verified as applied; two new run-local corrections (NC1 label rebind F858->857F90; NC2 F38) recorded with evidence.
+Conclusion: no unresolved process defect; QC_PARTIAL and coverage gaps are explicit, not hidden.

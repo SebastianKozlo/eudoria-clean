@@ -1,0 +1,58 @@
+[
+  {
+    "item": "caller frame normalization + 13-slot map",
+    "status": "DONE",
+    "evidence": "CALLER_FRAME_MAP.json, SOURCE_SLOT_MAP.csv, extracts J001-J011"
+  },
+  {
+    "item": "13-word backward slice + writer census",
+    "status": "DONE",
+    "evidence": "SOURCE_WRITER_CENSUS.json, SOURCE_DEF_USE.json"
+  },
+  {
+    "item": "ESI loop adjudication",
+    "status": "DONE",
+    "evidence": "LOOP_ALIAS_ADJUDICATION.json (NOT_ESTABLISHED writer; skippable path)"
+  },
+  {
+    "item": "857830 callee adjudication",
+    "status": "DONE",
+    "evidence": "J006+J008 both exits; direct writes outside buffer; result2 opaque"
+  },
+  {
+    "item": "7C3BB0 producer + helper classification",
+    "status": "DONE",
+    "evidence": "J005 full body; J009 thunks; H1/H2 identity UNVERIFIED"
+  },
+  {
+    "item": "allocator classification (95D3BE/95D3C4)",
+    "status": "DONE",
+    "evidence": "J010 IAT thunk chain"
+  },
+  {
+    "item": "arg2 (EBX) object identity via caller of 85A1B0",
+    "status": "BLOCKED",
+    "barrier": "zero literal direct callers in pinned H5; needs vtable/dispatch evidence or new corpus"
+  },
+  {
+    "item": "H1/H2 import semantics (cos/sin?)",
+    "status": "BLOCKED",
+    "barrier": "IAT targets outside saved listing; needs import table or runtime"
+  },
+  {
+    "item": "853BD0 body / result2 destination",
+    "status": "ADMISSIBLE",
+    "value": "low-medium: 3-dword write to opaque destination; cannot enter buffer without an alias through imports",
+    "next": "admit window 0x853BD0..first RET if ever load-bearing"
+  },
+  {
+    "item": "4154F0 / 413440 heads",
+    "status": "REJECTED_ROUTE",
+    "reason": "heads absent from H5 listing; no rows to admit at those ranges"
+  },
+  {
+    "item": "C3B0 preservation narrowing",
+    "status": "ADMISSIBLE_OPTIONAL_NOT_EXECUTED",
+    "value": "prior CONDITIONAL; downstream of the copy, independent of this run P0"
+  }
+]

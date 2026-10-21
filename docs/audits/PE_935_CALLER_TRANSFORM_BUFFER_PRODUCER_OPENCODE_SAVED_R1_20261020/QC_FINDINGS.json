@@ -1,0 +1,70 @@
+{
+  "qc_sessions": {
+    "attempt1": {
+      "session_id": "ses_ea296cb40ffeSWqxF5Ks8oZL4S",
+      "outcome": "EMPTY (finish=length, 0-byte assistant text; recorded WORKERS/QC001_EMPTY_ATTEMPT.md)"
+    },
+    "retry": {
+      "session_id": "ses_ea291867affe7JG5IPye0hPYpO",
+      "outcome": "DELIVERED, overall_qc_verdict=QC_PARTIAL"
+    }
+  },
+  "retry_verdicts": {
+    "claims": {
+      "L1": {
+        "verdict": "UNREVIEWED",
+        "reason": "In-loop rows confirm ESI-only writes with no ESP/EBP reassignment, but ESI origin at 85A315 is not in any provided packet; NOT_ESTABLISHED stands but is unverified."
+      },
+      "L2": {
+        "verdict": "CONFIRMED",
+        "reason": "Recounted pushes: ESP=F-0x14 at CALL, [ESP+0x28]=F+0x14=this; arg5=F+0x5C, arg4=F+0x94, arg3=F+0x50, arg2 slot overwritten by FSTP const [0xA7B1BC], arg1=F+0x3C (85A3a3, ESP=F-0x10). All match."
+      },
+      "C1": {
+        "verdict": "STRONGLY_SUPPORTED",
+        "reason": "Enumerated direct writes verified: ESI=arg1=F+0x3C read-only; EAX=arg3 writes F+0x50/54/58; FSTP [EDX] hits F+0x94 one-past-end. But result2 (853BD0) body absent, alias into buffer not excluded."
+      },
+      "P1": {
+        "verdict": "CONFIRMED",
+        "reason": "Exception tail only adjusts FPU stack, AL, ESI, ESP; no caller-frame memory writes. Prior callee writes before JP touch only callee locals."
+      }
+    },
+    "adversarial": [
+      "result2 destination opaque; ESI fixed at F+0x3C, cannot alias buffer.",
+      "No; 5 pushes balanced by RET 0x14; recomputed offsets all correct.",
+      "No; EDX=arg4 fixed F+0x94, outside [F+0x60..F+0x94) under any ESP state.",
+      "No in shown rows; result2 (CALL 853BD0) body missing, escape unreviewed."
+    ],
+    "overall_qc_verdict": "QC_PARTIAL"
+  },
+  "dispositions": [
+    {
+      "finding": "L2 (857830 arg mapping) CONFIRMED by independent re-count",
+      "disposition": "ACCEPTED"
+    },
+    {
+      "finding": "C1 (857830 no direct in-buffer writes) STRONGLY_SUPPORTED; result2 chain not excluded",
+      "disposition": "ACCEPTED - matches the claim wording exactly (result2 opaque was already the claim caveat)"
+    },
+    {
+      "finding": "P1 (exception path writes nothing) CONFIRMED",
+      "disposition": "ACCEPTED"
+    },
+    {
+      "finding": "L1 ESI-origin leg UNREVIEWED in retry packet",
+      "disposition": "COVERAGE_NOTE - row 1168690 (ESI=95D3BE result) was delivered to worker W002 which confirmed it; PACKET_COVERAGE.csv maps the claim leg to both packets"
+    },
+    {
+      "finding": "Worker W002 corrected coordinator: [F+0x38] IS written (85A2AA, ESP=F-4)",
+      "disposition": "ACCEPTED_CORRECTION - NC2 in CORRECTIONS_APPLIED.json"
+    },
+    {
+      "finding": "Worker W001 stated f1==f2 (equal to raw constant)",
+      "disposition": "REJECTED_WITH_EVIDENCE - f1/f2 pass through DIFFERENT thunked imports; only store structure accepted, values stay H1(c)/H2(c) UNKNOWN"
+    },
+    {
+      "finding": "7C3BB0 x87 stack leaves one value unpopped per literal trace",
+      "disposition": "RECORDED as limitation; net balance import-dependent, not load-bearing"
+    }
+  ],
+  "qc_origin": "INTERNAL_INDEPENDENT_REVIEW (fresh pe-master-auditor context, same model family - not model independence). External Desktop post-audit remains PENDING."
+}

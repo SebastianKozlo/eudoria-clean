@@ -1,0 +1,26 @@
+{
+  "from_prior_postaudit": [
+    "1: distinct CALL sites (arg80@857FE3, arg68@85821E) remain distinct producers; pointer-bit inequality UNKNOWN - preserved.",
+    "2: X_store=X_entry and C3B0 preservation remain CONDITIONAL - preserved, untouched by this run.",
+    "3: S=ESP before PUSH@85A421; source=[S+60,S+94), last word S+90; target=[X+30,X+64) - applied as the frame base of this run; CONFIRMED from admitted rows.",
+    "4: ESI-loop treated only as unqualified candidate - preserved; adjudicated NOT_ESTABLISHED writer, skippable path found (JBE@85A32B).",
+    "5: counters generated from guard status (charged 21/313/13/10, union 311/13) - applied; prior 42/953/949/59/20 not reused.",
+    "6: runtime_version = actual executing session version from DB = 1.18.18 (CLI), not a desktop launcher label - applied in MODEL_EFFECTIVE_OPTIONS/MODEL_GATE."
+  ],
+  "new_in_this_run": [
+    {
+      "id": "NC1",
+      "correction": "Prior label \"F858\" for the callee of 85A429 is rebound: the literal CALL target is 0x00857F90; the complete literal CALL census shows 0 direct callers of 0x0085F858 and exactly 1 direct caller of 0x00857F90 (this site).",
+      "evidence": "J001 row 1168764; CONTROL/NAV/NAV1.json, NAV2.json"
+    },
+    {
+      "id": "NC2",
+      "correction": "Coordinator initial reading \"[F+0x38] never written\" was WRONG; corrected after worker W002 and re-verification: [F+0x38] is written at 85A2AA (MOV [ESP+0x3C],EDI at ESP=F-4) with 1-ftol(second product).",
+      "evidence": "J003 rows 1168651-1168656"
+    },
+    {
+      "id": "NC3",
+      "note": "Worker W001 statement f1==f2 (both equal the raw constant) is not established: f1/f2 pass through DIFFERENT IAT-thunked helpers (95DA1C vs 95DA28); only the store structure was accepted, values remain H1(c)/H2(c) UNKNOWN."
+    }
+  ]
+}
