@@ -1,0 +1,76 @@
+{
+  "run_id": "PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021",
+  "corrections": [
+    {
+      "id": "CA-1",
+      "source": "QC004-F1",
+      "applied_to": [
+        "CLAIMS.json ORJ-08",
+        "OWNER_CANDIDATES.json"
+      ],
+      "summary": "ESP-shift correction: B source = gated slot X0+0x70 (post-push [ESP+0x78] row 4701 == pre-push [ESP+0x74] row 4694); visible 0085B840 wrapper at X0+0x74 is a distinct slot; T_d construction UNRESOLVED",
+      "verification": "parent re-derived the ESP arithmetic from rows 4692-4704 independently (confirmed QC004)"
+    },
+    {
+      "id": "CA-2",
+      "source": "QC001-F3",
+      "applied_to": [
+        "CLAIMS.json ORJ-03 adjudication note (SYMBOL_BINDINGS T_slot wording)"
+      ],
+      "summary": "T_slot = value returned by the virtual CALL EAX (EAX after row 1170934)",
+      "verification": "row-verified"
+    },
+    {
+      "id": "CA-3",
+      "source": "QC001-F4/F5, QC001-F1/F2",
+      "applied_to": [
+        "CLAIMS.json premises/coverage notes"
+      ],
+      "summary": "guard closures recorded as full-coverage notes (getter full body rows; RET 0x4 row 1171004; DF=0 explicit)",
+      "verification": "rows 1170926-1171004 full-read by parent and QC002"
+    },
+    {
+      "id": "CA-4",
+      "source": "QC003-F1",
+      "applied_to": [
+        "process"
+      ],
+      "summary": "corrective QC004 packet delivered the missing rows to a fresh reviewer instead of parent self-certification",
+      "verification": "QC004 session ses_ea1deeab2ffe9u1VLU1E61UZGQ, 64 rows inline"
+    },
+    {
+      "id": "CA-5",
+      "source": "QC003G2-F1",
+      "applied_to": [
+        "CLAIMS.json ORJ-06"
+      ],
+      "summary": "ORJ-06 amended to explicitly name the 7th census candidate 0x0085B652 as NOT_OPENED_CAP; scoped negative covers the six opened candidates",
+      "verification": "claim text re-read"
+    },
+    {
+      "id": "CA-6",
+      "source": "seal ROLE_PROMPT_PARITY failure (self-detected)",
+      "applied_to": [
+        "ROLE_LEDGER.json",
+        "QC_FINDINGS.json",
+        "MODEL_ATTESTATION.json",
+        "REPORT.md",
+        "HANDOFF.md"
+      ],
+      "summary": "dispatch parity repair: generation-2 exact-byte redelivery of all worker/QC prompts (trailing-newline transport artifact; QC003 gen1 also paraphrased); W002 gen2 retry length-failure -> explicit DIRECT_ANALYST fallback with coverage by W003R+QC002; original gen1 QC004-F1 ESP-shift material finding retained and re-confirmed",
+      "verification": "ROLE_LEDGER gen2 sessions: prompt bytes verbatim in DB user messages; answers byte-dumped from DB"
+    },
+    {
+      "id": "CA-7",
+      "source": "self-detected parity failure QC002 gen2",
+      "applied_to": [
+        "ROLE_LEDGER.json QC002 entry"
+      ],
+      "summary": "the QC002 packet question contained a one-digit typo (FLD1 cited as row 1170933; true row 1170993 per the packet rows); gen2 dispatches silently corrected it, breaking byte parity; gen3 delivered the packet verbatim (typo included) and the reviewer independently read FLD1 at 1170993; no claim text was affected (ORJ-04/ORJ-05 cite the correct row)",
+      "verification": "ROLE_PROMPT_PARITY re-check on gen3 session"
+    }
+  ],
+  "worker_answer_errata": {
+    "W004": "W004 answer Q2 contains the same ESP-shift attribution error (B from [ESP+0x78] wrapper) corrected by QC004-F1; raw answer preserved byte-exact, correction recorded here and in QC_FINDINGS.json"
+  }
+}

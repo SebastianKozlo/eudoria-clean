@@ -1,0 +1,12 @@
+claim_id,required_evidence,delivered_to,delivered_rows,coverage
+ORJ-01,caller rows 180895-180931,W001(72 incl)+QC001(72 incl)+coordinator,72,COVERED
+ORJ-02,caller frame rows + getter epilogue RET 0x4,W001+QC001(72)+QC002(64 incl row 1171004),136,COVERED
+ORJ-03,getter head rows 1170926-1170960,W001(72 incl)+QC001(72 incl),72,COVERED
+ORJ-04,getter tail + callee 0096CB20 rows,W002(44 incl)+W003R(64 incl)+QC002(64 incl),108,COVERED
+ORJ-05,getter output rows + caller copy rows,W001+QC001+QC002+W003R,208,COVERED
+ORJ-06,7 census candidate rows incl rejected stack/frame stores,J006..J011 extracts + QC003(85 partial: 0085B1CD only)+QC004(64: all five rejected candidates inline),149,COVERED_AFTER_CORRECTIVE_QC004
+ORJ-07,construction J013 + ctor J006 + registration J014 rows,J013(51)+J006(42)+J014(35) + W004(85 incl)+QC003(85 incl),85,COVERED
+ORJ-08,reader caller rows 4692-4704,J012(41)+W004(12)+QC003(12)+QC004(13 incl row 4692),25,COVERED_AFTER_CORRECTIVE_QC004
+ORJ-09,zero-init row + guard rows + absence-of-store coverage,J006+J001+J013+J014 spans + census + QC003,173,COVERED (barrier claim)
+ORJ-10,frontier rows (slot0 hook etc.),J014+prior hexdump + QC003,35,COVERED (barrier claim)
+ORJ-11,REF001-003 zero-hit scans with event pins,reference_probe verify_events re-derivation,0,COVERED (scoped negative)

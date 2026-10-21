@@ -1,0 +1,174 @@
+{
+  "run_id": "PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021",
+  "reviewers": [
+    {
+      "job_id": "QC001",
+      "session_id": "ses_ea1d36af5ffe1rrDdm4wJjZGKy",
+      "agent": "pe-master-auditor",
+      "model": "glm-5-3-default",
+      "verdict": "QC_PARTIAL: ORJ-01 PASS; ORJ-02/03/05 PASS_WITH_CORRECTIONS (formal guard/wording notes)",
+      "findings": [
+        {
+          "id": "QC001-F1",
+          "severity": "P2",
+          "finding": "[ESP+0x44] offset conditional on getter RET 0x4 premise (not in QC001 packet)",
+          "disposition": "ACCEPTED_CLOSED_BY_COVERAGE - J004 row 1171004 (RET 0x4) admitted and verified by QC002 full-balance arithmetic"
+        },
+        {
+          "id": "QC001-F2",
+          "severity": "P2",
+          "finding": "EBX preservation through getter not visible in QC001 packet",
+          "disposition": "ACCEPTED_CLOSED_BY_COVERAGE - full getter body rows 1170926-1171004 contain no EBX access (parent full-read; PUSH/POP EBX absent, no EBX write)"
+        },
+        {
+          "id": "QC001-F3",
+          "severity": "P1",
+          "finding": "T_slot wording: T_slot is the value RETURNED by CALL EAX (EAX after row 1170934), not EAX at the call",
+          "disposition": "ACCEPTED - wording corrected in claim adjudication"
+        },
+        {
+          "id": "QC001-F4",
+          "severity": "P1",
+          "finding": "T_slot vs U_getter distinctness not provable within QC001 packet (getter tail missing)",
+          "disposition": "ACCEPTED_CLOSED_BY_COVERAGE - QC002 rows prove EAX at return = OUT pointer (row 1170983); U_getter==OUT_local, and T_slot was consumed at rows 1170935-1170960; static-level distinctness established; runtime aliasing of T_slot with caller stack remains formally open but T_slots callee never received OUT address (note-level reasoning)"
+        },
+        {
+          "id": "QC001-F5",
+          "severity": "P1",
+          "finding": "DST_copy=R+0x30 conditional on EDI preservation through getter",
+          "disposition": "ACCEPTED_CLOSED_BY_COVERAGE - full getter body: PUSH EDI row 1170931, no EDI write in body, POP EDI row 1170999 (row-verified parent + QC002)"
+        },
+        {
+          "id": "QC001-F6",
+          "severity": "P2",
+          "finding": "DF=0 and ES-writability premises must be explicit",
+          "disposition": "ACCEPTED - kept as explicit premises in claims"
+        }
+      ],
+      "session_id_gen1": "ses_ea1e7f3d6ffe97u8LDk0ICB3pC",
+      "generation_note": "generation-2 exact-parity redelivery; gen1 verdicts were materially consistent (gen1 sessions retained above); QC004-F1 ESP-shift material finding originated in gen1 QC004 and its arithmetic was re-confirmed by the gen2 W004 worker and upheld in the corrected ORJ-08"
+    },
+    {
+      "job_id": "QC002",
+      "session_id": "ses_ea1b88e69ffem0vTUmy0qPjrOW",
+      "agent": "pe-master-auditor",
+      "model": "glm-5-3-default",
+      "verdict": "PASS: ORJ-04/ORJ-05 upheld with independent full ESP-chain re-derivation; status refinement: virtual-callee cleanup sub-part is STRONGLY_SUPPORTED (arithmetic necessity) while RET 0x24 of 0x0096CB20 is row-CONFIRMED; cdecl countermodel numerically rejected",
+      "findings": [
+        {
+          "id": "QC002-F1",
+          "severity": "P2",
+          "finding": "U_getter==OUT_local confirmed at STATIC pointer level only; runtime equality is a separate unanalyzed level",
+          "disposition": "ACCEPTED - claim carries static-level label; no runtime capture performed"
+        },
+        {
+          "id": "QC002-F2",
+          "severity": "P3",
+          "finding": "0x0096cf80 interior unreviewed (register-arg call, arithmetically neutral)",
+          "disposition": "ACCEPTED - recorded in SEARCH_FRONTIER FME5"
+        }
+      ],
+      "session_id_gen1": "ses_ea1e7c33afferPVZ0mAiI0ciYV",
+      "generation_note": "generation-2 exact-parity redelivery; gen1 verdicts were materially consistent (gen1 sessions retained above); QC004-F1 ESP-shift material finding originated in gen1 QC004 and its arithmetic was re-confirmed by the gen2 W004 worker and upheld in the corrected ORJ-08; gen3 delivered packet verbatim (CA-7 typo discipline)"
+    },
+    {
+      "job_id": "QC003",
+      "session_id": "ses_ea1cd82f7ffeyCeuTXoMayUmev",
+      "agent": "pe-master-auditor",
+      "model": "glm-5-3-default",
+      "verdict": "PASS_WITH_CORRECTIONS: ORJ-06 STRONGLY_SUPPORTED within packet bounds (candidate rejections were parent input, not inline); ORJ-07 CONFIRMED (shown rows); ORJ-08 STRONGLY_SUPPORTED with correction; ORJ-09/10 PASS",
+      "findings": [
+        {
+          "id": "QC003-F1",
+          "severity": "P1",
+          "finding": "packet-scope gap: rejected census candidate rows and wrapper-this row 4692 not delivered inline",
+          "disposition": "ACCEPTED - corrective packet QC004 dispatched with the missing rows (fresh reviewer, not parent correction)"
+        },
+        {
+          "id": "QC003-F2",
+          "severity": "P2",
+          "finding": "0x004123D0 deref semantics accepted as pinned-prior premise, not re-audited",
+          "disposition": "ACCEPTED - pinned prior decomp F004123D0.c is a hash-pinned input; body not re-admitted this run"
+        }
+      ],
+      "session_id_gen1": "ses_ea1e4dbfdffeq1TjcHqxkiP0EF",
+      "generation_note": "generation-2 exact-parity redelivery; gen1 verdicts were materially consistent (gen1 sessions retained above); QC004-F1 ESP-shift material finding originated in gen1 QC004 and its arithmetic was re-confirmed by the gen2 W004 worker and upheld in the corrected ORJ-08"
+    },
+    {
+      "job_id": "QC004",
+      "session_id": "ses_ea1c5d14effeR5qLgTyDmBDX11",
+      "agent": "pe-master-auditor",
+      "model": "glm-5-3-default",
+      "verdict": "QC_PASS: all five ORJ-06 candidate rejections upheld as stack/frame stores; ORJ-08 wrapper-this observed at rows 4692-4693",
+      "findings": [
+        {
+          "id": "QC004-F1",
+          "severity": "P1 MATERIAL",
+          "finding": "ESP-shift: after PUSH EDX (row 4700) the second 0x004123D0 at row 4702 receives [post-push ESP+0x78] == [pre-push ESP+0x74] == X0+0x70, the SAME slot as the gate at rows 4696-4698; the visible 0x0085B840 wrapper (rows 4692-4693) is at X0+0x74, a DISTINCT slot. The original ORJ-08 attribution of the B source to the visible wrapper was an ESP-shift error.",
+          "disposition": "ACCEPTED_AND_APPLIED - ORJ-08 corrected in CLAIMS.json (B source = gated slot X0+0x70; wrapper construction UNRESOLVED); W004 answer retains its original bytes with errata recorded"
+        },
+        {
+          "id": "QC004-F2",
+          "severity": "P3",
+          "finding": "(e) ESI=receiver premise not observable within QC004 span (row 1170088 not included)",
+          "disposition": "ACCEPTED_CLOSED_BY_COVERAGE - J011 full extract row 1170088 (0085b5eb MOV ESI,ECX) admits ESI=entryECX; parent full-read"
+        },
+        {
+          "id": "QC004-F3",
+          "severity": "P2",
+          "finding": "wrapper temp vs reader object levels must not be equated",
+          "disposition": "ACCEPTED - levels kept separate in corrected ORJ-08"
+        }
+      ],
+      "session_id_gen1": "ses_ea1deeab2ffe9u1VLU1E61UZGQ",
+      "generation_note": "generation-2 exact-parity redelivery; gen1 verdicts were materially consistent (gen1 sessions retained above); QC004-F1 ESP-shift material finding originated in gen1 QC004 and its arithmetic was re-confirmed by the gen2 W004 worker and upheld in the corrected ORJ-08"
+    }
+  ],
+  "dispatch_parity_repair": {
+    "summary": "all first-generation child dispatches lost exactly one trailing newline in prompt transport (and QC003 gen1 additionally contained a paraphrase); ROLE_PROMPT_PARITY failed at first seal; all jobs were re-dispatched with byte-exact prompt files (generation 2), which delivered; W002 gen2 retry hit finish=length and fell back per contract to DIRECT_ANALYST with coverage by W003R + QC002",
+    "sessions_gen2": {
+      "QC001": "ses_ea1d36af5ffe1rrDdm4wJjZGKy",
+      "QC002": "ses_ea1ce1beafferwSh1swesI3CNU",
+      "QC003": "ses_ea1cd82f7ffeyCeuTXoMayUmev",
+      "QC004": "ses_ea1c5d14effeR5qLgTyDmBDX11"
+    },
+    "w002_fallback": "W002 = RETRY_LENGTH_FAILURE_DIRECT_FALLBACK (non-DELIVERED); gen1 answer retained as parity-unverified auxiliary material"
+  },
+  "additional_findings": [
+    {
+      "id": "QC003G2-F1",
+      "severity": "P2",
+      "source": "QC003 generation-2",
+      "finding": "ORJ-06 claim text enumerated 7 census candidates but only 6 were accounted for in the claim body (7th not named in text)",
+      "disposition": "ACCEPTED_AND_APPLIED - CA-5: ORJ-06 amended to explicitly name 0x0085B652 as NOT_OPENED_CAP"
+    },
+    {
+      "id": "QC001G2-F1",
+      "severity": "P3",
+      "source": "QC001 generation-2",
+      "finding": "ORJ-02/ORJ-05 arithmetic depends on getter RET 0x4 premise (outside QC001 packet); gaps A/B/C noted (13th dword, DF=0, EAX-return semantics)",
+      "disposition": "ACCEPTED_CLOSED_BY_COVERAGE - all three gaps are row-covered by the admitted J003/J004 spans and verified by QC002 generation-2 (full balance re-derivation)"
+    },
+    {
+      "id": "QC004G2-F1",
+      "severity": "P3",
+      "source": "QC004 generation-2",
+      "finding": "Part 1e receiver ESI=entryECX asserted as packet premise, not inline",
+      "disposition": "ACCEPTED_CLOSED_BY_COVERAGE - J011 full extract row 1170088 (0085b5eb MOV ESI,ECX) admitted; parent full-read"
+    },
+    {
+      "id": "QC002G3-F1",
+      "severity": "P3",
+      "source": "QC002 generation-3",
+      "finding": "status refinement: virtual CALL EAX cleanup sub-claim of ORJ-04 rests on epilogue-balance arithmetic necessity (not a row of that callee) and is STRONGLY_SUPPORTED; the 0x0096CB20 RET 0x24 part is row-CONFIRMED",
+      "disposition": "ACCEPTED - consistent with the claim premises as written; U_getter==OUT_local stays CONFIRMED at the static pointer level"
+    },
+    {
+      "id": "QC002G3-F2",
+      "severity": "P2",
+      "source": "packet construction (self-detected)",
+      "finding": "QC002 packet question contained a one-digit typo (FLD1 cited as row 1170933; correct row 1170993); dispatched verbatim in gen3; reviewer independently used the correct row",
+      "disposition": "ACCEPTED_AND_APPLIED - CA-7; packet rows unaffected"
+    }
+  ]
+}

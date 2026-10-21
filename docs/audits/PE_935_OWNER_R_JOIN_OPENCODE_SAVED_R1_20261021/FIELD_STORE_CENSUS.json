@@ -1,0 +1,63 @@
+{
+  "mode": "field_store_candidates",
+  "displacement": "0x0C",
+  "pattern": "literal MOV dword ptr [GPR+0xC],value",
+  "ranges": [
+    "0x00527000..0x00529000",
+    "0x0085B100..0x0085B800"
+  ],
+  "nav_result": "CONTROL/NAV/NAV002_result.json",
+  "nav_event": "CONTROL/EVENTS/000007_NAV.json",
+  "denominator_note": "literal textual DWORD MOV stores with base+0xC displacement in the two preregistered ranges of the pinned H5 listing only; excludes MOVS/STOS/FST/indirect stores, whole-structure copies, other modules, runtime writes",
+  "candidates": [
+    {
+      "va": "00527200",
+      "row": 180213,
+      "qualification": "REJECTED_STACK_FRAME",
+      "reason": "MOV [EBP+0xC],EDI - incoming-argument frame slot in EBP-framed loop function",
+      "extract": "J008"
+    },
+    {
+      "va": "005272B5",
+      "row": 180277,
+      "qualification": "REJECTED_STACK_FRAME",
+      "reason": "MOV [EBP+0xC],EDI - same pattern",
+      "extract": "J009"
+    },
+    {
+      "va": "0085B14A",
+      "row": 1169736,
+      "qualification": "REJECTED_STACK_ZERO",
+      "reason": "MOV [ESP+0xC],ESI with ESI=0 (XOR ESI,ESI) in SEH logging-style function 0085B330-family shape; stack staging, not object field",
+      "extract": "J007"
+    },
+    {
+      "va": "0085B1CD",
+      "row": 1169775,
+      "qualification": "CTOR_ZERO_INIT",
+      "reason": "MOV [ESI+0xC],EBX with EBX=0 inside base constructor 0085B1B0, ESI=entry ECX; writes vtable 0x00A91E4C +0, 0 +4, arg +8, 0 +0xC, 0 +0x10; construction-time zero-init of the object field read later as B+0xC",
+      "extract": "J006"
+    },
+    {
+      "va": "0085B35A",
+      "row": 1169889,
+      "qualification": "REJECTED_STACK_ZERO",
+      "reason": "MOV [ESP+0xC],ESI with ESI=0; same logging shape as 0085B120",
+      "extract": "J010"
+    },
+    {
+      "va": "0085B5FE",
+      "row": 1170094,
+      "qualification": "REJECTED_STACK_STAGING",
+      "reason": "MOV [ESP+0xC],EAX local staging in method 0085B5E0 (writes receiver fields +0x5C/+0x60/+0x64 from 3-dword arg after 0x0096B760)",
+      "extract": "J011"
+    },
+    {
+      "va": "0085B652",
+      "row": 1170117,
+      "qualification": "NOT_OPENED_CAP",
+      "reason": "7th candidate; cap of 6 candidate windows opened (CONTRACT section 5); unqualified, left for the next run"
+    }
+  ],
+  "conclusion": "No nonzero owner-field writer of +0xC exists among the literal candidates in the two preregistered ranges; the only object-field write is the construction-time zero-init at 0x0085B1CD. Scoped negative: not a global absence claim."
+}

@@ -1,0 +1,93 @@
+{
+  "run_id": "PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021",
+  "symbols": {
+    "B": {
+      "definition": "entry ECX of 0x00527AB0, preserved to EBX at row 180897 (00527AB4 MOV EBX,ECX)",
+      "status": "CONFIRMED",
+      "source_rows": [
+        180896,
+        180897,
+        180929
+      ]
+    },
+    "R_load": {
+      "definition": "M32[B+0xC] into EDI at 00527AB7 (row 180899)",
+      "status": "CONFIRMED",
+      "source_rows": [
+        180899
+      ]
+    },
+    "R_call": {
+      "definition": "ECX passed to 0x0085BFA0 at 00527AF9 (row 180918); ==R_load within span (no EDI/ECX write between rows 180899..180917)",
+      "status": "CONFIRMED",
+      "source_rows": [
+        180917,
+        180918
+      ]
+    },
+    "P_provider": {
+      "definition": "M32[R_call+0x2C] at 0085BFA6 (row 1170927)",
+      "status": "CONFIRMED",
+      "source_rows": [
+        1170927
+      ]
+    },
+    "VT_provider": {
+      "definition": "M32[P_provider] at 0085BFA9 (row 1170928)",
+      "status": "CONFIRMED",
+      "source_rows": [
+        1170928
+      ]
+    },
+    "F_slot24": {
+      "definition": "M32[VT_provider+0x24] at 0085BFAB (row 1170929)",
+      "status": "CONFIRMED",
+      "source_rows": [
+        1170929
+      ]
+    },
+    "T_slot": {
+      "definition": "retval EAX of virtual CALL EAX at 0085BFB5 (row 1170934); 12 float reads [EAX..EAX+0x2C] from T_slot (rows 1170935-1170960)",
+      "status": "CONFIRMED",
+      "source_rows": [
+        1170934
+      ]
+    },
+    "U_getter": {
+      "definition": "retval EAX of whole 0x0085BFA0; equals the caller-pushed OUT_local pointer (loaded at 0085C06A row 1170983 from [ESP+0xac]=[ESPe+4]; EAX not overwritten after)",
+      "status": "CONFIRMED_STATIC_POINTER_LEVEL",
+      "note": "virtual CALL EAX callee-cleans its PUSH EDX arg by epilogue-balance necessity (arithmetic necessity inference, not a row of the virtual callee); no runtime pointer-equality capture",
+      "source_rows": [
+        1170983,
+        1170991,
+        1170996,
+        1170998,
+        1171000,
+        1171002
+      ]
+    },
+    "OUT_local": {
+      "definition": "stack buffer address LEA EAX,[ESP+0xC] = ESP0-0x34 at 00527AF2 (row 180915), 0x34 bytes = 13 DWORDs, pushed as sole getter arg (row 180916)",
+      "status": "CONFIRMED",
+      "source_rows": [
+        180915,
+        180916
+      ]
+    },
+    "DST_copy": {
+      "definition": "EDI after ADD 0x30 at 00527AFE (row 180919) = R+0x30; destination of 13-DWORD REP MOVSD (row 180922) from ESI=U_getter",
+      "status": "CONFIRMED",
+      "source_rows": [
+        180919,
+        180920,
+        180921,
+        180922
+      ]
+    },
+    "W_attach": {
+      "definition": "hypothesized nonzero writer of owner field +0xC",
+      "status": "UNVERIFIED_NOT_ESTABLISHED_IN_SCOPE"
+    }
+  },
+  "level_discipline": "B/R/P/T/U/OUT kept separate; no class-identity or world-space inference; T_slot != U_getter distinguished by rows"
+}

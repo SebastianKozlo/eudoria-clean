@@ -1,0 +1,12 @@
+gate_id,stage,measured_quantity,independent_source,predicate,result
+G1,model gate,MODEL_GATE.json verified by saved_guard start --proof (event 000001_START),OpenCode DB rows + scoped merged registry CLI verify + smoke/probe real child sessions,guard start --proof exits ok AND chain begins START,EXECUTABLE_PASS
+G2,admission discipline,27 events (1 START 6 NAV 14 ADMIT 6 REF) hash-chain intact,saved_guard event_list verification on every command,all reads gated and chain valid,EXECUTABLE_PASS
+G3,budget,charged 53/64 bodies 484/10000 rows 38/400 CALL 26/64 candidates; GA3 3/8 scans; nav 6,saved_guard status + reference_probe totals,all <= caps; ref scans <= 8; matches <= 32,EXECUTABLE_PASS
+G4,ETAP A reader/getter mechanics,ORJ-01..ORJ-05 pointer levels and frame maps,W001(72 rows)+W002(44)+W003R(64)+QC001(72)+QC002(64) independent reviews,claims row-verified by two independent reviewers each,EXECUTABLE_PASS
+G5,ETAP B field census,7 literal [GPR+0xC] candidates in two preregistered ranges all qualified,NAV002 event 000007 + J006..J011 extracts + QC003/QC004 reviews,no nonzero owner-field writer in literal census; scoped negative recorded,EXECUTABLE_PASS (scoped negative)
+G6,ETAP B/C construction upstream,new 0x128 -> 00528E50 -> 0085B1B0 (+0xC=0) -> 00856190 registration,J013/J014 rows + W004 + QC003 review; reader caller B origin J012 + QC004,chain row-verified; B source wrapper construction UNRESOLVED after QC004-F1 correction,EXECUTABLE_PASS_WITH_CORRECTIONS_APPLIED
+G7,ETAP C attach writer,R nonzero required at reader; construction zero; nonzero store site NOT found in scope,J001 guard rows + J006 zero row + census + upstream windows + REF001-003 zero-hits,W_attach NOT_ESTABLISHED (not proven absent),RESOLVED_AS_DATA_BARRIER
+G8,ETAP C R origin,origin class of attached R,admitted windows + REF zero-hits + opaque frontier list,NOT_ESTABLISHED with ranked frontier,RESOLVED_AS_DATA_BARRIER
+G9,internal QC,QC001 QC_PARTIAL / QC002 PASS / QC003 PASS_WITH_CORRECTIONS / QC004 QC_PASS (corrective packet),4 fresh pe-master-auditor sessions inline-only,all load-bearing claims reviewed with complete rows; QC004-F1 material correction applied,EXECUTABLE_PASS_WITH_CORRECTIONS_APPLIED
+G10,artifacts,required artifact set complete pre-seal,artifact_index.csv + saved_guard validate_tree,all section-8 files present,EXECUTABLE_PASS_PENDING_SEAL
+G11,publication,sanitized additive publication post-seal,PUBLICATION_TOOL.md pub_manifest create+verify,verify PASS before push else PUBLICATION_NOT_READY,PENDING

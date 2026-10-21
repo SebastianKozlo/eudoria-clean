@@ -1,0 +1,12 @@
+# HANDOFF - PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021
+
+- RUN_STATUS: SCIENCE_COMPLETE_PENDING_SEAL_AND_PUBLICATION at time of writing; seal/verify/publication executed after this file per event chain.
+- AUDIT_OUTPUT_ROOT: D:\Eudoria_Reconstruction\99_Audits\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021
+- FINAL_REPORT_PATH: REPORT.md (this root)
+- PRIMARY_EVIDENCE_PATHS: EXTRACTS/J001..J014.txt; EXTRACTS/REF001..REF003_REFERENCE.json; CONTROL/EVENTS (27 events); CONTROL/NAV/NAV001..NAV006; WORKERS/W001..W004,QC001..QC004 PROMPT/PACKET/ANSWER; CLAIMS.json; QC_FINDINGS.json; CORRECTIONS_APPLIED.json.
+- KEY SESSIONS (generation-2 parity redelivery): coordinator ses_ea20efac2ffeNM7Vc6ypcMxhs5 (glm-5-3, 1.18.18); smoke ses_ea20c08d9ffe10igaO97UN1x02; probe ses_ea20bae56ffeyZMWXA0IJ2ibKX; workers W001 ses_ea1daafacffeBDhhbOydtJurvX, W003R ses_ea1d773f7ffegF8R0rqtmhrh92, W004 ses_ea1d3b9dbffe4n2imDT22wsSs1; W002 RETRY_LENGTH_FAILURE_DIRECT_FALLBACK (gen1 ses_ea2017bbbffe64ptY2j6hcy4fl parity-broken, gen2 retry ses_ea1d7dc32ffeH3uLuIMKlhR2Cz finish=length); W003 gen1 ses_ea1f199ccffegLEuuxsF2d7mh1 = length-failure; reviewers QC001 ses_ea1d36af5ffe1rrDdm4wJjZGKy, QC002 ses_ea1ce1beafferwSh1swesI3CNU, QC003 ses_ea1cd82f7ffeyCeuTXoMayUmev, QC004 ses_ea1c5d14effeR5qLgTyDmBDX11 (gen1 sessions retained in QC_FINDINGS.json).
+- SCIENCE RESULT: reader/getter mechanics CONFIRMED (static); U_getter==OUT_local (static pointer level); construction zero-init of owner+0xC CONFIRMED; nonzero attach writer of owner+0xC NOT_ESTABLISHED (DATA_BARRIER, not proven absent); R origin NOT_ESTABLISHED; no class/instance identity claims; no world-space claims.
+- MATERIAL CORRECTION: QC004-F1 ESP-shift correction applied to ORJ-08 (B source = gated slot X0+0x70; visible 0085B840 wrapper is a distinct slot; wrapper construction UNRESOLVED); CA-5 ORJ-06 7th candidate explicit; CA-6 dispatch parity repair (generation-2 redelivery).
+- NEXT RUN (bounded proposal): admit derived ctor body 0x00528E50..0x00528E90 for post-base-chain stores to +0xC; optionally preregister new literal census ranges around the registration path and remaining family methods; a saved nonliteral reference representation is needed for slot targets of vtable 0x00A7DCB0.
+- BUDGETS: 53/64 bodies, 484 rows, 38 CALL, 26 candidates; GA3 3/8 scans; 6 navs; 0 incidents.
+- WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CURSOR_SOURCE_MEDIUM=UNKNOWN; CANONICAL_GATE_EFFECT=NONE.

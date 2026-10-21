@@ -1,0 +1,22 @@
+{
+  "status": "NOT_ESTABLISHED",
+  "established": "R is the value stored at owner field +0xC; the field is zero-initialized at construction (row 1169775); the reader requires it nonzero (rows 180900-180901) and passes it to the getter which dereferences R+0x2C as a provider (row 1170927)",
+  "not_established": "the producing store of the nonzero value and the origin class of the attached object (argument, embedded subobject, helper return, resource acquisition/clone, stream-record, unknown)",
+  "frontier_candidates_in_priority_order": [
+    {
+      "candidate": "derived ctor 0x00528E50 body post-base-chain stores",
+      "why": "the only constructor-level path not yet row-read for +0xC writes",
+      "bounded_next_step": "admit 0x00528E50..0x00528E90 next run"
+    },
+    {
+      "candidate": "virtual CALL EDX slot0 on registered object at 0x008561EB",
+      "why": "registration-time virtual init hook; opaque",
+      "bounded_next_step": "resolve slot0 target of vtable 0x00A7DCB0 (saved GA3 dataset has no A7DCB0 entry - REF001 zero-hit)"
+    },
+    {
+      "candidate": "writer outside the two preregistered ranges",
+      "why": "the attach store may use a literal base+0xC store in an unpreregistered range or a nonliteral mechanism",
+      "bounded_next_step": "new contract with preregistered ranges around other family methods, or nonliteral xref export"
+    }
+  ]
+}

@@ -1,0 +1,859 @@
+{
+  "run_id": "PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021",
+  "claims": [
+    {
+      "id": "ORJ-01",
+      "text": "In the owner reader 0x00527AB0, B=entry ECX is preserved in EBX, R_load=M32[B+0xC] is loaded into EDI at 0x00527AB7, and R_call passed to 0x0085BFA0 at 0x00527AF9 equals R_load within the caller span (no EDI/ECX write between, no intervening call).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "ESTABLISHED_STATIC",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J001.txt",
+          "extract_pin": {
+            "size_bytes": 1279,
+            "sha256": "8DB8DB416E592EC1601304031D5C46E3718A14BC2BAFAA7FABCC6E54AF174FCF"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000002_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2294,
+            "sha256": "6EF080F928A3E7DB4973D0FEB190047C2976905C64992FA674330CCDF068C5F4"
+          },
+          "source_rows": [
+            180895,
+            180896,
+            180897,
+            180898,
+            180899,
+            180900,
+            180901,
+            180913,
+            180914,
+            180915,
+            180916,
+            180917,
+            180918,
+            180919,
+            180929,
+            180930,
+            180931
+          ]
+        }
+      ],
+      "premises": [
+        "EBX/EDI/ESI callee-saved; standard MSVC x86"
+      ],
+      "countermodel": "asynchronous interrupt handler writing EDI/ECX inside the span (excluded by premise, not by rows)"
+    },
+    {
+      "id": "ORJ-02",
+      "text": "The reader reserves a 0x34-byte (13-DWORD) local frame; OUT_local=ESP0-0x34 is pushed as the sole stack argument to the getter; the getter epilogue RET 0x4 cleans it; the reader re-reads its own incoming argument at [ESP+0x44] and passes [B+0x10] as this to 0x00861150.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "ESTABLISHED_STATIC",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J001.txt",
+          "extract_pin": {
+            "size_bytes": 1279,
+            "sha256": "8DB8DB416E592EC1601304031D5C46E3718A14BC2BAFAA7FABCC6E54AF174FCF"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000002_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2294,
+            "sha256": "6EF080F928A3E7DB4973D0FEB190047C2976905C64992FA674330CCDF068C5F4"
+          },
+          "source_rows": [
+            180895,
+            180913,
+            180914,
+            180915,
+            180916,
+            180923,
+            180924,
+            180925,
+            180926,
+            180930,
+            180931
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J004.txt",
+          "extract_pin": {
+            "size_bytes": 68,
+            "sha256": "8386DAE2254621E13A0824E97013B2CA5E14E1176426EDF45CA35BAC6D01248C"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000005_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 1552,
+            "sha256": "634961A82267F01C8620324577EF2CF9206D1A7D308BB32EC560EF37F56F4F51"
+          },
+          "source_rows": [
+            1171004
+          ]
+        }
+      ],
+      "premises": [
+        "PUSH/RET byte-exact arithmetic"
+      ],
+      "countermodel": null
+    },
+    {
+      "id": "ORJ-03",
+      "text": "In getter 0x0085BFA0 head: P_provider=M32[R_call+0x2C] (0x0085BFA6), VT=M32[P] (0x0085BFA9), F_slot24=M32[VT+0x24] (0x0085BFAB); CALL EAX yields T_slot whose block provides the 12 float reads [T+0x00..T+0x2C]; T_slot is distinct from U_getter.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "ESTABLISHED_STATIC",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J002.txt",
+          "extract_pin": {
+            "size_bytes": 1512,
+            "sha256": "2A383E01DDCB1382E7D818E279C3D14B390A0C0B6AC804B3C143AE10E1FC05AE"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000003_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2273,
+            "sha256": "FA34CFF11FE1DE7A27772F2CAD2D0D3F9DD6D05CA9D40106F8DB3F671C055DB2"
+          },
+          "source_rows": [
+            1170926,
+            1170927,
+            1170928,
+            1170929,
+            1170930,
+            1170931,
+            1170932,
+            1170933,
+            1170934,
+            1170935,
+            1170936,
+            1170938,
+            1170940,
+            1170941,
+            1170942,
+            1170943,
+            1170944,
+            1170945,
+            1170946,
+            1170947,
+            1170948,
+            1170949,
+            1170950,
+            1170951,
+            1170952,
+            1170953,
+            1170954,
+            1170955,
+            1170956,
+            1170957,
+            1170958,
+            1170959,
+            1170960
+          ]
+        }
+      ],
+      "premises": [
+        "virtual CALL EAX callee identity opaque; no class-name claim"
+      ],
+      "countermodel": null
+    },
+    {
+      "id": "ORJ-04",
+      "text": "Getter frame closure: 0x0096CB20 ends with RET 0x24 (row 1500231), proving the callee-cleans model; with the epilogue POP EDI/POP ESI/ADD ESP,0xa0/RET 0x4 balance, ESP at 0x0085C06A is ESPe-0xa8 and [ESP+0xac]=[ESPe+4]=the caller-pushed OUT pointer; EAX is never overwritten afterwards, so U_getter==OUT_local pointer (static pointer level).",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "ESTABLISHED_STATIC",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J003.txt",
+          "extract_pin": {
+            "size_bytes": 1860,
+            "sha256": "62A2227BC6B64B4AF35442B91FCA38354E0FF86A76C3A9CC6694C03B5582D97F"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000004_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2388,
+            "sha256": "C810173F94954A40A3DD7E3AD63DA9A09E8D23EDB7904DF380126F29CCF8A5B2"
+          },
+          "source_rows": [
+            1170961,
+            1170962,
+            1170963,
+            1170964,
+            1170965,
+            1170966,
+            1170967,
+            1170968,
+            1170969,
+            1170970,
+            1170971,
+            1170972,
+            1170973,
+            1170974,
+            1170975,
+            1170976,
+            1170977,
+            1170978,
+            1170979,
+            1170980,
+            1170981,
+            1170982,
+            1170983,
+            1170984,
+            1170985,
+            1170986,
+            1170987,
+            1170988,
+            1170989,
+            1170990,
+            1170991,
+            1170992,
+            1170993,
+            1170994,
+            1170995,
+            1170996,
+            1170997,
+            1170998,
+            1170999,
+            1171000,
+            1171001,
+            1171002,
+            1171003
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J004.txt",
+          "extract_pin": {
+            "size_bytes": 68,
+            "sha256": "8386DAE2254621E13A0824E97013B2CA5E14E1176426EDF45CA35BAC6D01248C"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000005_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 1552,
+            "sha256": "634961A82267F01C8620324577EF2CF9206D1A7D308BB32EC560EF37F56F4F51"
+          },
+          "source_rows": [
+            1171004
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J005.txt",
+          "extract_pin": {
+            "size_bytes": 1149,
+            "sha256": "7895A71E426FF21D6FA8CE91FD4D17D4E78F1C25E0534B16C70C210E1BA99E1C"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000010_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2034,
+            "sha256": "90575AF069DED64A0712E2E0E6CF4C46A2ECB4E82A990B54D6CF783539E521B5"
+          },
+          "source_rows": [
+            1500212,
+            1500213,
+            1500214,
+            1500215,
+            1500216,
+            1500217,
+            1500218,
+            1500219,
+            1500220,
+            1500221,
+            1500222,
+            1500223,
+            1500224,
+            1500225,
+            1500226,
+            1500227,
+            1500228,
+            1500229,
+            1500230,
+            1500231
+          ]
+        }
+      ],
+      "premises": [
+        "the opaque virtual CALL EAX must clean its pushed EDX arg (epilogue-balance arithmetic necessity; not a row of that callee)",
+        "CALL 0x0096cf80 nets zero (premise; body not admitted)",
+        "no runtime pointer-equality capture performed"
+      ],
+      "countermodel": "cdecl virtual callee would leave ESP at ESPe-0xac making [ESP+0xac] the return address and corrupting the return - physically inconsistent with the balanced epilogue; REJECTED"
+    },
+    {
+      "id": "ORJ-05",
+      "text": "The getter writes a 13-DWORD (0x34-byte) block into the caller OUT buffer: 9 dwords via REP MOVSD, then [OUT+0x24],[OUT+0x28],[OUT+0x2C] via MOV stores and [OUT+0x30]=1.0f via FLD1/FSTP; the reader then copies 13 dwords from U_getter to DST_copy=R+0x30 via REP MOVSD ECX=0xD.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "ESTABLISHED_STATIC",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J003.txt",
+          "extract_pin": {
+            "size_bytes": 1860,
+            "sha256": "62A2227BC6B64B4AF35442B91FCA38354E0FF86A76C3A9CC6694C03B5582D97F"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000004_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2388,
+            "sha256": "C810173F94954A40A3DD7E3AD63DA9A09E8D23EDB7904DF380126F29CCF8A5B2"
+          },
+          "source_rows": [
+            1170986,
+            1170990,
+            1170991,
+            1170993,
+            1170994,
+            1170995,
+            1170996,
+            1170997,
+            1170998,
+            1170999,
+            1171000,
+            1171001,
+            1171002
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J001.txt",
+          "extract_pin": {
+            "size_bytes": 1279,
+            "sha256": "8DB8DB416E592EC1601304031D5C46E3718A14BC2BAFAA7FABCC6E54AF174FCF"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000002_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2294,
+            "sha256": "6EF080F928A3E7DB4973D0FEB190047C2976905C64992FA674330CCDF068C5F4"
+          },
+          "source_rows": [
+            180919,
+            180920,
+            180921,
+            180922
+          ]
+        }
+      ],
+      "premises": [
+        "DF=0 forward copy"
+      ],
+      "countermodel": null
+    },
+    {
+      "id": "ORJ-06",
+      "text": "Scoped negative: within the two preregistered ranges (0x00527000..0x00529000, 0x0085B100..0x0085B800) of the pinned H5, the literal MOV dword [GPR+0xC] census yields exactly 7 candidates: six qualified (0x0085B1CD = construction-time zero-init of the constructed object field; 00527200/005272B5 = EBP argument-slot stores; 0085B14A/0085B35A = ESP zero staging; 0085B5FE = ESP staging) and the seventh 0x0085B652 explicitly NOT_OPENED_CAP (cap of 6 candidate windows per contract). No nonzero owner-field writer exists among the six opened candidates; the scoped negative does not cover 0x0085B652 and is not a global absence claim.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "ESTABLISHED_SCOPED_NEGATIVE",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J006.txt",
+          "extract_pin": {
+            "size_bytes": 1749,
+            "sha256": "DBFBAB4FA6053F453DAC5E803779F6DC9BD692F24AC93EE6347FEE2B5AAE1907"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000011_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2450,
+            "sha256": "B7C2E2DB43E52DF2A0492FB3419F5314021B503216DB52E5E7E3B8EE619DAA78"
+          },
+          "source_rows": [
+            1169763,
+            1169764,
+            1169765,
+            1169766,
+            1169767,
+            1169768,
+            1169769,
+            1169770,
+            1169771,
+            1169772,
+            1169773,
+            1169774,
+            1169775,
+            1169776,
+            1169777
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J007.txt",
+          "extract_pin": {
+            "size_bytes": 1435,
+            "sha256": "028DE8B4A0BC05169ADBAA10260D5B72582455654DCABB61DDDDB28FAC70DA80"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000012_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2262,
+            "sha256": "143167CBB2B9784F0830D81789EA0CA23FA82569809A74A4AEE0B5301783D64C"
+          },
+          "source_rows": [
+            1169734,
+            1169735,
+            1169736
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J008.txt",
+          "extract_pin": {
+            "size_bytes": 1303,
+            "sha256": "6BE6E16E0AEEED8EAED14718ABC04A43B7FFFE713D3FB63805E2127510D384E6"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000013_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2194,
+            "sha256": "C3DDA9CDAEE7C3CC8132B6482B950DC19B5C1E67FF5455A0AE3C2EED63EC1B12"
+          },
+          "source_rows": [
+            180201,
+            180206,
+            180208,
+            180211,
+            180213,
+            180214
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J009.txt",
+          "extract_pin": {
+            "size_bytes": 1202,
+            "sha256": "57A3C408E26A98226BCF5EB35B0A7A1ACDB35089BED773C0456DC8FBF4F779B3"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000014_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2043,
+            "sha256": "047CC2AABA3A03F27CE55E9335DDA82A0EE0AA45F79E6365C40981F50249A98C"
+          },
+          "source_rows": [
+            180272,
+            180275,
+            180277,
+            180278
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J010.txt",
+          "extract_pin": {
+            "size_bytes": 1346,
+            "sha256": "5B8B8906F81CD3F10FC6427642EFD5D7A9B014E5A2528D47A841BD80FABBE3E5"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000015_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2154,
+            "sha256": "78F44B711FDAC7A2BACBD56AFB768B517732DCFCEAE158F989E98C94D8FB32D7"
+          },
+          "source_rows": [
+            1169887,
+            1169888,
+            1169889,
+            1169890
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J011.txt",
+          "extract_pin": {
+            "size_bytes": 1098,
+            "sha256": "7B4AE691E29D3582DBAFE84FCEE30DDC761BC1CA49205763C429938AEC15856C"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000016_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 1953,
+            "sha256": "BBDCC64B26C773B013FC679DFF179B5722E5F81DEC8476BE2516DFC354A4D51A"
+          },
+          "source_rows": [
+            1170092,
+            1170093,
+            1170094,
+            1170104,
+            1170105,
+            1170106
+          ]
+        }
+      ],
+      "premises": [
+        "census pattern and ranges preregistered in the run contract; NAV002 event pin 000007_NAV; excluded mechanisms: MOVS/STOS/FST, indirect stores, whole-structure copies, other modules, runtime writes; 7th candidate 0x0085B652 not opened (cap of 6 windows)"
+      ],
+      "countermodel": "a nonzero writer using a nonliteral mechanism or located outside the ranges would not appear in this census"
+    },
+    {
+      "id": "ORJ-07",
+      "text": "Owner construction chain: allocate 0x128 bytes (0x0095D3C4), call derived ctor 0x00528E50 (writes vtable 0x00A7DCB0 per pinned prior hexdump; calls base ctor 0x0085B1B0), base ctor writes vtable 0x00A91E4C to [ESI], 0 to [ESI+4], arg to [ESI+8], 0 to [ESI+0xC], 0 to [ESI+0x10]; then register via 0x00856190 on the singleton from 0x004154F0; registration head reads the object ([EDI+0x74] gate) and invokes virtual slot0 on it, with no visible [EDI+0xC] store in the head.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "ESTABLISHED_STATIC",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J006.txt",
+          "extract_pin": {
+            "size_bytes": 1749,
+            "sha256": "DBFBAB4FA6053F453DAC5E803779F6DC9BD692F24AC93EE6347FEE2B5AAE1907"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000011_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2450,
+            "sha256": "B7C2E2DB43E52DF2A0492FB3419F5314021B503216DB52E5E7E3B8EE619DAA78"
+          },
+          "source_rows": [
+            1169763,
+            1169764,
+            1169765,
+            1169766,
+            1169767,
+            1169768,
+            1169769,
+            1169770,
+            1169771,
+            1169772,
+            1169773,
+            1169774,
+            1169775,
+            1169776,
+            1169777
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J013.txt",
+          "extract_pin": {
+            "size_bytes": 1672,
+            "sha256": "9D1A52F7B4EE583E955126AEB57BF52CE95F289787639823243E78C0F8D3F195"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000026_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2514,
+            "sha256": "A3D717516648D09D848AE1C9388C85AAD46DE7BBC1D751A202275E76EEB74B5C"
+          },
+          "source_rows": [
+            65417,
+            65418,
+            65419,
+            65420,
+            65421,
+            65422,
+            65423,
+            65424,
+            65425,
+            65426,
+            65427,
+            65428,
+            65429,
+            65430,
+            65431,
+            65432,
+            65433,
+            65434,
+            65435,
+            65436,
+            65437,
+            65438,
+            65439
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J014.txt",
+          "extract_pin": {
+            "size_bytes": 1286,
+            "sha256": "958116BB1077195A25941AF09B48AAF6D7DA033343DB6748D7A40C1C06913986"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000027_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2353,
+            "sha256": "F7266FEF3A406803BBC7C79DB6E6323F6A4A2EEBA6633581E7833F7EB4156F4F"
+          },
+          "source_rows": [
+            1163651,
+            1163652,
+            1163653,
+            1163654,
+            1163655,
+            1163656,
+            1163657,
+            1163658,
+            1163659,
+            1163660,
+            1163661,
+            1163662,
+            1163663,
+            1163664,
+            1163665,
+            1163666,
+            1163667,
+            1163668,
+            1163669,
+            1163670,
+            1163671,
+            1163672,
+            1163673,
+            1163674,
+            1163675,
+            1163676,
+            1163677,
+            1163678,
+            1163679,
+            1163680,
+            1163681,
+            1163682,
+            1163683,
+            1163684,
+            1163685
+          ]
+        },
+        {
+          "kind": "PRIOR",
+          "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\01_RAW\\T2_HEX\\caller_of_ctor_region_00528C00.txt",
+          "pin": {
+            "size_bytes": 7390,
+            "sha256": "B8CC99C24923699AE970169AFAA6109547B25893AAB6243BFBB7FE84F9D78E70"
+          }
+        }
+      ],
+      "premises": [
+        "0x00528E50 body not fully admitted; derived-ctor field writes beyond the pinned hexdump are NOT covered",
+        "opaque callees may modify memory; absent visible store is not proof of absence"
+      ],
+      "countermodel": "the derived ctor or a later opaque callee may write +0xC nonzero; not excluded"
+    },
+    {
+      "id": "ORJ-08",
+      "text": "The single direct caller of the reader (0x0048EE31) obtains B as the retval of 0x004123D0 (trivial deref EAX=M32[ECX] per pinned prior decomp) called on the stack slot X0+0x70 (post-PUSH-EDX [ESP+0x78] at row 4701 = pre-push [ESP+0x74] at row 4694), i.e. the SAME slot whose M32 was gated nonzero at rows 4696-4698; the reader receives a stack argument LEA [ESP+0x18] (rows 4699-4700). The wrapper visible in the window (ctor 0x0085B840 at rows 4692-4693) constructed a DISTINCT slot X0+0x74 and is NOT the B source; the construction of the B-source wrapper T_d=X0+0x70 lies before the admitted window and is UNRESOLVED. Per pinned prior decomp, a 0x0085B840-class wrapper stores the retval of 0x008544D0 (container lookup returning M32[node+8]) into its +0 field.",
+      "evidence_status": "STRONGLY_SUPPORTED",
+      "claim_resolution": "SUPPORTED_WITH_OPAQUE_LINKS_AND_UNRESOLVED_WRAPPER_CONSTRUCTION",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J012.txt",
+          "extract_pin": {
+            "size_bytes": 1367,
+            "sha256": "C5A517910D85305BF73AC893B74B17BE3EA8BF53958A41F7B456B002ECC4CB48"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000025_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2366,
+            "sha256": "4327ACA8E98AEFC44F999364AA94FCF29A795E2A5E37C25FE7A928B84969C106"
+          },
+          "source_rows": [
+            4693,
+            4694,
+            4695,
+            4696,
+            4697,
+            4698,
+            4699,
+            4700,
+            4701,
+            4702,
+            4703,
+            4704
+          ]
+        },
+        {
+          "kind": "PRIOR",
+          "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\01_RAW\\DECOMP\\F004123D0.c",
+          "pin": {
+            "size_bytes": 96,
+            "sha256": "2084269BEDE6EB9D2C24A3782A09F5193B2E478B83E2DE5CB40F77B9F8F53868"
+          }
+        },
+        {
+          "kind": "PRIOR",
+          "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\01_RAW\\DECOMP\\F0085B840.c",
+          "pin": {
+            "size_bytes": 236,
+            "sha256": "DEEC3274CE425AFBFC291709DAE2C3B2145A87BB4792DAE70699714D9173A512"
+          }
+        },
+        {
+          "kind": "PRIOR",
+          "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\01_RAW\\DECOMP\\F008544D0.c",
+          "pin": {
+            "size_bytes": 308,
+            "sha256": "D83459C03BDCAB39C11715289B518868FC25353874B38BDC9ABFF6948D566BA7"
+          }
+        },
+        {
+          "kind": "PRIOR",
+          "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\01_RAW\\T2_HEX\\getter_FUN_004154F0.txt",
+          "pin": {
+            "size_bytes": 460,
+            "sha256": "B4FF4BFDE0A68F46FD5E05305D8F669DDE84076F647700648CCE2BBF484C68CE"
+          }
+        }
+      ],
+      "premises": [
+        "prior decomp/hexdump artifacts are hash-pinned inputs; wrapper and lookup bodies opaque in this run",
+        "ESP-shift arithmetic corrected per QC004: post-push [ESP+0x78] == pre-push [ESP+0x74] == X0+0x70",
+        "T_d construction (before row window start 0x0048EE03) not admitted; UNRESOLVED"
+      ],
+      "countermodel": "T_d may be filled by a path other than the 0085B840/008544D0 chain (its construction is unobserved); only the wrapper-class shape is supported",
+      "correction_history": "Corrected per QC004 finding QC004-F1 (ESP shift): original text attributed B source to the visible 0085B840 wrapper; corrected to the gated slot X0+0x70 with unresolved construction."
+    },
+    {
+      "id": "ORJ-09",
+      "text": "The real nonzero attach writer of owner+0xC (W_attach) is NOT_ESTABLISHED within the admitted scope: construction zero-initializes the field (CONFIRMED), the reader requires it nonzero (guard rows), and neither the preregistered literal census, the construction/registration windows, nor the qualified upstream windows contain the nonzero store. It is not proven absent.",
+      "evidence_status": "UNVERIFIED",
+      "claim_resolution": "NOT_ESTABLISHED",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J006.txt",
+          "extract_pin": {
+            "size_bytes": 1749,
+            "sha256": "DBFBAB4FA6053F453DAC5E803779F6DC9BD692F24AC93EE6347FEE2B5AAE1907"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000011_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2450,
+            "sha256": "B7C2E2DB43E52DF2A0492FB3419F5314021B503216DB52E5E7E3B8EE619DAA78"
+          },
+          "source_rows": [
+            1169768,
+            1169775
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J001.txt",
+          "extract_pin": {
+            "size_bytes": 1279,
+            "sha256": "8DB8DB416E592EC1601304031D5C46E3718A14BC2BAFAA7FABCC6E54AF174FCF"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000002_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2294,
+            "sha256": "6EF080F928A3E7DB4973D0FEB190047C2976905C64992FA674330CCDF068C5F4"
+          },
+          "source_rows": [
+            180899,
+            180900,
+            180901
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J013.txt",
+          "extract_pin": {
+            "size_bytes": 1672,
+            "sha256": "9D1A52F7B4EE583E955126AEB57BF52CE95F289787639823243E78C0F8D3F195"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000026_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2514,
+            "sha256": "A3D717516648D09D848AE1C9388C85AAD46DE7BBC1D751A202275E76EEB74B5C"
+          },
+          "source_rows": [
+            65417,
+            65418,
+            65432,
+            65435,
+            65439
+          ]
+        },
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J014.txt",
+          "extract_pin": {
+            "size_bytes": 1286,
+            "sha256": "958116BB1077195A25941AF09B48AAF6D7DA033343DB6748D7A40C1C06913986"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000027_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2353,
+            "sha256": "F7266FEF3A406803BBC7C79DB6E6323F6A4A2EEBA6633581E7833F7EB4156F4F"
+          },
+          "source_rows": [
+            1163651,
+            1163654,
+            1163655,
+            1163680,
+            1163681,
+            1163682,
+            1163683,
+            1163684
+          ]
+        }
+      ],
+      "premises": [
+        "bounded scope: two census ranges, opened windows, and admitted upstream levels only"
+      ],
+      "countermodel": null
+    },
+    {
+      "id": "ORJ-10",
+      "text": "The origin of the attached R object is NOT_ESTABLISHED (candidate classes per R_ORIGIN.json: derived ctor store, registration virtual hook, writer outside preregistered ranges, or nonliteral mechanism). No provider/instance identity and no model-instance join is claimed.",
+      "evidence_status": "UNVERIFIED",
+      "claim_resolution": "NOT_ESTABLISHED",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J014.txt",
+          "extract_pin": {
+            "size_bytes": 1286,
+            "sha256": "958116BB1077195A25941AF09B48AAF6D7DA033343DB6748D7A40C1C06913986"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000027_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2353,
+            "sha256": "F7266FEF3A406803BBC7C79DB6E6323F6A4A2EEBA6633581E7833F7EB4156F4F"
+          },
+          "source_rows": [
+            1163680,
+            1163681,
+            1163682,
+            1163683,
+            1163684
+          ]
+        },
+        {
+          "kind": "PRIOR",
+          "path": "D:\\Eudoria_Reconstruction\\12_WebGame\\eudoria-clean\\docs\\audits\\PE_935_ATTRIBUTE_ORIGIN_SEAM_R1_20260913\\01_RAW\\T2_HEX\\caller_of_ctor_region_00528C00.txt",
+          "pin": {
+            "size_bytes": 7390,
+            "sha256": "B8CC99C24923699AE970169AFAA6109547B25893AAB6243BFBB7FE84F9D78E70"
+          }
+        }
+      ],
+      "premises": [],
+      "countermodel": null
+    },
+    {
+      "id": "ORJ-11",
+      "text": "GA3 saved structural dataset zero-hits: no vtable equals 0x00A7DCB0 or 0x00A91E4C and no slot target equals 0x00527AB0 in the pinned GA3_VTABLE_ENTRIES.json (three complete scans, census_complete=true). Scoped zero: does not prove absence in the binary, only in this saved dataset. Evidence for the zero-hits is the REF event chain (re-derived at seal), not row records.",
+      "evidence_status": "CONFIRMED",
+      "claim_resolution": "ESTABLISHED_SCOPED_NEGATIVE",
+      "source_refs": [
+        {
+          "kind": "ADMITTED",
+          "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\EXTRACTS\\J001.txt",
+          "extract_pin": {
+            "size_bytes": 1279,
+            "sha256": "8DB8DB416E592EC1601304031D5C46E3718A14BC2BAFAA7FABCC6E54AF174FCF"
+          },
+          "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_OWNER_R_JOIN_OPENCODE_SAVED_R1_20261021\\CONTROL\\EVENTS\\000002_ADMIT.json",
+          "admission_event_pin": {
+            "size_bytes": 2294,
+            "sha256": "6EF080F928A3E7DB4973D0FEB190047C2976905C64992FA674330CCDF068C5F4"
+          },
+          "source_rows": [
+            180895,
+            180896,
+            180897,
+            180898,
+            180899
+          ]
+        }
+      ],
+      "premises": [
+        "zero-hit evidence is the REF event chain, not row records: REF001 (0x00A7DCB0), REF002 (0x00A91E4C), REF003 (0x00527AB0) each completed with census_complete=true (events 000017-000022); zero-hit scans re-derived and source/hash-validated by reference_probe.verify_events at seal; single pinned saved dataset GA3_VTABLE_ENTRIES.json (pin in INPUT_CATALOG)",
+        "the attached admitted rows anchor the object of the REF003 query (the reader function head 0x00527AB0)"
+      ],
+      "countermodel": null
+    }
+  ]
+}
