@@ -1,0 +1,25 @@
+﻿{
+  "qc_sessions": ["Q01R (ses_e9fc017b2ffe6h0JmkXqBFuyrh)", "QF1 (ses_e9fad09d6ffe8z1dEcMgG27NeE)", "QF2 (ses_e9facef11ffeCzelbOd8HsVOsk)", "Q01 (ses_e9fc1de23ffekUAGpm9b1uZ8Wt — FAILED finish=length, bez wyniku)"],
+  "verdicts": {
+    "Q01R": {"C1_lookup_value_origin": "SUPPORTS", "C2_ctor_callsite": "SUPPORTS", "C3_hipoteza_insert": "brak nieuprawnionego awansu"},
+    "QF1": {"QA1_register": "SUPPORTS", "QA2_insert": "SUPPORTS", "QA3_collection_compat": "SUPPORTS_typ + REQUIRES_CORRECTION_wording"},
+    "QF2": {"QB1_b_lookup_value": "SUPPORTS", "QB2_reader_chain": "REQUIRES_CORRECTION (przyjete)", "QB3_provider_wrapper": "SUPPORTS (+residual konwencja 0096cb20)", "QB4_key_origin": "SUPPORTS"}
+  },
+  "accepted_corrections": [
+    {"id": "OW1", "from": "Q01R", "claim": "keyed map lookup (J01)", "correction": "keyed=PLAUSIBLE do czasu analizy 00971780; po J10/J15: klucz porownywany realnie (find) i pochodzacy ze strumienia (caller) — status podniesiony do CONFIRMED w CL01 za J10/QF1"},
+    {"id": "OW2", "from": "Q01R", "claim": "singleton from 004154F0 (J02)", "correction": "przyjete: identity fabryki unproven w J02; nastepnie J11 ustalil lazy-init singleton (STRONGLY_SUPPORTED, tail uciety)"},
+    {"id": "P2a", "from": "QF1", "claim": "kolekcja wspolna insert/lookup (QA3)", "correction": "przyjete: zgodnosc TYPU kolekcji; instance-level zalezy od receiver identity (CL14=PLAUSIBLE)"},
+    {"id": "P2b", "from": "QF1", "claim": "J05 wstawianie na poczatku listy", "correction": "przyjete: literalnie relink za wezlem [bucket+0]"},
+    {"id": "P2c", "from": "QF1", "claim": "J04 out-param bool", "correction": "przyjete: out={node*,inserted_flag} (superseded J05)"},
+    {"id": "F1/F2", "from": "QF2", "claim": "QB2 reader", "correction": "przyjete: [EBX+0xE8] tylko na fall-through; sekwencja warunkowa R!=0 AND guard!=0; poprawiony tekst w CL10"},
+    {"id": "F5", "from": "QF2", "claim": "SHA literowka w tasku QC (transkrypcja mastera)", "correction": "przyjete jako incydent transkrypcji; plik J14 zweryfikowany niezaleznie"}
+  ],
+  "residual_uncertainties": [
+    "konwencja 0096cb20 (QF2 residual F3) — skoroborowana, nie wyeksportowana",
+    "F_slot24 moze mutowac provider (opaque call)",
+    "value@node+0x8 pointer-vs-inline (CL06) — dowod krzyzowy consumer-side",
+    "tail 004154F0 (C1 J11), fill bucketow CRT (C3 J13)",
+    "00414130 cialo — poza saved corpus"
+  ],
+  "scope_disclaimer": "QC pokrywal wskazane claims (3+3+4) na wskazanych pakietach; nie caly material kampanii; peer-master audit po terminalu: PENDING (Desktop)"
+}

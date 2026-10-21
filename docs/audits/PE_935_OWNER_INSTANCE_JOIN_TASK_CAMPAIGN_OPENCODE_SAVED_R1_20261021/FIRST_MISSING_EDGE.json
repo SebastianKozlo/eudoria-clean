@@ -1,0 +1,11 @@
+﻿{
+  "missing_edge": "KEY_MATCH: zgodnosc klucza rejestracji (00414130(B_ctor)) z identyfikatorem dekodowanym ze strumienia (klucz lookupu, def 0048ed23)",
+  "why_first": "wszystkie statyczne szczeble mostu B_ctor->Register->node{key,value}->lookup->B_lookup->R=[B+0xC]->provider->[R+0x30..0x63] sa potwierdzone def-use; jedyna niewiadoma instancyjna to rownosc kluczy (plus warunki receiver identity C1-C3); bez key-match B_ctor i B_lookup moga byc rozne",
+  "falsifiable_test_runtime": "capture porownania pointera zwracanego przez lookup z pointerem zwracanym przez ctor na tym samym obiekcie (zakazane w tej kampanii; wymaga zywego klienta)",
+  "falsifiable_test_static": "eksport ciala 00414130 (pochodzenie id) + pelny tail 004154F0 + sciezka klucza strumienia od formatu pliku; decyzja czlowieka czy uruchomic nowy eksport",
+  "cost_estimate": "niski dla runtime (jedna sesja debuggera z 2 breakpointami); sredni dla static (nowy eksport Ghidra regionow 00414100..00414200 + 00415540..00415590)",
+  "alternatives": [
+    "F_slot24 implementacje (zrodlo danych transformu wewnatrz providera) — wymaga identyfikacji vtable providera (runtime lub eksport vtable corpus)",
+    "MODEL_RESOURCE->instancja: sciezka resource-id (np. 4508->296445 klasa) — oddzielny downstream"
+  ]
+}
