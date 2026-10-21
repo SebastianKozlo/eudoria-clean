@@ -1,0 +1,18 @@
+﻿gate_id,claimed_measurement,raw_denominator,computation,pass_predicate,status
+G1_BINDING,token equality RUN_BINDING.json vs CONTRACT pin,1,sha256(CONTRACT.md) == binding SHA,exact match,PASS
+G2_INPUT_PINS,16 pinned inputs unchanged,16,re-hash each pinned file,size+sha256 equal to pin,PASS
+G3_INHERITED_BEFORE,455-file snapshot bijection+0 drift,455,full re-hash vs CSV,bijection and zero drift,PASS
+G4_SOURCE_ADMISSION,admission before semantic read,3 packets,timestamp order vs first semantic read,written before; hash-read not semantic,PASS
+G5_PHASE0_SYNTHETIC,14 control tests,14,run synthetic_tests.py,all pass and api_calls==0,PASS
+G6_MODEL_ROUTING,5/5 real CLI sessions,5,DB modelID per session,flash=opencode/glm-5.3-flash-free 3/3 and nask glm-5-3 medium 2/2,PASS
+G7_AGENT_ROUTING,agent=build,5,DB agent column,all build,PASS
+G8_PARITY,DB final text vs CLI event,5,string equality,PARITY_OK 5/5,PASS
+G9_ATTEMPT_BOUND,one attempt per role,5,attempts field + reservation exclusivity,5 attempts and 0 retries,PASS
+G10_SESSION_CENSUS,DB delta == subordinate sessions,1256 before,delta count,delta==5,PASS
+G11_FORMAT_STRICT,parseable strict JSON (no dup keys),5,fence/bare policy + strict_loads,5/5 parse (2 bare,3 fenced); nonce echo 4/5,PASS_WITH_FINDING
+G12_WORD_CAP,answer word caps,5,content-word measure per role,all within caps,FAIL (honest failure PF4; 0 retries)
+G13_INLINE_ONLY,zero tool calls,5,tool event count,0 tool parts in all sessions,PASS
+G14_SCIENCE_SCOPE,197 rows only no new sources,197,packet embedding + no H5/LEA/414130/EXE/runtime access,no new instruction material,PASS
+G15_MASTER_RECOMPUTATION,row-level recomputation of load-bearing claims,15 claims,ESP/offset algebra from packet rows,aliasing + frame balance + base-call offsets + F3 edges recomputed,PASS
+G16_PUBLICATION,sanitized allowlist publication,see PUBLICATION_RESULT.json,worktree from LIVE + pinned pub_manifest create/verify + FF push,see PUBLICATION_RESULT.json
+G17_INHERITED_AFTER,455-file snapshot re-verify after work,455,full re-hash vs CSV,bijection and zero drift,PASS

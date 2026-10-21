@@ -1,0 +1,197 @@
+{
+  "document": "CLAIMS.json",
+  "run_id": "PE_935_SAVED_PROOF_REQUALIFICATION_FLASH_PILOT_SAVED_R1_20261021",
+  "generated_utc": "2026-10-21T18:44:44.381012+00:00",
+  "note": "Worker/reviewer claim texts stay local (raw answers not for publication). Master dispositions are PE-MASTER row-level recomputations. Status algebra kept separate: worker status / reviewer verdict / master disposition.",
+  "claims": [
+    {
+      "id": "P1-C1",
+      "subject": "F1 wrapper 0085B840 mechanics: reads one stack arg via RET 0x4 image, ESI=ECX receiver, chains 004154F0 -> 008544D0(ECX=EAX), stores result to [ESI], returns ESI",
+      "rows": [
+        "1170283..1170293"
+      ],
+      "worker": "CONFIRMED",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED_BY_ROW_RECOMPUTATION",
+      "reason": "direct row reading 1170286-1170293"
+    },
+    {
+      "id": "P1-C2",
+      "subject": "F1 slot distinctness: worker treated LEA targets at rows 4692/4694/4701 as givens; value init outside packet",
+      "rows": [
+        "4691",
+        "4692",
+        "4693",
+        "4694",
+        "4700",
+        "4701"
+      ],
+      "worker": "CONFIRMED (as stated)",
+      "reviewer": "REJECT (aliasing correction)",
+      "master": "REVIEWER_CORRECTION_CONFIRMED_BY_MASTER_RECOMPUTATION",
+      "reason": "ESP algebra: with base B before PUSH EDI, 4692 LEA = B-4+0x78 = B+0x74; RET 0x4 restores B, so 4694 LEA = B+0x74; after PUSH EDX, 4701 LEA = B-4+0x78 = B+0x74. All three LEAs target the same slot B+0x74, which the wrapper initialized via [ESI] (ESI=ECX of 4692). Converges with pinned ORJ-A01 without having shown it to the models.",
+      "status_final": "REJECTED_AS_WORDED (slot-distinction premise)"
+    },
+    {
+      "id": "P1-C3",
+      "subject": "F1 reader ECX source: EAX of the SECOND CALL 004123D0 (0048EE2A) via MOV ECX,EAX (0048EE2F) reaches CALL 00527AB0",
+      "rows": [
+        "4702",
+        "4703",
+        "4704"
+      ],
+      "worker": "CONFIRMED",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED_BY_ROW_RECOMPUTATION",
+      "reason": "matches OAWC-A05 correction direction without having shown the key"
+    },
+    {
+      "id": "P1-C4",
+      "subject": "F1 bit-equality of the two 004123D0 results: NOT settled",
+      "rows": [
+        "4696",
+        "4697",
+        "4702"
+      ],
+      "worker": "CONFIRMED (reason: distinct slots)",
+      "reviewer": "CONDITIONAL (reason corrected: same slot, different second arg, body semantics PRIOR_DECOMP_NOT_BYTE_CLOSED)",
+      "master": "AGREE_WITH_REVIEWER_CORRECTION",
+      "status_final": "UNVERIFIED (equality unproven; slot-distinction argument withdrawn, premise-based conclusion retained)"
+    },
+    {
+      "id": "P1-C5",
+      "subject": "F1 rows alone do not prove arity/types of 004154F0 and 008544D0",
+      "rows": [
+        "1170285",
+        "1170287",
+        "1170288",
+        "1170289"
+      ],
+      "worker": "CONFIRMED",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED",
+      "status_final": "CONFIRMED (visible pushes do not close callee signatures; consistent with OAWC-A05)"
+    },
+    {
+      "id": "P2-C1",
+      "subject": "F2 RET 0x10 at 00529072 = 16-byte / 4-DWORD argument-area cleanup footprint",
+      "rows": [
+        "182498"
+      ],
+      "worker": "CONFIRMED",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED_BY_ROW_RECOMPUTATION"
+    },
+    {
+      "id": "P2-C2",
+      "subject": "F2 frame balance: prologue 0x38 bytes (SEH 3x4 + SUB 0x1C + 3 pushes + cookie) vs epilogue ADD ESP,0x28 + 4 pops = 0x38; zero residual before RET",
+      "rows": [
+        "182360..182370",
+        "182493..182497"
+      ],
+      "worker": "STRONGLY_SUPPORTED",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED_BY_ROW_RECOMPUTATION (4+4+4+28+12+4=56=0x38; 40+16=56)"
+    },
+    {
+      "id": "P2-C3",
+      "subject": "F2 base call image: CALL 0085B1B0 receives ECX=ESI (this) + three pushed dwords read from [ESP+0x3C/0x40/0x44] = entry+4/+8/+C; arg pushed last is first in memory order",
+      "rows": [
+        "182375..182382"
+      ],
+      "worker": "STRONGLY_SUPPORTED",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED_BY_ROW_RECOMPUTATION (E-0x38+0x3C=E+4 etc.)"
+    },
+    {
+      "id": "P2-C4",
+      "subject": "F2 derived ctor formal parameter count/types NOT provable from shown rows; three PUSHes prove only the base-call image; row 182437 [ESP+0x48]=entry+0x10 only under gap-balance and 0085AD60 cleanup premises",
+      "rows": [
+        "182382",
+        "182437",
+        "182498"
+      ],
+      "worker": "UNVERIFIED/CONDITIONAL",
+      "reviewer": "CONDITIONAL/SUPPORT",
+      "master": "CONFIRMED (footprint-vs-arity separation; consistent with OAWC-A04)"
+    },
+    {
+      "id": "P2-C5",
+      "subject": "F2 full stack-map requires: the 47 gap rows (esp. 0085B1B0 RET n), intervening PUSH/SUB in the gap, 0085AD60 cleanup convention",
+      "rows": [
+        "182383..182429"
+      ],
+      "worker": "stated",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED"
+    },
+    {
+      "id": "P3-C1",
+      "subject": "F3 node identity: byte +0x0, dwords +4/+8/+C/+10; bidirectional pair write ([old+8]=new, [new+4]=old); construction zeroes then self-links +8/+C",
+      "rows": [
+        "183599",
+        "183601",
+        "183602",
+        "183603",
+        "183649",
+        "183652..183656"
+      ],
+      "worker": "CONFIRMED",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED_BY_ROW_READING"
+    },
+    {
+      "id": "P3-C2",
+      "subject": "F3 owner join: ECX-arg object with count +0x14 and the same link block; no node-to-owner tie-back shown",
+      "rows": [
+        "183632..183643"
+      ],
+      "worker": "CONFIRMED",
+      "reviewer": "SUPPORT",
+      "master": "CONFIRMED"
+    },
+    {
+      "id": "P3-C3",
+      "subject": "F3 topology uniqueness of intrusive linked list: REJECTED; two distinct edge types (+8 walk in copy loop, +C child-chain recursion and tail walk) admit a tree/first-child countermodel; +C-as-flat-next also remains consistent",
+      "rows": [
+        "183592",
+        "183604",
+        "183610",
+        "183611",
+        "183681..183685"
+      ],
+      "worker": "REJECTED (uniqueness claim)",
+      "reviewer": "SUPPORT with its own alternative countermodel",
+      "master": "CONFIRMED (consistent with OAWC-A06; no library/class name used)"
+    },
+    {
+      "id": "P3-C4",
+      "subject": "F3 teardown calls 008c3580 on owner+4 and on [EBP-0x14] image, 0095d500(0,0) follows: PLAUSIBLE only (arg init and callee contract outside packet)",
+      "rows": [
+        "183615..183621",
+        "183636..183639"
+      ],
+      "worker": "PLAUSIBLE",
+      "reviewer": "SUPPORT (hedging appropriate)",
+      "master": "PLAUSIBLE retained"
+    },
+    {
+      "id": "REV-C1",
+      "subject": "REVIEWER independently re-derived the wrapper-slot aliasing (all three LEAs = B+0x74) without access to the correction key or ORJ postaudit",
+      "rows": [
+        "4691",
+        "4692",
+        "4693",
+        "4694",
+        "4700",
+        "4701",
+        "1170290",
+        "1170293"
+      ],
+      "worker": "-",
+      "reviewer": "REVIEWER_CORRECTION",
+      "master": "CONFIRMED_BY_MASTER_RECOMPUTATION; convergence with pinned ORJ-A01 noted (not shown to models)"
+    }
+  ],
+  "master_summary": "All three flash workers delivered materially correct closed-scope analyses that independently converge with the OAWC-A04/A05/A06 correction directions; the fresh reviewer added one materially correct aliasing correction (convergent with ORJ-A01) and correctly rejected the worker slot-distinction premise. No claim was promoted beyond the closed 197-row material."
+}
