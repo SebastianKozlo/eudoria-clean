@@ -1,0 +1,81 @@
+{
+  "positions": [
+    {
+      "id": "F1",
+      "edge": "ECX/D410 arg at 00858240",
+      "status": "DONE",
+      "value": "high",
+      "evidence": "J002/J003/J007 windows"
+    },
+    {
+      "id": "F2",
+      "edge": "A_alloc_shape -> ESI -> vptr A91DB8 -> vector push",
+      "status": "DONE",
+      "value": "high",
+      "evidence": "J006/J005/J004/J001/J002"
+    },
+    {
+      "id": "F3",
+      "edge": "C3B0 argument map (arg1..arg4, this)",
+      "status": "DONE",
+      "value": "high",
+      "evidence": "J003/J008"
+    },
+    {
+      "id": "F4",
+      "edge": "transform source provenance to caller stack buffer",
+      "status": "DONE",
+      "value": "high",
+      "evidence": "J008/J020/NAV02"
+    },
+    {
+      "id": "F5",
+      "edge": "frame cell preservation C3C1->CD06",
+      "status": "DONE",
+      "value": "high",
+      "evidence": "J008..J019 full linear coverage"
+    },
+    {
+      "id": "F6",
+      "edge": "U28 dispatch + V18 -> X+2c",
+      "status": "DONE",
+      "value": "medium",
+      "evidence": "J019"
+    },
+    {
+      "id": "F7",
+      "edge": "X+2c consumer (P slots +0x4c/+0x50, product array slot +0x84)",
+      "status": "ADMISSIBLE",
+      "value": "medium",
+      "note": "X-side chain; opening P semantics needs new admissions in C3B0 tail"
+    },
+    {
+      "id": "F8",
+      "edge": "writer of caller buffer [callerESP+0x64] (true transform data origin)",
+      "status": "ADMISSIBLE",
+      "value": "high",
+      "note": "caller loop region 0085a331..0085a3fe; new admission required"
+    },
+    {
+      "id": "F9",
+      "edge": "X_store <-> R (R=M32[B+0xC] of the 00527AB0 path)",
+      "status": "REJECTED_ROUTE_FOR_THIS_RUN",
+      "value": "blocked",
+      "note": "no concrete bridge admitted; contract forbids speculative census"
+    },
+    {
+      "id": "F10",
+      "edge": "allocator 0095D3C4 semantics (freshness)",
+      "status": "REJECTED_ROUTE_FOR_THIS_RUN",
+      "value": "low-medium",
+      "note": "opaque; opening it does not advance identity/transform-input questions materially"
+    },
+    {
+      "id": "F11",
+      "edge": "X_store==X_entry runtime confirmation (DF, SEH, live aliasing)",
+      "status": "BLOCKED",
+      "value": "medium",
+      "note": "requires live client/runtime - excluded by this contract (saved sources only)"
+    }
+  ]
+}

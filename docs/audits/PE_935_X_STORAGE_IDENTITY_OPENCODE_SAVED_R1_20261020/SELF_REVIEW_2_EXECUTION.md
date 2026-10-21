@@ -1,0 +1,9 @@
+# SELF_REVIEW_2 - model roles / coverage / budget / schema / publication
+
+1. Model gate: coordinator ses_ea2f8ce67ffeM0nfb7KgqtcHXG (pe-master, glm-5-3), smoke ses_ea2f7a6c2ffe7DO6kXPdkIyIlb (parent=coordinator, finish=stop, 2 completed tools, glm-5-3-default), probe ses_ea2f7704cffeYdzmu5veK7QtAC. MODEL_GATE.json + MODEL_EFFECTIVE_OPTIONS.json pinned from OBSERVED rows, guard start --proof PASS. REQUEST_EFFORT=NOT_OBSERVED, SERVER_EFFECTIVE_EFFORT=UNKNOWN.
+2. Worker JW001 (pe-reconstruction glm-5-3-default, finish=stop) and reviewer QC001 (pe-master-auditor glm-5-3-default, finish=stop) both direct children of the coordinator. Same GLM family - internal QC is fresh-context, NOT model-independent; recorded in MODEL_ATTESTATION and QC_FINDINGS.
+3. FOUND (process): QC packet omissions (J007 prologue rows, J003 convergence rows, NAV02 census) caused reviewer caveats on C2/C4/C7. Dispositions recorded in QC_FINDINGS.json; claims supported by admitted windows the reviewer did not receive. Not a claim defect; recorded as packet-coverage limitation.
+4. Budget (guard status recheck before STOP): rows 953/10000, calls 59/400, bodies 40/64, candidates 20/64 - all in budget; union counting respected (no refunds used).
+5. Admission discipline: every operand read preceded by REQUEST/PLAN/ADMIT/EXTRACT in this run; no pre-admission peeking; DENY none; INCIDENT none.
+6. Schema: all JSON unique-key parsed by guard loader; CSV widths uniform; CLAIMS evidence_status within taxonomy; no claim cites unadmitted operands.
+7. Publication plan: NEW isolated worktree from current LIVE master; allowlist = assessed run documents without literal listing blocks; EXTRACTS/CONTROL/events/NAV, worker and reviewer PROMPTS (contain literal listing rows), and any payload files excluded; no secrets; 8f80190 not pushed and not an ancestor of the new commit (verified pre-push).

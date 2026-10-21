@@ -1,0 +1,57 @@
+{
+  "function": "0085C3B0",
+  "prologue": [
+    {
+      "va": "0085c3b0",
+      "op": "PUSH EBP"
+    },
+    {
+      "va": "0085c3b1",
+      "op": "MOV EBP,ESP"
+    },
+    {
+      "va": "0085c3b3",
+      "op": "AND ESP,0xffffffc0"
+    },
+    {
+      "va": "0085c3b6",
+      "op": "SUB ESP,0xf4"
+    },
+    {
+      "va": "0085c3bc..0085c3be",
+      "op": "PUSH EBX;PUSH ESI;PUSH EDI"
+    }
+  ],
+  "base": "single base F = EBP; aligned ESP is a function of EBP and entry-ESP alignment (AND to 64-byte boundary); within one invocation the post-prologue ESP is constant",
+  "frame_cell": "physical cell = [alignedESP_after_3_pushes + 0x34]; written 0085C3C1 (MOV [ESP+0x34],EDX), read 0085CA3F and 0085CD06 (MOV ESI,[ESP+0x34])",
+  "esp_deltas_in_body": "only balanced SUB ESP,8 / ADD ESP,8 pairs around CALL EDI/EAX/EDX sites (see FRAME_PRESERVATION for the enumeration); all reads/writes of the cell occur at base ESP",
+  "args_via_ebp": {
+    "arg1": "[EBP+0x8]",
+    "arg2": "[EBP+0xc]",
+    "arg3": "[EBP+0x10]",
+    "arg4": "[EBP+0x14]"
+  },
+  "refs": [
+    {
+      "kind": "ADMITTED",
+      "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J008_extract.txt",
+      "extract_pin": {
+        "size_bytes": 1512,
+        "sha256": "F81F67D1E4A9E66664416018F8ED6845BD96FFA0A3A4A8FA17889EC4CC74EA11"
+      },
+      "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000010_ADMIT.json",
+      "admission_event_pin": {
+        "size_bytes": 2203,
+        "sha256": "C54E0C3B8C24593F3632366EBD3923D5EDF0C873DE9D2BC2DFD8960138EA94F3"
+      },
+      "source_rows": [
+        1171247,
+        1171248,
+        1171249,
+        1171250,
+        1171254,
+        1171255
+      ]
+    }
+  ]
+}

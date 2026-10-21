@@ -1,0 +1,60 @@
+{
+  "claim": "The C3B0 frame cell written at 0085C3C1 is preserved unchanged until the read at 0085CD06, on the covered paths",
+  "coverage": "linear admitted windows [0085C3B0,0085C440) U [0085C440,0085C5C0) U [0085C5C0,0085C740) U [0085C740,0085C8C0) U [0085C8C0,0085CA40) U [0085CA40,0085CBC0) U [0085CBC0,0085CD10) = complete listing coverage of [0085C3B0,0085CD10)",
+  "single_writer": "the only write to [ESP+0x34] in the covered range is 0085C3C1; verified also for shifted-ESP windows: a write hitting the cell during SUB ESP,8 would appear as [ESP+0x3c]; the only [ESP+0x3c] writes (0085c4f9 FSTP, 0085c50f FLD) occur at base ESP (before the first SUB ESP,8 at 0085c691)",
+  "esp_discipline": "all ESP modifications in the middle are balanced SUB ESP,8/ADD ESP,8 pairs; no MOV/LEA ESP, no POP into ESP-adjacent redefinition, no alloca pattern in covered rows",
+  "aliasing": "only LEA passed to a call in the covered middle is LEA EAX,[ESP+0x24] (0085ca83, to CALL EDX at 0085ca94); the 0x34 cell address is never passed to any callee",
+  "branch_audit": "all branch targets inside [0085C3B0,0085CD10) are in-window; the only forward exit target is 0085CD27; backward edges from beyond CD10 can only land in covered code that contains no other writer of the cell, so no new writer can be introduced by iteration",
+  "opaque_calls": "~32 CALL EDI/EAX/EDX sites are opaque; they cannot address the cell without its pointer (not passed) and their own frames grow below ESP",
+  "verdict": "STRONGLY_SUPPORTED (static single-writer preservation within full linear coverage; runtime DF/SEH/undetected-aliasing residual risk not excludable without live execution)",
+  "refs": [
+    {
+      "kind": "ADMITTED",
+      "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J008_extract.txt",
+      "extract_pin": {
+        "size_bytes": 1512,
+        "sha256": "F81F67D1E4A9E66664416018F8ED6845BD96FFA0A3A4A8FA17889EC4CC74EA11"
+      },
+      "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000010_ADMIT.json",
+      "admission_event_pin": {
+        "size_bytes": 2203,
+        "sha256": "C54E0C3B8C24593F3632366EBD3923D5EDF0C873DE9D2BC2DFD8960138EA94F3"
+      },
+      "source_rows": [
+        1171255
+      ]
+    },
+    {
+      "kind": "ADMITTED",
+      "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J009_extract.txt",
+      "extract_pin": {
+        "size_bytes": 3651,
+        "sha256": "79E438E7950A6AF87821FBC7A740C94FEBB6E5B197D7A6E17E2E9F8D2E32F7BA"
+      },
+      "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000011_ADMIT.json",
+      "admission_event_pin": {
+        "size_bytes": 2857,
+        "sha256": "C56D0C59A7DC0267BC366C875236C29686FA3CDF9CD73DEB54365AC433EA0BBA"
+      },
+      "source_rows": [
+        1171310
+      ]
+    },
+    {
+      "kind": "ADMITTED",
+      "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J014_extract.txt",
+      "extract_pin": {
+        "size_bytes": 3138,
+        "sha256": "46D7B7E801D196EBD5426554737AFDA58E22B8B5C7293771F9820AA2C3AE65AD"
+      },
+      "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000016_ADMIT.json",
+      "admission_event_pin": {
+        "size_bytes": 3168,
+        "sha256": "983F12AD8D31154F31C6EDD409639BA0E0A0C6128687309AB951143B82258F56"
+      },
+      "source_rows": [
+        1171887
+      ]
+    }
+  ]
+}

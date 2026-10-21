@@ -1,0 +1,57 @@
+{
+  "question": "Origin of the 13-DWORD source copied to X+0x30 in 0085C3B0",
+  "finding": "arg1 of C3B0 = F858 incoming stack arg1. At the sole direct caller (CALL 0085a429, complete literal census in pinned H5), that argument is LEA EAX,[ESP+0x64] pushed last at 0085a426 - i.e. a pointer to a stack buffer INSIDE the caller frame, not a heap object in these rows.",
+  "source_memory": "caller stack buffer at [callerESP+0x64] (52 bytes); its writer lies in the caller body (loop region 0085a331..0085a3fe writes via ESI into a buffer; exact link to [ESP+0x64] NOT yet admitted)",
+  "destination_memory": "X+0x30..X+0x5f via REP MOVSD (13 DWORDs, DF assumed 0 by convention - DF not explicitly checked at runtime, static assumption)",
+  "boundary_of_13_dwords": "arg1 pointer + 0x34 bytes; no bound checks in these rows; copy count 0xD hardcoded",
+  "roles": "13 floats consistent with a 3x4 matrix + translation or 12-float transform + extra; role of each element NOT established",
+  "not_proven": [
+    "that the buffer contains world-space coordinates",
+    "that the caller buffer writer produces placement data",
+    "DF=0 at runtime (static convention only)"
+  ],
+  "refs": [
+    {
+      "kind": "ADMITTED",
+      "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J008_extract.txt",
+      "extract_pin": {
+        "size_bytes": 1512,
+        "sha256": "F81F67D1E4A9E66664416018F8ED6845BD96FFA0A3A4A8FA17889EC4CC74EA11"
+      },
+      "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000010_ADMIT.json",
+      "admission_event_pin": {
+        "size_bytes": 2203,
+        "sha256": "C54E0C3B8C24593F3632366EBD3923D5EDF0C873DE9D2BC2DFD8960138EA94F3"
+      },
+      "source_rows": [
+        1171262,
+        1171267,
+        1171269,
+        1171271,
+        1171273
+      ]
+    },
+    {
+      "kind": "ADMITTED",
+      "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J020_extract.txt",
+      "extract_pin": {
+        "size_bytes": 944,
+        "sha256": "BCFFD0FE8F842271E14315C5725604CC0D74D287516FE2063EA2CA2E02F35A20"
+      },
+      "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000023_ADMIT.json",
+      "admission_event_pin": {
+        "size_bytes": 1971,
+        "sha256": "4D45216D92CB33885B1F16BD163C06EEA77DCB260BDD86F54CF5FE885412D708"
+      },
+      "source_rows": [
+        1168758,
+        1168759,
+        1168760,
+        1168761,
+        1168762,
+        1168763,
+        1168764
+      ]
+    }
+  ]
+}

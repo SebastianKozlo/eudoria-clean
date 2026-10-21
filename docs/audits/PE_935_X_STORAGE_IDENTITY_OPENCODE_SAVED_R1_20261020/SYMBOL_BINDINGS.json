@@ -1,0 +1,146 @@
+{
+  "symbols": [
+    {
+      "symbol": "A_alloc_shape",
+      "expression": "EAX result of CALL 0095D3C4 at 00857fe3 (PUSH 0x80)",
+      "register": "EAX",
+      "observation_va": "00857fe3",
+      "frame": "F858",
+      "time": "before field init block",
+      "premises": [
+        "allocator body 0095D3C4 NOT opened",
+        "fail path JZ 008580cf"
+      ],
+      "equality_status": "distinct call site vs X_init_in; value identity UNKNOWN"
+    },
+    {
+      "symbol": "A_vptr",
+      "expression": "MOV dword ptr [EAX],0xa91db8 at 00858059",
+      "register": "[EAX]",
+      "observation_va": "00858059",
+      "frame": "F858",
+      "time": "after A field init begins",
+      "premises": [
+        "EAX unchanged from 00857fe3 result through 00858059 (rows 00857ffe..0085805f contain no EAX redefinition; windows J005+J006 contiguous)"
+      ],
+      "equality_status": "first DWORD of A object"
+    },
+    {
+      "symbol": "X_init_in",
+      "expression": "EAX result of CALL 0095D3C4 at 0085821e (PUSH 0x68), moved to ECX at 0085823e",
+      "register": "ECX at 00858240",
+      "observation_va": "0085823e",
+      "frame": "F858",
+      "time": "immediately before CALL 0085D410",
+      "premises": [
+        "cached also at [ESP+0x18] at 00858226",
+        "fail path JZ 00858249 skips CALL with ESI=0"
+      ],
+      "equality_status": "NOT proven equal or unequal to A_alloc_shape"
+    },
+    {
+      "symbol": "X_init_out",
+      "expression": "EAX after CALL 0085D410, MOV ESI,EAX at 00858245",
+      "register": "EAX/ESI",
+      "observation_va": "00858245",
+      "frame": "F858",
+      "time": "after D410",
+      "premises": [
+        "D410 locally returns entry this (prior SRB-C3, retained)"
+      ],
+      "equality_status": "= X_init_in locally (prior D410 contract); this-run flow CONFIRMED"
+    },
+    {
+      "symbol": "X_entry",
+      "expression": "ECX = ESI at 00858260 before CALL 0085C3B0 at 0085826d",
+      "register": "ECX",
+      "observation_va": "00858260",
+      "frame": "F858",
+      "time": "C3B0 dispatch",
+      "premises": [
+        "ESI=X_init_out or 0 on alloc-fail"
+      ],
+      "equality_status": "X_entry==X_init_out CONFIRMED within admitted rows"
+    },
+    {
+      "symbol": "X_frame0",
+      "expression": "EDX=entry ECX of C3B0, stored [ESP+0x34] at 0085C3C1",
+      "register": "[ESP+0x34] cell",
+      "observation_va": "0085C3C1",
+      "frame": "C3B0 aligned frame",
+      "time": "C3B0 prologue",
+      "premises": [
+        "ESP after PUSH EBP;MOV EBP,ESP;AND ESP,~0x3F;SUB 0xF4;3 pushes"
+      ],
+      "equality_status": "X_frame0==X_entry CONFIRMED"
+    },
+    {
+      "symbol": "X_store",
+      "expression": "ESI = dword [ESP+0x34] at 0085CD06 (and 0085CA3F)",
+      "register": "ESI",
+      "observation_va": "0085CD06",
+      "frame": "C3B0 aligned frame",
+      "time": "dispatch read",
+      "premises": [
+        "single-writer preservation chain (FRAME_PRESERVATION)"
+      ],
+      "equality_status": "X_store==X_frame0 STRONGLY_SUPPORTED"
+    },
+    {
+      "symbol": "U28",
+      "expression": "ECX = dword [ESI+0x28] at 0085CD0a",
+      "register": "ECX",
+      "observation_va": "0085CD0a",
+      "frame": "C3B0",
+      "time": "dispatch",
+      "premises": [],
+      "equality_status": "field of X_store; class NOT established"
+    },
+    {
+      "symbol": "V18",
+      "expression": "EAX after CALL EAX (slot +0x18 of [U28] vtable), stored [ESI+0x2c] at 0085CD17",
+      "register": "EAX",
+      "observation_va": "0085CD17",
+      "frame": "C3B0",
+      "time": "post-dispatch",
+      "premises": [
+        "opaque virtual call, PUSH EBX arg"
+      ],
+      "equality_status": "fresh allocation NOT established"
+    },
+    {
+      "symbol": "B_F858_this",
+      "expression": "ECX at F858 entry, stored [ESP+0x14] at 00857fba",
+      "register": "ECX/[ESP+0x14]",
+      "observation_va": "00857fba",
+      "frame": "F858 prologue",
+      "time": "entry",
+      "premises": [],
+      "equality_status": "relation to 00527AB0 owner B: NOT established"
+    },
+    {
+      "symbol": "P_X2C",
+      "expression": "ECX = dword [ESI+0x2c] at 0085cd27; vtable slots +0x4c/+0x50 called",
+      "register": "ECX",
+      "observation_va": "0085cd27",
+      "frame": "C3B0",
+      "time": "after dispatch",
+      "premises": [
+        "opaque"
+      ],
+      "equality_status": "identity UNKNOWN; X-side only, not R-side"
+    },
+    {
+      "symbol": "arg1_transform_source",
+      "expression": "value at [ESP+0xa4] read 00858253 (= F858 frame [ESP+0x9c] = F858 incoming stack arg1) = LEA EAX,[ESP+0x64] pushed at caller 0085a426",
+      "register": "stack",
+      "observation_va": "0085a429/0085a426",
+      "frame": "caller of F858",
+      "time": "call setup",
+      "premises": [
+        "caller stack buffer; its writer not yet admitted"
+      ],
+      "equality_status": "CONFIRMED as pointer path"
+    }
+  ]
+}

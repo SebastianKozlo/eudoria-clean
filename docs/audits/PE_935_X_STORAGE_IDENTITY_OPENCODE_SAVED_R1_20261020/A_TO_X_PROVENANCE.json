@@ -1,0 +1,132 @@
+{
+  "question": "Is the earlier 0x80 allocation (A_alloc_shape) the ECX receiver of CALL 0085D410 at 00858240?",
+  "answer": "NO per register provenance; the D410 receiver X_init_in is the result of a DIFFERENT, LATER allocation call (PUSH 0x68, CALL 0095D3C4 at 0085821e). Value equality/inequality between the two results remains UNKNOWN (allocator body not opened).",
+  "chain": [
+    {
+      "va": "00857fe3",
+      "fact": "CALL 0095D3C4 with PUSH 0x80 -> EAX (A_alloc_shape)",
+      "ref": {
+        "kind": "ADMITTED",
+        "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J006_extract.txt",
+        "extract_pin": {
+          "size_bytes": 722,
+          "sha256": "48BE454A288E161E82467F0883368A60132DF492A0763BAA88A4A3B06DF3C5F5"
+        },
+        "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000007_ADMIT.json",
+        "admission_event_pin": {
+          "size_bytes": 1949,
+          "sha256": "7CBC294827D1D21FE9958BC2A59A52E90400BFF06AD6A16451174C8ABDF6195E"
+        },
+        "source_rows": [
+          1166029,
+          1166030,
+          1166031
+        ]
+      }
+    },
+    {
+      "va": "0085800a",
+      "fact": "MOV ESI,EAX links A to the ESI-based field-write block",
+      "ref": {
+        "kind": "ADMITTED",
+        "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J005_extract.txt",
+        "extract_pin": {
+          "size_bytes": 1804,
+          "sha256": "4AB32151A2A49F0A90DB2451ADF827B79383D57E3F07D70DAE4D95A73BB725AB"
+        },
+        "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000006_ADMIT.json",
+        "admission_event_pin": {
+          "size_bytes": 2239,
+          "sha256": "79B08D4DB7A19DED47F6A9208334729090BE0A80DB863790AB6314C13A9FCFED"
+        },
+        "source_rows": [
+          1166042
+        ]
+      }
+    },
+    {
+      "va": "00858059",
+      "fact": "MOV dword ptr [EAX],0xa91db8 writes A first DWORD (vptr)",
+      "ref": {
+        "kind": "ADMITTED",
+        "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J005_extract.txt",
+        "extract_pin": {
+          "size_bytes": 1804,
+          "sha256": "4AB32151A2A49F0A90DB2451ADF827B79383D57E3F07D70DAE4D95A73BB725AB"
+        },
+        "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000006_ADMIT.json",
+        "admission_event_pin": {
+          "size_bytes": 2239,
+          "sha256": "79B08D4DB7A19DED47F6A9208334729090BE0A80DB863790AB6314C13A9FCFED"
+        },
+        "source_rows": [
+          1166070
+        ]
+      }
+    },
+    {
+      "va": "0085821e",
+      "fact": "CALL 0095D3C4 with PUSH 0x68 -> EAX (X_init_in), cached [ESP+0x18]",
+      "ref": {
+        "kind": "ADMITTED",
+        "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J002_extract.txt",
+        "extract_pin": {
+          "size_bytes": 2619,
+          "sha256": "19EB607C69F409C8A2499A25EA1202177572B28E47B62C8DF9EC9E936C9FFB25"
+        },
+        "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000003_ADMIT.json",
+        "admission_event_pin": {
+          "size_bytes": 2700,
+          "sha256": "F29549D03229340AD44F1132829288AAB9DEE0A3EE8B3FF804612D1F317A0895"
+        },
+        "source_rows": [
+          1166195,
+          1166196,
+          1166198
+        ]
+      }
+    },
+    {
+      "va": "0085823e",
+      "fact": "MOV ECX,EAX: last live ECX before CALL 0085D410",
+      "ref": {
+        "kind": "ADMITTED",
+        "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J002_extract.txt",
+        "extract_pin": {
+          "size_bytes": 2619,
+          "sha256": "19EB607C69F409C8A2499A25EA1202177572B28E47B62C8DF9EC9E936C9FFB25"
+        },
+        "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000003_ADMIT.json",
+        "admission_event_pin": {
+          "size_bytes": 2700,
+          "sha256": "F29549D03229340AD44F1132829288AAB9DEE0A3EE8B3FF804612D1F317A0895"
+        },
+        "source_rows": [
+          1166205
+        ]
+      }
+    },
+    {
+      "va": "00858240",
+      "fact": "CALL 0085D410 receiver = X_init_in (0x68 result), NOT A per flow",
+      "ref": {
+        "kind": "ADMITTED",
+        "extract_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\EXTRACTS\\J003_extract.txt",
+        "extract_pin": {
+          "size_bytes": 948,
+          "sha256": "123809E0377744B626BA2B8DC8CAEC9D7085A50B2DFB09F5409483A791673F8B"
+        },
+        "admission_event_path": "D:\\Eudoria_Reconstruction\\99_Audits\\PE_935_X_STORAGE_IDENTITY_OPENCODE_SAVED_R1_20261020\\CONTROL\\EVENTS\\000004_ADMIT.json",
+        "admission_event_pin": {
+          "size_bytes": 2114,
+          "sha256": "A80023B00C6007B8450F1CD9EB6E0B67C8983AC55D7A5930449011B117D6C290"
+        },
+        "source_rows": [
+          1166206
+        ]
+      }
+    }
+  ],
+  "countermodel": "If 0095D3C4 returned the same address for both requests (non-fresh or aliasing allocator), X_init_in==A_alloc_shape and D410 would zero A's first DWORD including 0xa91db8. Not excludable without opening 0095D3C4; retained as UNKNOWN. The structural claim (different call sites, different size requests) is CONFIRMED.",
+  "implication_for_prior_SRB_C2": "The prior chain 'X_store = fresh heap 0x80 B, vptr A91DB8, destroyed in F858' is corrected: the D410/C3B0 object originates from a 0x68 allocation, not the 0x80 allocation. A91DB8 belongs to the A object (0x80), which is separately pushed into a vector at 00858206."
+}
