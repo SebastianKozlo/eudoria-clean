@@ -1,0 +1,315 @@
+{
+ "run_id": "PE_935_OWNER_BINDING_TRANSFORM_ROLE_HIGH_TASK_OPENCODE_SAVED_R1_20261023",
+ "era": "PE_EU_9_3_5_SAVED_ONLY",
+ "evidence_basis": "deterministic H5 packets (I0082, sha256 642CC29A01B8AD6F783E82E14DA4A61FA00BA6A3EC6DF98EDFF28AC25CC1D8DB) + 12 admitted saved data sources; H5 = saved representation, NOT automatically truth",
+ "interventions": "NONE (static saved-packet analysis only; no runtime, no hooks, no original EXE/assets)",
+ "note": "Public sanitized projection of the sealed local CLAIMS.json. Evidence references are packet row identifiers (VA+H5line); no RAW listings, SDK source, payloads, prompts, model answers, DB content or secrets are published. The sealed local package (MANIFEST_SHA256.csv pin C2E9EABA48439EB03081D24A372617874EE1B686DF595F0BD6C2110B824A4072) is the integrity reference.",
+ "preserved_baseline": "VSB-A01..A06 przyjete addytywnie; slot3 targets 0085B6A0/005278A0 zachowane; main predicate type3..7 OR(+7C==0 AND +78!=0) bez zmian; x87 (q-A)+A bez uproszczenia; WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CURSOR_SOURCE_MEDIUM=UNKNOWN; CANONICAL_GATE_EFFECT=NONE",
+ "qc_round_summary": {
+  "qsci": {
+   "verdict": "QC_PASS_WITH_FINDINGS",
+   "rows": 79,
+   "findings": "1xP1 (stack-label ambiguity), 4xP2",
+   "carry_tension": "CARRY_ERRONEOUS (resolved)"
+  },
+  "qscr": {
+   "verdict": "QC_PARTIAL",
+   "rows": 228,
+   "findings": "1xP1 (C-R02 overclaim, corrected), 1xP2 (R01A carry line82), 4xP3",
+   "note": "corrections applied to CLAIMS; no third QC under new name; R-wave stays QC_PARTIAL per contract"
+  }
+ },
+ "claims": [
+  {
+   "claim_id": "C-I01",
+   "text": "Ramka 004C47F0-family: __thiscall z frame-SEH prologiem; this->ESI (row013); arg1 dword @entry+4; klucz lookupu = dword lokalny [entry-0xB4] ladowany na VA 004C484E i PUSHowany jako jedyny stack-arg lookupu 008544D0(this=manager z 004154F0).",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded (I01A rows001-033 + I01B rows034-066, VA 004C47F0..004C48DD)",
+   "evidence": "I01A rows 001-033; RESULT.md I01A",
+   "premises": "PRIOR-1 (004154F0 singleton plainRET, VSB-A05), PRIOR-2 (008544D0 out/RET4)",
+   "classification": "new",
+   "qc_scope": "QSCI",
+   "qc_note": "QSCI P1: etykiety absolutne slotow lokalnych ([entry-0xB4] klucz, [entry-0x5C] float) niosa ambiwalencje +-4 wzgledem bilansu PUSH workerow; INSTRUKCJE odczytu (MOV ECX,[ESP+0x10] row024; FLD [ESP..] row033) CONFIRMED, ale absolutne etykiety slotow = UNVERIFIED detail; operative joins (receiver, key-as-sole-arg) nietkniete",
+   "qc_result": "QC_CONFIRMED (QSCI)"
+  },
+  {
+   "claim_id": "C-I02",
+   "text": "Pochodzenie WARTOSCI klucza (writer lokalu [entry-0xB4]) oraz wartosci float [entry-0x5C]: nieobserwowane w oknie; kandydaci (745360/7453d0) zgloszeni bez weryfikacji.",
+   "status": "UNVERIFIED",
+   "scope": "packet-bounded",
+   "evidence": "I01A RESULT sekcja 2 i 5",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCI (check: no invention of origin)",
+   "qc_note": "QSCI P1: jak wyzej - etykieta slotu klucza [entry-0xB4] to detail UNVERIFIED; load i def-use CONFIRMED",
+   "qc_result": "QC_CONFIRMED-with-label-caveat (QSCI P1)"
+  },
+  {
+   "claim_id": "C-I03",
+   "text": "Out-store 004C4861: ADRES = [ESI] (this+0), WARTOSC = EAX = pointer pary z lookupu; store NIEWARUNKOWANY przed JZ (row031); przy NULL zapisuje 0.",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded",
+   "evidence": "I01A row029-031",
+   "premises": "PRIOR-2",
+   "classification": "new",
+   "qc_scope": "QSCI",
+   "qc_result": "QC_CONFIRMED (QSCI)"
+  },
+  {
+   "claim_id": "C-I04",
+   "text": "Polarnosc JZ@row031 ROZSTRZYGNIETA (QSCI): JZ testuje ZF z TEST EAX,EAX (row029); EAX==0 (pusty lookup) -> JZ taken -> row064 skip-branch (this=lokalny bufor dla 00730F60); sukces EAX!=0 -> ZF=0 -> JZ pominiety (fall-through rows034+). Carry I01A task-message (flag=1, JZ bierze skok) = CARRY_ERRONEOUS (konflacja z byte-flaga row022).",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded",
+   "evidence": "I01A rows029-033 + I01B rows055-066",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCI (obligation: RESOLVE_CARRY_TENSION_JZ_ROW031)",
+   "qc_result": "QC_CONFIRMED (QSCI); carry error documented as OBTR-A09"
+  },
+  {
+   "claim_id": "C-I05",
+   "text": "MAIN RECEIVER_JOIN: receiver wywolania 0085B3E0@004C488A = zapisany wczesniej ptr pary przeladowany z [ESI]; B_at_call rowny wartosciowo B_lookup (store bezwarunkowy); ABI thiscall, 2 stack args (LEA local @ESP+0x4C, PUSH 1), oczekiwany cleanup RET 8.",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded dataflow (rows046-047)",
+   "evidence": "I01B rows044-047; I01A row030",
+   "premises": "PRIOR-1/2",
+   "classification": "new",
+   "qc_scope": "QSCI (literal proof rows 030, 046-047 + kontrmodel out-po-opaque-CALL)",
+   "qc_result": "QC_CONFIRMED (QSCI)"
+  },
+  {
+   "claim_id": "C-I06",
+   "text": "B (para) jest polimorficzne: vtable ptr w polu B+0; metoda slot5 [vptr+0x14] wolana wirtualnie (rows035-038), jej wynik KONSUMOWANY (TEST AL,AL rows041-042); wynik 0085B750 tez konsumowany (rows039-042); wynik 0085B3E0 NIEKONSUMOWANY; wynik 0085ADB0 NIEKONSUMOWANY; wynik 006B22D0 konsumowany (TEST row054-055). KOREKTA po QC (poprzednie sformulowanie zawyszalo jedyna konsumpcje do 006B22D0).",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded",
+   "evidence": "I01B rows035-055",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCI",
+   "qc_result": "QC_STRONGLY_SUPPORTED (QSCI P2 narrowing applied)"
+  },
+  {
+   "claim_id": "C-R01",
+   "text": "Kontrakt wywolan 00856800 z 0085B4D5/0085B56E: identyczny schemat R=[EDI+0xC]->PUSH; PUSH 2; PUSH const-float (wartosc z globali 0x00A80594/0x00A7AF9C przez FLD/FSTP); PUSH trio-ptr; CALL 00415570; MOV ECX,EAX; CALL 00856800.",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded (R01C rows001-046)",
+   "evidence": "R01C RESULT + CALL_CONTRACT.csv",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_CONFIRMED (QSCR)"
+  },
+  {
+   "claim_id": "C-R02",
+   "text": "Fork H-A rozstrzygniety NA POZIOMIE KONTRAKTU: 00856800 konsumuje argumenty [E+4..E+0x10] i konczy RET 0x10 -> 00415570 jest klasy RETn0 bez cleanupu stack args (fork H-B REJECTED). EFEKT EAX 00415570 = UNVERIFIED: cialo 00415570 nieobecne w H5 (0 wierszy w 415540:4155D0; H5 nie pokrywa 004154xx-004155xx w ogole, incl. 004154F0) i brak saved reprezentacji w 610-pinowym katalogu (0 trafien dla 415570; 3 istnieja dla 004154F0). Tozsamosc this_00856800 pozostaje UNKNOWN; literalny passthrough EAX bylby semantycznie niespojny z oknem2 R01C (EAX=&trio) i kontraktem this w 00856800 (this+0x18 RAII, this->[0x44]) -> mozliwe, ze 00415570 modyfikuje EAX (np. zwraca obiekt).",
+   "status": "CONFIRMED_ONLY_AT_CONTRACT_LEVEL / EAX_EFFECT_UNVERIFIED",
+   "scope": "cross-packet inference (R01A in-packet + R01C contract)",
+   "evidence": "R01A rows: prolog arg reads + row090 RET 0x10",
+   "premises": "R01C carry",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_PARTIAL (QSCR P1) — narrowing applied; tail 00415570 = DATA_BARRIER (no saved representation)"
+  },
+  {
+   "claim_id": "C-R03",
+   "text": "00856800 = kompletny thiscall bool-query wrapper: args (vec3* trio, float by value, int selector, obj* R), RET 0x10, zwraca bool z wirtualnego zapytania.",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded (R01A rows001-090, cialo kompletne)",
+   "evidence": "R01A RESULT",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_CONFIRMED (QSCR)"
+  },
+  {
+   "claim_id": "C-R04",
+   "text": "KOREKTA carry R01C: arg2/arg3 (callee-view [E+8]) to WARTOSC float (FLD ze slotu), nie pointer do dereferencji; wartosc pochodzi z pamieci globalnych stalych 0x00A80594/0x00A7AF9C — wartosc NIEZNANA (poza pakietem).",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded (R01A row032)",
+   "evidence": "R01A sekcja 2",
+   "premises": "brak",
+   "classification": "new_correction",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_CONFIRMED (QSCR)"
+  },
+  {
+   "claim_id": "C-R05",
+   "text": "R w 00856800: uzywane WYLACZNIE jako thiscall-this dla 0085C360(0) pre-query i 0085C360(1) post-query (gated R!=NULL, has_R byte); nigdy nie czytane jako dane; czysty filtr liczbowy REJECTED; rola: bracket-object wokol zapytania.",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded (R01A rows012/020/034-037/075-081)",
+   "evidence": "R01A RESULT sekcja 2",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_CONFIRMED (QSCR)"
+  },
+  {
+   "claim_id": "C-R06",
+   "text": "Rdzen zapytania 00856800: wirtualny call na this->[0x44] (obiekt polimorficzny), vtable slot 0x154, args (&vec3_trio, selector+1, 1, &block32{int 2; vec3(0,0,0); vec3 trio; float arg2}); dispatch selector 0/1/2, runtime=2 -> arg=3.",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded (R01A rows039-073)",
+   "evidence": "R01A RESULT sekcja 3-4",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_CONFIRMED (QSCR)"
+  },
+  {
+   "claim_id": "C-R07",
+   "text": "0085C360 = czysty fan-out forwarder: p=R->[0x2C]; n=p->vt[0x4C](); arr=p->vt[0x50](); petla for: elem->vt[0x8]((arg==0)?1:0); RET 0x4; cialo kompletne (rows001-035); zero zapisow na R; control flow identyczny dla arg 0/1; flaga przekazywana do elementow INWERTOWANA (PRE->1, POST->0).",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded (R02 rows001-035)",
+   "evidence": "R02 RESULT + C360_FACTS.csv",
+   "premises": "R01A bracket contract",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_note": "QSCR P3 caveat: zero zapisow na R = w obrebie widocznego ciala; efekty transitywne przez elem->vt[0x8] (opaque CALL) UNKNOWN",
+   "qc_result": "QC_CONFIRMED (QSCR, z caveatem)"
+  },
+  {
+   "claim_id": "C-R08",
+   "text": "ROLA R: holder/agregator kolekcji polimorficznych elementow (holder @ R+0x2C z vt[0x4C]=licznik, vt[0x50]=tablica; elementy z metoda vt[0x8]); KOREKTA PO QC: poprzednie slowo owner -> holder/agregator (ownership semantyczny nieudowodniony); semantyka booleana elementow (lock/include/refcount/invalidate/other) = UNKNOWN; domena (collision/physics/building/world) = NONE_OF_THE_ABOVE (brak dowodu).",
+   "status": "STRONGLY_SUPPORTED",
+   "scope": "cross-packet structural (R01A+R02); semantyka UNKNOWN",
+   "evidence": "R02 RESULT",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_STRONGLY_SUPPORTED (QSCR; mechanizm uciety do wierszy; semantyka UNKNOWN utrzymana)"
+  },
+  {
+   "claim_id": "C-R09",
+   "text": "B identyczne z EDI w oknach caller (B at EDI): PLAUSIBLE — def EDI poza oknami; window-span spojnosc (R01C okna + S02A okno + epilog RET 8) spojna z jednym cialem 0085B3E0, ale brak odczytu gapow (85B3E0..85B48D, 85B4DA..85B522, 85B570..85B5BC).",
+   "status": "PLAUSIBLE",
+   "scope": "bounded windows",
+   "evidence": "R01C T3/T9/T10, S02A RESULT",
+   "premises": "I01B dispatch ABI",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_PLAUSIBLE (QSCR zgoda)"
+  },
+  {
+   "claim_id": "C-R10",
+   "text": "Trio caller-frame: w1=([E+0x28],[E+0x2C],S-qword 0xA7B2D0), S=ST_prev+[E+0x18]; w2=([E2+0x10]+T, T+[E2+0x14], [E2+0x18]+qword 0xA79818); vec3-like struktura; semantyczne nazwy (REQUESTED_POSITION itd.) = UNKNOWN.",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded struktura / semantyka UNKNOWN",
+   "evidence": "R01C Q3, R01A trio consumption",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCR",
+   "qc_result": "QC_CONFIRMED (QSCR, P3 details noted)"
+  },
+  {
+   "claim_id": "C-S01",
+   "text": "entries[1]/VT+4 zakotwiczonych tabel A91E4C/A7DCB0 NIEODZYSKALNE z 12 przeszukanych saved zrodel (S01: 5 plikow; S01B: 7 plikow) — case (a) per plik z pelnymi denominatorami (S01: 159 struktur/95 vtable/154 entries; S01B: 7 plikow/851664B/28296 linii/98 skanow regex).",
+   "status": "REJECTED_AS_RECOVERABLE / DATA_BARRIER",
+   "scope": "bounded: 12 admitted saved sources",
+   "evidence": "S01 + S01B RESULT, SLOT1_CHAINS.csv, REGEX_CENSUS.csv",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCI (barrier spot-check)",
+   "qc_result": "QC_STRONGLY_SUPPORTED spot-check (QSCI: 3 skany liczbowo zgodne; licznik nie-slepy)"
+  },
+  {
+   "claim_id": "C-S02",
+   "text": "Schemat {table_base, entries[]} i konwencja offset+4 potwierdzone w korpusie dla INNYCH rodzin (3 egzemplarze: ZS2 MOV [EAX+0x4],imm32; F1_HEX +4->0x0070BF50; DWORD_ROSTER entries[i]=head+4i); bliska konflacja A91A4C (ArkCommunicator) odrzucona.",
+   "status": "CONFIRMED",
+   "scope": "admitted corpus, other families",
+   "evidence": "S01B RESULT",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCI"
+  },
+  {
+   "claim_id": "C-S03",
+   "text": "Deskryptory RTTI MovableObject obecne w S1_RTTI_CENSUS (0x00B79960/0x00B79984) — tylko tozsamosc klasy, zero slotow; 2 false-positives 0x00B9A7DC odnotowane.",
+   "status": "CONFIRMED",
+   "scope": "admitted source S1",
+   "evidence": "S01B RESULT pkt 4",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCI"
+  },
+  {
+   "claim_id": "C-S04",
+   "text": "Zachowane konflikty wewnetrzne korpusu: I0503 classimpl base -0x1C (4 pary, entries zgodne z kanonicznymi slotami 0-5); I0504 odd-VA 0x0095D4FA REJECTED jako code-pointer (podejrzenie artefaktu skanera).",
+   "status": "CONFIRMED",
+   "scope": "admitted corpus",
+   "evidence": "S01 RESULT konflikty",
+   "premises": "brak",
+   "classification": "prior_preserved",
+   "qc_scope": "none (prior S01, read-only)"
+  },
+  {
+   "claim_id": "C-S05",
+   "text": "0085B5CE = wirtualny dispatch PRZEZ VT+4 (entries[1]) na obiekcie EDI (thiscall, ECX=this z row007; args: &local E0-0x30, [ESP+0x54]); callee czyci 8B; trio NIE budowane w oknie; own stores tylko 2 arg-PUSH; callee identity = DATA_BARRIER.",
+   "status": "CONFIRMED",
+   "scope": "packet-bounded mechanizm / target UNKNOWN",
+   "evidence": "S02A RESULT + CALLWINDOW_FACTS.csv",
+   "premises": "DATA_BARRIER z S01/S01B",
+   "classification": "new",
+   "qc_scope": "QSCI",
+   "qc_result": "QC_STRONGLY_SUPPORTED (QSCI)"
+  },
+  {
+   "claim_id": "C-S06",
+   "text": "Epilog w oknie S02A (POPx3, ADD ESP 0x40, RET 8) spojny z ABI funkcji 0085B3E0 z I01B (thiscall 2 stack args) — wspolne cialo dla okien R01C/S02A STRONGLY_SUPPORTED (bez odczytu gapow).",
+   "status": "STRONGLY_SUPPORTED",
+   "scope": "structural, window-bounded",
+   "evidence": "S02A RESULT pkt 5; I01B SQ2",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "QSCI"
+  },
+  {
+   "claim_id": "C-X01",
+   "text": "WORLD_INSTANCE_RELEVANCE: UNVERIFIED — lancuch key->lookup->B->query nie dowodzi placementu instancji swiata; bool query + fan-out bracket to nie placement.",
+   "status": "UNVERIFIED",
+   "scope": "analyzed windows",
+   "evidence": "all RESULTs",
+   "premises": "CONTRACT section 5/8",
+   "classification": "new",
+   "qc_scope": "none (relevance verdict)"
+  },
+  {
+   "claim_id": "C-X02",
+   "text": "MODEL_RESOURCE_BINDING: UNVERIFIED — brak model/resource ID w analizowanych oknach.",
+   "status": "UNVERIFIED",
+   "scope": "analyzed windows",
+   "evidence": "workers' rozroznienia",
+   "premises": "brak",
+   "classification": "new",
+   "qc_scope": "none"
+  },
+  {
+   "claim_id": "C-X03",
+   "text": "BUILDING_ROLE (B jako budynek): UNKNOWN — nie ustalono ani potwierdzono, ani wykluczono.",
+   "status": "UNKNOWN",
+   "scope": "whole run",
+   "evidence": "brak dowodu w obie strony",
+   "premises": "CONTRACT section 3",
+   "classification": "carried_forward",
+   "qc_scope": "none"
+  },
+  {
+   "claim_id": "C-X04",
+   "text": "HISTORICAL_TRANSFORM_PROVENANCE: NOT_ESTABLISHED — zaden transform nie ma ustalonego zrodla historycznego; float trio/block32 role UNKNOWN; brak zapisu transform w analizowanych oknach (zapisy tylko przez CALL-niewidoczne ciala).",
+   "status": "NOT_ESTABLISHED",
+   "scope": "whole run",
+   "evidence": "all RESULTs",
+   "premises": "VSB-A01/A03 retained",
+   "classification": "carried_forward",
+   "qc_scope": "none"
+  },
+  {
+   "claim_id": "C-G01",
+   "text": "SDK reference (14 pinned files, w tym Win32/NiAVObject_Win32.cpp, NiTransform.inl/h 1.2.2.6): NOT READ this run — zero SDK exposures; uzasadnienie: zaden claim world-propagation nie powstal z fal I/R/S, wiec kontrproba SDK nie ma na czym pracowac (kontrmodel pozostaje ENGINEERING_REFERENCE_ONLY per VSB-A03).",
+   "status": "N/A_NOT_EXERCISED",
+   "scope": "this run",
+   "evidence": "brak claimow propagation",
+   "premises": "VSB-A03, LOCAL_GAMEBRYO_REFERENCE_POLICY",
+   "classification": "policy_decision",
+   "qc_scope": "QACCOUNT (scope audit)"
+  }
+ ]
+}

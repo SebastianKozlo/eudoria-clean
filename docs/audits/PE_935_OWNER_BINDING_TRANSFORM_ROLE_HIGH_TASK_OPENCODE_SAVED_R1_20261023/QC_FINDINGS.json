@@ -1,0 +1,43 @@
+{
+ "run_id": "PE_935_OWNER_BINDING_TRANSFORM_ROLE_HIGH_TASK_OPENCODE_SAVED_R1_20261023",
+ "qsci": {
+  "verdict": "QC_PASS_WITH_FINDINGS",
+  "theses": "C-I01..C-I06: CONFIRMED (C-I04 upgraded, C-I06 narrowed); C-S05 STRONGLY_SUPPORTED; C-S01 spot-check STRONGLY_SUPPORTED",
+  "carry_tension_resolution": "CARRY_ERRONEOUS (JZ@row031 tests TEST EAX,EAX row029; success=fall-through; carry conflated with byte-flag row022)",
+  "barrier_spot_check": "3/3 skany liczbowo zgodne (GA3 A91E4C=0, A7DCB0=0; DWORD_ROSTER=0; S1 MovableObject=4, A7DC=2); census sums 851664B/28296L/98 exact",
+  "findings": [
+   {
+    "severity": "P1",
+    "finding": "niespojnosc modelu stosu I01A/I01B: etykiety [entry-0xB4]/[-0x5C] off-by-4 vs wlasny bilans PUSH; cdecl kontrmodel odrzucony zlego adresu; operative joins nietkniete"
+   },
+   {
+    "severity": "P2",
+    "count": 4,
+    "finding": "C-I06 konsumpcja zawyzszona; inne pomniejsze (patrz QC_RESULT.md QSCI)"
+   }
+  ],
+  "report": "JOBS/QSCI_RECEIVER_JOIN_AND_BARRIER_QC/QC_RESULT.md"
+ },
+ "qscr": {
+  "verdict": "QC_PARTIAL",
+  "theses": "C-R01/03/04/05/06/07/10 QC_CONFIRMED; C-R08 QC_STRONGLY_SUPPORTED (holder/agregator; semantyka UNKNOWN); C-R09 QC_PLAUSIBLE; C-R02 narrowed (contract-level only)",
+  "findings": [
+   {
+    "severity": "P1",
+    "finding": "C-R02 '00415570=plain RET' overclaim; EAX effect poza pakietami; tail 00415570 nieobecny w H5 i katalogu (DATA_BARRIER); correction applied to CLAIMS"
+   },
+   {
+    "severity": "P2",
+    "finding": "R01A carry linia 82 prawdziwa tylko dla okna1"
+   },
+   {
+    "severity": "P3",
+    "count": 4,
+    "finding": "caveaty opaque-CALL, owner->holder, detale C-R10, mojibake R01A RESULT"
+   }
+  ],
+  "report": "JOBS/QSCR_R_ROLE_AND_FANOUT_QC/QC_RESULT.md"
+ },
+ "overall_science_qc": "I-wave QC_PASS_WITH_FINDINGS; R-wave QC_PARTIAL (corrections applied, disclosed); S-barrier spot-checked STRONGLY_SUPPORTED",
+ "pending": "QACCOUNT"
+}
