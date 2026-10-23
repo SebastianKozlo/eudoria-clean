@@ -1,0 +1,172 @@
+{
+  "run_id": "PE_935_PROVIDER_PROVENANCE_APPLIER_JOIN_HIGH_TASK_OPENCODE_SAVED_R1_20261023",
+  "claim_projection": "public sanitized projection of the sealed CLAIMS.json (same claim texts and statuses; internal job/session references retained only where they are provenance)",
+  "claims": {
+    "CL-1": {
+      "text": "B=dispatching object of 00528380; this=ECX->EBP @00528387; frame SUB ESP,0x88 @00528380; RET 0x8 on both exits (005285E0 normal, 005285FC guard)",
+      "status": "CONFIRMED",
+      "scope": "saved H5 window 00528380..0052860A",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "S01 executor job failed twice (length); window map is master-derived, labeled; fresh QSCI must verify from packet"
+    },
+    "CL-2": {
+      "text": "Entry guards: null [B+0xC]@00528389/0052838D and null [B+0x10]@00528393/00528397 jump to 005285E3 guard-exit which dispatches B vtable slot+0x24 with arg [ESP+0x90] @005285F3 and returns callee result; these are the ONLY entry guards (MSC-A03: enum!=3 is NOT an entry guard)",
+      "status": "CONFIRMED",
+      "scope": "saved H5 windows S01+S03",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "MSC-A03 preserved"
+    },
+    "CL-3": {
+      "text": "Enum gate: R_gate=M32[B+0xC] @005283EB; CMP [EAX+0x20],3 @005283F0; ==3 -> identity 3x3 matrix at ESP_A+0x28..0x48 via FLD1/FLDZ FST/FSTP run @0052840E..00528430; !=3 -> CALL 0096CCB0 (this=&matrix_local ESP_A+0x28, arg=[B+0x64] float) @00528407; both branches join @00528434. Enum3 selects the matrix CONSTRUCTION PATH only (not the whole writer)",
+      "status": "CONFIRMED",
+      "scope": "saved H5 window S01",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "identity-matrix slots 0x28/0x2c/0x30/0x34/0x38/0x3c/0x40/0x44/0x48 stitch with S02 REP-source X+0x34..0x57"
+    },
+    "CL-4": {
+      "text": "Two virtual dispatches on B own vtable slot+0xC: @005283AA (outbuf ESP_A+0x8) and @00528444 (outbuf X+0x58); both return pointers whose triples [EAX+0/4/8] are consumed (first: flag byte check [ESP+0x94]@005283AC then float calls on [B+0x10]; second: FADD sums into record)",
+      "status": "CONFIRMED",
+      "scope": "windows S01+S02",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "slot+0xC of B table; targets OPAQUE (cells not in saved capture)"
+    },
+    "CL-5": {
+      "text": "Record = 13 dwords at X+0x64: [0..8]=9-dword matrix REP-copied from ESP_A+0x28..0x4B (MOVSD count 9 @00528478); [9..11]=FADD sums [ret2+i]+[EBX+i] (EBX=M32[X+0x9C] @00528448, writer outside window); [12]=1.0 @00528480; record base cross-verified by two LEA rows (0052845A, 00528496)",
+      "status": "CONFIRMED",
+      "scope": "window S02",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [
+        "X=ESP after CALL EDX @00528444 returns; callee-clean hypothesis (U1) -> X=ESP_A-12; X-relative findings robust to +/-4"
+      ],
+      "notes": ""
+    },
+    "CL-6": {
+      "text": "R loads: R_apply=M32[B+0xC]@005284A1 (this of CALL 0085CDE0@005284AC), R_read1@005284B6 (this of 0085C0C0@005284B9), R_read2@005284D2 (this of 0085C280@005284E0); three FRESH loads of the same field; source-field identity FACT; value equality across loads NOT PROVABLE (opaque CALLs 0085CDE0/0085C0C0 intervene; no-interfering-write/lifetime premise unverified) - MSC-A01 discipline preserved",
+      "status": "CONFIRMED",
+      "scope": "window S02",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "do NOT phrase R_apply==R_read1==R_read2 as proven"
+    },
+    "CL-7": {
+      "text": "P-level access ([R+0x2C] or deeper deref of R) in caller windows 00528380..0052860A: CONFIRMED_ABSENT (all R uses are ECX this-arg loads only)",
+      "status": "CONFIRMED",
+      "scope": "windows S01+S02+S03",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": ""
+    },
+    "CL-8": {
+      "text": "Applier contract 0085CDE0: P_apply=M32[this+0x2C] @0085CEC5 (MOV ECX,[EBP+0x2C]); virtual dispatch [P_apply VT + byte 0x14] @0085CECF/0085CED1/0085CED4 (CALL EAX); single stack arg = pointer to locally permuted 48-byte block (LEA EDX,[ESP+0x58] @0085CE17; PUSH @0085CE1E); conditional 52-byte raw record-head cache to this+0x30: predicate arg2-byte-test @0085CED6 / JZ @0085CEDE; copy REP MOVSD 13 dwords @0085CEE0-0085CEEA",
+      "status": "CONFIRMED",
+      "scope": "saved packet I0236 (0085CDE0 body)",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_2",
+      "premises": [
+        "QUOTED_PRIOR RECORD_HEAD postaudit (I0267): transformed block to [[X+2C]vt+14], conditional cache 0x52B at X+30 - consistent, pinned not re-derived"
+      ],
+      "notes": ""
+    },
+    "CL-9": {
+      "text": "B cache + consumers: B+0x110/114/118 <- 0085C0C0 returned triple; B+0x11C/120/124 <- 0085C280 returned triple (completion @005284ED/005284F9/005284FF); B+0x104/108/10C <- 00861220/00734210/00861240 on [B+0x10]; mid-tail virtual consumers on B vtable: slot+0x24 cond @0052853C (arg EBX), slot+0x28 @00528547 (arg &[B+0x11C]), slot+0x30 @00528570 (arg {B+0x10C,0.0,B+0x104}), slot+0x2C @00528593 (arg {0.0,0.0,B+0x108}); tail stores B+0xD2=0 @00528595, B+0x9E=1 cond on 007CE1E0(004154F0())==0, B+0xD4/D8/DC <- globals 0xBA921C/0xBA9220/0xBA9224; DF: no STD/CLD in whole body",
+      "status": "CONFIRMED",
+      "scope": "windows S02+S03",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "NEW: the four cache-consumer dispatches on B own vtable slots +0x24/+0x28/+0x2C/+0x30 (targets opaque, cells not saved)"
+    },
+    "CL-10": {
+      "text": "Base ctor 0085B1B0 complete body 0085B1B0..0085B31E (RET 0xC, returns this): base vtable 0xA91E4C stored @0085B1C1 (NEW CONFIRMED: base-class table at construction level); +0x4=0, +0x8=arg1, +0xC=NULL @0085B1CD, +0x10=NULL @0085B1D0 (EBX=0 from XOR @0085B1B9); +0x14 member subobject via CALL 007345C0; zero-then-fill of +0x3C..+0x70 vector fields (tail value copies from 00746560/0040B070 results and globals); NO pointer installs in tail",
+      "status": "CONFIRMED",
+      "scope": "saved packets I0110 (head 53 rows) + I0319 (tail 60 rows)",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "complete-ctor denominator: head+tail cover whole body (epilogue RET 0xC in tail)"
+    },
+    "CL-11": {
+      "text": "R attach: POST_CONSTRUCTION_ONLY. Complete base ctor leaves [B+0xC]/[B+0x10] NULL; visible derived-ctor head (00528E50..00528F07, packet I0771) does not touch them; derived ctor tail 00528F07..body-end NOT in saved packets -> SAVED_COVERAGE_BARRIER; runtime guards imply R non-null at 00528380 dispatch time",
+      "status": "CONFIRMED",
+      "scope": "saved packets I0771+I0110+I0319",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "bounded negative: within saved coverage; the actual writer (setter/loader) unidentified"
+    },
+    "CL-12": {
+      "text": "Census [GPR+0x2C] writes binary-wide (count-only, 1,743,928 instruction rows scanned): MOV=598, LEA=0, other stores=144 (FSTP 71, FST 58, ADD 8, OR 3, AND 3, ADC 1) -> 742 write candidates; ESP-relative stack writes separate total 3894; ZONE_DERIVED (00528380..00528E60)=0; ZONE_FAMILY (0085B000..0085C400)=3: 0x0085BBF8 (other), 0x0085BE70 (mov), 0x0085C0A7 (mov); ZONE_CREATOR=0",
+      "status": "CONFIRMED",
+      "scope": "canonical saved H5 I0082",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_1",
+      "premises": [],
+      "notes": "bounded negative: pattern census only; computed/indirect addressing not excluded; no window qualification beyond base-ctor windows (no receiver-provenance premise for the 3 family candidates - layout clustering insufficient per contract)"
+    },
+    "CL-13": {
+      "text": "Prior inventory: NO pinned prior establishes a positive writer/ctor path for R or P; HBR campaign R (=arg of 00856800, receiver family 0085B3E0) vs our R: CANNOT_DETERMINE same-pointer-level; WRITER_OF_R_FIELD=NONE_FOUND, WRITER_OF_P_FIELD=NONE_FOUND, CTOR_VPTR_OF_R=NONE_FOUND in pinned priors",
+      "status": "CONFIRMED",
+      "scope": "pinned priors I0625,I0673,I0679,I0690,I0691,I0751,I0734",
+      "era": "prior runs (saved documents)",
+      "qc_scope": "QSCI_3",
+      "premises": [],
+      "notes": ""
+    },
+    "CL-14": {
+      "text": "Applier destination: OPAQUE virtual receiver ([P_apply VT+byte 0x14] target identity NOT in saved data); only concrete in-body destination = 52B raw record-head cache at this+0x30; no scene/root/model claim",
+      "status": "CONFIRMED",
+      "scope": "packet I0236 + saved-data boundary",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_2",
+      "premises": [],
+      "notes": ""
+    },
+    "CL-15": {
+      "text": "Record shape at SDK-reference level (Gamebryo 1.2.2.6 source, NOT PE ABI): 13-dword record PARTIAL_MATCH to NiTransform layout (m_Rotate 3x3 -> m_Translate -> m_fScale; NiTransform.h L25-27, order marked assembly-sensitive by NDL); 48B permuted payload = NONE_OF_THE_ABOVE (no scale-less 48-byte transform type in admitted SDK files); no admitted-SDK virtual method matches single-pointer-to-transform-block arg shape (ApplyTransform=virtual/3-arg, UpdateWorldData=virtual/0-arg, Set* non-virtual by-value); destination transform-setter semantics NOT_ESTABLISHED",
+      "status": "CONFIRMED",
+      "scope": "SDK reference files I0599,I0598,I0508,I0509 + run results",
+      "era": "SDK 1.2.2.6 2006-06-19 (reference only, not PE build)",
+      "qc_scope": "QSCI_2",
+      "premises": [],
+      "notes": "SDK_REFERENCE_NOT_PE_ABI; slot numbers do not transfer; PE record identity NOT claimed"
+    },
+    "CL-16": {
+      "text": "WORLD_INSTANCE_RELEVANCE = UNKNOWN: no edge to a concrete model resource or explicit world instance was established; chain barriers: (1) R attach writer unknown (post-construction, derived ctor tail not saved), (2) P class/vtable unknown (census qualification barrier), (3) [P VT+0x14] target opaque",
+      "status": "CONFIRMED",
+      "scope": "this run, all waves",
+      "era": "PE EU 9.3.5 saved H5",
+      "qc_scope": "QSCI_3",
+      "premises": [],
+      "notes": "honest negative with denominators; relevance gate applied after each wave"
+    },
+    "CL-17": {
+      "text": "Separated categories: RECEIVER_JOIN=NOT_ESTABLISHED (opaque CALLs between loads and stores; no no-interfering-write/lifetime premise); REGISTER_LOOKUP_JOIN=NOT_ESTABLISHED (not tested this run, no promotion of STATIC_CLASS_VTABLE_BINDING); STATIC_CLASS_VTABLE_BINDING=ESTABLISHED_AT_SAVED_CONSTRUCTION_LEVEL (derived 0xA7DCB0 @00528E50 prior + base 0xA91E4C @0085B1C1 new this run); INSTANCE_ROOT_ROLE=UNKNOWN; RESOURCE_INSTANCE_JOIN=UNKNOWN; TRANSFORM_SOURCE=UNKNOWN (ultimate float provenance past opaque virtuals); PHYSICAL_SOURCE_MEDIUM=UNKNOWN; HISTORICAL_TRANSFORM_PROVENANCE=NOT_ESTABLISHED",
+      "status": "CONFIRMED",
+      "scope": "this run + priors",
+      "era": "PE EU 9.3.5",
+      "qc_scope": "QSCI_3",
+      "premises": [],
+      "notes": "MSC-A04 preserved: STATIC_CLASS_VTABLE_BINDING != REGISTER_LOOKUP_JOIN"
+    },
+    "CL-18": {
+      "text": "WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CURSOR_SOURCE_MEDIUM=UNKNOWN; CANONICAL_GATE_EFFECT=NONE",
+      "status": "CONFIRMED",
+      "scope": "terminal constants per contract",
+      "era": "n/a",
+      "qc_scope": "QSCI_3",
+      "premises": [],
+      "notes": ""
+    }
+  }
+}

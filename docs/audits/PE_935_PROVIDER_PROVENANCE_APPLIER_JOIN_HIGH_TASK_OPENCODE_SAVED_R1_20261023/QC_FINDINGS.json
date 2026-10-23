@@ -1,0 +1,55 @@
+{
+  "run_id": "PE_935_PROVIDER_PROVENANCE_APPLIER_JOIN_HIGH_TASK_OPENCODE_SAVED_R1_20261023",
+  "qscience": [
+    {
+      "job": "QSCI_1a_caller_windows",
+      "attempts": 2,
+      "verdict": "QC_PASS",
+      "material_findings": 0,
+      "hygiene_findings": 2,
+      "report": "JOBS/QSCI_1A/QC_RESULT.md",
+      "scope": "caller windows S01+S02 pointer/time identity; master-derived S01 map independently verified 10/10"
+    },
+    {
+      "job": "QSCI_1b_ctor_cache_census",
+      "attempts": 1,
+      "verdict": "QC_PASS",
+      "material_findings": 0,
+      "hygiene_findings": 3,
+      "report": "JOBS/QSCI_1B/QC_RESULT.md",
+      "scope": "base ctor head+tail, census replay byte-identical, P_S03 spot checks"
+    },
+    {
+      "job": "QSCI_2_applier_contract",
+      "attempts": 2,
+      "verdict": "QC_PASS",
+      "material_findings": 0,
+      "hygiene_findings": 2,
+      "report": "JOBS/QSCI_2/REPORT.md",
+      "scope": "applier packet verification; verified new detail: 48B block = transposition of 3x3 + triple (dword 13 excluded); conditional cache = RAW 13-dword record head copy"
+    },
+    {
+      "job": "QSCI_3_relevance_msc_negatives",
+      "attempts": 1,
+      "verdict": "QC_PARTIAL",
+      "material_findings": 0,
+      "hygiene_findings": 2,
+      "report": "JOBS/QSCI_3/QC_LOG.md",
+      "scope": "MSC-A01..A06 preservation, negative scopes, category separation, FIRST_MISSING_EDGE concreteness, terminal constants",
+      "partial_reason": "Y5 (MSC-A05 document level) NOT_CHECKED_at_CORRECTION_LEDGER: CORRECTION_LEDGER and BODY ledger charge of neighbor F00528600 were outside the auditors admitted inputs; family Q_SCIENCE exhausted 6/6 so no follow-up QSCI attempt is possible; ledger-level accounting verification is delegated to QACC (fresh auditor, separate family) whose admitted inputs include CORRECTION_LEDGER and BODY_AND_BUDGET_LEDGER",
+      "caveat_must_remain_in_final_claims": true
+    }
+  ],
+  "qaccount": {
+    "job": "QACC_fresh_accounting",
+    "attempts": 1,
+    "verdict": "ACCOUNTING_PASS",
+    "material_findings": 0,
+    "hygiene_findings": 4,
+    "report": "JOBS/QACC/QC_LOG.md",
+    "scope": "READY<->DB parity 21/21, family caps, chronology, saved-only, honest units, gates consistency, CORRECTION_LEDGER disclosure check (MSC-A05 ledger level: PASS)",
+    "hygiene_resolution": "all 4 fixed pre-seal by master (H1 full-scope sums, H2 21/21 reconciliation, H3 ADMIN correction event, H4 G3 count)"
+  },
+  "material_findings_total": 0,
+  "note": "0 MATERIAL findings across all fresh QC; QC_PARTIAL on QSCI_3 is an admission-scope limitation, not a science defect; the caveat is carried into REPORT.md final claims"
+}

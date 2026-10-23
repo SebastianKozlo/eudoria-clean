@@ -1,0 +1,24 @@
+{
+  "run_id": "PE_935_PROVIDER_PROVENANCE_APPLIER_JOIN_HIGH_TASK_OPENCODE_SAVED_R1_20261023",
+  "first_missing_edge": {
+    "edge": "writer/attach provenance of R=M32[B+0xC] (and through it, P-class identity)",
+    "what_blocks_it": "the post-construction writer of [B+0xC] is not in any saved packet: complete base ctor clears the field; visible derived-ctor head (00528E50..00528F07) does not touch it; derived ctor TAIL 00528F07..body-end has NO saved coverage",
+    "missing_data_type": "SAVED_COVERAGE_GAP + unauthorized-census gap: (a) saved H5 export/coverage of the derived ctor tail; (b) a receiver-qualified [reg+0xC]-write callsite search (this run was authorized exactly ONE count-only census, for +0x2C writes)",
+    "discriminating_next_experiment": "extract saved H5 rows for 00528F07..derived-ctor-end and any family-zone setter candidates; qualify any [reg+0xC] write by literal receiver provenance (same constructed class 0xA7DCB0/0xA91E4C or its factory/creator 0x004C46C0 chain)"
+  },
+  "secondary_missing_edges": [
+    {
+      "edge": "P class identity and table slots (+0x14/+0x28/+0xDC/+0x160)",
+      "what_blocks_it": "no receiver-qualified writer of [R+0x2C] found; census candidates (0085BBF8/0085BE70/0085C0A7) lack receiver provenance; P-class table search was contract-gated on positive class (not met)"
+    },
+    {
+      "edge": "[P_apply VT+byte 0x14] target identity",
+      "what_blocks_it": "P runtime vptr NOT_OBSERVED; P table cells not in saved capture"
+    },
+    {
+      "edge": "B-table consumer slots +0x24/+0x28/+0x2C/+0x30 targets",
+      "what_blocks_it": "derived table 0xA7DCB0 cells beyond the 4 captured cells not in saved capture"
+    }
+  ],
+  "world_xyz": "NOT_RECOVERED (model+instance+transform+source all required; none established)"
+}
