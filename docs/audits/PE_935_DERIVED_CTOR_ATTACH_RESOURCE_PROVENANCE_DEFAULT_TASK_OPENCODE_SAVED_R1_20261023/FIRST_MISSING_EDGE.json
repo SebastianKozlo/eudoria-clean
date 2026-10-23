@@ -1,0 +1,12 @@
+{
+  "run_id": "PE_935_DERIVED_CTOR_ATTACH_RESOURCE_PROVENANCE_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023",
+  "selected_edge": "BODY_004154F0_POST_CTOR_B_ARGUMENT",
+  "description": "Ciało funkcji 004154F0 — jedyny bezpośredni odbiorca B po konstrukcji (B przekazane jako argument wskaźnikowy @004C47D3 po CALL 00528E50 @004C47C1 i JMP @004C47C6, który pomija XOR EAX,EAX; normal path przekazuje B, null-check path przekazuje NULL).",
+  "missing_property": "Czy ciało 004154F0 wykonuje store przez [arg+0xC] (lub pośrednio ustawia pole +0xC obiektu B przez alias/out-arg), czyli czy jest kwalifikowanym writerem R w [B+0xC].",
+  "time_window": "post-ctor, pre-POP @004C47EA (B leży na stosie caller-a również podczas CALL 00856190 @004C47DA — QSCI_3 P2-3).",
+  "why_first": "Jedyna konkretna, falsyfikowalna krawędź writer-hypothesis osiągalna w danych zapisanych: qa poištnik poza saved H5 (004154F0 < min VA 0048AEF0) — SAVED_TARGET_DATA_BARRIER; wymaga autoryzowanego przyszłego odczytu/eksportu tego ciała (nie autoryzowanego w tym runie). Alternatywne krawędzie: 00414130 (poza H5), sloty vtable A7DCB0/A91E4C w .rdata (poza H5), 00856190 (args unknown).",
+  "measurement_type": "FUTURE: autoryzowany pinned packet/disassembly ciała 004154F0 (~60 wierszy od entry) + def-use argumentu.",
+  "falsifier": "Store przez [arg+0xC] w 004154F0 gdzie arg=B → writer kandydat; brak jakiegokolwiek dostępu przez arg → wyklucza bezpośredni zapis (scope-bounded do tego ciała).",
+  "note": "Adjudykacja PE-MASTER rozbieżności QSCI_2/QSCI_3: 004154F0 leży POZA saved H5 (0x4154F0 < 0x48AEF0); wymóg wymienienia w bounds W01 pozostaje, ze statusem out-of-H5.",
+  "qc_basis": "QSCI_2 punkt 5; QSCI_3 punkt 6(i) i P2-3; W03 CM1/O1."
+}

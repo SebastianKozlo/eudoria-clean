@@ -1,0 +1,93 @@
+{
+  "run_id": "PE_935_DERIVED_CTOR_ATTACH_RESOURCE_PROVENANCE_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023",
+  "claims": [
+    {
+      "claim_id": "CTOR-COV-1",
+      "text": "Zapisane pokrycie konstruktora pochodnego 00528E50 jest kompletne dla zakresu 00528E50..00529072 (139 wierszy, 4 fragmenty, nakładki 2 wiersze, bez dziur VA).",
+      "status": "CONFIRMED",
+      "evidence": "QSCI_1 niezależny per-wiersz; CTOR_COVERAGE.csv; fragmenty SHA-pinned",
+      "scope": "saved packet A3 (139 rows) only — nie cala funkcja poza zapisanym zasięgiem"
+    },
+    {
+      "claim_id": "CTOR-EXIT-1",
+      "text": "Dwa normalne wyjścia: long-path epilog (MOV EAX,ESI @0052905E, SEH unwind, POP, ADD ESP,0x28, RET 0x10 @00529072, EAX=B) i warunkowy wczesny exit JZ @00528FBF→0052905E (CMP EDI,EBX).",
+      "status": "CONFIRMED",
+      "evidence": "fragmenty C01c/C01d; QSCI_1 pkt 4 (stack 56=56)"
+    },
+    {
+      "claim_id": "CTOR-ZERO-1",
+      "text": "Brak jawnego store do B+0xC/B+0x10 w całym saved pokryciu derived ctor; oba pola zerowane przez bazowy ctor 0085B1B0 (store 0085B1CD).",
+      "status": "CONFIRMED",
+      "evidence": "QSCI_1 własny census w 4 fragmentach; W01/QSCI_2 census okien 0085B1B0"
+    },
+    {
+      "claim_id": "CTOR-PHASE-1",
+      "text": "NONZERO_WRITER_NOT_ESTABLISHED na obu wyjściach; POST_CONSTRUCTION_ONLY i STILL_NULL_AT_CTOR_EXIT nie są roszczone (PPA-A01 compliant).",
+      "status": "CONFIRMED",
+      "evidence": "CONSTRUCTION_PHASE_MAP; QSCI_1/QSCI_3"
+    },
+    {
+      "claim_id": "CTOR-C0-1",
+      "text": "Kluczowa krawędź konstrukcyjna: CALL 005247C0 @00528FE1 (receiver EDI), retval→[B+0xC0] @00528FEA; późniejsze cally w tail mają receiver [B+0xC0] i argumenty &B+0x44/&B+0x5C/&B+0x50.",
+      "status": "CONFIRMED",
+      "evidence": "fragment C; QSCI_1 pkt 3 (VA correction of blended citation)"
+    },
+    {
+      "claim_id": "CREATOR-1",
+      "text": "Creator 004C46C0: jedyny DIRECT caller konstruktora 00528E50 widoczny w saved H5 (callsite 004C47C1); alokacja 0x128 przez 0095D3C4 @004C4797 z null-check; funkcja kończy się RET @004C47EF.",
+      "status": "CONFIRMED",
+      "evidence": "W02 count-only census; QSCI_2 EXACT recount",
+      "scope": "direct calls in saved H5; indirect/virtual construction paths NOT excluded (QSCI_3 P2-1 reworded)"
+    },
+    {
+      "claim_id": "CREATOR-2",
+      "text": "Po konstrukcji normal path przekazuje B jako argument wskaźnikowy do 004154F0 (JMP @004C47C6 pomija XOR EAX,EAX; null-check path przekazuje NULL); retval 004154F0 → receiver 00856190; brak rejestracji B w oknie.",
+      "status": "CONFIRMED",
+      "evidence": "W03 packet 34 rows; QSCI_2 pkt 2 rozstrzygnięcie; QSCI_3 pkt 5"
+    },
+    {
+      "claim_id": "WRITER-1",
+      "text": "Census saved H5 (1,743,928 wierszy, VA 0048AEF0..00A745E4, formy MOV/RMW/stack/indexed/float): w oknach 9 funkcji powiązanych z B jedyny nie-stackowy store [reg+0xC] to zerujący 0085B1CD; brak kwalifikowanego niezerowego writera w zapisanym zakresie.",
+      "status": "CONFIRMED",
+      "scope": "seven-item non-exclusion list applies (adjusted-base, REP, out-arg, setter-alias, indexed-intersection, 004154F0/00414130 out-of-H5, .rdata slots); saved rows only",
+      "evidence": "W01; W04 independent EXACT; QSCI_2 3-variant recount"
+    },
+    {
+      "claim_id": "WRITER-2",
+      "text": "Sloty vtable 0xA7DCB0/0xA91E4C nieodzyskiwalne z przypiętych saved źródeł (H5 = .text, max VA 00A745E4 < vtable region; 5 vtable JSON nie zawiera tych tabel).",
+      "status": "CONFIRMED",
+      "evidence": "W04; QSCI_2 pkt 3"
+    },
+    {
+      "claim_id": "BARRIER-1",
+      "text": "SAVED_TARGET_DATA_BARRIER: ciała 004154F0 i 00414130 leżą poniżej min VA saved H5 (0048AEF0).",
+      "status": "CONFIRMED",
+      "evidence": "QSCI_2 pkt 5; PE-MASTER adjudication CL-7"
+    },
+    {
+      "claim_id": "RESOURCE-JOIN-1",
+      "text": "RESOURCE_INSTANCE_JOIN dla 296445/4508 = CONTEXT_MENTION_ONLY (bounded 2 docs + index; 11 hit-plików nieczytanych; cytaty vs oryginały NOT_CHECKED poza scope QC).",
+      "status": "CONFIRMED_BOUNDED",
+      "evidence": "J02; QSCI_3 pkt 3"
+    },
+    {
+      "claim_id": "PLACEMENT-1",
+      "text": "WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CURSOR_SOURCE_MEDIUM=UNKNOWN; CANONICAL_GATE_EFFECT=NONE; bez samodzielnego awansu milestone.",
+      "status": "CONFIRMED",
+      "evidence": "QSCI_3 pkt 4"
+    },
+    {
+      "claim_id": "PROC-1",
+      "text": "Wszystkie dispatche (14 Task + 1 MASTER_READ) przez dispatch_admission READY; rodziny C6/W4/J1/QSCI3; max 2 active children; depth 1; zero grandchildren; zero retry/fail.",
+      "status": "CONFIRMED",
+      "evidence": "DISPATCH_READY/*; DISPATCH_RECONCILIATION.json; DB census pending"
+    },
+    {
+      "claim_id": "R-BIND-1",
+      "text": "R_written→R_apply binding: NOT_ESTABLISHED_IN_ADMITTED_SCOPE.",
+      "status": "CONFIRMED (as negative-status claim)",
+      "evidence": "R_PROVENANCE.json; PPA-A05"
+    }
+  ],
+  "note": "Wording incorporates QSCI_3 P2 corrections; worker files remain frozen; CORRECTION_LEDGER CL-1..CL-8."
+}

@@ -1,0 +1,51 @@
+{
+  "qsci_1": {
+    "verdict": "QC_PASS",
+    "findings": [
+      {
+        "id": "P2-overlap-note",
+        "text": "nota overlap C/D cytuje 00528FF5 zamiast 00528FFB; arytmetyka nienaruszona"
+      },
+      {
+        "id": "P2-o6",
+        "text": "[ESP+0x48]@00528FA3 = 4. slot arg (domknięcie O6)"
+      },
+      {
+        "id": "P3-wording",
+        "text": "wording '40 bytes locals'"
+      }
+    ],
+    "disposition": "ACCEPTED, no load-bearing claim refuted"
+  },
+  "qsci_2": {
+    "verdict": "QC_PASS",
+    "findings": [
+      {
+        "id": "P2-window-creator",
+        "text": "okno creatora w W01 nadzbiór body (n=95 vs 244); immaterial — 0 store w nadzbiorze"
+      },
+      {
+        "id": "RESOLVED-W03-ambiguity",
+        "text": "JMP @004C47C6 pomija XOR EAX,EAX; normal path przekazuje B do 004154F0; NULL tylko z gałęzi null-check"
+      }
+    ],
+    "disposition": "ACCEPTED"
+  },
+  "qsci_3": {
+    "verdict": "QC_PARTIAL",
+    "findings": [
+      "P2-1 W02 single-factory-path overclaim",
+      "P2-2 W02 same-EAX population mix",
+      "P2-3 W03 sole-residual-hole + post-construction gloss",
+      "P2-4 W01 missing explicit non-exclusion bounds",
+      "P2-5 W04 immateriality asserted not demonstrated (closed post-hoc by QSCI_2)",
+      "P2-6 cosmetic provenance drift J02/W03"
+    ],
+    "disposition": "liczby ACCEPTED (EXACT recount); bounds-text REJECTED-AS-WORDED w 4 punktach; korekty przyjęte w centralnych claimach"
+  },
+  "master_adjudication": {
+    "qsci3_p2_4f_corrected": "004154F0 leży POZA saved H5 (0x4154F0 < 0x48AEF0), zgodnie z QSCI_2 recount; wymóg wymienienia w bounds W01 pozostaje ze statusem out-of-H5",
+    "impact": "none on numbers; affects finding text only"
+  },
+  "qc_partial_reservations_kept": true
+}
