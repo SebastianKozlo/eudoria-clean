@@ -1,0 +1,14 @@
+gate,measured_value,predicate,pass,note
+capture_attempt_count,1,"exactly 1 attempt, no retry",PASS,helper single-shot; CAPTURE dir exclusive-create
+capture_identity,2/2 hashes == pin,both full SHA256 equal pinned value,PASS,pass1 and closing
+capture_reads,21,"21 ledgered reads, debit 16035856 == cap",PASS,receipt check ok=true
+slot3_controls,2/2,BASE 0x0085B6A0 and DERIVED 0x005278A0 exact,PASS,B00 recomputation
+mincap_selftests,22/22,all synthetic adversarial tests ok,PASS,CONTROL/MINCAP_SELFTESTS_RESULT.json
+helper_review_C00,PASS,no material defect,PASS,JOBS/C00_REVIEW_CAPTURE/RESULT.md
+target_bodies_available,2/2,both slot1 targets present in pinned H5,PASS,thunk line + function head
+writer_identified,YES,direct stores with WRITE_ADDRESS/WRITE_VALUE,PASS,0x00528380 self-cache
+ctor_vtable_link,EXACT 0x00A7DCB0,stored vtable == captured derived base,PASS,H5:182387
+native_task_count,11,census children == ledger attempts == 11,PASS,"census 11/11 verified: 9 workers + 2 auditors, 10 stop / 1 length, parity OK"
+receiver_join,NOT_ESTABLISHED,HBR-A01 preserved; no promotion,PASS,invariant held
+world_xyz,NO,no placement recovery promised or claimed,PASS,invariant held
+seal_format_checks,PENDING,validate_active_artifacts ok + terminal_consistency ok pre-seal (failed first pass preserved as TERMINAL_CONSISTENCY.json.failed.txt; BODY ledger top-level actual fixed),PASS,sealer re-runs validator before manifest

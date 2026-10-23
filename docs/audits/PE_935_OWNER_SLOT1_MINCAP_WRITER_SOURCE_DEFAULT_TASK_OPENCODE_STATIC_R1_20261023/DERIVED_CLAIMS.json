@@ -1,0 +1,61 @@
+{
+  "run_id": "PE_935_OWNER_SLOT1_MINCAP_WRITER_SOURCE_DEFAULT_TASK_OPENCODE_STATIC_R1_20261023",
+  "provenance": {
+    "source_pin": {
+      "size_bytes": 8015872,
+      "sha256": "E7785430E81DFFE648CE8F5312414B17BC9FCE61389689A22F753765D5280F31"
+    },
+    "capture_scope": "4 DWORD cells + header4096 + 2 full hashes; 21 reads; 16035856 bytes == cap; single attempt",
+    "code_provenance": "pinned saved disassembly (H5); code bytes NOT revalidated against the original"
+  },
+  "claims": [
+    {
+      "id": "DC-1",
+      "text": "Static content of the four pinned cells: BASE VT+4=0x0095D4FA; BASE slot3 control=0x0085B6A0; DERIVED VT+4=0x00528380; DERIVED slot3 control=0x005278A0",
+      "status": "CONFIRMED",
+      "scope": "pinned file identity; not runtime"
+    },
+    {
+      "id": "DC-2",
+      "text": "BASE VT+4 target is a single-instruction indirect-jump thunk forwarding through .rdata cell 0x00A75378 (content NOT_READ; identity UNKNOWN)",
+      "status": "CONFIRMED_at_saved_disassembly_level"
+    },
+    {
+      "id": "DC-3",
+      "text": "DERIVED VT+4 target 0x00528380 is a thiscall writer self-caching into this+0x104..0x124 (two float triples from out-arg producers, three floats, five tail stores incl. three globals-sourced dwords)",
+      "status": "STRONGLY_SUPPORTED"
+    },
+    {
+      "id": "DC-4",
+      "text": "Producer callees 0x0085C0C0/0x0085C280 return the caller out-arg buffer and forward via virtual slots on [this+0x2c]; ultimate value provenance UNKNOWN (runtime-vptr barrier)",
+      "status": "STRONGLY_SUPPORTED"
+    },
+    {
+      "id": "DC-5",
+      "text": "Ctor 0x00528E50 stores vtable 0x00A7DCB0, exactly the captured derived-table base: static class-vtable binding of the creator(0x004C46C0)->ctor class to the captured table",
+      "status": "STRONGLY_SUPPORTED"
+    },
+    {
+      "id": "DC-6",
+      "text": "REGISTER_LOOKUP_JOIN = STATIC_CLASS_VTABLE_BINDING_ESTABLISHED (construction level); RECEIVER_JOIN = NOT_ESTABLISHED (HBR-A01)",
+      "status": "PRESERVED_DISCIPLINE"
+    },
+    {
+      "id": "DC-7",
+      "text": "No world/scene/model/resource evidence found in any read chunk of this run (bounded-read negative; not a global absence proof)",
+      "status": "CONFIRMED_as_negative_within_scope"
+    },
+    {
+      "id": "DC-8",
+      "text": "Base-table class identity UNKNOWN; base table never observed stored in this run",
+      "status": "HONEST_UNKNOWN"
+    }
+  ],
+  "invariants": {
+    "WORLD_XYZ_RECOVERED": "NO",
+    "HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+    "CURSOR_SOURCE_MEDIUM": "UNKNOWN",
+    "CANONICAL_GATE_EFFECT": "NONE"
+  },
+  "sanitization": "derived conclusions and provenance pins only; no raw bytes, listings, prompts, model outputs, DB or SDK text"
+}
