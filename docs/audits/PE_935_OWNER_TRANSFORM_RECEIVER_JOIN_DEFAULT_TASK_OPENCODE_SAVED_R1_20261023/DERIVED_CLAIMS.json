@@ -1,0 +1,141 @@
+{
+  "run_id": "PE_935_OWNER_TRANSFORM_RECEIVER_JOIN_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023",
+  "note": "Sanitized derived claims for publication; full evidence and ledgers remain in the sealed local package; no RAW/packet/prompt/model data.",
+  "claims": [
+    {
+      "claim_id": "C01",
+      "text": "Function 00528380 is the head of the function containing CALL 0085CDE0 at row181601 (VA 005284AC)",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "H5 181511-181621",
+      "classification": "REVALIDATION",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C02",
+      "text": "At callsite 005284AC the actual receiver R_call of CALL 0085CDE0 = [owner_this+0x0C] (last ECX def row181598 MOV ECX,[EBP+0xC])",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "H5 181511-181621",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C03",
+      "text": "At callsite 005284AC arg2=1 (PUSH 0x1 row181582), so the conditional 13-DWORD copy to X+0x30 is ACTIVE at this site; the 13th dword at payload+0x30 is 1.0f written by the caller (FLD1/FSTP rows 181591-181592)",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "H5 181582-181601",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C04",
+      "text": "At callsite 005284AC arg1 = local 48B payload block (9 REP MOVSD-copied dwords + sums at +0x24/+0x28/+0x2C + 1.0f at +0x30)",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "H5 181543-181601",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C05",
+      "text": "Function 00528810 is the head of the function containing CALL 0085CDE0 at row182002 (VA 00528A00)",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "H5 181862-182002",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C06",
+      "text": "At callsite 00528A00 R_call = [owner_this+0x0C] (row182001 MOV ECX,[ESI+0xC]); arg2=0 so the 13-DWORD copy is SKIPPED; arg1 = local block E1+0x18 part-filled by 0085bfa0 (inferred, no in-span writer of block+0..+0x20)",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "H5 181887-182002",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C07",
+      "text": "B-family def-use link at the two owner callsites: REFUTED in-span (A1) / UNDECIDABLE in-span (A2); the old chain X=[D+4] with D=[B+10] is NOT proven equal to [B+0xC]",
+      "status": "STRONGLY_SUPPORTED",
+      "confidence": "MEDIUM",
+      "source_ranges": "H5 spans of A1/A2 + prior canon",
+      "classification": "OPEN",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C08",
+      "text": "00528E50 is a derived constructor: thiscall, calls base ctor 0085B1B0(this,arg1..3), installs vtable [this]=0xA7DCB0 after base install [this]=0xA91E4C; RET 0x10 (4 callee-cleaned args)",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "H5 182360-182498 + K01 prior rows 0085B1B0-25B",
+      "classification": "REVALIDATION",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C09",
+      "text": "SCOPED NEGATIVE: neither the derived ctor 00528E50 (rows 182360-182498, complete body) nor the base ctor 0085B1B0 (0085B1B0-0085B31E, RET 0xC) writes owner this+0x0C or this+0x10 nonzero; base ctor ZERO-inits both fields",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "H5 182360-182498; 1169816-1169875; K01 prior 0085B1B0-0085B25B",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C10",
+      "text": "The nonzero writer of owner this+0x0C (the R_call/X-candidate object) lives OUTSIDE both constructors - post-construction init/setter path; frontier: caller flow of ctor (004C46C0/004C47C1) and family setters",
+      "status": "PLAUSIBLE",
+      "confidence": "MEDIUM",
+      "source_ranges": "negative union of C09",
+      "classification": "OPEN",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C11",
+      "text": "Candidate unification: X (0085CDE0 receiver) == [B+0x0C] == R of the prior provider chain (0085bfa0: P=[R+0x2C], VT=[P], F=[VT+0x24]); consistent with 0085CDE0 delegation this=[X+0x2C] slot5 on the same P; equality X=[D+4]==[B+0x0C] UNPROVEN",
+      "status": "PLAUSIBLE",
+      "confidence": "MEDIUM",
+      "source_ranges": "merge of C02/C06 + prior OWNER_INSTANCE_JOIN canon",
+      "classification": "OPEN",
+      "qc_scope": "QSCIENCE"
+    },
+    {
+      "claim_id": "C12",
+      "text": "00412430 wire decode = 12 bytes per decode CONFIRMED_WITH_LINES (LEA EAX,[EDX+0xc]; CMP EAX,[ECX+0x8]; JA fail; MOV [ESP+4],0xc; JMP 0040de60 tail); 13B/25B claims REFUTED",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "SD001/SD003 (DISASM_FUN_00412430.txt, F00412430_READ_VEC3.txt)",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE_B1"
+    },
+    {
+      "claim_id": "C13",
+      "text": "00412430/0040DE60 do NOT read globals 0x00BA921C/20/24; error default is 0.0f (FLDZ), not 1.0; 1.0-default/scale claims REFUTED for these bodies; globals are stored to owner this+0x50/54/58 by base ctor tail instead",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "SD001-SD004; H5 1169816-1169875",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE_B1"
+    },
+    {
+      "claim_id": "C14",
+      "text": "Cursor error/validity flag at cursor+0x11; cleared on error path (00412430) and overflow (0040DE60); never set nonzero within admitted bodies (sticky-fail until external re-validation)",
+      "status": "CONFIRMED",
+      "confidence": "MEDIUM",
+      "source_ranges": "SD001/SD002",
+      "classification": "NEW_TEST",
+      "qc_scope": "QSCIENCE_B1"
+    },
+    {
+      "claim_id": "C15",
+      "text": "WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CURSOR_SOURCE_MEDIUM=UNKNOWN; CANONICAL_GATE_EFFECT=NONE",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "source_ranges": "whole campaign negative space",
+      "classification": "ALREADY_ESTABLISHED",
+      "qc_scope": "none"
+    }
+  ]
+}
