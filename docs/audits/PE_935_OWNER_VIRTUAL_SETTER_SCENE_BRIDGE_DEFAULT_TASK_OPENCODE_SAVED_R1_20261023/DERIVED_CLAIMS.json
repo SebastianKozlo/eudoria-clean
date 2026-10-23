@@ -1,0 +1,171 @@
+{
+  "run_id": "PE_935_OWNER_VIRTUAL_SETTER_SCENE_BRIDGE_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023",
+  "provenance": "sanitized projection of the sealed local CLAIMS.json; era PE_EU_9_3_5_SAVED_ONLY; conclusions and confidence only, no raw listings/packets/prompts/model outputs; publication is transport, not canon acceptance",
+  "claims": [
+    {
+      "claim_id": "CL-01",
+      "text": "Saved representation VTABLE_INVENTORY.csv (S01-discovered, sha EFBA7978...) contains literal vtable cell value for derived table base 0x00A7DCB0 (class .?AVClientMovableObject@@, col_va 0x00AA17CC, 13 slots): cell at slot index 3 / byte offset 0xC = 0x005278A0.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "data-backed slot value in searched saved representations; NOT a claim about receiver B's dynamic type",
+      "evidence": "JOBS/S01_SAVED_SLOT_REPRESENTATIONS/RESULT.md + CANDIDATES.csv rows; offset convention proven by GA3 cross-join (ArkPortalCellGraph slot3 0x0084D750 exact) and slot_count<4 => slot3=0 rule (0/1393)",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C1 PASS"
+    },
+    {
+      "claim_id": "CL-02",
+      "text": "Same representation gives base table 0x00A91E4C (class .?AVMovableObject@@, col_va 0x00AB33D0, 13 slots): cell slot index 3 / offset 0xC = 0x0085B6A0.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "data-backed slot value in searched saved representations",
+      "evidence": "S01 RESULT/CANDIDATES; filename-level corroboration F0085B6A0_SLOT3.txt (not opened)",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C1 PASS"
+    },
+    {
+      "claim_id": "CL-03",
+      "text": "No saved representation among 22 searched files (6 pinned + 16 discovered, all forms: hex upper/lower/bare/00-prefixed/LE/decimals) contains literal cell values for byte offset +4 of either table (0xA7DCB4 / 0xA91E50).",
+      "status": "DATA_BARRIER_IN_SEARCHED_REPRESENTATIONS",
+      "confidence": "HIGH",
+      "scope": "bounded negative: SEARCH_SPACE=22 files, forms enumerated; NOT a claim about the archive at large",
+      "evidence": "S01 RESULT section 3; CANDIDATES.csv rows 5,9",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C1 (provenance chain) PASS; negative bounded"
+    },
+    {
+      "claim_id": "CL-04",
+      "text": "Receiver B (EDI) at 0085B5CE (VT+4) and 0085B473 (VT+0xC) in function 0085B3E0 is NOT linked in any searched source to either table 0xA7DCB0 or 0xA91E4C; no vptr install inside 0085b3e0..0085b5d6. Both tables remain CONDITIONAL FAMILY CANDIDATES.",
+      "status": "STRONGLY_SUPPORTED",
+      "confidence": "HIGH",
+      "scope": "bounded negative over searched space; dynamic type of B remains UNKNOWN",
+      "evidence": "S01 RESULT section 5; QSCIENCE C7 bounded H5 grep (5 hits total, 0 in range)",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C7 PASS"
+    },
+    {
+      "claim_id": "CL-05",
+      "text": "Base-table VT+0xC target 0085B6A0 (conditional on receiver linkage) is mechanically a virtual out-vector method: thiscall, one 4-byte stack arg = out-pointer to 3 floats, callee-cleans RET 0x4, EAX=out-pointer; emits (0.0, 0.0, z) where z = min(float-result of CALL 00861320 with this=[this+0x10]=D, const@0x00A81D40) - const is UPPER bound; type field [this+8] gates value set {3,4,5,6,7}; D==NULL emits (0,0,const).",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "mechanical contract of the opened body; clamp direction corrected per QC F1",
+      "evidence": "JOBS/V01_BASE_GETTER_0085B6A0/RESULT.md (corrected R1); packet sha B7449BEB...",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C2 PASS after F1 correction; R1 re-derivation"
+    },
+    {
+      "claim_id": "CL-06",
+      "text": "Derived-table VT+0xC target 005278A0 (conditional on receiver linkage) is a derived override: gates on dword [this+0xBC] and byte [this+0xB0] (both nonzero), then either copies global 12-byte triple 0x00BA921C/0x00BA9220/0x00BA9224 into the out-buffer or delegates with the same out-pointer to base 0085B6A0; EAX=out-ptr, RET 0x4 both paths.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "mechanical contract of the opened body",
+      "evidence": "JOBS/V01D_DERIVED_GETTER_005278A0/RESULT.md; packet sha 88CB6AB3...",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C3 PASS (full 83-row re-read)"
+    },
+    {
+      "claim_id": "CL-07",
+      "text": "00861320 (the float method called on D=[B+0x10] by 0085B6A0) is exactly FLD dword ptr [ECX+0x40]; RET - a pure x87 ST0 getter of the 32-bit float at [D+0x40]; zero writes, zero calls; X=[D+4] is NOT read by it.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "mechanical contract of the two-instruction body",
+      "evidence": "JOBS/V02_D_FLOAT_METHOD_00861320/RESULT.md; packet sha 346CFD6D...",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C4 PASS (full 68-row re-read)"
+    },
+    {
+      "claim_id": "CL-08",
+      "text": "The out-vector Z component is therefore (conditional on receiver linkage) min(float@[[B+0x10]+0x40], const@0x00A81D40); the writer/source of the float at [D+0x40] was NOT found in this run.",
+      "status": "STRONGLY_SUPPORTED",
+      "confidence": "HIGH",
+      "scope": "value-producer chain closed mechanically; upstream writer remains unknown",
+      "evidence": "CL-05+CL-07; no writer opened (L01 rejected)",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C2/C4"
+    },
+    {
+      "claim_id": "CL-09",
+      "text": "Caller binding at 0085B440..0085B4A0 is CONSISTENT with the out-vector contract (one dword push of local buffer, 3-float consumption with x87 FLD/FADD, receiver EDI): arity/register/width/shape match. Consistency is a necessary-condition match only; it does NOT prove receiver B's dynamic type or the actual callee.",
+      "status": "STRONGLY_SUPPORTED",
+      "confidence": "HIGH",
+      "scope": "binding consistency; ABI-compatible alternatives not excluded",
+      "evidence": "V01 RESULT section 5; QSCIENCE countermodel table",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C2 PASS; countermodels checked"
+    },
+    {
+      "claim_id": "CL-10",
+      "text": "The 00854E11 branch (empty-bucket path of find-or-insert) is mechanically: arg2 loaded, pushed with &arg2_slot and EDX(unknown origin), CALL opaque 00851610 (ECX=ESI=this-map), node pointer taken from [EAX], out-pair written {dword+0=node, byte+4=1(inserted)}; no direct node-field writes; no visible count increment (may be inside opaque callee). All three tail paths agree on the out-pair contract; payload window returns EAX=[found+0x8] on hit, 0 on miss, RET 0x4.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "mechanical branch coverage of packet ranges; allocator semantics UNKNOWN",
+      "evidence": "JOBS/M01_EMPTY_BUCKET_AND_KEY_CALLER/RESULT.md + BRANCH_COVERAGE.csv (F2/F3 corrected); packet sha 37717274...",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C5 PASS with F2/F3 corrections applied by R1"
+    },
+    {
+      "claim_id": "CL-11",
+      "text": "Lookup key equality to insertion key [B+0x74] is NOT_PROVEN_IN_PACKET: key caller 004C484E..004C4863 computes key candidate via opaque 004154f0([caller ESP+0x10]) plus a pre-window stack arg; window contains no [B+0x74] access and no B identification; lookup result stored to [ESI] (memory write at 0x004C4861); all five same-owner premises remain OPEN.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "negative-in-packet claim; premises enumerated",
+      "evidence": "M01 RESULT section 4-5 (F3 corrected); BRANCH_COVERAGE.csv",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C5 PASS"
+    },
+    {
+      "claim_id": "CL-12",
+      "text": "0085B190 is a null-safe acquire wrapper (ECX=[recv+4], null-check, JMP 0x00413440) with ZERO memory writes; its caller at 00854520 passes receiver [found+0x8] payload; helper is REJECTED as a writer/source candidate; no deallocator chain developed.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "mechanical contract; sibling 0085B1A0 tail-jumps to 00413450 (pairing observed, semantics UNPROVEN)",
+      "evidence": "JOBS/L01_HELPER_0085B190/RESULT.md; packet sha 28709F20...",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C6 PASS (full 38-row re-read)"
+    },
+    {
+      "claim_id": "CL-13",
+      "text": "Against pinned local Gamebryo 1.2.2.6 sources, the PE anchor pattern (out-vector virtual, flag-gated derived override with base fallback, caller inline read + vector add) most resembles PROPAGATE_WORLD of the six operation classes; resemblance is a reference-only implementation analogy, NOT a PE identity claim; class certainty capped at INSUFFICIENT_DATA beyond closest-of-six (type-gate {3..7} has no pinned-SDK counterpart).",
+      "status": "PLAUSIBLE",
+      "confidence": "MEDIUM",
+      "scope": "ENGINEERING REFERENCE ONLY; no SDK-to-PE offset/slot/size transfer",
+      "evidence": "JOBS/G01_GAMEBRYO_REFERENCE_FINGERPRINT/RESULT.md; 11/11 SDK SHA verified; 783/800 SDK lines",
+      "era": "GAMEBRYO_1_2_2_6_SDK_REFERENCE_ONLY",
+      "classification": "new",
+      "qc_scope": "NOT audited by QSCIENCE (out of claim set); reference-class only"
+    },
+    {
+      "claim_id": "CL-14",
+      "text": "WRITER_OBSERVED=NO: no qualified nonzero writer for R=[B+0x0C], D=[B+0x10], X=[D+4] or the VT+4 setter effect was found; the actual VT+4 slot target value is data-barred in searched representations; L01 candidate rejected.",
+      "status": "STRONGLY_SUPPORTED",
+      "confidence": "HIGH",
+      "scope": "this run's searched/covered space; indirect callee effects remain UNKNOWN (OFL-A01 standing)",
+      "evidence": "CL-03, CL-12; S01 negatives; prior run direct-store negative B3E0",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "new",
+      "qc_scope": "QSCIENCE C7 + bounded negatives"
+    },
+    {
+      "claim_id": "CL-15",
+      "text": "Standing baseline retained: WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CURSOR_SOURCE_MEDIUM=UNKNOWN; map storage facts and OFL-A01..A06 corrections accepted additively.",
+      "status": "PRIOR_RETAINED",
+      "confidence": "HIGH",
+      "scope": "canonical baseline",
+      "evidence": "NEXT_BASELINE.md; CORRECTION_LEDGER.json",
+      "era": "PE_EU_9_3_5_SAVED_ONLY",
+      "classification": "prior",
+      "qc_scope": "baseline acceptance"
+    }
+  ]
+}
