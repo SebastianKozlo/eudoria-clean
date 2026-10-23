@@ -1,0 +1,38 @@
+﻿{
+  "qc_jobs": [
+    {
+      "job": "QSCIENCE_OWR_R1",
+      "verdict": "QC_PASS_WITH_FINDINGS",
+      "claims": "C1 VERIFIED, C2 VERIFIED, C3 VERIFIED_WITH_NOTES (IAT thunk NOT_VERIFIABLE_IN_WINDOW), C4 VERIFIED, C5 VERIFIED, C6 VERIFIED_WITH_NOTES, C7 VERIFIED_WITH_NOTES",
+      "countermodels": "M1-M7 all HOLD (M1 parallel leg NOT_VERIFIABLE_IN_WINDOW as predicted; M6 no cross-body contamination; M7 no disjointness overclaim)",
+      "findings": [
+        {"id": "P1", "severity": "MATERIAL", "text": "00414130 receives ECX=B @00528FD9; not in C7 risk list; census 'exhausted' overclaim", "resolution": "RESOLVED: 00414130 opened (4-byte getter, read-only); census corrected and re-QC'd (QSCIENCE2/3)"},
+        {"id": "P2", "text": "0095D3C4 thunk JMP [0xA75354] not verifiable in window", "resolution": "RETAINED as NOT_VERIFIABLE_IN_WINDOW (prior canon thunk)"},
+        {"id": "P3a", "text": "M2 arithmetic note [ESP+0x18] vs [ESP+0x14] flag slot wording", "resolution": "CLARIFIED in OWR-C6 wording (insert flag at [ESP+0x18], B at [ESP+0x14])"},
+        {"id": "P3b", "text": "QC source overshoot ~610 rows vs 320 cap (ticket design)", "resolution": "OWR-IN2 incident; later QC tickets under cap"},
+        {"id": "P3c", "text": "getter NULL-return path note", "resolution": "RETAINED (null singleton leg marked)"}
+      ]
+    },
+    {
+      "job": "QSCIENCE2_CENSUS",
+      "verdict": "QC_FAIL (interim census wording)",
+      "findings": [
+        {"id": "P1", "severity": "MATERIAL", "text": "census missed 0085B0A0 (list text) and 00401360 (ECX=B survival)", "resolution": "RESOLVED: C2 job opened both; final census OWR-C2"},
+        {"id": "P2", "text": "non-B list incomplete (00746570, [0xA75A5C])", "resolution": "RESOLVED: added to OWR-C8 risk items"},
+        {"id": "P3", "text": "0085B120 POP ECX writes cookie into ECX - survival arguments must quote literal chains", "resolution": "ADOPTED in final census (def-chains cited)"}
+      ]
+    },
+    {
+      "job": "QSCIENCE3_CENSUS_REVALIDATION",
+      "verdict": "QC_FAIL on superseded wording; final census table derived and verified in the same report",
+      "findings": [
+        {"id": "P0-1", "severity": "MATERIAL", "text": "00746570 receiver is EDI not B (last ECX def MOV ECX,EDI@00528F2E); interim C6'' internal contradiction 8-vs-7", "resolution": "RESOLVED: OWR-C2/OWR-C3 final wording = QSCIENCE3's own verified table"},
+        {"id": "P0-2", "severity": "MATERIAL", "text": "0085AD60 arg = EDI+0x20, not B+0x20", "resolution": "RESOLVED: OWR-C3"},
+        {"id": "P2-1", "text": "00414130 callsite 00528FD9 not 00528FDE", "resolution": "RESOLVED in OWR-C2"},
+        {"id": "P3-1", "text": "0085B120 POP ECX ECX-survival caveat", "resolution": "RECORDED"}
+      ]
+    }
+  ],
+  "qc_scope_note": "Science QC executed as 3 fresh pe-master-auditor sessions (depth 1, no nesting). The census obligation consumed its 2-attempt cap; the final published census (OWR-C2) and chain (OWR-C3) are the QC3-derived tables, not an unverified third master rewrite. ACCOUNTING QC (QACCOUNT) executes separately.",
+  "overall_science_qc": "QC_PASS_WITH_FINDINGS on final content; two superseded interim wordings rejected (recorded in CORRECTION_LEDGER)"
+}

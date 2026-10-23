@@ -1,0 +1,13 @@
+﻿{
+  "writer_missing_edge": {
+    "main": "[B+0x0C] nonzero writer: NOT_OBSERVED in all admitted windows (creator flow + ctor + all 7 direct-B callees + registration hop)",
+    "ranked_next_edges": [
+      {"rank": 1, "edge": "ctor indirect CALL [0xA75A5C]@00528FF5 (stack-buffer receiver, target UNKNOWN) - resolve actual target cell from saved vtable/imports data; risk item (d)"},
+      {"rank": 2, "edge": "FUN_004157b0 inside 00401360 (pseudocode receiver = fresh 0x88 singleton object; pseudocode args garbled; literal body not in H5) - risk item (e)"},
+      {"rank": 3, "edge": "family setters on [ESI] in 004C47F0 flow (0085B3E0@004C488A with arg1, 0085ADB0@004C4896 - note 0085ADB0 READS [this+0xC] and its pointee, a consumer-pattern witness; 006B22D0@004C489D) - these act on a DIFFERENT this ([ESI] of 004C47F0), relation to B unproven"},
+      {"rank": 4, "edge": "post-ctor family setters found by owner-vtable walk (0xA7DCB0 methods) - census not yet run"},
+      {"rank": 5, "edge": "00856090/00854D90 map insert/lookup bodies (registration internals; insert may write B-adjacent bookkeeping, not [B+0x0C])"}
+    ],
+    "denominators": "ctor direct-B callees opened 7/7; ctor non-B callees opened 0/9; creator-flow callees opened 2/15 visible CALLs (004154F0, 00856190)"
+  }
+}
