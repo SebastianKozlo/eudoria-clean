@@ -1,0 +1,102 @@
+{
+  "run_id": "PE_935_RECORD_HEAD_TRANSFORM_ROOT_DEFAULT_TASK_OPENCODE_SAVED_R1_20261022",
+  "era": "PE_EU_9_3_5_SAVED_ONLY",
+  "claims": [
+    {
+      "id": "R1",
+      "text": "0085CDE0 przyjmuje this=X, arg1=&blok52B, arg2=flag byte (RET 0x8) i nie wykonuje interpolacji (wylacznie FLD/FSTP ruchy danych)",
+      "confidence": "CONFIRMED",
+      "source": "packet A1 rows 1171960-1172042; QSCIENCE S5,S9",
+      "premises": "row-major odczyt bloku; normal ABI",
+      "qc": "QSCIENCE 9/9"
+    },
+    {
+      "id": "R2",
+      "text": "0085CDE0 restrukturyzuje blok do 3x4 (transpozycja czesci 3x3 + kolumna b+0x24/28/2C) i deleguje thiscallem do [[X+0x2C]vtable+0x14] (slot 5)",
+      "confidence": "CONFIRMED",
+      "source": "packet A1 rows 1171987-1172027; QSCIENCE S6,S7",
+      "premises": "DF=0; REP MOVSD 9 dword",
+      "qc": "QSCIENCE 9/9"
+    },
+    {
+      "id": "R3",
+      "text": "warunkowa kopia 13 DWORD bloku do X+0x30 przy arg2!=0; obserwowany caller 00861150 podaje arg2=0 (skip); siostra 00861030 i 3 census callerow podaja 1 (copy active)",
+      "confidence": "CONFIRMED",
+      "source": "A1 rows 1172028-1172033; B2A row 1176758; B1 RESULT",
+      "premises": "brak",
+      "qc": "QSCIENCE S7-S8 (S8 z korekta uzasadnienia QS-1)"
+    },
+    {
+      "id": "R4",
+      "text": "0096CDD0 czyta dokladnie 12B input, ma guard |v0^2-K|<eps ze skokiem do special branch 0096CE6C, i w fall-through zapisuje 9 kolejnych DWORD [[A,B,0],[0,0,1],[B,-A,0]] gdzie A=thunk(0095DA1C)(s), B=thunk(0095DA28)(s), s=v1+v2",
+      "confidence": "CONFIRMED",
+      "source": "packet A2 rows 1500434-1500484; master spot-check",
+      "premises": "K/eps values UNKNOWN",
+      "qc": "master spot-check rows 1500465-1500484 PASS"
+    },
+    {
+      "id": "R5",
+      "text": "wyjscie 0096CDD0 jest rotation-shaped; euler_composition STRONGLY_SUPPORTED (para IAT-thunkow + pojedynczy kat s + wzorzec macierzy); identity/unit-conversion FALSIFIED; import identities UNKNOWN -> semantyka NIE CONFIRMED",
+      "confidence": "STRONGLY_SUPPORTED",
+      "source": "A2 + B3 RESULT",
+      "premises": "A^2+B^2=1 wymaga sin/cos - niedowodnione bez IAT",
+      "qc": "B3 self-check; QSCIENCE NOT_CHECKED (poza zakresem QC)"
+    },
+    {
+      "id": "R6",
+      "text": "0095DA1C/0095DA28 to import thunki JMP dword [0xA75390]/[0xA75398] - nie ciala; reszta okna to 0095DA40 (_ftol-like dual converter)",
+      "confidence": "CONFIRMED",
+      "source": "packet B3 rows 1483471-1483493",
+      "premises": "brak",
+      "qc": "B3 census 23/23"
+    },
+    {
+      "id": "R7",
+      "text": "00864360 to cdecl(arg1=cursor, arg2=head record out); zapisy +0/+4/+8 (triple1), +C/+10/+14 (triple2 lub default 0xBA921C-24), +0x18=flags1&0xFE; advance 13/25B; return cursor; trzy wczesniejsze PUSH-e NIE sa jego argumentami (chain 0085BD20 po ADD ESP,8)",
+      "confidence": "CONFIRMED",
+      "source": "packet A3 + A3X rows 1180781-1180859, 1170757-1170809",
+      "premises": "00412430/0085BD20 bodies not opened (decoder types UNKNOWN)",
+      "qc": "MTB-A07 revalidated from instructions"
+    },
+    {
+      "id": "R8",
+      "text": "triple1 (+0/+4/+8) idzie jako kolumna translacyjna bloku52B (def-use w 00861150/00861030); record+C (triple2) idzie do 0096CDD0",
+      "confidence": "CONFIRMED",
+      "source": "B2A rows 1176743-1176763; prior campaign 00861150",
+      "premises": "semantic label 'translation' = rola strukturalna (4. kolumna 3x4), nie zweryfikowana jednostkami/konsumentem",
+      "qc": "QSCIENCE S2"
+    },
+    {
+      "id": "R9",
+      "text": "00861030 to siostrany applier 00861150 (identyczny ABI/record arg); 11 bezposrednich zapisow D (+8..+3C wg mapy) + 4 metody atrybutow na X po apply; asymetria 11-vs-12 ze 00861150 zgloszona jawnie",
+      "confidence": "CONFIRMED",
+      "source": "packet B2A; QSCIENCE S3 recount",
+      "premises": "brak",
+      "qc": "QSCIENCE S1-S4"
+    },
+    {
+      "id": "R10",
+      "text": "X = wspolny transform-destination node: struktura klasy (gate +0x20, byte +0x24, subobjekt +0x2C z vtable slotami +0x14/+0x160, bufor +0x30..0x63); metody rodziny na X; czy X jest rootem instancji sceny - NIEROZSTRZYGNIETE",
+      "confidence": "CONFIRMED_STRUCTURE_ONLY",
+      "source": "B1 cross-window + B2",
+      "premises": "root-vs-subobject wymaga slot5 body lub ctor",
+      "qc": "QSCIENCE S9 (brak ctor/writera w pakietach)"
+    },
+    {
+      "id": "R11",
+      "text": "pochodzenie X=[D+4]: writer/ctor NIEOBECNY w otwartych cialach - DATA_BARRIER; wymaga census/eksportu ctorow poza dostepnymi saved sources",
+      "confidence": "DATA_BARRIER",
+      "source": "QSCIENCE S9; census NAV",
+      "premises": "negatyw scoped do otwartych cial",
+      "qc": "QSCIENCE"
+    },
+    {
+      "id": "R12",
+      "text": "WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CURSOR_SOURCE_MEDIUM=UNKNOWN; CANONICAL_GATE_EFFECT=NONE",
+      "confidence": "CONFIRMED_CEILING",
+      "source": "caly run (zero runtime/history data)",
+      "premises": "brak",
+      "qc": "n/a"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "run_id": "PE_935_RECORD_HEAD_TRANSFORM_ROOT_DEFAULT_TASK_OPENCODE_SAVED_R1_20261022",
+  "qscience": {
+    "session": "ses_e984b9326ffeY6Nnjdvg05W1Cd",
+    "verdict": "QC_PASS",
+    "checks": "S1-S9 all CONFIRMED (full literal read of B2A 90 rows + A1 83 rows, SHA verified)",
+    "defects": [
+      {
+        "id": "QS-1",
+        "sev": "P2",
+        "finding": "A1 worker wording 'vcall-callee RET 0x8' unsound; epilogue balance requires vcall net 0 (callee pops 1 dword)",
+        "disposition": "ACCEPTED; wording corrected in REPORT/CLAIMS; conclusion [ESP+0x90]=arg2 unchanged CONFIRMED",
+        "revalidation": "re-run stack balance when vtable slot5 body available"
+      },
+      {
+        "id": "QS-2",
+        "sev": "P2",
+        "finding": "temp object from 00415570+00856760 @rows 1172034-36 unused result",
+        "disposition": "ACCEPTED as observation; no impact on S1-S9"
+      }
+    ],
+    "not_checked": "bodies 0096cdd0 (as QC target), 0085d040/d0b0/d290/d2f0, 00415570, 00856750/60, vtable slot5, H5 outside packets"
+  },
+  "qaccount": {
+    "session": "ses_e9852b715ffejmxDC9O1FqSPb8",
+    "verdict": "QC_PARTIAL",
+    "verified_exact": "548 packet rows, 40 literal CALL, 10 packets, 6 RESULT.md, 8 attempts, chronology tool-generated monotonic, per-job caps <=160, UNMEASURED honesty preserved",
+    "defects": [
+      {
+        "id": "QA-D1",
+        "sev": "P2",
+        "finding": "CALL-unit reservations 20 vs actuals 40, no top-up admission",
+        "disposition": "ACCEPTED; ADMIN amendment seq20; overrun disclosed; cap 400 not breached"
+      },
+      {
+        "id": "QA-D2",
+        "sev": "P1",
+        "finding": "master_lower_bound 504 contradicts detail sum 584",
+        "disposition": "ACCEPTED; corrected to 584 in draft amendment"
+      },
+      {
+        "id": "QA-D3",
+        "sev": "P2",
+        "finding": "3 admitted doc sources (seq10) consumed without READ event",
+        "disposition": "ACCEPTED; process deviation; reconstructed lines disclosed as UNMEASURED_READ; amendment seq20"
+      },
+      {
+        "id": "QA-D4",
+        "sev": "P2",
+        "finding": "charged_lower_bound=12 not derivable from lists",
+        "disposition": "ACCEPTED; charging rule stated (10 bodies + 2 charged thunks)"
+      }
+    ]
+  }
+}
