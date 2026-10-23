@@ -1,0 +1,115 @@
+{
+  "run_id": "PE_935_OWNER_FACTORY_ATTACH_LOOKUP_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023",
+  "era": "PE_EU_9_3_5_SAVED_ONLY",
+  "derived_from": "sealed CLAIMS.json (manifest 65B8599B8AFECB8FFEDCB45CC94359BEFD21EFFB9025424DEC70A3204810EB96 covers local copy; local/public pins may differ by newline normalization)",
+  "claims": [
+    {
+      "id": "OFL-C1",
+      "text": "0085B3E0 (called from 004C488A on this=[ESI]=B_lookup result, args: caller 3-float buffer ptr + flag 1) performs a stepped-movement/payload-application loop: reads [B+0x0C] as a call argument (0085b48d, 0085b522), never references B+0x10, performs ZERO own-field stores on the receiver; it is a CONSUMER of B+0x0C, not a setter/writer. Two virtual calls on this: vt+0xC @0085b475 and vt+0x4 @0085b5ce (interiors UNKNOWN).",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "155-row body 0085B3E0..0085B5D6 + 5 caller rows, literal",
+      "classification": "NEW_TEST",
+      "qc": "QSCIENCE scope limited to A6 hop; A1 not re-derived by fresh QC (limitation)"
+    },
+    {
+      "id": "OFL-C2",
+      "text": "008544D0 is a map lookup: guard on mgr+0x44, delegates to 00971780 (thiscall on mgr+0x10) with out-local and key-slot pointers; found epilogue returns [found_entry+0x8] (caller-side read premise), not-found returns 0; a separate sibling entry 00854520..00854564 post-processes via 0085B190 (not on this caller's path).",
+      "status": "STRONGLY_SUPPORTED",
+      "confidence": "HIGH",
+      "scope": "60-row body + 8 caller rows",
+      "classification": "NEW_TEST",
+      "qc": "partial: [found+0x8] chain not re-derived"
+    },
+    {
+      "id": "OFL-C3",
+      "text": "00971780 (lookup engine, same map family): open hashing over bucket-head array [this+0x8]..[this+0xC] (N dwords = N-1 buckets), bucket index = key % (N-1), dword key; chain walk over node+0x0 (next), key compare at node+0x4; found -> *out=node, not-found -> *out=0; NO node+0x8 access in this body.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "36-row body, literal",
+      "classification": "NEW_TEST",
+      "qc": "not re-derived by fresh QC (limitation)"
+    },
+    {
+      "id": "OFL-C4",
+      "text": "00856090 is reserve/ensure-capacity only: computes load vs float loadFactor [ESI+0x18], on overflow allocates a new bucket array via allocator [0x00a75848] and delegates rebuild to 00855ee0 (interior UNKNOWN); it NEVER reads the caller's B slot and writes no node fields.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "79-row body + 21 caller-context rows, literal S-arithmetic",
+      "classification": "NEW_TEST",
+      "qc": "not re-derived by fresh QC (limitation)"
+    },
+    {
+      "id": "OFL-C5",
+      "text": "00854D90 is FIND-OR-INSERT: key=*Q (Q=[S+8]); same open-hashing family; miss path CALL 00854260(this+0x4,Q) -> new node, splice after head, count++ at this+0x14, *P=new node (P=[S+4]), byte[P+0x4]=1; found path (jump to 00854E00): *P=node, byte[P+0x4]=0; both RET 0x8.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "47-row body + 8 found-path rows + caller ctx, literal",
+      "classification": "NEW_TEST",
+      "qc": "QSCIENCE CONFIRMED"
+    },
+    {
+      "id": "OFL-C6",
+      "text": "Node factory 00854260 allocates 0xC bytes via allocator [0x00a759e8]; on success writes node+0x0=0, node+0x4=[Q], node+0x8=[Q+0x4]; failure path skips the copies.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "19-row body literal",
+      "classification": "NEW_TEST",
+      "qc": "QSCIENCE CONFIRMED"
+    },
+    {
+      "id": "OFL-C7",
+      "text": "REGISTRATION PAYLOAD CHAIN (key hop): wrapper 00856190 key slot = E-0x10 (holds [B+0x74] via 00414130), B slot = E-0xC; Q = LEA ECX,[ESP+0xc] = E-0x10, so Q+0x4 = E-0xC = B slot; therefore node+0x8 payload = B (the registered object). node+0x8 = B CONFIRMED_IN_PACKET.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "wrapper 48 rows + findinsert 47 + factory 19 + foundpath 8; full E-relative arithmetic re-derived twice",
+      "classification": "NEW_TEST",
+      "qc": "QSCIENCE CONFIRMED"
+    },
+    {
+      "id": "OFL-C8",
+      "text": "Wrapper flag polarity: CMP byte [ESP+0x18] @008561db reads flag byte [P+0x4] (E-0x4); flag=0 (key found existing) -> virtual slot0 call on B with arg 1 (008561e3..eb), returns AL=0; flag=1 (newly inserted) -> unlock+return AL=1. 'Already present'/'newly inserted' labels are INTERPRETIVE; the mechanical polarity is literal.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "literal",
+      "classification": "NEW_TEST",
+      "qc": "QSCIENCE CONFIRMED"
+    },
+    {
+      "id": "OFL-C9",
+      "text": "LOOKUP-TO-SAME-OWNER BRIDGE: a 008544D0 lookup that finds key [B+0x74] in the same map object (mgr+0x10, singleton mgr premise) returns [node+0x8] = the same B registered earlier. The join is SUPPORTED (map-object identity via singleton premise + same-key premise; key-namespace equality mgr[0x24]+1 at insert vs lookup-key source remains POSSIBLE_ONLY).",
+      "status": "STRONGLY_SUPPORTED",
+      "confidence": "MEDIUM-HIGH",
+      "scope": "conditional on two premises: (a) singleton mgr identity (PRIOR_CANON 004154F0 returns [0xBA12E8]); (b) insert key [mgr+0x24]+1 equals lookup key source namespace",
+      "classification": "NEW_TEST",
+      "qc": "QSCIENCE: step itself UNVERIFIABLE_FROM_PACKET (consistent with SUPPORTED)"
+    },
+    {
+      "id": "OFL-C10",
+      "text": "SECOND 0xA7DCB0 INSTALLER: 00529080 is a destructor/close-style related creator (SEH frame, receiver ESI=pre-allocated object via ECX, plain RET): reinstalls vptr 0xA7DCB0 @005290A8 (vptr-based identity with class B, not RTTI proof), frees vector member [B+0xC4]/[B+0xCC] via imported deallocator [0x00a759fc], then calls 0085B3A0(B). Its only own object store is the vptr; NO store to B+0x0C/B+0x10.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "36-row true body 00529080..005290F9; rows to 00529177 include a SIBLING vector-assign helper not attributed",
+      "classification": "NEW_TEST",
+      "qc": "not re-derived by fresh QC (limitation)"
+    },
+    {
+      "id": "OFL-C11",
+      "text": "0085B3A0 (called from 00529080 close path on B) is a destruction stage: reinstalls vptr 0xa91e4c, frees [B+0x3C] and [B+0x40] via 0062b100 + deallocator 0095d42a; no stores to B+0x0C/B+0x10.",
+      "status": "CONFIRMED",
+      "confidence": "HIGH",
+      "scope": "23-row body literal (master direct analysis, disclosed)",
+      "classification": "NEW_TEST",
+      "qc": "not re-derived by fresh QC (limitation)"
+    },
+    {
+      "id": "OFL-C12",
+      "text": "NONZERO WRITER of B+0x0C/B+0x10: NOT_OBSERVED_IN_BOUNDED_SEARCH. Bounded search performed: prior-run full ctor 00528E50 + all 7 ECX=B helper bodies + creator packet (prior canon); this run: 0085B3E0 (consumer), full map machinery chain (00856090/00854D90/00854260/00971780 - never touch B fields), 00529080 (destructor), 0085B3A0 (destructor); mechanical censuses: dword-store pattern census (11442 total [reg+0xC]/[reg+0x10] stores, 133 in 0085xxxx family, receiver identity unproven for ~40 non-ESP candidates), vptr census (denominator closed: exactly 2 installers, both resolved), allocator-call census (~1800 generic sites, non-selective). The only PROVEN writer of B+0x0C/B+0x10 remains 0085B1B0 zero-init (value 0, PRIOR_CANON). NOT_TESTED_CLASSES: indirect/aliased-address stores, other widths, virtual callee interiors of vt+0xC/vt+0x4 (vtable DATA absent from H5 listing - slot targets NOT_RECOVERABLE_FROM_SAVED), runtime writes (forbidden).",
+      "status": "PLAUSIBLE_NEGATIVE_BOUNDED",
+      "confidence": "MEDIUM",
+      "scope": "bounded search as enumerated; NOT a global absence proof",
+      "classification": "NEW_TEST",
+      "qc": "accounting-level only"
+    }
+  ]
+}

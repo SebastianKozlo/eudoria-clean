@@ -1,0 +1,17 @@
+gate,measured_value,status,evidence
+package_tools_authoring_preflight,33 rows/34 files ok=true,PASS,pre-START read-only verify-tree
+package_tools_postaudit_preflight,25/26 ok=true,PASS,pre-START read-only verify-tree
+opr_baseline_read_after_ADMIT,REPORT.md 82 lines + NEXT_BASELINE 14 lines,PASS,seq2 ADMIT before read
+native_task_count,10 (8 workers + 2 auditors),PASS,DB mode=ro parent binding 10/10
+worker_jobs_minimum_3,"6 substantive worker jobs (A1,A2,A4,A3R,A5,A6,B7=7) + QSCIENCE + QACCOUNT x2",PASS,JOBS artifacts
+max_active_children,2,PASS,sequential dispatch pairs
+depth1_no_nested,no child dispatched children,PASS,event log + no worker ADMIT job_dispatch
+packet_caps,all <=160/attempt; QC <=320,PASS,QACCOUNT2 recount
+QSCIENCE,QC_PASS_WITH_FINDINGS (C1-C5 CONFIRMED; C6 CONFIRMED_IN_PACKET),PASS_WITH_FINDINGS,QSCIENCE_A6_PAYLOAD_HOP/QC_RESULT.md
+QACCOUNT_attempt1,"QACCOUNT_FAIL (F0 pin mutation, F1-F5)",FAIL_CORRECTED,seq23-25
+QACCOUNT_attempt2,QACCOUNT_PASS_WITH_FINDINGS (documentary P2/P3 only),PASS_WITH_FINDINGS,QACCOUNT2_REAUDIT/QC_RESULT.md
+event_log_read_gap_QA1,A3R/A5/A6/B7 worker READ events late-logged (disclosed),PASS_AFTER_FIX,seq27-30
+INPUT_RECHECK,full machine object at close,"PASS (full machine object; packet pins ALL_MATCH; A3 expected-value typo corrected, bytes unchanged)",INPUT_RECHECK.json
+validate_active_artifacts,strict JSON/JSONL/CSV on canonical artifacts,PASS (14 active files strict JSON/JSONL/CSV),validate output; authoring tool
+SEAL,package_tools --seal LAST,"READY_TO_SEAL (receipt will live at RECEIPT_ROOT; seal = byte integrity only, not truth of claims)",PENDING until seal executes
+PUBLICATION,sanitized commit + FF push + remote verify,PENDING (canonical receipt: RECEIPT_ROOT/PUBLICATION_RESULT.json),receipt outside science root

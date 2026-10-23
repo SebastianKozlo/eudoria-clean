@@ -1,0 +1,40 @@
+{
+  "run_id": "PE_935_OWNER_FACTORY_ATTACH_LOOKUP_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023",
+  "qc_jobs": [
+    {
+      "job": "QSCIENCE_A6_PAYLOAD_HOP",
+      "auditor": "pe-master-auditor fresh native Task ses_e96ae350cffetp2ZSxOwxFzR0r",
+      "verdict": "QC_PASS_WITH_FINDINGS",
+      "adjudications": {
+        "C1_factory": "CONFIRMED (with correction: factory writes node+0x0=0 explicitly)",
+        "C2_wrapper_stack": "CONFIRMED (all offsets independently recomputed)",
+        "C3_findinsert_abi": "CONFIRMED",
+        "C4_cmp_reads_flag_byte": "CONFIRMED ([E-0x4]=[P+0x4])",
+        "C5_polarity": "CONFIRMED",
+        "C6_node_payload_B": "CONFIRMED_IN_PACKET",
+        "lookup_final_step": "PREMISE_NOT_REDERIVED (consistent with SUPPORTED, not CONFIRMED)"
+      },
+      "findings_on_worker_result": [
+        "P2: incomplete forced-convention list (missing RET 0x4 on called vt)",
+        "P2: light interpretation of 'allocation size' wording",
+        "P3: trivial 'below E-0x20' phrasing"
+      ],
+      "countermodels_rejected": [
+        "ESP delta miscounts",
+        "P/Q role inversion",
+        "Q+0x4 different local",
+        "factory base offset shift (payload at node+0xC)",
+        "00856090 RET 0x4 not popping before [ESP+0x14] store",
+        "byte [P+0x4] vs [P] read ambiguity"
+      ]
+    }
+  ],
+  "unre_qced": [
+    "A1",
+    "A2",
+    "A3R",
+    "A4",
+    "A5",
+    "B7 results not independently re-derived by fresh QC (documented limitation; master planning reads overlapped their packets)"
+  ]
+}

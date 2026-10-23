@@ -1,0 +1,8 @@
+# PUBLICATION_SCOPE — PE_935_OWNER_FACTORY_ATTACH_LOOKUP_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023
+
+BASE = 6c65d15e8d0c53099635e6a8e661ef660188806e (measured origin/master via git ls-remote before worktree creation; NOT the stale local checkout 34cf114).
+Published (this folder): REPORT.md, HANDOFF.md, DERIVED_CLAIMS.json, RESOURCE_INSTANCE_TRANSFORM_MATRIX.csv, QC_FINDINGS.json, FIRST_MISSING_EDGE.json, STAGE_ACCEPTANCE_GATES.csv, PUBLICATION_SCOPE.md, EXTERNAL_POSTAUDIT_SUMMARY.md, PUBLICATION_MANIFEST.csv (generated LAST, self-excluded).
+Also published: docs/audits/PE_935_OWNER_POINTER_WRITER_RESOLUTION_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023/POSTAUDIT_NOTICE_R1.md (NEW additive file for OPR-A01..A06; no existing file touched; no conflict found at BASE) and ONE newest-first row in AUDIT_ENTRYPOINT.md (insertion only, numstat 1/0).
+SANITIZATION: no RAW packets, no literal instruction listings, no binary payloads, no assets, no model prompts/answers/reasoning, no DB extracts, no config/env/secrets, no ZIPs. REPORT/claims contain instruction ADDRESSES and field offsets as scientific citations only. EXTERNAL_POSTAUDIT_SUMMARY.md is a byte-identical copy of the pinned postaudit PUBLIC_SUMMARY.md (UTF-8 verified valid). Local sealed package and public projection may differ in pins (newline normalization); manifest covers the PUBLIC bytes.
+LOCAL SEALED PACKAGE: manifest 44 rows / 45 physical files, MANIFEST_SHA256.csv 4405 B, SHA256 65B8599B8AFECB8FFEDCB45CC94359BEFD21EFFB9025424DEC70A3204810EB96 (seal = byte integrity only, NOT truth of claims).
+Publication is NOT scientific acceptance. CANONICAL_GATE_EFFECT = NONE. DESKTOP_POST_AUDIT = PENDING.

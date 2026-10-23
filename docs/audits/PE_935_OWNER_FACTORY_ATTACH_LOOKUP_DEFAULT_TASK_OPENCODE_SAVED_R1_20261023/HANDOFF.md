@@ -1,0 +1,9 @@
+AUTHORING_ROOT=D:\Eudoria_Reconstruction\99_Audits\PE_935_OWNER_FACTORY_ATTACH_LOOKUP_DEFAULT_TASK_AUTHORING_R1_20261023
+SCIENCE_ROOT=D:\Eudoria_Reconstruction\99_Audits\PE_935_OWNER_FACTORY_ATTACH_LOOKUP_DEFAULT_TASK_OPENCODE_SAVED_R1_20261023
+RECEIPT_ROOT=D:\Eudoria_Reconstruction\99_Audits\PE_935_OWNER_FACTORY_ATTACH_LOOKUP_DEFAULT_TASK_RECEIPT_R1_20261023
+MODEL=DEFAULT_GLM_CLIENT_MEDIUM (nask-glm/glm-5-3, reasoningEffort=medium)
+NATIVE_TASKS=10 (8 workers pe-reconstruction, 2 auditors pe-master-auditor x3 sessions: QSCIENCE, QACCOUNT, QACCOUNT2)
+ROOT_SESSION=ses_e96d1682cffe80eQIRGaW47K6W
+NEXT_EXPERIMENT=closed chain: 00854E11 empty-bucket + 008544D0 caller-side [found+0x8] packet to close lookup-join to CONFIRMED; vt+0xC/vt+0x4 slot targets require vtable DATA (not in saved H5) — DATA_BARRIER
+CANONICAL_GATE_EFFECT=NONE
+WORLD_XYZ_RECOVERED=NO
