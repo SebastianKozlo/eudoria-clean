@@ -1,0 +1,23 @@
+﻿{
+  "run_id": "PE_935_MESSAGE_TRANSFORM_INSTANCE_BINDING_DEFAULT_TASK_OPENCODE_SAVED_R1_20261022",
+  "qc_round": "QCA_SCIENCE_QC attempt 1 (fresh pe-master-auditor, ses_e98975209ffeQ4hImBqrHnrKb7, finish=stop)",
+  "qc_verdict": "QC_PARTIAL",
+  "inputs_literal": ["PACKET_handler_binding_rows (15)", "PACKET_85b840 (79)", "PACKET_861150 (79)", "J16 frozen window (121)"],
+  "verified": {
+    "C05_chain": "PASS (independently recomputed rows 1170283-1170293)",
+    "C06_stack_math": "PASS (independent ESP recompute; second deref = out_slot F+0x74; record live at 00527AB0 entry)",
+    "C07_provider_copy_and_call": "PASS (52B=13 dwords verified; [ESP+0x44]=record verified by stack math)",
+    "C08_field_map": "PASS on all offsets/widths/unpacks (rows 1176856-1176887)",
+    "defect_adjudication": "ACCEPTED_DEFECT: J01 row-4690 JZ tests cursor flag [ESI+0x11] (CMP 0048EDFF), not K_query; corrective wording issued",
+    "countermodels": "record NOT popped before consumer (rows 4699-4704); no class/semantics overclaim; 004123D0 deref consistent"
+  },
+  "not_checked_by_qca": ["C02/C03 (rows 4705-4775 outside QC window)", "C04 SAMPLE_ONLY (parser packet not re-read)", "C09/C10 (packets not in QC input set)", "REPORT.md (not in input set)"],
+  "findings": [
+    {"id": "F1", "severity": "P2", "text": "J06 RESULT.md Answer.1 says 'Eleven direct field stores'; literal count in rows 1176856-1176887 is TWELVE (3 FLD/FSTP + 3 MOV + 4 bit-unpacks + 2 FLD/FSTP). Worker artifact left untouched; correction applied additively here and in REPORT.md QC correction section.", "revalidation": "recount = 12"},
+    {"id": "F2", "severity": "P3", "text": "C07 wording: row 180931 RET 0x4 cleans the OUTER handler record arg; the inner PUSH ECX (row 180924) is cleaned by 00861150's own RET 0x4 (row 1176891). Wording precision recorded.", "revalidation": "none needed (no verdict change)"}
+  ],
+  "corrections_applied_additively": [
+    "REPORT.md gains a QC correction section (count=12, RET 0x4 precision, J01 defect adjudication)",
+    "J01 defect corrective wording (from A5) recorded in IDENTITY_AND_TIME_MAP note and REPORT"
+  ]
+}
