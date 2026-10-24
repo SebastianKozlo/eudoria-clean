@@ -1,0 +1,133 @@
+{
+ "run_id": "PE2003_SCENE_BOOTSTRAP_MODEL_INSTANCE_DISCOVERY_R1_20261024",
+ "taxonomy": "CONFIRMED/STRONGLY_SUPPORTED/PLAUSIBLE/UNVERIFIED/REJECTED",
+ "claim_groups": {
+  "CLIENT_MECHANISM": [
+   {
+    "id": "C01",
+    "text": "Startup script ID source = command-line -i -> atoi (FUN_00401f80 @0x4021c7) -> setter FUN_00542de0 -> settings[X+0x5C]; read back via 0x46A170->0x490650->0x542D20",
+    "status": "CONFIRMED",
+    "evidence": "STARTUP_ID_PROVENANCE.json; QC independent byte re-derivation of full chain",
+    "falsifier": "any other writer of +0x5C before script_startup not accounted (secondary OR-writer 0x542D30 documented)"
+   },
+   {
+    "id": "C02",
+    "text": "J09 claim 'id hard-coded as [X+0x5c]=1' DISPROVEN; observed 1 = atoi('-i1')",
+    "status": "CONFIRMED",
+    "evidence": "STARTUP_ID_PROVENANCE.json cmdline_semantics_corrections"
+   },
+   {
+    "id": "C03",
+    "text": "-p has NO offline semantics in binary; offline flag is separate field X+0x19 (FUN_00489e50), unlinked from -p",
+    "status": "CONFIRMED",
+    "evidence": "STARTUP_ID_PROVENANCE.json; zero 'offline' strings in binary"
+   },
+   {
+    "id": "C04",
+    "text": "Scripts.ark roster: 1937 members; 1936 encrypted Blowfish-class DLOB + 1 plaintext; 233 stubs; 0 duplicate names/ids",
+    "status": "CONFIRMED",
+    "evidence": "SCRIPT_REGISTRATION_ROSTER.csv full census; QC recomputed full counts"
+   },
+   {
+    "id": "C05",
+    "text": "DLOB header self-ID == filename ID in 1936/1936; startup script id 1 ABSENT locally (ids 203..6431)",
+    "status": "CONFIRMED",
+    "evidence": "roster; QC full (not sampled) recheck"
+   },
+   {
+    "id": "C06",
+    "text": "v2-class decoder (re-derived in-run from binary) reproduces pinned decoded corpus byte-exactly 1936/1936 incl. W1 plaintexts 4508/4057",
+    "status": "CONFIRMED",
+    "evidence": "DECODER_ENGINE_PARITY.json; QC 3/3 independent re-decodes + full SHA match list",
+    "note": "independence lineage: QC reused pinned engine for bulk; core mixing bytes independently verified"
+   },
+   {
+    "id": "C07",
+    "text": "J09 port failure root cause = v1-class raw-XOR key-schedule mixing (roundtrip-consistent, no DLOB magic)",
+    "status": "PLAUSIBLE",
+    "evidence": "signature-level attribution; J09 port code not preserved",
+    "note": "PARTIAL per executor; not a code diff"
+   },
+   {
+    "id": "C08",
+    "text": "Forced script_startup return-1 is pure status-set; VM container/effects require registry hit for the id (absent for id 1) -> explains gray scene causally without server-artifact inference",
+    "status": "STRONGLY_SUPPORTED",
+    "evidence": "BOOTSTRAP_SIDE_EFFECTS.md; static chain; runtime not re-observed this run"
+   },
+   {
+    "id": "C09",
+    "text": "Scene step 0x46CF80 gated by byte+4==1 whose producer is connect-success FUN_0048CDA0; 50s wait = 50000ms network timeout parameter (not Sleep)",
+    "status": "CONFIRMED",
+    "evidence": "SCENE_INIT_GRAPH.json; QC decoded gate+callers+50000 storage"
+   },
+   {
+    "id": "C10",
+    "text": "Sandbox file closure 705/705 vs INSTALL_MANIFEST; Data/Terrain junction with pinned 50.bnt; writable-client paths redirected",
+    "status": "CONFIRMED",
+    "evidence": "SANDBOX_COMPLETENESS.json; QC hash-snapshot level (full 705 re-hash by executor)"
+   },
+   {
+    "id": "C11",
+    "text": "50.bnt (PE42) = BUNT archive, 51,921 members (51,920 TDF 32x32 + 1 overview), terrain-only at container/tile-structure level; no placement-capable record grammar",
+    "status": "CONFIRMED_AT_STRUCTURE_LEVEL",
+    "evidence": "TERRAIN_50BNT_EXAMINATION.json; QC footer/index/2-tile re-derivation",
+    "note": "RLE payload bytes + 75 tile residues unexamined; meta bytes 16-51 UNKNOWN"
+   },
+   {
+    "id": "C12",
+    "text": "Per-model def->resource PROVEN: 4508->{296445.nif,296446.bvi}, 4057->{218757.nif,218758.bvi}; BVI id+1 pairing code-qualified at definition level (twin C-register getters)",
+    "status": "CONFIRMED",
+    "evidence": "MODEL_INSTANCE_JOIN.csv; VM_OPCODE_TABLE.json; QC twin-getter re-derivation from own decoded streams"
+   },
+   {
+    "id": "C13",
+    "text": "VM opcode table 229/229 matches engine dispatch (709-entry jump table @0x4581EC); DLOB bytecode exposes ids to engine, does NOT itself load/instantiate",
+    "status": "CONFIRMED",
+    "evidence": "VM_OPCODE_TABLE.json; QC dispatch-byte verification"
+   },
+   {
+    "id": "C14",
+    "text": "Model loader call edge (engine id->member-open chain) and instance assignment: NOT closed",
+    "status": "UNVERIFIED",
+    "evidence": "MODEL_INSTANCE_JOIN.csv stage loader/instance=UNKNOWN",
+    "note": "5858 computed CALL/JMP candidate sites delivered (OPENER_SEARCH_REPORT.json); semantic classification executor-performed, QC NOT_CHECKED at instruction level"
+   },
+   {
+    "id": "C15",
+    "text": "218757 PE42 variant (C13D0873, 4.1.0.12) vs 9.3.5 (3E8A22C2, 10.1.0.0): same 14-shape mesh core; 9.3.5 adds lights/viewport/string extra +1 material, removes NiVertexColorProperty",
+    "status": "CONFIRMED_DATA_LEVEL",
+    "evidence": "jd1_nif_diff_218757.json; 9.3.5 geometry counts UNKNOWN (parser desync recorded)",
+    "note": "role continuity NOT assumed"
+   }
+  ],
+  "OFFLINE_RENDER_PREVIEW": [
+   {
+    "id": "P01",
+    "text": "Own private preview renders both models from real pinned PE42 assets; mesh pipeline verified by drawn==geometry==parse triple equality (296445: 1030 tri/2415 verts; 218757: 526/1130); 2 distinct frames each",
+    "status": "CONFIRMED",
+    "evidence": "PREVIEW_RESULT.json; frames local WORK_ROOT/preview",
+    "note": "SYNTHETIC_PREVIEW label mandatory; not historical placement"
+   }
+  ],
+  "HISTORICAL_RECOVERY": [
+   {
+    "id": "H01",
+    "text": "Authentic historical instance transforms for 296445/218757: NONE found in examined channels; HISTORICAL_INSTANCE_CANDIDATES empty (honest)",
+    "status": "NOT_ESTABLISHED",
+    "evidence": "HISTORICAL_INSTANCE_CANDIDATES.csv; LOCAL_SOURCE_COVERAGE.csv",
+    "note": "negative bounded to examined channels; NOT a global impossibility claim"
+   },
+   {
+    "id": "H02",
+    "text": "PE2003_WORLD_XYZ_RECOVERED=NO; PE2003_HISTORICAL_PLACEMENT=NOT_ESTABLISHED",
+    "status": "CONFIRMED_AS_CURRENT_STATE"
+   }
+  ]
+ },
+ "standing_corrections": [
+  "R3 43/50 -> honest recount 31/50 CONFIRMED+SS (REPLAY_REVALIDATED.csv)",
+  "36 corrupt R3 CSV rows normalized additively, 20 AMBIGUOUS_SOURCE_ROW",
+  "J09 'hard-coded 1' and '-poffline' beliefs disproven",
+  "NETWORK_RUNTIME_ONLY stays retracted to scoped observation (F01)"
+ ]
+}

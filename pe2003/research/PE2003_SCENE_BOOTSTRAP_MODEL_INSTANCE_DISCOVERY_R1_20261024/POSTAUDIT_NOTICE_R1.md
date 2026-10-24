@@ -1,0 +1,15 @@
+﻿# POSTAUDIT_NOTICE_R1 — additive corrections for PE2003 R3 + FREECAM (F01–F11)
+This notice is issued by run PE2003_SCENE_BOOTSTRAP_MODEL_INSTANCE_DISCOVERY_R1_20261024 as an ADDITIVE supplement to the already-published reports of PE2003_MODELS_296445_218757_REBUILD_LOCATION_YOLO_R3_20261024 and the offline free-cam campaign. Source runs are not modified. Dispositions (full table: BASELINE_DISPOSITION.json in the run package):
+- F01 ACCEPTED/OPEN-scoped: exclusive network placement NOT established; NETWORK_RUNTIME_ONLY retracted to NETWORK_POSITION_PATH_OBSERVED_STATICALLY (avatar-class only). LOCAL_PLACEMENT_NOT_FOUND_IN_EXAMINED_CHANNELS.
+- F02 ACCEPTED/PARTIALLY_RESOLVED: the old opener scanner was low-sensitivity; this run's new search found 5858 computed CALL/JMP sites over the full .text (590,882 instructions) with a positive control (D3D8 path) and 5/5 synthetic sensitivity countermodels. Per-model def->open edge remains open; DYNAMIC-ONLY-as-fact stays retracted.
+- F03 ACCEPTED/RESOLVED as discipline: per-model join stages kept separate (def/resolver/loader/instance); join NOT claimed.
+- F04 ACCEPTED/RESOLVED: all new chains re-derived in the pinned 2003 binary (SHA256 561789...0650); no 9.3.5 VA imported.
+- F05 ACCEPTED/RESOLVED: startup ID provenance byte-proven (-i -> atoi -> X+0x5C); "hard-coded 1" and "-poffline as offline switch" DISPROVEN; startup script id 1 absent from the local corpus (ids 203..6431); decoder v2-class parity reproduces the pinned corpus 1936/1936; J09 port failure signature-attributed to v1 key-schedule mixing (PLAUSIBLE, code not preserved); forced return=1 is status-only (gray scene explained causally, no server-artifact inference).
+- F06 ACCEPTED/RESOLVED: sandbox 705/705 vs INSTALL_MANIFEST incl. the correct Data/Terrain/50.bnt junction; scene-init condition map delivered (0x46CF80 gated by connect success; 50s = 50000 ms network timeout parameter; terrain path separate from Volumes.ark).
+- F07 ACCEPTED/OPEN: renderer hook dedup (by module/address/role) and sendto/recvfrom coverage remain preconditions for any future runtime attempt (E1).
+- F08 ACCEPTED/RESOLVED: 36 corrupt rows normalized additively (20 AMBIGUOUS_SOURCE_ROW); strict checker published.
+- F09 ACCEPTED/RESOLVED: full-digest SHA ledger with match==serialized-equality enforcement.
+- F10 ACCEPTED/OPEN: seal/artifact-list obligations belong to the closing phase of this run (SCIENCE_STOP recorded).
+- F11 ACCEPTED/OPEN: NETWORK_TRAFFIC_DURING_J11=NOT_EXHAUSTIVELY_MEASURED; PUBLIC_NETWORK_ISOLATION=NOT_ESTABLISHED_FROM_THIS_TRACE; future offline attempts require both-side UDP reception capture and process-scoped containment.
+- Replay recount: "43/50 documented" superseded by 31/50 CONFIRMED+STRONGLY_SUPPORTED (16 UNVERIFIED after F01-F03 overclaim downgrades; 2 REJECTED scoped; 1 PLAUSIBLE).
+Standing: PE2003_WORLD_XYZ_RECOVERED=NO; PE2003_HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CANONICAL_GATE_EFFECT=NONE. This notice does not claim the external postaudit accepted anything beyond its own frozen text.

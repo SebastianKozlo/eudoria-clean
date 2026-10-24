@@ -1,0 +1,7 @@
+﻿# REPRODUCTION (advisory)
+Pinned inputs (SHA256 in the private run package INPUT_PINS.json and public manifests of prior runs): PE2_unpacked_out.exe (2003 build) 56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650; Scripts.ark 1701D696...85AE; Models.ark F660D055...3EA62; Terrain/50.bnt 8E43CD14...76665; both model payloads (296445: 656795D8...B862 @Models.ark idx 1720; 218757: C13D0873...AD98 @idx 1189).
+1. Startup-ID chain: disassemble the pinned binary at 0x4018B0 (switch table), 0x4021C7 (atoi->setter), 0x542DE0 (setter), 0x46A170->0x490650->0x542D20 (read chain). Any 2003-image disassembler reproduces the byte proofs.
+2. Roster: parse Scripts.ark (AK/ZIP-like directory), classify members (marker/magic), decode with the engine's v2-class Blowfish (key material is NOT published — reproduction of decode requires the original binary's key blob at 0x610478, 0x1C0 B).
+3. 50.bnt: read the footer ([-8:] = index_offset + "BUNT"); index = 51921 x 21-byte entries (name@12 + 0x0A, packed, offset); any TDF member: header+subheader+32x32 uint16 heights @+64 + material records + 0xFFFFFFFF RLE masks.
+4. Model payloads: extract ark members 1720/1189, verify SHA256, parse as NIF 4.1.0.12; mesh counts: 296445 = 2415 verts/1030 tris (30 shapes); 218757 = 1130/526 (14 shapes).
+5. Our published tools (pe2003/tools/): strict CSV/JSON validator (check_strict.py) with unit tests; preview builder/runner (own renderer; three.js r169 caveats recorded: transparent DoubleSide two-pass; info.render.vertices removed in r158).

@@ -1,0 +1,8 @@
+﻿# QC_AND_PROCESS_SUMMARY
+- Native tasks: 8 (7 executor pe-reconstruction incl. 1 empty-return retry consumed per contract; 1 fresh pe-master-auditor QC). Depth=1, max 2 active, NO_NESTED_TASKS held. Runtime client: 0 attempts (E0 isolation precondition unmet; static + own-preview continued per contract).
+- Model bindings: children nask-glm/glm-5-3 (medium-class request; wire/server UNKNOWN, non-blocking after the client gate: 32 pinned inputs physically read+re-hashed by preflight). No global config changes.
+- Fresh QC: Pack1 QSCI_BOOTSTRAP PASS_WITH_NOTES; Pack2 QSCI_MODEL_DATA PASS_WITH_NOTES; Pack3 QACCOUNT QC_PARTIAL (3 missing ADMIT entries — honestly appended as RETROACTIVE_ADMIT by root; checker scope gap — closed by re-run). QC independently re-derived (own PE parser, own byte-level chains, full roster recount, 3/3 re-decodes, twin-getter re-derivation, 50.bnt footer/index/2-tile, replay recount). QC NOT_CHECKED (disclosed): instruction-level classification of the 5858 opener sites, full 705-file sandbox re-hash, preview render numbers, full 51,921-tile census.
+- Code budget overruns disclosed by workers (JB1 1418, JC1 ~830, JD1 1252 lines vs 800; Ghidra debug rounds; no scope expansion).
+- Disclosure hygiene: zero key material in any output (hash-match verdicts only); preview frames and game assets never leave the private workspace.
+- Seal: closing recheck strict-parse of all 43 artifacts (zero schema violations); SCIENCE_STOP admission; MANIFEST_SHA256.csv generated LAST, self-excluded, bijection verified.
+- CANONICAL_GATE_EFFECT=NONE; PENDING_EXTERNAL_POSTAUDIT. This publication is not scientific acceptance.

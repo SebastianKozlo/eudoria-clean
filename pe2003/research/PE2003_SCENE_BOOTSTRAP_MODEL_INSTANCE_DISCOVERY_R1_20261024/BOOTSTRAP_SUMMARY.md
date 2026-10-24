@@ -1,0 +1,7 @@
+﻿# BOOTSTRAP_SUMMARY (PE2003 client mechanism, 2003 build)
+- Startup script ID: sourced from the -i command-line parameter (atoi @0x4021C7 -> setter FUN_00542DE0 -> settings[X+0x5C]; read-back chain 0x46A170->0x490650->0x542D20). Secondary OR-writer (graphics flags) documented; reset writers documented.
+- Scripts.ark: 1937 members; 1936 encrypted Blowfish-class DLOB + 1 plaintext; 233 stubs; 0 duplicate names/ids; DLOB header self-ID == filename ID 1936/1936 (rule proven); startup script id 1 ABSENT locally (ids 203..6431).
+- Decoder: v2-class engine (bsw-wrapped key-schedule mixing, tables re-derived from the binary) reproduces the pinned decoded corpus byte-exactly 1936/1936 incl. both W1 plaintexts. J09 port failure attributed (signature-level) to v1-class raw-XOR mixing.
+- VM effects: forced script_startup success is pure status-set; the success path (VM container at runtime+0x10064, frame passes, flags) requires a registry hit for the id — impossible for id 1 locally => causal explanation of the gray scene without invoking server artifacts (STRONGLY_SUPPORTED, static).
+- Scene init: 0x46CF80 gated by connect-success flag (producer FUN_0048CDA0); the historical "~50s connect_attempt" is a 50000 ms network timeout parameter, not a Sleep; terrain path (FUN_004D8670 -> FUN_004E9760 -> %u.bnt) is separate from Volumes.ark.
+- Sandbox: full PE42 file closure 705/705 (junctioned read-only sources, writable-client paths redirected; Data/Terrain/50.bnt SHA-verified).
