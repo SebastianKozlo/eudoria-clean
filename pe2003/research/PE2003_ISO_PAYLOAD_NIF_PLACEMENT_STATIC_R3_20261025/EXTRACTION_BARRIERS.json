@@ -1,0 +1,23 @@
+{
+  "status": "NO_BLOCKING_BARRIERS — installer payload fully recovered (56/56 rows FILE_RECOVERED_COMPLETE).",
+  "open_micro_items": [
+    {
+      "item": "CRC trailer semantics",
+      "detail": "4-byte trailer 0x15F87AFB at 0x9653D99 sits exactly after the last uninstall data block (structure consistent with firstheader.flags&1 = 'CRC on' per NSIS 2.0b1/b2 firstheader flag semantics). zlib.crc32 over 6 candidate ranges (firstheader..end-4, after-firstheader, after-headerblock, whole-file, incl-trailer, stub..end-4) does NOT match. The stub's crc32 table (VA 0x40a6b8) is BSS (runtime-initialized), so the exact algorithm/coverage was not re-derived within budget.",
+      "impact": "none on payload recovery — every block decoded to exact csize with BFINAL; BNT/mp3/DLL/EXE structure validates independently",
+      "decisive_next_step": "disassemble the crc32 init routine that fills 0x40a6b8 and the verification call in loadHeaders (callers of the function containing the 0x402253 update loop) to extract exact poly/init/coverage"
+    },
+    {
+      "item": "bit30 in 50.bnt size dword (0x86D9E1D0)",
+      "detail": "bit30 set, never tested by stub code (inert for extraction); producer-side marker, cause unknown",
+      "impact": "none",
+      "decisive_next_step": "would require the producer's patched makensis (not in corpus)"
+    },
+    {
+      "item": "PCG 50.bnt vs PE42 corpus 50.bnt identity",
+      "detail": "PCG demo 50.bnt = 118,016,977 bytes with FULL 51,920+1 TDF grid (BUNT footer census). Size differs from the full-install corpus 50.bnt; content identity UNVERIFIED (explicitly not assumed, not filled from PE42).",
+      "impact": "none for this job; follow-up candidate for a later question (tile-level comparison vs PE42 corpus)",
+      "decisive_next_step": "BUNT parse + per-TDF offset/size comparison against PE42 50.bnt (separate job)"
+    }
+  ]
+}

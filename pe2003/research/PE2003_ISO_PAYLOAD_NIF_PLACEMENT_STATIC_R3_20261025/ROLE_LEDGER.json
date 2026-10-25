@@ -1,0 +1,49 @@
+{
+  "run_id": "PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025",
+  "file": "ROLE_LEDGER.json",
+  "author": "Z01 closing (pe-master-auditor), 2026-10-25",
+  "note": "Ledger ról wg stanu dostarczonego przez root (prompt Z01, pkt 7) + plików RESULT jobów. REQUEST_EFFORT=NOT_OBSERVED, SERVER_EFFECTIVE_EFFORT=UNKNOWN (brak telemetrii per dziecko w danych źródłowych).",
+  "root_session": {
+    "role": "pe-master (root, supervisory controller)",
+    "model": "nask-glm/glm-5-3",
+    "session_id": "NOT_RECORDED (root, sesja bieżąca 2026-10-25)",
+    "responsibilities": [
+      "kontrakt runu (00_CONTROL\\CONTRACT.md, eratum provenance)",
+      "piny wejść (zweryfikowane hash 2026-10-25)",
+      "DIRECT_ANALYST: inspekcja stubu UPX w I02 (2 pliki tools zapisane w jobs\\I02; przyczyna śmierci 2 prób dzieci — praca wykonana przez root zamiast dzieci)",
+      "korekta ścieżki po śmierci prób: split I02 → I02a (zmiana lineage)",
+      "dispatch wszystkich natywnych Task",
+      "adjudication QC findings i dispatch C01",
+      "seal (SCIENCE_STOP.json + MANIFEST_SHA256.csv) po powrocie Z01 — POZA zakresem tego pliku"
+    ],
+    "incidents": ["INC-R3-01: zmyślona końcówka SHA PE.exe w promptach I02/I02a-a1 (ROOT_INCIDENT_NOTE.md; żadna nauka nie oparła się na błędnym pinie)"]
+  },
+  "child_sessions": [
+    { "job": "I01", "agent_role": "pe-reconstruction (executor, wave 1)", "model_family": "GLM (default/medium wg kontraktu)", "session_id": "NOT_RECORDED", "result": "COMPLETE (INSTALLER_PAYLOAD_COMPLETE 56/56)" },
+    { "job": "N01", "agent_role": "pe-reconstruction (executor, wave 1)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "PASS (N1-N4)" },
+    { "job": "B01", "agent_role": "pe-reconstruction (executor, wave 2)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "COMPLETE (56/56 qualified)" },
+    { "job": "I02 (2 próby, obie infra-dead)", "agent_role": "pe-reconstruction (executor)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "DEAD (infra) x2 → split do I02a; praca stubowa wykonana ostatecznie przez root (DIRECT_ANALYST) i dzieci I02a-a2" },
+    { "job": "I02a (próba 1)", "agent_role": "pe-reconstruction (executor)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "PARTIAL-DEAD (2 pliki tools w jobs\\I02a; prompt zawierał zmyślony pin — INC-R3-01)" },
+    { "job": "I02a (próba 2)", "agent_role": "pe-reconstruction (executor)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "SECTIONS_DECOMPRESSED (unpack PE.exe 5.1.0.0)" },
+    { "job": "I02b", "agent_role": "pe-reconstruction (executor)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "COMPLETE (7 tasków mechanizmów NIF/placement buildu ISO)" },
+    { "job": "D01", "agent_role": "pe-reconstruction (executor)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "COMPLETE (kanał danych SERVER_DELIVERED_ONLY, census ISO 42)" },
+    { "job": "I03", "agent_role": "pe-reconstruction (executor)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "COMPLETE (unpack ClientLoader+CLUpdater, kanał FTP)" },
+    { "job": "N02", "agent_role": "pe-reconstruction (executor)", "model_family": "GLM (default/medium)", "session_id": "NOT_RECORDED", "result": "PASS (MODEL-LOCAL composed, dual A/B)" },
+    { "job": "QC1", "agent_role": "pe-master-auditor (fresh QC, wave 1)", "model_family": "GLM (NOT model-independent — jawnie zastrzeżone)", "session_id": "NOT_RECORDED", "result": "QC_PASS (3xP2+2xP3)" },
+    { "job": "QC2 (próba 1)", "agent_role": "pe-master-auditor (fresh QC)", "model_family": "GLM", "session_id": "NOT_RECORDED", "result": "INFRA-DEAD (3 skrypty w work\\ ponownie wykorzystane w próbie 2)" },
+    { "job": "QC2 (próba 2)", "agent_role": "pe-master-auditor (fresh QC, fale 2-5)", "model_family": "GLM", "session_id": "NOT_RECORDED", "result": "QC_PASS (35 itemów: 33 TRUE/2 FALSE; 2xP2+3xP3)" },
+    { "job": "C01", "agent_role": "pe-master-auditor (documentation correction)", "model_family": "GLM", "session_id": "NOT_RECORDED", "result": "13 korekt in-place + 6 ERRATA; ledger 7C29F5F58E2AD1145187AA588D4BCAB363425CAD91C54007D0A601EEDFEF97F7; obserwacja o braku plików QC_FINDINGS na dysku BŁĘDNA (pliki istnieją — korekta roota)" },
+    { "job": "Z01 (closing/authoring)", "agent_role": "pe-master-auditor (ten plik)", "model_family": "GLM (nask-glm/glm-5-3 wg środowiska)", "session_id": "bieżąca sesja Z01", "result": "patrz SCIENCE_ROOT (ten pakiet)" }
+  ],
+  "effort_fields": {
+    "REQUEST_EFFORT": "NOT_OBSERVED (brak zapisu requested effort per dziecko w danych źródłowych)",
+    "SERVER_EFFECTIVE_EFFORT": "UNKNOWN (brak telemetrii; budget per job w BUDGET_LEDGER.json)"
+  },
+  "separation_of_duties": {
+    "executors": "pe-reconstruction (I01, N01, B01, I02x, I02a, I02b, D01, I03, N02)",
+    "independent_qc": "pe-master-auditor fresh sessions (QC1, QC2) — ta sama rodzina modeli, niezależność sesji/roli jawnie zastrzeżona",
+    "corrections": "C01 (pe-master-auditor) na dispatch roota; scope_guards w ledgerze",
+    "closing": "Z01 (pe-master-auditor, ten pakiet) — synteza, zero nowej nauki",
+    "seal": "root (po powrocie Z01) — SCIENCE_STOP.json i MANIFEST_SHA256.csv NIE są pisane przez Z01"
+  }
+}

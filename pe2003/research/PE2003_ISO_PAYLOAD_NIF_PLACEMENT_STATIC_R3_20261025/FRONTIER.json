@@ -1,0 +1,64 @@
+{
+  "run_id": "PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025",
+  "file": "FRONTIER.json",
+  "author": "Z01 closing (pe-master-auditor), 2026-10-25",
+  "note": "Zbiór zidentyfikowanych barier/otwartych krawędzi po zamknięciu fal R3. Żaden nie był testowany w R3 poza deklaracją bariery; każdy ma źródło fizyczne i proponowany następny krok. ID wg konwencji BLK-R3-xx.",
+  "items": [
+    {
+      "id": "BLK-R3-01",
+      "title": "Konsument PE_PCG.ark w wydaniu ISO",
+      "question": "Kto fizycznie konsumuje nazwę 'PE_PCG.ark' z Download.data? Literal nieobecny we wszystkich 3 binariach (PE.exe, ClientLoader, CLUpdater); konsument może być installer-era bootstrap lub ścieżka liczona.",
+      "evidence_source": "jobs\\I03\\RESULT.md §4-5 (exhaustive scans, zero hits); jobs\\D01\\RESULT.md (zero-hit w PE.exe).",
+      "next_step": "Unpack CLDLLPatcher.exe (patrz BLK-R3-02) + pełne przejrzenie 315 instrukcji NSIS instalatora pod kątem odczytu Download.data; jeśli negatywnie — oznaczyć jako niedostępne statycznie bez runtime (poza zakresem kampanii statycznej).",
+      "cost": "niski-średni (CLDLLPatcher 9 728 B UPX; census instrukcji już zmapowany w INSTALLER_MAP.json)",
+      "impact": "zamknięcie ostatniej niejednoznaczności kanału danych; nie wpływa na werdykt SERVER_DELIVERED_ONLY"
+    },
+    {
+      "id": "BLK-R3-02",
+      "title": "Unpack CLDLLPatcher.exe",
+      "question": "CLDLLPatcher 1.0.0.1 (9 728 B, UPX) konsumuje CLDLLPatcher01.ark — czy niesie dodatkową logikę danych (np. manifestowo-instalacyjną konsumpcję PE_PCG.ark)?",
+      "evidence_source": "jobs\\D01\\RESULT.md §2 (packed; barrier); jobs\\I03\\RESULT.md §3 (binaria pobierane także przez loader).",
+      "next_step": "unpack wiernym interpreterem stubu (metoda I03); potem skan literalów.",
+      "cost": "niski (proven recipe I03)",
+      "impact": "może rozstrzygnąć BLK-R3-01"
+    },
+    {
+      "id": "BLK-R3-03",
+      "title": "PE42: registry+0x3C ctor i krawędź resource→instance",
+      "question": "Jak klient PE42 tworzy OBIEKTY-ŚWIATA z zasobów Models.ark? (kandydaci: ctor obiektu rejestru (registry+0x3C) i konsumenci resource-open 0x51F6E0 / wewnętrzne struktury ArkBoundingVolumeRenderer).",
+      "evidence_source": "R2-A04 baseline (rodzina ArkBoundingVolumeRenderer nie dowodzi instancji); jobs\\I02b\\RESULT.md Task 5 (konsumenci nie w pełni deasemblowani); jobs\\N02\\RESULT.md §2 (konsument transformów node 0x005068F0).",
+      "next_step": "deasemblacja konsumentów resource-open w PE2_unpacked_out.exe + poszukiwanie klas instancji z polami transformu world-frame; falsyfikator: żaden konsument nie tworzy instancji z danymi placementowymi.",
+      "cost": "średni-wysoki (kilkadziesiąt ciał)",
+      "impact": "JEDYNA znana statyczna ścieżka do krawędzi resource→instance (kluczowa luka placementu)"
+    },
+    {
+      "id": "BLK-R3-04",
+      "title": "Geometria NiTriShapeData vs composed offsets (test 'w obrębie bryły')",
+      "question": "Czy przesunięcia drzwi/obiektów/soczewek mieszczą się w bryle budynku (296445: max |t| ~11 291 jedn. modelowych; 218757: ~1 316)? Wymaga zdekodowania wierzchołków NiTriShapeData (62 bloki TYPE_ONLY).",
+      "evidence_source": "jobs\\N02\\RESULT.md §4 (explicit negation: bounding box nieznany); CLAIMS.json C-N02-05 (UNVERIFIED).",
+      "next_step": "rozszerzenie parsera N01 o layout NiTriShapeData (numVertices, numTriangles, data); porównanie bboxów bryły z composed offsetami części.",
+      "cost": "średni (layout per type; strukturalna walidacja jak w N01)",
+      "impact": "przekształca UNVERIFIED w testowalny wynik; również podstawa przyszłej kalibracji jednostek modelu (AXIS_UNITS_FRAME)"
+    },
+    {
+      "id": "BLK-R3-05",
+      "title": "BUNT trailer — nienazwane pola u32 po ostatnim wpisie (4+8 B)",
+      "question": "Semantyka pól traileru BUNT 50.bnt po 51 921 wpisach (poza zakresem B01).",
+      "evidence_source": "jobs\\B01\\RESULT.md §Barriers (item 2).",
+      "next_step": "parse + korelacja z kodem klienta (otwieranie BNT: '\\Terrain\\*.bnt' w 5.1.0.0; odpowiednik PE42).",
+      "cost": "niski",
+      "impact": "higiena formatu; brak wpływu na placement"
+    },
+    {
+      "id": "BLK-R3-06",
+      "title": "CRC trailer instalatora NSIS",
+      "question": "Dokładny algorytm/pokrycie 4-bajtowego trailera 0x15F87AFB @0x9653D99 (tabela crc32 stubu w BSS, runtime-init).",
+      "evidence_source": "jobs\\I01\\data\\EXTRACTION_BARRIERS.json (item 1: 6 kandydatów pokrycia przetestowanych, żaden nie trafia).",
+      "next_step": "deasemblacja procedury init 0x40a6b8 + caller weryfikacji w loadHeaders; wyciągnięcie poly/init/xor/coverage.",
+      "cost": "niski-średni",
+      "impact": "kompletność provenance instalatora; brak wpływu na recovery (56/56 COMPLETE niezależnie)"
+    }
+  ],
+  "first_missing_edge": "W łańcuchu ISO→installer→build→models→instance→placement pierwszą brakującą krawędzią dla celu kampanii jest ISO_PAYLOAD→model_definition: dane modeli (Models.ark w PE_PCG.ark) nieobecne w wydaniu ISO lokalnie (SERVER_DELIVERED_ONLY) — bez niej krawędzie resource→instance→transform→world dla wydania ISO nie istnieją statycznie. Dla ścieżki referencyjnej PE42 pierwszą brakującą krawędzią pozostaje resource→instance (R2-A04).",
+  "next_best_experiment": "BLK-R3-03 (PE42: deasemblacja konsumentów resource-open / ctor registry+0x3C) — jedyne statyczne źródło, które może zamknąć krawędź resource→instance bez danych serwerowych 2003; kosztem niższym niż frontier geometryczny i z bezpośrednim wpływem na cel placementu. Runner-up: BLK-R3-04 (geometria NiTriShapeData) jako niezależna lokalna noga dowodowa i przyszła podstawa kalibracji jednostek."
+}

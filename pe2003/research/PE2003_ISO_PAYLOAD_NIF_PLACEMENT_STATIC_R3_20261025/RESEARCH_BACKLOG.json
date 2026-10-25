@@ -1,0 +1,82 @@
+{
+  "run_id": "PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025",
+  "file": "RESEARCH_BACKLOG.json",
+  "author": "Z01 closing (pe-master-auditor), 2026-10-25",
+  "note": "Backlog per zakończona/otwarta gałąź badawcza. Pola: question, motivation, source, novelty (względem R2/P01), cost, outcome, closure_reason.",
+  "branches": [
+    {
+      "branch": "BR-ISO-CHAIN (ISO → installer)",
+      "question": "Czy obraz ISO 2003 zawiera pełny, weryfikowalny łańcuch do instalatora gry i czy instalator da się w pełni zmapować i rozpakować statycznie?",
+      "motivation": "Bez pełnego payloadu instalatora nie można było rozstrzygnąć, czy dane modeli są lokalne.",
+      "source": "jobs\\I01 (mapa + mechanizm + recovery); jobs\\D01 (spacer ISO9660); R2-A05/A06.",
+      "novelty_vs_R2": "Instalator zidentyfikowany jako genuine NSIS gen-2.0-beta bez tabeli block_header; wariant stored-bez-NLEN rozstrzygnięty; 56/56 FILE_RECOVERED_COMPLETE.",
+      "cost": "zakończone (I01+QC1+D01)",
+      "outcome": "COMPLETE — payload pełny; anomalia bloku 40 rozstrzygnięta jako kompresja, nie uszkodzenie.",
+      "closure_reason": "Odpowiedź na pytanie gałęzi osiągnięta; otwarte tylko mikro-itemy (CRC trailer — BLK-R3-06, bit30)."
+    },
+    {
+      "branch": "BR-BUILD (installer → build)",
+      "question": "Jaki build klienta jest w wydaniu ISO i co transferuje się z korpusów referencyjnych?",
+      "motivation": "R2-A05 zabraniał utożsamiania ISO z PE42; wymagana twarda identyfikacja buildu i certyfikat reużywalności.",
+      "source": "jobs\\B01; jobs\\I02a/I02b.",
+      "novelty_vs_R2": "ISO2003NOV-PE-5.1.0.0 (TDS 2003-07-02); FIELD_ORDER_SAME; id-hash NIEOBECNY; resource-open VARIANT; kanał web MindArk1_Patched identity.",
+      "cost": "zakończone",
+      "outcome": "COMPLETE — DIFFERENT_BUILD, NO VA TRANSFER; REUSE_CERTIFICATE (teren + 16 plików tożsamo-międzykorpusowych).",
+      "closure_reason": "Identyfikacja i certyfikat wydane; brak otwartych subpytań w zakresie R3."
+    },
+    {
+      "branch": "BR-DATA-CHANNEL (build → models)",
+      "question": "Skąd klient 5.1.0.0 bierze dane gry (modele/teren) w wydaniu ISO?",
+      "motivation": "Decyduje o dostępności danych modeli dla placementu.",
+      "source": "jobs\\D01; jobs\\I03 (unpack loaderów); jobs\\I01 (manifesty).",
+      "novelty_vs_R2": "Pełny silnik FTP na raw sockets z hardcoded pulami IP 2003; FullDat_%d.ark → materializacja montowanych ark; transport rozstrzygnięty (packed-state barrier z D01 zamknięta przez I03).",
+      "cost": "zakończone",
+      "outcome": "COMPLETE dla werdyktu — SERVER_DELIVERED_ONLY; OPEN: konsument literalu PE_PCG.ark (BLK-R3-01/02), funkcja checksum.",
+      "closure_reason": "Werdykt osiągnięty trzema niezależnymi nogami; otwarte mikro-itemy przeniesione do FRONTIER."
+    },
+    {
+      "branch": "BR-NIF-FORMAT (models: kolejność pól + parser)",
+      "question": "Jaka jest rzeczywista kolejność pól transformu w NIF 4.1.0.12 wg natywnego loadera i czy da się zbudować odporny parser strukturalny?",
+      "motivation": "R2-A01 wymagało bajtowego rozstrzygnięcia; P01 miał systematycznie złą kolumnę translation.",
+      "source": "jobs\\N01; QC1.",
+      "novelty_vs_R2": "Translation @rotation_off−12 PRZED macierzą (16 pinów); parser strukturalny 155/155+62/62 bez mismatchy; properties-vs-children rozstrzygnięte; TriShape transforms nowo zdekodowane.",
+      "cost": "zakończone",
+      "outcome": "COMPLETE — kolejność CONFIRMED; stara semantyka REJECTED (38/38).",
+      "closure_reason": "Cel gałęzi osiągnięty; TYPE_ONLY (135 bloków) poza zakresem deklarowanym (frontier BLK-R3-04 dla NiTriShapeData)."
+    },
+    {
+      "branch": "BR-MODEL-LOCAL (instance-prep: composed transforms)",
+      "question": "Jak ułożone są części modeli w ich lokalnej ramie (root→część) i czy konwencja macierzy jest rozstrzygalna?",
+      "motivation": "Przygotowanie pod przyszłą krawędź instance→world; higiena N5 (bez promocji).",
+      "source": "jobs\\N02; QC2.",
+      "novelty_vs_R2": "26/7 części z niezerowym composed; AMBIGUOUS_DUAL_REPORTED z czułością 3/82; drzewa kompletne 56/26.",
+      "cost": "zakończone",
+      "outcome": "COMPLETE w zakresie MODEL_LOCAL — wyniki dual; test 'w obrębie bryły' UNVERIFIED (geometria poza zakresem).",
+      "closure_reason": "Zakres MODEL_LOCAL wyczerpany; promocja do WORLD zabroniona i niewykonalna bez krawędzi instance (BLK-R3-03)."
+    },
+    {
+      "branch": "BR-PLACEMENT (instance → world)",
+      "question": "Gdzie historycznie stały modele 296445/218757 w wydaniu ISO/PE42?",
+      "motivation": "Cel główny kampanii.",
+      "source": "R2-A02/A04; jobs R3 (przygotowanie ścieżek).",
+      "novelty_vs_R2": "R3 wykazało, że wydanie ISO nie zawiera danych modeli wcale (SERVER_DELIVERED_ONLY) — cel placementu dla wydania ISO jest statycznie NIEOSIĄGALNY bez danych 2003; ścieżka PE42 pozostaje otwarta.",
+      "cost": "otwarte",
+      "outcome": "NOT_ESTABLISHED (bez zmian standingu); FIRST_MISSING_EDGE = ISO_PAYLOAD→model_definition (ISO) / resource→instance (PE42).",
+      "closure_reason": "Gałąź NIE zamknięta — przeniesiona do frontierów BLK-R3-03/04; wymaga decyzji PE-MASTER o kolejnym runie."
+    },
+    {
+      "branch": "BR-TERRAIN-REUSE (teren ISO == pipeline ref-A)",
+      "question": "Czy wyniki pipeline terenowego stosują się do terenu wydania ISO?",
+      "source": "jobs\\B01 (REUSE_CERTIFICATE); QC2 (streamed compare).",
+      "novelty_vs_R2": "Tożsamość bajtowa 50.bnt — pełny 220×236 grid; ARCHIVE IDENTITY DOES NOT PROVE CLIENT IDENTITY.",
+      "cost": "zakończone",
+      "outcome": "COMPLETE — certyfikat reużywalności wydany (era-label: pipeline-2003 ref-A).",
+      "closure_reason": "Rozstrzygnięte; era-divergence wobec terenu instalacji PE42 udokumentowane."
+    }
+  ],
+  "summary": {
+    "closed": ["BR-ISO-CHAIN", "BR-BUILD", "BR-DATA-CHANNEL", "BR-NIF-FORMAT", "BR-MODEL-LOCAL", "BR-TERRAIN-REUSE"],
+    "open": ["BR-PLACEMENT (cel główny)"],
+    "note": "Wszystkie zamknięcia warunkowe: standing ADVISORY, EXTERNAL_POSTAUDIT=PENDING."
+  }
+}

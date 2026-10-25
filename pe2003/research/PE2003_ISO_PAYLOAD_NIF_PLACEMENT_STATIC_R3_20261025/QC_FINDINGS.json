@@ -1,0 +1,113 @@
+{
+  "run_id": "PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025",
+  "file": "QC_FINDINGS.json (agregacja SCIENCE_ROOT)",
+  "author": "Z01 closing (pe-master-auditor), 2026-10-25",
+  "note": "Agregacja findings QC1+QC2 (źródła verbatim: QC\\QC1\\QC_FINDINGS.json, QC\\QC2\\QC_FINDINGS.json — pliki FIZYCZNIE OBECNE; obserwacja C01 o ich braku była błędna i skorygowana przez roota) + dyspozycje z C01 (CORRECTION_LEDGER_R3.json). Katalog QC\\ pozostaje nietknięty.",
+  "qc_verdicts": {
+    "QC1": { "verdict": "QC_PASS", "scope": "fala 1 (I01+N01)", "items": "34 = 32 TRUE + 2 FALSE", "findings": "3xP2 + 2xP3" },
+    "QC2": { "verdict": "QC_PASS", "scope": "fale 2-5 (B01, I02a, I02b, N02, D01, I03) + proces", "items": "35 = 33 TRUE + 2 FALSE", "findings": "2xP2 + 3xP3" }
+  },
+  "findings": [
+    {
+      "finding_id": "P2-QC1-01", "severity": "P2", "job": "I01",
+      "title": "Zły adres bloku 50.bnt (0x2951D02 zamiast 0x28B3D02) w DECOMPRESSION_MECHANISM.md §6 i BLOCK40_ANOMALY.json (P7 + key_offsets.same_mechanism_second_block.block_abs)",
+      "evidence_summary": "Dword 0x86D9E1D0 fizycznie @0x28B3D02; bajty @0x2951D02 to mid-stream (QC1 własny byte-read).",
+      "disposition_c01": "CORRECTED in-place w obu plikach (0x2951D02→0x28B3D02); walidacja: json.load OK, 0 pozostałych trafień; hash_before/after w ledgerze (DECOMP: AB1E9FB3→1AEA79F0; BLOCK40: 8A59886F→0B1BEDC7).",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "P2-QC1-02", "severity": "P2", "job": "I01",
+      "title": "INSTALLER_MAP.json wiersz 'CLDLLPatcher manifest block': data_off_rel=0x5B92 niespójne z abs_range (fizycznie blok entry 174, data_off_rel 0x7992)",
+      "evidence_summary": "0xC361+0x5B92=0x11EF3 nie jest nagłówkiem bloku; abs_range 0x13CF3-0x13D33 → 0x7992 (QC1 własny walk).",
+      "disposition_c01": "CORRECTED in-place (entry_index opisany jako ten sam fizyczny blok co entry 174 ClientFiles.txt + errata adnotacja; data_off_rel 0x5B92→0x7992); walidacja fizyczna: dword @0x13CF3=0x8000003C, dekompresja 400 B == recovered\\ClientFiles.txt SHA; hash_before (rekonstrukcja)→E1ADCC79.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "P2-QC1-03", "severity": "P2", "job": "N01",
+      "title": "Liczniki nonunity_scale w summary_296445/218757.json (19/7/30 i 12/14) przeczą CSV i bajtom (scale=1.0 w 82/82)",
+      "evidence_summary": "CSV ma jedną wartość scale='1.0'; byte-read potwierdza; tabela RESULT sama deklaruje Scale≠1: 0 (QC1).",
+      "disposition_c01": "CORRECTED in-place do 0/0/0 i 0/0 (obie summary); pozostałe liczniki zweryfikowane 1:1; generator_defect_note: tools\\n01\\nif_transform_parser.py poza allowlistem C01 — naprawa należy do pe-reconstruction przez PE-MASTER.",
+      "status": "RESOLVED (naprawa generatora nadal OPEN jako request do pe-reconstruction)"
+    },
+    {
+      "finding_id": "P3-QC1-04", "severity": "P3", "job": "I01",
+      "title": "Precyzja sformułowania 'first 2 payload bytes as NLEN' — pierwszy blok obu strumieni anomalnych jest dynamiczny (BTYPE=2); błąd zlib powstaje przy późniejszym bloku stored",
+      "disposition_c01": "NOTE_FOR_NEXT_REVISION (precyzja sformułowania; mechanizm no-NLEN potwierdzony bajtowo niezależnie).",
+      "status": "NOTED (bez zmiany treści naukowej)"
+    },
+    {
+      "finding_id": "P3-QC1-05", "severity": "P3", "job": "I01",
+      "title": "Wyliczenie '53 pliki + łańcuch licencyjny + blok CLDLLPatcher + łańcuch uninst' może być odczytane jako rozłączne (67 bloków), fizycznie 53 bloki łącznie (nakładanie się łańcuchów na bloki wpisów)",
+      "disposition_c01": "NOTE_FOR_NEXT_REVISION (jawna adnotacja o nakładaniu — uwzględniona w C-INS-03 CLAIMS.json).",
+      "status": "NOTED"
+    },
+    {
+      "finding_id": "QC2-F01", "severity": "P2", "job": "I02a",
+      "title": "Zła transkrypcja dziesiętna pól packheadera w UNPACK_RESULT.json (c_len/compressed_stream_bytes_consumed 952999→953767; u_file_size 2917471→2912351) + fałszywe jak-zformułowane zdanie known-answer w RESULT.md",
+      "evidence_summary": "Falsyfikator: adler32(952999 B)=1E66F64F (brak matchu), adler32(953767 B)=31C626AA (match) (QC2).",
+      "disposition_c01": "CORRECTED in-place w UNPACK_RESULT.json (3 pola); RESULT.md I02a poza allowlistem → ERRATA.md E3 (READ WITH CORRECTION); walidacja: re-run interpretera (konsumpcja 0xE8DA7, 23 735 930 kroków) + json.load OK.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "QC2-F02", "severity": "P3", "job": "I03 (+I02a label)",
+      "title": "VA literału formatu ClientFiles.txt zapisany jako 0x4FBD90 (fizycznie 0x4FBD9C; cudzysłów podwójny nie pojedynczy); spójność nazwy metody UPX method 5 (NRV2B_32BIT_LE vs NRV2D_LE32)",
+      "evidence_summary": "Literal '%s\\t%d\\t%d\\t\"%s\"' zaczyna się @VA 0x4FBD9C, 16 B po 'ClientFiles.txt' @0x4FBD8C (QC2 byte-search).",
+      "disposition_c01": "CORRECTED in-place: I03 RESULT.md + DOWNLOAD_CHANNEL.json (VA→0x4FBD9C z adnotacją); I02a UNPACK_RESULT.json + ERRATA (label metody → NRV2D_LE32 zgodnie z I03); walidacja json.load + byte-read.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "QC2-F03", "severity": "P3", "job": "B01",
+      "title": "Transkrypcja LegalCopyright: fizyczny UTF-16 U+00A9 (©) zapisany jako '(c)' w CLIENT_BUILD_ID.json",
+      "disposition_c01": "CORRECTED in-place do 'Copyright \u00a9 MindArk...' (kodowanie UTF-8 no BOM pozwala); pozostałe 7 pól wersji niezmienione.",
+      "status": "RESOLVED (kosmetyka)"
+    },
+    {
+      "finding_id": "QC2-F04", "severity": "P3", "job": "cross-job (I02a vs I03)",
+      "title": "Niespójność nazewnicza tej samej metody UPX 5: 'NRV2B_32BIT_LE' (I02a) vs 'NRV2D_LE32' (I03)",
+      "disposition_c01": "CORRECTED: etykieta ujednolicona do NRV2D_LE32 (I02a JSON + ERRATA); semantyka była walidowana checksumami, nie etykietą (kontrola pozytywna QC2).",
+      "status": "RESOLVED (jednolinijkowa rekoncyliacja wg tabeli metod UPX z I03)"
+    },
+    {
+      "finding_id": "QC2-F05", "severity": "P2", "job": "D01",
+      "title": "Główny deliverable ISO_DATA_CHANNEL.json nieparsowalny jako JSON (linia 80: niescape'owane backslashe + adnotacja za zamykającym cudzysłowem) — L10",
+      "evidence_summary": "json.load fails line 80 col 84 (QC2); treść wizualnie obecna i poprawna (mount VAs zgodne z I02b).",
+      "disposition_c01": "CORRECTED in-place (adnotacja przeniesiona do wnętrza stringa; walidacja: json.load OK, 14 kluczy top-level); treść semantyczna zachowana.",
+      "status": "RESOLVED"
+    }
+  ],
+  "process_findings": [
+    {
+      "finding_id": "INC-R3-01", "severity": "P2 (proces)",
+      "title": "Root podał zmyśloną końcówkę SHA256 PE.exe w promptach I02/I02a-a1 (miał tylko prefix z wypowiedzi B01)",
+      "evidence": "jobs\\I02a\\ROOT_INCIDENT_NOTE.md (root self-report); prawdziwy pin 46B68741568D09664D8B0152E19FF765DFD562A8FF4BE32664E867971D55BB32 (fizycznie odzyskany z jobs\\I01\\recovered\\PE.exe; re-hash Z01 MATCH).",
+      "impact": "Żadna nauka nie oparła się na błędnym pinie (próby martwe na infrastrukturze przed semantyką); dokumentacja w BUDGET_LEDGER roota.",
+      "disposition": "DOKUMENTOWANE (incident note); brak korekty treści naukowej wymaganej.",
+      "status": "RESOLVED (transparency)"
+    },
+    {
+      "finding_id": "C01-OBS-CORR", "severity": "P3 (obserwacja skorygowana)",
+      "title": "Obserwacja C01: 'pliki QC_FINDINGS nieobecne na dysku (MISSING_PHYSICAL_INPUT)' — BŁĘDNA",
+      "evidence": "QC\\QC1\\QC_FINDINGS.json (6 440 B) i QC\\QC2\\QC_FINDINGS.json (12 035 B) fizycznie istnieją; Z01 odczytał oba w całości; root zweryfikował przed dispatchem Z01.",
+      "impact": "C01 poprawnie wykonał wszystkie korekty (treść findings przyjął verbatim z assignmentu); tylko obserwacja o dostępności plików była błędna — finding content identyczny.",
+      "disposition": "KOREKTA OBSERWACJI w pakiecie zamykającym (ten plik); treść korekt C01 niezależnie weryfikowana fizycznie (ledger hash_before/after + walidacje).",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "Z01-DRIFT-01", "severity": "P3 (nowa obserwacja Z01, poza zakresem korekt — jobs\\ read-only)",
+      "title": "Suma '163 584 477 bytes total' w RESULT.md I01 odbiega o +16 461 B od sumy out_size jego własnego RECOVERED_FILES.csv (163 568 016 B; suma zgodna z niezależnym policzeniem QC1)",
+      "evidence": "Programowe zliczenie Z01 z CSV: 54 wiersze z out_size = 163 568 016 B (== QC1); 53 wiersze plikowe = 163 534 578 B; 163 568 016 + license_data.bin 11 756 + regdata_64.bin 64 = 163 579 836 B (suma z surowymi intermediatami); RESULT deklaruje 163 584 477 (różnica +16 461, w przybliżeniu rozmiar 'Condition d´utilisation.txt' 4 641 + niezidentyfikowane ~11 820).",
+      "impact": "Defekt agregacji w PROZIE raportu; per-plikowe SHA, completeness i niezależny walk QC1 (53 bloki, zero luk) nietknięte.",
+      "disposition": "Z01 nie modyfikuje jobs\\ (read-only) — odnotowane w CLAIMS.json (C-INS-03 ograniczenia) i SELF_REVIEW; ewentualna korekta prose należy do przyszłego dispatchu CORRECT_DOCUMENTATION.",
+      "status": "OPEN (dokumentacyjny; nie podważa żadnej tezy)"
+    }
+  ],
+  "summary_counts": {
+    "qc1": { "P2": 3, "P3": 2 },
+    "qc2": { "P2": 2, "P3": 3 },
+    "process": { "P2_incident": 1, "P3_observation_corrected": 1, "P3_new_z01_drift": 1 },
+    "resolved_by_c01": 8,
+    "noted_only": 2,
+    "open_documentation": 1,
+    "science_invalidated": 0
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "run_id": "PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025",
+  "file": "BUDGET_LEDGER.json",
+  "author": "Z01 closing (pe-master-auditor), 2026-10-25",
+  "global_limits_per_contract": {
+    "native_tasks": 96,
+    "function_bodies": 256,
+    "unique_rows": 32000,
+    "exposures": 96000,
+    "call_edge_units": 2000,
+    "candidates": 512,
+    "docs_rows": 100000,
+    "data": "20 GiB",
+    "reserve_note": "rezerwa >=8 natywnych Task na QC/close/publish (zachowana: 96 vs 16 użytych przed publikacją)"
+  },
+  "per_job_usage": {
+    "I01": { "function_bodies": "36/48 (job-local)", "unique_lines": "~1150/6000 (job-local)", "exposures": "30/24000", "call_edges": "~120/300", "candidates": "11/64", "data": "~490 MB/6 GiB", "source": "jobs\\I01\\RESULT.md §Budget usage" },
+    "N01": { "function_bodies": "11/24", "unique_lines": "~1430/4000", "exposures": "pinned-only", "call_edges": "n/a (capstone)", "candidates": "0/128", "data": "~3 MB", "source": "jobs\\N01\\RESULT.md §7" },
+    "B01": { "function_bodies": "15/16", "unique_lines": "~720/3000", "exposures": "n/d", "call_edges": "~40/600", "candidates": "6/32", "data": "~1.4 GiB/2 GiB", "source": "jobs\\B01\\RESULT.md §Budget usage" },
+    "I02a": { "function_bodies": "<=4/48", "unique_lines": "138/1500 (stub disasm)", "exposures": "n/d", "call_edges": "n/a", "candidates": "n/d", "data": "~5 MB/1 GiB", "source": "jobs\\I02a\\RESULT.md §Budget compliance" },
+    "I02b": { "function_bodies": "21/48", "unique_lines": "~4900/6000", "exposures": "n/d", "call_edges": "~180/300", "candidates": "~27/96", "data": "~15 MiB/1 GiB", "source": "jobs\\I02b\\RESULT.md §Budget used" },
+    "D01": { "function_bodies": "10/12", "unique_lines": "<2000", "exposures": "n/d", "call_edges": "n/d", "candidates": "5/48", "data": "~0.9 GiB", "source": "jobs\\D01\\RESULT.md §Budget usage" },
+    "I03": { "function_bodies": "~7/16", "unique_lines": "1831/3000", "exposures": "n/d", "call_edges": "n/d", "candidates": "44/64 (stringi)", "data": "<10 MB/1 GiB", "source": "jobs\\I03\\RESULT.md §7" },
+    "N02": { "function_bodies": "3/8", "unique_lines": "~300 (+~300 wierszy wyjściowych)", "exposures": "n/d", "call_edges": "n/a (zero nowych deasemblacji)", "candidates": "0", "data": "~170 KB", "source": "jobs\\N02\\RESULT.md §7" },
+    "QC1": { "function_bodies": "n/d (własne narzędzia re-derivacyjne)", "unique_lines": "n/d", "rows": "34 verified items", "note": "QC nie raportuje budżetu w jednostkach wykonawców", "source": "QC\\QC1\\QC_SUMMARY.md" },
+    "QC2": { "function_bodies": "n/d (sandbox re-run + własne skany)", "unique_lines": "n/d", "rows": "35 verified items", "note": "jw.; dysk ~176 MB wg QC2 process check", "source": "QC\\QC2\\QC_SUMMARY.md" },
+    "C01": { "function_bodies": "0 (korekty dokumentacyjne)", "unique_lines": "n/d", "rows": "13 korekt + 6 ERRATA", "data": "~1 GB (weryfikacje fizyczne)", "source": "CORRECTION_LEDGER_R3.json" },
+    "Z01": { "function_bodies": "0 (synteza)", "unique_lines": "n/d (docs)", "rows": "synteza + re-hash 15 wejść", "data": "~1.6 GiB read (re-hash)", "source": "ten pakiet" }
+  },
+  "aggregate": {
+    "native_tasks_used_before_publication": 16,
+    "native_tasks_limit": 96,
+    "function_bodies_declared_sum": "~107 z deklaracji per-job wykonawców (36+11+15+4+21+10+7+3; QC1/QC2/C01/Z01 poza jednostkami wykonawców) — LOWER_BOUND wobec 256 globalnego",
+    "unique_rows_declared_sum": "~10 469 (I01 ~1150 + N01 ~1430 + B01 ~720 + I02a 138 + I02b ~4900 + I03 1831 + N02 ~300) — LOWER_BOUND/UNMEASURED (QC1/QC2/C01/Z01 bez pomiaru w tych jednostkach; D01 jedynie '<2000')",
+    "candidates_declared_sum": "~93 (11+0+6+27+5+44) — LOWER_BOUND",
+    "data_declared_sum": "~5.0 GiB (I01 0.49 + B01 1.4 + D01 0.9 + pozostałe ~0.03 + QC re-hash ISO ~0.62 + Z01 re-hash ~1.6) — LOWER_BOUND; limit 20 GiB zachowany z dużym zapasem",
+    "exposures": "UNMEASURED globalnie (job-local deklaracje: 30/24000 w I01; brak telemetrii zbiorczej)"
+  },
+  "semantic_budget_compliance": {
+    "verdict": "LOWER_BOUND_COMPLIANT",
+    "method": "sumaryczne unikalne wiersze policzone z deklaracji per-job RESULT-ów: ~10 469 (+D01 <=2000) <= 32 000 limitu; dane ~5.0 GiB <= 20 GiB; natywne Taski 16 <= 96 (rezerwa zachowana)",
+    "caveats": [
+      "UNMEASURED: QC1/QC2/C01/Z01 nie raportują wierszy w jednostkach wykonawców (QC raportuje verified-items: 34+35)",
+      "D01 jedynie '<2000' — przyjęte jako upper bound 2000 w ocenie",
+      "R2-A09 (dawne odstępstwa nielegalne retroaktywnie) honorowane: SEMANTIC_BUDGET_COMPLIANCE nie jest deklarowane jako w pełni zmierzony fakt, lecz LOWER_BOUND_COMPLIANT"
+    ]
+  }
+}

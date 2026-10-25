@@ -1,0 +1,40 @@
+{
+  "run_id": "PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025",
+  "file": "NATIVE_TASK_CENSUS.json",
+  "author": "Z01 closing (pe-master-auditor), 2026-10-25",
+  "source": "census dostarczony przez root w prompcie Z01 (pkt 7) + pliki RESULT/ROOT_INCIDENT_NOTE/QC_SUMMARY. Rozstrzygnięcia prób wg deklaracji roota; Z01 nie może samodzielnie weryfikować infra-statusów martwych prób (poza artefaktami na dysku: jobs\\I02, jobs\\I02a\\work, QC2 work\\).",
+  "native_task_attempts_before_z01": 15,
+  "native_task_attempts_including_z01": 16,
+  "global_limit": 96,
+  "attempts": [
+    { "no": 1, "job": "I01", "attempt": 1, "outcome": "ok", "note": "wave 1" },
+    { "no": 2, "job": "N01", "attempt": 1, "outcome": "ok", "note": "wave 1" },
+    { "no": 3, "job": "B01", "attempt": 1, "outcome": "ok", "note": "wave 2" },
+    { "no": 4, "job": "QC1", "attempt": 1, "outcome": "ok", "note": "QC fali 1" },
+    { "no": 5, "job": "N02", "attempt": 1, "outcome": "ok", "note": "wave 5" },
+    { "no": 6, "job": "I02", "attempt": 1, "outcome": "dead (infra)", "note": "wg nomenklatury roota 'I02a1(dead)'" },
+    { "no": 7, "job": "I02", "attempt": 2, "outcome": "dead (infra)", "note": "wg nomenklatury roota 'I02a2(dead)'; po 2 martwych próbach → split lineage do I02a; praca stubowa częściowo przez root DIRECT_ANALYST (zapisana w jobs\\I02)" },
+    { "no": 8, "job": "I02a", "attempt": 1, "outcome": "partial-dead", "note": "'I02a-a1(partial-dead)': 2 pliki tools zapisane w jobs\\I02a; prompt zawierał zmyślony pin SHA (INC-R3-01); semantyka niezdobyta" },
+    { "no": 9, "job": "I02a", "attempt": 2, "outcome": "ok", "note": "'I02a-a2(ok)': SECTIONS_DECOMPRESSED" },
+    { "no": 10, "job": "I02b", "attempt": 1, "outcome": "ok", "note": "wave 3" },
+    { "no": 11, "job": "D01", "attempt": 1, "outcome": "ok", "note": "wave 4" },
+    { "no": 12, "job": "I03", "attempt": 1, "outcome": "ok", "note": "wave 5" },
+    { "no": 13, "job": "QC2", "attempt": 1, "outcome": "dead (infra)", "note": "infra-dead; 3 skrypty w work\\ ponownie wykorzystane" },
+    { "no": 14, "job": "QC2", "attempt": 2, "outcome": "ok", "note": "QC_PASS, 35 itemów" },
+    { "no": 15, "job": "C01", "attempt": 1, "outcome": "ok", "note": "13 korekt in-place + 6 ERRATA" },
+    { "no": 16, "job": "Z01", "attempt": 1, "outcome": "ok (ten pakiet)", "note": "closing/authoring — 15+1 natywnych dispatchy" }
+  ],
+  "attempt_cap_compliance": {
+    "rule": "brak 3. identycznego retry; split lineage zamiast retry po wyczerpaniu",
+    "i02": "2 próby dead → split do I02a (zmiana lineage) — COMPLIANT",
+    "i02a": "próba 1 partial-dead → próba 2 ok (bez 3. próby) — COMPLIANT",
+    "qc2": "próba 1 dead → próba 2 ok (bez 3. próby) — COMPLIANT",
+    "third_identical_retry": "NONE observed"
+  },
+  "not_counted_as_native_tasks": [
+    "root DIRECT_ANALYST: inspekcja stubu UPX (praca własna roota, 2 pliki w jobs\\I02)",
+    "root seal + publication child: doliczone dopiero PO sealu w finalnym census RECEIPT_ROOT (zaznaczone: FINAL_CENSUS_PENDING)"
+  ],
+  "final_census_note": "Finalny rzeczywisty census (wg wzorca R2-A07) doliczy po sealu dziecko publikacji: oczekiwane 15+Z01=16 natywnych Task przed publikacją; finalny census RECEIPT musi zawierać 17 (16 + publication child). NINIEJSZY plik zamyka stan na moment powrotu Z01 do roota.",
+  "verification_limits": "Z01 widzi artefakty prób (jobs\\I02, jobs\\I02a\\work, QC2\\work) i pliki RESULT; infra-status martwych prób przyjmuje per deklarację roota (root-provided census) — nie ma niezależnego logu dispatchera w dostępnych danych."
+}

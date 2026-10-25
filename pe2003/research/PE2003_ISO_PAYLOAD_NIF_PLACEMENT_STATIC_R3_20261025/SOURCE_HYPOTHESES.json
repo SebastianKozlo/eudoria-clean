@@ -1,0 +1,64 @@
+{
+  "run_id": "PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025",
+  "file": "SOURCE_HYPOTHESES.json",
+  "author": "Z01 closing (pe-master-auditor), 2026-10-25",
+  "question": "Skąd pochodziły dane modeli i terenu w wydaniu ISO 2003 (PC Gamer November 2003) i jakie źródła statyczne pozostają?",
+  "hypotheses": [
+    {
+      "id": "H-SRC-01",
+      "name": "SOURCE=SERVER_DELIVERED_ONLY dla modeli (edycja ISO)",
+      "status": "CONFIRMED (statycznie, dla odzyskanego zakresu)",
+      "scope": "Modele 296445/218757 (i cała zawartość Models.ark) w wydaniu ISO 2003.",
+      "evidence": [
+        "ISO: pełny spacer ISO9660 42 pozycji — 0 plików .ark/.nif/.bvi/.bnt na dysku (jobs\\D01\\out\\iso_walk.csv).",
+        "Instalator: pełne mapowanie NSIS I01 — 0 arkuszy w payloaddzie; Download.data = '1 PE_PCG.ark' (manifest jednostki pobierania); ClientFiles.txt = 4 ark-y pomocnicze.",
+        "ClientLoader 5.1.0.0 (unpack I03): kompletny silnik FTP (USER/PASS/CWD/PASV/RETR, WSOCK32), hardcoded IP 217.212.240.131-134 (pula), .43 (update), .42 (login), pobiera FullDat_%d.ark / Dat%d_%d.ark / Lang_%u.ark / manifests, ekstrakcja materializuje Models/Textures/Volumes/Scripts.ark (ExtractThreadedExecutor @0x413B97).",
+        "Klient PE.exe 5.1.0.0: zero stringów http/ftp/WinInet/PE_PCG — klient nigdy sam nie pobiera danych (pełne 2x2,939,409 B skany)."
+      ],
+      "limitations": [
+        "Statyczne stringi+disasm identyfikują capability; niczego nie wykonano, sieci nie dotknięto (kontrakt).",
+        "Literal 'PE_PCG.ark' NIE występuje w żadnym z 3 binariów — konsument nazwy manifestu niezidentyfikowany statycznie (bariera; nie podważa werdyktu: jednostki pobierania i mechanizm ekstrakcji są dowiedzione)."
+      ],
+      "counter_model": "Dane modeli obecne lokalnie na ISO lub w instalatorze (CM1/CM2 D01) — REFUTED pełnym censusem ISO i instalatora.",
+      "disposition": "STANDING: SOURCE (edycja ISO)=SERVER_DELIVERED_ONLY dla modeli."
+    },
+    {
+      "id": "H-SRC-02",
+      "name": "SOURCE=LOCAL dla terenu (wyjątek era-labelowany)",
+      "status": "CONFIRMED",
+      "scope": "Archiwum terenu 50.bnt w wydaniu ISO.",
+      "evidence": [
+        "50.bnt (118 016 977 B) fizycznie w payloadzie instalatora (I01 recovered; FILE_RECOVERED_COMPLETE).",
+        "IDENTICAL_BYTES z historyczną referencją pipeline 2003 (01_Original_Files\\BNT\\50.bnt) — strumieniowy compare B01 + QC2, 0 rozbieżności.",
+        "Footer BUNT: 51 921 nazw = pełna siatka 220x236 (51 920 + sentinel 7ffe7ffe.tdf)."
+      ],
+      "limitations": [
+        "Tożsamość archiwum NIE dowodzi tożsamości klienta (ARCHIVE IDENTITY DOES NOT PROVE CLIENT IDENTITY — REUSE_CERTIFICATE B01).",
+        "Teren instalacji PE42 (116 528 920 B) jest era-divergent (DIFFERENT_BYTES od byte 15) — poprawna era-labeling wymagana."
+      ],
+      "counter_model": "Teren ISO identyczny z terenem instalacji PE42 — REFUTED (era-divergent).",
+      "disposition": "STANDING: terrain LOCAL (era: pipeline 2003 ref-A)."
+    },
+    {
+      "id": "H-SRC-03",
+      "name": "PE42 reference frontier: SOURCE_UNKNOWN per R2",
+      "status": "UNVERIFIED (przeniesione z R2; nie testowane w R3)",
+      "scope": "Pochodzenie definicji modeli 296445/218757 w korpusie PE42 (Models.ark z instalacji pe42_en.exe).",
+      "evidence": [
+        "Korpus PE42 zawiera oba modele jako wypakowane NIF z Models.ark (06_Models_and_Materials\\PE42_EN_80553A75\\), piny SHA w kontrakcie.",
+        "R2 nie rozstrzygnął kanału dostarczenia danych dla instalacji PE42; R3 nie rozszerzał zakresu o to pytanie."
+      ],
+      "limitations": [
+        "R3 analizował build PE42 wyłącznie jako referencję mechanizmów (loader NIF, konwencje transformów).",
+        "Kwestia kanału danych instalacji PE42 pozostaje otwarta (kandydat: ten sam mechanizm FTP ClientLoadera — brak buildu loadera PE42 w zakresie R3)."
+      ],
+      "counter_model": "Instalacja PE42 również server-delivered (analogiczny loader) — PLAUSIBLE, nieweryfikowalne w zakresie R3.",
+      "disposition": "STANDING: PE42 reference status SOURCE_UNKNOWN per R2; LOCAL_SOURCE_EXHAUSTED=NO (frontier otwarty)."
+    }
+  ],
+  "era_labels": {
+    "ISO2003NOV": "Wydanie PC Gamer November 2003: klient 5.1.0.0, teren = pipeline-2003 bytes, dane modeli server-delivered.",
+    "PE42_REF": "Referencja PE 3.4.3.1 COT (pe42_en.exe): definicje modeli, kanon loadera NIF; build różny od ISO — NO VA TRANSFER.",
+    "EU935_REF": "Corpus referencyjny EU 9.3.5.6746 — wyłączony jako różny build (B01)."
+  }
+}

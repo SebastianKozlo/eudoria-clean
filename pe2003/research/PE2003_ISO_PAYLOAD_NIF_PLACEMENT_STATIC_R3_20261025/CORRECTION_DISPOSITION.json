@@ -1,0 +1,40 @@
+{
+  "run_id": "PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025",
+  "file": "CORRECTION_DISPOSITION.json",
+  "author": "Z01 closing (pe-master-auditor), 2026-10-25",
+  "baseline": "R2-A01..A11 z PE2003_R2_ISO_PROVENANCE_DESKTOP_POSTAUDIT_R1_20261025 (kontrakt R3 linie 30-42: 'korekty R2-A01..A11 obowiązują jako CORRECTION_DISPOSITION baseline') + addytywna korekta Desktop o 2202/768/382.",
+  "r2_baseline_dispositions": [
+    { "id": "R2-A01", "summary": "P01 czytał złą trójkę jako translation; native loader 00416860: translation PRZED macierzą (node+0x50), macierz +0x2C, scale +0x5C, późniejsza trójka +0x94; w pliku XYZ przy rotation_off−12.", "r3_disposition": "EXECUTED_AND_STRENGTHENED — N01 rozstrzygnął bajtowo (16 pinów; 38/38 countercheck; QC1 niezależnie); stara semantyka REJECTED (C-NIF-02).", "status": "CLOSED" },
+    { "id": "R2-A02", "summary": "31/31 identity obalone; wynik ograniczony, nie pełny census.", "r3_disposition": "EXTENDED — N01/N02: pełny census 82 FULL_STRUCTURAL (26+7 niezerowych translacji w 296445; 7 w 218757); TriShape nowo zdekodowane (44).", "status": "CLOSED (zakres rozszerzony)" },
+    { "id": "R2-A03", "summary": "Dodatni NIF writer macierzy istnieje (004078C0→00416860→0041B690); odrzucenie w P02/R2-C23 błędne (maska mod10).", "r3_disposition": "HONORED — R3 nie ponawiał błędu; loader chain re-weryfikowany (N01 §1; N02 konsument-kwaternion).", "status": "CLOSED" },
+    { "id": "R2-A04", "summary": "Graf silnie związany z ArkBoundingVolumeRenderer; wspólna rodzina/root NIE dowodzi instancji modelu.", "r3_disposition": "HONORED_AS_CONSTRAINT — krawędź resource→instance pozostaje MISSING_EDGE (MODEL_INSTANCE_EDGE_MAP.csv); R3 nie rości sobie instancji.", "status": "OPEN (jako luka; frontier BLK-R3-03)" },
+    { "id": "R2-A05", "summary": "ISO→ZIP→PE_PCG.exe potwierdzone; ZAWARTOŚĆ instalatora nie jest identyczna z PE42; nie nazywać PE42 wyciągniętym z ISO.", "r3_disposition": "EXECUTED — B01 rozstrzygnął zawartość: DIFFERENT_BUILD 5.1.0.0; per-plikowo 16/10/30; era-labeling throughout.", "status": "CLOSED" },
+    { "id": "R2-A06", "summary": "Seal R2 nie był manifest-LAST; nowy run: STOP przed manifestem, manifest LAST obejmuje STOP, wyklucza tylko siebie.", "r3_disposition": "EXECUTING — Z01 pisze pakiet bez SCIENCE_STOP.json i MANIFEST_SHA256.csv; root pieczętuje po powrocie (manifest LAST).", "status": "IN_PROGRESS (root po Z01)" },
+    { "id": "R2-A07", "summary": "Finalny census R2 = 18 dzieci; census zamrożony science oddzielnie od finalnego globalnego.", "r3_disposition": "HONORED — NATIVE_TASK_CENSUS.json rozdziela census naukowy (przed publikacją) od finalnego RECEIPT (po sealu).", "status": "EXECUTED" },
+    { "id": "R2-A08", "summary": "Takeover/quiescence niewykazane; root pieczętuje po powrocie dzieci.", "r3_disposition": "HONORED — seal wyłącznie po powrocie Z01 (root).", "status": "EXECUTED" },
+    { "id": "R2-A09", "summary": "Dawne odstępstwa nielegalne retroaktywnie; SEMANTIC_BUDGET_COMPLIANCE=UNVERIFIED uczciwe.", "r3_disposition": "HONORED — BUDGET_LEDGER deklaruje LOWER_BOUND_COMPLIANT z jawnymi UNMEASURED; bez pełnego pomiaru.", "status": "EXECUTED (uczciwie)" },
+    { "id": "R2-A10", "summary": "Publikacja z izolowanego worktree, rzeczywiste timestampy, bez literalnych wycinków kodu gry.", "r3_disposition": "PENDING — publikacja po sealu (root; poza zakresem Z01); zasady przeniesione do instrukcji seal.", "status": "PENDING (root)" },
+    { "id": "R2-A11", "summary": "Zakres negatywu rejestrów DLL ograniczony do badanego zbioru.", "r3_disposition": "HONORED — negatywy R3 formułowane z jawnymi denominatorami (np. id-hash: pełny obraz 2×2 939 409 B + kontrola PE42 10/12/1).", "status": "EXECUTED" },
+    { "id": "R2-A-ADD", "summary": "Addytywna korekta poprzedniego Desktop o 2202/768/382 (obecne, nie nieobecne).", "r3_disposition": "HONORED w source pins (obecność fizyczna potwierdzona re-hashem Z01: PE_EU==ISO PE.exe; Entropia.exe EU935 obecny na dysku).", "status": "EXECUTED" }
+  ],
+  "qc_and_process_dispositions": [
+    { "id": "P2-QC1-01 (I01, adres bloku 50.bnt)", "disposition": "CORRECTED_BY_C01 in-place (0x2951D02→0x28B3D02 w DECOMPRESSION_MECHANISM.md + BLOCK40_ANOMALY.json); walidacja json.load + 0 trafień starego adresu.", "revalidation_predicate": "grep '0x2951D02' w jobs\\I01 = 0 hitów; dword 0x86D9E1D0 @0x28B3D02 potwierdzony.", "status": "RESOLVED" },
+    { "id": "P2-QC1-02 (I01, data_off_rel mapy)", "disposition": "CORRECTED_BY_C01 in-place (0x5B92→0x7992, entry_index z adnotacją ten-sam-blok-co-174); walidacja dekompresją bloku do SHA ClientFiles.txt.", "revalidation_predicate": "każdy data_off_rel payload_table rozwiązuje się do nagłówka jednego z 53 bloków (skrypt).", "status": "RESOLVED" },
+    { "id": "P2-QC1-03 (N01, nonunity_scale)", "disposition": "CORRECTED_BY_C01 in-place (oba summary do 0); generator poza allowlistem — naprawa odroczona do pe-reconstruction.", "revalidation_predicate": "liczniki == 0; row-level recheck vs CSV scale column zgodny.", "status": "RESOLVED (generator OPEN)" },
+    { "id": "P3-QC1-04 (I01, precyzja NLEN wording)", "disposition": "NOTE_FOR_NEXT_REVISION.", "status": "NOTED" },
+    { "id": "P3-QC1-05 (I01, nakładanie łańcuchów)", "disposition": "NOTE_FOR_NEXT_REVISION; uwzględnione w C-INS-03.", "status": "NOTED" },
+    { "id": "QC2-F01 (I02a, transkrypcje dziesiętne)", "disposition": "CORRECTED_BY_C01 in-place (UNPACK_RESULT.json 3 pola) + ERRATA.md E3 dla RESULT.md (byte-unchanged, READ WITH CORRECTION).", "revalidation_predicate": "grep '952999'/'2917471' w jobs\\I02a = 0; c_len==0xE8DA7==953767; falsyfikator adler slices.", "status": "RESOLVED" },
+    { "id": "QC2-F02 (I03 VA + I02a/I03 method label)", "disposition": "CORRECTED_BY_C01 in-place (VA→0x4FBD9C w RESULT.md I03 + DOWNLOAD_CHANNEL.json; label→NRV2D_LE32 w I02a JSON + ERRATA).", "revalidation_predicate": "byte-read @VA = 25 73 09 25 64 (start literalu).", "status": "RESOLVED" },
+    { "id": "QC2-F03 (B01, ©)", "disposition": "CORRECTED_BY_C01 in-place (U+00A9).", "status": "RESOLVED (kosmetyka)" },
+    { "id": "QC2-F04 (cross-job, nazwa metody UPX 5)", "disposition": "RECONCILED_BY_C01 do NRV2D_LE32 (źródło: stub disasm I03).", "status": "RESOLVED" },
+    { "id": "QC2-F05 (D01, malformed JSON)", "disposition": "CORRECTED_BY_C01 in-place (escaping + adnotacja w stringu); json.load OK, 14 kluczy.", "status": "RESOLVED" },
+    { "id": "INC-R3-01 (root, zmyślona końcówka SHA w promptach I02/I02a-a1)", "disposition": "DOCUMENTED (ROOT_INCIDENT_NOTE.md); prawdziwy pin fizyczny; żadna nauka nie oparła się na błędnym pinie; re-hash Z01 potwierdza pin 46B6...BB32.", "status": "RESOLVED (transparency)" },
+    { "id": "C01-OBS-CORR (obserwacja C01 o braku plików QC_FINDINGS)", "disposition": "OBSERVATION_CORRECTED — pliki QC1/QC2 QC_FINDINGS.json istnieją fizycznie (Z01 odczytał oba w całości; root zweryfikował); treść korekt C01 identyczna z treścią findings, więc korekty pozostają ważne.", "status": "RESOLVED" },
+    { "id": "Z01-DRIFT-01 (I01 RESULT.md suma 163 584 477 vs suma CSV 163 568 016)", "disposition": "OPEN_DOCUMENTATION — odnotowane przez Z01 (jobs\\ read-only); nie podważa per-plikowych SHA ani niezależnego walk QC1; kandydat na przyszły dispatch CORRECT_DOCUMENTATION.", "status": "OPEN (dokumentacyjny)" }
+  ],
+  "integrity_of_frozen_content": {
+    "rule": "zamrożone treści naukowe nietknięte; modyfikacje wyłącznie w polach wskazanych przez QC (explicit QC-indicated error fields); recovered\\ payloads i tools\\ nietknięte",
+    "c01_scope_guards": "SCIENCE_ROOT_untouched=true; no_science_result_changed=true (CORRECTION_LEDGER_R3.json)",
+    "z01_note": "Z01 pisał wyłącznie do SCIENCE_ROOT (nowe pliki); jobs\\* i QC\\ tylko czytał."
+  }
+}
