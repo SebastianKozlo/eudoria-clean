@@ -1,0 +1,16 @@
+﻿{
+  "report_id": "ROLE_LEDGER",
+  "run_id": "PE2003_ISO_ARCHIVE_RESOURCE_INSTANCE_PLACEMENT_STATIC_R4_20261025",
+  "roles": [
+    {"role": "root/campaign-owner/sole-summary-writer", "agent": "PE-MASTER", "writes": ["SCIENCE_ROOT/** (ledgers, claims, docs zbiorcze)", "RECEIPT_ROOT/**"], "note": "nie pisał kodu projektu ani artefaktów dzieci"},
+    {"role": "executor M01/L01/J01/N01/J02", "agent": "pe-reconstruction", "writes": ["WORK_ROOT/jobs/<JOB>/** (disjoint per job)"], "note": "jeden writer na job; NO_NESTED_TASKS"},
+    {"role": "correction executor C01", "agent": "pe-reconstruction", "writes": ["jobs/L01|jobs/M01|jobs/J01 (wyłącznie pliki z listy QC1)"], "note": "bounded additive errata; DISASM/ekstrakcje nietknięte"},
+    {"role": "internal QC QC1/QC2", "agent": "pe-master-auditor (fresh contexts)", "writes": ["WORK_ROOT/QC/QC1|QC2/** only"], "note": "read-only poza własnym katalogiem QC"}
+  ],
+  "attribution_notes": [
+    "M01 tools (scan_literals.py, dis_func.py): autorstwo M01 executor (R3-A08 lekcja: narzędzia pisze dziecko, nie root)",
+    "QC/QC1/work + QC/QC2/work: własne narzędzia auditorów (provenance w nagłówkach)",
+    "jobs/L01/tools/qc_revalidate.py: C01 correction child",
+    "jobs/M01/tools/scan_utf16.py: C01 (adaptacja z QC1 qc_scan.py; provenance zapisany)"
+  ]
+}
