@@ -1,0 +1,298 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "job": "J02",
+ "attempt": 1,
+ "lineage": "B02a-continuation (J2)",
+ "recorded_utc": "2026-10-25T09:32:00Z (tool: python datetime.now(UTC))",
+ "mode": "100% static file analysis; own J02-scoped copy of B02a decoder; no runtime/client/Frida/Ghidra",
+ "question": "Which VM instructions in 4508.obj.dec/4057.obj.dec reference/call the DYN entries holding 296445/296446/218757/218758, and where does the fetched value flow (native hostcall / property store / MISSING_EDGE)?",
+ "inputs": {
+  "4508.obj.dec": {
+   "size": 3640,
+   "sha256": "B6C96E9CCB2763C18644BC8BA5268B1FA63BCC28A738544225E276F4D3FFC9F3",
+   "gate": "PASS-before-read"
+  },
+  "4057.obj.dec": {
+   "size": 2688,
+   "sha256": "EA93FCA93C5F46D133D272D61012963DB7F5F338F9558421994B73BD644945D3",
+   "gate": "PASS-before-read"
+  },
+  "RESOURCE_OPEN_FLOW.json": {
+   "size": 25715,
+   "sha256": "117FB27F427797875027402BD60247A2203DB7F5E7C80D11B3E07C93AACB5953",
+   "gate": "PASS-before-read",
+   "role": "R1 canon"
+  },
+  "VM_RESOURCE_PROPERTY_FLOW.json": {
+   "size": 18871,
+   "sha256": "98A8601D8E9DC759E9B8A8CF96705CDB06492A3615201C8BAD30D37FEFB36CE1",
+   "gate": "PASS-before-read",
+   "role": "R1 canon"
+  },
+  "HOSTCALL_BINDING.json": {
+   "size": 96520,
+   "sha256": "E52457D0C4532A13B4E4530886B46DECB90B1A1164F1F5C24C2A653FA19D184E",
+   "gate": "PASS-before-read",
+   "role": "R1 canon"
+  },
+  "B02a_CHAIN_DECODE.json": {
+   "size": 19357,
+   "sha256": "80AEA1BFD7F87E310A772030270D49B88E3D76A87E0EBA885A64711925F0CA8D",
+   "gate": "context (hash recorded on admission)"
+  },
+  "PE2_unpacked_out.exe": {
+   "size": 2207744,
+   "sha256": "56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650",
+   "gate": "PASS-before-byte-read (re-verified in-tool)"
+  },
+  "opcode_table_v2.csv": {
+   "sha256": "9B0D63CD07C2CC6DB159DF2D416DF4A87C7D2F5183C1BC6A278B84E6D76800EB",
+   "role": "decoder PRIMARY input (B02a-pinned)"
+  },
+  "VM_OPCODE_TABLE.json": {
+   "sha256": "2007F0BCE492C40C11C83032EB0064E227333A6608803047C2FB07D531C0FFE3",
+   "role": "decoder cross-check (B02a-pinned)"
+  }
+ },
+ "decode_census": {
+  "4508": {
+   "items": 625,
+   "instr": 397,
+   "data": 228,
+   "unknown": 0,
+   "branches": 32,
+   "code_bytes": 3252,
+   "extn": 10,
+   "pfix": 1,
+   "dyn": 4
+  },
+  "4057": {
+   "items": 457,
+   "instr": 289,
+   "data": 168,
+   "unknown": 0,
+   "branches": 23,
+   "code_bytes": 2368,
+   "extn": 8,
+   "pfix": 1,
+   "dyn": 3
+  }
+ },
+ "dyn_tables_raw_bytes": {
+  "4508": [
+   {
+    "idx": 0,
+    "f0": 296479,
+    "f1": 162187,
+    "f2": "0xA5222B37",
+    "f3": 332,
+    "role": "ctor method"
+   },
+   {
+    "idx": 1,
+    "f0": 296478,
+    "f1": 1617,
+    "f2": "0x585DAF8C",
+    "f3": 248,
+    "role": "getter -> C=296445 (watch model)"
+   },
+   {
+    "idx": 2,
+    "f0": 296477,
+    "f1": 1611,
+    "f2": "0x9FA86861",
+    "f3": 164,
+    "role": "getter -> C=296446 (+1 sibling)"
+   },
+   {
+    "idx": 3,
+    "f0": 296476,
+    "f1": 7769,
+    "f2": "0x20ED2B3A",
+    "f3": 20,
+    "role": "name-getter (has HOSTCALL+CALL in body)"
+   }
+  ],
+  "4057": [
+   {
+    "idx": 0,
+    "f0": 218787,
+    "f1": 162187,
+    "f2": "0xA5222B37",
+    "f3": 188,
+    "role": "ctor method"
+   },
+   {
+    "idx": 1,
+    "f0": 218784,
+    "f1": 1617,
+    "f2": "0x585DAF8C",
+    "f3": 104,
+    "role": "getter -> C=218757 (watch model)"
+   },
+   {
+    "idx": 2,
+    "f0": 218783,
+    "f1": 1611,
+    "f2": "0x9FA86861",
+    "f3": 20,
+    "role": "getter -> C=218758 (+1 sibling)"
+   }
+  ],
+  "f1_pattern": "f1=1617 <-> watch model ids (296445/218757); f1=1611 <-> +1 siblings (296446/218758); identical across both defs; f1 semantics UNCHECKED",
+  "b02a_prose_correction": "B02a_CHAIN_DECODE.json transposed f1/f2 of the 4508 getter recs (said 296478->1611/0x9FA86861); raw bytes give 296478->1617/0x585DAF8C. Lesson candidate."
+ },
+ "reference_census": {
+  "csv": "WORK/jobs/J02/data/J02_REFERENCE_CENSUS.csv",
+  "rows": 30,
+  "model_id_literals": {
+   "296445": {
+    "file": "4508",
+    "instr": "STOREI_SPoff@272 [20, 296445]",
+    "bytes": "de fe 00 77 14 00 00 00 fd 85 04 00",
+    "file_off": "0x298",
+    "instruction_occurrences": 1
+   },
+   "296446": {
+    "file": "4508",
+    "instr": "STOREI_SPoff@188 [20, 296446]",
+    "bytes": "de fe 00 77 14 00 00 00 fe 85 04 00",
+    "file_off": "0x244",
+    "instruction_occurrences": 1
+   },
+   "218757": {
+    "file": "4057",
+    "instr": "STOREI_SPoff@128 [20, 218757]",
+    "bytes": "de fe 00 77 14 00 00 00 85 56 03 00",
+    "file_off": "0x1C8",
+    "instruction_occurrences": 1
+   },
+   "218758": {
+    "file": "4057",
+    "instr": "STOREI_SPoff@44 [20, 218758]",
+    "bytes": "de fe 00 77 14 00 00 00 86 56 03 00",
+    "file_off": "0x174",
+    "instruction_occurrences": 1
+   }
+  },
+  "getter_method_resource_ids": "296478/296477/218784/218783 occur ONLY as DYN f0 (file 0x148/0x158/0x118/0x128); ZERO decoded-instruction operands, ZERO EXTN ext_id/owner, ZERO PFIX fields",
+  "sibling_model_records": "296473/218782 = HEADER B + PFIX#0 resource_id + raw echoes only (0xC, 0x1C)",
+  "crossfile_4508_4057": "0 hits for all target ids"
+ },
+ "getter_bodies": {
+  "shape": "PUSH C,B,A,D,PARAM,E -> STOREI_SPoff[20,<id>] -> LOAD_C_SPoff[20] -> JMP+8 -> POPs -> ADD_SP 4 -> RET",
+  "items_each": 16,
+  "hostcall_in_body": 0,
+  "call_in_body": 0,
+  "store_to_object_in_body": 0,
+  "value_flow_in_file": "literal -> [SP+20] -> register C -> RET across DYN dispatch boundary; NO further in-file consumer"
+ },
+ "binding_tests": {
+  "EXTN_ext_id_eq_getter_id": {
+   "4508": 0,
+   "4057": 0
+  },
+  "EXTN_owner_eq_getter_id": {
+   "4508": 0,
+   "4057": 0
+  },
+  "EXTN_type2_records": {
+   "4508": 0,
+   "4057": 0
+  },
+  "EXTN_slots_inside_getter_bodies_true_DYN_bounds": {
+   "4508": 0,
+   "4057": 0
+  },
+  "CALL_IND_instructions_in_file": {
+   "4508": 0,
+   "4057": 0
+  },
+  "verdict": "No VM instruction in either file references or calls the model DYN getters; binding is exclusively the DYN table (native dispatch contract)"
+ },
+ "countermodels": {
+  "CM1_getters_dead_unreferenced": "in-file reference counts recorded: each getter id 1x DYN f0; code 0; EXTN 0; corpus 0; EXE 0 -> dead in-file, DYN-record-bound only",
+  "CM2_index_arithmetic_only": "REFUTED in-file: id is STOREI immediate -> C -> returned; never an operand index",
+  "CM3_consumption_in_another_class": "REFUTED at literal level: raw LE32 all-alignment scan of all 1936 decoded corpus files for all 13 target ids = 0 foreign-def hits (anchor noise counts: 1617 in 1356 files, 1611 in 817, 162187 in 1350, 4508 in 13, 4057 in 1 - not consumption evidence); RESIDUAL: runtime value-passing / non-literal encoding statically untestable"
+ },
+ "native_qualification": {
+  "exe_literal_scan": "0 occurrences of any model/getter/sibling id or NYD hash in PE2_unpacked_out.exe; all 9 raw 4-byte matches are unaligned byte-fragments with context bytes verified (displacements/rel32, e.g. 218782@0x44CABB inside MOV BL,[ESI+0x356])",
+  "FUN_00452860_bytes": "8b 51 04 56 8b 74 24 08 8b 02 57 3b c2 74 0e 8b 78 08 39 77 04 74 35 - walks manager collection [+4], compares record field +4 to ext_id arg - resolution canon CONFIRMED by bytes",
+  "resource_open_family_byte_verified": [
+   "0x51F6E0",
+   "0x520EE0",
+   "0x464F30",
+   "0x522010",
+   "0x5B7170",
+   "0x441DF0",
+   "reader vtable 0x5E7974 = 0x520EE0/0x520D80/0x520C20/0x5209D0/0x5206A0"
+  ],
+  "qualification_verdict": "mechanism EXISTS and is byte-verified; the connecting edge (which native code queries property f1=1617/1611 on a 4508/4057 instance and forwards the returned id to FUN_0051F6E0) has NO static anchor: no in-file consumer, no corpus literal, no EXE literal (1617/1611 only as unaligned displacement fragments). R1 'def->getter 51F6E0(id=...)' phrasing is a MECHANISM HYPOTHESIS at J02 static level, not a byte-verified edge (consistent with R1-L3 volume-consumer OPEN record)."
+ },
+ "value_flow_classification": {
+  "296445": {
+   "file": "4508",
+   "class": "(e) MISSING_EDGE",
+   "evidence_chain": "STOREI_SPoff@272[20,296445] -> LOAD_C[20] -> C -> RET across DYN dispatch; consumer not statically observable; coverage: full decode 625 items 0 unknown + all EXTN/PFIX/DYN/HEADER fields + raw LE32 both files + cross-file + 1936-file corpus scan 0 + EXE literal scan 0"
+  },
+  "296446": {
+   "file": "4508",
+   "class": "(e) MISSING_EDGE",
+   "evidence_chain": "STOREI_SPoff@188[20,296446] -> same shape; same coverage"
+  },
+  "218757": {
+   "file": "4057",
+   "class": "(e) MISSING_EDGE",
+   "evidence_chain": "STOREI_SPoff@128[20,218757] -> same shape; same coverage"
+  },
+  "218758": {
+   "file": "4057",
+   "class": "(e) MISSING_EDGE",
+   "evidence_chain": "STOREI_SPoff@44[20,218758] -> same shape; same coverage"
+  },
+  "classes_abcd": "(a)=no hostcall receives the value; (b)=no instance-property store; (c)=no index arithmetic; (d)=DYN-record-bound only, no in-file caller",
+  "sibling_note": "watch (296445/218757, f1=1617) vs +1 (296446/218758, f1=1611) separated throughout; f1 semantics and +1 pairing rationale UNCHECKED"
+ },
+ "gates": {
+  "J02-G1": {
+   "predicate": "complete reference census for the 4 model DYN entries in their own files (who references, how many, with bytes)",
+   "result": "PASS",
+   "detail": "all 4 getter DYN entries + model ids + siblings censused with bytes; negatives bounded over tested classes (decoded operands, EXTN/PFIX/DYN/HEADER fields, raw LE32 all alignments, corpus, EXE)"
+  },
+  "J02-G2": {
+   "predicate": "value-flow classification per model id with evidence chain",
+   "result": "PASS",
+   "detail": "all 4 ids classified (e) MISSING_EDGE with exact coverage; mechanism family byte-verified but not assumed"
+  },
+  "hard_stops": "none triggered (no SHA mismatch; B02a incident seq=14 hash-verified byte-identical; no second writer; no runtime needed)"
+ },
+ "honest_limits": [
+  "f1 property-id semantics (1611/1617) unresolved; NYD f2 is a hash with no static name-resolution path",
+  "native DYN dispatch CALLER (runtime code invoking FUN_00452860 with 296478 etc. and consuming C) not located - generic data-driven machinery, no literal anchors; reference-reachability walk beyond J02 scope",
+  "corpus scan is literal-level; computed/non-literal id usage in another class would evade it (residual, not claimed refuted)",
+  "jd1_decode_4508/4057 R1 decode texts NOT in J02 ADMIT, NOT read",
+  "B02a incident: first decoder run unpatched re-wrote B02a/data files deterministically byte-identical (all 12 hashes match B02a HANDOFF pins); ledger seq=14"
+ ],
+ "evidence_files": [
+  "WORK/jobs/J02/data/j02_census_raw.json",
+  "WORK/jobs/J02/data/J02_DECODE_4508.txt",
+  "WORK/jobs/J02/data/J02_DECODE_4057.txt",
+  "WORK/jobs/J02/data/J02_REFERENCE_CENSUS.csv",
+  "WORK/jobs/J02/data/J02_GETTER_BODIES.txt",
+  "WORK/jobs/J02/data/J02_EXTN_DYN_BINDING.json",
+  "WORK/jobs/J02/data/J02_CORPUS_RAW_SCAN.csv",
+  "WORK/jobs/J02/data/J02_ANCHOR_COUNTS.csv",
+  "WORK/jobs/J02/data/J02_EXE_LITERAL_SCAN.csv",
+  "WORK/jobs/J02/data/J02_NATIVE_BYTES.txt",
+  "WORK/jobs/J02/EARLY_RESULT.md",
+  "WORK/jobs/J02/EVIDENCE.md",
+  "WORK/jobs/J02/HANDOFF.md"
+ ],
+ "tools": [
+  "WORK/jobs/J02/tools/j02_decode.py",
+  "WORK/jobs/J02/tools/j02_analyze.py",
+  "WORK/jobs/J02/tools/j02_native_corpus_scan.py",
+  "WORK/jobs/J02/tools/j02_emit.py"
+ ],
+ "status": "PASS G1+G2; all 4 model ids = class (e) MISSING_EDGE with exact coverage; binding exclusively via DYN table/native dispatch contract; resource-open family byte-verified as mechanism, connecting edge not statically reachable"
+}

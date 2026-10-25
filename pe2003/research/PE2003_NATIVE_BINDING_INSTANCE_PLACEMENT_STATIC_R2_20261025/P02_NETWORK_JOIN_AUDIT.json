@@ -1,0 +1,118 @@
+{
+  "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+  "job": "P02",
+  "family": "P",
+  "attempt": 1,
+  "lineage": "P01-continuation (P5)",
+  "recorded_utc": "2026-10-25T10:19:11Z (tool: python datetime.now(UTC))",
+  "era": "PE2003 static",
+  "exe_sha256": "56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650",
+  "question": "does the network cursor/placement family (0x5bbca5 area; struct-0x48/record[6] mechanism) write world-transform fields (rotation +0x2C, translation +0x50..0x58) on the SAME node/owner class our 4508/4057 chain constructs and FUN_005068f0 consumes, or are they disjoint object families",
+  "ghidra": {
+    "tool": "Ghidra 11.2.1 analyzeHeadless, own project P02Proj (WORK/jobs/P02/tools/ghidra_proj), language x86:LE:32:default (windows cspec)",
+    "program": "PE2_P02_copy.exe (sandbox copy of pinned EXE, SHA256 re-verified identical to pin)",
+    "scripts": [
+      "P02GhidraScan.java",
+      "P02GhidraScan2.java",
+      "P02GhidraScan3.java",
+      "P02GhidraScan4.java",
+      "P02GhidraScan5.java",
+      "P02GhidraScan6.java",
+      "P02GhidraScan7.java"
+    ],
+    "decompiled_disassembled": "65+ functions (44 + 16 + 5 across scan1-7; 7 scans EXIT=0)"
+  },
+  "g1_provenance_of_0x5bbca5_target": {
+    "answer": "the 0x5bbca5 write target (EDI) is the 0x48-byte record[6] wire struct of the network definition record - NOT any node class and NOT vt 0x5EBBEC owner class",
+    "chain": [
+      "0x5bb733: CMP CL,1 / 0x5bb736: JNE (flag gate in FUN_005bb5a0 0x1C record reader)",
+      "0x5bb738: PUSH 0x48 / 0x5bb73a: CALL FUN_005390dc (operator_new thunk) - 0x48-struct allocation",
+      "0x5bb740..0x5bb784: zero-init stores incl. [EAX+0x2C]=EBX @0x5bb769 - NO vtable ever installed on the struct (class = plain data record)",
+      "0x5bb787: MOV [EDI+0x18],EAX - struct stored at record[6] of the 0x1C definition record",
+      "0x5bb785: MOV ECX,EAX / 0x5bb78a: CALL FUN_005bbbd0 - thiscall, this = the 0x48 struct",
+      "0x5bbbed: MOV EDI,ECX - EDI = the 0x48 struct",
+      "0x5bbbf7: CMP ECX,0x36 - cursor-bounds gate (stream at [ESI]/[ESI+8]/[ESI+0xC])",
+      "0x5bbca5: LEA ECX,[EDI+0x2C] / 0x5bbcae: CALL FUN_00461380 (ntohl x3 wire read into ECX buffer) - struct+0x2C = wire triplet #3 (triplet #1 @0x5bbc7c LEA ECX,[EDI+0x14], #2 @0x5bbc93 LEA ECX,[EDI+0x20])"
+    ],
+    "status": "CONFIRMED byte-verified (12/12 byte checks + Ghidra decompile/disasm of FUN_005bbbd0/FUN_005bb5a0)"
+  },
+  "network_cursor_family_direct_writes_census": {
+    "summary": "all direct stores of the cursor/TLV family target its own record classes: message 0x5F8 (vt 0x5EBD44), holder 0x30 (vt 0x5EBD38), 0x1C definition records, 0x48 record[6] struct, 8B and 0x20B sub-records",
+    "cross_checks": [
+      "vtable 0x5EBBEC (owner class): referenced ONLY from FUN_005b2c40@0x5b2d0e and FUN_005b2d50@0x5b2d72 (Ghidra xref) - NO network-family reference",
+      "image-wide LEA/float-store census disp==0x2C: 151 sites (p02_scan2) + 15 SIB sites (p02_scan3): NONE in the NIF loader region 0x5b3xxx-0x5b8xxx; family-region hits are pointers/zero/wire reads (0x5bb240, 0x5bb3f8, 0x5bb769, 0x5bbca5, plus 8B reads)",
+      "FUN_005977b0 sites 0x597938/0x5979d6 LEA E?X,[EBP+0x2C]: EBP = record[6] struct (MOV EBP,[EDI+0x18] @0x597919) - the struct triplets handed to the entity API, not node writes"
+    ],
+    "verdict": "the cursor mechanism itself is DISJOINT from the node/owner classes (its +0x2C fields live on its own record classes; provenance = ctor/allocation chains above, not offset similarity)"
+  },
+  "network_transform_write_channel": {
+    "chain": [
+      "FUN_005bbbd0 wire triplets -> record[6] struct (+0x14/+0x20/+0x2C)",
+      "FUN_005977b0 pass-2 @0x597919: EBP = record[6]; @0x597944: CALL FUN_00445a00(this=def) -> entity = def+0xC (class 0x118, ctor FUN_004889c0, vt 0x5E4628 installed @0x4889de)",
+      "FUN_005977b0 vslot dispatches: 0x5979d1 CALL [EAX+0x4C] (slot dword 0x5E4674=0x00488b70), 0x5979de CALL [EDX+0x50] (arg=EBP+0x2C), 0x5979eb CALL [EDX+0x58] (slot dword 0x5E4680=0x00488cb0, arg=EBP+0x20, flag 1)",
+      "FUN_00488b70/FUN_00488cb0: compute values (FUN_00597130/FUN_00597240 entity stores; FUN_00489650 entity+0x24..+0x2C; FUN_00489670 entity+0x30 internal 3x3 matrix; FUN_00488c50 entity+4..0xC triplet)",
+      "registry provenance: ECX chain FUN_00586ec0(+0x1C) <- FUN_00402720(+0x34) <- FUN_00542d20(+0x5C) <- FUN_00488f00 (returns entity+0x110 = GCE, lazily created via FUN_00468980/FUN_0048fc80) => registry = [[GCE+0x5C]+0x34]+0x1C; id = FUN_005871e0(entity) = entity+0x44",
+      "FUN_005030c0(this=registry, id, x,y,z, matrix9f): entry = FUN_00503940(hash lookup by id; sole caller xref); node = *(*(entry+4)+4)",
+      "FUN_005030c0 writes: node+0x50/+0x54/+0x58 = (x,y,z)*100.0f (@0x50310a/0x50311e/0x503129; FMUL _DAT_005e412c @0x5030ec) and node+0x2C..+0x4C = 9-float rotation matrix copy (decompile lines 42-47)"
+    ],
+    "node_class_identity": {
+      "vtable_primary": "0x5E2A3C",
+      "vtable_interface_0xE8": "0x5E2B20",
+      "size": "0x130 bytes",
+      "ctor": "FUN_00405b50 (installs vt 0x5E2A3C @0x405bdf: c7 06 3c 2a 5e 00; iface vt at +0xE8 @0x405b5d; child-list pool at +0xEC, count +0xF4)",
+      "installers": "dword 0x005e2a3c in .text ONLY at 0x405be1 (ctor), 0x405c08 (dtor-region), 0x405cfa (re-init FUN_00405cf0, 6 E8 callers), 0x40753c/0x407898 (intra-family continuation labels, no separate E8 ctors)",
+      "creation_in_channel": "FUN_00502e80 (registry-add): PUSH 0x130 @0x502ece, CALL FUN_00405b50 @0x502eef; entry {u32 id, ptr obj} inserted into the hash table (same hash ((id>>16|id<<16)^id)*0x7f&mask as FUN_00503940); sole caller FUN_00488d80@0x488ea4 (entity-family method, same registry chain)"
+    },
+    "status": "CONFIRMED byte-verified: the network family (via entity 0x118 vslots) writes BOTH the translation (+0x50/+0x54/+0x58, x100.0f) AND the 3x3 rotation matrix (+0x2C..+0x4C) on the class with primary vtable 0x5E2A3C"
+  },
+  "consumer_side": {
+    "node_resolution": "FUN_00506780 @0x5067cd: MOV ECX,[X+8] (manager); PUSH id; CALL [EAX+0x50]. FUN_005068f0 @0x506935: same vt+0x50 resolve on param_3 manager. Alt manager: [owner+0x1C] @0x5067ed (owner = X+0x14, class 0x78 vt 0x5EBBEC)",
+    "manager_provenance": "[X+8] = NIF parse root: FUN_005b5340 MOV [ESI+8],EDI @0x5b5364; called from FUN_005b71e0 @0x5b7288 with root = parse result of FUN_004045f0/FUN_00404200 (NIF block loop; block objects created via FUN_00412b70 loader-registry create-functions - 'NiStream:: Unable to find loader' string)",
+    "resolver_identity": "dword 0x00407440 (recursive name resolver: own-name compare via FUN_004165c0/FUN_00478a50, then child list +0xEC/+0xF4, recursive child vt+0x50) appears at slot+0x50 of EXACTLY 13 vtables: 0x5E2A3C base + 12 family vtables (0x5E4710, 0x5E4878, 0x5E6E10, 0x5E7378, 0x5E8ED4, 0x5E8FB8, 0x5E909C, 0x5E9180, 0x5E9264, 0x5E9DF8, 0x5EA024, 0x5EA10C) - one class family",
+    "reads": "FUN_005068f0: node+0x2C matrix -> FUN_00545030 (ADD ESI,0x2C @0x506b86, CALL @0x506b8e); node+0x50/+0x54/+0x58 translation (param_2[0x14]/[0x15]/[0x16])",
+    "status": "node RESOLUTION mechanism byte-verified; resolved-node CLASS bounded by the loader-registry dispatch (which of the 13 family vtables the [X+8] root carries is NOT statically closed - same OPEN edge as P01 type-dispatch)"
+  },
+  "p01_missing_edge_resolution": {
+    "node_plus_0x2C_writer": "RESOLVED: FUN_005030c0 writes the 9-float rotation matrix at node+0x2C..+0x4C on the vt-0x5E2A3C-class objects registered in the GCE-side instance registry; FUN_005030c0 is network-reachable (entity vslots from FUN_005977b0 pass-2) and also called at registry-add time by FUN_00502e80",
+    "candidate_nif_reader": "REJECTED - image-wide interior-pointer and float-store censuses (151 + 15 sites) show no +0x2C write of any form in the NIF loader family; the NIF block reader writes owner +0x50..+0x74 only (P01 canon, unchanged)",
+    "candidate_network_cursor": "REFINED - the cursor itself writes its own 0x48 record struct (+0x2C wire triplet @0x5bbca5), NOT the node class; but the network family reaches FUN_005030c0 which writes node-class +0x2C/+0x50..0x58"
+  },
+  "countermodels": {
+    "cm1_cursor_writes_different_record_class": "CONFIRMED (0x48 record[6] struct, no vtable, allocation chain 0x5bb738-0x5bb787)",
+    "cm2_matrix_writer_is_third_family": "REQUALIFIED: the node+0x2C matrix writer is FUN_005030c0, which IS network-reachable (not an independent third scene/composition family); its target objects are the GCE-registry 0x130 vt-0x5E2A3C instances",
+    "cm3_join_only_for_other_entity_families": "NOT CONFIRMED at object-identity level: the write target class (vt 0x5E2A3C family) is the SAME class family that carries the consumer's recursive resolver (FUN_00407440 at slot+0x50 of 13 family vtables incl. the base), but the object-identity bridge (are the network-written 0x130 objects the exact nodes resolved for our 4508/4057 models) is bounded by the OPEN loader-registry dispatch and runtime-bound factories - honest AMBIGUOUS, no invented closure"
+  },
+  "classification": {
+    "verdict": "AMBIGUOUS",
+    "per_side_identities": {
+      "cursor_mechanism_direct_writes": "DISJOINT from node/owner classes (own record classes: msg 0x5F8 vt 0x5EBD44, holder 0x30 vt 0x5EBD38, 0x1C records, 0x48 struct)",
+      "network_transform_writer_target_class": "primary vtable 0x5E2A3C, size 0x130, ctor FUN_00405b50, +0x2C matrix / +0x50..0x58 translation written by FUN_005030c0",
+      "consumer_resolved_node_class": "0x5E2A3C-family resolver (FUN_00407440, 13 vtables) on the NIF parse root [X+8] (class instance within the family NOT statically pinned - loader-registry OPEN)",
+      "owner_class_vt_0x5EBBEC": "network family NEVER references it (xref: only its own ctors FUN_005b2c40/FUN_005b2d50) - disjoint"
+    },
+    "what_would_close_it": "statically: the FUN_00412b70 loader-registry create-function table (NIF type string -> factory) to pin the [X+8] root's vtable within the 13-family set, plus a provenance path from model-id 4508/4057 instances to the GCE-registry {id -> 0x130 obj} entries; otherwise runtime"
+  },
+  "gates": {
+    "P02-G1": "PASS - object provenance of the 0x5bbca5 write target fully established (class = 0x48 record[6] struct; ctor chain = operator_new(0x48)@0x5bb73a + zero-init + record[6] store@0x5bb787 + thiscall@0x5bb78a; EDI binding@0x5bbbed), all bytes verified; additional provenance for the indirect transform writer FUN_005030c0 target (vt 0x5E2A3C ctor FUN_00405b50) also byte-verified",
+    "P02-G2": "PASS - classification AMBIGUOUS delivered with byte evidence for both sides: network writer target class identity (vt 0x5E2A3C family) and consumer resolver family identity (FUN_00407440 at slot+0x50 of the same 13-vtable family rooted at 0x5E2A3C); the cursor mechanism itself classified DISJOINT; object-identity bridge honestly recorded as OPEN (loader-registry dispatch), per QH-012 no offset-similarity claim is used",
+    "non_pass_classes_used": [
+      "AMBIGUOUS (object-identity join between network-written 0x130 objects and the nodes resolved for 4508/4057 models)",
+      "OPEN (NIF loader-registry dispatch FUN_00412b70 create-functions -> [X+8] root vtable within the 13-family set; owner+0x1C writer/class)"
+    ]
+  },
+  "coverage_and_limits": [
+    "not checked: FUN_00412b70 loader-registry contents (create-function table - P01's OPEN type-dispatch edge, would need a separate decompile campaign of the registration init)",
+    "not checked: which of the 13 family vtables the 0x130 GCE-registry objects carry at their creation (FUN_00405b50 installs base 0x5E2A3C; subclass vtable re-installs after ctor not observed in FUN_00502e80 - no re-install byte found, so they stay base-class vt 0x5E2A3C)",
+    "not checked: owner+0x1C writer and lookup-root class (second consumer manager branch)",
+    "not checked: FUN_00445a00 internal def->entity mechanics beyond provenance needed for the chain",
+    "all field-write census rows and byte checks in WORK/jobs/P02/data/P02_FIELD_WRITE_CENSUS.csv (37 rows) and tools/p02_verify.py output (37 TRUE checks after VA alignment)",
+    "runtime VALUES of the written/transform fields (needs runtime; 100% static per contract)"
+  ],
+  "evidence_files": [
+    "WORK/jobs/P02/data/P02_FIELD_WRITE_CENSUS.csv",
+    "WORK/jobs/P02/data/P02_VT_FAMILY_RESOLVER.csv",
+    "WORK/jobs/P02/tools/out/p02_scan_log.txt + p02_scan2..7_log.txt",
+    "WORK/jobs/P02/tools/out/fn_*.c / fn_*.asm (65+ function decompiles/disasms incl. FUN_005bbbd0, FUN_005bb5a0, FUN_005977b0, FUN_00488b70, FUN_00488cb0, FUN_005030c0, FUN_00503940, FUN_00502e80, FUN_00506780, FUN_005068f0, FUN_00405b50, FUN_00407440, FUN_005b71e0, FUN_005b5340, FUN_00404200, FUN_004045f0)",
+    "WORK/jobs/P02/tools/p02_scan1.py, p02_scan2.py, p02_scan3.py, p02_verify.py, p02_emit.py"
+  ]
+}

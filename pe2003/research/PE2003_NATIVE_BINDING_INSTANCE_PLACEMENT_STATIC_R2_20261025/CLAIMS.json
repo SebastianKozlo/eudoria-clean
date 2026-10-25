@@ -1,0 +1,355 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "kind": "CLAIMS",
+ "recorded_utc": "2026-10-25T11:17:38Z",
+ "status_vocabulary": "CONFIRMED / STRONGLY_SUPPORTED / PLAUSIBLE / UNVERIFIED / REJECTED (evidence status; non-pass classes recorded per claim)",
+ "counting_note": "counts below are tool-computed from this file's claims list",
+ "status_counts": {
+  "CONFIRMED": 29,
+  "STRONGLY_SUPPORTED": 6,
+  "UNVERIFIED": 8,
+  "REJECTED": 3
+ },
+ "total_claims": 46,
+ "claims": [
+  {
+   "id": "R2-C01",
+   "area": "B/binding",
+   "claim": "EXTN records become executed targets via: file chunk tables -> in-memory def fields (+0x50/+0x54 EXTN, +0x1c code array, PFIX/DYN lists) -> startup resolve pass (superclass chains) -> EXTN bind pass FUN_00453e20 ADDS resolved ids/indices into the code words at recorded offsets -> VM executes the patched bytecode",
+   "status": "CONFIRMED",
+   "evidence": "B01_RESOLVER_FLOW.json (fixup write bytes VA 0x453F8F-0x453FA0; native fallback ff 55 08 @0x453F1B; QC VC-01 TRUE; root A1-CC seq=4)"
+  },
+  {
+   "id": "R2-C02",
+   "area": "B/binding",
+   "claim": "Owners 2202/768/382 are FILE_CLASS_PRESENT: raw members exist in Scripts.ark byte-identical (provenance PROVEN) and decoded counterparts are in the 1936-row pinned corpus; the absence of a matching .obj is NOT an actual barrier",
+   "status": "CONFIRMED",
+   "evidence": "B01_OWNER_CLASSIFICATION.csv + B01_OBJ_PROVENANCE.json; QC VC-19/20/21/22 TRUE (ark SHA + 3 member AK local-header parses, CRC+SHA)"
+  },
+  {
+   "id": "R2-C03",
+   "area": "B/binding",
+   "claim": "R1 'MISSING .obj' labels for ext ids 30298/33521/126796/7769/1545/14758 were namespace errors: ext ids are METHOD ids resolved inside their owner class file, not standalone files",
+   "status": "CONFIRMED",
+   "evidence": "B01_ID_NAMESPACE_MAP.json (header B == PFIX#0 resource_id byte-exact in every parsed file); ext 33521 = 2202 DYN#0 code@532"
+  },
+  {
+   "id": "R2-C04",
+   "area": "B/binding",
+   "claim": "ext 33521 target CLOSED (was R1 MISSING_EDGE): 2202 DYN#0 {33521, hash 2DB10D07, code@532}, hash byte-equal to 1796 EXTN#23",
+   "status": "CONFIRMED",
+   "evidence": "B01_RESOLVER_FLOW.json ext_30298_trace hop7 + B02a_CHAIN_DECODE.json lead_B_verdict (raw bytes f2 fe 00 77 @1116, operand slot @1120)"
+  },
+  {
+   "id": "R2-C05",
+   "area": "B/binding",
+   "claim": "A native fallback binding exists (manager+0x1C binder vcall slot+8, byte-verified) and is the mechanism for owner-1 native/builtin ids (65/14758/116229/0x7FFFEC7E), not for 2202/768/382; no install DLL hosts any class registry",
+   "status": "CONFIRMED",
+   "evidence": "B01_OWNER_CLASSIFICATION.csv owner=1 row; B01_RESOLVER_FLOW.json; WORK/jobs/B01/tools/out/b01_countermodel_dlls.json (dpvs=135 culling exports, Mss32=351 audio exports)"
+  },
+  {
+   "id": "R2-C06",
+   "area": "J/callback",
+   "claim": "fn-ptr table at 0x61E82C..0x61E87C: 20 slots (k=5*class_a+sub_b), 15 lazy-init installer writers (one-shot guard-flag wrappers), 5 zero-BSS slots; DAT_A=T1[6]=0x61E844, DAT_B=T1[11]=0x61E858; all values are compile-time immediate local EXE VAs (or 0); no imports/GetProcAddress/relocations",
+   "status": "CONFIRMED",
+   "evidence": "J01a_WRITER_CENSUS.json + J01a_TABLE_MAP.csv (28 window hits full-file LE32 census; QC VC-16 TRUE; negative controls: 0 SIB writer forms, reloc dir RVA=0 size=0)"
+  },
+  {
+   "id": "R2-C07",
+   "area": "J/callback",
+   "claim": "Table region is BEYOND-RAW BSS: .data VA 0x20B000 VS 0x14384 SR 0xF000; table in-section offset 0x1382C-0x1387C > 0xF000 -> loader zero-init",
+   "status": "CONFIRMED",
+   "evidence": "J01a_WRITER_CENSUS.json (corrected 0xF0->0xF000, seq=7); QC VC-18 independently parsed PE header (.data SR 0xF000)"
+  },
+  {
+   "id": "R2-C08",
+   "area": "J/callback",
+   "claim": "DAT_A = FUN_005c27a0 = EMPTY NO-OP (single byte c3 + NOP padding); also used as default elem_dtor and installed in 2 table slots; 1193 static references from ~1100 distinct functions",
+   "status": "CONFIRMED",
+   "evidence": "J01a_WRITER_CENSUS.json + J01b_EXECUTOR_SEMANTICS.md; QC VC-14 TRUE (raw file bytes)"
+  },
+  {
+   "id": "R2-C09",
+   "area": "J/callback",
+   "claim": "DAT_B = FUN_00561ee0 = 13-byte pure forwarder -> FUN_005541e0, the 0x18-record (quaternion) normalizer: adjacent-pair dot < 0 -> negate q[i+1] (shortest-path sign flip via FUN_00544720), then clamp record+8 into [-1.0, +1.0]",
+   "status": "CONFIRMED",
+   "evidence": "J01b_RECEIVER_FLOW.json c_executors + J01b_EXECUTOR_SEMANTICS.md; QC VC-15/VC-17 TRUE"
+  },
+  {
+   "id": "R2-C10",
+   "area": "J/callback",
+   "claim": "DAT_A/DAT_B receivers in FUN_005068f0 are freshly allocated typed-array record buffers (0x14 records {target=owner+0x6C/+0x70 bit-exact, x,y,z from node+0x50/54/58}; 0x18 records {target, quat[4] from node+0x2C via FUN_00545030}); producer chain FUN_00505870/505aa0 -> FUN_00506780 (sole caller, REF_TOTAL=1) -> FUN_005068f0",
+   "status": "CONFIRMED",
+   "evidence": "J01b_RECEIVER_FLOW.json a_receiver (VA-by-VA, byte-verified); QC VC-11/12/13 TRUE"
+  },
+  {
+   "id": "R2-C11",
+   "area": "J/instance",
+   "claim": "VM decode of the attach chain: 4508/4057 per-part loop -> CALL_abs ext 30298 -> 1796 CODE@1016 forwarder -> CALL_IND_Aoff slot 1120 -> [comp+8] slot 0 -> ext 33521 -> 2202 CODE@532..804; EXTN consumption bijection 10/10 (4508) and 8/8 (4057), zero unmatched slots/records; 0 unknown opcodes in all four decoded files (1419 items)",
+   "status": "STRONGLY_SUPPORTED",
+   "evidence": "B02a_CHAIN_DECODE.json + B02a_DECODE_ANNOTATED.txt; QC machine-parsed the census CSVs (VC-30 bijection re-derived TRUE; VC-24 STOREI bytes re-derived) but did NOT re-run the full VM decode (QC NOT_CHECKED) - hence STRONGLY_SUPPORTED, not CONFIRMED"
+  },
+  {
+   "id": "R2-C12",
+   "area": "J/instance",
+   "claim": "Attach chain classification COMMON: the chain is structurally byte-identical for 4508 and 4057, carries only runtime handles, and contains ZERO literal model-resource ids; per-model data (26 vs 18 parts, mesh names, part ext ids, model ids) lives OUTSIDE the chain in DYN getters and caller init literals injected into part-object properties before the attach call",
+   "status": "STRONGLY_SUPPORTED",
+   "evidence": "B02a_CHAIN_DECODE.json classification + J02_MODEL_ID_FLOW.json; the in-file zero-literal negative was a job-tool census not independently re-run by QC"
+  },
+  {
+   "id": "R2-C13",
+   "area": "J/model-id",
+   "claim": "Model ids 296445/296446 exist in 4508.obj.dec and 218757/218758 in 4057.obj.dec ONLY as STOREI_SPoff operands inside separate DYN getter methods (getter DYN recs 296478/296477/218784/218783), OUTSIDE the attach chain; value flow: literal -> [SP+20] -> C -> RET across the DYN dispatch boundary, no further in-file consumer",
+   "status": "CONFIRMED",
+   "evidence": "J02_MODEL_ID_FLOW.json reference_census + B02a model_id_census; QC VC-24 TRUE (instruction bytes de fe 00 77 14 00 00 00 <id> re-derived; instruction start VA = cited file_off - 4, see erratum R2-E03)"
+  },
+  {
+   "id": "R2-C14",
+   "area": "J/model-id",
+   "claim": "No VM instruction in either file references or calls the model DYN getters (0 EXTN ext_id/owner bindings, 0 CALL_IND in file, 0 in-file callers); binding is exclusively the DYN table (native dispatch contract); all 4 model ids classified (e) MISSING_EDGE",
+   "status": "CONFIRMED",
+   "evidence": "J02_MODEL_ID_FLOW.json binding_tests (all zero) + value_flow_classification; QC row-count verified (30 census rows)"
+  },
+  {
+   "id": "R2-C15",
+   "area": "J/model-id",
+   "claim": "Honest bounded negative: 13 target ids, ZERO foreign raw literal hits in all 1936 decoded corpus files (LE32 all alignments) and in the EXE (9 raw matches are unaligned byte fragments with verified displacement/rel32 context); residual: computed/non-literal id usage in another class would evade a literal scan",
+   "status": "STRONGLY_SUPPORTED",
+   "evidence": "J02_MODEL_ID_FLOW.json countermodels CM3 + J02_CORPUS_RAW_SCAN.csv/J02_EXE_LITERAL_SCAN.csv; corpus/EXE scans not re-run by QC (NOT_CHECKED)"
+  },
+  {
+   "id": "R2-C16",
+   "area": "P/transform",
+   "claim": "X (receiver-chain middle object, vt 0x5EBC1C, ctor FUN_005b5110) is 0x28 bytes (push 0x28 at both creation sites; J01b '0x28B' disproven); +0x2C/+0x6C/+0x70 are NOT fields of X - they live on owner=[X+0x14] (class 0x78, vtable 0x5EBBEC, ctor FUN_005b2c40) and on node objects",
+   "status": "CONFIRMED",
+   "evidence": "P01_TRANSFORM_FIELD_SOURCE.json premise_correction; QC VC-07 TRUE (6a 28 @0x521b78/@0x5b7256; calls at 0x521b94/0x5b7272 both target FUN_005b5110)"
+  },
+  {
+   "id": "R2-C17",
+   "area": "P/transform",
+   "claim": "X+0x14 writer = FUN_005b5380 @0x5b5433 (MOV [ESI+0x14],EAX; owner constructed in place via FUN_005b2c40+FUN_005b2d50) - closes J01b's X+0x14 MISSING_EDGE",
+   "status": "CONFIRMED",
+   "evidence": "P01_TRANSFORM_FIELD_SOURCE.json x14_owner_link + J04_INSTANCE_JOIN.json x14_writer_correction_to_J01b; QC VC-08 TRUE"
+  },
+  {
+   "id": "R2-C18",
+   "area": "P/transform",
+   "claim": "owner+0x6C/+0x70 writers: ctor defaults -1.0f (0x5b2cf4/f7) overwritten by the NIF block reader (owner vtable slot 3, FUN_005b38c0 region, version/level-gated stream reads +0x50..+0x74); classification NIF_FILE_LOCAL; producer->transform->consumer chain byte-verified at code level",
+   "status": "CONFIRMED",
+   "evidence": "P01_TRANSFORM_FIELD_SOURCE.json owner_6c_70_writer; QC VC-02/VC-06 TRUE (LEA instruction starts at 0x5b3ca9 - see erratum R2-E01)"
+  },
+  {
+   "id": "R2-C19",
+   "area": "P/transform",
+   "claim": "node+0x2C is a 3x3 ROTATION MATRIX (9 floats, +0x2C..+0x4F), not a stored quaternion; FUN_00545030 converts matrix->quaternion (J01b 'quat[4]' superseded); node+0x50/+0x54/+0x58 = translation xyz (NiAVObject local-transform layout)",
+   "status": "CONFIRMED",
+   "evidence": "P01_TRANSFORM_FIELD_SOURCE.json node_2c_quaternion_area.correction; consistent with P02 writer FUN_005030c0 9-float matrix copy"
+  },
+  {
+   "id": "R2-C20",
+   "area": "P/nif",
+   "claim": "NIF parses complete: 296445.nif 155 blocks, 218757.nif 62 blocks (inventories complete, type-string occurrences == numBlocks header); ALL extracted NiNode local transforms (19 + 12 = 31/31) are identity rotation, scale 1.0, translation (0,0,0); the pinned NIF models carry NO world placement data and no non-identity local transforms (LOCAL_PART_TRANSFORM at most)",
+   "status": "CONFIRMED",
+   "evidence": "P01_TRANSFORM_FIELD_SOURCE.json nif_parse + P01_NIF_BLOCK_MAP.csv (217 data rows machine-parsed by QC); QC VC-26 NIF pins TRUE"
+  },
+  {
+   "id": "R2-C21",
+   "area": "P/network",
+   "claim": "The 0x5bbca5 cursor write target is the 0x48-byte record[6] wire struct of the network definition record (no vtable, plain data record), NOT any node class and NOT the vt 0x5EBBEC owner class; the cursor mechanism is DISJOINT from the node/owner classes",
+   "status": "CONFIRMED",
+   "evidence": "P02_NETWORK_JOIN_AUDIT.json g1_provenance_of_0x5bbca5_target (12/12 byte checks + allocation chain 0x5bb733-0x5bbcae)"
+  },
+  {
+   "id": "R2-C22",
+   "area": "P/network",
+   "claim": "Network transform write channel: FUN_005bbbd0 wire triplets -> record[6] struct -> FUN_005977b0 pass-2 -> entity (class 0x118, ctor FUN_004889c0, vt 0x5E4628) vslots +0x4C/+0x50/+0x58 -> FUN_005030c0 writes node+0x50/+0x54/+0x58 = (x,y,z)*100.0f and node+0x2C..+0x4C = 9-float rotation matrix on objects of class 0x130, primary vtable 0x5E2A3C, ctor FUN_00405b50, registry-add FUN_00502e80",
+   "status": "STRONGLY_SUPPORTED",
+   "evidence": "P02_NETWORK_JOIN_AUDIT.json network_transform_write_channel (37/37 byte claims verified by the job's own p02_verify.py after VA alignment; QC re-derived the load-bearing install bytes VC-04 and the g1 12/12 checks, but not the full 37-row chain end-to-end)"
+  },
+  {
+   "id": "R2-C23",
+   "area": "P/network",
+   "claim": "P01 node+0x2C MISSING_EDGE RESOLVED: writer = FUN_005030c0 (network-reachable via entity vslots, also called at registry-add); NIF-reader candidate REJECTED (no +0x2C write of any form in the NIF loader family, 151+15 census sites); cursor candidate REFINED (the cursor writes its own 0x48 record struct only)",
+   "status": "CONFIRMED",
+   "evidence": "P02_NETWORK_JOIN_AUDIT.json p01_missing_edge_resolution + P01 countermodels; install bytes QC VC-04 TRUE"
+  },
+  {
+   "id": "R2-C24",
+   "area": "J/root",
+   "claim": "[X+8] NIF-parse root = NiNode block-0 object; NiNode create-fn 0x4077F0 installs primary vtable 0x5E2A3C (c7 06 3c 2a 5e 00 @0x407896) and interface vtable 0x5E2B20 @+0xE8; loader registry singleton 0x619E78 (vt 0x5E29E8, 37 buckets), byte-pinned in FUN_00404200 @0x404291; create-function table census 3403 register sites / 100 unique pairs; no Load-chain vtable re-install",
+   "status": "CONFIRMED",
+   "evidence": "J03_ROOT_VTABLE_BRIDGE.json; QC VC-03/VC-05 TRUE (both install byte sequences independently re-derived); census row counts verified (100/3403)"
+  },
+  {
+   "id": "R2-C25",
+   "area": "J/root",
+   "claim": "FAMILY-LEVEL join established: the network world-transform writer (FUN_005030c0 target class, vt install @0x405bdf) and the models' chain node resolution ([X+8] root, vt install @0x407896) target the SAME vtable family 0x5E2A3C, pinned by two independent byte-identical install sites; the consumer resolver FUN_00407440 sits at slot+0x50 of exactly 13 family vtables",
+   "status": "CONFIRMED",
+   "evidence": "J03_ROOT_VTABLE_BRIDGE.json join_resolution + P02_VT_FAMILY_RESOLVER.csv (13 rows); QC VC-03/VC-04 TRUE (both installs byte-identical, independently re-derived)"
+  },
+  {
+   "id": "R2-C26",
+   "area": "J/root",
+   "claim": "Part objects B=[SP+56] are VM objects (def-4653 component factory via ext 122888, VM method-table dispatch A=[B+8] CALL [A+0]) - DISJOINT as C++ objects from the vt-0x5E2A3C node family; FUN_005030c0 never touches VM objects",
+   "status": "CONFIRMED",
+   "evidence": "J03_ROOT_VTABLE_BRIDGE.json part_object_family (CM2 CONFIRMED) + B02a chain bytes"
+  },
+  {
+   "id": "R2-C27",
+   "area": "J/instance",
+   "claim": "GCE attach path CLOSED: the GCE 0x130 node created by FUN_00502e80 is attached into a scene-graph node tree (AddChild [parent_vt+0xD0] under parent=[registry+0x3C] @0x502ff3-0x502ffe; slot fn FUN_00405e30 refcount+pool; NiTriShape children vt 0x5E2E88; SetName string 0x6142cc 'ArkBoundingVolumeRenderer::l_ptNewEntry->m_ptBoxes'); 22-step chain, 69/69 raw-byte checks TRUE; registry reachable from entity family ([entity+0x110]->[GCE+0x5C]->[C1+0x34]->[C2+0x1C])",
+   "status": "STRONGLY_SUPPORTED",
+   "evidence": "J04_INSTANCE_JOIN.json gce_attach_path + J04_BYTE_VERIFY.csv (69 rows 69 TRUE; QC sampled 5 rows re-derived from raw EXE - VC-29)"
+  },
+  {
+   "id": "R2-C28",
+   "area": "J/instance",
+   "claim": "owner+0x1C: writer = owner vtable slot+0x10 FUN_005b3cf0 @0x5b3d09 (value = FUN_00403e80(arg) of a cursor-array class); owner+0x1C is NOT the GCE id-hash registry (no vt dispatch on the registry vs [manager_vt+0x50] 13-family name-resolver dispatch on owner+0x1C @0x506937/0x506957); owner and its manager are peer KEYS of the 0x61A0C8 name-to-object registry (cross-link [value1+0x1C]=value2 @0x5b3283); exact stored-object class remains OPEN",
+   "status": "CONFIRMED",
+   "evidence": "J04_INSTANCE_JOIN.json owner_plus_0x1c (20-row per-class census; sole writer xref = vtable slot; 190 indirect [reg+0x10] sites); QC VC-10 TRUE"
+  },
+  {
+   "id": "R2-C29",
+   "area": "J/instance",
+   "claim": "[X+8] dual provenance: FUN_00521b60 (X creator) direct-root branch stores the parse root via FUN_005b5340, else-branch stores FUN_004186a0(this) result (0x61A0C8 transient-registry-mediated; vt 0x5E31C8 install @0x4186f0)",
+   "status": "CONFIRMED",
+   "evidence": "J04_INSTANCE_JOIN.json x8_dual_provenance; QC VC-25 TRUE"
+  },
+  {
+   "id": "R2-C30",
+   "area": "J/mechanism",
+   "claim": "Resource-open mechanism family byte-verified: FUN_00452860 walks manager collections ([+4] payload+4==ext_id, [+0x2c]/[+0x28] node+0xC==ext_id); reader vtable 0x5E7974 = 0x520EE0/0x520D80/0x520C20/0x5209D0/0x5206A0; GCE lazily created via FUN_00468980/FUN_0048fc80",
+   "status": "STRONGLY_SUPPORTED",
+   "evidence": "J02_MODEL_ID_FLOW.json native_qualification (FUN_00452860 bytes quoted by the job); not independently re-derived by QC"
+  },
+  {
+   "id": "R2-C31",
+   "area": "standing",
+   "claim": "Object-instance network->model join: STILL_AMBIGUOUS. Exact missing edges: (1) registry+0x3C root identity (whether owner+0x1C / the [X+8] root is or is under the registry+0x3C tree - the decisive instance-join edge); (2) class/ctor of the object stored at owner+0x1C (= FUN_00403e80(arg) of an unidentified cursor-array class; 190 indirect [reg+0x10] call sites); (3) binder-patched HOSTCALL case ids binding def-ids 4652/4653 to native factories (runtime data, R1 honest limit); (4) ctx+0x50-member append method (not load-bearing for the verdict)",
+   "status": "UNVERIFIED",
+   "evidence": "J04_INSTANCE_JOIN.json exact_missing_edges; J03 join_resolution.object_instance_level=STILL_AMBIGUOUS; P02 classification AMBIGUOUS; family-level join R2-C25 is the strongest established link",
+   "non_pass_class": "STILL_AMBIGUOUS"
+  },
+  {
+   "id": "R2-C32",
+   "area": "standing",
+   "claim": "WORLD_XYZ_RECOVERED=NO - no world placement of 296445/218757 recovered; no LOCAL->WORLD promotion is made anywhere in this run (all NIF-derived transform data classified LOCAL_PART_TRANSFORM at most)",
+   "status": "UNVERIFIED",
+   "evidence": "P01_TRANSFORM_FIELD_SOURCE.json classification.local_vs_world; QC overclaim scan (no placement/world recovery claim found anywhere)",
+   "non_pass_class": "NOT_RECOVERED"
+  },
+  {
+   "id": "R2-C33",
+   "area": "standing",
+   "claim": "HISTORICAL_PLACEMENT=NOT_ESTABLISHED - the source and value of the historical instance transforms remain unestablished for both models",
+   "status": "UNVERIFIED",
+   "evidence": "R2-C31/R2-C32; P02 countermodels cm3 (honest AMBIGUOUS, no invented closure); CONTRACT terminal clause",
+   "non_pass_class": "NOT_ESTABLISHED"
+  },
+  {
+   "id": "R2-C34",
+   "area": "standing",
+   "claim": "SOURCE_UNKNOWN - neither local nor network exclusivity proven: local NIF/DLOB sources carry no placement data for these models (R2-C13/R2-C20), and the network writer exists (R2-C22) but its object-identity join to our models is unproven (R2-C31)",
+   "status": "UNVERIFIED",
+   "evidence": "postaudit SP-A01 disposition carried unchanged; R2 evidence set",
+   "non_pass_class": "UNKNOWN"
+  },
+  {
+   "id": "R2-C35",
+   "area": "standing",
+   "claim": "PE2003_LOCAL_SOURCE_EXHAUSTED=NO - remaining precisely-scoped static edges exist (see FRONTIER.md / BACKLOG.json)",
+   "status": "UNVERIFIED",
+   "evidence": "J03/J04 coverage_and_limits + P02 what_would_close_it",
+   "non_pass_class": "NOT_EXHAUSTED"
+  },
+  {
+   "id": "R2-C36",
+   "area": "standing",
+   "claim": "CANONICAL_GATE_EFFECT=NONE; ADVISORY_PENDING_EXTERNAL_POSTAUDIT",
+   "status": "UNVERIFIED",
+   "evidence": "CONTRACT terminal clause; no canonical EU935/Vault/INDEX/skill change performed in this run",
+   "non_pass_class": "NONE"
+  },
+  {
+   "id": "R2-C37",
+   "area": "process",
+   "claim": "J01b_RECEIVER_FLOW.json supersession map (mandatory QC P2-3 disclosure): the frozen original (SHA256 25874C25EC1DFC02E47FCFF9F678EFFB6F94D32986A0DF2B58711E2AD1EF466E) claims X=0x28B owner-of-fields, X+0x14-no-writer and node+0x2C-quat - superseded by P01 (X=0x28; fields on owner class 0x78 vt 0x5EBBEC; +0x2C=3x3 rotation matrix) and J04 (X+0x14 writer @0x5b5433); J01b's flow/read-site claims (fld sites, executor semantics, COMMON verdict) remain standing",
+   "status": "CONFIRMED",
+   "evidence": "P01_TRANSFORM_FIELD_SOURCE.json premise_correction + node_2c correction; J04_INSTANCE_JOIN.json x14_writer_correction_to_J01b; QC P2-3 (supersession byte-verified by QC)"
+  },
+  {
+   "id": "R2-C38",
+   "area": "process",
+   "claim": "B02a_CHAIN_DECODE.json carries an f1/f2 transposition defect for the 4508 getter DYN recs (visible in the frozen original SHA256 80AEA1BFD7F87E310A772030270D49B88E3D76A87E0EBA885A64711925F0CA8D); J02's correction is correct (raw bytes: 296478->f1=1617/0x585DAF8C, 296477->f1=1611/0x9FA86861); original left unmodified with the defect visible",
+   "status": "CONFIRMED",
+   "evidence": "J02_MODEL_ID_FLOW.json b02a_prose_correction + dyn_tables_raw_bytes; QC VC-23 TRUE (independent DLOB chunk parse)"
+  },
+  {
+   "id": "R2-C39",
+   "area": "process",
+   "claim": "J02 seq=14 incident: the first run of the copied decoder ran unpatched and re-wrote B02a/data files - deterministically byte-identical, all hashes match B02a HANDOFF pins (ZERO drift); ledger prose says '12' files but enumerates 11 and the directory contains 11 (count nit QC P3-5)",
+   "status": "CONFIRMED",
+   "evidence": "ADMISSION_EVENTS seq=14; QC VC-34 TRUE (all 11 files re-hashed by QC)"
+  },
+  {
+   "id": "R2-C40",
+   "area": "process",
+   "claim": "P01 tool LOC 878 > 800 hard cap - disclosed at closure, tools hash-pinned, not trimmed post-hoc; MASTER disposition ACCEPTED_AS_DEVIATION",
+   "status": "UNVERIFIED",
+   "evidence": "ADMISSION_EVENTS seq=17 KNOWN DEVIATION; BUDGET_LEDGER P01 entry (MASTER disposition recorded); QC P2-2",
+   "non_pass_class": "ACCEPTED_AS_DEVIATION"
+  },
+  {
+   "id": "R2-C41",
+   "area": "process",
+   "claim": "SEMANTIC_BUDGET_COMPLIANCE=UNVERIFIED (SP-A09): BUDGET_LEDGER contains an additive completion block (2026-10-25T11:12:45Z) enumerating all dispatch units incl. dead attempts, but bodies/instruction exposures remain UNMEASURED aggregates; recorded native dispatch total 16 of 96 with family attribution A2/B5/J7/P3/Q1 (family counters include 2 root-side A-family units)",
+   "status": "UNVERIFIED",
+   "evidence": "BUDGET_LEDGER.json native_task_accounting + notes; QC P1-1 (additive completion accepted as the P1-1 correction)",
+   "non_pass_class": "UNVERIFIED"
+  },
+  {
+   "id": "R2-C42",
+   "area": "rejections",
+   "claim": "R1 claim '2202.obj.dec/768/382 MISSING' (as a corpus-level fact) - REJECTED: it was a 12-file corpus-slice statement; the pinned 1936-file corpus and Scripts.ark contain the files (raw members byte-identical, decoded counterparts pinned)",
+   "status": "REJECTED",
+   "evidence": "B01_OWNER_CLASSIFICATION.csv rows 2202/768/382; B01_OBJ_PROVENANCE.json; QC VC-19/20/21/22"
+  },
+  {
+   "id": "R2-C43",
+   "area": "rejections",
+   "claim": "Network cursor family as writer of owner+0x6C/+0x70 - REJECTED (no standard-form float write in the network family region; its +0x2C store @0x5bb3f8 is a pointer on its own 0x30-byte record class vt 0x5EBD38); NIF-reader family as writer of node+0x2C - REJECTED (image-wide interior-pointer and float-store censuses, 151+15 sites)",
+   "status": "REJECTED",
+   "evidence": "P01 countermodels.network_family; P02 cross_checks + p01_missing_edge_resolution (vtable 0x5EBBEC referenced ONLY from its own ctors)"
+  },
+  {
+   "id": "R2-C44",
+   "area": "rejections",
+   "claim": "VM property stores as writers of owner+0x6C/+0x70 - REJECTED (write path closed from the NIF stream: ctor default + block reader, no VM store in between); J01a attempt-1 'section table stripped/zeroed' claim - REJECTED (4 sections physically present)",
+   "status": "REJECTED",
+   "evidence": "P01 countermodels.vm_property_stores + default_identity; QC_STRUCTURE_CHECK.json (independent PE section parse)"
+  },
+  {
+   "id": "R2-C45",
+   "area": "process",
+   "claim": "B01 admission-trail gap: B01's child admission events were lost with the dead prior session (ADMISSION_EVENTS seq starts at A1/ROOT_TAKEOVER); compensation: root A1-CC independent countercheck seq=4 (ark members, decoded pins, EXE key bytes - all PASS) and post-hoc admin HANDOFF synthesized by the J01a child on root order; disclosure required in the final report per QC P2-1",
+   "status": "CONFIRMED",
+   "evidence": "QC_FINDINGS.json P2-1; ADMISSION_EVENTS seq=1-4; ROLE_LEDGER takeover note; WORK/jobs/B01/HANDOFF.md"
+  },
+  {
+   "id": "R2-C46",
+   "area": "process",
+   "claim": "Run process compliance: fresh QC verdict QC_PARTIAL (37 verification items all TRUE; QC_PARTIAL due to budget-ledger coverage at QC time, B01 admission loss, P01 LOC deviation and explicit NOT_CHECKED load-bearing components); root+children modelID=glm-5-3 (zero high, SP-A06 respected); ADMISSION_EVENTS seq 1..23 contiguous; max-attempt cap honored (B02 split to B02a after 2 dead attempts; J01 split to J01a/J01b after 2 attempts)",
+   "status": "CONFIRMED",
+   "evidence": "QC/QC_SUMMARY.md + QC_VERIFIED_CLAIMS.csv (37 rows); ROLE_LEDGER.json; QC_STRUCTURE_CHECK.json admission_events"
+  }
+ ],
+ "standing": {
+  "WORLD_XYZ_RECOVERED": "NO",
+  "HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+  "SOURCE": "UNKNOWN",
+  "OBJECT_INSTANCE_NETWORK_TO_MODEL_JOIN": "STILL_AMBIGUOUS (family-level JOIN_ESTABLISHED; exact missing edges in R2-C31 and FRONTIER.md)",
+  "PE2003_LOCAL_SOURCE_EXHAUSTED": "NO",
+  "CANONICAL_GATE_EFFECT": "NONE",
+  "ADVISORY": "PENDING_EXTERNAL_POSTAUDIT"
+ }
+}

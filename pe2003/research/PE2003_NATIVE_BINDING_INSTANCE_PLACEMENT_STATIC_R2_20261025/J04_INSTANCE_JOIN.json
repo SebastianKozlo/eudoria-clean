@@ -1,0 +1,119 @@
+{
+  "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+  "job": "J04",
+  "family": "J",
+  "attempt": 1,
+  "lineage": "J03-continuation",
+  "recorded_utc": "2026-10-25T11:06:12Z (tool: python datetime.now(UTC))",
+  "era": "PE2003 static",
+  "exe_sha256": "56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650",
+  "question": "can the two remaining instance-level edges be closed statically: (a) manager identity at owner+0x1C (class/vtable/writer; same GCE/scene-graph registry the network path writes through?), (b) does the GCE 0x130-object from FUN_00502e80 get attached into the scene graph by a byte-verifiable path",
+  "ghidra": {
+    "tool": "Ghidra 11.2.1 analyzeHeadless, own project J04Proj (WORK/jobs/J04/tools/ghidra_proj), language x86:LE:32:default (windows cspec)",
+    "program": "PE2_J04_copy.exe (sandbox copy of pinned EXE, SHA256 re-verified identical to pin)",
+    "scans": [
+      "J04GhidraScan.java",
+      "J04GhidraScan2.java",
+      "J04GhidraScan3.java",
+      "J04GhidraScan4.java",
+      "J04GhidraScan5.java"
+    ],
+    "outputs": "tools/out/ = 60+ fn_*.c/fn_*.asm + 5 region_*.asm + vt dumps + indcall_disp10_census.txt (190 rows) + 5 scan logs, all EXIT=0"
+  },
+  "owner_plus_0x1c": {
+    "class_facts": "owner = *(X+0x14), class 0x78 bytes, vtable 0x5EBBEC spanning 12 slots (+0x00..+0x2C); X vtable 0x5EBC1C begins at 0x5EBBEC+0x30",
+    "write_census": {
+      "zero_writes": [
+        "FUN_005b2c40 @0x5b2c7c 89 5e 1c (ctor)",
+        "FUN_005b2d50 @0x5b2d89 89 7b 1c (re-init, re-installs vt 0x5EBBEC @0x5b2d72)"
+      ],
+      "value_writer": "owner vt slot+0x10 FUN_005b3cf0 (slot dword 0x5EBBFC = 0x005b3cf0): MOV [this+0x1C],EAX @0x5b3d09 where EAX = FUN_00403e80(arg); FUN_004057d0 additionally stores FUN_00403e80(arg) into [this+0x10] @0x4057ff",
+      "value_provenance": "FUN_00403e80(this): cursor [this+0x74] (incremented) -> index [[this+0x68]] (id array); -1 -> 0; return [[this+0x34]] (object array) element. The slot call's ARG class (cursor-array owner) is NOT statically identified",
+      "sole_static_reference_of_writer": "vtable slot 0x5EBBFC only (Ghidra xref + byte check); indirect CALL [reg+0x10] image census = 190 sites (register provenance infeasible statically)",
+      "readers": [
+        "FUN_00506780 @0x5067f0 8b 78 1c (consumer, alt resolve-root)",
+        "owner slot+0x14 FUN_005b34d0 @0x5b34ed 8b 4f 1c",
+        "owner slot+0x18 FUN_005b3580 @0x5b359c 8b 47 1c",
+        "owner slot+0x20 FUN_005b3d80 @0x5b3dd3 8b 47 1c (to FUN_005b44a0)",
+        "owner slot+0x24 FUN_005b31c0 @0x5b3234 8b 6b 1c (0x61A0C8 registry KEY)"
+      ],
+      "excluded_non_field_hits": "stack [ESP+0x1C] in 0x5b50f0/0x5b38c0/0x5b3580; byte [EBX+0x1C] @0x5b1131 in separate function 0x5b10b0 (class-ambiguous); slot+0x1C @0x5b10a0 is a JMP thunk to FUN_004058b0",
+      "per_class_denominator": "20 census rows: 12 owner vt slots + 2 ctors + 2 creators (FUN_005b5380, FUN_005128a0) + 2 consumer fns + 2 writer helpers (FUN_00403e80, FUN_004057d0) - data/J04_OWNER1C_CENSUS.csv"
+    },
+    "manager_identity_verdict": {
+      "not_the_gce_hash_registry": "CONFIRMED: the id-hash registry `this` (FUN_005030c0/FUN_00502e80/FUN_00503940/FUN_005031e0) is never vt-dispatched (plain data fields [this]/[this+4]/[this+8]/[this+0x14]/[this+0x3C]/[this+0x40]); owner+0x1C IS vt-dispatched ([manager_vt+0x50] in FUN_005068f0 @0x506937/0x506957)",
+      "node_family_semantics": "CONFIRMED: FUN_005068f0 calls [manager_vt+0x50] per node = FUN_00407440-family recursive name resolver (P02 census of 13 vtables; base vt 0x5E2A3C slot+0x50 byte-checked at 0x5E2A8C)",
+      "exact_class": "OPEN (MISSING_EDGE): stored object = FUN_00403e80(arg) of an unidentified cursor-array class; countermodel 'texture/stream manager' REFUTED (name-resolver dispatch cannot be served by such), but vtable/ctor of the stored object NOT byte-pinned (QH-012 respected)"
+    },
+    "cross_registry_link": "FUN_005b31c0 (owner slot+0x24): value1 = lookup(0x61A0C8, key=owner); if manager (owner+0x1C) nonzero: value2 = lookup(0x61A0C8, key=manager); [value1+0x1C] = value2 @0x5b3283 89 71 1c - owner and its manager are peer KEYS of the same name-to-object registry; their VALUES are cross-linked the same way",
+    "x14_writer_correction_to_J01b": "FUN_005b5340 (which stores [X+8]=root @0x5b5364) calls FUN_005b5380 @0x5b5372; FUN_005b5380 constructs the owner in place (FUN_005b2c40 @0x5b540a, FUN_005b2d50 @0x5b543e) and stores the container-append result at [X+0x14] @0x5b5433 (89 46 14) - J01b's 'no static writer of X+0x14' is corrected",
+    "x8_dual_provenance": "FUN_00521b60 (X creator): direct-root branch FUN_005b5340(X, *([holder+0x18]+8)) AND else-branch [X+8] = FUN_004186a0(this) result (0x61A0C8 transient-registry-mediated; FUN_004186a0 installs vt 0x5E31C8 registry at global 0x61A0C8 @0x4186f0, calls [this_vt+8] then [this_vt+0x24] @0x41870c); owner slot+0x24 = FUN_005b31c0 is a consistent [vt+0x24] implementation reading 0x61A0C8"
+  },
+  "gce_attach_path": {
+    "verdict": "BYTE-VERIFIED ATTACH: the GCE 0x130 node created by FUN_00502e80 is attached into a scene-graph node tree",
+    "chain": [
+      "source child list: [registry+0x40] member vt+0xC @0x502ea8, list head at +0xF4 @0x502eb3",
+      "new(8) pair {id, node}; new(0x130) @0x502ece + ctor FUN_00405b50 @0x502eef (vt 0x5E2A3C @0x405bdf, P02 canon)",
+      "SetName FUN_0041bfa0(node, 0x6142cc) @0x502f0a; name string = 'ArkBoundingVolumeRenderer::l_ptNewEntry->m_ptBoxes'; FUN_0041bfa0 = free old [this+8] + strdup",
+      "per child: FUN_005036b0 -> 0x10C object ctor FUN_004135d0 installs vt 0x5E2E88 = NiTriShape (J03 create-fn map) + 0x74 data obj (FUN_0042ae30); geometry from wire fields x100.0f (FUN_00503200); CALL [mapped_vt+0xE8] @0x502f3e; FUN_00422da0(mapped+0xBC) @0x502f61; AddChild: CALL [new_vt+0xD0](new, mapped, 0) @0x502f72",
+      "post-loop: [node+0x14] &= 0xfe @0x502fd6; [vt+0xA8] = FUN_00418fc0 @0x502fda; FUN_00419760 @0x502fe2; FUN_00415a80(node,0,1) @0x502fee (J03 Load-chain family)",
+      "TOP-LEVEL ATTACH: parent = [registry+0x3C] @0x502ff3 (8b 4e 3c); CALL [parent_vt+0xD0](parent, new_node, 0) @0x502ffe (ff 92 d0 00 00 00)",
+      "parent updates: FUN_00415cc0 @0x503007, FUN_00415ff0 @0x50300f, FUN_00415a80(parent,0,1) @0x50301b",
+      "id-hash insert @0x503054-0x503073 (buckets [this+0], mask [this+4], count INC [this+8] @0x50307d); FUN_005030c0(this, id) @0x503098 writes node+0x50/54/58 x100.0f (@0x50310a/0x50311e/0x503129) and node+0x2C 9-float matrix (ECX=9 REP MOVSD @0x5031b0-0x5031c1)"
+    ],
+    "addchild_slot_proof": "node vt 0x5E2A3C slot+0xD0 = FUN_00405e30 (dword at 0x5E2B0C): refcount INC [child+4] @0x405e44; operates on this+0xE8 embedded member (81 c6 e8 00 00 00 @0x405e64/@0x405f02; member+4 = node+0xEC pool, member+0xC = node+0xF4 count - J03 layout canon); dedupe + pool insert FUN_0055fa30 @0x405f2a",
+    "registry_reachability": "entity-family methods: [entity+0x110] (0x488f03) -> [GCE+0x5C] (0x542d20) -> [C1+0x34] (0x402720) -> [C2+0x1C] (0x586ec0) = registry; registry-add CALL FUN_00502e80 @0x488ea4 (unnamed region 0x488d80); transform updates CALL FUN_005030c0 @0x488c3e and @0x488d71 (region 0x488bf0); post-add: FUN_005031e0 (registry+0x3C accessor: 8b 49 3c @0x5031e1, INC [ECX+4] @0x5031f6) then Load-chain updates on the parent @0x488edc-0x488eee",
+    "parent_class": "OPEN (MISSING_EDGE): registry+0x3C node ctor/vtable NOT byte-pinned - the registry is pre-built (GCE ctor FUN_004892a0 takes [GCE+0x5C] as a parameter @0x489309; FUN_00468980 chain NOFN not followed); parent IS treated as a node-family world-update object (FUN_00415ff0/00415cc0/00415a80 + AddChild dispatch)"
+  },
+  "countermodels": {
+    "cm_parallel_entity_graph_never_attached": "PARTIALLY REFUTED: attach into a scene-graph tree byte-verified (registry+0x3C AddChild + NiTriShape children + Load-chain updates). NOT REFUTED at root level: no static edge connects the registry+0x3C tree to the [X+8] NIF-root tree or to owner+0x1C - two disjoint scene systems at ROOT level remains possible",
+    "cm_owner1c_different_manager": "REFUTED in the strong form: consumer dispatches the 13-family name resolver [manager_vt+0x50] on owner+0x1C; owner+0x1C is a peer KEY with the owner in the 0x61A0C8 name-to-object registry. Exact class of the stored object remains OPEN",
+    "cm_runtime_data_only_attach": "REFUTED for the attach (static unconditional AddChild path before hash-insert and transform write); RETAINED for the identity join (owner+0x1C value = runtime arg of a virtual call)"
+  },
+  "classification": {
+    "verdict": "STILL_AMBIGUOUS",
+    "scope": "object-instance identity between the network-written GCE 0x130 nodes and the nodes resolved for model instances",
+    "advanced_edges": [
+      "J03 missing edge 1 (GCE attach path): CLOSED - byte-verified scene-graph attach",
+      "J03 missing edge 2 (owner+0x1C manager identity): PARTIALLY CLOSED - writer pinned, node-family resolver-root semantics pinned, NOT the GCE hash registry; exact class OPEN"
+    ],
+    "exact_missing_edges": [
+      "class/ctor of the object stored at owner+0x1C (= FUN_00403e80(arg) of an unidentified cursor-array class; 190 indirect [reg+0x10] call sites, arg provenance runtime-bound)",
+      "registry+0x3C node ctor/vtable (registry constructor not located; FUN_00468980 chain not followed)",
+      "root-identity: whether owner+0x1C (or the FUN_00521b60 else-branch [X+8] root) is or is under the registry+0x3C tree - the decisive instance-join edge",
+      "inherited unchanged: binder-patched HOSTCALL case ids for 4652/4653; ctx+0x50-member append method (not load-bearing for this verdict)"
+    ],
+    "world_placement_claim": "NONE - mechanism-join question only"
+  },
+  "gates": {
+    "J04-G1": {
+      "predicate": "owner+0x1C manager identity (class/vtable/writer, byte-verified) or precise coverage",
+      "result": "PASS",
+      "detail": "exhaustive per-class census delivered (20 rows, 12 slots + 2 ctors + creators + consumers, all forms incl. stack/non-field exclusions); writer byte-pinned (FUN_005b3cf0 @0x5b3d09, value = FUN_00403e80(arg)); manager NOT the GCE hash registry (no vt dispatch on it vs vt+0x50 resolver dispatch on owner+0x1C - byte contrast); node-family resolver-root semantics byte-pinned; exact class of stored object recorded as precise MISSING_EDGE with coverage (sole writer xref = vtable slot; 190-site indirect-call census)"
+    },
+    "J04-G2": {
+      "predicate": "attach-path classification with evidence; PASS = classification with byte evidence or exact missing-edge list",
+      "result": "PASS",
+      "detail": "classification STILL_AMBIGUOUS delivered with byte evidence: attach CLOSED (AddChild into registry+0x3C tree, 22-step chain, 69/69 raw-byte checks TRUE), owner+0x1C identity partially closed, and the exact missing-edge list (stored-object class, parent ctor, root-identity edge) recorded; mandatory countermodels all evaluated with byte evidence"
+    },
+    "non_pass_classes_used": [
+      "MISSING_EDGE (owner+0x1C stored-object class; registry+0x3C ctor; root-identity)",
+      "AMBIGUOUS (object-instance identity join - the classification verdict)"
+    ]
+  },
+  "coverage_and_limits": [
+    "not checked: FUN_00468980 chain (registry/C1/C2 construction) - NOFN region, not followed",
+    "not checked: 190-site indirect [reg+0x10] register-provenance analysis (statically infeasible within scope; census recorded)",
+    "not checked: FUN_005b44a0 (slot+0x20 consumer of owner+0x1C), FUN_00503200 full geometry semantics, FUN_005039e0, NiTriShape vt slot+0xE8 target",
+    "not checked: runtime object identity / values (100% static per contract)"
+  ],
+  "evidence_files": [
+    "WORK/jobs/J04/data/J04_BYTE_VERIFY.csv (69 rows, 69 TRUE, python raw decoder independent of Ghidra)",
+    "WORK/jobs/J04/data/J04_OWNER1C_CENSUS.csv (20 rows, csv.writer)",
+    "WORK/jobs/J04/data/J04_ATTACH_CHAIN.csv (22 rows, csv.writer)",
+    "WORK/jobs/J04/tools/out/ (60+ fn dumps, 5 region dumps, vt dumps, indcall census, 5 scan logs)",
+    "WORK/jobs/J04/EVIDENCE.md, EARLY_RESULT.md, HANDOFF.md",
+    "WORK/jobs/J04/tools/j04_verify.py, j04_census.py, J04GhidraScan.java .. J04GhidraScan5.java"
+  ],
+  "status": "PASS G1+G2; attach path CLOSED (byte-verified scene-graph attach under registry+0x3C); owner+0x1C writer+semantics pinned, exact class OPEN; instance join honest STILL_AMBIGUOUS with exact missing edges"
+}

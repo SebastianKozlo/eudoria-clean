@@ -1,0 +1,110 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "job": "B01",
+ "artifact": "B01_ID_NAMESPACE_MAP.json",
+ "generated_utc": "2026-10-25T06:55:30.427123+00:00",
+ "single_question": "How does a concrete EXTN record become an executed target, and is the absence of a matching .obj file (owners 2202/768/382) an actual barrier, or is there a native class/builtin/inheritance/alias binding in the 2003 EXE/DLL that resolves these owners without a decoded .obj?",
+ "namespace_classes": [
+  {
+   "namespace": "CLASS/DEFINITION id (DLOB header id; file <id>.obj in Scripts.ark)",
+   "examples": {
+    "2202": "class 2202 (superclass 768)",
+    "768": "class 768 (superclass 208)",
+    "382": "class 382 (superclass 376)",
+    "1796": "class 1796 (superclass 768)",
+    "208": "exists as 208.obj.dec",
+    "376": "exists as 376.obj.dec",
+    "343": "Concrete/Model Manager (V18)",
+    "477": "forwarder class",
+    "4751": "forwarder class",
+    "4652": "string/registry service def",
+    "4653": "property-data def",
+    "4508": "26-part construction def",
+    "4057": "18-part construction def"
+   },
+   "evidence": "2202/382/768/1796 headers parsed byte-exact (b01_dlob_owners.json); presence census in same file"
+  },
+  {
+   "namespace": "METHOD/ext id (PFIX/DYN resource_id inside the OWNING class file; NO own file expected)",
+   "examples": {
+    "33502": "2202 PFIX#0 code@0 (= header B of 2202)",
+    "29039": "2202 PFIX#2 code@380",
+    "29040": "2202 PFIX#1 code@456",
+    "33521": "2202 DYN#0 code@532 hash 2DB10D07 (== 1796 EXTN#23)",
+    "26322": "2202 DYN#1 code@20 hash 69485F88 (== 1796 EXTN#18)",
+    "30298": "1796 PFIX#2 code@1016 (attach forwarder, V18)",
+    "33520": "1796 PFIX#0 code@1148 (twin forwarder)",
+    "1148": "382 PFIX#1 code@0 (entry-chain target of 126796/1545)",
+    "6333": "768 PFIX#0 code@0 (superclass entry of 768)",
+    "1545": "477 PFIX (V18 canon)",
+    "7769": "343 DYN (V18 canon)",
+    "126796": "4751 PFIX (V18 canon)"
+   },
+   "evidence": "b01_dlob_owners.json record tables; V17/V18 pinned JSONs",
+   "key_finding": "R1 'MISSING .obj' labels for ext ids 30298/33521/126796/7769/1545/14758 were namespace errors: ext ids are METHOD ids resolved inside their owner class file, not standalone files"
+  },
+  {
+   "namespace": "PROPERTY-SELECTOR id (EXTN type3 + PDAT records)",
+   "examples": {
+    "33503": "1796",
+    "33505": "1796",
+    "33518": "2202",
+    "33519": "2202",
+    "33504": "2202"
+   },
+   "evidence": "b01_dlob_owners.json EXTN type3 records + PDAT dwords (owner field)"
+  },
+  {
+   "namespace": "NATIVE/BUILTIN (owner 1; NO file; resolved by the native binder fallback)",
+   "examples": {
+    "65": "list/VM service (1796 EXTN#8)",
+    "14758": "string/hash service (382 EXTN#2, 4508 EXTN#2)",
+    "116229": "382 EXTN#1",
+    "0x7FFFEC7E": "engine case-space (V1 canon dispatcher 0x441df0)"
+   },
+   "evidence": "no 1.obj.dec in 1936-row pins census; native fallback call physically verified at VA 0x453F1B (ff 55 08) in FUN_00453e20"
+  },
+  {
+   "namespace": "MODEL/RESOURCE id (Models.ark resource space; distinct from definition ids)",
+   "examples": {
+    "296445/296446/218757/218758": "R1 watch models",
+    "296473/296476-296479": "4508 PFIX/DYN",
+    "218782-218787": "4057 PFIX/DYN"
+   },
+   "evidence": "R1 pinned JSONs; ZERO occurrences of 296445/296446/218757/218758 in 2202/382/768/1796/2234 (watch censuses)"
+  },
+  {
+   "namespace": "SUPERCLASS link (DLOB header A)",
+   "examples": {
+    "2202.A": 768,
+    "1796.A": 768,
+    "768.A": 208,
+    "382.A": 376
+   },
+   "evidence": "header parses; consumed by FUN_00453cc0 (def+0xC = header A -> tree lookup -> def+0x10; error 6 if absent)"
+  },
+  {
+   "namespace": "SELF/ENTRY resource id (DLOB header B = PFIX rec0 resource_id = code@0 entry method)",
+   "examples": {
+    "2202.B": 33502,
+    "1796.B": 33501,
+    "382.B": 1148,
+    "768.B": 6333,
+    "4652.B": 122867,
+    "4653.B": 122888
+   },
+   "evidence": "header B == PFIX#0 resource_id byte-exact in every parsed file"
+  }
+ ],
+ "denominators": {
+  "scripts_ark_members": 1937,
+  "decoded_corpus_pins_rows": 1936,
+  "obj_named_members": 1937
+ },
+ "source_tools": [
+  "b01_obj_provenance.py",
+  "b01_dlob_owners.py",
+  "b01_verify_bytes.py",
+  "b01_countermodel_dlls.py"
+ ]
+}

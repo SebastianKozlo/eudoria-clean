@@ -63,3 +63,33 @@ Verification pins: SHA256 `656795D8B3DDDF8F9192EE41C4710D592894860F6959B53B2C080
 run REPORT (NiNode 19, NiArkBillboardNode 7, NiTriShape 30, …).
 
 Run report: `../../research/PE2003_MODELS_296445_218757_REBUILD_LOCATION_YOLO_R3_20261024/REPORT.md`
+
+
+## R2 update — PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025
+
+The independent Desktop postaudit of R1 (REQUIRE_CORRECTIONS, SP-A01..09) was executed by the
+static closing wave R2; full sanitized projection:
+`../research/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/REPORT.md`.
+Corrections supersede the table rows above where stated; the R1 file itself is byte-untouched
+(see `../research/PE2003_MODEL_INSTANCE_PLACEMENT_STATIC_R1_20261024/STATIC_R1_EXTERNAL_POSTAUDIT_NOTICE.md`).
+
+- **TRANSFORM_SOURCE corrected to SOURCE_UNKNOWN** (was NETWORK_RUNTIME_ONLY): neither local
+  nor network exclusivity is proven (postaudit SP-A01). CONFIRMED mechanism: the network
+  transform channel reaches FUN_005030c0 which writes translation (x100.0f) + a 3x3 rotation
+  matrix on vt-0x5E2A3C-class 0x130 objects; NIF local transforms are ALL identity (31/31
+  NiNode blocks across both model files) — no local placement data in the NIF files; the
+  +0x6C/+0x70 fields are NIF_FILE_LOCAL on the owner class 0x78 (vt 0x5EBBEC).
+- **Instance join, family level: ESTABLISHED (CONFIRMED mechanism)** — loader create-fn
+  0x4077F0 and network writer FUN_005030c0 both target the vt 0x5E2A3C class (installs
+  0x407896 / 0x405bdf byte-verified). **Object-instance join: STILL_AMBIGUOUS (OPEN)** —
+  the decisive missing edge is the registry+0x3C root identity (FUN_00468980 chain,
+  BLK-R2-01); no historical world placement of 296445 is claimed.
+- **"missing 2202.obj" corrected to FILE_CLASS_PRESENT** — namespace error; the raw member is
+  PROVEN byte-identical in Scripts.ark (header offset 1032200). The 4508 attach chain is fully
+  decoded (COMMON plumbing: ext 30298 -> 1796@1016 -> ext 33521 -> 2202@532; EXTN bijection
+  10/10). Model ids 296445/296446 appear only as DYN getters with cross-dispatch consumers
+  (MISSING_EDGE; bounded negative: 13 target ids, 0 foreign raw hits in the 1936 corpus files
+  + EXE).
+- Standing: WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; SOURCE_UNKNOWN;
+  PE2003_LOCAL_SOURCE_EXHAUSTED=NO; CANONICAL_GATE_EFFECT=NONE;
+  ADVISORY_PENDING_EXTERNAL_POSTAUDIT.

@@ -1,0 +1,88 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "kind": "BACKLOG",
+ "recorded_utc": "2026-10-25T11:18:11Z",
+ "policy": "per-item B/J/P family, best next operand, blocked/done status; from J03/J04 NOT_CHECKED + P02 what_would_close_it + B01 hop8 honest edge",
+ "items": [
+  {
+   "id": "BLK-R2-01",
+   "family": "J",
+   "edge": "registry+0x3C parent node ctor/vtable (FUN_00468980 chain, NOFN region, not followed) - the decisive root-identity edge: is owner+0x1C / the [X+8] NIF root (or under) the registry+0x3C tree",
+   "best_next_operand": "decompile walk of FUN_00468980 registry construction chain + registry ctor site that stores [registry+0x3C]",
+   "status": "open",
+   "source": "J04_INSTANCE_JOIN.json exact_missing_edges / coverage_and_limits"
+  },
+  {
+   "id": "BLK-R2-02",
+   "family": "J",
+   "edge": "owner+0x1C stored-object exact class: value = FUN_00403e80(arg) of an unidentified cursor-array class; 190 indirect [reg+0x10] call sites",
+   "best_next_operand": "FUN_00403e80 cursor-array owner class identification ([this+0x34] object array / [this+0x68] id array / [this+0x74] cursor); bounded provenance walk over the 190 sites",
+   "status": "open",
+   "source": "J04 owner_plus_0x1c.manager_identity_verdict"
+  },
+  {
+   "id": "BLK-R2-03",
+   "family": "B",
+   "edge": "binder-patched HOSTCALL case ids binding def-ids 4652/4653 to native factories (runtime binder data; static residual: locate the HOSTCALL case-id registration table used by dispatcher 0x441df0)",
+   "best_next_operand": "HOSTCALL binding table case-space census around dispatcher 0x441df0 (V1 canon) for ids consumed by 4508/4057 HOSTCALL slots 3008/364/220/2124/128",
+   "status": "open",
+   "source": "J03 join_resolution.missing_edges; B02a extn_consumption_bijection"
+  },
+  {
+   "id": "BLK-R2-04",
+   "family": "J",
+   "edge": "ctx+0x50-member append method of the FUN_005b71e0 parse context (arr[0]=block-0 holds under both interpretations - not load-bearing for the root verdict)",
+   "best_next_operand": "byte-decompile the ctx+0x50 append call in FUN_00404200/FUN_0040e440 region",
+   "status": "open (low priority)",
+   "source": "J03 root_provenance.coverage_note"
+  },
+  {
+   "id": "BLK-R2-05",
+   "family": "J",
+   "edge": "0x5E6E10 / 0x5E7378 create-fn mapping (two 13-family vtables with no direct body-scan hit; deeper ctor chains)",
+   "best_next_operand": "follow the create-fn bodies that install 0x5E6E10/0x5E7378 via nested base ctors",
+   "status": "open (low priority)",
+   "source": "J03 create_fn_vtable_map.not_found_direct_body_scan"
+  },
+  {
+   "id": "BLK-R2-06",
+   "family": "P",
+   "edge": "4508 literal @0x5bcfe5 (the ONLY file-wide LE32 occurrence of 4508, outside the chain) - struct-offset probe: what structure operand carries 4508 there",
+   "best_next_operand": "disassemble the 0x5bcfe5 region and identify the enclosing function + operand role",
+   "status": "open",
+   "source": "J01b d_classification evidence; J01b_EXECUTOR_SEMANTICS.md"
+  },
+  {
+   "id": "BLK-R2-07",
+   "family": "P",
+   "edge": "owner-class block-type identity mapping via the type registry (the 0x61Exxx global slot -> factory map; P01 OPEN edge on NIF_FILE_LOCAL classification)",
+   "best_next_operand": "map the NIF type-string dispatch for the owner class (vt 0x5EBBEC factory) inside the 0x619E78 loader table",
+   "status": "open",
+   "source": "P01 classification.owner_6c_70 OPEN edge; J03 create-function table"
+  },
+  {
+   "id": "BLK-R2-08",
+   "family": "P",
+   "edge": "native DYN dispatch caller: which native code queries property f1=1617/1611 on a 4508/4057 instance and forwards the returned model id to FUN_0051F6E0 (generic data-driven machinery, no literal anchors)",
+   "best_next_operand": "reference-reachability walk from FUN_00452860 callers over manager collection [+0x2c] DYN lists (bounded, with denominators)",
+   "status": "open",
+   "source": "J02 honest_limits / native_qualification.qualification_verdict"
+  },
+  {
+   "id": "BLK-R2-09",
+   "family": "P",
+   "edge": "0xFC transform-stream drain beyond FUN_00506e10 (inherited R1 T3-d2 OPEN)",
+   "best_next_operand": "follow FUN_00506e10 -> channel drain consumers on the 0xFC object",
+   "status": "open (low priority; consumer semantics may require runtime)",
+   "source": "J01b mechanism; P01 coverage_and_limits"
+  },
+  {
+   "id": "BLK-R2-10",
+   "family": "J",
+   "edge": "f1 property-id semantics (1617 <-> watch ids, 1611 <-> +1 siblings) and the +1 sibling pairing rationale (296446/218758)",
+   "best_next_operand": "corpus-wide f1=1617/1611 DYN census to characterize the property space",
+   "status": "open (low priority)",
+   "source": "J02 f1_pattern / sibling_note"
+  }
+ ]
+}

@@ -1,0 +1,149 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "job": "B01",
+ "artifact": "B01_RESOLVER_FLOW.json",
+ "generated_utc": "2026-10-25T06:55:30.427123+00:00",
+ "family_qualification": [
+  {
+   "va": "0x453860",
+   "name": "FUN_00453860",
+   "qualification": "BOLD/DLOB definition-file parser + chunk dispatcher. NOT a resolver: performs no id->target resolution itself.",
+   "does_with_0x50_0x54": "indirect: hands EXTN payload to FUN_00452640 which stores table->def+0x54, count->def+0x50",
+   "does_with_code_0x1c": "indirect: hands CODE payload to FUN_00452590 which stores the heap code array -> def+0x1c",
+   "touches_EXTN_owner_hash": "yes: dispatches EXTN/PFIX/DYN/PDAT chunk handlers; tree checks use header id (u32 at file+4); compares name-bytes with DAT_00610640",
+   "byte_evidence": {
+    "BOLD cmp imm": "VA 0x453896",
+    "EXTN tag imm": "VA 0x453ABE",
+    "PFIX tag imm": "VA 0x453B90",
+    "CODE tag imm": "VA 0x453A01",
+    "PDAT tag imm": "VA 0x4539D4",
+    "DAT_00610640 ref": "VA 0x453924"
+   },
+   "decompile_sha_pin": "F5F50B75589F9B196E40EF7F94146706EC9752FB0667E193F85AE2E07D612390 (ADMIT-verified; WORK copy re-hashed identical)"
+  },
+  {
+   "va": "0x4534e0",
+   "name": "FUN_004534e0",
+   "qualification": "GETTER ONLY: std::map-style lookup by id in manager tree1 (+4) or tree2 (+0x10); returns node->value(+0x14) or 0. NOT a resolver.",
+   "does_with_0x50_0x54": "none",
+   "does_with_code_0x1c": "none",
+   "touches_EXTN_owner_hash": "no",
+   "byte_evidence": "decompile fn_0x4534e0 (attempt-1 Ghidra, consistent with verified tree-find FUN_004411f0 bytes)",
+   "callers": [
+    "FUN_0046a1a0@0x0046a1c7 (script-id lookup before run)",
+    "FUN_0044aa50@0x0044aa80 (instance creation lookup)"
+   ]
+  },
+  {
+   "va": "0x453550",
+   "name": "FUN_00453550",
+   "qualification": "REGISTRATION/LINK: inserts a newly constructed definition into tree1 (flag 0) or tree2 (flag 1); in tree2 also writes new_def into owner-node value+0x14 (class-membership link). NOT a resolver.",
+   "touches_EXTN_owner_hash": "no (registration only)"
+  },
+  {
+   "va": "0x453cc0",
+   "name": "FUN_00453cc0",
+   "qualification": "SUPERCLASS-CHAIN RESOLVER/EXECUTOR: def+0x24 done-flag; def+0xC (= header A superclass id) looked up in manager tree -> def+0x10 = superclass object; recursive resolve; then prepare/execute (FUN_00452c80, FUN_004528d0); returns 6 when superclass missing.",
+   "touches_EXTN_owner_hash": "no direct EXTN table access; consumes the superclass link (header A = the EXTN owner_id namespace origin)",
+   "byte_evidence": {
+    "imm6 error path": "found in FUN_00453cc0 bytes (b01_verify_bytes check 'imm6' True)",
+    "prologue +0x24 flag": "8a 46 24 84 c0 at VA 0x453CC8"
+   }
+  },
+  {
+   "va": "0x453e20",
+   "name": "FUN_00453e20",
+   "qualification": "THE EXTN BINDER (fixup applier): walks every definition in tree1/tree2; for each EXTN entry (def+0x54 + i*0x18, count def+0x50): resolves owner_id (entry+8) via FUN_004542b0/FUN_004411f0; resolves target by ext_id (FUN_00452860 across manager collections [+4], [+0x2c], [+0x28]); computes value by entry type (1: *(target+0x14); 2: FUN_00452830 index<<2; 3: *(target+0x20)); on missing owner falls back to a NATIVE VIRTUAL CALL through manager+0x1C (binder object) vtable slot +8 with ext_id as argument; finally ADDS the value into the code word at def->code_base(+0x1C) + (entry.code_offset>>2)*4.",
+   "does_with_0x50_0x54": "primary consumer (via FUN_00452d90 / FUN_00452630)",
+   "does_with_code_0x1c": "writes fixups into the code array (+=)",
+   "byte_evidence": {
+    "native fallback": "VA 0x453F00-0x453F1B: 8b 5c 24 18; 8b 43 1c (manager+0x1C); 8b 28 (vtable); 8b 48 04 (ext_id); 51; 8b 4b 1c; ff 55 08 (call [vtable+8])",
+    "fixup write": "VA 0x453F8F-0x453FA0: 8b 4e 1c (def+0x1C code base); c1 e8 02; 8d 04 81 (base+(off>>2)*4); 8b 08; 03 cd (add); 89 08",
+    "entry getter dependency": "FUN_00452630 bytes: 8b 49 54; 8d 04 40; 8d 04 c1 (+0x54 + 24*i)"
+   }
+  },
+  {
+   "va": "0x453d80",
+   "name": "FUN_00453d80",
+   "qualification": "DRIVER: iterates a manager tree calling FUN_00453cc0 per definition (dependency resolution pass before FUN_00453e20 in startup FUN_0046a000)."
+  },
+  {
+   "va": "0x46a000",
+   "name": "FUN_0046a000",
+   "qualification": "SCRIPT-SYSTEM STARTUP: loads all definitions from '<path>\\Scripts' (FUN_004535e0), then FUN_00453d80(0) resolve-all, then FUN_00453e20(0) apply-all-EXTN, then FUN_00453fe0.",
+   "byte_evidence": {
+    "s__Scripts__00610e90 refs": "VA 0x46A045/0x46A066/0x46A070"
+   }
+  },
+  {
+   "va": "0x4411f0",
+   "name": "FUN_004411f0",
+   "qualification": "std::map lower_bound helper (tree keyed by node+0x10). Used by getters/resolvers."
+  },
+  {
+   "va": "0x452860",
+   "name": "FUN_00452860",
+   "qualification": "ext_id resolver across THREE manager collections: [+4] payload+4==ext_id, [+0x2c] node+0xC==ext_id (DYN), [+0x28] node+0xC==ext_id; returns payload/node+8.",
+   "byte_evidence": "prologue: 8b 51 04 ... 8b 51 2c (b01_verify_bytes dump)"
+  },
+  {
+   "va": "0x452830",
+   "name": "FUN_00452830",
+   "qualification": "returns the INDEX of ext_id (entry+4) in the DYN list at def+0x2c (used by EXTN type2 value = index<<2)."
+  },
+  {
+   "va": "0x4521e0/0x4522a0/0x452590/0x452640/0x452740",
+   "name": "chunk handlers",
+   "qualification": "PFIX handler builds {res_id,...,code_ptr=def->code_base+off} list; DYN handler keyed-list at def+0x2c; CODE handler heap-copies dwords to def+0x1c; EXTN handler stores +0x54/+0x50; PDAT handler builds typed property records.",
+   "byte_evidence": {
+    "PFIX add": "8b 41 1c; 03 c6 (def+0x1c + offset) at 0x4521E0",
+    "DYN +0x2c": "8b 51 2c at 0x4522A0",
+    "CODE +0x1c": "8b 46 1c / 8b 7c 24 10 at 0x452590",
+    "EXTN": "89 41 54; 89 51 50 at 0x452640"
+   }
+  }
+ ],
+ "ext_30298_trace": [
+  {
+   "hop": 1,
+   "role": "producer (file)",
+   "evidence": "1796.obj.dec PFIX#2 {resource_id 30298, hash 53AA64FE, code_offset 1016} + 4508/4057 EXTN records {type1, ext 30298, owner 1796, hash 53AA64FE, slot 0x0BD4/0x08F0} (V17 pinned; 1796 table re-parsed by b01_dlob_owners.py)"
+  },
+  {
+   "hop": 2,
+   "role": "parse/load",
+   "evidence": "FUN_00453860 (Scripts-dir startup FUN_0046a000 -> FUN_004535e0 loads each DLOB; tag immediates byte-verified)"
+  },
+  {
+   "hop": 3,
+   "role": "in-memory tables",
+   "evidence": "PFIX/DYN lists keyed by resource_id with ABSOLUTE code pointers (def+0x1c base); EXTN table def+0x54, count def+0x50; code array def+0x1c"
+  },
+  {
+   "hop": 4,
+   "role": "resolve pass",
+   "evidence": "FUN_00453d80 -> FUN_00453cc0 per definition: superclass chain (1796 -> A=768 -> A=208; 2202 -> 768 -> 208); error 6 if missing"
+  },
+  {
+   "hop": 5,
+   "role": "EXTN bind pass (consumer mechanism)",
+   "evidence": "FUN_00453e20: for each EXTN entry, resolves owner and ext target, computes value, ADDS it into code word at code_base+(code_offset>>2)*4 (bytes verified)"
+  },
+  {
+   "hop": 6,
+   "role": "attach chain execution semantics",
+   "evidence": "4508/4057 per-part loop CALL_abs slot (patched by hop 5) -> ext 30298 = 1796 CODE@1016 (raw bytes 0x7700FEF4+0x0C SUB_SP 12 etc. re-verified by b01_dlob_owners.py ext30298_code1016_first32_hex, consistent with V18 decode) -> dispatch CALL_IND_Aoff slot 1120 -> ext 33521 owner 2202"
+  },
+  {
+   "hop": 7,
+   "role": "ext 33521 target CLOSED (was R1 MISSING_EDGE)",
+   "evidence": "2202 DYN#0 {resource_id 33521, hash 2DB10D07, code_offset 532} in 2202.obj.dec (SHA 8CC7C017...); hash byte-equal to 1796 EXTN#23 {type2, ext 33521, owner 2202, hash 2DB10D07, code_offset 1120}; first bytes of CODE+532 captured (0x7700FF0F family VM opcodes)"
+  },
+  {
+   "hop": 8,
+   "role": "MISSING_EDGE (honest)",
+   "evidence": "EFFECTIVE patched values (what the binder ADDS at runtime) and the identity/class of the binder object at manager+0x1C are runtime data / not identified in this static pass; searched: attempt-1 Ghidra xref census (88 functions), image-wide LE-reference scans, vtable-region candidates (DATA refs to dispatcher 0x441df0 at 0x5e28bc/0x5e3cac/0x5eb76c). No writer of manager+0x1C identified without a further Ghidra run."
+  }
+ ],
+ "answer_to_question": "A concrete EXTN record becomes an executed target via: file chunk tables -> in-memory def fields (+0x50/+0x54 EXTN, +0x1c code array, PFIX/DYN lists with absolute code pointers) -> startup resolve pass (superclass chains) -> EXTN bind pass that ADDS resolved ids/indices into the code words at the recorded code_offsets -> VM execution of the patched bytecode (CALL_abs/CALL_IND_Aoff slots). The absence of .obj files for owners 2202/768/382 is NOT an actual barrier and in fact was never true at corpus level: raw members 2202.obj/768.obj/382.obj exist in Scripts.ark (provenance PROVEN byte-identical) and their decoded counterparts are in the 1936-row pinned corpus; the dispatch target ext 33521 is physically present as 2202 DYN#0 code@532. A native fallback binding DOES exist (manager+0x1C binder vcall, byte-verified) but is the mechanism for owner-1 native/builtin ids (65/14758/116229/0x7FFFEC7E), not for 2202/768/382. No install DLL hosts any class registry (dpvs=culling, Miles=audio only; client EXE imports confirm)."
+}

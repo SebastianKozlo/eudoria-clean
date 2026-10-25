@@ -1,0 +1,38 @@
+claim_id,artifact,claim,independent_method,verdict
+VC-01,B01_RESOLVER_FLOW.json,native fallback call [vt+8] @0x453F1B ff 55 08,own python raw read VA-0x400000 after PE-section mapping (RA==VA for .text),TRUE
+VC-02,P01_TRANSFORM_FIELD_SOURCE.json,owner ctor writes +0x6C/+0x70 @0x5B2CF4 89 46 6c 89 46 70,own python raw read,TRUE
+VC-03,J03_ROOT_VTABLE_BRIDGE.json,NiNode create-fn vt 0x5E2A3C install @0x407896 c7 06 3c 2a 5e 00,own python raw read,TRUE
+VC-04,P02_NETWORK_JOIN_AUDIT.json / J03,network-side vt 0x5E2A3C install @0x405BDF c7 06 3c 2a 5e 00 (load-bearing family join),own python raw read,TRUE
+VC-05,J03_ROOT_VTABLE_BRIDGE.json,NiNode iface vtable install @0x407814 c7 86 e8 00 00 00 20 2b 5e 00,own python raw read,TRUE
+VC-06,P01_TRANSFORM_FIELD_SOURCE.json,NIF reader LEA EDX[EDI+0x6C] 8d 57 6c in 0x5b3c40-0x5b3cd0 stream-read sequence,own python raw read (instruction at 0x5b3ca9; bytes exact; VA citation off-by-one see P3-1),TRUE
+VC-07,P01 premise_correction,X size 0x28: push 0x28 (6a 28) before operator_new + ctor call at both creation sites,own python raw read: 6a 28 @0x521b78 and @0x5b7256; calls at 0x521b94/0x5b7272 both target FUN_005b5110,TRUE
+VC-08,J04_INSTANCE_JOIN.json,X+0x14 writer MOV [ESI+0x14] EAX @0x5B5433 89 46 14,own python raw read,TRUE
+VC-09,P01/J03,[X+8]=root store @0x5B5364 89 77 08,own python raw read,TRUE
+VC-10,J04_INSTANCE_JOIN.json,owner vt slot+0x10 writer MOV [EDI+0x1C] EAX @0x5B3D09 (89 47 1c this=EDI),own python raw read,TRUE
+VC-11,J01a_WRITER_CENSUS.json,DAT_A consumer call @0x506B1E ff 15 44 e8 61 00,own python raw read,TRUE
+VC-12,J01a_WRITER_CENSUS.json,DAT_B consumer call @0x506C58 ff 15 58 e8 61 00,own python raw read,TRUE
+VC-13,J01b_RECEIVER_FLOW.json,owner+0x6C FLD @0x506AAB d9 40 6c and owner+0x70 FLD @0x506AF0 d9 40 70,own python raw read,TRUE
+VC-14,J01b_EXECUTOR_SEMANTICS.md,DAT_A FUN_005c27a0 = c3 + NOP padding (empty no-op),own python raw read,TRUE
+VC-15,J01b_EXECUTOR_SEMANTICS.md,DAT_B FUN_00561ee0 = 13-byte forwarder 8b 44 24 08 8b 4c 24 04 50 51 e8...,own python raw read,TRUE
+VC-16,J01a_WRITER_CENSUS.json,installer writes @0x561a72 and @0x561ec8 (c7 80 2c e8 61 00 imm32),own python raw read,TRUE
+VC-17,J01b consts,0x5e2cf4=0.0 / 0x5e2cf0=-1.0 / 0x5e2b24=1.0,own python struct float unpack,TRUE
+VC-18,J01a correction + seq=7,.data SizeOfRawData 0xF000 (0xF0->0xF000),own PE header parse: .data SR 0xF000 RA 0x20B000 (0xF0 disproven; 0xF000 confirmed; beyond-raw conclusion unaffected),TRUE
+VC-19,B01_OBJ_PROVENANCE.json,Scripts.ark sha256 == 1701D696...85AE pin,own hashlib full-file rehash,TRUE
+VC-20,B01_OBJ_PROVENANCE.json,2202.obj member byte-identity: hdr@1032200 csize2024 CRC1750A5AE SHA E81EC1A4... (AK local-header 30+namelen+extralen),own AK local-header parser + zlib CRC + SHA,TRUE
+VC-21,B01_OBJ_PROVENANCE.json,768.obj member: hdr@4990079 csize128 CRC044B1143 SHA 5F933AD6...,own AK local-header parser,TRUE
+VC-22,B01_OBJ_PROVENANCE.json,382.obj member: hdr@2602823 csize896 CRC73FAD41C SHA 3EC2825C...,own AK local-header parser,TRUE
+VC-23,J02_MODEL_ID_FLOW.json b02a_prose_correction,4508 DYN rec idx1 = {296478 f1=1617 f2=0x585DAF8C f3=248}; idx2 = {296477 1611 0x9FA86861 164}; 4057 idx1 = {218784 1617 0x585DAF8C 104},own DLOB chunk parser on raw 4508/4057.obj.dec (NYD chunk): J02 correction CORRECT; B02a_CHAIN_DECODE.json transposition (296478->1611/0x9FA86861) confirmed present in unmodified original,TRUE
+VC-24,J02_MODEL_ID_FLOW.json,STOREI model-id instruction bytes for 296445/296446 (4508@0x294-0x2A0/0x244) and 218757/218758 (4057@0x1C8/0x174): de fe 00 77 14 00 00 00 <id>,own raw file read (ids also verified: 0x000485FD=296445 etc.),TRUE
+VC-25,J04_INSTANCE_JOIN.json,registry install MOV [0x61A0C8] @0x4186f0 (89 35 c8 a0 61 00),own python raw read,TRUE
+VC-26,P01/J02 admission pins,296445.nif sha 656795D8... and 218757.nif sha C13D0873... match pins,own hashlib rehash of PE2003/06_Models_and_Materials/PE42_EN_80553A75 copies,TRUE
+VC-27,all SCIENCE_ROOT JSON,strict parse no duplicate keys (11 files),own json.loads with object_pairs_hook dup detector,TRUE
+VC-28,ledger JSONs,strict parse (BUDGET/ROLE/ADMISSION),own dup-key detector,TRUE
+VC-29,J04 data,J04_BYTE_VERIFY.csv = 69 data rows 69 TRUE; sampled 5 rows re-derived from raw EXE (owner ctor 89 5e 1c; SetName rel32; REP MOVSD 83 c7 2c b9 09; [X+0x14] region),own csv parse + raw byte re-derivation,TRUE
+VC-30,B02a data,EXTN_CONSUMPTION bijection 10/10 (4508) + 8/8 (4057) = 18 rows,own csv parse + per-file counter,TRUE
+VC-31,row-count claims,J02_REFERENCE_CENSUS 30 data rows; P01_NIF_BLOCK_MAP 217 (155+62); J03_CREATE_TABLE_CENSUS 100; SITES 3403; P02_FIELD_WRITE_CENSUS 37; P02_VT_FAMILY_RESOLVER 13; J04_OWNER1C_CENSUS 20; J04_ATTACH_CHAIN 22,own csv parse,TRUE
+VC-32,seq=13/20 admission,B02a_CHAIN_DECODE.json sha 80AEA1BF... (original unmodified incl. f1/f2 defect),own hashlib rehash vs admitted pin,TRUE
+VC-33,seq=8/9 admission,J01b_RECEIVER_FLOW.json sha 25874C25... (frozen original preserved; supersession documented downstream P01/J04),own hashlib rehash vs admitted pin,TRUE
+VC-34,seq=14 incident,B02a/data 11 files all hash-match B02a HANDOFF.md pins (unpatched decoder rewrite = zero drift),own hashlib rehash of all 11 files vs HANDOFF.md,TRUE
+VC-35,seq=9 ADMIN_APPENDIX,j01a_emit.py patched sha C980D08E...; line 206 region_status carries 0xF000,own hashlib rehash + line read,TRUE
+VC-36,other admissions,J02/P02/J03/J04/P01 SCIENCE_ROOT JSON hashes match admitted admission pins (053515C8/55A4C976/86936238/6F64DAF6/9CE160D5/1F89BAC4),own hashlib rehash,TRUE
+VC-37,ADMISSION_EVENTS,seq 1..23 contiguous no gaps no duplicates; every executed job B01a..J04 has admission events (except B01 see P2-1),own parse,TRUE

@@ -1,0 +1,427 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "job": "B02a",
+ "attempt": 1,
+ "lineage": "B02-split-a (B02 attempts 1-2 infra-dead); re-derives V17/V18/R1 leads independently",
+ "recorded_utc": "2026-10-25T09:23:23Z (tool: python datetime.now(UTC))",
+ "mode": "100% static file analysis; own DLOB parser + own VM decoder; no runtime/client/Frida/Ghidra",
+ "inputs": {
+  "2202.obj.dec": {
+   "size": 2016,
+   "sha256": "8CC7C0179EE36360A6422574F072E6E13AD3B768B5ACED0335866C4F52E268E2",
+   "gate": "PASS-before-read"
+  },
+  "1796.obj.dec": {
+   "size": 2192,
+   "sha256": "5ED2FC3C77FE39DCFFF88A9E96140F25F4135C9F4FD1E3A8037BB2074D28736D",
+   "gate": "PASS-before-read"
+  },
+  "4508.obj.dec": {
+   "size": 3640,
+   "sha256": "B6C96E9CCB2763C18644BC8BA5268B1FA63BCC28A738544225E276F4D3FFC9F3",
+   "gate": "PASS-before-read"
+  },
+  "4057.obj.dec": {
+   "size": 2688,
+   "sha256": "EA93FCA93C5F46D133D272D61012963DB7F5F338F9558421994B73BD644945D3",
+   "gate": "PASS-before-read"
+  },
+  "opcode_table_v2.csv": {
+   "size": 21570,
+   "sha256": "9B0D63CD07C2CC6DB159DF2D416DF4A87C7D2F5183C1BC6A278B84E6D76800EB",
+   "role": "PRIMARY opcode table"
+  },
+  "VM_OPCODE_TABLE.json": {
+   "size": 45892,
+   "sha256": "2007F0BCE492C40C11C83032EB0064E227333A6608803047C2FB07D531C0FFE3",
+   "role": "cross-check"
+  },
+  "EXTN_FIXUPS_4508_4057.json": {
+   "size": 23098,
+   "sha256": "1287D89E9F7922653BD76DA9D4BBA89A96CA494CCAE0931B66A1D8967652097B",
+   "role": "pinned R1 fixup map (cross-reference target)"
+  },
+  "opcode_tables_cross_check": "229/229 opcodes identical mnemonic+handler_va between both tables; mismatch=0"
+ },
+ "decode_census": {
+  "4508": {
+   "items": 625,
+   "instr": 397,
+   "data": 228,
+   "unknown": 0,
+   "branches": 32,
+   "dwords_total": 813,
+   "residual_bytes": 0
+  },
+  "4057": {
+   "items": 457,
+   "instr": 289,
+   "data": 168,
+   "unknown": 0,
+   "branches": 23,
+   "dwords_total": 592,
+   "residual_bytes": 0
+  },
+  "1796": {
+   "items": 208,
+   "instr": 195,
+   "data": 13,
+   "unknown": 0,
+   "branches": 20,
+   "dwords_total": 320,
+   "residual_bytes": 0
+  },
+  "2202": {
+   "items": 129,
+   "instr": 129,
+   "data": 0,
+   "unknown": 0,
+   "branches": 13,
+   "dwords_total": 201,
+   "residual_bytes": 0
+  }
+ },
+ "decode_census_note": "linear dword-granular walk; known opcode->instr(stride from v2 table); dword in valid jumptable range 0x7700FD01..0x7700FFC4 but unmapped->UNKNOWN_OP; outside range->DATA. Unknown opcodes found: 0 in all four files.",
+ "container_parse": {
+  "4508": "HEADER{id=4508,A=4751,B=296473,ver=0300} XIFP16 NTXE240 ZISM4 NYD64 EDOC3252 + 4-byte ENIL trailer",
+  "4057": "HEADER{id=4057,A=477,B=218782,ver=0300} XIFP16 NTXE192 ZISM4 NYD48 EDOC2368 (parsed_end==file)",
+  "1796": "HEADER{id=1796,A=768,B=33501,ver=0300} XIFP112 RTPP8 RTPS8 NTXE624 ZISM4 NYD16 EDOC1280 TADP56 (parsed_end==file)",
+  "2202": "HEADER{id=2202,A=768,B=33502,ver=0300} XIFP48 RTPP12 RTPS12 NTXE936 ZISM4 NYD32 EDOC804 TADP84 (parsed_end==file)"
+ },
+ "lead_A_verdict": {
+  "claim": "2202 CODE: 129 instr, no unknown opcodes; method 33521 = 532..804 ending RET_cleanup; EXTN-patched words inside 33521 at 552/568/584 (STORE_Boff_A operands) and 644/684/736 (CALL_abs operands)",
+  "verdict": "CONFIRMED (independent byte-level re-derivation)",
+  "evidence": {
+   "code_chunk": "804 bytes; 129/129 items are instructions, 0 data, 0 unknown",
+   "method_entry": "2202 DYN rec0 {f0=33521, f1=0, f2=0x2DB10D07, f3=532} -> entry @532",
+   "method_end": "RET_cleanup@796 (operand 12) -> stream ends exactly at 804 = EDOC chunk end",
+   "patched_words": [
+    {
+     "slot": 552,
+     "instr": "STORE_Boff_A@548",
+     "raw8": "b9 fe 00 77 00 00 00 00",
+     "extn": "#32 type=3 ext=33504 owner=2202"
+    },
+    {
+     "slot": 568,
+     "instr": "STORE_Boff_A@564",
+     "raw8": "b9 fe 00 77 00 00 00 00",
+     "extn": "#33 type=3 ext=33519 owner=2202"
+    },
+    {
+     "slot": 584,
+     "instr": "STORE_Boff_A@580",
+     "raw8": "b9 fe 00 77 00 00 00 00",
+     "extn": "#34 type=3 ext=33518 owner=2202"
+    },
+    {
+     "slot": 644,
+     "instr": "CALL_abs@640",
+     "raw8": "ee fe 00 77 00 00 00 00",
+     "extn": "#35 type=1 ext=26327 owner=1796"
+    },
+    {
+     "slot": 684,
+     "instr": "CALL_abs@680",
+     "raw8": "ee fe 00 77 00 00 00 00",
+     "extn": "#36 type=1 ext=29040 owner=2202"
+    },
+    {
+     "slot": 736,
+     "instr": "CALL_abs@732",
+     "raw8": "ee fe 00 77 00 00 00 00",
+     "extn": "#37 type=1 ext=29038 owner=1796"
+    }
+   ]
+  }
+ },
+ "lead_B_verdict": {
+  "claim": "1796 CODE: method@1016 (ext-30298 forwarder) ends CALL_IND_Aoff at +1116 whose operand word at offset 1120 is the EXTN#23-patched slot; dispatch via [arg1+8] method table",
+  "verdict": "CONFIRMED (independent byte-level re-derivation)",
+  "evidence": {
+   "method_entry": "1796 PFIX rec2 {resource_id=30298, hash=0x53AA64FE, code_offset=1016} -> entry @1016",
+   "forwarder": "20 instructions @1016..1144 (132B): SUB_SP_imm12/SAVE_CTX/MOV_A_B/STOREA_SPoff24/LOAD_A_Bidx[0-slot1044->ext33505 type3 owner1796]/STOREA_SPoff28/CLR_C/MOV_A_C/STOREA_SPoff32/PUSH_B/PUSHV_SPoff36 x3/LOAD_B_SPoff56/LOAD_A_Bidx[8]/CALL_IND_Aoff[0]/POP_B/REST_CTX/ADD_SP_imm12/RET_cleanup4",
+   "tail": "CALL_IND_Aoff@1116 raw8=f2 fe 00 77 00 00 00 00; operand slot @1120 raw4=00 00 00 00 (patch target, EXTN#23: type=2 ext=33521 owner=2202 hash=0x2DB10D07)",
+   "dispatch": "B=[SP+56]=caller stack top (the constructed part object comp); A=[B+8]; CALL_IND_Aoff[0] -> [A+0] = method-table slot 0, patched to ext 33521 (owner 2202 class)",
+   "twin": "ext 33520 forwarder @1148..1280 IDENTICAL shape, dispatch slot @1252 (EXTN#25 -> ext 33521); pair (30298 attach / 33520 detach-or-parent) on the same 2202 method",
+   "correction": "V18 said \"3x TEN SAM dword [SP+36]\": PUSHV_SPoff semantics reads at SP_before+off and SP shifts -4 per push, so the three pushes read three DIFFERENT locals: [S1+8]=0, [S1+4]=root.prop(33505), [S1+0]=root. Re-derived, not copied."
+  }
+ },
+ "extn_consumption_bijection": {
+  "4508": "10/10 EXTN records consumed by exactly one instruction each (EXTN#9 ext30298 owner1796 -> CALL_abs@3168 in per-part loop; 122867->CALL_abs@384; 122888->CALL_abs@3024; 122915->LEA_B_A_imm@3084; 122889->STORE_Aoff_C@3140; 126796->CALL_abs@4; 7769->CALL_abs@40; 14758->HOSTCALL@128; 0x7FFFEC7E->HOSTCALL@364 and @3004)",
+  "4057": "8/8 (EXTN#7 ext30298 owner1796 -> CALL_abs@2284 in per-part loop; 122867->CALL_abs@240; 122888->CALL_abs@2140; 122915->LEA_B_A_imm@2200; 122889->STORE_Aoff_C@2256; 1545->CALL_abs@4; 0x7FFFEC7E->HOSTCALL@220 and @2124)",
+  "zero_unmatched_slots": true,
+  "zero_unmatched_records": true,
+  "csv": "WORK/jobs/B02a/data/B02a_EXTN_CONSUMPTION.csv (18 rows) + B02a_LEAD_SLOTS.csv (11 rows)"
+ },
+ "per_part_loops": {
+  "4508": {
+   "guard": "JGE_C_imm imm=26 disp=220 @2984",
+   "head": 2976,
+   "back_edge": "JMP_rel@3196 disp=0xFFFFFF24(-220) -> 2976",
+   "exit": 3204,
+   "body_contains": "PUSH_imm 4653; HOSTCALL(slot 3008, ext 0x7FFFEC7E); CALL_abs@3024 (ext 122888 def-4653 part-object ctor); name copy SP0+128+i*256 -> part-object property (patched selector slot 3088, ext 122915 owner 4653); part id read [SP0+24+i*4] -> part-object property (patched selector slot 3144, ext 122889 owner 4653); PUSH_B; PUSHV[SP0+20]; B:=[SP0+16]; CALL_abs@3168 slot 3172 = EXTN#9 ext 30298 owner 1796",
+   "parts": 26
+  },
+  "4057": {
+   "guard": "JGE_C_imm imm=18 disp=220 @2100",
+   "head": 2092,
+   "back_edge": "JMP_rel@2312 disp=0xFFFFFF24(-220) -> 2092",
+   "exit": 2320,
+   "body_contains": "identical shape; CALL_abs@2284 slot 2288 = EXTN#7 ext 30298 owner 1796; name table SP0+96+i*256, id array [SP0+24+i*4]",
+   "parts": 18
+  },
+  "sp_arithmetic_note": "VM pushes move SP; all SPoff operands are relative to CURRENT SP. E.g. caller LOAD_A_SPoff 24 after one push reads [SP0+20] (part object); loop name source ADD_C_SPoff 128 computed before PUSH_C reads SP0+128+i*256 which matches init STRCPY dest (LEA_A_SPoff 132 evaluated with one outstanding push = SP0+128+256k). Verified consistent both files."
+ },
+ "chain": {
+  "caller_loop_4508": "2976..3200 (per-part) -> CALL_abs@3168 (slot 3172 patched ext 30298)",
+  "caller_loop_4057": "2092..2312 (per-part) -> CALL_abs@2284 (slot 2288 patched ext 30298)",
+  "ext30298_resolution": "1796 PFIX rec2 resource 30298 == EXTN#9(4508)/#7(4057) ext_id 30298 owner 1796 hash 0x53AA64FE -> CODE@1016 (forwarder)",
+  "forwarder_1796_1016": "dispatch prep + CALL_IND_Aoff@1116 (slot 1120 patched ext 33521 type2 owner 2202 hash 0x2DB10D07)",
+  "dispatch_object": "B=[SP+56] = caller stack top = per-part constructed object (comp); A=[B+8]; call [A+0]",
+  "target_method": "2202 DYN rec0 {33521, 0x2DB10D07, 532} -> 2202 CODE@532..804 (method 33521 of class 2202)",
+  "chain_byte_identical_between_defs": true,
+  "chain_carries": "runtime handles only: part-object handle (B register / pushed), root handle [SP0+16], forwarder locals 0 / root.prop(33505) / root"
+ },
+ "per_part_identity": {
+  "in_caller_4508": {
+   "part_mesh_names": 26,
+   "part_ext_ids": [
+    126743,
+    126745,
+    126747,
+    126749,
+    126751,
+    126753,
+    126755,
+    126745,
+    126758,
+    126760,
+    126762,
+    42302,
+    126765,
+    126767,
+    126769,
+    126771,
+    126773,
+    126775,
+    126777,
+    126779,
+    126781,
+    126779,
+    126779,
+    126779,
+    126779,
+    126779
+   ],
+   "representation": "26 inline literal strings (LEA_A_inline + JMP-over) copied to frame SP0+128+256k; 26 STOREI_SPoff literals into id array [SP0+24+4k]; both injected into part-object properties per iteration BEFORE the attach call"
+  },
+  "in_caller_4057": {
+   "part_mesh_names": 18,
+   "part_ext_ids": [
+    218760,
+    218762,
+    128046,
+    218762,
+    52313,
+    218762,
+    218768,
+    218762,
+    193449,
+    218762,
+    189548,
+    218762,
+    126767,
+    218588,
+    191560,
+    218762,
+    136640,
+    218588
+   ]
+  },
+  "in_chain": "NONE - no per-part literal inside ext30298 forwarder, dispatch, or 2202@532 (operand scan: frame offsets 0..48 / member idx 0,8 / branch disps only)"
+ },
+ "model_id_census": {
+  "tested_ids": [
+   296445,
+   296446,
+   218757,
+   218758,
+   296473,
+   296476,
+   296477,
+   296478,
+   296479,
+   218782,
+   218783,
+   218784,
+   218785,
+   218786,
+   218787,
+   4508,
+   4057
+  ],
+  "tested_representation_classes": [
+   "decoded LE32 instruction operands (4-aligned, linear decode)",
+   "raw LE32 at ALL alignments in all 4 whole files",
+   "chunk attribution HEADER/XIFP/NTXE/ZISM/NYD/EDOC/TADP/TRAILER"
+  ],
+  "results": [
+   {
+    "id": 296445,
+    "present": true,
+    "location": "4508 EDOC code_off=280 (file 664), consumed by STOREI_SPoff@272",
+    "chunk_context": "DYN getter method @248 (DYN rec {296478,1611,0x9FA86861,code 248})",
+    "in_attach_chain": false
+   },
+   {
+    "id": 296446,
+    "present": true,
+    "location": "4508 EDOC code_off=196 (file 580), consumed by STOREI_SPoff@188",
+    "chunk_context": "DYN getter method @164 (DYN rec {296477,1611,0x9FA86861,code 164})",
+    "in_attach_chain": false
+   },
+   {
+    "id": 218757,
+    "present": true,
+    "location": "4057 EDOC code_off=136 (file 456), consumed by STOREI_SPoff@128",
+    "chunk_context": "DYN getter method @104 (DYN rec {218784,1617,0x585DAF8C,code 104})",
+    "in_attach_chain": false
+   },
+   {
+    "id": 218758,
+    "present": true,
+    "location": "4057 EDOC code_off=52 (file 372), consumed by STOREI_SPoff@44",
+    "chunk_context": "DYN getter method @20 (DYN rec {218783,1611,0x9FA86861,code 20})",
+    "in_attach_chain": false
+   },
+   {
+    "id": 296473,
+    "present": true,
+    "location": "4508 HEADER B + XIFP PFIX rec0 resource_id",
+    "in_attach_chain": false
+   },
+   {
+    "id": 296476,
+    "present": true,
+    "location": "4508 NYD DYN rec {296476,7769,0x20ED2B3A,code 20} (name-getter method resource)",
+    "in_attach_chain": false
+   },
+   {
+    "id": 296477,
+    "present": true,
+    "location": "4508 NYD DYN rec",
+    "in_attach_chain": false
+   },
+   {
+    "id": 296478,
+    "present": true,
+    "location": "4508 NYD DYN rec",
+    "in_attach_chain": false
+   },
+   {
+    "id": 296479,
+    "present": true,
+    "location": "4508 NYD DYN rec {296479,162187,0xA5222B37,code 332} (constructor method resource)",
+    "in_attach_chain": false
+   },
+   {
+    "id": 218782,
+    "present": true,
+    "location": "4057 HEADER B + XIFP PFIX rec0",
+    "in_attach_chain": false
+   },
+   {
+    "id": 218783,
+    "present": true,
+    "location": "4057 NYD DYN rec",
+    "in_attach_chain": false
+   },
+   {
+    "id": 218784,
+    "present": true,
+    "location": "4057 NYD DYN rec",
+    "in_attach_chain": false
+   },
+   {
+    "id": 218785,
+    "present": false,
+    "location": "ABSENT from all 4 files (aligned+unaligned raw LE32 scan)",
+    "in_attach_chain": false
+   },
+   {
+    "id": 218786,
+    "present": false,
+    "location": "ABSENT from all 4 files (aligned+unaligned raw LE32 scan)",
+    "in_attach_chain": false
+   },
+   {
+    "id": 218787,
+    "present": true,
+    "location": "4057 NYD DYN rec {218787,162187,0xA5222B37,code 188} (constructor method resource)",
+    "in_attach_chain": false
+   },
+   {
+    "id": 4508,
+    "present": true,
+    "location": "4508 HEADER script_id",
+    "in_attach_chain": false
+   },
+   {
+    "id": 4057,
+    "present": true,
+    "location": "4057 HEADER script_id",
+    "in_attach_chain": false
+   }
+  ],
+  "chain_literal_verdict": "NO model-resource id literal exists anywhere in the decoded attach chain (caller loop attach sequence, ext-30298 forwarder, dispatch, 2202@532). 296445/296446 (4508) and 218757/218758 (4057) exist ONLY as STOREI_SPoff operands inside separate DYN getter methods of the SAME definitions, outside the chain.",
+  "bounded_negative": "ids 218785/218786 ABSENT under tested classes: decoded operands + raw LE32 all alignments in all 4 whole files (4508:910, 4057:672, 1796:548, 2202:504 aligned dwords + unaligned scan)."
+ },
+ "classification": "COMMON",
+ "classification_rationale": "The attach chain (per-part loop -> ext 30298 -> 1796@1016 -> [comp+8] slot0 -> ext 33521 -> 2202@532) is structurally byte-identical for definitions 4508 and 4057, carries only runtime handles (part object, root, forwarder locals), and contains ZERO literal model-resource ids. Per-model data (model ids 296445/218757 families; 26 vs 18 parts; per-part mesh names and part ext ids) lives OUTSIDE the chain: in DYN getter methods and in the caller init literals that are injected into the part-object properties per iteration BEFORE the attach call. Per-model edge is therefore ABSENT at the chain level; the chain is COMMON plumbing.",
+ "countermodels": {
+  "CM1_common_with_runtime_identity_injection": "STATUS: this IS the confirmed model, not a refuted countermodel. Exact injection instructions (4508 offsets; 4057 = 3084/3144-class analogues 2200/2256): (a) STRCPY_B_A@3096 copies the per-part literal mesh name into the part-object property addressed by LEA_B_A_imm@3084 whose operand slot 3088 the bind pass patches with property-selector ext 122915 (type 3, owner 4653); (b) STORE_Aoff_C@3140 writes the per-part ext id (read from the static literal array [SP0+24+i*4]) into the part-object property addressed by patched selector slot 3144 (ext 122889, owner 4653). Static analysis cannot see: the effective selector values the binder writes into type-3 slots, the property layout they address, or what the runtime object holds - but the injected VALUES (name, part id) are statically literal in the caller CODE.",
+  "CM2_slot_consumed_by_different_method": "STATUS: REFUTED within corpus. Bijection is exact: 10/10 (4508) and 8/8 (4057) patched operand slots each consumed by exactly one instruction at code_offset-4; zero unmatched slots or records. ext 30298 resolves via 1796 PFIX rec2 (resource 30298 hash 0x53AA64FE == hash in callers EXTN#9/#7) to CODE@1016; ext 33521 resolves via 1796 EXTN#23 (type 2) to owner 2202, whose DYN rec0 (hash 0x2DB10D07 == EXTN#23 hash) pins CODE@532. Residual honesty: the EXTN/PFIX records are the static BINDING CONTRACT; the physical act of patching happens at runtime and is not observable statically - if the runtime binder violated its own fixup table, static analysis could not detect it (outside evidence boundary, era 2003, statically unfalsifiable)."
+ },
+ "gates": {
+  "B02a_G1": {
+   "predicate": "independent decode census of 4508+4057 CODE chunks (counts, unknown list) + lead-A/lead-B verdicts with bytes",
+   "result": "PASS",
+   "detail": "4508: 625 items (397 instr / 228 data / 0 unknown / 32 branches), decoded to end incl. 4-byte ENIL trailer accounted; 4057: 457 items (289/168/0/23), parsed_end==file. Lead-A CONFIRMED, lead-B CONFIRMED with raw bytes. Unknown opcode list: EMPTY (all 4 files)."
+  },
+  "B02a_G2": {
+   "predicate": "chain classification COMMON vs PER-MODEL with literal-id evidence; explicit id census table; absence => bounded negative with tested representation classes",
+   "result": "PASS",
+   "detail": "Classification COMMON. Census table: 17 ids x (decoded operands + raw LE32 all alignments, 4 files, chunk-attributed). Chain literal negative bounded by tested classes. 218785/218786 ABSENT."
+  }
+ },
+ "honest_limits": [
+  "2202@532 method body stores into [B+0] via type-3 patched selectors 33504/33519/33518 and conditionally calls getters 26327/29040/29038/29039 - their further behavior is within-corpus but beyond the chain question; NOT deep-qualified here",
+  "callee register result conventions (A/B after CALL_abs) partly inferred from opcode semantics + SP arithmetic; frame slot identification [SP0+16]=root/[SP0+20]=part-object/[SP0+24..124]=id array verified consistent across both files",
+  "effective values written by the bind pass into patched slots are runtime data; static evidence pins location+key (ext_id/owner/hash) only",
+  "jd1_decode_4508.txt / jd1_decode_4057.txt (prior untrusted decodes) NOT in B02a ADMIT list and NOT read",
+  "296446/218758 semantics (why a +1 sibling id) unresolved - literal presence and location only"
+ ],
+ "evidence_files": [
+  "WORK/jobs/B02a/data/b02a_census_raw.json",
+  "WORK/jobs/B02a/data/B02a_DECODE_4508.txt",
+  "WORK/jobs/B02a/data/B02a_DECODE_4057.txt",
+  "WORK/jobs/B02a/data/B02a_DECODE_1796.txt",
+  "WORK/jobs/B02a/data/B02a_DECODE_2202.txt",
+  "WORK/jobs/B02a/data/B02a_EXTN_CONSUMPTION.csv",
+  "WORK/jobs/B02a/data/B02a_LEAD_SLOTS.csv",
+  "WORK/jobs/B02a/data/B02a_MODEL_ID_CENSUS.csv",
+  "WORK/jobs/B02a/data/B02a_MODEL_ID_CENSUS.json",
+  "WORK/jobs/B02a/data/B02a_PART_ID_ARRAYS.csv",
+  "WORK/jobs/B02a/data/B02a_PART_NAME_STRINGS.csv",
+  "WORK/jobs/B02a/EARLY_RESULT.md",
+  "WORK/jobs/B02a/EVIDENCE.md",
+  "WORK/jobs/B02a/HANDOFF.md"
+ ],
+ "tools": [
+  "WORK/jobs/B02a/tools/b02a_decode.py",
+  "WORK/jobs/B02a/tools/b02a_qualify.py",
+  "WORK/jobs/B02a/tools/b02a_emit.py"
+ ],
+ "status": "PASS G1+G2; chain COMMON; per-model edge ABSENT at chain level (bounded negative)"
+}

@@ -1,0 +1,41 @@
+{
+  "qc_run_id": "QC_PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025_F1",
+  "executed_utc": "2026-10-25T11:08:34Z..11:20:00Z",
+  "tools": {
+    "qc_bytecheck.py": "own python PE-section-aware raw reader (VA->file offset via parsed section table: .text/.rdata/.data RA==VA, imagebase 0x400000), hashlib, AK local-header parser, zlib CRC",
+    "qc_structure.py": "strict JSON parse with duplicate-key object_pairs_hook; csv module full-parse row+field counts; hash pin comparison"
+  },
+  "inputs_verified": {
+    "PE2_unpacked_out.exe": {"sha256": "56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650", "pin_match": true, "size": 2207744},
+    "Scripts.ark": {"sha256": "1701D696A5A211146F33C253B89E6EA5E501E1C2405AF1816A4BEA07BABA85AE", "pin_match": true, "path": "D:/Eudoria_Reconstruction/01_Original_Files/ARK/Scripts.ark"},
+    "PE_section_table_independently_parsed": {".text": "VS 0x1e014a VA 0x1000 SR 0x1e1000 RA 0x1000", ".rdata": "VS 0x28643 VA 0x1e2000 SR 0x29000 RA 0x1e2000", ".data": "VS 0x14384 VA 0x20b000 SR 0xf000 RA 0x20b000", ".rsrc": "VS 0xcc0 VA 0x220000 SR 0x1000 RA 0x21a000", "note": "independently confirms J01a corrected SizeOfRawData 0xF000 and J01a 'attempt-1 section-table-stripped claim FALSE' (4 sections physically present)"}
+  },
+  "json_strict_parse": {
+    "science_root_11_files": {"result": "ALL OK", "duplicate_keys": 0},
+    "ledgers_3_files": {"result": "ALL OK", "duplicate_keys": 0, "note": "ADMISSION_EVENTS.jsonl is a single JSON object not JSONL (P3-6)"}
+  },
+  "csv_checks": [
+    {"file": "B01_OWNER_CLASSIFICATION.csv", "rows_total_incl_header": 7, "data_rows": 6, "field_counts": [8], "expected": "7 rows", "note": "6 classified owners; 'owner_rows: 7' in budget ledger counts header (P3-4)"},
+    {"file": "J01a_TABLE_MAP.csv", "rows_total": 21, "data_rows": 20, "field_counts": [13], "expected": "20 slots"},
+    {"file": "P01_NIF_BLOCK_MAP.csv", "rows_total": 218, "data_rows": 217, "field_counts": [11], "expected": "155+62=217 blocks"},
+    {"file": "J02_REFERENCE_CENSUS.csv", "rows_total": 31, "data_rows": 30, "field_counts": [6], "expected": "30 rows"},
+    {"file": "J04_BYTE_VERIFY.csv", "rows_total": 70, "data_rows": 69, "field_counts": [5], "result_TRUE": 69, "expected": "69 rows 69 TRUE", "sample_rederived": 5},
+    {"file": "B02a_EXTN_CONSUMPTION.csv", "rows_total": 19, "data_rows": 18, "per_file": {"4508.obj.dec": 10, "4057.obj.dec": 8}, "field_counts": [12], "expected": "10/10 + 8/8 bijection"},
+    {"file": "J03_CREATE_TABLE_CENSUS.csv", "data_rows": 100, "expected": 100},
+    {"file": "J03_CREATE_TABLE_SITES.csv", "data_rows": 3403, "expected": 3403},
+    {"file": "J03_CREATE_FN_VTABLE_MAP.csv", "data_rows": 100},
+    {"file": "J03_ROOT_VTABLE_CHAIN.csv", "data_rows": 15},
+    {"file": "J04_OWNER1C_CENSUS.csv", "data_rows": 20, "field_counts": [7], "expected": 20},
+    {"file": "J04_ATTACH_CHAIN.csv", "data_rows": 22, "field_counts": [5], "expected": 22},
+    {"file": "P02_FIELD_WRITE_CENSUS.csv", "data_rows": 37, "field_counts": [9], "expected": 37},
+    {"file": "P02_VT_FAMILY_RESOLVER.csv", "data_rows": 13, "field_counts": [3], "expected": 13}
+  ],
+  "hash_pin_verification": {
+    "science_root_vs_admission_pins": {"checked": 8, "match": 8, "mismatches": []},
+    "b02a_data_11_files_vs_handoff_pins": {"checked": 11, "match": 11, "conclusion": "seq=14 unpatched-decoder rewrite incident = ZERO byte drift, independently confirmed"},
+    "j01a_emit.py_vs_seq9_appendix_pin": {"sha256": "C980D08EB92A08A2DE523E2689285300DCACE5DB56D0C7307D04F5331607612B", "match": true},
+    "nif_inputs_vs_pins": {"296445.nif": true, "218757.nif": true, "note": "canon copies under PE2003/06_Models_and_Materials/PE42_EN_80553A75 re-hashed"}
+  },
+  "admission_events": {"seq": "1..23 contiguous", "duplicates": false, "gaps": false, "jobs_with_own_admissions": "J01a(x2+fix), J01b(x2), B02(x2 dead), B02a, J02(x3 incl incident seq=14), P01(x2), P02(x2), J03(x2), J04(x2)", "missing": "B01 child admissions (P2-1)"},
+  "budget_ledger": {"coverage": "A1, B01, J01, A1-CC ONLY", "missing_jobs": ["J01a", "J01a-fix", "J01b", "B02 dead x2", "B02a", "J02", "P01", "P02", "J03", "J04"], "finding": "P1-1"}
+}

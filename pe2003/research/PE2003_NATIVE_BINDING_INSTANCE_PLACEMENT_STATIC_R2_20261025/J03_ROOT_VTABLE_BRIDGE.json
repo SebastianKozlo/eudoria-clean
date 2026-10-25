@@ -1,0 +1,145 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "job": "J03",
+ "family": "J",
+ "attempt": 1,
+ "lineage": "P02-continuation",
+ "recorded_utc": "2026-10-25T10:48:12Z (tool: python datetime.now(UTC))",
+ "era": "PE2003 static",
+ "exe_sha256": "56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650",
+ "question": "what vtable does the NIF-parse root object stored at X+8 carry (FUN_00412b70 loader-registry create-function table), and does the 4508/4057 part-object family join the vt 0x5E2A3C family",
+ "loader_registry": {
+  "singleton_global": "0x00619E78",
+  "pinned_by": "FUN_00404200 (NIF block loop) @0x00404291 bytes 8b 0d 78 9e 61 00, immediately before CALL FUN_00412b70 @0x00404297",
+  "lookup": "FUN_00412b70 thiscall: hash=[[this]]vt+4, buckets=[this+0xC], chain {key@0, value@4, next@8}, value=create-function to out-slot, RET 0x8",
+  "registry_object": "0x14 bytes, vt 0x5E29E8 (+0), count (+4), 37 buckets 0x25 (+8), bucket array 0x94B (+0xC); lazily built in FUN_004046a0/FUN_00404790",
+  "second_registry_distinct": "global 0x61A0C8, vt 0x5E31C8, runtime-type registry (built FUN_004186a0; readers FUN_00416640/FUN_004166d0/FUN_00418730); FUN_00412b70 is a generic lookup shared by both — NIF branch byte-pinned to 0x619E78"
+ },
+ "create_function_table": {
+  "census_method": "python raw-byte scan of all E8 calls to 0x4046a0 (register), pattern PUSH createfn; PUSH type-string; CALL rel32 (tools/j03_table_census.py)",
+  "call_sites": 3403,
+  "standard_push_pairs": 3403,
+  "nonstandard": 0,
+  "unique_pairs": 100,
+  "evidence": "WORK/jobs/J03/data/J03_CREATE_TABLE_CENSUS.csv (100 rows), J03_CREATE_TABLE_SITES.csv (3403 rows)"
+ },
+ "ninode_create_function": {
+  "type_string": "NiNode",
+  "string_va": "0x0060ECCC",
+  "create_fn_va": "0x004077F0",
+  "registration_sites": 92,
+  "alloc": "PUSH 0x130 @0x004077f2 (68 30 01 00 00)",
+  "base_ctor": "CALL 0x415690 @0x0040780d (installs base vt 0x5E30CC @0x004156e7 c7 06 cc 30 5e 00)",
+  "interface_vtable": "MOV [ESI+0xE8],0x5E2B20 @0x00407814 (c7 86 e8 00 00 00 20 2b 5e 00)",
+  "primary_vtable_install": {
+   "va": "0x00407896",
+   "bytes": "c7 06 3c 2a 5e 00",
+   "value": "0x5E2A3C",
+   "finality": "last install in create path; NiNode Load chain (FUN_004078c0->FUN_00416860->FUN_0041c350/FUN_0041f9a0/FUN_0041b690/FUN_00419760/FUN_00403ea0/FUN_00403df0/FUN_00404bd0) contains 0 vtable-range stores (no re-install; CM1 refuted)"
+  },
+  "layout": "0x130 bytes, iface vt +0xE8, child pool +0xEC, count +0xF4 (same class family shape as FUN_00405b50 ctor)"
+ },
+ "root_provenance": {
+  "chain": [
+   "FUN_005b71e0 ('NetI'): EDX=[ctx+0x54] @0x005b7247 (8b 54 24 5c) — parse-context top-level object array (member at ctx+0x50, vt 0x5E29E4, cleared at parse start by FUN_0040e440 called with LEA ECX,[EBP+0x50] @0x00404220, refilled during block loop)",
+   "EDI=[EDX] @0x005b724e (8b 3a) = arr[0] = first top-level parse object",
+   "FUN_005b5340(X,EDI) stores [X+8]=EDI @0x005b5364 (89 77 08)",
+   "FUN_005b72c0(EDI) walks EDI+0xEC/+0xF4 = NiNode child layout (shape check)",
+   "block 0 of both pinned NIFs = NiNode 'Scene Root' (P01 canon: 296445.nif 155 blocks, 218757.nif 62 blocks, block0 NiNode both)"
+  ],
+  "coverage_note": "ctx+0x50-member append method not individually byte-decompiled; arr[0]=block-0 object holds under both interpretations (all-blocks creation order or top-level-only; block 0 is the single root per complete P01 inventories)"
+ },
+ "create_fn_vtable_map": {
+  "method": "python byte scan of each create-fn body for MOV [reg],vt / MOV [reg+disp],vt stores in .rdata VA range (tools/j03_vtmap.py, function-end-aware)",
+  "evidence": "WORK/jobs/J03/data/J03_CREATE_FN_VTABLE_MAP.csv",
+  "family_hits_direct": {
+   "NiNode": "0x5E2A3C",
+   "NiBSPNode": "0x5E8ED4",
+   "NiBillboardNode": "0x5E9DF8",
+   "NiCollisionSwitch": "0x5E8FB8",
+   "NiFltAnimationNode": "0x5E9180",
+   "NiLODNode": "0x5E9264",
+   "NiRoomGroup": "0x5EA10C",
+   "NiSortAdjustNode": "0x5E4878",
+   "NiSwitchNode": "0x5E909C",
+   "NiWall": "0x5E4710"
+  },
+  "non_family_examples": {
+   "NiTriShape": "0x5E2E88",
+   "NiExtraData": "0x5E2A10",
+   "NiAlphaProperty": "0x5E32FC",
+   "NiZBufferProperty": "0x5E3540",
+   "NiStringExtraData": "0x5E9770"
+  },
+  "not_found_direct_body_scan": [
+   "0x5E6E10",
+   "0x5E7378"
+  ],
+  "implication": "the 13-vtable resolver family (P02 census) is the node-subclass family sourced by this loader table"
+ },
+ "part_object_family": {
+  "verdict": "DISJOINT as C++ objects: part objects B=[SP+56] are VM objects (def-4653 component factory via CALL_abs ext 122888; properties via patched selectors ext 122915/122889 owner 4653; dispatch A=[B+8] CALL [A+0] resolves VM method ext 33521 of VM class 2202) — a VM method table, not a C++ vtable; FUN_005030c0 never touches VM objects (P02 census). CM2 CONFIRMED.",
+  "native_chain_of_models": "J01b canon: pair+0xC -> FUN_004918b0 -> X (vt 0x5EBC1C, ctor FUN_005b5110) -> [X+8] = NIF root = vt 0x5E2A3C (this job); consumer FUN_00506780/FUN_005068f0 resolves via [X+8] vt+0x50 = FUN_00407440 (13-family)"
+ },
+ "network_writer_side": {
+  "writer": "FUN_005030c0 (P02 CONFIRMED, re-verified on admission): writes node+0x2C 9-float rotation and node+0x50/+0x54/+0x58 translation (x100.0f)",
+  "target_class": "0x130 bytes, ctor FUN_00405b50, primary vt install c7 06 3c 2a 5e 00 @0x00405bdf — BYTE-IDENTICAL install bytes to the NiNode create-fn install @0x00407896",
+  "creation_path": "FUN_00502e80 registry-add (fresh 0x130 object) in GCE id-registry; id = entity+0x44 (P02 canon)"
+ },
+ "join_resolution": {
+  "family_level": "JOIN_ESTABLISHED",
+  "family_level_rationale": "network world-transform writes (class vt 0x5E2A3C, install @0x405bdf) and the models' chain node resolution ([X+8] root vt 0x5E2A3C, install @0x407896, resolver FUN_00407440 at family slot+0x50) target the SAME vtable family, pinned by two independent byte-identical install sites",
+  "object_instance_level": "STILL_AMBIGUOUS",
+  "missing_edges": [
+   "attach/registration path from FUN_00502e80-created GCE 0x130 objects into model scene graphs (are network-written instances the resolved nodes, or attached relatives)",
+   "identity of the alternative consumer manager branch [owner+0x1C] @0x5067ed (P02 not-checked; if = GCE registry, consumer directly resolves network-written objects)",
+   "binder-patched HOSTCALL case ids binding def-ids 4652/4653 to native factories (runtime data, R1 honest limit)",
+   "ctx+0x50-member append method byte-exact identification (does not affect arr[0]=block-0)"
+  ]
+ },
+ "countermodels": {
+  "CM1_nif_roots_non_family_vtable": "REFUTED: NiNode create-fn installs 0x5E2A3C directly (bytes @0x407896); Load chain installs nothing; family vtables are installed by the table's node-type create-fns",
+  "CM2_part_objects_vm_side": "CONFIRMED: part objects are VM objects with VM method tables, never touched by FUN_005030c0",
+  "CM3_multiple_registries": "CONFIRMED: 0x619E78 loader (vt 0x5E29E8), 0x61A0C8 runtime-types (vt 0x5E31C8), GCE id-registry, VM definition registry (tree @GCE+0x10064); NIF branch byte-pinned to 0x619E78; no offset-similarity inference used (QH-012)"
+ },
+ "gates": {
+  "J03-G1": {
+   "predicate": "NIF-root vtable pinned (create-function table entry + install bytes) or precise coverage statement",
+   "result": "PASS",
+   "detail": "[X+8] root = NiNode block-0 object; create-fn 0x4077F0; primary vt 0x5E2A3C install bytes c7 06 3c 2a 5e 00 @0x00407896; iface vt 0x5E2B20 @+0xE8; no Load-chain re-install; root provenance chain byte-listed; coverage note on the append method recorded"
+  },
+  "J03-G2": {
+   "predicate": "join resolution JOIN_ESTABLISHED | DISJOINT | STILL_AMBIGUOUS with evidence for the 4508/4057 part-object family",
+   "result": "PASS",
+   "detail": "classification delivered with byte evidence: family-level JOIN_ESTABLISHED (two byte-identical install sites 0x407896/0x405bdf; resolver family slot+0x50 = the loader-table node family); part objects themselves DISJOINT (VM method tables, B02a bytes); object-instance level STILL_AMBIGUOUS with 4 exact missing edges"
+  },
+  "non_pass_classes_used": [
+   "AMBIGUOUS (object-instance identity between network-written GCE 0x130 objects and resolved scene nodes)",
+   "MISSING_EDGE (owner+0x1C manager identity; GCE-object attach path; binder case ids; ctx+0x50 append method)"
+  ]
+ },
+ "coverage_and_limits": [
+  "not checked: ctx+0x50-member append method exact function",
+  "not checked: 0x5E6E10/0x5E7378 create-fn mapping (deeper ctor chains)",
+  "not checked: NiArkBillboardNode ctor-chain final vtable (non-root children only in our corpus)",
+  "not checked: runtime values / runtime object identity (100% static per contract)"
+ ],
+ "evidence_files": [
+  "WORK/jobs/J03/data/J03_CREATE_TABLE_CENSUS.csv",
+  "WORK/jobs/J03/data/J03_CREATE_TABLE_SITES.csv",
+  "WORK/jobs/J03/data/J03_CREATE_FN_VTABLE_MAP.csv",
+  "WORK/jobs/J03/data/J03_ROOT_VTABLE_CHAIN.csv",
+  "WORK/jobs/J03/tools/out/fn_0x412b70_FUN_00412b70.asm",
+  "WORK/jobs/J03/tools/out/fn_0x4077f0_J03_create_4077f0.asm",
+  "WORK/jobs/J03/tools/out/fn_0x404200_FUN_00404200.asm",
+  "WORK/jobs/J03/tools/out/fn_0x5b71e0_FUN_005b71e0.asm",
+  "WORK/jobs/J03/tools/out/fn_0x415690_FUN_00415690.asm",
+  "WORK/jobs/J03/tools/out/j03_scan1..8_log.txt"
+ ],
+ "tools": [
+  "WORK/jobs/J03/tools/J03GhidraScan.java .. J03GhidraScan8.java (Ghidra 11.2.1, own project J03Proj, x86:LE:32:default:windows)",
+  "WORK/jobs/J03/tools/j03_table_census.py",
+  "WORK/jobs/J03/tools/j03_vtmap.py"
+ ],
+ "status": "PASS G1+G2; [X+8] root vt = 0x5E2A3C (byte-pinned); family-level JOIN_ESTABLISHED; part objects VM-side DISJOINT; object-instance level STILL_AMBIGUOUS with exact missing edges"
+}

@@ -1,0 +1,161 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "job": "P01",
+ "family": "P",
+ "attempt": 1,
+ "lineage": "J01b-continuation (P1)",
+ "recorded_utc": "2026-10-25T09:58:39Z",
+ "era": "PE2003 static",
+ "exe_sha256": "56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650",
+ "question": "who writes +0x6C/+0x70 (floats) and +0x2C (quaternion area) on class-X (vt 0x5EBC1C) graph objects - NIF loader, network, VM, or other; and the data source",
+ "premise_correction": {
+  "finding": "X (vt 0x5EBC1C, ctor FUN_005b5110) is 0x28 bytes: PUSH 0x28 (6a 28) before the ctor call at BOTH creation sites (callsites 0x521b94, 0x5b7272; verified from raw bytes). J01b's '0x28B' is disproven.",
+  "implication": "+0x2C/+0x6C/+0x70 CANNOT be fields of X itself; they live on owner=[X+0x14] and on node objects of the X ownership graph."
+ },
+ "write_census": {
+  "ghidra": {
+   "tool": "P01GhidraScan.java sha256 3D5C99883F821412975C1F2EA6242E2F19AE56A3FEA7DF1A77BA62B3F004BF42",
+   "instructions_scanned": 590882,
+   "hits": 3605,
+   "writes": 1559,
+   "reads": 2046
+  },
+  "raw_python": {
+   "tool": "p01_census.py",
+   "offsets_scanned": 1970168,
+   "raw_candidates": 3941,
+   "denominator_classes": 104
+  },
+  "cross_validation": "0 of 3605 Ghidra hits missing from raw scan (superset holds); raw byte records truncated at disp for imm forms (cosmetic)",
+  "forms": "88/89 mov, C6/C7 imm, F3/F2 0F 10/11 movss/movsd, D9/DD/DF x87 fld/fst/fstp, A3 moffs, mod00/01/10, SIB, 66-prefix; disps 0x2C/0x6C/0x70 positive",
+  "non_stack_writes": {
+   "0x2c": 288,
+   "0x6c": 86,
+   "0x70": 49
+  },
+  "per_hit_artifacts": "WORK/jobs/P01/tools/out/p01_census_hits.tsv (full instruction + bytes per hit); data/P01_HIT_CLASSIFICATION.csv"
+ },
+ "writer_identification": {
+  "x14_owner_link": {
+   "writer": "FUN_005b5380 @0x005b5433: MOV [ESI+0x14],EAX (89 46 14), ESI=X",
+   "context": "FUN_005b5340(this=X, root=NIF graph root) stores root at [X+8] (89 77 08 @0x5b5364, AddRef via INC [ESI+4] @0x5b5369), then CALLs FUN_005b5380(X)",
+   "chain": "FUN_005b5380(X): [X+0x10]=FUN_00519d40(registry, root, buf) (89 46 10 @0x5b5407); owner constructed on stack at [ESP+0x98] via FUN_005b2c40+FUN_005b2d50; [X+0x14]=FUN_00519d40(registry, root, &owner) (89 46 14 @0x5b5433)",
+   "status": "CONFIRMED byte-verified; closes J01b MISSING_EDGE (owner of X+0x14)"
+  },
+  "owner_class": {
+   "identity": "size 0x78 (operator_new(0x78) in factory FUN_005b2f10 = vt slot 0x5EBBF4), vtable 0x5EBBEC, ctor FUN_005b2c40 (+2nd phase FUN_005b2d50), dtor FUN_005b2d30 (vt slot0)",
+   "installers": "vtable 0x5EBBEC referenced ONLY from FUN_005b2c40 @0x5b2d0e and FUN_005b2d50 @0x5b2d72 (Ghidra refs)",
+   "ctor_field_fingerprint": "+0x1C=0, +0x60..+0x70 five floats = -1.0f (0xbf800000) incl. [ESI+0x6C] @0x5b2cf4 (89 46 6c) and [ESI+0x70] @0x5b2cf7 (89 46 70), +0x74 byte gate = 0; matches J01b owner fingerprint (+0x1C lookup-root, +0x6C/+0x70 targets, +0x74 gate)"
+  },
+  "owner_6c_70_writer": {
+   "writer": "NIF block reader = owner vtable slot 3 (dword at 0x5EBBF8 = 0x5b38c0), function 0x005b38c0-0x005b3ce8, this=EDI (MOV EDI,ECX @0x5b38d7), stream object at [ESI+0x48] (ESI=parse-context arg)",
+   "writes_via_stream_read_calls": [
+    "0x5b3c53: MOV ECX,[ESI+0x48]; LEA EDX,[EDI+0x54]; PUSH 4; PUSH EDX; CALL [EAX+8] -> read(owner+0x54,4)",
+    "+0x58 (4) @0x5b3c63; +0x5C (1 byte) @0x5b3c71; +0x60 (4) @0x5b3c7f; +0x64 (4) @0x5b3c8d; +0x68 (4) @0x5b3c9b",
+    "+0x6C: LEA EDX,[EDI+0x6C] (8d 57 6c) @0x5b3cab; PUSH 4; CALL [EAX+8] @0x5b3cb4",
+    "+0x70: LEA EDX,[EDI+0x70] (8d 57 70) @0x5b3cba; PUSH 4; CALL [EAX+8] @0x5b3cc3",
+    "+0x74 gate byte (conditional on [owner+0x18]>1): ADD EDI,0x74 @0x5b3cd2; PUSH 1; CALL [EAX+8] @0x5b3cda"
+   ],
+   "reader_gating": "version/level-gated (CMP [EDI+0x18],3 @0x5b3952ff; CMP [EDI+0x18],1 @0x5b3cca) - genuine NIF-file block reader in the FUN_005b71e0 parse subsystem",
+   "status": "CONFIRMED byte-verified from raw EXE bytes (all offsets verified by direct file reads)"
+  },
+  "consumer": "FUN_005068f0 (J01b chain re-verified in own disasm): EAX=[X+0x14]=owner @0x506b78; gate byte [EAX+0x74] @0x506b7b; FLD [EAX+0x6C] @0x506ca6; FLD [EAX+0x70] @0x506cc0; FLD [EAX+0x64] @0x506e7d; FLD [EAX+0x68] @0x506e8c"
+ },
+ "node_2c_quaternion_area": {
+  "correction": "node+0x2C is a 3x3 ROTATION MATRIX (9 floats, +0x2C..+0x4F), not a stored quaternion; J01b's 'quat[4] via FUN_00545030' is produced by conversion",
+  "evidence": "FUN_00545030 = classic matrix->quaternion converter (trace formula w=sqrt(trace+1)/2, off-diagonal differences, diagonal-selection fallback table DAT_00617494); FUN_005068f0 passes ESI=node+0x2C (ADD ESI,0x2c @0x506b86) into it @0x506b8e; node+0x50/+0x54/+0x58 = translation xyz (same layout as NiAVObject local transform)",
+  "writer_status": "MISSING_EDGE (writer not identified)",
+  "coverage": [
+   "whole-image base+disp census (both decoders): NO loader-family function writes [reg+0x2C] floats (5 NIF-region W hits all classified: FUN_005b0770 ctor zero-init another class vt 0x5EBB68; FUN_005b8000 blob ctor vt 0x5EBCE4; FUN_005bb200/0x5bb320 pointer field own record class; FUN_005bb5a0 raw-buffer reader family)",
+   "LEA interior-pointer scans for [r+0x2C]: only 0x5bbca5 (LEA ECX,[EDI+0x2C]) in the 0x5bb5a0-0x5bbd30 raw-buffer reader family (cursor-based); function identity/semantics unresolved",
+   "MOV r,[r+0x48]+LEA [r+0x2C] stream-read window scan: 3 hits, none in NIF family",
+   "quat-pattern (4-consecutive-dword) window scan: 92 image windows, none in the NIF loader family"
+  ],
+  "candidate_families": "NIF reader (pattern-consistent, no byte hit in coverage) vs network record family 0x5bb5a0-0x5bbd30 (byte-adjacent cursor reader at 0x5bbca5; R1 canon record[6]/0x48-struct family region; join to the J01b node class NOT established)"
+ },
+ "nif_parse": {
+  "files": {
+   "296445.nif": {
+    "size": 108876,
+    "sha256": "656795D8B3DDDF8F9192EE41C4710D592894860F6959B53B2C08036977E7B862",
+    "magic": "NetImmerse File Format, Version 4.1.0.12",
+    "version": "4.1.0.12 (raw 0x0401000c)",
+    "num_blocks": 155,
+    "type_histogram": {
+     "NiTriShape": 30,
+     "NiTriShapeData": 30,
+     "NiTexturingProperty": 22,
+     "NiNode": 19,
+     "NiMaterialProperty": 17,
+     "NiZBufferProperty": 10,
+     "NiAlphaProperty": 10,
+     "NiArkBillboardNode": 7,
+     "NiStringExtraData": 4,
+     "NiArkAnimationExtraData": 1,
+     "NiArkTextureExtraData": 1,
+     "NiArkImporterExtraData": 1,
+     "NiTextureEffect": 1,
+     "NiUVController": 1,
+     "NiUVData": 1
+    }
+   },
+   "218757.nif": {
+    "size": 56535,
+    "sha256": "C13D08736D7E778803E20A3105067448007F32D15290AF168F836CD99248AD98",
+    "magic": "NetImmerse File Format, Version 4.1.0.12",
+    "version": "4.1.0.12 (raw 0x0401000c)",
+    "num_blocks": 62,
+    "type_histogram": {
+     "NiTriShape": 14,
+     "NiTriShapeData": 14,
+     "NiNode": 12,
+     "NiTexturingProperty": 9,
+     "NiMaterialProperty": 8,
+     "NiArkAnimationExtraData": 1,
+     "NiArkTextureExtraData": 1,
+     "NiArkImporterExtraData": 1,
+     "NiZBufferProperty": 1,
+     "NiVertexColorProperty": 1
+    }
+   }
+  },
+  "format": "PE 2003 variant: 'NetImmerse File Format, Version 4.1.0.12\\n' (no length prefix) + u32 version + u32 numBlocks; blocks = length-prefixed type string + data (no size table, no type-index array); inventory complete: 155/62 type-string occurrences == numBlocks header",
+  "ninode_local_transforms": "all NiNode/NiArkBillboardNode local transforms extracted (19 + 12); ALL are identity rotation, scale 1.0, translation (0,0,0) - byte-verified e.g. block0 Scene Root rotation 1.0f diagonal at file offsets 0x5F/0x6F/0x7F, scale 1.0f @0x83, translation @0x87..0x92",
+  "implication": "the pinned NIF models carry NO world placement data and no non-identity local transforms; per contract critical distinction the NIF-derived values are LOCAL_PART_TRANSFORM at most"
+ },
+ "countermodels": {
+  "network_family": {
+   "tested": "R1 canon record[6]/0x48-struct family (FUN_005bbbd0 area; PLACEMENT_MESSAGE_SCHEMA.json 4E3B279F... cited as reference only)",
+   "result": "no standard-form float write to +0x6C/+0x70 anywhere in the network family region; its +0x2C write (FUN_005bb320 @0x5bb3f8, 89 46 2c) stores a POINTER to an own 8-byte record on its own 0x30-byte class (vt 0x5EBD38) - not a transform field",
+   "verdict": "REJECTED as writer of owner+0x6C/+0x70; UNRESOLVED for node+0x2C (0x5bbca5 interior-pointer candidate in the adjacent cursor-reader family, join NOT established)"
+  },
+  "vm_property_stores": "REJECTED for +0x6C/+0x70: the write path is closed from the NIF stream (ctor default + block reader) with no VM store in between; no census hit function is in the VM/hostcall family for these fields on X-graph objects",
+  "default_identity": "PARTIAL: ctor initializes +0x60..+0x70 = -1.0f and +0x74 = 0 (compiled constants, FUN_005b2c40 @0x5b2cf4/f7), but the block reader overwrites +0x50..+0x74 from the file - the final values are file-derived, not defaults",
+  "writer_outside_tested_forms": "for +0x2C only: interior-pointer forms are not exhaustively censused image-wide (LEA scans were family-scoped); honest coverage stated"
+ },
+ "classification": {
+  "owner_6c_70": "NIF_FILE_LOCAL (writer = NIF block reader FUN_005b38c0 region; data source = NIF file stream of <id>.nif; producer->transform->consumer chain byte-verified at code level; the block-type identity mapping to vtable 0x5EBBEC via the type registry is NOT closed - OPEN edge)",
+  "x_14_link": "NIF_FILE_LOCAL chain closed statically (FUN_005b5380 @0x5b5433)",
+  "node_2c": "MISSING_EDGE/AMBIGUOUS (NIF reader vs network cursor reader; see node_2c_quaternion_area)",
+  "local_vs_world": "ALL NIF-derived transform data = LOCAL_PART_TRANSFORM / definition data. WORLD placement of 296445/218757 remains OPEN and is NOT recoverable from these fields; no claim of placement recovery is made"
+ },
+ "gates": {
+  "P01-G1": "PASS - census complete with per-form denominators, every hit byte-verified (dual decode, 0 missing); >=1 writer of the X-graph +0x6C/+0x70 fields identified with VA+bytes+object provenance (owner ctor 0x5b2cf4/f7 + NIF reader 0x5b3cab/0x5b3cba + X+0x14 link 0x5b5433); +0x2C writer = exhaustive negative within tested forms with coverage recorded",
+  "P01-G2": "PASS - classification NIF_FILE_LOCAL for +0x6C/+0x70 with producer->transform->consumer chain (NIF file stream -> block reader -> owner fields -> FUN_005068f0 consumer); NIF block correspondence established for both models at file level (complete block inventory; all NiNode local transforms identity); +0x2C = MISSING_EDGE (AMBIGUOUS between two candidate families) - NOT classified",
+  "non_pass_classes_used": [
+   "MISSING_EDGE (node+0x2C matrix writer)",
+   "AMBIGUOUS (node+0x2C candidate families)",
+   "OPEN (owner-class block-type dispatch via type registry)"
+  ]
+ },
+ "coverage_and_limits": [
+  "not checked: exact NIF-type-name to owner-class dispatch (the 0x61Exxx global slot -> factory map); owner reader semantics beyond +0x50..+0x74 fields; the 0xFC transform-stream drain beyond FUN_00506e10 (inherited OPEN T3-d2)",
+  "the 'node' class identity (matrix +0x2C, translation +0x50..0x58) is unresolved; its writer and its vtable remain MISSING_EDGE",
+  "runtime VALUES of the fields (needs runtime; static analysis only)"
+ ],
+ "evidence_files": [
+  "WORK/jobs/P01/data/P01_RAW_CENSUS.json/.csv, P01_HIT_CLASSIFICATION.csv, P01_NIF_PARSE.json, P01_NIF_BLOCK_MAP_RAW.csv, p01_vt_dump.txt",
+  "WORK/jobs/P01/tools/out/p01_census_hits.tsv, p01_scan_log.txt, p01_scan2_log.txt, fn_*.c (1090+ decompiles)",
+  "WORK/jobs/P01/tools/p01_census.py, P01GhidraScan.java, P01GhidraScan2.java, p01_nifparse.py, PE2_P01_copy.exe (sandbox, hash-verified)"
+ ]
+}

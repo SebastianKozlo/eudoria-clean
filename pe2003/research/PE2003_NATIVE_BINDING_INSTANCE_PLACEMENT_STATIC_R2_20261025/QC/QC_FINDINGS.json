@@ -1,0 +1,123 @@
+{
+  "qc_run_id": "QC_PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025_F1",
+  "parent_run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+  "mode": "INTERNAL_QC, procedurally independent, 100% read-only except QC dir",
+  "qc_started_utc": "2026-10-25T11:08:34Z",
+  "qc_finished_utc": "2026-10-25T11:20:00Z",
+  "verdict": "QC_PARTIAL",
+  "verdict_rationale": "All sampled byte claims independently re-derived TRUE; corrections handled honestly (immutability + downstream supersession + ledger records verified); no forbidden overclaim wording found; WORLD_XYZ_RECOVERED=NO and family-level-join limits maintained. QC_PARTIAL (not QC_PASS) because: (1) BUDGET_LEDGER covers only 4 of 13+ executed job units — spend vs caps (96; A6/B30/J24/P18/Q18) is NOT independently checkable, so under SP-A09 SEMANTIC_BUDGET_COMPLIANCE=UNVERIFIED; (2) B01 has no child admission events in ADMISSION_EVENTS; (3) P01 tool-LOC hard-cap deviation (878>800) disclosed but unresolved; (4) load-bearing components NOT_CHECKED by this QC (Ghidra decompilations, J03 3403-site census recount, J02 1936-file corpus scan, opencode.db model census) forbid QC_PASS under control 15 / L11.",
+  "findings": [
+    {
+      "id": "P1-1",
+      "severity": "P1",
+      "title": "BUDGET_LEDGER materially incomplete: only A1/B01/J01/A1-CC recorded; all later jobs unaccounted",
+      "file": "D:/Eudoria_Reconstruction/PE2003/10_Campaigns/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/ledgers/BUDGET_LEDGER.json",
+      "line_field": "spent{} (whole object, 4 keys)",
+      "evidence": "BUDGET_LEDGER.json contains spent entries only for A1, B01, J01, A1-CC (recorded_utc 08:27:27Z, i.e. before J01a..J04 ran). Jobs J01a, J01a-fix, J01b, B02 (2 dead attempts), B02a, J02, P01, P02, J03, J04 have no budget entries. max_attempts_per_atomic_job=2 compliance is verifiable from ADMISSION_EVENTS (B02 attempt2, J01 attempt2 split honored, no 3rd identical retry), but native-task total 96 and per-family caps (A6/B30/J24/P18/Q18, reserve Q8) cannot be checked against actual dispatches from this ledger. The ledger's own note admits 'own aggregate UNMEASURED never yields budget PASS'.",
+      "contradicted_claim": "implied budget coverage of the run",
+      "effect": "SP-A09 standard from the governing postaudit is violated by omission: SEMANTIC_BUDGET_COMPLIANCE for this run must be UNVERIFIED, not PASS.",
+      "required_correction": "Before seal/publication: append (never rewrite) a completion block to BUDGET_LEDGER enumerating every dispatch incl. dead attempts (B01 attempt1 dead, J01 attempt1+2, B02 attempt1+2 dead, J01a, J01a-fix, J01b, B02a, J02, P01, P02, J03, J04) with family attribution and an explicit per-family spend-vs-cap statement, or an explicit UNMEASURED/UNVERIFIED declaration carried into the final report."
+    },
+    {
+      "id": "P2-1",
+      "severity": "P2",
+      "title": "B01 has no child admission events in ADMISSION_EVENTS",
+      "file": "D:/Eudoria_Reconstruction/PE2003/10_Campaigns/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/ledgers/ADMISSION_EVENTS.jsonl",
+      "line_field": "events[0..3] (seq 1-4: A1, ROOT_TAKEOVER, ROOT_TAKEOVER_2, A1-CC only)",
+      "evidence": "B01 science artifacts (generated 06:55:30Z) were emitted by a prior session that died (ROLE_LEDGER takeover note); its admission events died with it. Compensation exists and is disclosed: root countercheck seq=4 (independent ark/EXE byte verification, all PASS) and B01 HANDOFF.md which transparently states the docs were synthesized post-hoc by the J01a child on root order.",
+      "effect": "ledger completeness gap for the first executed job; mitigated by root independent countercheck + disclosure.",
+      "required_correction": "State the B01 admission-trail loss explicitly in the final run report (additive disclosure; no ledger rewrite needed beyond that)."
+    },
+    {
+      "id": "P2-2",
+      "severity": "P2",
+      "title": "P01 tool-LOC hard-cap deviation 878 > 800 (process deviation, disclosed)",
+      "file": "D:/Eudoria_Reconstruction/PE2003/10_Campaigns/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/ledgers/ADMISSION_EVENTS.jsonl",
+      "line_field": "seq=17 reservation: 'KNOWN DEVIATION: tool LOC 878 > 800 hard cap'",
+      "evidence": "Deviation honestly disclosed at closure (also states tools hash-pinned, not trimmed post-hoc; hand prose 181<=400).",
+      "effect": "process non-compliance with the per-job tool cap; scientific outputs unaffected by the disclosure itself.",
+      "required_correction": "Root must accept the deviation explicitly or order a bounded trim/re-plan note in the final report; it must not be recorded as silently compliant."
+    },
+    {
+      "id": "P2-3",
+      "severity": "P2",
+      "title": "J01b superseded claims carry no in-file supersession marker; supersession lives only in downstream artifacts",
+      "file": "D:/Eudoria_Reconstruction/99_Audits/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/J01b_RECEIVER_FLOW.json",
+      "line_field": "b_owner_6c70.writers ('NOT IDENTIFIED... no writer found'), receiver_chain_to_owner ('X (0x28B, vtable 0x5EBC1C... class carries m_pTriShape@+0x1C, m_spTextureOptimizeData@+0x20...)'), e_countermodels[2] ('X+0x14 is written at runtime (no static writer found) -> static per-model join through owner impossible')",
+      "evidence": "File is immutably preserved (re-hash PIN-OK 25874C25...). Supersession IS documented downstream: P01_TRANSFORM_FIELD_SOURCE.json premise_correction (X is 0x28 bytes; 0x28B disproven; +0x2C/+0x6C/+0x70 live on owner/node objects) and node_2c_quaternion_area.correction ('quat[4] via FUN_00545030' corrected to 3x3 rotation matrix); J04_INSTANCE_JOIN.json x14_writer_correction_to_J01b (X+0x14 static writer = FUN_005b5380 @0x5b5433). This is acceptable under the immutability rule but MUST be stated.",
+      "effect": "a downstream reader citing J01b alone would take superseded X-class facts (X size 0x28B, X+0x14 runtime-only writer, 'static join impossible') as current canon.",
+      "required_correction": "Final run report must contain a supersession map: J01b X-size/field-class/X+0x14-writer/node+0x2C-quat claims superseded by P01/P02/J04 (all corrections byte-verified by this QC)."
+    },
+    {
+      "id": "P3-1",
+      "severity": "P3",
+      "title": "VA-citation off-by-one precision defects (claims byte-supported, VAs imprecise)",
+      "file": "D:/Eudoria_Reconstruction/99_Audits/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/P01_TRANSFORM_FIELD_SOURCE.json",
+      "line_field": "owner_6c_70_writer.writes_via_stream_read_calls: '+0x6C: LEA EDX,[EDI+0x6C] (8d 57 6c) @0x5b3cab'; '+0x70: ... @0x5b3cba'",
+      "evidence": "Independent raw read: instruction '8d 57 6c' starts at VA 0x5b3ca9 (0x5b3cab is the disp byte); '8d 57 70' starts at 0x5b3cb9. Same defect class as seq=4's noted B01_RESOLVER_FLOW prose off-by-one nits. All claimed BYTES exist exactly as stated.",
+      "effect": "cosmetic provenance imprecision; no semantic impact.",
+      "required_correction": "additive erratum note in final report (do not edit frozen artifact)."
+    },
+    {
+      "id": "P3-2",
+      "severity": "P3",
+      "title": "P01 push-0x28 creation-site VAs cite the ctor CALL, not the PUSH; exact push VAs unstated (root's open finding RESOLVED)",
+      "file": "D:/Eudoria_Reconstruction/99_Audits/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/P01_TRANSFORM_FIELD_SOURCE.json",
+      "line_field": "premise_correction.finding ('PUSH 0x28 (6a 28) before the ctor call at BOTH creation sites (callsites 0x521b94, 0x5b7272; verified from raw bytes)')",
+      "evidence": "Independent raw read: 0x521b94 = e8 77 35 09 00 (CALL -> 0x5b5110, X ctor) and 0x5b7272 = e8 99 de ff ff (CALL -> 0x5b5110); the actual '6a 28' bytes are at 0x521b78 and 0x5b7256, followed in both sites by 8b f9/e8...->operator_new(0x28)->mov [esp+8],eax->...->mov ecx,eax->call ctor. The X-size-0x28 premise is BYTE-SUPPORTED (6a 28 = push 0x28 present at both sites, immediately before operator_new+ctor).",
+      "effect": "root countercheck 'cannot confirm 6a 28 at cited VAs' is explained and resolved: cited VAs are the CALL sites, as the prose actually says; the premise stands.",
+      "required_correction": "record the exact push VAs (0x521b78, 0x5b7256) in the final report / erratum so future byte checks cite the instruction, not the disp/call site."
+    },
+    {
+      "id": "P3-3",
+      "severity": "P3",
+      "title": "J02 model-id 'file_off' values point at the id operand dword, not the instruction start",
+      "file": "D:/Eudoria_Reconstruction/99_Audits/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/J02_MODEL_ID_FLOW.json",
+      "line_field": "reference_census.model_id_literals.*.file_off (0x298/0x244/0x1C8/0x174)",
+      "evidence": "Independent raw reads of 4508.obj.dec / 4057.obj.dec: full 12-byte instruction 'de fe 00 77 14 00 00 00 <id LE32>' starts 4 bytes before each cited offset (e.g. 0x294 for 296445); cited offset is where the id dword sits. Bytes match exactly.",
+      "effect": "label ambiguity only.",
+      "required_correction": "clarify convention (operand-VA vs instruction-VA) in final report erratum."
+    },
+    {
+      "id": "P3-4",
+      "severity": "P3",
+      "title": "B01 owner_rows count-convention ambiguity: 6 data rows vs 'owner_rows: 7'",
+      "file": "D:/Eudoria_Reconstruction/PE2003/10_Campaigns/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/ledgers/BUDGET_LEDGER.json + 99_Audits/.../B01_OWNER_CLASSIFICATION.csv",
+      "line_field": "BUDGET_LEDGER.spent.B01.measured.owner_rows=7; CSV = 7 lines (1 header + 6 owner data rows: 2202, 768, 382, 1, 208, 376)",
+      "evidence": "CSV field counts stable (8 fields, all rows); csv-module row count incl header = 7. 'owner_rows' semantically suggests data rows (6).",
+      "effect": "potential misreading of the denominator.",
+      "required_correction": "state the convention (6 classified owners; 7 = total CSV rows) in the final report."
+    },
+    {
+      "id": "P3-5",
+      "severity": "P3",
+      "title": "seq=14 incident record says '12 B02a/data files' but enumerates 11; directory contains 11",
+      "file": "D:/Eudoria_Reconstruction/PE2003/10_Campaigns/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/ledgers/ADMISSION_EVENTS.jsonl",
+      "line_field": "seq=14 ranges ('all 12 B02a/data files re-hashed...')",
+      "evidence": "Enumerated hash list has 11 entries; WORK/jobs/B02a/data contains exactly 11 files, ALL re-hashed by this QC and ALL matching HANDOFF.md pins (zero drift incident verified).",
+      "effect": "count nit; incident verification itself PASS.",
+      "required_correction": "none scientific; optional count correction in final report."
+    },
+    {
+      "id": "P3-6",
+      "severity": "P3",
+      "title": "ADMISSION_EVENTS.jsonl is not JSONL (single JSON object with events[] wrapper)",
+      "file": "D:/Eudoria_Reconstruction/PE2003/10_Campaigns/PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025/ledgers/ADMISSION_EVENTS.jsonl",
+      "line_field": "file format",
+      "evidence": "Parses as one strict JSON object (no dup keys). Extension implies JSON-lines format. seq 1..23 contiguous, no gaps/duplicates (verified).",
+      "effect": "machine-consumers expecting JSONL would fail.",
+      "required_correction": "note format in final report; no rewrite of the frozen ledger."
+    }
+  ],
+  "overclaim_scan_result": {
+    "searched_terms": ["NETWORK_ONLY", "branches_exhausted", "exhausted all branches", "proves", "impossible", "cannot exist", "no local positions", "placement recovered", "world position recovered", "WORLD_XYZ", "recovered"],
+    "scope_searched": "all SCIENCE_ROOT artifacts (full reads) + all WORK/**/EVIDENCE.md, HANDOFF.md, EARLY_RESULT.md via regex",
+    "hits": [
+      "J01b_RECEIVER_FLOW.json lines 23,50 + J01b/EVIDENCE.md line 92: 'static per-model join ... impossible' — SCOPED statements ('with searched coverage'), frozen original, superseded for the X+0x14 writer point by P01/J04 (see P2-3). Not an unbounded impossibility claim.",
+      "P01_TRANSFORM_FIELD_SOURCE.json lines 124,140: 'NOT recoverable from these fields; no claim of placement recovery is made' — correct LIMIT statement, not an overclaim."
+    ],
+    "world_xyz_recovered_status": "NO claim of world placement recovery anywhere; LOCAL_PART_TRANSFORM vs WORLD distinction maintained in P01 classification.local_vs_world and downstream consumers (J03/J04 inherit; no WORLD join or instance-identity claim beyond FAMILY-LEVEL: J03 object_instance_level=STILL_AMBIGUOUS, J04 verdict=STILL_AMBIGUOUS, P02 verdict=AMBIGUOUS).",
+    "confirmed_without_pointer": "none found in the fully-read SCIENCE_ROOT artifacts; every CONFIRMED status read was tied to named byte evidence (VA + bytes + independent-decoder statements).",
+    "per_model_identity": "only literal-id-based census claims (B02a/J02 model-id census with exact ids/offsets/bytes — re-derived TRUE); no per-model identity/join promotion found."
+  }
+}

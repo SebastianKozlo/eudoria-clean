@@ -1,0 +1,113 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "kind": "CORRECTION_LEDGER",
+ "recorded_utc": "2026-10-25T11:17:38Z",
+ "policy": "append-only corrections; frozen originals never modified; immutability + downstream supersession + disclosure per QC",
+ "corrections": [
+  {
+   "id": "R2-CLR-01",
+   "utc": "2026-10-25T08:45:24Z",
+   "actor": "J01a-fix child (root order)",
+   "target": "J01a_WRITER_CENSUS.json + WORK/jobs/J01a/data/J01a_WRITER_TABLE.json + EVIDENCE.md + HANDOFF.md + EARLY_RESULT.md",
+   "defect": "SizeOfRawData misread 0xF0, corrected to 0xF000 from PE header bytes",
+   "effect": "beyond-raw conclusion unchanged (table offset 0x1382C > 0xF000)",
+   "verification": "QC VC-18 TRUE (independent PE header parse); j01a_emit.py patched per ADMIN_APPENDIX seq=9 (SHA C980D08E...), line 206 carries 0xF000",
+   "frozen_original": "not applicable - bounded correction at seq=7 before admission of the corrected artifact (pin 1F89BAC4...)"
+  },
+  {
+   "id": "R2-CLR-02",
+   "utc": "2026-10-25T09:03:04Z",
+   "actor": "J01b child",
+   "target": "WORK/jobs/J01a/tools/j01a_emit.py (ADMIN_APPENDIX)",
+   "defect": "emitter script still carried the pre-correction 0xF0 string",
+   "effect": "single-line region_status 0xF0->0xF000; no other line changed; corrected string matches seq=7-corrected SCIENCE JSON verbatim",
+   "verification": "QC VC-35 TRUE (patched sha C980D08E... matches seq=9 pin; line 206 read)",
+   "frozen_original": "prior emit script sha 74B47F3C... recorded in seq=6"
+  },
+  {
+   "id": "R2-CLR-03",
+   "utc": "2026-10-25T09:58:39Z (P01) / 11:06:12Z (J04)",
+   "actor": "P01 child; J04 child",
+   "target": "J01b_RECEIVER_FLOW.json (supersession WITHOUT touching the frozen original)",
+   "defect": "J01b in-file claims: X=0x28B; +0x6C/+0x70 on X itself; X+0x14 runtime-only writer ('static per-model join through owner impossible' under searched coverage); node+0x2C stored quaternion",
+   "effect": "superseded by P01 premise_correction (X=0x28; fields on owner class 0x78 vt 0x5EBBEC) and node_2c correction (+0x2C=3x3 rotation matrix); X+0x14 writer = FUN_005b5380 @0x5b5433 (J04); J01b flow/read-site claims (fld sites, executor semantics, COMMON verdict) remain standing",
+   "verification": "QC P2-3: supersession documented only downstream; this run report carries the mandatory supersession map (QC requirement); all correcting bytes independently re-derived by QC (VC-02/06/07/08)",
+   "frozen_original": "J01b_RECEIVER_FLOW.json sha256 25874C25EC1DFC02E47FCFF9F678EFFB6F94D32986A0DF2B58711E2AD1EF466E re-hash PIN-OK (QC VC-33)"
+  },
+  {
+   "id": "R2-CLR-04",
+   "utc": "2026-10-25T09:32:00Z",
+   "actor": "J02 child",
+   "target": "B02a_CHAIN_DECODE.json prose (frozen original left unmodified)",
+   "defect": "f1/f2 transposition for the 4508 getter DYN recs (said 296478->1611/0x9FA86861; raw bytes give 296478->1617/0x585DAF8C)",
+   "effect": "J02_MODEL_ID_FLOW.json carries the corrected dyn_tables_raw_bytes; B02a original preserved with the defect visible",
+   "verification": "QC VC-23 TRUE (independent DLOB chunk parse of the NYD chunk)",
+   "frozen_original": "B02a_CHAIN_DECODE.json sha256 80AEA1BFD7F87E310A772030270D49B88E3D76A87E0EBA885A64711925F0CA8D re-hash PIN-OK (QC VC-32)"
+  },
+  {
+   "id": "R2-CLR-05",
+   "utc": "2026-10-25T09:27:46Z",
+   "actor": "J02 child (incident record seq=14)",
+   "target": "WORK/jobs/B02a/data/ (11 files re-written by the unpatched copied decoder)",
+   "defect": "first execution of the copied decoder ran UNPATCHED (PowerShell quoting failure of an inline patch) and re-wrote B02a/data outputs deterministically",
+   "effect": "ZERO byte drift: all 11 files re-hashed and match B02a HANDOFF pins; decoder then patched via script file and re-run scoped to J02 outputs only",
+   "verification": "QC VC-34 TRUE (all 11 files independently re-hashed); QC P3-5: seq=14 prose says '12' but enumerates 11 and the directory contains 11",
+   "frozen_original": "n/a - byte-identical rewrite, hash-verified"
+  },
+  {
+   "id": "R2-CLR-06",
+   "utc": "2026-10-25 (run span)",
+   "actor": "B01/J01b/J02 children",
+   "target": "R1 baseline statements (frozen R1 untouched)",
+   "defect": "R1 statements superseded/corrected this run: (a) 'missing .obj for 2202/768/382' -> FILE_CLASS_PRESENT (namespace error; raw members PROVEN in Scripts.ark); (b) R1-V8 'EBX=param_1 (obj 0xFC)' in FUN_005068f0 -> at the owner-chain sites EBX=arg2=the SceneInstancePair, 0xFC arrives via arg1 as pointer-to-slot; (c) R1 'FUN_004fe250->FUN_00503b90' as a FUN_00506780 caller -> NOT a caller (REF census: exactly 2 callers); (d) R1 'def->getter 51F6E0(id=...)' phrasing -> MECHANISM HYPOTHESIS at J02 static level, not a byte-verified edge",
+   "effect": "all corrections additive; R1 frozen artifacts untouched",
+   "verification": "B01_OWNER_CLASSIFICATION.csv; J01b corrections_to_prior; J02 native_qualification.qualification_verdict",
+   "frozen_original": "R1 audit dir read-only (MANIFEST pin F534472D... re-verified in INPUT_RECHECK.json)"
+  },
+  {
+   "id": "R2-CLR-07",
+   "utc": "2026-10-25T09:59:46Z",
+   "actor": "P01 child (disclosure); MASTER (disposition)",
+   "target": "P01 tools LOC",
+   "defect": "tool LOC 878 > 800 hard cap (census 196 + GhidraScan 262 + GhidraScan2 110 + nifparse 144 + emit 166)",
+   "effect": "process deviation; scientific outputs unaffected; hand prose 181 <= 400; executed tools hash-pinned, not trimmed post-hoc",
+   "verification": "ADMISSION_EVENTS seq=17 KNOWN DEVIATION; QC P2-2; BUDGET_LEDGER P01 entry records MASTER disposition ACCEPTED_AS_DEVIATION",
+   "frozen_original": "n/a"
+  },
+  {
+   "id": "R2-CLR-08",
+   "utc": "2026-10-25T11:12:45Z",
+   "actor": "root (single-writer ledger)",
+   "target": "BUDGET_LEDGER.json (additive completion block; no history rewritten)",
+   "defect": "QC P1-1: ledger covered only 4 early units (A1/B01/J01/A1-CC) at QC start",
+   "effect": "additive completion enumerates every dispatch unit incl. dead attempts with family attribution (spent keys A1, B01, J01, A1-CC, J01a, J01b, B02_dead, B02a, J02, P01, P02, J03, J04, QC1) and native_task_accounting (prior 4 + this 12 = 16; dead_infra 3; family A2/B5/J7/P3/Q1); SEMANTIC_BUDGET_COMPLIANCE remains UNVERIFIED (SP-A09)",
+   "verification": "QC P1-1 required 'additive completion OR explicit UNVERIFIED carry' - BOTH are present (ledger block + UNVERIFIED declaration carried in this report)",
+   "frozen_original": "pre-completion entries byte-untouched (append-only)"
+  },
+  {
+   "id": "R2-CLR-09",
+   "utc": "2026-10-25T11:20:00Z",
+   "actor": "QC F1 (finding); carried by this closing",
+   "target": "VA-citation precision (additive errata; frozen artifacts unmodified)",
+   "defect": "P3-1: P01 LEA +0x6C cited @0x5b3cab / +0x70 @0x5b3cba - the instructions START at 0x5b3ca9 / 0x5b3cb9 (cited VAs are the disp bytes); P3-2: P01 push-0x28 creation-site VAs cite the ctor CALL sites (0x521b94, 0x5b7272) - the actual '6a 28' bytes are at 0x521b78 and 0x5b7256; P3-3: J02 model-id 'file_off' values point at the id operand dword, the 12-byte instruction starts 4 bytes earlier (0x294/0x240/0x1C4/0x170)",
+   "effect": "cosmetic provenance imprecision only; all claimed BYTES exist exactly as stated (QC re-derived)",
+   "verification": "QC P3-1/P3-2/P3-3 with independent raw reads (VC-06/07/24); future byte checks must cite the instruction start VA",
+   "frozen_original": "P01/J02 artifacts unmodified",
+   "errata_ids": {
+    "R2-E01": "P01 LEA +0x6C/+0x70 instruction-start VAs are 0x5b3ca9/0x5b3cb9 (cited 0x5b3cab/0x5b3cba are the disp bytes)",
+    "R2-E02": "P01 push-0x28 bytes are at 0x521b78/0x5b7256 (cited 0x521b94/0x5b7272 are the ctor CALL sites)",
+    "R2-E03": "J02 model-id file_off values point at the id operand dword; the 12-byte instruction starts 4 bytes earlier"
+   }
+  },
+  {
+   "id": "R2-CLR-10",
+   "utc": "2026-10-25T11:20:00Z",
+   "actor": "QC F1 (finding); carried by this closing",
+   "target": "count/format conventions (additive notes)",
+   "defect": "P3-4: BUDGET_LEDGER 'owner_rows: 7' counts CSV rows incl. header - the classified-owner data rows are 6; P3-5: seq=14 says '12 B02a/data files' but 11 exist (all re-hashed, zero drift); P3-6: ADMISSION_EVENTS.jsonl is a single strict-JSON object with an events[] wrapper, not JSON-lines (machine consumers expecting JSONL would fail)",
+   "effect": "convention/label notes only; no scientific impact",
+   "verification": "QC_STRUCTURE_CHECK.json + QC_FINDINGS.json P3-4/5/6",
+   "frozen_original": "ledgers unmodified"
+  }
+ ]
+}

@@ -1,0 +1,160 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "kind": "NATIVE_TASK_CENSUS",
+ "recorded_utc": "2026-10-25T11:18:11Z",
+ "sources": [
+  "ledgers/BUDGET_LEDGER.json (read-only)",
+  "ledgers/ROLE_LEDGER.json (read-only)",
+  "ledgers/ADMISSION_EVENTS.jsonl (read-only; single JSON object, see QC P3-6)",
+  "QC/QC_STRUCTURE_CHECK.json",
+  "QC/QC_FINDINGS.json"
+ ],
+ "totals": {
+  "prior_session_children": 4,
+  "this_session_children": 12,
+  "total_dispatches": 16,
+  "dead_infra_attempts": 3,
+  "attempt_cap": "max 2 per atomic job (contract para 2)",
+  "native_task_cap": 96,
+  "family_caps": {
+   "A": 6,
+   "B": 30,
+   "J": 24,
+   "P": 18,
+   "Q": 18
+  },
+  "family_spent_per_budget_ledger": {
+   "A": 2,
+   "B": 5,
+   "J": 7,
+   "P": 3,
+   "Q": 1
+  }
+ },
+ "attempt_cap_compliance": {
+  "B02": "2 attempts (both infra-dead) -> explicit split to B02a with lineage - no 3rd identical retry",
+  "J01": "2 attempts (attempt1 partial/attempt2 dead) -> explicit split to J01a/J01b per contract - no 3rd identical retry",
+  "verdict": "PASS (attempt-cap honored; QC verified: 'B02 attempt2, J01 attempt2 split honored, no 3rd identical retry')"
+ },
+ "dispatches": [
+  {
+   "job": "B01 attempt1",
+   "family": "B",
+   "session": "prior (takeover-1 era)",
+   "status": "DEAD / admissions lost with the dead session (QC P2-1)",
+   "evidence": "ROLE_LEDGER takeover note; BUDGET_LEDGER B01 entry wording 'attempt1 dead'; ADMISSION_EVENTS has no B01 child events"
+  },
+  {
+   "job": "B01 attempt2 (science emit)",
+   "family": "B",
+   "session": "prior (died post-emit)",
+   "status": "COMPLETE (artifacts emitted 2026-10-25T06:55:30Z; admission trail lost with dead session; root A1-CC seq=4 countercheck PASS)",
+   "evidence": "B01_* SCIENCE_ROOT artifacts; ROLE_LEDGER; WORK/jobs/B01/HANDOFF.md (post-hoc admin docs by J01a child on root order)"
+  },
+  {
+   "job": "J01 attempt1",
+   "family": "J",
+   "session": "prior",
+   "status": "PARTIAL (census JSON/CSV complete; Ghidra leg failed with wrong language id)",
+   "evidence": "BUDGET_LEDGER J01 entry; WORK/jobs/J01/tools/out/ghidra_stderr.txt (read-only)"
+  },
+  {
+   "job": "J01 attempt2",
+   "family": "J",
+   "session": "prior",
+   "status": "DEAD_INFRA (semantic progress in DB only, no artifacts)",
+   "evidence": "ROLE_LEDGER (child ses_e8e337b9bffexxiCRKGZgkTf7z died 06:45:19Z)"
+  },
+  {
+   "job": "J01a",
+   "family": "J",
+   "session": "this",
+   "status": "COMPLETE (writer census 15/20 slots)",
+   "evidence": "ADMISSION_EVENTS seq=5/6"
+  },
+  {
+   "job": "J01a-fix",
+   "family": "J",
+   "session": "this",
+   "status": "COMPLETE (bounded correction 0xF0->0xF000)",
+   "evidence": "ADMISSION_EVENTS seq=7"
+  },
+  {
+   "job": "J01b",
+   "family": "J",
+   "session": "this",
+   "status": "COMPLETE (receiver flow + executor semantics; J01b G1/G2 PASS)",
+   "evidence": "ADMISSION_EVENTS seq=8/9"
+  },
+  {
+   "job": "B02 attempt1",
+   "family": "B",
+   "session": "this",
+   "status": "DEAD_INFRA (zero artifacts)",
+   "evidence": "ADMISSION_EVENTS seq=10"
+  },
+  {
+   "job": "B02 attempt2",
+   "family": "B",
+   "session": "this",
+   "status": "DEAD_INFRA (zero artifacts)",
+   "evidence": "ADMISSION_EVENTS seq=11"
+  },
+  {
+   "job": "B02a",
+   "family": "B",
+   "session": "this",
+   "status": "COMPLETE (4508/4057 chain decode; B02a G1/G2 PASS)",
+   "evidence": "ADMISSION_EVENTS seq=12"
+  },
+  {
+   "job": "J02",
+   "family": "J",
+   "session": "this",
+   "status": "COMPLETE (model-id value flow; J02 G1/G2 PASS; seq=14 incident recorded, zero drift)",
+   "evidence": "ADMISSION_EVENTS seq=13/14/15"
+  },
+  {
+   "job": "P01",
+   "family": "P",
+   "session": "this",
+   "status": "COMPLETE (transform field writer/source; P01 G1/G2 PASS; LOC deviation ACCEPTED_AS_DEVIATION)",
+   "evidence": "ADMISSION_EVENTS seq=16/17"
+  },
+  {
+   "job": "P02",
+   "family": "P",
+   "session": "this",
+   "status": "COMPLETE (network join audit; P02 G1/G2 PASS)",
+   "evidence": "ADMISSION_EVENTS seq=18/19"
+  },
+  {
+   "job": "J03",
+   "family": "J",
+   "session": "this",
+   "status": "COMPLETE (root vtable bridge; J03 G1/G2 PASS)",
+   "evidence": "ADMISSION_EVENTS seq=20/21"
+  },
+  {
+   "job": "J04",
+   "family": "J",
+   "session": "this",
+   "status": "COMPLETE (instance join; J04 G1/G2 PASS)",
+   "evidence": "ADMISSION_EVENTS seq=22/23"
+  },
+  {
+   "job": "QC1",
+   "family": "Q",
+   "session": "this",
+   "status": "COMPLETE (fresh pe-master-auditor INTERNAL_QC; verdict QC_PARTIAL; 37 verification items)",
+   "evidence": "QC/QC_SUMMARY.md + QC_FINDINGS.json + QC_VERIFIED_CLAIMS.csv"
+  }
+ ],
+ "honest_notes": [
+  "family_spent_per_budget_ledger counts root-side A-family units too (A1 preflight, A1-CC countercheck): 2+5+7+3+1=18 units vs 16 child dispatches - the ledger's own accounting, carried verbatim.",
+  "BUDGET_LEDGER's B01 entry wording 'attempt1 dead + attempt2 emit complete' vs dead_infra_attempts=3 (B02 x2 + J01 attempt2, per the ledger's own note): the B01 attempt1 admission trail is part of the dead-session loss (QC P2-1); recorded, not reinterpreted.",
+  "SEMANTIC_BUDGET_COMPLIANCE=UNVERIFIED (SP-A09): bodies/instruction exposures not fully aggregated; own aggregate UNMEASURED never yields budget PASS (ledger note).",
+  "root modelID=glm-5-3 default/medium per ROLE_LEDGER (opencode.db read-only census, zero glm-5-3-high) - SP-A06 respected this run.",
+  "opencode DB read-only census and the J01 attempt2 DB-recovered leads are recorded governance evidence; request effort NOT_OBSERVED / server effort UNKNOWN (contract para 2)."
+ ]
+}

@@ -1,0 +1,83 @@
+{
+ "run_id": "PE2003_NATIVE_BINDING_INSTANCE_PLACEMENT_STATIC_R2_20261025",
+ "job": "J01b",
+ "family": "J",
+ "attempt": 1,
+ "lineage": "J01-split-b",
+ "recorded_utc": "2026-10-25T09:02:23Z",
+ "era": "PE2003 static",
+ "exe_sha256": "56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650",
+ "question": "receiver of DAT_A/DAT_B submit path in FUN_005068f0; owner+0x6C/+0x70 field path readers/writers and class; executor semantics FUN_005c27a0/FUN_00561ee0; COMMON vs PER-MODEL",
+ "method": "own Ghidra project (J01bProj, x86:LE:32:default:windows), 6 passes, full disasm+decompile of chain; raw-byte countercheck with own python file decoder (independent of Ghidra); full-image paired +0x6C/+0x70 census (13491 fns); E8/E9 direct-census python",
+ "a_receiver": {
+  "dat_a_call": "0x506b1e ff 15 44 e8 61 00 (CALL [0x61E844]) args (record_buffer, 2)",
+  "dat_b_call": "0x506c58 ff 15 58 e8 61 00 (CALL [0x61E858]) args (record_buffer, 2)",
+  "receiver_object": "both receivers are freshly allocated typed-array record buffers local to FUN_005068f0: 0x14-records: operator_new(0x2c)@0x506a5b, header [0]=2 refcount, buffer=+4, elem_size=0x14, count=2, elem_ctor FUN_00506dd0, elem_dtor FUN_005c27a0(empty); records {target=owner+0x6C/+0x70 bit-exact dword, 0x14, x,y,z from node+0x50/+0x54/+0x58}; 0x18-records: operator_new(0x34)@0x506b95, elem_size=0x18, elem_ctor FUN_00506d30, elem_dtor FUN_005c27a0; records {target, 0x18, quat[4] from node+0x2C via FUN_00545030}",
+  "producer_chain": "FUN_00505870 @0x5059ca / FUN_00505aa0 @0x505c03 -> FUN_00506780 @0x506896 (SOLE caller of FUN_005068f0, tool-verified REF_TOTAL=1) -> FUN_005068f0 -> DAT_A @0x506b1e / DAT_B @0x506c58",
+  "arg_provenance": "FUN_00506780(arg1=SceneInstancePair obj, arg2=node, arg3=flag): pair built by FUN_00511dd0 (0x10B, vtable 0x5E7534: +8 id, +0xC refcounted object); 0xFC transform-stream obj built by new(0xFC)+FUN_00556520(name from sprintf \"%i_%s...\" = pair+8 id + node+8/+0xC/+0x10 names, 0xc, 0xc); FUN_005068f0 receives 0xFC via pointer-to-slot (deref at 0x506cee MOV ECX,[EDI]); pair passed as arg2 (EBX@0x506a0f=[ESP+0x54]); node resolved per-iteration via vt+0x50 lookup on arg3 (root = owner+0x1C when flag!=0)",
+  "receiver_chain_to_owner": "EBX=arg2(pair) -> [EBX+0xC]=P (pair+0xC; 0x505870 path: instance obj from FUN_0051f6e0/FUN_00521b60, 0x10B vtable 0x5E799C via ctor FUN_00521380: +8 manager, +0xC X) -> FUN_004918b0 (MOV EAX,[ECX+0xC]) -> X (0x28B, vtable 0x5EBC1C, ctor FUN_005b5110; class carries m_pTriShape@+0x1C, m_spTextureOptimizeData@+0x20, tri_indices_computed per debug strings in slot fn FUN_005b6280) -> owner = [X+0x14] (0x506a34 MOV EAX,[EAX+0x14])",
+  "status": "CONFIRMED (receiver + reader chain, VA-by-VA, byte-verified)"
+ },
+ "b_owner_6c70": {
+  "readers": "FUN_005068f0: owner+0x6C @0x506aab/0x506bee, owner+0x70 @0x506af0/0x506c2a (FLD/FSTP bit-exact dwords d9 40 6c / d9 40 70), owner+0x74 byte gate @0x506a37/0x506b7b, copies into channel-holder +0x14/+0x18 @0x506ca6/0x506cc0; FUN_00506780: owner+0x1C @0x5067f0",
+  "writers": "NOT IDENTIFIED (MISSING_EDGE): owner object is *(X+0x14); X+0x14 zeroed by X ctor FUN_005b5110 and no writer found in: 16 X-class vtable slots (all disassembled, only 2 unrelated stack-frame [ESP+0x14] writes), 2nd ctor FUN_005b51d0, both X creators (0x521b94, 0x5b7272). Additionally pair+0xC object class is producer-path-dependent (0x505870: FUN_0051f6e0 instance; 0x505aa0: *(param_2) raw object) -> the P/X objects are runtime-chosen per path; static owner-class join impossible with searched coverage",
+  "field_semantics": "owner+0x6C and owner+0x70 hold two bit-exact dword \"target\" handles consumed as record[0] of each 0x14/0x18 command record; owner+0x74 = byte gate enabling the record emission; owner+0x1C = lookup-root object for the alternate producer branch",
+  "offset_similarity_countermodel": "QUANTIFIED: 110/13491 functions access +0x6C AND +0x70 on a common base register; >=28 write both; no function also matches owner fingerprint +0x74 within the paired census; offset-pair similarity was NOT used for class identification (per contract)",
+  "status": "READERS CONFIRMED (bytes); WRITER/CLASS = MISSING_EDGE with coverage"
+ },
+ "c_executors": {
+  "FUN_005c27a0_dat_a": "EMPTY NO-OP: single byte c3 (RET) + NOP padding (raw file bytes verified). Also passed as elem_dtor arg to FUN_0053955a (pushed 0x68 a0 27 5c 00 @0x506a70 and @0x506baa) and installed in 2 table slots (T1[5]=0x61E840 by FUN_005543b0(1,0), DAT_A=T1[6]=0x61E844 by FUN_00561a30(1,1)). 1193 static references from ~1100 distinct functions = a default do-nothing callback shared image-wide",
+  "FUN_00561ee0_dat_b": "13-byte PURE FORWARDER: 8b 44 24 08 8b 4c 24 04 50 51 e8 f1 22 ff ff -> tail call FUN_005541e0(buf, count). 2 static refs: installer immediate @0x561ec8 + direct CALL @0x56211e from an unnamed sibling 0x18-record producer (0x562040-0x56212f region, no Ghidra function; builds operator_new(0x18*n+4) arrays) - NO_DIRECT_XREF discipline: found by REF scan + raw disasm, not function-level xref",
+  "FUN_005541e0_real_dat_b_work": "0x18-record (quaternion) normalizer, in-place: pass1 over adjacent pairs: dot(q[i],q[i+1]) 4-float dot; if dot < 0.0f (const 0x5e2cf4=0.0) -> negate all 4 components of q[i+1] via FUN_00544720 (-q, shortest-path quaternion sign flip); pass2: clamp record+8 (first quat component) into [-1.0f(0x5e2cf0), +1.0f(0x5e2b24)] writing 0xbf800000/0x3f800000",
+  "mechanism": "producer (FUN_005068f0: records from node memory + owner targets) -> [DAT_B normalizer on 0x18 records; DAT_A inert] -> consumer FUN_005553f0/00555470 (thiscall this=0x50-byte channel-holder, submit buffer into 0xFC transform-stream obj: lazy channel obj at this+0x44 via FUN_00554bb0, store via FUN_00554c80/FUN_00554c50, clear this+0x3C/+0x38, optional FUN_00555570) -> FUN_00556d70 (register channel id by name in 0xFC obj, out maps +0x18..+0x28) + FUN_00556ea0 (store channel-holder at id in 0xFC obj map +0x48..+0x54) -> FUN_00506e10 finalize; drain side inherited OPEN from R1 (T3-d2)",
+  "consts": {
+   "0x5e2cf4": 0.0,
+   "0x5e2cf0": -1.0,
+   "0x5e2b24": 1.0,
+   "0x5e7498": 1.0,
+   "0x5e749c": 0.0
+  },
+  "status": "CONFIRMED (all raw-byte verified)"
+ },
+ "d_classification": {
+  "verdict": "COMMON",
+  "evidence": "FUN_005c27a0 shared by ~1100 functions (1193 refs) + 2 table slots; FUN_005541e0 shared by table slot T1[0] (installer 0x553f38) + direct callers FUN_0055ddf0, FUN_00561ee0, FUN_00568630 + sibling 0x18-producer @0x56211e; NO per-model id (4508/4057/296445/218757) in ANY chain region (8 regions byte-scanned: NONE) nor file-wide for 296445/218757/4057 (0 LE32 occurrences); 4508 occurs exactly once file-wide at 0x5bcfe5, outside the chain; chain carries per-INSTANCE identity (pair id, node) not per-MODEL ids",
+  "rule_respected": "no common class promoted to per-model identity by offset similarity; vtable identity used where claimed (pair 0x5E7534, P 0x5E799C, X 0x5EBC1C)"
+ },
+ "e_countermodels": [
+  "CONFIRMED-CASE: shared common executors without per-model identity (DAT_A no-op shared image-wide; DAT_B normalizer shared by >=5 call paths)",
+  "QUEUED/OPAQUE: record submission into 0xFC channel obj is synchronous in this function; downstream drain of the transform stream was NOT followed beyond FUN_00506e10 (T3-d2 inherited OPEN); effect timing not static-resolvable",
+  "RUNTIME-CHOSEN RECEIVER: pair+0xC (and thus X, owner) object class depends on producer path (FUN_0051f6e0 instance vs *(param_2)) and X+0x14 is written at runtime (no static writer found) -> static per-model join through owner impossible; exact coverage recorded (16 X-vtable slots disassembled, both creators, ctors, REF/E8 censuses, full-image 6C/70 census)",
+  "NO_DIRECT_XREF != dead code: honored; FUN_00561ee0 second consumer found in unnamed region 0x56211e via REF scan + raw disasm"
+ ],
+ "f_gates": {
+  "J01b-G1": "PASS - receiver of DAT_A/DAT_B identified (fresh record buffers) with VA-by-VA provenance chain and raw bytes; owner+0x6C/+0x70 reader path byte-established; owner WRITER/class = MISSING_EDGE with precise coverage (documented in b_owner_6c70)",
+  "J01b-G2": "PASS - executor semantics established: DAT_A empty no-op; DAT_B forwarder -> FUN_005541e0 quaternion sign-flip + [-1,1] clamp; producer->normalizer->submit-consumer mechanism identified; classification COMMON with per-model-negative evidence",
+  "non_pass_classes_used": [
+   "MISSING_EDGE (owner class writer)"
+  ]
+ },
+ "g_coverage": {
+  "decompiled": "FUN_005068f0, 506780, 505870, 505aa0, 4d03e0, 4b59f0, 511dd0, 51f6e0, 521b60, 521a50, 521380, 5b5110, 5b5340, 4186a0, 48d1d0, 5c27a0, 561ee0, 5541e0, 544720, 53955a, 506de0, 506d90, 506dd0, 506d30, 555340, 554bb0, 554c80, 554c50, 555470, 5553f0, 5554f0, 555570, 556520, 556d70, 556ea0, 4918b0, 478a50, 491de0, 5120b0/e0/110, 470d70, 561f30, 5b51b0, 5b5b80, 5b5dc0, 5b5f60, 5b6280, 5967b0, 50f6b0, 50ff90, 529650 + X-class slots disassembled",
+  "xref_classes_searched": [
+   "Ghidra REF to exact VAs (1193/2/4/1/2/2/2/2/2)",
+   "direct E8/E9 python census (callers of 0x5b5110/0x5b51d0/0x521b60; into 0x562000-0x562130: 0)",
+   "unnamed-region raw disasm (0x562040-0x56212f)",
+   "vtable slot enumeration (0x5EBC1C 16 slots, 0x5E799C 6 slots, 0x5e6858 16 dwords, 0x5e7534 16 dwords)",
+   "full-image paired +0x6C/+0x70 instruction census"
+  ],
+  "not_checked": "runtime values of owner/X fields (needs runtime); downstream drain of 0xFC transform stream beyond FUN_00506e10; the 5 other no-writer table slots semantics; concrete values of slot ids in SIB-indexed consumers (J01a MISSING_EDGE, inherited)"
+ },
+ "evidence_files": [
+  "WORK/jobs/J01b/tools/out/j01b_scan_log.txt, j01b_scan2_log.txt, j01b_scan3_log.txt, j01b_scan4_log.txt, j01b_scan5_log.txt",
+  "WORK/jobs/J01b/tools/out/fn_*.c (decompiles incl. fn_0x5068f0, fn_0x5c27a0, fn_0x561ee0, fn_0x5541e0, fn_0x544720, fn_0x5b5110, fn_0x521380)",
+  "WORK/jobs/J01b/data/J01b_OWNER6C70_ACCESS.csv, J01b_CHAIN_CENSUS.json",
+  "WORK/jobs/J01b/EVIDENCE.md, HANDOFF.md, EARLY_RESULT.md",
+  "this file J01b_RECEIVER_FLOW.json + J01b_EXECUTOR_SEMANTICS.md"
+ ],
+ "corrections_to_prior": [
+  "R1-V8 \"EBX=param_1 (obj 0xFC)\" in FUN_005068f0 owner-chain: imprecise - at the owner-chain sites EBX = arg2 = the SceneInstancePair (0x10B vt 0x5E7534); the 0xFC object arrives via arg1 as pointer-to-slot (deref 0x506cee). Chain verified byte-level: [pair+0xC] -> FUN_004918b0 -> +0xC -> +0x14",
+  "R1 placement_message summary \"targets *(owner+0x6C)/+0x70, owner=*(FUN_004918b0()+0x14)\" - CONFIRMED and extended two levels down: pair+0xC=P(instance, vt 0x5E799C), P+0xC=X(0x28B, vt 0x5EBC1C), X+0x14=owner",
+  "R1 native-paths claim \"FUN_004fe250->FUN_00503b90\" as a FUN_00506780 caller: NOT a caller (REF census: exactly 2 callers of 0x506780: 0x505870, 0x505aa0)"
+ ]
+}
