@@ -1,0 +1,152 @@
+{
+ "schema": "NATIVE_TASK_CENSUS/1.0 (strict)",
+ "run_id": "PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025",
+ "build_id": "ISO2003NOV_PE_5_1_0_0",
+ "date": "2026-10-25",
+ "source": "BODY_ADMISSION_EVENTS.jsonl (14 admissions, seq 1-14) + BUDGET_LEDGER.json attempts_ledger + jobs RESULT headers; reconciled by QC2 (native_task_census expected=12 found=12) and closing child",
+ "note": "14 native task entries (12 science/QC tasks incl. A01R retry + QC1 + QC2 + CORR1); ROOT preflight is a NON-TASK admission event, listed separately below",
+ "tasks": [
+  {
+   "task_id": "A01",
+   "role": "EXECUTOR (wave A: ABI/typed dataflow)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-A01-001; superseded in-run by retry)",
+   "status": "COMPLETE_AFTER_RETRY (attempt-1 findings carried via pinned SHA; final verdict from A01R)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/A01/EARLY_RESULT.md"
+  },
+  {
+   "task_id": "J01",
+   "role": "EXECUTOR (model-root-join, NIF loader value-flow)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-J01-001)",
+   "status": "COMPLETED_WITH_SCOPED_BARRIER",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/J01/RESULT.md"
+  },
+  {
+   "task_id": "A01R",
+   "role": "EXECUTOR (A01 retry, a1..a6 map + scratch-slot closure)",
+   "worker": "pe-reconstruction",
+   "attempt": "2/2 (R5-A01-002, lineage R5-A01-001)",
+   "status": "COMPLETE",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/A01/RESULT.md"
+  },
+  {
+   "task_id": "J02",
+   "role": "EXECUTOR (name-assembly provenance, slot+0x3C qualification, insert-side, [SUB+0x18])",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-J02-001)",
+   "status": "COMPLETED_WITH_SCOPED_BARRIER (zero-refs sub-claim later REJECTED by QC1-F01; erratum E2)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/J02/RESULT.md"
+  },
+  {
+   "task_id": "QC1",
+   "role": "QC (rolling, wave A + J01/J02)",
+   "worker": "pe-master-auditor (fresh session)",
+   "attempt": "1 (R5-QC1-001)",
+   "status": "PASS_WITH_FINDINGS (P1x1, P2x2, P3x2; all findings closed by ERRATA_J01_J02.md via J03 + CORR1 re-issues)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/QC/QC1/QC_SUMMARY.md"
+  },
+  {
+   "task_id": "D01",
+   "role": "EXECUTOR (manager+8 holder/escape + a1..a6 source)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-D01-001)",
+   "status": "COMPLETED_WITH_BUDGET_BREACH_FLAG (self-reported ~71k rows; root adjudication 2026-10-25: PROCESS_INCIDENT, evidence static-valid, scan-window prohibition from J03)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/D01/RESULT.md"
+  },
+  {
+   "task_id": "J03",
+   "role": "EXECUTOR (QC1 corrections + redirected edge: callers 527A00/527BC0/498B80)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-J03-001)",
+   "status": "COMPLETED (errata E1-E5, census+refusal, closed 57-classification, certificate update)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/J03/RESULT.md"
+  },
+  {
+   "task_id": "D02",
+   "role": "EXECUTOR (registry [0x6C62F4] receivers)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-D02-001)",
+   "status": "COMPLETED_WITH_MINOR_BUDGET_FLAG (code_rows 1003/1000 self-reported; 2 D01 corrections byte-proven)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/D02/RESULT.md"
+  },
+  {
+   "task_id": "J04",
+   "role": "EXECUTOR ([obj+0xBC] readers; type-7 lifecycle; lane (a) closure)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-J04-001)",
+   "status": "COMPLETED_WITH_SCOPED_BARRIER (code_rows 1246/1200 minor overrun disclosed)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/J04/RESULT.md"
+  },
+  {
+   "task_id": "D03",
+   "role": "EXECUTOR (disp58 receiver resolution + 468010 handler tree)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-D03-001)",
+   "status": "COMPLETED_WITH_MINOR_BUDGET_FLAG (1241/1200 attempt-inclusive; 989/1200 retained; slot-22 alias eliminated)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/D03/RESULT.md"
+  },
+  {
+   "task_id": "J05",
+   "role": "EXECUTOR (lane (c)/(d) final bridge lanes)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-J05-001)",
+   "status": "COMPLETED_WITH_SCOPED_BARRIER (bodies 16/16 STOP disclosed)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/J05/RESULT.md"
+  },
+  {
+   "task_id": "D04",
+   "role": "EXECUTOR ([M+0x8C] subsystem hubs + M-cell readers)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-D04-001)",
+   "status": "COMPLETED (no budget breach; pass5 re-exposure accounted; pin-verification catch disclosed)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/D04/RESULT.md"
+  },
+  {
+   "task_id": "QC2",
+   "role": "QC (final pre-seal)",
+   "worker": "pe-master-auditor (fresh session)",
+   "attempt": "1 (R5-QC2-001)",
+   "status": "PASS_WITH_FINDINGS (P2x3, P3x3; STATUS_SEAL_READY=NO with conditions 1-3, all since closed: F01/F02/F05 by CORR1, F03 by root ledger adjudication)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/QC/QC2/QC_SUMMARY.md"
+  },
+  {
+   "task_id": "CORR1",
+   "role": "EXECUTOR (pre-seal corrections per QC2 conditions; NOTE: performed by pe-reconstruction, not auditor - role recorded)",
+   "worker": "pe-reconstruction",
+   "attempt": "1 (R5-CORR-001)",
+   "status": "COMPLETE (erratum receiver projection J03 CORRECTED; strict re-projection D03_EVIDENCE_STRICT.json; QC1 CSV re-projection QC_VERIFIED_ITEMS_STRICT.csv; additive only, frozen sources untouched)",
+   "path": "[WORK_ROOT]/PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025/jobs/J03/data/MODEL_BINDING_CERTIFICATE_J03_CORRECTED.json"
+  }
+ ],
+ "non_task_events": [
+  {
+   "event_id": "R5-ROOT-001",
+   "role": "ROOT PREFLIGHT (authoring package + 555 input pins verification, read-only, writes=0)",
+   "worker": "PE-MASTER (root)",
+   "attempt": "n/a (not a native task attempt)",
+   "status": "PASS (preflight ok=true, author_rows=27, input_pins=555, writes=0)",
+   "path": "[AUTHORING_ROOT]/preflight_readonly.py"
+  }
+ ],
+ "attempts_accounting": {
+  "ledger_used_native_attempts": 13,
+  "ledger_attempts_list": [
+   "1 A01 exec",
+   "2 J01 exec",
+   "3 A01R exec retry",
+   "4 J02 exec",
+   "5 QC1 audit",
+   "6 D01 exec",
+   "7 J03 exec",
+   "8 D02 exec",
+   "9 J04 exec",
+   "10 D03 exec",
+   "11 J05 exec",
+   "12 D04 exec",
+   "13 QC2 audit"
+  ],
+  "correction": "CORR1 (R5-CORR-001) appears in BODY_ADMISSION_EVENTS.jsonl (seq 15) but is NOT in the ledger attempts list (13 used); closing child flags this for root: either the ledger requires the additive CORR1 entry (14 used) or CORR1 is counted inside the reserved 8 - ROOT to adjudicate at seal",
+  "caps": "96 total attempts; reserve last 8 for QC/closing/pub; bodies 190/256; call_edges 892/2000; candidates 396/512"
+ }
+}

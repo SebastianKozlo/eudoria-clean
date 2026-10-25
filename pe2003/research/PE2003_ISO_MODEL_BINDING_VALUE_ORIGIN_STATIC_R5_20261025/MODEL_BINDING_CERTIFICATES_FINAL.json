@@ -1,0 +1,72 @@
+{
+  "schema": "MODEL_BINDING_CERTIFICATE/2.0-FINAL (R5 closing consolidation)",
+  "run_id": "PE2003_ISO_MODEL_BINDING_VALUE_ORIGIN_STATIC_R5_20261025",
+  "build_id": "ISO2003NOV_PE_5_1_0_0",
+  "date": "2026-10-25",
+  "consolidation_provenance": {
+    "sources": [
+      {"file": "jobs/J05/data/MODEL_BINDING_CERTIFICATE_J05.json", "note": "final lane (c)/(d) narrowing"},
+      {"file": "jobs/J03/data/MODEL_BINDING_CERTIFICATE_J03_CORRECTED.json", "note": "CORR1 re-issue per QC2-F01 (receiver = P, not [P+0x10]); supersedes frozen jobs/J03/data/MODEL_BINDING_CERTIFICATE_J03.json (SHA256 9AFE3641E88175D18CA0C72B2CE3417B9FBCF6BD2CB5492D20DAA4E1D41531C4, NOT edited)"},
+      {"file": "jobs/J01/data/MODEL_BINDING_CERTIFICATES.json", "note": "open-by-name / record / SFO visual base"},
+      {"file": "jobs/J02/data/MODEL_BINDING_CERTIFICATES_J02.json", "note": "slot+0x3C census, VFS initializer"},
+      {"file": "jobs/J04/data/MODEL_BINDING_CERTIFICATE_J04.json", "note": "type-7 detach, container-readers closure"}
+    ],
+    "rule": "frozen job certificates untouched; this file is a NEW consolidation for the closing package; where sources disagree, the CORR1-corrected (receiver=P) and the latest lane-status (J05) wording governs; no status promotion applied"
+  },
+  "image": {
+    "path": "[WORK_ROOT]/PE2003_ISO_PAYLOAD_NIF_PLACEMENT_STATIC_R3_20261025/jobs/I02a/data/section1.bin",
+    "sha256": "D43A23B9EFCFC9BC4092B38FA3C73499DE7DE7B03B20F34478B9E81EE8893631",
+    "size": 2939409,
+    "va_mapping": "VA = 0x401000 + blob_offset"
+  },
+  "era_label": "PE 5.1.0.0 unfiltered client image, static analysis only, 2026-10-25",
+  "common_mechanism_confirmed": {
+    "open_by_name": "0x423280 (class 0x65B3BC slot +0x3C @0x65B3F8, sole vtable reference; ret 8) returns a direct refcounted ROOT (+4) for a file name; stream construction 0x43C490 (fopen 'rb', flags 0x2800) is not the loader (nested [nested_vt+8] loads); 0x42BA30 = binary stream reader at slot +0xC; 0x42E9B0 = texture-class resource wrapper (type-walk via runtime-init descriptor 0x6C3940); 0x423350 = compare/merge (slot +0x40), not placement",
+    "record_side": "records 0x5C runtime-created from messages (47CFB0 -> 45DE90/45D5F0 -> 477FC0 flag=0 -> 473430); [rec+0x38]=NULL at every in-image creation (provider branch statically dead: 477FC0 hardcodes flag=0, xor edi,edi @0x477FE1 + push edi @0x477FE9); lazy-create K=0 (measured sites); 46ECA0 re-bind takes K from the message (K!=0 exists); T0 immortality not proven",
+    "message_keyed_creation": "handler 0x47B8A0 -> 4579E0 -> 54FD40([0x6C6A44], msg id) -> W -> 46EC60 -> P (0x7C proxy) -> 527A00/527BC0(P, message-string, flag) create per-name type-7 components of class 0x65B3BC in [per-name obj+0xBC] (slot+0x2C=0x422340 returns 7; attach 4220A0, detach 414D20(obj,7)+485E60); BOTH retvals DISCARDED at the caller (0x47B8F4 test ebp,ebp; 0x47B902 lea) — receiver = P itself (CORR1, QC2-F01)",
+    "wrapper_lane": "0x4859A0 -> 498B80(inner=[svc_result+0x38] via [0x6C4F20] keyed 0x19A) -> [[inner] vt+0x3C] = potential open-by-name with message-borne (name, context-string) args; inner class = runtime BARRIER; retval DISCARDED @0x485A07",
+    "visual_consumption": "SFO visual via message-key -> 52A130 -> 564AB0 -> 564890 -> [entry+8] wrapper vt 0x65E648 -> 5257C0 -> [SFO+0x10]",
+    "vfs_initializer": "0x45E4F0 (class vt 0x65BFD8) registers 'textures.ark'/'models.ark'/bnt paths and '.nif'/'.dds'/'.tga' extension patterns from CONFIG LITERALS only; feeds no measured edge into 52A130/564890"
+  },
+  "bridge_lane_status": {
+    "a_container_readers": "CLOSED-NEGATIVE (section1): the only type-7 consumers are the detach paths inside 527A00/527BC0 (0x527A68/0x527C28); no measured [obj+0xBC] reader dispatches slot+0x3C/+0x38 on an element (J04 T3/T4/T5)",
+    "b_residual_slot3C": "OPEN: residual 14 call [reg+0x3C] sites with runtime-selected receivers (strongest 0x498C50 via wrapper 0x498B80; second 0x56FA46 switch-dispatch arm) + the wrapper-inner lane (key 0x19A) — runtime data required",
+    "c_sub18_provider": "CLOSED-NEGATIVE-IN-IMAGE: provider branch statically dead (flag=0 hardcoded; [MGR+0x18] never assigned a value in-image, 602-form census); residual = runtime assignment outside section1 or unhandled forms, but the [P_vt+4]->[rec+0x38] edge stays dead in-image regardless",
+    "d_member18_owner_chain": "MEASURED NON-KEY-CONTRIBUTING: member +0x18 = owner-chain (4062C0 recursive walk; fallback class 0x65B140 whose +0x70=deleting dtor, +0xDC=import thunk, +0x3C=0x41DEF0 — no open-by-name slot); 526AE0 does contact the visual map (52A130 @0x526CC9) but with handler-local owner/key; residual = post-52A130 flow 0x526CFA+ and runtime receiver classes",
+    "e_outside_section1": "BARRIER: vtables/registrations in later PE sections (wrapper 0x498B80 vtable, RTTI 0x6C3898/0x6C3A0C, import [0x65A1A8], service [0x6C4F20])"
+  },
+  "model_binding_certificates": [
+    {
+      "model_id": "296445.nif",
+      "model_sha256_known_prefix": "656795D8 (pinned by run control)",
+      "binding_status": "CONDITIONAL_OPEN",
+      "status_detail": "mechanizm wspolny potwierdzony; per-model binding not established: literal '296445' absent (SCOPED_NEGATIVE, literals only — name-assembly exists so runtime-built names remain possible); no measured edge carries the 296445 name or ROOT into record/SFO/map; both J03 callers discard retvals; lanes (a)/(c)/(d) measured-closed-negative",
+      "pointer_level": "ROOT = direct refcounted ptr (+4); type-7 instances = direct ptrs in [per-name obj+0xBC] (refcount +4); wrapper {vt 0x65C69C, inner +4}; [SFO+0x10] = direct visual ptr",
+      "store_load": "0x40F020 smart-ptr exchange [this+0x34] (loader-side storage, provider [0x6C3F34]); 4220A0 inserts into [per-name obj+0xBC]; [W+0xF8]=P cache; [rec+0x38]=NULL at in-image creations",
+      "condition": "binding would require lanes (b) residual-14 slot+0x3C receivers / 0x498B80 inner (key 0x19A), (d-res) post-52A130 flow 0x526CFA+, or (e) code outside section1.bin",
+      "lifetime": "type-7 instances container-owned, refcounted, detachable via message flag; P = 0x7C proxy (473E90 product, cached [W+0xF8]); records runtime-created, re-bindable; T0 immortality unproven",
+      "aliasing_premise": "requires lanes (b)/(d-res)/(e); the message-keyed creation namespace and the open-by-name key namespace remain unjoined by any measured value flow",
+      "barrier_list": ["runtime class of [svc_result+0x38] wrapper inner (key 0x19A)", "runtime receivers of the residual 14 call [reg+0x3C] sites", "runtime type-identity via descriptor 0x6C3940 (zero in image)", "runtime classes of [per-name_vt+0x50] lookup objects (RTTI 0x6C3898/0x6C3A0C runtime-init)", "post-52A130 flow 0x526CFA+ unmeasured", "sections outside section1.bin", "runtime assignment of [MGR+0x18] (lane c residual; does not revive the in-image dead branch)"]
+    },
+    {
+      "model_id": "218757.nif",
+      "model_sha256_known_prefix": "C13D0873 (pinned by run control)",
+      "binding_status": "CONDITIONAL_OPEN",
+      "status_detail": "identical shared pipeline (single common mechanism); dword 218757 @0x469CBB classified INCIDENTAL (J01); no per-model separation introduced by any J-wave/D-wave finding",
+      "pointer_level": "same as 296445.nif",
+      "store_load": "same as 296445.nif",
+      "condition": "same as 296445.nif",
+      "lifetime": "same as 296445.nif",
+      "aliasing_premise": "same as 296445.nif",
+      "barrier_list": "same as 296445.nif"
+    }
+  ],
+  "non_promotion": {
+    "PE2003_WORLD_XYZ_RECOVERED": "NO",
+    "PE2003_HISTORICAL_PLACEMENT": "NOT_ESTABLISHED",
+    "SOURCE_SPECIFIC_ISO_MODELS": "UNKNOWN (common mechanism confirmed; per-model open)",
+    "LOCAL_SOURCE_EXHAUSTED": "NO (all negatives are scoped)",
+    "CANONICAL_GATE_EFFECT": "NONE",
+    "MODEL_INSTANCE_JOIN": "UNVERIFIED (no CONFIRMED issued)"
+  }
+}
