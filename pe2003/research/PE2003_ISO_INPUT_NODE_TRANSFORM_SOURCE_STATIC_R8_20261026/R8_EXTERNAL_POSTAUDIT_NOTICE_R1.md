@@ -1,0 +1,15 @@
+# R8_EXTERNAL_POSTAUDIT_NOTICE_R1 (addytywny; pliki R8 bajtowo nietknięte)
+
+RUN_ID ktorego dotyczy: PE2003_ISO_INPUT_NODE_TRANSFORM_SOURCE_STATIC_R8_20261026.
+Zrodlo postaudytu: niezalezny Desktop postaudit R1 (verdict REQUIRE_CORRECTIONS) + kampania nastepcza PE2003_ISO_RECORD_MODEL_VALUE_JOIN_STATIC_R9_20261026, ktora wykonala i zweryfikowala nastepujace korekty. Ten notice nie powiela niedozwolonego excerptu encodingu instrukcji obecnego w publicznym REPORT R8 (defekt zasygnalizowany; bajty niepowtarzane).
+
+## Korekty
+1. STOP: R8 zakonczono jako CLEAN_STOP_WITH_READY_EDGES pomimo gotowych, dostepnych i mieszczacych sie w budzecie zadan ( frontier F-A07/F-A08/F-A09/F-A10/F-M11 ). STOP nie spelnil bramki kontraktu; kampania R9 kontynuowala te galezie.
+2. F-A07 (A07 analysis): zrodlo fizyczne dekodow = obraz klienta ISO 5.1.0.0 (section1.bin, SHA256 D43A23B9..., base 0x401000), nie PE2_unpacked_out.exe. Pierwszy wiersz dekodu 0x505C00 byl dezalignowany (fantomowy cel poza obrazem); od 0x505c05 wszystkie VA/bajty fizycznie poprawne (R9 A1 + Q1). raw_reads pre_head: etykieta VA poprawna (poczatek wewnatrz instrukcji).
+3. Kandydaci crypto z R8 podniesione do CONFIRMED (R9 A2 + QC2, niezalezne odtworzenie): 0x520620/0x520fa0 = kanoniczny Blowfish keysetup (tabele P/S pi w obrazie na 0x6b7b10/0x6b6b10, bajt-dokladne vs niezaleznie wygenerowane wzory); 0x520AD0 = Blowfish DECRYPT (drabina P[17]->P[1]); klucz statyczny 448-bit @0x6b6648; glowica funkcji okna = 0x505ba0; jedyny caller 0x45c9b6 w kontekscie '/Scripts/'.
+4. Receiver/stack: owner chain potwierdzony bajtowo i bez nagwiazdania +78/+34 (kolejne hopki na roznych obiektach: A=M32[S+0x78] -> B=M32[A+0x34] -> C=M32[B+8] -> D=M32[C+0x1C] -> owner=M32[D+8]); owner stack-storage w 564890 ([esp+8] store -> [esp+0xc] readback) potwierdzony.
+5. Pointer levels: produkcja X domknieta (setter 0x451730 [E+0x14]=owner wywolywany z 564890; odczyt X w 52a130); X=owner; thunk 0x564ab0 dowodzi E'==E; M = get-or-create node (0x417600, 37-bucket mapa, temp global [0x6c3a70]); rekord 12B (vtable 0x65e648, E weak, M strong) zwracany jako wynik 52a130. Natura M jako model/wezel pozostaje UNKNOWN.
+6. Getter 46F190 (EAX=ECX+0x6C): utrzymany bez zmian (nie kwestionowany w R9).
+7. Negatywy ISO/network: utrzymane UNVERIFIED/not-establised; R9 dodalo dokladny zakres negatywu availability (pelny payload instalatora + drzewo ISO9660 + 50.bnt terrain-only 0 NIF); PE_PCG.ark/FullDat pozostaja nazwami-nie-dowod (Download.data 12B verbatim). Surowy skan nie zostal uzyty jako dowod semantycznej nieobecnosci.
+8. Liczniki/chronologia/census R8 (98 ADMIT, 32 Task, STOP 19:05Z vs 12:07Z, PUB ID typo): utrzymane zaszlosciowo; R9 prowadzilo wlasny accounting z zegarowych UTC i RECONSTRUCTED oznaczeniami dla czasow dispatchu; dziesiec pustych-zwrotow dzieci R9 odnotowanych jako incydent procesowy INC-R9-001.
+9. Standing kanoniczny: bez awansu. PE2003_WORLD_XYZ_RECOVERED=NO; PE2003_HISTORICAL_PLACEMENT=NOT_ESTABLISHED; SOURCE_SPECIFIC_ISO_MODELS=NOT_OBSERVED_IN_BOUNDED_SEARCH (zakres per R9 I1); LOCAL_SOURCE_EXHAUSTED=NO. CANONICAL_GATE_EFFECT=NONE.
