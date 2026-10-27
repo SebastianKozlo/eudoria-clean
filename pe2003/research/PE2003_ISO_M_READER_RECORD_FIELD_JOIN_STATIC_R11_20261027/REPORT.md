@@ -1,0 +1,31 @@
+# PE2003_ISO_M_READER_RECORD_FIELD_JOIN_STATIC_R11_20261027 — public sanitized report (advisory)
+
+Era/build: ISO2003NOV_PE_5_1_0_0 (client 5.1.0.0). Image: section1.bin, SHA256 D43A23B9EFCFC9BC4092B38FA3C73499DE7DE7B03B20F34478B9E81EE8893631, flat mapping base 0x401000. 100% STATIC_ONLY: zero runtime, zero game execution, zero original-code emulation. Models under investigation: 296445.nif, 218757.nif. Placement result: WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; CANONICAL_GATE_EFFECT=NONE. This publication is a sanitized projection of the sealed local science package; it carries conclusions, VAs, statuses and provenance only (no raw instruction encodings, no payload bytes).
+
+## Results (static, QC-verified)
+
+1. 0x447B20 (the call target receiving argument M) is QUALIFIED WITHOUT ASSUMED SEMANTICS: __thiscall, exactly one stack argument M, bool return in AL; early-exit RET inside the decoded window; the body dereferences M (vtable read, virtual call on M), walks a chain comparing nodes against constant 0x6C3A50, and iterates a list at M+0xBC with a refcount-release idiom. It is NOT established as a reader/model-reader; classification stays open (query/detach-style operation on M's internal list is the bounded reading).
+2. Consumer 0x5257C0 CLOSED to a normal return (ret 8) at 0x5258F5: __thiscall constructor (vtable 0x65E5B4 installed at 0x525865); NO backedge exists (the earlier "0x24-stride iteration" hypothesis is disproven for this consumer); F+0x24 is the ADDRESS of an embedded field inside the F record (F extends to at least +0x4D), passed as the second constructor argument to 0x52F290 together with the value [F+0x1C]; the call result is refcounted ([R+4] increment) and stored into member [this+0x30] after releasing the old value via 0x528E10; the allocation is a fresh 0x10-byte block via 0x4ADE7C.
+3. 0x52F290 (partial, honest gap): initializes a refcount field to zero at +0x04 and forwards both arguments into a fresh 0x3C-byte sub-object (via 0x52C610) whose pointer is stored at receiver+0x08 with its own refcount bump. Whether it returns the receiver remains UNKNOWN in the decoded window.
+4. Wrapper 0x4021E0: a systematic field copier from S_entry into a newly built E object (0x78-byte block, ctor 0x451430). The call at 0x40248A targets 0x451730 with the argument [S_entry+0x68]; [S_entry+0x64] is consumed via 0x451720 at 0x40247F. The wrapper's own RET was NOT reached within the decoded range (tail continues past 0x402560).
+5. Callsite provenance: 0x4019EB is the only direct call site of the wrapper; ECX=S_entry via a register move at 0x4019E9; the wrapper call is gated by a necessary-but-not-exhaustive precondition comparing record fields [esi+0x28]/[esi+0x2c] and [esi+0x34]/[esi+0x38]. The containing method has its entry at 0x401980 (thiscall).
+6. Sole caller: a full-image census (every byte offset examined as a potential call start, negative control on an off-by-one target: zero hits) found EXACTLY ONE direct call site of 0x401980: VA 0x40120F. S_entry is constructed there as a NEW 0x78-byte object (allocator 0x4ADE7C; ctor 0x401770).
+7. Class S ctor fully closed (0x401770..0x401855, ret 4): POLYMORPHIC — a vptr (0x65A71C) is installed LAST at 0x40183E (an earlier in-run inference of non-polymorphism was REFUTED and retracted). Five 12-byte owned sub-objects at +0x1C..+0x57; scalar tail includes +0x58<-0x4000, +0x5C<-0x400, +0x60<-0x300, +0x6C<-0x7530, +0x70<-2. The record fields of interest ARE initialized in-ctor: a store to +0x64 (source register; value not verifiable in-window) and a store of the constant 0x20 to +0x68 (CONFIRMED) — the same field later passed to 0x451730 by the wrapper.
+8. Setter family map (record/field join at both ends): 0x451710 stores arg to E+0x0C, 0x451720 to E+0x10, 0x451730 to E+0x14 (each dword, ret 4). Hence the wrapper copies [S+0x64]->E+0x10 and [S+0x68]->E+0x14.
+9. E_builder class identity: ctor 0x451430..0x451591 fully closed (plain ret; 0x14 stack cleanup is callee-local/SEH, NOT five stack arguments — the caller pushes none; an in-run inference to the contrary was RETRACTED). The ctor installs vtable 0x65BDB4 (distinct from the F-class vtable 0x65E5B4) and copies a static string (0x6AEE00) into the +0x54 member.
+10. Identity bridge verdict: NO_BRIDGE between the E_builder population (built by 0x4021E0) and the E_fetch population (consumed at 0x564890): the only shared signal is the setter-family call 0x451710 (class-family edge). E_builder != E_fetch is NOT a proven inequality. Corrected census: exactly NINE direct call sites of 0x451730 in the whole image (full-range scan).
+
+## Model case status
+
+- 296445.nif: all six case-cert fields remain OPEN (no source-specific asset observation, no definition join, no instance identity, no transform source, no authentic values, no frame). COMMON mechanism knowledge advanced only.
+- 218757.nif: same status. A common mechanism never closes the join for a specific model.
+
+## Best missing edges (for the next run)
+
+E1: identity bridge E_builder <-> E_fetch — resolve the E_fetch class (runtime vtable read site 0x5649B8) against the now-static E_builder vtable 0x65BDB4. E2: any post-ctor writer modifying [S+0x68] between construction and the wrapper call (undecoded region 0x401240..0x401990 of the sole-caller function).
+
+## Process (advisory)
+
+29 native Task dispatches (21 research + 8 QC; depth 1, max 2 active, no nesting); 3 empty worker finishes and 1 API-connect failure honestly recorded and retried; 5 QC waves + accounting QC: final verdicts QC_PASS (x4), QC_PARTIAL with applied corrections (QC5), accounting QC_PASS_WITH_P2. Two in-run inferences were retracted under QC (S-class polymorphism direction; ctor argument count) — retractions are recorded in the sealed claim list. Budget: 60 admissions / 0 denials; all keys within caps; closing reserve intact; admission-before-read chronology clean. The sealed local package (exclusive-create manifest, 142 artifacts) passed the package verify; the seal receipt lives outside the science tree.
+
+WORLD_XYZ_RECOVERED=NO; HISTORICAL_PLACEMENT=NOT_ESTABLISHED; SOURCE_SPECIFIC_ISO_MODELS=NOT_OBSERVED_IN_BOUNDED_SEARCH; LOCAL_SOURCE_EXHAUSTED=NO; CANONICAL_GATE_EFFECT=NONE; EXTERNAL_POSTAUDIT=PENDING; EU935 milestones untouched.
