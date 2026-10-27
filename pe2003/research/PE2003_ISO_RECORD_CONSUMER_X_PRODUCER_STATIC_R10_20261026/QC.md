@@ -1,0 +1,4 @@
+# QC - R10
+Q1 (fresh pe-master-auditor, ses_e83f2b3d0ffeBubOOXEfuJcEHr): PASS for X1 RESULT (all stack-delta/epilogue/esi-path/arg2 arithmetic independently reproduced) and PASS for C1 ROOT_FALLBACK (push order, 5 rel32 targets recomputed, vptr store, vtable dump byte-identical to flat blob at offset 0x25D5B4). Report: jobs/Q1/attempt_1/QC_REPORT.md.
+Q2 (fresh pe-master-auditor, ses_e83e3626affexVwqoUobonJnNW): QC_PASS for C2/X3/X4/C3/C4/C5 (all load-bearing claims independently recomputed from raw blob, including vtable dwords 0x65BDB4/0x65BCE4 slots); ONE P2 finding accepted and corrected (451730 argument [S+0x68] not [S+0x64]; see CORRECTIONS.md). Q2 also fixed a prompt typo ([vt+0x10] reader value 0x447B20 confirmed against the C5 report). Report: jobs/Q2/attempt_1/QC_REPORT.md.
+SELF_REVIEWs and INPUT_RECHECK cover the closing rehash and the master second pass.

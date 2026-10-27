@@ -1,0 +1,4 @@
+# CORRECTIONS - R10
+1. Q2-P2 (accepted, root own error): in the X2 dispatch packet the root attributed the 451730 call at 0x40248A to argument [S+0x64]. Independent Q2 recompute of raw bytes shows: at 0x40247F call 451720 <- [S+0x64]; at 0x40248A call 451730 <- [S+0x68]. The wrapper is a run of 5+ adjacent setter calls (451700..451990) over successive source fields (S+0x5C..S+0x70 observed region). X (wrapper population) = copy of [S+0x68].
+2. X1 RESULT naming offset (0x564A3A mov / 0x564A3E push) was resolved in-run by the executor and confirmed by Q1; no further correction needed.
+3. R9 corrections are carried unchanged and were not re-litigated: 564A32->451710->[E+0xC]; function 417690 owns window 4176C0; 52A215..224 releases M (EDI), record stores E and retains M; pi-tables confirmed but 448-bit key/full standard Blowfish equivalence unproven; two VFS scalars are not XYZ and their consumer is unknown; model availability is a bounded non-observation.

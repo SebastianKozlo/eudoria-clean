@@ -1,0 +1,5 @@
+# CLOSURE_ELIGIBILITY - R10
+SCIENCE: NOT exhausted - ready significant edges remain (FRONTIER items 1-6 attainable, in-budget). The run closes as a bounded research checkpoint: the controller session reached its reliable execution horizon (real process/context constraint of THIS session), not a science-depletion stop. No closure claim science-complete is made. Availability negatives remain bounded; model data remain unobserved in the tested scope.
+PROCESS: preflight PASS (1752 pins); budget admissions all ADMIT (29 ledger events); no cap breach; closing reserve protected (PUB admission reserved 600 MiB).
+INTEGRITY: no frozen source modified; no game executed; no original code emulated; STATIC_ONLY held; children never nested; root is sole writer of central docs and ledger.
+STOP reason for this session: real controller-session horizon (bounded execution blocker in contract terms), partial outputs preserved, exact resume action in FRONTIER.md. Terminal label: SCIENCE_STOP (checkpoint), NOT science exhaustion.

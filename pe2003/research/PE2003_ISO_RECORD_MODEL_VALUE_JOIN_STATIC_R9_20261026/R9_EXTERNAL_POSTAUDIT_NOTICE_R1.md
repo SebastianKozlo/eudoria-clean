@@ -1,0 +1,16 @@
+# R9_EXTERNAL_POSTAUDIT_NOTICE_R1.md (additive; R9 files byte-untouched)
+Issued by: PE2003 campaign R10 (RUN_ID PE2003_ISO_RECORD_CONSUMER_X_PRODUCER_STATIC_R10_20261026), sealed 2026-10-27, advisory (CANONICAL_GATE_EFFECT=NONE).
+Purpose: carry the R9 Desktop postaudit corrections into the record and state what R10 confirmed vs what remains open. This notice does not modify the frozen R9 REPORT or its sealed package.
+
+## Upheld R9 corrections (R9 files remain authoritative; R10 evidence agrees)
+1. Owner/X: call at 0x564A32 targets 0x451710, which stores owner to [E+0xC]; the 0x451730/[E+0x14] setter is a different body; X=M32[E+0x14] is a read; X=owner remains UNVERIFIED. R10 additionally: no dword 0x00451730/0x00451710 exists anywhere in the flat image, so no vtable of this image carries either setter as a direct entry (bounded negative, direct dwords only).
+2. Function boundary/M map: 417600 ends RET 0x41768A; window 0x4176C0 belongs to the function starting 0x417690. Untouched by R10; carried.
+3. Release M/E lifetime: 0x52A215..224 releases M in EDI, not E; the record stores E (rec+4) and retains M (rec+8). R10 adds: the direct consumer 5257C0 binds the record into a 0x70 receiver via 52B750 (this+0xC = whole record, this+8 = M), and M is dispatched to reader 0x447B20 through helper vtable 0x65BCE4 slot +0x10 (core 0x4475C0, front-or-NULL collection, consumer iteration stride 0x24). M remains UNCLASSIFIED; E balance/lifetime remains open.
+4. Keylength/cipher proof: R9 finding unchanged in R10 (pi tables confirmed; 448-bit key/full standard Blowfish equivalence unproven; block helper/mode/padding open). R10 did not develop the crypto library (not needed for the record-consumer/writer route).
+5. VFS semantic negatives: unchanged. The file with 918 nine-float sections is not semantically excluded as transforms; the two target scalars are not XYZ and their consumer is unknown. R10 P1 adds: 26/26 VFS files hash-covered by the existing M2_7_2 manifest, era/source UNRESOLVED; no PE_PCG*.ark / FullDat*.ark / Dat*_*.ark found in the contracted local directories (metadata-only sweep, limits recorded); [LOCAL_DIR]/PE_Terrain does not exist.
+6. Census and budget: R9 had 15 native children and 16 TASK reservations (PUB executed by root); six empty returns were length-class (16384 output tokens), infrastructure failure not established - R9 finding carried. R9 INC-005 charged 84672512 output bytes vs 184061568 physically measured, overrun disclosed but not debited - R10 records this as a standing accounting caution; R10 itself separated reservations from measured actuals in its sealed BUDGET_ACTUAL_CHARGED.md and reserved 600 MiB for the publication checkout.
+
+## What R10 added (see this run directory)
+- C-route: record(E,M) fully bound into the 0x70 receiver; M dispatch chain pinned to reader 0x447B20 (body still undecoded).
+- X-route: candidate E+0x14 writer population = builder wrapper 0x4021E0 (single caller 0x4019EB; E ctor 0x451430; E class vtable 0x65BDB4 with [vt+0x30]=0x447C90); for this population X is a copy of source field [S+0x68]. Identity with the 0x564890-flow E: NO edge proven.
+- Per-model status: unchanged (296445.nif and 218757.nif: availability NOT_OBSERVED_IN_BOUNDED_SEARCH; resource->instance->transform->frame OPEN/NOT_ESTABLISHED for both).
