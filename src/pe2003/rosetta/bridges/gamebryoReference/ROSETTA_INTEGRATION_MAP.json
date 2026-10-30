@@ -1,0 +1,108 @@
+{
+  "record_id": "ROSETTA_INTEGRATION_MAP",
+  "run_id_parent": "PE2003_ROSETTA_GAMEBRYO_BRIDGE_CORRECTIONS_R1_20261030",
+  "job": "J5 = Wave B3+B4: executable knowledge integration for the Rosetta namespace",
+  "generated": "2026-10-30",
+  "namespace": "src/pe2003/rosetta/bridges/gamebryoReference/",
+  "namespace_status": "NEW NAMESPACE (no src/pe2003/ tree existed before this job). Existing Rosetta layer = src/pesource/* (BuntArchive, Bnt2Archive, Bnt2TerrainArchive, ArkArchive, TdfDecoder, TdfMaterialTailDecoder, TgaDecoder, VegetationClimateDecoder, PESourceMount, PEProvenance - 'the Rosetta layer with NO renderer semantics') and src/peworld/* (PETerrainCore, PEFoliageCore). NO overlap: no existing transform module, no existing transform consumer, no existing gamebryoReference record. No existing Rosetta file was modified.",
+  "runtime_enabled_note": "runtime_enabled=false for EVERY record below: this namespace is REFERENCE ONLY. The 8140 runtime (eudoria-clean demo/scene) is another writer's and is NOT touched by this job.",
+  "records": [
+    {
+      "knowledge_record": "niTransformAdapter.mjs",
+      "source_build": "PE42 NiTransform convention (point-math ground truth via transform_check.py, sha256 68FEB748E290AD87AC05F97DC41A327122CDCFA664AD4ED4BF0E4FE4FCC1D4FF) + NiDX9Renderer.cpp (Gamebryo 1.2 SDK, REFERENCE_OTHER_BUILD, sha256 62205FDB798BAA90D601D212E20DD0F3F19F0FCF12B4433E9827B23DC22C212F) as convention reference only",
+      "source_hash": "32D3DD4B6EA53E29EDB9953D0E79454E7D966F0F088A18651C8A69A6AB8B643F",
+      "claim_status": "EXECUTED PASS 8/8 gates (J4 suite re-run in this worktree by tests/bridge/rosettaRegistry.test.mjs); wrong-transpose mutant fails as required negative control",
+      "limitation": "Uniform-scale NiTransform IR only; NaN/Inf rejected at ingestion; handedness is an explicit convention parameter (MissingConventionError otherwise); no skinning, no non-uniform scale, no runtime engine claim",
+      "consumer_code_api": "src/pe2003/rosetta/bridges/gamebryoReference/niTransformAdapter.mjs: makeIR(), applyIR(), niToD3DWorld(), d3dDeviceApply(), niToThreeWorld(), threeElementsApply(), compose(), cameraBasis(), cameraViewD3D(), cameraViewThree(); constants D3D_LH_TARGET, THREE_RH_TARGET; errors NiTransformIRError, MissingConventionError",
+      "executed_test_ids": "test_adapter.mjs gates: identity, rotY90_scale1.5, noncommuting_pair, parent_child_composition, camera_eye_to_origin, nan_inf_rejection, wrong_transpose_mutation_must_fail, three_engine_math_crosscheck; registry test gates: module_hashes_match_j4, adapter_math_spotcheck, adapter_gates_rerun_pass, mutant_negative_control_fails",
+      "runtime_enabled": false,
+      "future_import": "import { makeIR, niToThreeWorld, compose, cameraViewThree } from '../src/pe2003/rosetta/bridges/gamebryoReference/niTransformAdapter.mjs';",
+      "integration_pending": "INTEGRATION_PENDING: no runtime code imports this module yet. Future import sites: (a) any 8140-runtime transform consumer (another writer's scope) for world/view matrix math; (b) a future billboard/camera-facing re-implementation consuming cameraBasis/cameraView*; (c) a future graph-reattachment repair consuming compose() to re-apply L_removed."
+    },
+    {
+      "knowledge_record": "test_adapter.mjs",
+      "source_build": "J4 executed test suite (independent oracle transcribed from transform_check.py)",
+      "source_hash": "8179AD185D05A7725F82B1601EC45F6E66F7055067CA885774361B5438559FA1",
+      "claim_status": "EXECUTED in this worktree: node test_adapter.mjs -> exit 0, ALL_GATES_PASS; node test_adapter.mjs --adapter=./mutant_wrong_transpose.mjs -> exit non-zero (required negative control)",
+      "limitation": "G8 three_engine_math_crosscheck resolves three portably (bare specifier + module-relative walk-up; honest SKIP if unresolvable); executed against three@0.185.0 in WORK_ROOT; SKIPPED in the bare worktree (no node_modules); it is an executed MATH cross-check of THREE.Matrix4/Vector3/Quaternion classes, NOT a runtime/rendering engine proof; if three is unresolvable the gate self-skips (exit 0 with 7 pass + 1 skipped)",
+      "consumer_code_api": "standalone test executable: node src/pe2003/rosetta/bridges/gamebryoReference/test_adapter.mjs [--adapter=./mutant_wrong_transpose.mjs]; also spawned by tests/bridge/rosettaRegistry.test.mjs (gates adapter_gates_rerun_pass, mutant_negative_control_fails)",
+      "executed_test_ids": "the 8 gate names above (this file DEFINES them)",
+      "runtime_enabled": false,
+      "future_import": "not imported - executed as a child process: spawnSync(process.execPath, ['test_adapter.mjs'], { cwd: <namespace dir> })",
+      "integration_pending": "INTEGRATION_PENDING: keep re-running on any adapter change; the mutant negative control is mandatory (a suite that passes with the mutant present is itself broken)."
+    },
+    {
+      "knowledge_record": "mutant_wrong_transpose.mjs",
+      "source_build": "J4 deliberate wrong-transpose mutant (harness MatFromTransform layout)",
+      "source_hash": "81F84F7C9B4E039A6D11A611EFEA3CCB710DE73B252A83B56813CBD2941298AC",
+      "claim_status": "EXECUTED NEGATIVE CONTROL: fails the suite with non-zero exit (as required)",
+      "limitation": "negative control only - never a consumer; byte-identical to the J4 mutant",
+      "consumer_code_api": "test input only: node test_adapter.mjs --adapter=./mutant_wrong_transpose.mjs",
+      "executed_test_ids": "same 8 gates, expected to FAIL (exit non-zero is the pass condition of the control)",
+      "runtime_enabled": false,
+      "future_import": "none (test fixture)",
+      "integration_pending": "INTEGRATION_PENDING: none for consumers (fixture is complete); byte-identity to the J4 pin must be preserved on any republish."
+    },
+    {
+      "knowledge_record": "FORMAT_LOSS_MATRIX.json",
+      "source_build": "OLD HARNESS path: frozen lab PE2003_GAMEBRYO_LOCAL_TOOLKIT_ASSET_BRIDGE_LAB_R1_20261030 (harness.cpp sha256 ACB38FD9...1DD3F; strip tool niark_strip_v41_local.mjs sha256 C37E16DC...69DD)",
+      "source_hash": "see ground_truth_sources inside the record (TEXTURE_ERA_AND_ALPHA.json E7093A3B..., TRANSFORM_COUNTEREXAMPLES.json 0C35F626..., GRAPH_BYPASS_FORENSICS.json 62983A14...)",
+      "claim_status": "11 capability rows grounded in executed evidence: transform_world UNSUPPORTED, transform_view UNSUPPORTED, hierarchy_reparent UNSUPPORTED, billboard UNSUPPORTED, zbuffer_property PARTIAL, uv_animation PARTIAL, texture_rgb SUPPORTED, texture_alpha UNSUPPORTED, skin UNTESTED, collision UNTESTED, niark_unknown UNTESTED",
+      "limitation": "status describes the OLD HARNESS path only; skin/collision/niark_unknown are UNTESTED by corpus absence (recorded, never inferred as capability); frozen to the three hashed artifacts",
+      "consumer_code_api": "rosettaReferenceRegistry.mjs: loadRecords().FORMAT_LOSS_MATRIX / lookupCapability(name); validated by tests/bridge/rosettaRegistry.test.mjs gate records_loadable_and_wellformed",
+      "executed_test_ids": "registry test gates: records_loadable_and_wellformed, claim_corrections_complete",
+      "runtime_enabled": false,
+      "future_import": "import { loadRecords } from '../src/pe2003/rosetta/bridges/gamebryoReference/rosettaReferenceRegistry.mjs'; const matrix = loadRecords().FORMAT_LOSS_MATRIX;",
+      "integration_pending": "INTEGRATION_PENDING: no runtime consumer yet; a future capability-gated renderer should consult the matrix before claiming any listed capability."
+    },
+    {
+      "knowledge_record": "TEXTURE_ERA_RECORD.json",
+      "source_build": "EU_LATER Textures.bnt (archive sha256 2EAE115958D3157FA62F8CBFBAC6F4BFB5C38A820F1D05F9248C4200C0208A56, 8095 entries, 850681602 bytes) vs CD_JAN_2003:Textures.ark (D611D125...B80); era label source PEProvenance.js (E88B5104...7799)",
+      "source_hash": "TEXTURE_ERA_AND_ALPHA.json E7093A3BC186D398115EB2B8DF26D2021472654285A209B2CF1FA238F71F1539 (ground-truth artifact)",
+      "claim_status": "SAME_ERA_WITH_PE42=FALSE; 16/24 byte-identical vs CD_JAN_2003, 8/24 byte-different, 0 absent; per-member era NOT_ESTABLISHED for the 8 byte-different (pixel comparison not evaluated); lookup verified by executed registry gates",
+      "limitation": "EU_LATER is RE evidence ONLY - never ISO_5_1_0_0 / JUL_2003 primary-target truth; M3-3 namespace matching unreliable for these rows (used for ARK-side hashes only); no ISO confirmation from SDK agreement exists",
+      "consumer_code_api": "rosettaReferenceRegistry.mjs: lookupByArchiveSha256('2EAE1159...'), lookupForBuild('ISO_5_1_0_0') (strict, never substitutes); validated by registry gates provenance_lookup_finds_eu_later_not_iso_truth and iso51_query_rejects_substitution",
+      "executed_test_ids": "registry test gates: provenance_lookup_finds_eu_later_not_iso_truth, iso51_query_rejects_substitution",
+      "runtime_enabled": false,
+      "future_import": "import { lookupByArchiveSha256, lookupForBuild } from '../src/pe2003/rosetta/bridges/gamebryoReference/rosettaReferenceRegistry.mjs';",
+      "integration_pending": "INTEGRATION_PENDING: the existing provenance consumer src/pesource/PESourceMount.js (imports makeProvenance/EVIDENCE_STATUS/ERAS/KNOWN_HASHES from PEProvenance.js) is the natural future integration site for era-scoped texture lookups; it is NOT modified by this job (existing Rosetta file - untouched)."
+    },
+    {
+      "knowledge_record": "CLAIM_CORRECTIONS.json",
+      "source_build": "parent run PE2003_ROSETTA_GAMEBRYO_BRIDGE_CORRECTIONS_R1 QC/audit finding register (corrections 1-4 grounded in the three hashed evidence artifacts; corrections 5-6 from the parent-run finding register per the J5 contract)",
+      "source_hash": "ground-truth artifacts as cited per correction inside the record",
+      "claim_status": "6 additive corrections recorded with old_wording preserved verbatim: (1) 'real 2003 textures' -> EU_LATER scoping; (2) 'lossless' -> RGB-scoped + alpha-lost; (3) transform fidelity -> API-identity only + corrected adapter 8/8; (4) graph bypass -> PROVEN_BROKEN_FOR_7_OF_7; (5) QC counter 54858 -> 55304; (6) manifest incompleteness -> enumerated",
+      "limitation": "additive only (history not rewritten); corrections 5-6 are parent-run findings not present in the three JSON artifacts (honestly labeled); no corrected wording establishes primary-target content",
+      "consumer_code_api": "rosettaReferenceRegistry.mjs: loadRecords().CLAIM_CORRECTIONS / lookupCorrection(id); validated by registry gate claim_corrections_complete",
+      "executed_test_ids": "registry test gate: claim_corrections_complete",
+      "runtime_enabled": false,
+      "future_import": "import { loadRecords } from '../src/pe2003/rosetta/bridges/gamebryoReference/rosettaReferenceRegistry.mjs'; const corrections = loadRecords().CLAIM_CORRECTIONS;",
+      "integration_pending": "INTEGRATION_PENDING: any future documentation or UI text in the runtime must use the corrected_wording strings (or stricter), never the rejected old_wording strings."
+    },
+    {
+      "knowledge_record": "rosettaReferenceRegistry.mjs",
+      "source_build": "J5 consumer lookup API for this namespace (loads the four JSON records from its own directory; strict no-cross-era semantics)",
+      "source_hash": "computed in-run after creation (see J5 output handoff file list)",
+      "claim_status": "EXECUTED PASS by tests/bridge/rosettaRegistry.test.mjs (all gates)",
+      "limitation": "reference registry only - no archive I/O, no texture decoding, no runtime mounting; lookupForBuild NEVER substitutes eras (explicit rejection result)",
+      "consumer_code_api": "exported API: ERAS_LOCAL, BUILD_IDS, loadRecords(), listRecordIds(), lookupByArchiveSha256(sha256OrPrefix), lookupForBuild(buildId), lookupCapability(name), lookupCorrection(id)",
+      "executed_test_ids": "registry test gates: module_hashes_match_j4, records_loadable_and_wellformed, provenance_lookup_finds_eu_later_not_iso_truth, iso51_query_rejects_substitution, adapter_math_spotcheck, adapter_gates_rerun_pass, mutant_negative_control_fails, claim_corrections_complete",
+      "runtime_enabled": false,
+      "future_import": "import { lookupByArchiveSha256, lookupForBuild, loadRecords } from '../src/pe2003/rosetta/bridges/gamebryoReference/rosettaReferenceRegistry.mjs';",
+      "integration_pending": "INTEGRATION_PENDING: future consumers (e.g. src/pesource/PESourceMount.js era-scoped lookups, or an 8140-runtime asset resolver) import THIS module rather than parsing the JSON files directly."
+    }
+  ],
+  "record_count": 7,
+  "integration_pending_summary": [
+    "No runtime code (8140 demo/scene - another writer's scope) imports this namespace yet; runtime_enabled=false for every record.",
+    "src/pesource/PESourceMount.js is the exact future import site for era-scoped texture-record lookups (existing Rosetta file - NOT modified by this job).",
+    "Graph-reattachment repair (compose L_removed via compose()) not yet applied to any NIF.",
+    "Billboard camera-facing behavior not re-implemented (math available via cameraBasis/cameraView*).",
+    "Alpha-capable texture path not implemented (alpha loss documented in FORMAT_LOSS_MATRIX.json row texture_alpha).",
+    "skin / collision / niark_unknown remain UNTESTED - each needs its own authorized evidence run before any status change."
+  ],
+  "limits": [
+    "No runtime engine claim: nothing here was executed against the 8140 runtime or any game/SDK binary.",
+    "No ISO confirmation from SDK agreement: SDK 1.2 files are REFERENCE_OTHER_BUILD convention evidence only; the primary target is ISO_5_1_0_0 and no record in this namespace is its truth."
+  ]
+}

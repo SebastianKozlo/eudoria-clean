@@ -1,0 +1,129 @@
+{
+  "record_id": "FORMAT_LOSS_MATRIX",
+  "run_id_parent": "PE2003_ROSETTA_GAMEBRYO_BRIDGE_CORRECTIONS_R1_20261030",
+  "job": "J5 = Wave B3+B4: executable knowledge integration for the Rosetta namespace",
+  "generated": "2026-10-30",
+  "mode": "RESEARCH/REFERENCE ONLY; no runtime, no GUI, no game/SDK execution, no commits",
+  "status_taxonomy": {
+    "SUPPORTED": "old-harness/lab path preserves this capability end-to-end per executed evidence",
+    "PARTIAL": "capability partially preserved (blocks/bytes survive, or a device-global substitute exists), with a documented, measured residue",
+    "UNSUPPORTED": "capability broken/lost on the old harness path per executed counterexample evidence",
+    "UNTESTED": "no executed evidence for this capability exists in the R1 evidence corpus; nothing invented"
+  },
+  "status_scope": "status describes the OLD HARNESS path (frozen lab PE2003_GAMEBRYO_LOCAL_TOOLKIT_ASSET_BRIDGE_LAB_R1_20261030 + its strip tool), NOT the corrected adapter",
+  "lab_only_flag_definition": "LAB_ADAPTED_ONLY=yes means the corrected implementation exists ONLY inside this lab/reference namespace (src/pe2003/rosetta/bridges/gamebryoReference/); no runtime integration exists (runtime_enabled=false for every record, see ROSETTA_INTEGRATION_MAP.json)",
+  "ground_truth_sources": {
+    "TEXTURE_ERA_AND_ALPHA.json": {
+      "sha256": "E7093A3BC186D398115EB2B8DF26D2021472654285A209B2CF1FA238F71F1539",
+      "run_id": "PE2003_ROSETTA_GAMEBRYO_BRIDGE_CORRECTIONS_R1_20261030",
+      "artifact": "TEXTURE_ERA_AND_ALPHA.json"
+    },
+    "TRANSFORM_COUNTEREXAMPLES.json": {
+      "sha256": "0C35F626C8CD9DD1FAFF7E7F2ABE099EBFA94714CD0D43E8062C2D94DDF81E1B",
+      "run_id": "PE2003_ROSETTA_GAMEBRYO_BRIDGE_CORRECTIONS_R1_20261030",
+      "artifact": "TRANSFORM_COUNTEREXAMPLES.json"
+    },
+    "GRAPH_BYPASS_FORENSICS.json": {
+      "sha256": "62983A1421B6EDCD1874A385D45608ED36121A56178DE32BCD52699D4F0FE806",
+      "run_id": "PE2003_ROSETTA_GAMEBRYO_BRIDGE_CORRECTIONS_R1_20261030",
+      "artifact": "GRAPH_BYPASS_FORENSICS.json"
+    }
+  },
+  "rows": [
+    {
+      "capability": "transform_world",
+      "status": "UNSUPPORTED",
+      "status_detail": "Old harness MatFromTransform (harness.cpp:153-162, sha256 ACB38FD9...1DD3F) copies rows of R into rows and feeds a row-vector device, computing R^T(s p)+t instead of R(s p)+t; measured deviations 3.0 / 5.0 / 2.0 / 9.0 units on the 4 non-identity executed cases (identity is transpose-blind).",
+      "evidence": "TRANSFORM_COUNTEREXAMPLES.json harness_vs_sdk_rule; executed_cases[rotY90_scale1.5].harness_layout_result=(50,0,21.5) vs ground_truth=(50,0,18.5), harness_max_abs_err=3.0; executed_cases[parent_child_compose].harness_max_abs_err=9.0",
+      "correction": "niTransformAdapter.mjs niToD3DWorld(): M[i][j]=s*R[j][i] (rotation TRANSPOSED into upper 3x3, GetD3DFromNi layout NiDX9Renderer.cpp:2801-2816), translate in row 4; niToThreeWorld(): NO transpose (column-vector device, logical rows carry R directly). Gates identity / rotY90_scale1.5 / noncommuting_pair / parent_child_composition re-run PASS; mutant_wrong_transpose.mjs fails (required negative control).",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "transform_view",
+      "status": "UNSUPPORTED",
+      "status_detail": "Old harness MatFromCameraWorld (harness.cpp:169-184) writes the (X,Y,F) basis as ROWS into a row-vector device, computing B^T v - B e: the eye does NOT map to the view origin (harness view(eye) = (-6.52046, 2.448951, -17.653281), |v|=18.977674). Additional independent mirror bug: harness X = norm(U x F) = -col2 = -(0.5, 0, 0.866025), mirroring the view X axis relative to the engine's own kRight.",
+      "evidence": "TRANSFORM_COUNTEREXAMPLES.json camera_case.harness_view_eye_norm=18.977673634; camera_case.basis.harness_X_equals_neg_engine_right=true; harness_vs_sdk_rule (SetCameraData NiDX9Renderer.cpp:2643-2658 / D3DXLookAtLH place basis in COLUMNS)",
+      "correction": "niTransformAdapter.mjs cameraBasis(): X = camera's OWN right (R col2), not U x F (mirror fix); cameraViewD3D(convention:'d3d-lh'): basis-in-columns, eye -> exactly (0,0,0); cameraViewThree(convention:'three-rh'): explicit separately-declared diag(1,1,-1) LH->RH reorientation step. Gate camera_eye_to_origin re-run PASS; MissingConventionError without explicit convention (no silent handedness conversion).",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "hierarchy_reparent",
+      "status": "UNSUPPORTED",
+      "status_detail": "The strip tool's bypass-splice (niark_strip_v41_local.mjs, sha256 C37E16DC...69DD) replaces a removed NiArk graph node's slot IN-PLACE with the removed node's children but performs NO local transform composition: the child's world transform loses the factor L_removed; properties/controllers of the removed node are dropped and never transferred.",
+      "evidence": "GRAPH_BYPASS_FORENSICS.json strip_mechanism (key lines 125-149 resolveRemovedGraph; 'NO local transform composition'); strip_mechanism.world_geometry_consequence (world = W_parent * L_child instead of W_parent * L_billboard * L_child)",
+      "correction": "niTransformAdapter.mjs compose(): Ni/Gamebryo parent-o-child operator, child applied FIRST ((P o C).s=P.s*C.s; (P o C).R=P.R*C.R; (P o C).t=P.t+P.R(P.s*C.t)), matching the SDK composition site NiDX9Renderer.cpp:2948. A correct reattachment must compose L_removed; NO repaired NIF was produced in this run (documentation + executable operator only).",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "billboard",
+      "status": "UNSUPPORTED",
+      "status_detail": "NiArkBillboardNode camera-facing behavior is lost by the strip tool's own REMOVED ONLY semantics, AND the bypass is world-geometry-breaking: PROVEN_BROKEN_FOR_7_OF_7 billboard nodes in 296445.nif (position deltas 4941.8-11291.1 magnitude units + dropped 180-deg-Z rotations; engine recount shows all 7 quads collapsed at (0,0,-534.634) vs true positions up to (-1277.75,-1274.89,10611.30)).",
+      "evidence": "GRAPH_BYPASS_FORENSICS.json verdict=PROVEN_BROKEN_FOR_7_OF_7_NODES; removed_nodes[0..6].position_delta_magnitude = 11291.139997 / 11096.602086 / 4951.179005 / 4943.223171 / 4944.841469 / 4941.815043 / 10658.431373; removed_nodes_notes.independent_engine_crosscheck",
+      "correction": "The old lab's world-geometry-preservation implication is REJECTED and enumerated per node with exact deltas; niTransformAdapter.mjs provides the correct camera/view math (cameraBasis/cameraViewD3D/cameraViewThree) usable by a future billboard re-implementation. Camera-facing behavior itself is NOT re-implemented in this namespace.",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "zbuffer_property",
+      "status": "PARTIAL",
+      "status_detail": "7 NiZBufferProperty blocks (flags=1, function=3) were node-level properties of the removed billboards; after the splice the surviving quads inherit NOTHING (their own property lists are [NiMaterialProperty('Flare'), NiAlphaProperty, NiTexturingProperty] - no NiZBufferProperty). Depth rendering still happens only because the harness imposes device-global states: D3DFMT_D24S8 depth stencil (harness.cpp:970), D3DRS_ZENABLE=D3DZB_TRUE (:992), D3DRS_CULLMODE=D3DCULL_NONE (:991, which also masks the 180-deg orientation flip).",
+      "evidence": "GRAPH_BYPASS_FORENSICS.json zbuffer_orphans (count=7, blocks 114/120/126/132/138/144/150 with original and stripped indices); zbuffer_orphans.consumer_correction; zbuffer_orphans.harness_imposed_states.citations",
+      "correction": "Orphan blocks enumerated with exact indices and attachments; per-object depth state loss documented as a consumer correction (quads render with harness-imposed depth only). The transform adapter does not address render states; no fix implemented.",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "uv_animation",
+      "status": "PARTIAL",
+      "status_detail": "The UV controller chain SURVIVED the strip intact (NiUVController block 33 kept with target 32->29 and data_ref 34->31 remapped; NiUVData block 34 kept as linkless verbatim copy; census retains NiUVController:1, NiUVData:1) and the harness DOES run controllers (harness.cpp:1078). The UVs were visibly inert because of the PLAN_B untextured render path, NOT because of block removal.",
+      "evidence": "GRAPH_BYPASS_FORENSICS.json uv_analysis.tool_handling; uv_analysis.verdict_on_inertia_claim ('UV animation inertia is NOT attributable to the strip')",
+      "correction": "The misattribution of inert UVs to the strip tool is corrected: the strip's only UV-relevant behavior is keeping the blocks and remapping two links. No adapter change required or made.",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "texture_rgb",
+      "status": "SUPPORTED",
+      "status_detail": "RGB is preserved through the lab chain (M3-2 source PNG -> lineage copy -> harness 24-bpp BMP -> D3DFMT_X8R8G8B8): chain_verification (source_png_sha256_matches_lineage / lineage_copy_png_sha256_matches_lineage / harness_bmp_sha256_matches_lineage) is true on all 31 lineage rows, 0 row-hash verification failures; 22/24 textures are RGB_ONLY_OK (the remaining 2 lose only alpha, not RGB).",
+      "evidence": "TEXTURE_ERA_AND_ALPHA.json era_chain.row_hash_verification_failures=0; alpha_analysis.loss_class=RGB_ONLY_OK for all ids except loss_list=[126773, 126775]",
+      "correction": "The old lab's blanket word 'lossless' is corrected to RGB-scoped wording: 'RGB lossless; alpha lost for 2/24 (126773, 126775); GPU format X8R8G8B8 alpha-less' (see CLAIM_CORRECTIONS.json #2). Era caveat: the corpus is EU_LATER, not 'real 2003 textures' (see TEXTURE_ERA_RECORD.json).",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "texture_alpha",
+      "status": "UNSUPPORTED",
+      "status_detail": "Variable alpha is lost for 2/24 textures (126773: 5212/16384 non-255 alpha pixels, source alpha range 0..255; 126775: 2580/8192) at the 24-bpp BMP re-encode step, before the GPU is even involved; all 31 lineage BMPs are 24-bpp. The GPU path is alpha-less end-to-end: D3DFMT_X8R8G8B8 (harness.cpp:468-469), loader writes 0xFF000000 forced opaque (:483), texture stage sets D3DTSS_ALPHAOP=D3DTOP_DISABLE (:1015).",
+      "evidence": "TEXTURE_ERA_AND_ALPHA.json alpha_analysis.loss_list=[126773, 126775]; alpha_analysis[126773].loss_class=ALPHA_LOST; alpha_analysis[126775].loss_class=ALPHA_LOST; alpha_analysis.gpu_resource_consequence (lines 468/483/1015 verbatim)",
+      "correction": "Corrected wording recorded (CLAIM_CORRECTIONS.json #2); blend/test/order semantics beyond the two cited harness lines remain UNKNOWN (no speculation). No alpha-capable path implemented in this namespace.",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "skin",
+      "status": "UNTESTED",
+      "status_detail": "No skinning evidence for the old harness path exists in the R1 evidence corpus; nothing was executed and nothing is claimed. The SDK skin composition site (NiDX9Renderer.cpp:2948, world * skinToBone) was used as CONVENTION REFERENCE ONLY for the parent-o-child operator.",
+      "evidence": "ABSENCE in TEXTURE_ERA_AND_ALPHA.json / TRANSFORM_COUNTEREXAMPLES.json / GRAPH_BYPASS_FORENSICS.json (bounded corpus; absence is recorded, not inferred as capability)",
+      "correction": "niTransformAdapter.mjs compose() implements the parent-o-child closed form used at that composition site; no skinning test, no bone-matrix path, no claim. First skin evidence requires its own authorized run.",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "collision",
+      "status": "UNTESTED",
+      "status_detail": "No collision evidence exists in the R1 evidence corpus. (Project canon: BVI = local collision mesh, not world placement - unrelated to this lab corpus.)",
+      "evidence": "ABSENCE in the three R1 evidence artifacts",
+      "correction": "None (record only). No collision work was done or claimed.",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    },
+    {
+      "capability": "niark_unknown",
+      "status": "UNTESTED",
+      "status_detail": "Semantics of the NiArk* block family beyond the removal census are NOT established: 10 NiArk blocks removed from 296445.nif (7 NiArkBillboardNode + NiArkAnimationExtraData/NiArkTextureExtraData/NiArkImporterExtraData leaf blocks 'removed harmlessly' - harmlessness of the leaf removals is the frozen lab's own label, not an executed semantics proof); 3 leaf NiArk blocks removed from 218757.nif; 0 NiArk blocks left as null in either file.",
+      "evidence": "GRAPH_BYPASS_FORENSICS.json null_blocks_census (296445 and 218757); removed_nodes_notes.total_removed_niark=10",
+      "correction": "Removal set and per-block fates enumerated exactly; unknown semantics remain explicitly unknown. No semantics claim is made for NiArk blocks beyond what execution proved (the 7 billboard graph nodes).",
+      "lab_only_flag": { "LAB_ADAPTED_ONLY": "yes" }
+    }
+  ],
+  "row_count": 11,
+  "limits": [
+    "Status describes the OLD HARNESS path only; the corrected adapter's own coverage is given by its executed gates (see ROSETTA_INTEGRATION_MAP.json).",
+    "No runtime engine claim: nothing in this namespace was executed against the 8140 runtime or any game/SDK binary.",
+    "Skin and collision rows are UNTESTED by corpus absence; absence of evidence here is recorded, never read as capability.",
+    "Ground truth is frozen to the three hashed evidence artifacts listed above; any future contradicting evidence supersedes rows by a new run, not by editing this record."
+  ]
+}

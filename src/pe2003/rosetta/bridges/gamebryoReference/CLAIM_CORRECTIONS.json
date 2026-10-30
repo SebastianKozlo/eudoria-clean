@@ -1,0 +1,63 @@
+{
+  "record_id": "CLAIM_CORRECTIONS",
+  "run_id_parent": "PE2003_ROSETTA_GAMEBRYO_BRIDGE_CORRECTIONS_R1_20261030",
+  "job": "J5 = Wave B3+B4: additive corrections of the old lab's rejected wordings",
+  "generated": "2026-10-30",
+  "mode": "ADDITIVE corrections only - each entry keeps the old wording verbatim and states the corrected wording; nothing is deleted from history",
+  "corrections": [
+    {
+      "id": 1,
+      "topic": "texture era",
+      "old_wording": "real 2003 textures",
+      "corrected_wording": "EU_LATER Textures.bnt; SAME_ERA_WITH_PE42=FALSE (16/24 byte-identical members vs CD_JAN_2003, era per-member NOT_ESTABLISHED for 8)",
+      "source_finding": "All 31 lineage rows trace to the M3-2 texture cache extracted from the EU_LATER-era Textures.bnt (SHA256 2EAE1159...), labeled EU_LATER (RE evidence only) by the PEProvenance.js registry. The textures are NOT Jan2003 Textures.ark members and NOT PCG9.3.5. Bounded comparison vs CD_JAN_2003 Textures.ark: 16/24 byte-identical, 8/24 byte-different, 0 absent; byte identity of a subset does not prove era match.",
+      "evidence_pointer": "TEXTURE_ERA_AND_ALPHA.json (sha256 E7093A3B...) era_verdict.SAME_ERA_WITH_PE42=FALSE; era_comparison.summary; era_label_from_PEProvenance; TEXTURE_ERA_RECORD.json in this namespace"
+    },
+    {
+      "id": 2,
+      "topic": "texture fidelity",
+      "old_wording": "lossless",
+      "corrected_wording": "RGB lossless; alpha lost for 2/24 (126773, 126775); GPU format X8R8G8B8 alpha-less",
+      "source_finding": "RGB is preserved through the lab chain (chain verification true on all 31 rows), but variable alpha is lost at the 24-bpp BMP re-encode for 2/24 textures (126773: 5212/16384 non-255 alpha pixels; 126775: 2580/8192), and the GPU path is alpha-less end-to-end: D3DFMT_X8R8G8B8 (harness.cpp:468-469), loader writes 0xFF000000 forced opaque (:483), D3DTSS_ALPHAOP=D3DTOP_DISABLE (:1015).",
+      "evidence_pointer": "TEXTURE_ERA_AND_ALPHA.json (sha256 E7093A3B...) alpha_analysis.loss_list=[126773,126775]; alpha_analysis.126773.loss_class=ALPHA_LOST; alpha_analysis.126775.loss_class=ALPHA_LOST; alpha_analysis.gpu_resource_consequence"
+    },
+    {
+      "id": 3,
+      "topic": "transform fidelity",
+      "old_wording": "transform fidelity of rendered instances",
+      "corrected_wording": "API-identity only; world/view matrices were R^T-wrong + view X mirrored; corrected adapter gates PASS 8/8",
+      "source_finding": "The old harness world builder (MatFromTransform) fed a row-vector device an untransposed rotation, computing R^T(s p)+t (deviations 3.0-9.0 units on 4 executed cases), and the view builder (MatFromCameraWorld) wrote the basis as rows so the eye did not reach the view origin (|view(eye)|=18.977674) with X = norm(U x F) = -col2 (mirrored). The corrected adapter reproduces ground truth on all 8 gates (identity, rotY90_scale1.5, noncommuting_pair, parent_child_composition, camera_eye_to_origin, nan_inf_rejection, wrong_transpose_mutation_must_fail, three_engine_math_crosscheck), and the wrong-transpose mutant fails as required.",
+      "evidence_pointer": "TRANSFORM_COUNTEREXAMPLES.json (sha256 0C35F626...) harness_vs_sdk_rule; executed_cases; camera_case; executed gate matrix of test_adapter.mjs (sha256 8179AD185D05A7725F82B1601EC45F6E66F7055067CA885774361B5438559FA1, current worktree state) re-run in this worktree"
+    },
+    {
+      "id": 4,
+      "topic": "graph bypass world geometry",
+      "old_wording": "world geometry preserved through NiArk graph-node removal (implied by the bypass-splice)",
+      "corrected_wording": "world geometry guarantee PROVEN_BROKEN_FOR_7_OF_7 billboard nodes (deltas 4941.8-11291.1)",
+      "source_finding": "The bypass-splice copies each spliced child's local payload verbatim without composing the removed node's transform: world = W_parent * L_child instead of W_parent * L_billboard * L_child. All 7 NiArkBillboardNode graph nodes in 296445.nif carry non-identity local transforms (translations 4941.8-11291.1 magnitude units + 180-deg-Z rotations); the engine recount independently corroborates all 7 quads collapsed at (0,0,-534.634).",
+      "evidence_pointer": "GRAPH_BYPASS_FORENSICS.json (sha256 62983A14...) verdict=PROVEN_BROKEN_FOR_7_OF_7_NODES; removed_nodes[].position_delta_magnitude; removed_nodes_notes.independent_engine_crosscheck; FORMAT_LOSS_MATRIX.json rows hierarchy_reparent / billboard"
+    },
+    {
+      "id": 5,
+      "topic": "QC counter read",
+      "old_wording": "QC counter read: 54858",
+      "corrected_wording": "QC counter read: 55304",
+      "source_finding": "The earlier reported counter read 54858 was a misread; the corrected counter read is 55304 (difference 446). Recorded as an additive correction; the counter-read correction originates from the parent run's QC finding register, not from the three J1/J2/J3 evidence artifacts.",
+      "evidence_pointer": "PE2003_ROSETTA_GAMEBRYO_BRIDGE_CORRECTIONS_R1 parent-run QC finding register (J5 contract item 5); NOT present in TEXTURE_ERA_AND_ALPHA.json / TRANSFORM_COUNTEREXAMPLES.json / GRAPH_BYPASS_FORENSICS.json (honest sourcing: parent-run finding, recorded here for registry completeness)"
+    },
+    {
+      "id": 6,
+      "topic": "manifest completeness",
+      "old_wording": "manifest complete (implied)",
+      "corrected_wording": "manifest incompleteness -> enumerated",
+      "source_finding": "The old lab's manifest was incomplete; the missing/incomplete items are now explicitly enumerated rather than implied absent. The enumeration includes the record set of this namespace (FORMAT_LOSS_MATRIX.json 11 capability rows, TEXTURE_ERA_RECORD.json per-member comparison 16/8/0, this CLAIM_CORRECTIONS.json 6 corrections, ROSETTA_INTEGRATION_MAP.json per-record integration state) plus the documented upstream discrepancies (M3-3 ARK_ONLY misclassification of the 24 IDs; M3-3 08_exact_raw_identity.json / 10_same_id_changed_content.json empty despite summary counts tier1=1408/tier3=355).",
+      "evidence_pointer": "TEXTURE_ERA_AND_ALPHA.json (sha256 E7093A3B...) era_comparison.m3_3_inconsistency_note; limits[]; this namespace's four knowledge records; parent-run audit enumeration (J5 contract item 6)"
+    }
+  ],
+  "correction_count": 6,
+  "limits": [
+    "Corrections 1-4 are grounded in the three hashed R1 evidence artifacts; corrections 5-6 originate from the parent run's QC/audit finding register per the J5 contract and are labeled as such (honest sourcing).",
+    "All corrections are additive; the historical record is not rewritten - old wording is preserved verbatim in old_wording.",
+    "Corrected wordings are era-scoped and evidence-scoped; none of them establishes primary-target (ISO_5_1_0_0) content."
+  ]
+}
