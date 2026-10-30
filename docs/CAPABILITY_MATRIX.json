@@ -1,0 +1,135 @@
+{
+  "record_id": "CAPABILITY_MATRIX",
+  "job_id": "W23_DOCS_ROSETTA_REGISTRY",
+  "attempt_id": "W23_a1",
+  "campaign": "PE2003_WORLD_ROSETTA_NIF_ENV_CHARACTER_6H_R1_20261030",
+  "generated": "2026-10-30",
+  "primary_target_era": "ISO_5_1_0_0 (PE 5.1.0.0, PC Gamer Nov2003 CD)",
+  "status_legend": {
+    "IMPLEMENTED_AND_TESTED": "implemented in this runtime AND verified by executed gates against era data",
+    "PARTIAL": "implemented and tested but only for a bounded scope (state the boundary)",
+    "KNOWLEDGE_ONLY": "documented/documented-verified knowledge (census, source semantics, static decode) with NO runtime implementation",
+    "REFERENCE_OTHER_BUILD": "evidence exists for a DIFFERENT build/era corpus; nothing established for the primary target",
+    "OPEN_BLOCKER": "no recovered knowledge and no implementation; the blocking gap is named"
+  },
+  "counts": { "IMPLEMENTED_AND_TESTED": 0, "PARTIAL": 7, "KNOWLEDGE_ONLY": 6, "REFERENCE_OTHER_BUILD": 2, "OPEN_BLOCKER": 1 },
+  "domains": [
+    {
+      "domain": "containers (archive framing)",
+      "status": "PARTIAL",
+      "consumer_api": "src/pesource/{PESourceMount,PEProvenance,BuntArchive,Bnt2Archive,Bnt2TerrainArchive,ArkArchive}.js",
+      "test_id": "W03 T1-T2 (12/12) — SCI jobs/W03/W03_UNIT_TEST.json",
+      "limitation": "BUNT fully implemented + censused for ISO_5_1_0_0 50.bnt (51,921 entries, 0 bad). BNT2/BNT2_TERRAIN implemented but validated on the PCG corpus (different era). ArkVFS used for reference/script corpora. ISO-era texture container MISSING (documented missing edge; 12 TexIDs have no era payload)."
+    },
+    {
+      "domain": "terrain height/topology",
+      "status": "PARTIAL",
+      "consumer_api": "src/pesource/TdfDecoder.js; src/peworld/IsoPatchSelection.js; terrain/world_iso.js",
+      "test_id": "W03 12/12 unit + 10/10 browser; SCI jobs/W03/{W03_UNIT_TEST.json,BROWSER_PROOF.json}",
+      "limitation": "ONE deterministic 3x3-tile patch (grid 95,0; 96x96 samples; RAW u16 max 767) — NOT the continent. Display scale u16/128->m is CURRENT_RUNTIME_CALIBRATION (2 m/sample), not a recovered unit. Edge seams kept as ORIGINAL DATA (E 20/192, S 25/192, unrepaired). All-zero (water/nodata) tiles rejected explicitly."
+    },
+    {
+      "domain": "material masks/UV",
+      "status": "PARTIAL",
+      "consumer_api": "src/pesource/TdfMaterialTailDecoder.js; terrain/world_iso.js (splat, NEAREST cell, materialX=heightX>>1)",
+      "test_id": "W05 11/11 unit + 12/12 browser (cross-check 52 layers / 0 mismatches); SCI jobs/W05/{W05_UNIT_TEST.json,BROWSER_PROOF.json}",
+      "limitation": "Masks era-truth for the same 3x3 patch only; offsetbase +56 proven for the ISO corpus (E1-E4, TMF1.7 +52 falsified). Weight sums >255 kept as ORIGINAL DATA. UV world-space repeat 8 m is a RECONSTRUCTION_CANDIDATE, not recovered. Max 10 overlays/tile; record field 32..55 role UNVERIFIED."
+    },
+    {
+      "domain": "textures",
+      "status": "REFERENCE_OTHER_BUILD",
+      "consumer_api": "terrain/world_iso.js (DataTexture cache per TexID)",
+      "test_id": "W05 G9 + browser join gate 12/12; SCI jobs/W05/W05_UNIT_TEST.json",
+      "limitation": "ISO corpus ships NO texture container (missing edge). The 12/12 TexID join resolves against CD_JAN_2003 Textures.ark (TGA 2.0 256x256x24, payload SHAs re-verified) — REFERENCE, explicitly NOT ISO truth. No era texture exists to be more honest toward."
+    },
+    {
+      "domain": "NIF scenegraph",
+      "status": "PARTIAL",
+      "consumer_api": "src/pesource/NifModelReader.js parseWitnessModel; terrain/inspector.{html,js}",
+      "test_id": "W07 46/46 IR cross-check + browser proof; W08 engine-oracle 31/32; SCI jobs/W07/W07_UNIT_TEST.json",
+      "limitation": "NIF 10.1.0.0 WITNESS SCOPE only (all 10 climate-0 ids parse FULL-OK; 16..62 blocks). NiArk blocks unparseable by stock engine (negative control); adapted copies carry lossmaps. NIF 4.1.0.12 gated — dedicated adapter pending (engine oracle validated the frozen R61 lineage 22/22, but no 4.1 IR in this runtime). Controllers recorded as refs only (OPAQUE)."
+    },
+    {
+      "domain": "TRS (local/world transforms, camera)",
+      "status": "PARTIAL",
+      "consumer_api": "src/pe2003/rosetta/bridges/gamebryoReference/niTransformAdapter.mjs (makeIR/compose/cameraBasis/cameraViewThree); terrain/inspector.js world-TRS panel",
+      "test_id": "adapter 8/8 gates + registry 8/8 (live three@187 crosscheck, mutant negative control); W07 46/46; SCI jobs/W01/RAW_test_adapter.txt",
+      "limitation": "Uniform-scale NiTransform IR only; NaN/Inf rejected; handedness explicit. World TRS implemented for the v10 witness assets. 4.1 assets: no IR (gate). Camera semantics source-backed (NiCamera.cpp pinned); runtime camera is the preview controller, not a recovered PE camera."
+    },
+    {
+      "domain": "lights",
+      "status": "KNOWLEDGE_ONLY",
+      "consumer_api": "none (runtime light is ENGINEERING_PREVIEW in src/peworld/IsoEnvironment.js)",
+      "test_id": "W14 corpus census (NiDirectionalLight 1, NiAmbientLight 20 in CD Models.ark) — SCI jobs/W14/W14_environment_scan.json",
+      "limitation": "Block censuses only — zero scene-light parameters recovered. Runtime sun 2.5 / ambient 1.0 are explicit preview values."
+    },
+    {
+      "domain": "sky/fog",
+      "status": "KNOWLEDGE_ONLY",
+      "consumer_api": "src/peworld/IsoEnvironment.js (preview layers; THREE.Fog + uFog uniforms)",
+      "test_id": "W14 18/18 unit + 15/15 browser (fog model label gate; toggle pixel-diffs); SCI jobs/W14/W14_UNIT_TEST.json",
+      "limitation": "Fog MODEL source-backed (gb12 NiFogProperty semantics, pinned) but VALUES are ENGINEERING_PREVIEW (near 100/far 900 m derived, not recovered). 0 cubemaps / 0 NiFogProperty / 0 NiBillboardNode in the era-consistent corpus. environmentzones (24,007 records) PLAUSIBLE-UNVERIFIED — excluded. VM-era sky corpus = different era, candidate only."
+    },
+    {
+      "domain": "particles",
+      "status": "KNOWLEDGE_ONLY",
+      "consumer_api": "none",
+      "test_id": "W08 engine-oracle census L3b (2 NiParticleSystems, NiPSysUpdateCtlr x2 in BABYLENGUIN) — REFERENCE record",
+      "limitation": "Census-level engine-oracle evidence only; no particle decode, no runtime implementation in this campaign."
+    },
+    {
+      "domain": "animation controllers",
+      "status": "KNOWLEDGE_ONLY",
+      "consumer_api": "none (inspector shows controller refs marked OPAQUE)",
+      "test_id": "W08 oracle censuses (NiBoneLODController, NiPSysUpdateCtlr x2, NiUVController+NiUVData, NiFlipController 13 in CD); t0/t1 TRS probes static — SCI jobs/W08/REPORT.md §4c-d",
+      "limitation": "No controller decode. No animation claimed anywhere: both probed assets' world TRS static in [0, 0.5] (honest probe result); a true animated-TRS fixture (kfm/keyframe) does not exist yet."
+    },
+    {
+      "domain": "skin/skeleton/morphs",
+      "status": "KNOWLEDGE_ONLY",
+      "consumer_api": "none",
+      "test_id": "W08 census (NiSkinInstance/SkinData/SkinPartition x2 in BABYLENGUIN); CHAR_A bone map (Bip01_face_cd_* morph bone set in 635) — SCI jobs/CHAR_A/CHARACTER_CREATION_SCHEMA.json",
+      "limitation": "Census + static bone-name evidence only. No skinning decode; no morph animation. (Historical old-harness loss matrix row 'skin' also UNTESTED — unchanged.)"
+    },
+    {
+      "domain": "BVI collision",
+      "status": "KNOWLEDGE_ONLY",
+      "consumer_api": "none",
+      "test_id": "none this campaign (project canon: BVI = local collision mesh, NOT world placement)",
+      "limitation": "No BVI decode or consumer exists. Canon rule (do not rescan BVI for model IDs / world placement) unchanged."
+    },
+    {
+      "domain": "VM definitions (ArkScript VM)",
+      "status": "PARTIAL",
+      "consumer_api": "static decoders only (SCI jobs/CHAR_B/charb_{decode,full_sweep,build_schema}.py); CHARACTER_CREATION_SCHEMA_V2.json",
+      "test_id": "CHAR_B full-CODE sweep zero residue (4,901 op items + 71 strings); opcodes CONFIRMED with handler VAs (PE2_unpacked_out.exe SHA 56178993692A... canon-verified)",
+      "limitation": "Static only (client never executed). Host-call command ids are binder-patched (raw 0x0) — the GCE vtable[3] host-command catalog is OPEN (PE_VM_HOSTAPI_R1). Decodes 1883-class UI scripts; not a general VM implementation."
+    },
+    {
+      "domain": "instance/placement",
+      "status": "REFERENCE_OTHER_BUILD",
+      "consumer_api": "none for ISO era (inspector renders models in REFERENCE_ASSET_STAGE, explicitly not world positions)",
+      "test_id": "no ISO-era placement test this campaign; historical PE_935 placement/instance audits exist under docs/audits/ (different build/corpus)",
+      "limitation": "All placement/instance knowledge comes from the EU935/PE_935-era evidence — REFERENCE only. Nothing established for ISO_5_1_0_0; no world placement in this runtime."
+    },
+    {
+      "domain": "avatar creation",
+      "status": "PARTIAL",
+      "consumer_api": "none runtime (documented knowledge: docs/CHARACTER_CREATION.md + SCI jobs/CHAR_A/CHARACTER_CREATION_SCHEMA.json + jobs/CHAR_B/CHARACTER_CREATION_SCHEMA_V2.json)",
+      "test_id": "CHAR_A byte-probes (PDAT 26/26 tiling; 21 EN + 21 FR labels at exact offsets); CHAR_B idiom decode (20/21 -> 210421 hash 7DFBB38F; sweep zero residue)",
+      "limitation": "Labels RECOVERED, layout RECOVERED, creation idiom CONFIRMED — but ranges/palettes/defaults are ENGINE_DEPENDENT (built engine-side behind FF8F hostcalls; catalog OPEN), wire format unknown, slider->bone runtime proof partial, asset template registry missing. No playable creator exists."
+    },
+    {
+      "domain": "transport/network",
+      "status": "OPEN_BLOCKER",
+      "consumer_api": "none",
+      "test_id": "none",
+      "limitation": "No wire-format knowledge for the era (client->server submit after 'Accept Look' un-captured; only name-validation message TEXTS recovered, and even the client-vs-server side of the length check is UNKNOWN). No transport code. Blocker: requires a live capture or server-binary RE, neither authorized/run."
+    }
+  ],
+  "limits": [
+    "Counts: 0 IMPLEMENTED_AND_TESTED because every implemented domain has an explicit bounded scope (patch-level terrain, witness-scope NIF) — the boundaries ARE the status.",
+    "Statuses derive only from the campaign artifacts (SCI jobs W01..W14, CHAR_A, CHAR_B); historical audits are REFERENCE_OTHER_BUILD and never promote a status by themselves.",
+    "Nothing in this matrix claims original sky/fog/light values, character ranges, 4.1 IR, animation, or network wire format."
+  ]
+}

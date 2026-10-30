@@ -120,6 +120,21 @@ export class PESourceMount {
             `[PESourceMount] ${key}: PCG_9_3_5 terrain requires BNT2_TERRAIN framing (got ${m.format})`);
         }
         arch = new Bnt2TerrainArchive(m.bytes, this.io);
+      } else if (era === ERAS.ISO_5_1_0_0) {
+        // W03 ISO_5_1_0_0: the recovered ISO 50.bnt is BUNT-framed (byte-verified
+        // 2026-10-30: footer 'BUNT', index @116,926,624, 51,921 entries, per-record
+        // marker 020000ff + u32 size + zlib). DIFFERENCES vs PCG_9_3_5
+        // terrain.bnt (BNT2_TERRAIN): footer 'BUNT' not 'BNT2'; 21-byte fixed
+        // index entries (13-byte name + packed_size + offset) not 16-byte
+        // (name + size + crc32 + pad); 51,921 entries (regular 220x236
+        // filename-xy + sentinel 7ffe7ffe.tdf) not 58,451 (which adds 6,530
+        // special-row entries y=0xff1a..0xffff, absent here); no crc32 field;
+        // packed_size counts 8 trailing bytes (BUNT_TRAILING_BYTES quirk).
+        if (m.format !== 'BUNT') {
+          throw new Error(
+            `[PESourceMount] ${key}: ISO_5_1_0_0 terrain requires BUNT framing (got ${m.format})`);
+        }
+        arch = new BuntArchive(m.bytes, this.io);
       } else {
         throw new Error(
           `[PESourceMount] terrain decoding not authorized for era ${era} (NO silent era substitution)`);
@@ -200,6 +215,7 @@ export class PESourceMount {
     const TERRAIN_CONTAINERS = {
       [ERAS.JUL_2003]: 'Terrain/50.bnt',
       [ERAS.PCG_9_3_5]: 'Terrain/terrain.bnt',
+      [ERAS.ISO_5_1_0_0]: 'Terrain/50.bnt', // W03: ISO 5.1.0.0 recovered corpus (BUNT)
     };
     const container = TERRAIN_CONTAINERS[era];
     if (!container) {

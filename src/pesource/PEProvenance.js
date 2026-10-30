@@ -20,6 +20,15 @@ export const ERAS = {
   PCG_9_3_5: 'PCG_9_3_5',       // 9.3.5 installed client (pcg_install) — the CLEAN
                                 // RUNTIME primary era (ledger ENTRY #1/#6); never
                                 // silently mixed with JUL_2003 historical truth
+  ISO_5_1_0_0: 'ISO_5_1_0_0',   // PE 5.1.0.0 ISO PC Gamer Nov2003 cover-disc
+                                // corpus (job W03 ISO_TERRAIN_VERTICAL_SLICE).
+                                // Registered as a NEW EXPLICIT era per contract —
+                                // NEVER an alias of JUL_2003/PCG_9_3_5, even
+                                // where bytes coincide (the recovered
+                                // Data/Terrain/50.bnt is byte-identical to the
+                                // JUL_2003 corpus copy, SHA256 A6E59EE0…; the
+                                // era label stays distinct because provenance
+                                // is physical-source-anchored, not hash-merged)
   EU_LATER: 'EU_LATER',         // later EU-runtime corpora — RE evidence ONLY,
                                 // never silently JUL-2003 truth
 };
@@ -32,6 +41,12 @@ export const KNOWN_HASHES = {
   // PCG_9_3_5 terrain container (era-validated ITER 019: BNT2 framing, 58,451
   // entries; 51,920 regular 220x236 filename-xy + 6,530 special rows + sentinel).
   'PCG_9_3_5:Terrain/terrain.bnt': '95841761CE4EA074C97930EC1CEF3FB57AAC7F7F4F3D9B751A9EE60510299990',
+  // PE 5.1.0.0 ISO (PC Gamer Nov2003) terrain container — W03 contract pin.
+  // Byte-verified in-session 2026-10-30 (118,016,977 B): BUNT footer framing,
+  // index @116,926,624, 51,921 entries. NOTE: byte-identical to the
+  // JUL_2003:Terrain/50.bnt corpus copy — recorded as a COINCIDENCE of bytes,
+  // not an era alias (era identity = physical source + label, see ERAS).
+  'ISO_5_1_0_0:Terrain/50.bnt': 'A6E59EE07A51EAC06A3E75DA5421E5928D59EDED74F096DCAD04CE80ED01DA00',
   // EU-runtime texture corpus (8,095 BNT2 entries; M3-2-R1 8,095/8,095 raw payloads).
   'EU_LATER:Textures.bnt': '2EAE115958D3157FA62F8CBFBAC6F4BFB5C38A820F1D05F9248C4200C0208A56',
   // PCG_9_3_5 texture corpus (SAME-ERA container for the clean runtime primary

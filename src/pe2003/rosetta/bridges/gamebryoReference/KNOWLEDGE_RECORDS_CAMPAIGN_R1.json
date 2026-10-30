@@ -1,0 +1,71 @@
+{
+  "record_id": "KNOWLEDGE_RECORDS_CAMPAIGN_R1",
+  "run_id_parent": "PE2003_WORLD_ROSETTA_NIF_ENV_CHARACTER_6H_R1_20261030",
+  "job": "W23_DOCS_ROSETTA_REGISTRY: fold campaign-R1 findings into the gamebryoReference namespace as ADDITIVE knowledge records",
+  "generated": "2026-10-30",
+  "mode": "ADDITIVE only - new standalone file; no existing record in this namespace was modified (CLAIM_CORRECTIONS.json / ROSETTA_INTEGRATION_MAP.json / FORMAT_LOSS_MATRIX.json / TEXTURE_ERA_RECORD.json left byte-identical; the J4 hash gate pins niTransformAdapter.mjs / test_adapter.mjs / mutant_wrong_transpose.mjs and is untouched). Records follow the ROSETTA_INTEGRATION_MAP record shape.",
+  "era_scope": "PRIMARY TARGET = ISO_5_1_0_0 (PE 5.1.0.0, PC Gamer Nov2003 CD). Reference labels used where the primary target has no data: CD_JAN_2003 (Textures.ark), PE2_unpacked_out (ArkScript VM binary), gb12 Gamebryo 1.2 source, PCG_9_3_5 / PE42_CORPUS / EU_LATER (historical reference only).",
+  "records": [
+    {
+      "knowledge_record": "KR-W08-a: NiTexturingProperty baseTextureIndex (engine stage index) vs IR baseSlot.source (source ref) are DIFFERENT FIELDS",
+      "source_build": "W08 engine oracle: stock Gamebryo 1.2 helper on 457485_adapted.nif (fixture SHA 1014238EB5F156A977676223E84A7A4674C89CE3097BDC8F0459824A944C9623; original 457485.nif SHA 72479A7F4EEBE93401708FC539D153B6F865DD29D04490C8E1243C0BA72B2239) vs JS IR src/pesource/NifModelReader.js parseWitnessModel on the ORIGINAL",
+      "source_hash": "COMPARE_457485.json (W08 evidence; 31/32 fields MATCH)",
+      "claim_status": "CONFIRMED DIFFERENT FIELDS, not a data mismatch: JS IR baseSlot.source = -1 (NULL source ref) while engine NiTexturingProperty::GetBaseTextureIndex() = 0. The engine accessor returns the texture STAGE INDEX (0 = BASE stage) for a present-but-sourceless BASE slot; our IR records the source *ref*. Registry rule: for an engine BASE slot, index 0 with source=-1 is NORMAL and must NOT be interpreted as a texture ref.",
+      "limitation": "Derived from one 10.1.0.0 witness (457485, NiArk-stripped adapted copy for the engine side, losses in the lossmap sidecar 457485_adapted.nif.stripmap.json). Not generalized to 4.1.0.12 or to other slot types without further oracle runs.",
+      "consumer_code_api": "src/pesource/NifModelReader.js (IR producer; unchanged); terrain/inspector.js materials panel (displays Ark textureId and slot state honestly)",
+      "executed_test_ids": "W08 COMPARE_457485.json field texture.baseTextureIndex (single non-match, verdict DIFFERENT_FIELDS); W07 unit gate re-read of COMPARE verdict (46/46 ALL_PASS)",
+      "evidence_pointer": "W08_REPORT.md §4a; W08 compare/COMPARE_457485.json; W07_UNIT_TEST.json oracle cross-check section",
+      "runtime_enabled": false
+    },
+    {
+      "knowledge_record": "KR-W05-b: ISO_5_1_0_0 TDF material-tail offsetbase = +56 (record-relative, from the size field); legacy TMF1.7 '+52' is FALSIFIED for the ISO corpus",
+      "source_build": "W05 fixture probe on the ISO_5_1_0_0 3x3 terrain patch @ grid (95,0), 9 tiles / 81 records (52 named + 29 system), decoded with the repo TdfMaterialTailDecoder and an independent dual decode",
+      "source_hash": "W05_TAIL_FIXTURE.json offsetbase.evidence E1-E4",
+      "claim_status": "CONFIRMED +56 with byte-level evidence: E1 18/18 RLE named records decode EXACTLY at +56 (negative control at +52: 0/18); E2 overlay RAW masks begin with a smooth ramp at +56, while bytes 52..55 carry per-record checksum-like values (field 32..55, 24 B, role UNVERIFIED, never interpreted); E3 base (position-0) all-255 in 9/9 tiles; E4 72/72 stride size+4 lands on the next [size][dim] header. TMF1.7 misassigned the 4-byte per-record field @52..55 to the mask - era-labelled lesson for the ISO corpus.",
+      "limitation": "Proven on the ISO_5_1_0_0 corpus only; NOT asserted for PCG BNT2_TERRAIN tails. Base rule: base-first (position 0), max 10 overlays/tile; weight sums > 255 occur and are kept as ORIGINAL DATA (non-complementary model, no renormalization).",
+      "consumer_code_api": "src/pesource/TdfMaterialTailDecoder (repo decoder, dual-decode verified 52/52 layers 0 mismatches); terrain/world_iso.js splat runtime; src/peworld/IsoMaterialsFixture.js (generated fixture)",
+      "executed_test_ids": "W05_UNIT_TEST.json 11/11 PASS (incl. G9 REFERENCE texture payload re-verify); BROWSER_PROOF.json 12/12 PASS (cross-check fixture==live 52 layers / 9 tiles / 0 mismatches)",
+      "evidence_pointer": "W05_REPORT.md §1; W05_TAIL_FIXTURE.json (offsetbase.evidence E1-E4)",
+      "runtime_enabled": true
+    },
+    {
+      "knowledge_record": "KR-W03-c: ISO_5_1_0_0 50.bnt uses BUNT framing - 51,920 regular filename-xy tiles + 1 sentinel, ZERO special rows (vs PCG terrain.bnt BNT2_TERRAIN 6,530 special rows)",
+      "source_build": "W03 full index census of the recovered ISO 50.bnt (118,016,977 B, SHA256 A6E59EE07A51EAC06A3E75DA5421E5928D59EDED74F096DCAD04CE80ED01DA00), verified before mount and re-verified in the browser",
+      "source_hash": "W03_UNIT_TEST.json T2 census",
+      "claim_status": "CONFIRMED: BUNT footer, index @ offset 116,926,624, 51,921 entries x 21 B (13-byte name + \\n + packed_size + offset), filename-xy grid 0..219 x 0..235 (51,920 regular) + 1 sentinel 7ffe7ffe.tdf; 0 duplicates, 0 bad names, 0 out-of-grid. Record framing: marker 020000ff + u32 decompressed_size + zlib (78da); BUNT packed_size counts 8 trailing bytes over (BUNT_TRAILING_BYTES - handled by true-stream slicing, re-verified per entry by strict inflate in the browser). Contrast with PCG terrain.bnt (BNT2_TERRAIN): footer BNT2, 16-byte entries with crc32, 58,451 entries including 6,530 special rows y=0xff1a..0xffff - rows that DO NOT EXIST in the ISO corpus. TDF payload: 32x32 u16 LE @ offset 64, data_size=2100, dim=32, payload 3652 B.",
+      "limitation": "ISO 50.bnt bytes are byte-identical to the JUL_2003 copy (same SHA256) - recorded as BYTE COINCIDENCE, not an era alias (era = physical source + label). TDF offsets come from the audited fixture, not blind +/-4.",
+      "consumer_code_api": "src/pesource/PEProvenance.js (ERAS.ISO_5_1_0_0 + KNOWN_HASHES); src/pesource/PESourceMount.js (ISO_5_1_0_0 requires BUNT framing -> BuntArchive; hash verified at mount boundary, mismatch = refusal); src/peworld/IsoPatchSelection.js (row-major occupancy selector)",
+      "executed_test_ids": "W03_UNIT_TEST.json 12/12 PASS (T1 hash, T2 census 51,921/51,920/1, T3 first tile, T4 patch); BROWSER_PROOF.json 10/10 PASS (mountHashVerified true, REVISION 187, 0 fatal errors)",
+      "evidence_pointer": "W03_REPORT.md; W03_UNIT_TEST.json; BROWSER_PROOF.json",
+      "runtime_enabled": true
+    },
+    {
+      "knowledge_record": "KR-CHAR_B-d: ArkScript VM opcodes FF91/FEEB/FFA0/FEDE semantics CONFIRMED with handler VAs (build PE2_unpacked_out.exe)",
+      "source_build": "CHAR_B static decode reusing the byte-proven R2 Ghidra project (opcode_table_v2.csv, 229 ops, 100% instance coverage) + fresh full-CODE sweep of 1883.obj.dec (CharDefUI, SHA256 E0BC80C84241304DE2C561362F57747F0BEDF24C3FA79BF6997BD6258E3A63F4)",
+      "source_hash": "PE2_unpacked_out.exe SHA256 56178993692A7409C896398089E482EDDF96177666BACB91A8CC1A638D9A0650 (canon match, VERIFIED before use)",
+      "claim_status": "CONFIRMED (all with handler VAs + ASM lines): 0xFF91 LEA_A_inline @0x00457B79 (A := cursor+4; with FEEB = inline string block base); 0xFEEB JMP_rel @0x00456D2C (cursor += disp; disp>8 skips inline data); 0xFFA0 PUSHEA_B_off @0x00457CE5 (push B+off = panel/sub-object selector); 0xFEDE STOREI_SPoff @0x00456C32 ([SP+off] := imm32 frame-local store). Support ops also CONFIRMED: 0xFEEE CALL_abs @0x00456D4B (binder-patched, slot raw 0x0), 0xFF8F HOSTCALL @0x00458182 (GCE.vtable[3] engine call), 0xFEC8 STRCPY, 0xFEBD LEA_B_SPoff, 0xFF09 PUSHEA_SPoff, 0xFEE7 STOREF_SPoff_imm. This OVERTURNS CHAR_A hypotheses (FF91/FEEB are NOT 'string push', FFA0/FEDE are NOT 'UI params'). Full-CODE sweep of 1883: 4901 op items + 71 inline strings, ZERO residue (independent per-file reproduction of the R2 corpus claim). Panel census B+0x00 x9 / B+0x0C x4 / B+0x10 x5 / B+0x14 x3 confirmed as 4 sub-panels. PDAT tiling-end corrected 892 -> 896.",
+      "limitation": "Static evidence only (client NOT executed). Range/palette/default values for the 21 creation controls are NOT in the script bytes - they are constructed ENGINE-SIDE behind FF8F hostcalls whose command ids are binder-patched slots (raw 0x0 statically); the GCE vtable[3] host-command catalog remains OPEN (PE_VM_HOSTAPI_R1). No min/max/step/default/palette opcode exists in 1883 CODE (proven by the clean sweep + creator-function internals + CharDef::227472 containing no clamps).",
+      "consumer_code_api": "jobs/CHAR_B/charb_decode.py, charb_full_sweep.py, charb_build_schema.py (static decoders); CHARACTER_CREATION_SCHEMA_V2.json (21 controls, 10-opcode table, validation)",
+      "executed_test_ids": "CHAR_B full-CODE sweep zero-residue (doubles as desync check); EXTN offset convention verified on 11/11 init-region and 20/21 label-area calls; creator function hash-double-confirmed (20/21 -> name_id 210421 PFIX 0x335F5 hash 7DFBB38F; 'Size' -> 211689 PFIX 0x33AE9 hash C022BE30)",
+      "evidence_pointer": "CHAR_B_REPORT.md §§1-4; CHARACTER_CREATION_SCHEMA_V2.json; DELTA_VS_CHAR_A.csv",
+      "runtime_enabled": false
+    },
+    {
+      "knowledge_record": "KR-W14-e: NiFogProperty serialize/evaluate model (source-backed paraphrase; fog VALUES not recovered)",
+      "source_build": "W14 direct read of gb12 Gb12_Source CoreLibs/NiMain/NiFogProperty.{h,cpp,inl} (NDL Gamebryo 1.2 reference source, local lab read-only tree)",
+      "source_hash": "pin = file exists in the gb12 read-only lab tree (W14 record; the ISO-era PE 5.1.0.0 consumer binary was NOT scanned - out of W14 scope)",
+      "claim_status": "SOURCE_BACKED MODEL (paraphrase, no SDK code reproduced verbatim): NiFogProperty is a NiProperty with (a) fog enable flag, (b) FogFunction enum {FOG_Z_LINEAR, FOG_RANGE_SQ, FOG_VERTEX_ALPHA}, (c) depth float, (d) NiColor. Serialized order: flags, depth, color. Depth semantics: 0 = no fog, 1 = fog starts at the near plane, >1 = starts in front of it (front distance = near/depth). Era-consistent corpus qualification: CD Jan-2003 Models.ark contains ZERO NiFogProperty / NiSourceCubeMap / NiBillboardNode blocks (full NIF block-type scan, 1815+440+237 payloads); CD Textures.ark DDS scan found 0 cubemaps - so no original fog VALUES or sky assets are recoverable in the ISO/CD corpus.",
+      "limitation": "MODEL source-backed, VALUES ENGINEERING_PREVIEW in the runtime (near=100 m / far=900 m derived from gb12 depth 0.01 @ near 1 - preview, not recovered data). environmentzones_semantic (24,007 records) is PLAUSIBLE-NOT-VERIFIED (container + consumer unidentified) and was EXCLUDED as a fog source. The VM-era sky corpus (834 sky NIFs, cubemaps) is a DIFFERENT era - candidate only, no substitution.",
+      "consumer_code_api": "src/peworld/IsoEnvironment.js (fog layer consumer; THREE.Fog + explicit uFog uniforms in the splat shader, since custom ShaderMaterial ignores scene.fog)",
+      "executed_test_ids": "W14_UNIT_TEST.json 18/18 PASS (incl. GB12_FOG_MODEL label check); W14_BROWSER_PROOF.json 15/15 PASS (fog toggle pixel-diff controlled test, environmentzones-excluded gate)",
+      "evidence_pointer": "W14_REPORT.md; W14_ENVIRONMENT_SOURCE_MAP.md; W14_environment_scan.json (ark SHA pins D611D125... / F660D055...)",
+      "runtime_enabled": true
+    }
+  ],
+  "record_count": 5,
+  "limits": [
+    "Additive only: this file does not modify or supersede any existing namespace record; the J4 module hash gate (niTransformAdapter.mjs / test_adapter.mjs / mutant_wrong_transpose.mjs) is untouched by this addition.",
+    "Era discipline: KR-W03-c and KR-W05-b are ISO_5_1_0_0 primary-target findings; KR-W08-a is NIF 10.1.0.0 witness scope; KR-CHAR_B-d is CD/PE2-binary ArkScript scope; KR-W14-e is gb12 REFERENCE_OTHER_BUILD semantics with era-consistent negative evidence (0 NiFogProperty in CD NIFs).",
+    "No record claims recovered sky/fog/light VALUES, character-control ranges/palettes/defaults, or NIF 4.1.0.12 IR - those remain explicitly OPEN (see docs/CAPABILITY_MATRIX.json)."
+  ]
+}
