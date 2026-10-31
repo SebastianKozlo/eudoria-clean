@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<title>AV-2 — PE ISO asset viewer (Models.ark / Textures.ark, era ISO_5_1_0_0, NIF 4.1.0.12 + Three r187)</title>
+<style>
+  body { background:#111; color:#ddd; font-family:monospace; margin:0; font-size:11px; }
+  #badges { position:fixed; top:0; left:0; right:0; background:#1a1a22; padding:6px 10px; display:flex;
+            flex-wrap:wrap; gap:8px; align-items:center; z-index:10; border-bottom:1px solid #333; }
+  .badge { background:#2a2a35; border-radius:4px; padding:3px 8px; white-space:nowrap; }
+  .badge b { color:#fbbf24; }
+  .badge.ok { background:#14532d; } .badge.fail { background:#7f1d1d; } .badge.warn { background:#7f4f1d; }
+  #layout { position:fixed; inset:56px 0 0 0; display:flex; }
+  #list { width:300px; min-width:230px; background:#141419; border-right:1px solid #333; display:flex; flex-direction:column; }
+  #search { margin:6px; padding:5px; background:#0d0d12; color:#ddd; border:1px solid #444; }
+  #models { flex:1; overflow:auto; }
+  .mrow { padding:3px 8px; cursor:pointer; border-bottom:1px solid #1c1c22; }
+  .mrow:hover { background:#20202c; } .mrow.sel { background:#2b3a2b; }
+  .mrow small { color:#888; }
+  #pager { display:flex; gap:6px; padding:6px; border-top:1px solid #333; align-items:center; }
+  #pager button { flex:1; }
+  #mid { flex:1; position:relative; display:flex; flex-direction:column; }
+  #viewwrap { flex:1; position:relative; }
+  #view { position:absolute; inset:0; }
+  #viewmsg { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+             color:#f87171; text-align:center; padding:24px; pointer-events:none; }
+  #animbar { background:#141419; border-top:1px solid #333; padding:6px 10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  #animbar button { min-width:64px; }
+  #seek { width:220px; }
+  #panel { width:430px; min-width:320px; overflow:auto; background:#141419; border-left:1px solid #333; padding:8px; }
+  h3 { color:#fbbf24; margin:12px 0 4px 0; font-size:12px; border-bottom:1px solid #333; }
+  table { border-collapse:collapse; }
+  td { padding:1px 6px 1px 2px; vertical-align:top; }
+  td.k { color:#9ca3af; white-space:nowrap; }
+  .note { color:#94a3b8; padding-left:12px; }
+  .honest { color:#f87171; } .st { color:#4ade80; }
+  .warnbox { background:#7f4f1d; padding:6px; margin:4px 0; border-radius:4px; }
+  button { background:#2a2a35; color:#ddd; border:1px solid #444; border-radius:4px; padding:4px 8px; cursor:pointer; }
+  button.off { opacity:.5; }
+  input[type=range] { accent-color:#fbbf24; }
+  select { background:#0d0d12; color:#ddd; border:1px solid #444; }
+</style>
+</head>
+<body>
+<div id="badges">
+  <span class="badge ref">AV-2 asset viewer · era: <b>ISO_5_1_0_0</b> (PE 2003 CD, PC Gamer Nov2003)</span>
+  <span class="badge" id="b-index">index: —</span>
+  <span class="badge" id="b-model">model: —</span>
+  <span class="badge" id="b-status">status: —</span>
+  <span class="badge" id="b-tex">textures: —</span>
+  <span class="badge" id="b-anim">anim: —</span>
+  <span class="badge" id="b-revision">three: —</span>
+</div>
+<div id="layout">
+  <div id="list">
+    <input id="search" type="text" placeholder="search model id / name…" />
+    <div id="models"></div>
+    <div id="pager">
+      <button id="pg-prev">◀</button>
+      <span id="pg-info" style="flex:2;text-align:center;">—</span>
+      <button id="pg-next">▶</button>
+    </div>
+  </div>
+  <div id="mid">
+    <div id="viewwrap"><div id="view"></div><div id="viewmsg"></div></div>
+    <div id="animbar">
+      <button id="btn-play">▶ play</button>
+      <button id="btn-pause">⏸ pause</button>
+      <button id="btn-stop">⏹ stop</button>
+      <input id="seek" type="range" min="0" max="1000" value="0" />
+      <span id="time">0.00s</span>
+      <label>speed <input id="speed" type="range" min="1" max="20" value="10" style="width:80px;vertical-align:middle;" /></label>
+      <span id="speedval">1.0×</span>
+      <select id="clip-sel"><option value="-1">— no clip —</option></select>
+      <button id="btn-wire">wireframe: off</button>
+      <button id="btn-tex">textures: on</button>
+    </div>
+  </div>
+  <div id="panel"><h3>PE ISO ASSET VIEWER (AV-2)</h3>
+  <div class="note">select a model on the left…</div></div>
+</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "/node_modules/three/build/three.module.js",
+    "three/addons/": "/node_modules/three/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="/compat/assets.js"></script>
+</body>
+</html>
