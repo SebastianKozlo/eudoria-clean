@@ -169,10 +169,38 @@ async function fetchJson(url) {
 
 function tileName(gx, gy) { return gx.toString(16).padStart(4, '0') + gy.toString(16).padStart(4, '0') + '.tdf'; }
 
+/** W1-2 BUG_FIX b): refresh /api/world/status WITHOUT losing the tile-cache
+ *  identity (identityOf). The boot polling loops previously did
+ *  `state.status = await fetchJson(...)` which REPLACED the whole status
+ *  object and silently dropped state.status.identityOf (set once at boot) —
+ *  cacheGet then saw `identityOf === undefined` and "controlled-refused"
+ *  EVERY cached tile, forcing a full ~100-tile (10x10 field) refetch on every
+ *  window change/return despite the LRU (measured in W1-1: fe1->fe2 +100
+ *  fetches for an already-cached home window). Re-deriving identityOf from
+ *  the FRESH status keeps the CAM-C3 discipline (era/container/sha256 pin)
+ *  intact: a genuine identity change still refuses old entries. */
+async function refreshWorldStatus() {
+  const s = await fetchJson('/api/world/status');
+  s.identityOf = {
+    era: s.era,
+    container: 'Terrain/terrain.bnt',
+    containerSha256: s.containers?.terrain?.sha256,
+  };
+  return s;
+}
+
 // ---- client tile cache (bounded LRU; CAM-C3 identity discipline) ----
 function cachePut(tile, identity) {
   const key = `${tile.gridX},${tile.gridY}`;
-  if (state.cache.has(key)) state.cache.delete(key);
+  if (state.cache.has(key)) {
+    state.cache.delete(key);
+    // W1-2 BUG_FIX b): the SAME key re-put must not leave a STALE duplicate in
+    // the LRU order queue — duplicates evicted live tiles early (measured:
+    // return-refetch of tiles still within CLIENT_CACHE_MAX). Remove the old
+    // order slot so the queue stays a faithful bijection of state.cache.
+    const oi = state.cacheOrder.indexOf(key);
+    if (oi !== -1) state.cacheOrder.splice(oi, 1);
+  }
   state.cache.set(key, { tile, identity: { era: identity.era, container: identity.container, containerSha256: identity.containerSha256, entryName: tile.name } });
   state.cacheOrder.push(key);
   while (state.cacheOrder.length > CLIENT_CACHE_MAX) {
@@ -1274,6 +1302,14 @@ function updateCensusPanel() {
     `renderer: draw calls ${renderer.info.render.calls}, trójkąty ${renderer.info.render.triangles}, tekstury ${renderer.info.memory.textures}, geometrie ${renderer.info.memory.geometries}\n` +
     `origin okna: ${state.windowOrigin ? `${state.windowOrigin.gx},${state.windowOrigin.gy}` : '—'}`;
   updateCoherencePanel();
+  // W1-2 BUG_FIX a): the evidence panel previously refreshed ONLY from the
+  // vegetation drain path — after a window change with veg still building (or
+  // off) it kept showing the PREVIOUS window's diag line (W1-1 evidence:
+  // 583/583 in world-evidence vs 959/959 in world-census, old window origin
+  // after teleport). Refreshing it on the same 400 ms census tick keeps both
+  // panels coherent with the CURRENT window (gate: after teleport, panel
+  // origin == requested window).
+  updateEvidencePanel();
   const vs = $('veg-status-line');
   vs.hidden = !state.vegOn || !vc?.ok;
   if (state.vegOn && vc?.ok) {
@@ -1298,6 +1334,10 @@ window.__peR2Debug = {
   get running() { return { busy: state.rebuildBusy, runningOrigin: state.runningOrigin ? { ...state.runningOrigin } : null, pending: state.pendingOrigin ? { ...state.pendingOrigin } : null, sceneId: state.sceneRequest?.id ?? null, vegBusy: state.vegBusy, vegPending: state.vegPending ? { origin: { ...state.vegPending.origin }, requestId: state.vegPending.requestId } : null, vegTrace: state.vegTrace.slice(-24) }; },
   queryHeightAt(x, z) { return state.heightField ? state.heightField.triangleHeightAtWorld(x, z) : null; },
 };
+// W4-1 (staging 8171 only): the render-scene handle for the GAME_CHARACTER_REF
+// pawn module (compat/world-player.js). READ-ONLY wiring exposure — the app's
+// own behavior is unchanged; the player module adds its own objects.
+window.__peWorldScene = { scene, camera, renderer, controls };
 
 // ---- animate ----
 let lastT = performance.now();
@@ -1409,7 +1449,7 @@ async function boot() {
   applyDrawerState();
   syncCanvasSize();
   hud('łączę z serwerem świata…');
-  state.status = await fetchJson('/api/world/status');
+  state.status = await refreshWorldStatus(); // W1-2 BUG_FIX b): keep identityOf (tile-cache identity) across refreshes
   state.status.identityOf = {
     era: state.status.era,
     container: 'Terrain/terrain.bnt',
@@ -1487,7 +1527,7 @@ async function boot() {
     setLoading('czekam na indeks tekstur (weryfikacja pinu Textures.bnt)…');
     const waitT0 = performance.now();
     for (;;) {
-      state.status = await fetchJson('/api/world/status');
+      state.status = await refreshWorldStatus(); // W1-2 BUG_FIX b): keep identityOf (tile-cache identity) across refreshes
       const stx = state.status?.containers?.textures;
       if (stx?.indexState === 'READY') break;
       if (performance.now() - waitT0 > 20000) {
@@ -1511,7 +1551,7 @@ async function boot() {
     setLoading('czekam na indeks modeli (weryfikacja pinu Models.bnt)…');
     const waitT0 = performance.now();
     for (;;) {
-      state.status = await fetchJson('/api/world/status');
+      state.status = await refreshWorldStatus(); // W1-2 BUG_FIX b): keep identityOf (tile-cache identity) across refreshes
       const stm = state.status?.containers?.models;
       if (stm?.indexState === 'READY') break;
       if (performance.now() - waitT0 > 20000) {

@@ -1,13 +1,13 @@
-<!DOCTYPE html>
-<!-- world.html — PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010 (contract §3–§7)
-     THE /world view: the whole available map as a CONTINUOUS WORLD — near
+﻿<!DOCTYPE html>
+<!-- world.html â€” PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010 (contract Â§3â€“Â§7)
+     THE /world view: the whole available map as a CONTINUOUS WORLD â€” near
      window (RAW u16 from terrain.bnt) + mid/far distant LOD from decimated
      REAL samples, shared triangle-exact height query for rendering/trees/
      walking, original textures + diversified original vegetation.
 
-      LAYOUT (contract §5): the canvas is the main screen (>=85% width, >=80%
+      LAYOUT (contract Â§5): the canvas is the main screen (>=85% width, >=80%
       height of a 1280x720 viewport); details/hashes/hierarchy/calibration/
-      provenance live in the collapsible drawer „Szczegóły” (default collapsed,
+      provenance live in the collapsible drawer â€žSzczegÃ³Å‚yâ€ (default collapsed,
       preference remembered; never captures movement keys while typing).
       No fixed 480px sidebar, no overlapping action bars.
 
@@ -15,22 +15,22 @@
         - terrain heights = RAW uint16 from the original TDF payload offset
           64..2111, decoded by the production chain; NO normalization, NO
           smoothing, NO seam hiding, NO tile rewriting;
-        - the CURRENT_RUNTIME_CALIBRATION preset (u16/128 → meters, 2 adapter
+        - the CURRENT_RUNTIME_CALIBRATION preset (u16/128 â†’ meters, 2 adapter
           units/sample, identity min/max) is applied EXACTLY ONCE (inside the
           shared PEHeightField/PETerrainRegion conversion) and is reversible;
           it is a runtime preset with provenance, NOT a proven historical fact;
-        - position readouts are adapter units + tile key — NEVER „original XYZ”;
+        - position readouts are adapter units + tile key â€” NEVER â€žoriginal XYZâ€;
         - the distant LOD (mid/far) is a RENDERER policy: decimated REAL
           samples at their own positions; missing tiles are explicit holes,
           never a zero surface; the LOD boundary grid lines MATCH the finer
-          level edge (the same ORIGINAL samples on the cut lines — no cracks,
+          level edge (the same ORIGINAL samples on the cut lines â€” no cracks,
           no skirts);
         - vegetation = RECONSTRUCTION_PREVIEW: ORIGINAL_CLIMATE_RECORDS (strict
           .vcl; 25.vcl stays UNSUPPORTED) + the RECOVERED byte-locked RNG
           chain (PEFoliageCore, untouched) + the DOCUMENTED LAB_SEED wrapper
           (PEFoliageLabSeed v2); models = ORIGINAL same-era NIF payloads
           through the EXISTING qualified importer; the INSTANCE DISTRIBUTION
-          is reconstruction-only — no historical seed/count/biome claims; the
+          is reconstruction-only â€” no historical seed/count/biome claims; the
           regional preview map is OURS (ORIGINAL_REGION_TO_CLIMATE_JOIN =
           NOT_ESTABLISHED);
         - water = NOT_RECOVERED. -->
@@ -38,7 +38,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PE Eudoria — ciągły świat (teren z oryginalnych próbek u16)</title>
+<title>PE Eudoria â€” ciÄ…gÅ‚y Å›wiat (teren z oryginalnych prÃ³bek u16)</title>
 <link rel="stylesheet" href="/compat/compat.css">
 <link rel="stylesheet" href="/compat/world.css">
 <script type="importmap">
@@ -51,110 +51,112 @@
 <body>
 <header id="app-header">
   <div class="brand-row">
-    <div class="brand">PE Eudoria — ciągły świat | run PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010</div>
-    <button id="btn-drawer" title="pokaż/ukryj panel szczegółów (Szczegóły)">Szczegóły</button>
+    <div class="brand">PE Eudoria â€” ciÄ…gÅ‚y Å›wiat | run PE_WORLD_CONTINUOUS_ROSETTA_R2_20261010</div>
+    <button id="btn-drawer" title="pokaÅ¼/ukryj panel szczegÃ³Å‚Ã³w (SzczegÃ³Å‚y)">SzczegÃ³Å‚y</button>
   </div>
   <div class="labels">
-    <span class="lab">teren = SUROWE uint16 z terrain.bnt (offset 64..2111; era PCG_9_3_5) · daleki LOD = decymowane RZECZYWISTE próbki (polityka renderera, jawne braki)</span>
-    <span class="lab">jednostki = adaptera (CURRENT_RUNTIME_CALIBRATION: u16/128 → m, 2 jedn./próbkę) — NIE „oryginalne XYZ” · roślinność = RECONSTRUCTION_PREVIEW · woda = NOT_RECOVERED</span>
+    <span class="lab">teren = SUROWE uint16 z terrain.bnt (offset 64..2111; era PCG_9_3_5) Â· daleki LOD = decymowane RZECZYWISTE prÃ³bki (polityka renderera, jawne braki)</span>
+    <span class="lab">jednostki = adaptera (CURRENT_RUNTIME_CALIBRATION: u16/128 â†’ m, 2 jedn./prÃ³bkÄ™) â€” NIE â€žoryginalne XYZâ€ Â· roÅ›linnoÅ›Ä‡ = RECONSTRUCTION_PREVIEW Â· woda = NOT_RECOVERED</span>
   </div>
 </header>
 
-<div id="hud-line">boot…</div>
+<div id="hud-line">bootâ€¦</div>
 <div id="error-banner" hidden></div>
-<div id="boundary-banner" hidden>brak danych powierzchni poza tym punktem — ruch wstrzymany (NIE zrzucamy w pustkę; to NIE jest wysokość 0)</div>
+<div id="boundary-banner" hidden>brak danych powierzchni poza tym punktem â€” ruch wstrzymany (NIE zrzucamy w pustkÄ™; to NIE jest wysokoÅ›Ä‡ 0)</div>
 
 <main id="world-layout">
   <div id="viewport-wrap">
     <canvas id="view-canvas"></canvas>
     <div id="action-bar">
       <button id="btn-mode-orbit" class="active" title="tryb orbity (klawisz 1)">Orbita [1]</button>
-      <button id="btn-mode-fly" title="tryb lotu (klawisz 2) — WASD + Q/E">Lot [2]</button>
-      <button id="btn-mode-walk" title="tryb spaceru (klawisz 3) — WASD po terenie">Spacer [3]</button>
-      <button id="btn-fit" title="dopasuj widok do fokusu (klawisz F) — stabilny, nie przesuwa okna">Dopasuj [F]</button>
+      <button id="btn-mode-fly" title="tryb lotu (klawisz 2) â€” WASD + Q/E">Lot [2]</button>
+      <button id="btn-mode-walk" title="tryb spaceru (klawisz 3) â€” WASD po terenie">Spacer [3]</button>
+      <button id="btn-fit" title="dopasuj widok do fokusu (klawisz F) â€” stabilny, nie przesuwa okna">Dopasuj [F]</button>
       <button id="btn-reset" title="reset kamery na spawn (klawisz R)">Reset [R]</button>
-      <button id="btn-launcher" title="powrót do launchera">← Launcher</button>
-      <button id="btn-assetlab" title="Asset Lab — podgląd modeli (witness PCG 519316 + 4 proxy CD)">Asset Lab</button>
+      <button id="btn-launcher" title="powrÃ³t do launchera">â† Launcher</button>
+      <button id="btn-assetlab" title="Asset Lab â€” podglÄ…d modeli (witness PCG 519316 + 4 proxy CD)">Asset Lab</button>
       <label class="tog"><input type="checkbox" id="tog-textures" checked> tekstury terenu</label>
-      <label class="tog"><input type="checkbox" id="tog-vegetation" checked> roślinność</label>
+      <label class="tog"><input type="checkbox" id="tog-vegetation" checked> roÅ›linnoÅ›Ä‡</label>
       <label class="tog"><input type="checkbox" id="tog-wireframe"> siatka</label>
       <label class="tog"><input type="checkbox" id="tog-tilebounds"> granice kafli</label>
     </div>
-    <div id="pos-hud" class="small mono">pozycja: …</div>
-    <div id="lock-hint" class="small" hidden>tryb Lot/Spacer: kliknij canvas, aby przechwycić mysz (ESC uwalnia); jeśli przeglądarka odmówi — działa tryb przeciągania (trzymaj LPM i ruszaj myszą)</div>
+    <div id="pos-hud" class="small mono">pozycja: â€¦</div>
+    <div id="lock-hint" class="small" hidden>tryb Lot/Spacer: kliknij canvas, aby przechwyciÄ‡ mysz (ESC uwalnia); jeÅ›li przeglÄ…darka odmÃ³wi â€” dziaÅ‚a tryb przeciÄ…gania (trzymaj LPM i ruszaj myszÄ…)</div>
     <div id="veg-status-line" class="small mono" hidden></div>
   </div>
 
-  <!-- the collapsible „Szczegóły” drawer (contract §5: details/hashes/
+  <!-- the collapsible â€žSzczegÃ³Å‚yâ€ drawer (contract Â§5: details/hashes/
        hierarchy/calibration/provenance live here; canvas >=85%/80%) -->
-  <aside id="world-side" aria-label="Szczegóły">
+  <aside id="world-side" aria-label="SzczegÃ³Å‚y">
     <div class="drawer-head">
-      <b>Szczegóły</b>
-      <button id="btn-drawer-close" title="zwiń panel (kamera bez zmian)">Zwiń</button>
+      <b>SzczegÃ³Å‚y</b>
+      <button id="btn-drawer-close" title="zwiÅ„ panel (kamera bez zmian)">ZwiÅ„</button>
     </div>
     <section class="diag-section">
-      <h4>Ładowanie i błędy (uczciwie)</h4>
-      <div id="world-loading" class="small mono">…</div>
-      <div id="scene-coherence" class="small mono">…</div>
+      <h4>Åadowanie i bÅ‚Ä™dy (uczciwie)</h4>
+      <div id="world-loading" class="small mono">â€¦</div>
+      <div id="scene-coherence" class="small mono">â€¦</div>
     </section>
     <section class="diag-section">
-      <h4>Profil / seed / gęstość (ustawienia rekonstrukcji)</h4>
+      <h4>Profil / seed / gÄ™stoÅ›Ä‡ (ustawienia rekonstrukcji)</h4>
       <label class="small">Tryb profilu
         <select id="veg-mode">
           <option value="global">globalny (oryginalnie odczytany profil)</option>
           <option value="regional">regionalny RECONSTRUCTION_PREVIEW (mapa NASZA)</option>
         </select>
       </label>
-      <label class="small">Profil roślinności (0..31)
+      <label class="small">Profil roÅ›linnoÅ›ci (0..31)
         <select id="veg-profile"></select>
       </label>
-      <label class="small">Seed podglądu (LAB_SEED)
+      <label class="small">Seed podglÄ…du (LAB_SEED)
         <input id="veg-seed" type="number" value="0" min="0" max="999999" step="1">
       </label>
-      <label class="small">Gęstość podglągu
+      <label class="small">GÄ™stoÅ›Ä‡ podglÄ…gu
         <input id="veg-density" type="range" min="0" max="100" value="50">
         <span id="veg-density-value" class="mono">50%</span>
       </label>
-      <button id="veg-apply" title="zatwierdź profil/seed/gęstość i przebuduj scenę">Zastosuj (przebuduj)</button>
-      <div class="small mono" id="world-veg">…</div>
+      <button id="veg-apply" title="zatwierdÅº profil/seed/gÄ™stoÅ›Ä‡ i przebuduj scenÄ™">Zastosuj (przebuduj)</button>
+      <div class="small mono" id="world-veg">â€¦</div>
     </section>
     <section class="diag-section">
-      <h4>Teleport (wybór kafla)</h4>
+      <h4>Teleport (wybÃ³r kafla)</h4>
       <label class="small">Kafel gx,gy
         <input id="tp-gx" type="number" min="0" max="219" step="1" placeholder="0..219">
         <input id="tp-gy" type="number" min="0" max="235" step="1" placeholder="0..235">
       </label>
-      <button id="tp-go" title="teleport na środek kafla (najpierw zapewniane są dane miejsca docelowego)">Teleport</button>
-      <div class="small" id="tp-note">teleport najpierw zapewnia dane powierzchni miejsca docelowego; brak ground ≠ wysokość zero</div>
+      <button id="tp-go" title="teleport na Å›rodek kafla (najpierw zapewniane sÄ… dane miejsca docelowego)">Teleport</button>
+      <div class="small" id="tp-note">teleport najpierw zapewnia dane powierzchni miejsca docelowego; brak ground â‰  wysokoÅ›Ä‡ zero</div>
     </section>
     <section class="diag-section">
-      <h4>Census pamięci / instancji / LOD</h4>
-      <div id="world-census" class="small mono">…</div>
+      <h4>Census pamiÄ™ci / instancji / LOD</h4>
+      <div id="world-census" class="small mono">â€¦</div>
     </section>
     <section class="diag-section">
       <h4>Punkt debug (kliknij teren/model)</h4>
-      <div id="debug-point" class="small mono">kliknij teren lub model w trybie orbity — łańcuch provenance (era → kontener SHA → wpis/payload SHA → dekoder → obiekt sceny → polityka)</div>
+      <div id="debug-point" class="small mono">kliknij teren lub model w trybie orbity â€” Å‚aÅ„cuch provenance (era â†’ kontener SHA â†’ wpis/payload SHA â†’ dekoder â†’ obiekt sceny â†’ polityka)</div>
     </section>
     <section class="diag-section">
       <h4>Sterowanie</h4>
       <div class="small">
-        <b>Orbita</b>: LMB obrót · RMB/scroll przybliżenie · MMB/SRMB przesuwanie.<br>
-        <b>Lot</b>: WASD + Q (w dół) / E (w górę) · Shift ×3.<br>
-        <b>Spacer</b>: WASD po terenie (wysokość z WSPÓLNEGO zapytania trójkątowego; offset oka 1,7 m) · Shift ×3.<br>
-        <b>1/2/3</b> tryby · <b>F</b> dopasuj · <b>R</b> reset · <b>ESC</b> uwolnij kursor. Klawisze ruchu nie działają, gdy piszesz w polach panelu.
+        <b>Orbita</b>: LMB obrÃ³t Â· RMB/scroll przybliÅ¼enie Â· MMB/SRMB przesuwanie.<br>
+        <b>Lot</b>: WASD + Q (w dÃ³Å‚) / E (w gÃ³rÄ™) Â· Shift Ã—3.<br>
+        <b>Spacer</b>: WASD po terenie (wysokoÅ›Ä‡ z WSPÃ“LNEGO zapytania trÃ³jkÄ…towego; offset oka 1,7 m) Â· Shift Ã—3.<br>
+        <b>1/2/3</b> tryby Â· <b>F</b> dopasuj Â· <b>R</b> reset Â· <b>ESC</b> uwolnij kursor. Klawisze ruchu nie dziaÅ‚ajÄ…, gdy piszesz w polach panelu.
       </div>
     </section>
     <details id="evidence">
-      <summary>Panel dowodów — provenance, kalibracja, topologia (dane techniczne)</summary>
-      <div id="world-evidence" class="small mono">…</div>
+      <summary>Panel dowodÃ³w â€” provenance, kalibracja, topologia (dane techniczne)</summary>
+      <div id="world-evidence" class="small mono">â€¦</div>
     </details>
     <details id="diagnostics">
       <summary>DIAGNOSTICS (boot + render)</summary>
-      <div id="world-diag" class="small mono">…</div>
+      <div id="world-diag" class="small mono">â€¦</div>
     </details>
   </aside>
 </main>
 
 <script type="module" src="/compat/world-app.js"></script>
+<!-- W4-1 staging: the GAME_CHARACTER_REF pawn (game clips 546617/546613; Models.bnt 546608) -->
+<script type="module" src="/compat/world-player.js"></script>
 </body>
 </html>
