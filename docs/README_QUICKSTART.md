@@ -58,12 +58,20 @@ node server.mjs
 
 | URL | What it is |
 |---|---|
-| `http://127.0.0.1:8140/terrain/world_iso.html` | ISO terrain patch (3×3 tiles) with material splat + environment layers |
+| `http://127.0.0.1:8140/terrain/world_iso.html` | ISO terrain with **explore window (W25)**: a Chebyshev radius-2 (5×5) tile window follows the camera grid cell, replanned on every cell change; streamed-tile cache limit 40 with farthest-from-camera eviction; HUD shows the live camera grid position (x,y), window range vs the 220×236 map, cache size/limit and eviction count. Material splat + environment layers; frustum culling on by default — KeyC toggles |
 | `http://127.0.0.1:8140/terrain/inspector.html` | NIF model inspector (block graph / TRS / materials / 3D viewport) |
+| `http://127.0.0.1:8140/terrain/character_preview.html` | 2003 avatar preview (REFERENCE asset stage): real avatar 208861 + hair meshes 32498 (MALE) / 32509 (FEMALE) with era textures — gender pairing **byte-proven** (CHAR_G slot-45 GetSex 1=MALE/2=FEMALE + 6052 gender tables; W25 re-paired the previously crossed textures: 32498+216257 MALE, 32509+216302 FEMALE) — **read-only engineering preview, NOT a playable creator** (see `CHARACTER_CREATION.md` for what is/isn't recovered) |
 
 Inspector accepts query params: `?asset=<name>&era=<era>`.
 Examples: `?asset=457485&source=models_bnt` (full original-direct chain), or a fixture
 name routed via `/assets/…`.
+
+**Data routes are env-supplied** (`server.mjs` reads its exact-path allowlist at
+startup; the file itself needs no edits — restart the server after changing routes).
+The character preview needs the avatar/hair payload routes from the W18 lease
+(`/assets/avatar/…`, `/assets/hair/…`) plus the existing `/iso/50.bnt` route; point
+every entry at your own local copies of the recovered files (placeholder example
+above — **no absolute paths are prescribed here**).
 
 ## 5. Controls (world_iso)
 
@@ -77,9 +85,17 @@ name routed via `/assets/…`.
 | **N** (KeyN) | sky layer on/off |
 | **B** (KeyB) | fog layer on/off |
 | **L** (KeyL) | light layer on/off |
+| **C** (KeyC) | frustum culling on/off (W22; HUD shows the live culled-tile count) |
 
 Console hooks: `__w05SetMaterialMode`, `__w14SetEnv`, `__w14EnvStats` (used by the
-browser-proof probes).
+browser-proof probes), plus W22: `__w22SetCulling`, `__w22Stats`,
+`__w22StartPerf`/`__w22StopPerf`, `__w22SetOrbit`.
+
+## 5b. Controls (character_preview)
+
+OrbitControls **drag = rotate, wheel = zoom**; per-hair toggle buttons show/hide each
+hair mesh. The panel is read-only knowledge (labels + statuses) — there are
+deliberately **no sliders** (0 input/range elements, DOM-gated).
 
 ## 6. Stop the server
 

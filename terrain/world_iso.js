@@ -50,16 +50,42 @@
 // the fog MODEL shape (linear z-fog) is source-backed gb12 NiFogProperty
 // semantics (paraphrase, pinned in W14_ENVIRONMENT_SOURCE_MAP.md).
 //
-// W06 (this job, 2026-10-30 attempt W06_a1): MULTIPATCH STREAMING — expand
-// the visible area from the fixture-pinned 3x3 core to a 5x5 window
-// containing it (windowContainingCore, clamped to the 220x236 grid), with
-// per-tile ASYNC decode + near-origin-first order + explicit ocean/nodata
-// skip (>90% zero samples — the SAME W03/W05 census heuristic) + a
-// name-keyed tile cache with explicit eviction/disposal. The fly/render
-// loop starts on the core; ring tiles appear as they decode (non-blocking
-// background task — the core 3x3 fallback keeps working if streaming
-// fails). NOT implemented (backlog, ranked): LOD, frustum culling,
-// workers, priority queue.
+// W06 (job 2026-10-30 attempt W06_a1 — SUPERSEDED BY W25 below): MULTIPATCH
+// STREAMING — expand the visible area from the fixture-pinned 3x3 core to a
+// STATIC 5x5 window containing it, with per-tile ASYNC decode + near-origin-
+// first order + explicit ocean/nodata skip + a name-keyed tile cache with
+// explicit eviction/disposal. The W25 job replaces the STATIC window with a
+// CAMERA-FOLLOW window (see the W25 block) — the W06 state fields live on
+// for probe compatibility. NOT implemented (backlog, ranked): LOD, workers.
+//
+// W22 (this job, 2026-10-30 attempt W22_a1): PER-TILE FRUSTUM CULLING +
+// REAL frame-time measurements. Per-frame THREE.Frustum test against a
+// static per-tile Box3 (computed once at registration — the geometry
+// join of the core region mesh is NOT split; it stays one mesh). Culled
+// count goes to HUD + __w22Stats(). Frame-time recording (__w22StartPerf/
+// StopPerf: raw rAF deltas + renderer.info per frame) feeds the W22 perf
+// aggregates (p50/p95/p99, stutters) measured by the CDP probe. Programmatic
+// orbit (__w22SetOrbit) drives the moving-camera measurement. LOD/workers
+// REMAIN in the backlog (not this job).
+//
+// W25 (this job, 2026-10-31 attempt W25_a1): CAMERA-FOLLOW EXPLORE WINDOW.
+// The W06 STATIC 5x5 window is replaced by a DYNAMIC window of fixed
+// Chebyshev radius STREAM_RADIUS=2 tiles around the CAMERA GRID CELL
+// (bounded scope: fixed-radius window, NOT quadtree/LOD). When the camera
+// moves to a new grid cell the desired window is REPLANNED: missing tiles
+// enter a queue sorted CAMERA-RELATIVE (distance from the camera cell —
+// W06 backlog #4 resolved); ocean/nodata and failed tiles are MEMOIZED so
+// replans never re-decode them. Tiles decode ASYNC in a background task
+// (render never blocks; core 3x3 keeps rendering as fallback). Eviction:
+// when the streamed-tile cache exceeds MAX_STREAM_CACHE=40 the tile
+// FARTHEST from the camera (horizontal grid distance) is disposed
+// (geometry+material, scene groups, W22 culling registry) and evicted —
+// the core 9 fixture-pinned tiles are NEVER evicted. W25 also FIXES a W25-
+// discovered W06 placement bug: ring tiles were placed relative to the
+// WINDOW ORIGIN, so the window column WEST of the core landed ON TOP of
+// the core's west column (64 m overlap). Streamed tiles now use
+// GRID-ABSOLUTE placement relative to the core patch origin
+// (world x = (gridX - core) * 64 m) — disjoint from the core by construction.
 import { DEFAULT_ENV, ENV_LAYERS, GB12_FOG_MODEL, envConfigInvariant, fogRangeFromGb12, skyColorAt, layerTable } from '../src/peworld/IsoEnvironment.js';
 import * as THREE from 'three';
 import { PESourceMount } from '../src/pesource/PESourceMount.js';
@@ -67,7 +93,7 @@ import { ERAS } from '../src/pesource/PEProvenance.js';
 import { decodeMaterialTail } from '../src/pesource/TdfMaterialTailDecoder.js';
 import { decodeTga2 } from '../src/pesource/TgaDecoder.js';
 import { PETerrainRegion, HEIGHT_QUERY } from '../src/peworld/PETerrainCore.js';
-import { findFirstWorkingPatch, ISO_GRID, windowContainingCore, streamRingPlan, tileTerrainStats, isOceanNodataTile, OCEAN_SKIP_RULE } from '../src/peworld/IsoPatchSelection.js';
+import { findFirstWorkingPatch, ISO_GRID, tileNameFromGrid, tileTerrainStats, isOceanNodataTile, OCEAN_SKIP_RULE } from '../src/peworld/IsoPatchSelection.js';
 import { ISO_MATERIALS_FIXTURE, ISO_TEXTURE_PAYLOADS } from '../src/peworld/IsoMaterialsFixture.js';
 
 const ERA = ERAS.ISO_5_1_0_0;
@@ -355,25 +381,130 @@ const splatTiles = [];
 let maxOverlays = 0;
 
 // =====================================================================
-// W06 — MULTIPATCH STREAMING state (declared early: applyEnv + HUD read it;
+// W06/W25 — STREAMING state (declared early: applyEnv + HUD read it;
 // populated by the background stream task further below, never blocking init)
 // =====================================================================
-const WIN_N = 5;                        // expansion window size (contract §7)
 const OVERLAY_CAP_RING = 13;            // position+normal+13 weight attrs = 15 vertex attributes (WebGL2 minimum guarantee 16 — a 15-cap hit 'Too many attributes' on real hardware); capped tiles reported
-const MAX_STREAM_CACHE = 25;            // explicit cache limit; the 5x5 window never exceeds it (documented in the report)
-const streamDiagGroup = new THREE.Group(); // ring tiles in DIAGNOSTIC mode (flat color, same as core region mesh)
+// ---- W25 explore window (this job): camera-follow, fixed radius ----
+const STREAM_RADIUS = 2;                // Chebyshev radius around the camera grid cell -> 5x5 window (bounded: fixed radius, NOT quadtree/LOD)
+const MAX_STREAM_CACHE = 40;            // explicit streamed-tile cache limit (contract); core 9 fixture-pinned tiles NEVER evicted
+const CORE_GX = patch.originGridX;      // world origin = core patch origin (PETerrainCore region geometry is local: world 0 = core origin)
+const CORE_GY = patch.originGridY;
+const TILE_WORLD_M = 64;                // 32 samples x 2 m/sample (CURRENT_RUNTIME_CALIBRATION)
+const worldXOfGrid = (gx) => (gx - CORE_GX) * TILE_WORLD_M; // W25 grid-absolute placement (FIXES the W06 window-origin-relative overlap)
+const worldZOfGrid = (gy) => (gy - CORE_GY) * TILE_WORLD_M;
+const gridXOfWorld = (wx) => Math.floor(wx / TILE_WORLD_M) + CORE_GX;
+const gridYOfWorld = (wz) => Math.floor(wz / TILE_WORLD_M) + CORE_GY;
+const inCorePatch = (gx, gy) =>
+  gx >= CORE_GX && gx < CORE_GX + patch.n && gy >= CORE_GY && gy < CORE_GY + patch.n;
+const streamDiagGroup = new THREE.Group(); // streamed tiles in DIAGNOSTIC mode (flat color, same as core region mesh)
 scene.add(streamDiagGroup);
 const streamDiagMaterial = new THREE.MeshLambertMaterial({ color: 0x9a8f7a, wireframe: false });
-const streamSplatTiles = [];            // ring tile records (same shape as core splatTiles records)
-const tileStreamCache = new Map();      // W06 cache: keyed by TILE NAME -> record
+const streamSplatTiles = [];            // streamed tile records (same shape as core splatTiles records)
+const tileStreamCache = new Map();      // cache: keyed by TILE NAME -> record (streamed tiles only)
+const streamOceanMemo = new Map();      // W25: name -> stats for ocean/nodata tiles (replans never re-decode skips)
+const streamFailMemo = new Map();       // W25: name -> error string for failed tiles (no infinite retry loops)
 const w06StreamState = {
   job: 'W06_MULTIPATCH_STREAMING', attempt: 'W06_a1',
   startedUtc: null, complete: false, failed: false,
   window: null, planned: 0, decoded: 0, loaded: 0,
   oceanSkipped: [], errors: [], cappedOverlays: [],
   cacheEvictions: 0, firstTileVisibleAt: null, completedUtc: null,
-  framesAtFirstTile: null, // framesRendered when the FIRST ring tile appeared — render-first proof
+  framesAtFirstTile: null, // framesRendered when the FIRST streamed tile appeared — render-first proof
 };
+const w25State = {
+  job: 'W25_EXPLORE_WINDOW_AND_HAIR_REPAIR', attempt: 'W25_a1',
+  radiusTiles: STREAM_RADIUS, cacheLimit: MAX_STREAM_CACHE,
+  windowCenter: null,          // {gridX, gridY} — camera grid cell (clamped to the 220x236 grid)
+  windowUpdates: 0,            // count of replans triggered by camera-cell changes
+  windowHistory: [],           // last 40: {centerX, centerY, planned, reason, utc}
+  queued: 0,                   // candidates currently queued (live)
+  busy: false,                 // background decode task draining the queue
+  loaded: 0, oceanSkipped: 0, failed: 0,   // lifetime W25 counters (separate from w06 legacy fields)
+  cacheEvictions: 0,
+  loadLog: [],                 // last 40: {name, gridX, gridY, utc}
+  evictionLog: [],              // last 40: {name, gridX, gridY, distToCamM, utc}
+  placement: 'GRID-ABSOLUTE relative to the core patch origin (world x=(gridX-core)*64 m) — fixes the W06 window-origin-relative placement that overlapped the west ring column onto the core by 64 m',
+  priority: 'camera-relative: candidates sorted by distance from the camera grid cell (W06 backlog #4), row-major tie-break',
+  evictionPolicy: `farthest-from-camera (horizontal XZ distance) when streamed cache > ${MAX_STREAM_CACHE}; core 9 never evicted; geometry disposed once (shared splat+diag) + splat material disposed + W22 culling registry entry removed`,
+  scope: 'fixed Chebyshev radius window around the camera grid cell; NOT quadtree/LOD/workers (backlog)',
+};
+
+// =====================================================================
+// W22 — PER-TILE FRUSTUM CULLING + FRAME-TIME PERF RECORDING
+// (declared early: the core splat loop + buildStreamTile + tick use it)
+// Culling: per frame, ONE THREE.Frustum built from the camera, tested
+// against a STATIC per-tile Box3 (computed once at registration). The
+// per-mesh three.js automatic frustum test is DISABLED on registered
+// tiles (mesh.frustumCulled = false) so on/off toggling is exact: OFF =
+// all registered tiles ALWAYS submitted; ON = visible flag per frustum.
+// The core 3x3 DIAGNOSTIC region stays ONE joined mesh (contract: do not
+// break the geometry join) — it keeps three's default whole-mesh culling.
+// =====================================================================
+const w22State = {
+  job: 'W22_PERFORMANCE_CULLING', attempt: 'W22_a1',
+  enabled: (() => { const q = new URLSearchParams(location.search).get('culling'); return q === null ? true : q !== '0'; })(),
+  method: 'THREE.Frustum.setFromProjectionMatrix + Frustum.intersectsBox(static per-tile Box3) per frame; registered tiles have mesh.frustumCulled=false (explicit W22 culling replaces the per-mesh default)',
+  tiles: [],            // {name, kind: 'core'|'ring', mesh, diagMesh|null, box, visibleWanted}
+  culledCount: 0, visibleCount: 0, culledNames: [],
+  framesChecked: 0, recentCulledCounts: [], allVisible: true,
+  coreRegionMeshNote: 'core 3x3 diagnostic region = SINGLE joined mesh, three default whole-mesh culling (join NOT split by contract)',
+};
+const w22Frustum = new THREE.Frustum();
+const w22ProjScreen = new THREE.Matrix4();
+function w22RegisterTile(mesh, diagMesh, name, kind) {
+  const box = new THREE.Box3().setFromBufferAttribute(mesh.geometry.getAttribute('position'));
+  mesh.frustumCulled = false;            // explicit W22 culling replaces the per-mesh test
+  if (diagMesh) diagMesh.frustumCulled = false; // same geometry as the splat mesh — same box
+  w22State.tiles.push({ name, kind, mesh, diagMesh, box, visibleWanted: true });
+}
+function w22ApplyCulling() {
+  if (!w22State.enabled) {
+    if (!w22State.allVisible) { // OFF: restore + keep every registered tile submitted
+      for (const rec of w22State.tiles) { rec.mesh.visible = true; if (rec.diagMesh) rec.diagMesh.visible = true; rec.visibleWanted = true; }
+      w22State.allVisible = true;
+    }
+    w22State.culledCount = 0;
+    w22State.visibleCount = w22State.tiles.length;
+    w22State.culledNames = [];
+    return;
+  }
+  w22State.allVisible = false;
+  camera.updateMatrixWorld();
+  w22ProjScreen.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+  w22Frustum.setFromProjectionMatrix(w22ProjScreen);
+  let culled = 0; const names = [];
+  for (const rec of w22State.tiles) {
+    const hit = w22Frustum.intersectsBox(rec.box);
+    rec.mesh.visible = hit;
+    if (rec.diagMesh) rec.diagMesh.visible = hit;
+    rec.visibleWanted = hit;
+    if (!hit) { culled++; names.push(rec.name); }
+  }
+  w22State.culledCount = culled;
+  w22State.visibleCount = w22State.tiles.length - culled;
+  w22State.culledNames = names;
+  w22State.framesChecked++;
+  if (w22State.recentCulledCounts.length >= 120) w22State.recentCulledCounts.shift();
+  w22State.recentCulledCounts.push(culled);
+}
+// ---- frame-time recording (raw rAF deltas — UNCLAMPED, unlike fly dt) ----
+const w22Perf = { recording: null };
+const w22FrameStamps = []; // rolling ~2s of frame timestamps for the live fps number
+function w22RecordFrame(nowMs, rawDeltaMs) {
+  w22FrameStamps.push(nowMs);
+  while (w22FrameStamps.length > 0 && nowMs - w22FrameStamps[0] > 2000) w22FrameStamps.shift();
+  if (w22Perf.recording) {
+    w22Perf.recording.samples.push({
+      frameMs: +(rawDeltaMs.toFixed(3)),
+      drawCalls: renderer.info.render.calls,
+      triangles: renderer.info.render.triangles,
+    });
+  }
+}
+function w22Fps() { const now = performance.now(); return w22FrameStamps.filter((t) => now - t <= 1000).length; }
+// ---- programmatic orbit (moving-camera measurement driver) ----
+const w22Orbit = { active: false, center: null, radiusM: 0, heightM: 0, periodSec: 20, startMs: 0 };
 
 for (let ty = 0; ty < patch.n; ty++) {
   for (let tx = 0; tx < patch.n; tx++) {
@@ -498,6 +629,7 @@ for (let ty = 0; ty < patch.n; ty++) {
     const tmat = new THREE.ShaderMaterial({ uniforms, vertexShader: vert, fragmentShader: frag });
     const tmesh = new THREE.Mesh(tg, tmat);
     splatGroup.add(tmesh);
+    w22RegisterTile(tmesh, null, tile.name, 'core'); // W22: per-tile culling record (static Box3)
     splatTiles.push({
       name: tile.name,
       base: { id: base.id, name: base.name, mode: getTexture(base.id).mode },
@@ -523,6 +655,7 @@ function setMaterialMode(mode) {
   mesh.visible = mode === 'diagnostic';
   splatGroup.visible = mode === 'splat';
   streamDiagGroup.visible = mode === 'diagnostic'; // W06: ring tiles follow the same mode toggle
+  w22ApplyCulling(); // W22: sync render paths respect the per-tile frustum state too
   renderer.render(scene, camera);
   framesRendered++;
   return { mode, canvasStats: canvasStats(`mode_${mode}`) };
@@ -556,7 +689,8 @@ const FLY_SPEED = 40; // m/s baseline (display-scale meters)
 let lastT = performance.now(); // manual delta-time (THREE.Clock deprecated in r187)
 function tick() {
   const now = performance.now();
-  const dt = Math.min((now - lastT) / 1000, 0.1);
+  const rawDelta = now - lastT; // W22: UNCLAMPED raw frame delta (perf recording)
+  const dt = Math.min(rawDelta / 1000, 0.1);
   lastT = now;
   const sp = FLY_SPEED * (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 3 : 1) * dt;
   const fwd = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
@@ -569,10 +703,23 @@ function tick() {
   if (keys.has('KeyR')) camera.position.y += sp;
   if (keys.has('KeyF')) camera.position.y -= sp;
   movedDistance += camera.position.distanceTo(before);
-  applyLook();
+  if (w22Orbit.active) { // W22 programmatic orbit — fly keys are idle in headless
+    const a = ((now - w22Orbit.startMs) / 1000 / w22Orbit.periodSec) * Math.PI * 2;
+    camera.position.set(
+      w22Orbit.center.x + Math.cos(a) * w22Orbit.radiusM,
+      w22Orbit.heightM,
+      w22Orbit.center.z + Math.sin(a) * w22Orbit.radiusM);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(w22Orbit.center);
+  } else {
+    applyLook();
+  }
   skyDome.position.copy(camera.position); // sky dome follows the camera (no parallax)
+  maybeUpdateExploreWindow(); // W25: replan the explore window when the camera enters a new grid cell
+  w22ApplyCulling(); // W22: per-tile frustum test BEFORE the render it affects
   renderer.render(scene, camera);
   framesRendered++;
+  w22RecordFrame(now, rawDelta); // W22: raw frame time + renderer.info of THIS frame
   requestAnimationFrame(tick);
 }
 applyLook();
@@ -581,37 +728,104 @@ framesRendered++;
 requestAnimationFrame(tick);
 
 // =====================================================================
-// W06 — MULTIPATCH STREAMING (5x5 expansion, async per-tile decode)
-// The fly loop above ALREADY renders the core 3x3; ring tiles below are
-// decoded one by one in a background task (NOT awaited — no sync blocking)
-// and appear in subsequent frames as they decode, near-origin-first.
+// W25 — CAMERA-FOLLOW EXPLORE WINDOW (streaming queue + background decode)
+// The fly/render loop above ALREADY renders the core 3x3; streamed tiles
+// below are decoded ONE BY ONE in a background task (NOT awaited — no sync
+// blocking) and appear in subsequent frames as they decode, CAMERA-RELATIVE
+// priority (nearest to the camera grid cell first). The desired window is
+// the Chebyshev STREAM_RADIUS square around the camera grid cell (clamped
+// to the 220x236 regular grid; the core 3x3 is always resident — fixture
+// pin + fallback). Replanning happens whenever the camera ENTERS A NEW
+// GRID CELL (tick + __w03MoveCamera); ocean/nodata and failed tiles are
+// MEMOIZED so a replan never re-decodes them.
 // =====================================================================
-w06StreamState.window = windowContainingCore(patch, WIN_N);
-const ringPlan = streamRingPlan(patch, w06StreamState.window);
-w06StreamState.planned = ringPlan.length;
-log(`W06 stream: window ${w06StreamState.window.n}x${w06StreamState.window.n} @ grid ${w06StreamState.window.originX},${w06StreamState.window.originY} (${w06StreamState.window.rule}); ${ringPlan.length} ring candidates, near-origin-first; ocean skip rule: ${OCEAN_SKIP_RULE}`);
+function cameraGridCell() {
+  return {
+    gridX: Math.max(0, Math.min(ISO_GRID.GRID_X - 1, gridXOfWorld(camera.position.x))),
+    gridY: Math.max(0, Math.min(ISO_GRID.GRID_Y - 1, gridYOfWorld(camera.position.z))),
+  };
+}
+const isStreamedOrMemoized = (name) =>
+  tileStreamCache.has(name) || streamOceanMemo.has(name) || streamFailMemo.has(name);
 
-// ---- explicit cache eviction (never triggers for this 5x5 window; wired
-// anyway): evict the stream tile FARTHEST from the camera, dispose geometry
-// + materials, remove from scene groups and from the splat/fog registry.
+let streamQueue = []; // pending candidates {gridX, gridY, name, dist} — camera-relative priority order
+function replanExploreWindow(reason) {
+  const cell = cameraGridCell();
+  if (w25State.windowCenter &&
+      cell.gridX === w25State.windowCenter.gridX && cell.gridY === w25State.windowCenter.gridY) {
+    return false; // same cell — window unchanged, queue keeps draining
+  }
+  w25State.windowCenter = cell;
+  w25State.windowUpdates++;
+  const plan = [];
+  for (let dy = -STREAM_RADIUS; dy <= STREAM_RADIUS; dy++) {
+    for (let dx = -STREAM_RADIUS; dx <= STREAM_RADIUS; dx++) {
+      const gx = cell.gridX + dx, gy = cell.gridY + dy;
+      if (gx < 0 || gx >= ISO_GRID.GRID_X || gy < 0 || gy >= ISO_GRID.GRID_Y) continue;
+      if (inCorePatch(gx, gy)) continue;            // core 3x3: fixture-pinned, always resident
+      const name = tileNameFromGrid(gx, gy);
+      if (isStreamedOrMemoized(name)) continue;    // loaded / ocean / failed — memoized
+      plan.push({ gridX: gx, gridY: gy, name, dist: Math.hypot(dx, dy) });
+    }
+  }
+  plan.sort((a, b) => a.dist - b.dist || a.gridY - b.gridY || a.gridX - b.gridX); // CAMERA-RELATIVE priority (W06 backlog #4)
+  streamQueue = plan; // replaces stale candidates (loads are memoized — no duplicates, no losses)
+  w06StreamState.planned += plan.length;
+  w25State.queued = plan.length;
+  w25State.windowHistory.push({
+    centerX: cell.gridX, centerY: cell.gridY, planned: plan.length, reason, utc: new Date().toISOString(),
+  });
+  if (w25State.windowHistory.length > 40) w25State.windowHistory.shift();
+  // legacy W06 window rect (HUD rendered-area line + __w06StreamStats read it)
+  w06StreamState.window = {
+    originX: Math.max(0, cell.gridX - STREAM_RADIUS), originY: Math.max(0, cell.gridY - STREAM_RADIUS),
+    n: STREAM_RADIUS * 2 + 1,
+    rule: `W25 explore window: ${STREAM_RADIUS * 2 + 1}x${STREAM_RADIUS * 2 + 1} Chebyshev square around the camera grid cell (clamped to the ${ISO_GRID.GRID_X}x${ISO_GRID.GRID_Y} grid), replanned on every camera cell change`,
+  };
+  ensureStreamTaskRunning();
+  log(`W25 window: center grid ${cell.gridX},${cell.gridY} (${reason}) — ${plan.length} new candidates queued camera-relative (cache ${tileStreamCache.size}/${MAX_STREAM_CACHE}, evictions ${w25State.cacheEvictions})`);
+  return true;
+}
+function maybeUpdateExploreWindow() { // tick + __w03MoveCamera call this — replan ONLY on camera cell change
+  if (!w25State.windowCenter) { replanExploreWindow('init'); return; }
+  const cell = cameraGridCell();
+  if (cell.gridX !== w25State.windowCenter.gridX || cell.gridY !== w25State.windowCenter.gridY) {
+    replanExploreWindow('camera-cell-change');
+  }
+}
+
+// ---- explicit cache eviction (W25: ACTIVE — farthest-from-camera first):
+// dispose geometry + materials, remove from scene groups, from the splat/fog
+// registry AND from the W22 culling registry (an evicted tile must never be
+// tested or drawn again). The core 9 (fixture-pinned fallback) are NOT in
+// tileStreamCache and are NEVER evicted.
 function disposeStreamRecord(rec) {
   splatGroup.remove(rec.mesh);
   streamDiagGroup.remove(rec.diagMesh);
   rec.mesh.material.dispose();
   rec.geometry.dispose(); // shared between the splat + diag meshes — disposed ONCE
   streamSplatTiles.splice(streamSplatTiles.indexOf(rec), 1);
+  const wi = w22State.tiles.findIndex((t) => t.mesh === rec.mesh); // W22 registry sync
+  if (wi >= 0) w22State.tiles.splice(wi, 1);
 }
 function evictIfNeeded() {
   while (tileStreamCache.size > MAX_STREAM_CACHE) {
     let far = null, farD = -1;
-    for (const rec of tileStreamCache.values()) {
-      const d = camera.position.distanceToSquared(rec.center);
+    for (const rec of tileStreamCache.values()) { // horizontal XZ distance — camera altitude must not skew tile eviction
+      const dx = rec.center.x - camera.position.x, dz = rec.center.z - camera.position.z;
+      const d = dx * dx + dz * dz;
       if (d > farD) { farD = d; far = rec; }
     }
     tileStreamCache.delete(far.name);
     disposeStreamRecord(far);
     w06StreamState.cacheEvictions++;
-    log(`W06 stream: cache eviction ${far.name} (limit ${MAX_STREAM_CACHE})`);
+    w25State.cacheEvictions++;
+    w25State.evictionLog.push({
+      name: far.name, gridX: far.gridX, gridY: far.gridY,
+      distToCamM: +Math.sqrt(farD).toFixed(1), utc: new Date().toISOString(),
+    });
+    if (w25State.evictionLog.length > 40) w25State.evictionLog.shift();
+    log(`W25 eviction: ${far.name} (${+Math.sqrt(farD).toFixed(0)} m from camera — cache limit ${MAX_STREAM_CACHE})`);
   }
 }
 
@@ -622,8 +836,13 @@ function evictIfNeeded() {
 // join, unknown TexIDs fall back to the existing STRICT_ISO diagnostic color).
 function buildStreamTile(tile, stats) {
   const S = 32;
-  const lx0 = (tile.gridX - w06StreamState.window.originX) * S;
-  const ly0 = (tile.gridY - w06StreamState.window.originY) * S;
+  // W25: GRID-ABSOLUTE placement relative to the CORE PATCH ORIGIN (world 0 =
+  // core origin). The W06 code placed ring tiles relative to the WINDOW
+  // origin, so the window column west of the core overlapped the core's west
+  // column by exactly one tile width (64 m) — fixed here (disjoint by
+  // construction, like the core region itself).
+  const lx0 = (tile.gridX - CORE_GX) * S;
+  const ly0 = (tile.gridY - CORE_GY) * S;
   const positions = new Float32Array(S * S * 3);
   for (let ly = 0; ly < S; ly++) {
     for (let lx = 0; lx < S; lx++) {
@@ -753,64 +972,99 @@ function buildStreamTile(tile, stats) {
   };
   rec.center.set((lx0 + S / 2) * 2, 0, (ly0 + S / 2) * 2);
   streamSplatTiles.push(rec);
+  w22RegisterTile(rec.mesh, rec.diagMesh, tile.name, 'ring'); // W22 (shared geometry — one Box3)
   return rec;
 }
 
-async function streamExpandWindow() {
-  w06StreamState.startedUtc = new Date().toISOString();
-  for (const cand of ringPlan) { // near-origin-first order (streamRingPlan)
-    w06StreamState.decoded++; // candidates processed (decoded or failed)
+// ---- W25 background decode loop: drains streamQueue ONE tile per await
+// (fetch+inflate+TDF decode). Render NEVER blocks (this task is not awaited
+// anywhere); per-tile failures are caught here, so the fixture-pinned core
+// 3x3 keeps rendering regardless (fallback). The queue is REPLACED by
+// replanExploreWindow whenever the camera enters a new grid cell — the loop
+// picks up the fresh queue on its next iteration (memoization makes
+// replacement lossless). w06StreamState.complete flips when the INITIAL
+// window has drained (legacy W05/W06/W22 probes poll it).
+let streamTaskActive = false;
+function ensureStreamTaskRunning() {
+  if (streamTaskActive) return;
+  streamTaskActive = true;
+  w25State.busy = true;
+  if (!w06StreamState.startedUtc) w06StreamState.startedUtc = new Date().toISOString();
+  (async function streamDrainLoop() {
     try {
-      const tile = await mount.getTerrainTile({ era: ERA, gridX: cand.gridX, gridY: cand.gridY });
-      const stats = tileTerrainStats(tile.heights);
-      if (isOceanNodataTile(stats)) {
-        w06StreamState.oceanSkipped.push({ name: tile.name, ...stats, reason: 'OCEAN_NODATA (>90% zeros — explicit skip)' });
-        log(`W06 stream: ${tile.name} SKIP ocean/nodata (${stats.zeros}/1024 zero samples)`);
-        continue;
+      while (streamQueue.length > 0) {
+        const cand = streamQueue.shift();
+        w25State.queued = streamQueue.length;
+        w06StreamState.decoded++; // candidates processed (decoded or failed)
+        try {
+          const tile = await mount.getTerrainTile({ era: ERA, gridX: cand.gridX, gridY: cand.gridY });
+          const stats = tileTerrainStats(tile.heights);
+          if (isOceanNodataTile(stats)) {
+            streamOceanMemo.set(tile.name, stats); // memoize: replans never re-decode this tile
+            w06StreamState.oceanSkipped.push({ name: tile.name, ...stats, reason: 'OCEAN_NODATA (>90% zeros — explicit skip)' });
+            w25State.oceanSkipped++;
+            log(`W25 stream: ${tile.name} SKIP ocean/nodata (${stats.zeros}/1024 zero samples) — memoized`);
+            continue;
+          }
+          const rec = buildStreamTile(tile, stats);
+          tileStreamCache.set(tile.name, rec);
+          evictIfNeeded(); // ACTIVE in W25 (cache limit 40, farthest-from-camera)
+          w06StreamState.loaded++;
+          w25State.loaded++;
+          w25State.loadLog.push({ name: tile.name, gridX: tile.gridX, gridY: tile.gridY, utc: new Date().toISOString() });
+          if (w25State.loadLog.length > 40) w25State.loadLog.shift();
+          if (w06StreamState.loaded === 1) {
+            w06StreamState.firstTileVisibleAt = new Date().toISOString();
+            w06StreamState.framesAtFirstTile = framesRendered; // >0 proves frames were rendered BEFORE the first streamed tile appeared
+          }
+          log(`W25 stream: ${tile.name} loaded (${w25State.loaded} total streamed — ${stats.nonZero}/1024 nonZero, maxRaw ${stats.maxRawHeight}, cache ${tileStreamCache.size}/${MAX_STREAM_CACHE}${rec.overlaysCapped ? `, overlays CAPPED ${OVERLAY_CAP_RING}/${rec.liveLayers - 1}` : ''})`);
+        } catch (err) {
+          streamFailMemo.set(cand.name, String(err?.message ?? err)); // memoize: no infinite retry on replans
+          w06StreamState.errors.push({ name: cand.name, error: String(err?.message ?? err) });
+          w25State.failed++;
+          log(`W25 stream: ${cand.name} FAILED (core 3x3 fallback unaffected): ${err?.message ?? err}`);
+        }
       }
-      const rec = buildStreamTile(tile, stats);
-      tileStreamCache.set(tile.name, rec);
-      evictIfNeeded(); // explicit (no-op for this window: 12 loaded << limit 25)
-      w06StreamState.loaded++;
-      if (w06StreamState.loaded === 1) {
-        w06StreamState.firstTileVisibleAt = new Date().toISOString();
-        w06StreamState.framesAtFirstTile = framesRendered; // >0 proves frames were rendered BEFORE the first ring tile appeared
+    } catch (e) { // stream-level fatal — recorded, never blocks the fly loop
+      w06StreamState.failed = true;
+      w06StreamState.complete = true;
+      w06StreamState.errors.push({ name: '__stream_task__', error: String(e?.message ?? e) });
+      w25State.failed++;
+    } finally {
+      streamTaskActive = false;
+      w25State.busy = streamQueue.length > 0;
+      if (streamQueue.length > 0) {
+        ensureStreamTaskRunning(); // queue refilled while draining — continue
+      } else if (!w06StreamState.complete) {
+        // initial window drained — scene-size proof (core vs expanded, live meshes)
+        const expandedBox = new THREE.Box3().union(box); // start from the CORE region bounds
+        for (const rec of streamSplatTiles) expandedBox.union(new THREE.Box3().setFromObject(rec.diagMesh));
+        const coreVerts = geom.positions.length / 3;
+        const ringVerts = streamSplatTiles.length * 32 * 32;
+        const ext = (b) => ({ x: +(b.max.x - b.min.x).toFixed(1), y: +(b.max.y - b.min.y).toFixed(1), z: +(b.max.z - b.min.z).toFixed(1) });
+        w06StreamState.sceneProof = {
+          coreVertexCount: coreVerts,
+          expandedVertexCount: coreVerts + ringVerts,
+          coreWorldExtentM: ext(box),
+          expandedWorldExtentM: ext(expandedBox),
+          coreWorldBounds: { min: [box.min.x, box.min.y, box.min.z], max: [box.max.x, box.max.y, box.max.z] },
+          expandedWorldBounds: { min: [expandedBox.min.x, expandedBox.min.y, expandedBox.min.z], max: [expandedBox.max.x, expandedBox.max.y, expandedBox.max.z] },
+          largerThan3x3: (expandedBox.max.x - expandedBox.min.x) > (box.max.x - box.min.x) + 1 &&
+            (expandedBox.max.z - expandedBox.min.z) > (box.max.z - box.min.z) + 1 &&
+            (coreVerts + ringVerts) > coreVerts,
+        };
+        w06StreamState.complete = true;
+        w06StreamState.completedUtc = new Date().toISOString();
+        log(`W25 initial window COMPLETE: ${w06StreamState.loaded} streamed tiles loaded, ${w06StreamState.oceanSkipped.length} ocean-skipped, ${w06StreamState.errors.length} errors — window now FOLLOWS the camera (replan on every grid-cell change).`);
       }
-      log(`W06 stream: ${tile.name} loaded (${w06StreamState.loaded}/${ringPlan.length} ring — ${stats.nonZero}/1024 nonZero, maxRaw ${stats.maxRawHeight}${rec.overlaysCapped ? `, overlays CAPPED ${OVERLAY_CAP_RING}/${rec.liveLayers - 1}` : ''})`);
-    } catch (err) {
-      w06StreamState.errors.push({ name: cand.name, error: String(err?.message ?? err) });
-      log(`W06 stream: ${cand.name} FAILED (core 3x3 fallback unaffected): ${err?.message ?? err}`);
     }
-  }
-  // scene-size proof (contract §7 browser probe): core 3x3 vs expanded 5x5
-  const expandedBox = new THREE.Box3().union(box); // start from the CORE region bounds
-  for (const rec of streamSplatTiles) expandedBox.union(new THREE.Box3().setFromObject(rec.diagMesh));
-  const coreVerts = geom.positions.length / 3;
-  const ringVerts = streamSplatTiles.length * 32 * 32;
-  const ext = (b) => ({ x: +(b.max.x - b.min.x).toFixed(1), y: +(b.max.y - b.min.y).toFixed(1), z: +(b.max.z - b.min.z).toFixed(1) });
-  w06StreamState.sceneProof = {
-    coreVertexCount: coreVerts,
-    expandedVertexCount: coreVerts + ringVerts,
-    coreWorldExtentM: ext(box),
-    expandedWorldExtentM: ext(expandedBox),
-    coreWorldBounds: { min: [box.min.x, box.min.y, box.min.z], max: [box.max.x, box.max.y, box.max.z] },
-    expandedWorldBounds: { min: [expandedBox.min.x, expandedBox.min.y, expandedBox.min.z], max: [expandedBox.max.x, expandedBox.max.y, expandedBox.max.z] },
-    largerThan3x3: (expandedBox.max.x - expandedBox.min.x) > (box.max.x - box.min.x) + 1 &&
-      (expandedBox.max.z - expandedBox.min.z) > (box.max.z - box.min.z) + 1 &&
-      (coreVerts + ringVerts) > coreVerts,
-  };
-  w06StreamState.complete = true;
-  w06StreamState.completedUtc = new Date().toISOString();
-  log(`W06 stream COMPLETE: ${w06StreamState.loaded}/${ringPlan.length} ring tiles loaded, ${w06StreamState.oceanSkipped.length} ocean-skipped, ${w06StreamState.errors.length} errors — visible tiles now ${9 + w06StreamState.loaded} (core 9 + ring ${w06StreamState.loaded}).`);
+  })();
 }
-// NOT awaited — non-blocking background task; per-tile failures are caught
-// above, so the fixture-pinned core 3x3 keeps rendering regardless (fallback).
-const w06Task = streamExpandWindow();
-w06Task.catch((e) => {
-  w06StreamState.failed = true;
-  w06StreamState.complete = true;
-  w06StreamState.errors.push({ name: '__stream_task__', error: String(e?.message ?? e) });
-});
+// W25: the INITIAL window plan is created from the camera start position
+// (no static core-centered window anymore — the explore window is
+// camera-following from the first frame). maybeUpdateExploreWindow() is
+// called by the tick() fly loop and __w03MoveCamera below.
+replanExploreWindow('init');
 
 // ---------- CANVAS PIXEL STATS (deterministic diversity stat) ----------
 let statsCanvas = null, statsCtx = null;
@@ -856,6 +1110,8 @@ window.__w03MoveCamera = (dx, dy, dz) => {
   const before = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
   camera.position.set(before.x + dx, before.y + dy, before.z + dz);
   applyLook();
+  maybeUpdateExploreWindow(); // W25: a programmatic move replans the explore window (headless rAF may idle)
+  w22ApplyCulling(); // W22: sync render respects culling (headless rAF idle)
   renderer.render(scene, camera); // synchronous fresh frame (headless rAF is idle)
   framesRendered++;
   const after = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
@@ -930,12 +1186,12 @@ window.__w14EnvStats = () => ({
   materialMode,
 });
 
-// ---------- W06 hooks (streaming stats + camera grid cell) ----------
+// ---------- W06/W25 hooks (streaming stats + camera grid cell + explore window) ----------
 window.__w06StreamStats = () => {
   const win = w06StreamState.window;
-  const camGridX = Math.floor(camera.position.x / 64) + (win ? win.originX : 0);
-  const camGridY = Math.floor(camera.position.z / 64) + (win ? win.originY : 0);
-  const totalVisible = 9 + w06StreamState.loaded; // core 9 + loaded ring (all loaded tiles are visible — no culling, by scope)
+  const cell = cameraGridCell(); // W25: camera grid cell — grid-absolute (core-origin mapping)
+  const camGridX = cell.gridX, camGridY = cell.gridY;
+  const totalLoaded = 9 + w06StreamState.loaded; // core 9 + streamed tiles resident in cache
   return {
     job: 'W06_MULTIPATCH_STREAMING', attempt: 'W06_a1',
     stream: {
@@ -943,31 +1199,34 @@ window.__w06StreamStats = () => {
       planned: w06StreamState.planned, decoded: w06StreamState.decoded,
       loaded: w06StreamState.loaded, oceanSkipped: w06StreamState.oceanSkipped,
       errors: w06StreamState.errors, cappedOverlays: w06StreamState.cappedOverlays,
-      order: ringPlan.map((r) => r.name),
+      order: streamQueue.map((r) => r.name), // W25: CURRENT pending queue (camera-relative priority)
     },
     window: win,
     cache: {
       keyedBy: 'tile name', size: tileStreamCache.size, limit: MAX_STREAM_CACHE,
       evictions: w06StreamState.cacheEvictions,
-      disposal: 'geometry disposed once (shared splat+diag), splat material disposed; evicts farthest-from-camera',
-      note: 'limit 25 never reached for this 5x5 window (12 loaded ring tiles) — eviction wired but inactive, reported explicitly',
+      disposal: 'geometry disposed once (shared splat+diag), splat material disposed, W22 culling registry entry removed; evicts farthest-from-camera (horizontal XZ)',
+      note: `W25 DYNAMIC explore window — eviction ACTIVE (limit ${MAX_STREAM_CACHE}); core 9 fixture-pinned tiles never evicted`,
     },
     tiles: {
-      core: 9, ringLoaded: w06StreamState.loaded, totalVisible,
+      core: 9, ringLoaded: w06StreamState.loaded, totalLoaded,
       windowTiles: win ? win.n * win.n : null,
       oceanSkippedCount: w06StreamState.oceanSkipped.length,
     },
     renderedArea: win ? {
-      gridXRange: [win.originX, win.originX + win.n - 1],
-      gridYRange: [win.originY, win.originY + win.n - 1],
-      worldMeters: { x: [0, win.n * 64], z: [0, win.n * 64] },
-      tileCount: totalVisible,
+      gridXRange: [Math.max(0, win.originX), Math.min(ISO_GRID.GRID_X - 1, win.originX + win.n - 1)],
+      gridYRange: [Math.max(0, win.originY), Math.min(ISO_GRID.GRID_Y - 1, win.originY + win.n - 1)],
+      worldMeters: {
+        x: [worldXOfGrid(Math.max(0, win.originX)), worldXOfGrid(Math.min(ISO_GRID.GRID_X, win.originX + win.n))],
+        z: [worldZOfGrid(Math.max(0, win.originY)), worldZOfGrid(Math.min(ISO_GRID.GRID_Y, win.originY + win.n))],
+      },
+      tileCount: totalLoaded,
     } : null,
     wholeMapAvailable: {   // SEPARATE (contract: rendered range vs whole-map availability)
       gridX: ISO_GRID.GRID_X, gridY: ISO_GRID.GRID_Y,
       regularTiles: patch.census.regularTiles, sentinel: patch.census.sentinelEntries,
-      renderedHere: totalVisible,
-      renderedFraction: +(totalVisible / patch.census.regularTiles).toFixed(5),
+      renderedHere: totalLoaded,
+      renderedFraction: +(totalLoaded / patch.census.regularTiles).toFixed(5),
     },
     camera: {
       x: camera.position.x, y: camera.position.y, z: camera.position.z,
@@ -978,10 +1237,147 @@ window.__w06StreamStats = () => {
     materialMode,
   };
 };
+// ---------- W25 hooks (explore-window stats — the browser gate reads these) ----------
+window.__w25ExploreStats = () => {
+  const cell = cameraGridCell();
+  const names = [...tileStreamCache.keys()];
+  return {
+    job: 'W25_EXPLORE_WINDOW_AND_HAIR_REPAIR', attempt: 'W25_a1',
+    window: {
+      radiusTiles: STREAM_RADIUS,
+      center: w25State.windowCenter ? { ...w25State.windowCenter } : null,
+      cameraCell: { gridX: cell.gridX, gridY: cell.gridY, tile: tileNameFromGridLocal(cell.gridX, cell.gridY) },
+      clampedRangeX: [Math.max(0, cell.gridX - STREAM_RADIUS), Math.min(ISO_GRID.GRID_X - 1, cell.gridX + STREAM_RADIUS)],
+      clampedRangeY: [Math.max(0, cell.gridY - STREAM_RADIUS), Math.min(ISO_GRID.GRID_Y - 1, cell.gridY + STREAM_RADIUS)],
+      windowUpdates: w25State.windowUpdates,
+      history: w25State.windowHistory,
+      wholeMapGrid: { x: ISO_GRID.GRID_X, y: ISO_GRID.GRID_Y, regularTiles: patch.census.regularTiles },
+    },
+    queue: { pending: streamQueue.length, busy: w25State.busy, nextNames: streamQueue.slice(0, 8).map((r) => r.name) },
+    counters: {
+      loaded: w25State.loaded, oceanSkipped: w25State.oceanSkipped, failed: w25State.failed,
+      cacheSize: tileStreamCache.size, cacheLimit: MAX_STREAM_CACHE,
+      cacheEvictions: w25State.cacheEvictions,
+      loadedCoreTiles: 9,
+      visibleNow: w22State.enabled ? w22State.visibleCount : 9 + w06StreamState.loaded,
+      cullingEnabled: w22State.enabled,
+    },
+    residency: { cachedTileNames: names, loadLog: w25State.loadLog, evictionLog: w25State.evictionLog },
+    policy: { priority: w25State.priority, eviction: w25State.evictionPolicy, placement: w25State.placement, scope: w25State.scope },
+    renderInfo: { threeRevision: THREE.REVISION, materialMode, framesRendered },
+    errors: window.__W03_ERRORS__,
+  };
+};
 function tileNameFromGridLocal(gx, gy) {
   if (gx < 0 || gx > 219 || gy < 0 || gy > 235) return null; // outside regular grid (camera can fly out)
   return gx.toString(16).padStart(4, '0') + gy.toString(16).padStart(4, '0') + '.tdf';
 }
+
+// ---------- W22 hooks (culling toggle/stats, perf recording, orbit, sanity) ----------
+window.__w22SetCulling = (on) => {
+  if (typeof on !== 'boolean') throw new Error('[W22] on must be a boolean');
+  w22State.enabled = on;
+  w22ApplyCulling();
+  renderer.render(scene, camera);
+  framesRendered++;
+  return window.__w22Stats();
+};
+window.__w22Stats = () => ({
+  job: 'W22_PERFORMANCE_CULLING', attempt: 'W22_a1',
+  culling: {
+    enabled: w22State.enabled, method: w22State.method,
+    tiles: w22State.tiles.length, culledCount: w22State.culledCount,
+    visibleCount: w22State.visibleCount, culledNames: w22State.culledNames,
+    framesChecked: w22State.framesChecked,
+    recentCulledCounts: [...w22State.recentCulledCounts],
+    coreRegionMesh: w22State.coreRegionMeshNote,
+    boxComputation: 'static per-tile Box3, computed ONCE at registration (geometry never moves)',
+  },
+  fps: w22Fps(), // rolling 1s window of rAF frames
+  renderer: {
+    threeRevision: THREE.REVISION, width: W, height: H,
+    pixelRatio: renderer.getPixelRatio(), // fixed 1 (renderer.setPixelRatio(1))
+    info: { render: { ...renderer.info.render }, memory: { ...renderer.info.memory } }, // LAST frame / live memory
+  },
+});
+window.__w22StartPerf = (label) => {
+  if (w22Perf.recording) throw new Error(`[W22] recording already active: ${w22Perf.recording.label}`);
+  if (typeof label !== 'string' || !label) throw new Error('[W22] label required');
+  w22Perf.recording = { label, startedUtc: new Date().toISOString(), startedAtMs: performance.now(), samples: [] };
+  return { label, started: true };
+};
+window.__w22StopPerf = () => {
+  const r = w22Perf.recording;
+  if (!r) throw new Error('[W22] no active recording');
+  w22Perf.recording = null;
+  r.stoppedAtMs = performance.now();
+  r.durationWallMs = +(r.stoppedAtMs - r.startedAtMs).toFixed(1);
+  r.sampleCount = r.samples.length;
+  return r;
+};
+window.__w22SetOrbit = (spec) => {
+  if (spec === null || spec === false) { w22Orbit.active = false; return { active: false }; }
+  if (typeof spec !== 'object' || !Number.isFinite(spec.centerX) || !Number.isFinite(spec.centerZ) ||
+      !Number.isFinite(spec.radiusM) || !Number.isFinite(spec.heightM) || !Number.isFinite(spec.periodSec)) {
+    throw new Error('[W22] orbit spec requires centerX/centerZ/radiusM/heightM/periodSec (numbers)');
+  }
+  w22Orbit.center = new THREE.Vector3(spec.centerX, spec.centerY ?? 0, spec.centerZ);
+  w22Orbit.radiusM = spec.radiusM;
+  w22Orbit.heightM = spec.heightM;
+  w22Orbit.periodSec = spec.periodSec;
+  w22Orbit.startMs = performance.now();
+  w22Orbit.active = true;
+  return { active: true, ...spec };
+};
+// deterministic in-page culling correctness test (runs ATOMICALLY in one JS turn —
+// no rAF tick interleaves): (1) aimed at a tile from above -> VISIBLE,
+// (2) camera moved past the terrain edge looking AWAY -> that tile (and ALL
+// tiles) behind the camera -> CULLED, (3) rotate back toward the region ->
+// visible AGAIN. Camera state is restored at the end.
+window.__w22CullingSanity = () => {
+  if (!w22State.enabled) throw new Error('[W22] culling sanity requires culling ON (call __w22SetCulling(true) first)');
+  const savedPos = camera.position.clone();
+  const savedQuat = camera.quaternion.clone();
+  const cx = center.x, cz = center.z;
+  let t1 = null, t1d = Infinity;
+  for (const t of w22State.tiles) { // tile whose center is nearest the region center
+    const bx = (t.box.min.x + t.box.max.x) / 2, bz = (t.box.min.z + t.box.max.z) / 2;
+    const d = (bx - cx) ** 2 + (bz - cz) ** 2;
+    if (d < t1d) { t1d = d; t1 = t; }
+  }
+  const t1c = new THREE.Vector3((t1.box.min.x + t1.box.max.x) / 2, (t1.box.min.y + t1.box.max.y) / 2, (t1.box.min.z + t1.box.max.z) / 2);
+  const out = { tilesTotal: w22State.tiles.length, t1: t1.name, steps: [] };
+  // step 1: directly above T1, looking straight down at it
+  camera.position.set(t1c.x, box.max.y + 400, t1c.z);
+  camera.up.set(0, 1, 0);
+  camera.lookAt(t1c);
+  camera.updateMatrixWorld();
+  w22ApplyCulling();
+  out.steps.push({ step: 'aimed_at_t1_from_above', t1Visible: t1.visibleWanted === true, culledCount: w22State.culledCount, visibleCount: w22State.visibleCount });
+  // step 2: 400 m EAST of the region center (outside the 5x5 window), looking +X away — all tiles behind the camera
+  camera.position.set(cx + 400, box.max.y + 250, cz);
+  camera.lookAt(cx + 4000, box.max.y + 250, cz);
+  camera.updateMatrixWorld();
+  w22ApplyCulling();
+  out.steps.push({ step: 'looking_away_all_behind_camera', t1Culled: t1.visibleWanted === false, culledCount: w22State.culledCount, allCulled: w22State.culledCount === w22State.tiles.length });
+  // step 3: same position, rotate back toward the region center
+  camera.lookAt(cx, (box.min.y + box.max.y) / 2, cz);
+  camera.updateMatrixWorld();
+  w22ApplyCulling();
+  out.steps.push({ step: 'rotated_back_toward_region', t1VisibleAgain: t1.visibleWanted === true, culledCount: w22State.culledCount, visibleCount: w22State.visibleCount });
+  // restore camera state (fly loop resumes from yaw/pitch next tick)
+  camera.position.copy(savedPos);
+  camera.quaternion.copy(savedQuat);
+  camera.updateMatrixWorld();
+  w22ApplyCulling();
+  out.gates = {
+    tile_in_frustum_always_visible: out.steps[0].t1Visible === true,
+    tile_behind_camera_culled: out.steps[1].t1Culled === true && out.steps[1].allCulled === true,
+    rotation_restores_visibility: out.steps[2].t1VisibleAgain === true,
+  };
+  out.allGatesPass = Object.values(out.gates).every(Boolean);
+  return out;
+};
 
 // ---------- HUD provenance (era, SHA prefix, tiles, counts, material modes) ----------
 function updateHud() {
@@ -995,21 +1391,23 @@ counts: tiles ${st.tilesWithSplat}, layers ${st.layerTotal} (max ${st.maxOverlay
 offsetbase: mask@record+56 (fixture-derived, evidence E1-E4) | weights: 16x16 masks -> vertex attrs, NEAREST cell (materialX = heightX>>1), sums>255 = ORIGINAL DATA
 UV: world-space repeat ${st.uvRepeatMeters} m (RECONSTRUCTION_CANDIDATE), RepeatWrapping, mipmap linear | colorspace: sRGB textures -> linear lighting -> sRGB out | alpha: 24bpp opaque, weight = blend
 patch 3x3 @ grid ${patch.originGridX},${patch.originGridY}: ${tileNames.join(' ')}
-W06 STREAM: ${w06StreamState.complete ? (w06StreamState.failed ? 'FAILED' : 'COMPLETE') : 'STREAMING…'} — ring ${w06StreamState.loaded}/${w06StreamState.planned} loaded, ${w06StreamState.oceanSkipped.length} ocean-skipped (>90% zeros), ${w06StreamState.errors.length} errors, cache ${tileStreamCache.size}/${MAX_STREAM_CACHE} (evictions ${w06StreamState.cacheEvictions}), order near-origin-first
-tiles visible: ${9 + w06StreamState.loaded} (core 9 + ring ${w06StreamState.loaded}; all loaded tiles drawn — no culling by scope)
-RENDERED AREA (this page): grid x ${w06StreamState.window.originX}..${w06StreamState.window.originX + w06StreamState.window.n - 1} × y ${w06StreamState.window.originY}..${w06StreamState.window.originY + w06StreamState.window.n - 1} (${w06StreamState.window.n}x${w06StreamState.window.n} window = ${w06StreamState.window.n * 64}x${w06StreamState.window.n * 64} m @ 2 m/sample)
-WHOLE MAP AVAILABLE (index census — NOT rendered here): ${ISO_GRID.GRID_X}x${ISO_GRID.GRID_Y} grid = ${patch.census.regularTiles} regular tiles (+${patch.census.sentinelEntries} sentinel) — this page draws ${((9 + w06StreamState.loaded) / patch.census.regularTiles * 100).toFixed(2)}% of the map
+W25 EXPLORE WINDOW (camera-follow): center grid ${w25State.windowCenter ? `${w25State.windowCenter.gridX},${w25State.windowCenter.gridY}` : '—'} | queue ${streamQueue.length} (busy ${w25State.busy ? 'Y' : 'N'}) | radius ${STREAM_RADIUS} tiles (5x5) | cache ${tileStreamCache.size}/${MAX_STREAM_CACHE} | evicted ${w25State.cacheEvictions} (farthest-first) | priority camera-relative | replans ${w25State.windowUpdates} | initial window: ${w06StreamState.complete ? (w06StreamState.failed ? 'FAILED' : 'COMPLETE') : 'STREAMING…'} (streamed ${w06StreamState.loaded}, ocean-skip ${w06StreamState.oceanSkipped.length} >90% zeros, errors ${w06StreamState.errors.length})
+tiles loaded: ${9 + w06StreamState.loaded} (core 9 + streamed ${w06StreamState.loaded}) | visible this frame: ${w22State.enabled ? `${w22State.visibleCount} (culling ON, culled ${w22State.culledCount})` : `${9 + w06StreamState.loaded} (culling OFF)`}
+RENDERED AREA (live window around camera): grid x ${Math.max(0, (w25State.windowCenter?.gridX ?? 0) - STREAM_RADIUS)}..${Math.min(219, (w25State.windowCenter?.gridX ?? 0) + STREAM_RADIUS)} × y ${Math.max(0, (w25State.windowCenter?.gridY ?? 0) - STREAM_RADIUS)}..${Math.min(235, (w25State.windowCenter?.gridY ?? 0) + STREAM_RADIUS)} (clamped 5x5 = up to 320x320 m @ 2 m/sample) — grid-absolute placement (W25 fix)
+WHOLE MAP AVAILABLE (index census — NOT rendered here): ${ISO_GRID.GRID_X}x${ISO_GRID.GRID_Y} grid = ${patch.census.regularTiles} regular tiles (+${patch.census.sentinelEntries} sentinel) — this page holds ${((9 + w06StreamState.loaded) / patch.census.regularTiles * 100).toFixed(2)}% of the map
 heights: RAW u16 max ${patch.patchStats.maxRawHeight} | zeros(nodata/water) ${patch.patchStats.zeroSamples}/${9 * 1024} | display: u16/128 -> m (CURRENT_RUNTIME_CALIBRATION), 2 m/sample
 W14 ENVIRONMENT LAYERS (per-layer provenance + toggles — none is a recovered original effect):
   sky: ${env.sky.enabled ? 'ON' : 'OFF'} ENGINEERING_PREVIEW (procedural gradient; 0 cubemaps/skydomes recovered in ISO/CD corpus) — KeyN / __w14SetEnv
   fog: ${env.fog.enabled ? `ON near ${fogState.near.toFixed(0)}m far ${fogState.far.toFixed(0)}m` : 'OFF'} MODEL=SOURCE_BACKED (gb12 NiFogProperty FOG_Z_LINEAR), VALUES=ENGINEERING_PREVIEW (environmentzones PLAUSIBLE-UNVERIFIED excluded) — KeyB / __w14SetEnv
   light: ENGINEERING_PREVIEW sun ${sun.intensity.toFixed(1)} ambient ${ambient.intensity.toFixed(1)} (W03/W05 diagnostic, kept explicit) — KeyL / __w14SetEnv
-camera: ${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)} | moved ${movedDistance.toFixed(1)} m | frames ${framesRendered}
-controls: WASD move, mouse drag look, R/F up/down, Shift x3 | M mode toggle (M key: diagnostic/splat)`;
+camera: ${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)} | grid cell (x,y): ${(() => { const c = cameraGridCell(); return `${c.gridX},${c.gridY}`; })()} | moved ${movedDistance.toFixed(1)} m | frames ${framesRendered}
+W22 CULLING/PERF: culling ${w22State.enabled ? 'ON' : 'OFF'} — culled ${w22State.culledCount}/${w22State.tiles.length} tiles (per-frame Frustum x Box3, culled count live) | fps ${w22Fps()} | KeyC toggle / __w22SetCulling / __w22Stats / __w22StartPerf-StopPerf / __w22SetOrbit
+controls: WASD move, mouse drag look, R/F up/down, Shift x3 | M mode toggle (M key: diagnostic/splat) | W25: window FOLLOWS the camera — __w25ExploreStats / __w06StreamStats`;
 }
 setInterval(updateHud, 500);
 window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyM') setMaterialMode(materialMode === 'diagnostic' ? 'splat' : 'diagnostic');
+  if (e.code === 'KeyC') window.__w22SetCulling(!w22State.enabled); // W22 culling toggle
   if (e.code === 'KeyN') window.__w14SetEnv({ sky: !env.sky.enabled });
   if (e.code === 'KeyB') window.__w14SetEnv({ fog: !env.fog.enabled });
   if (e.code === 'KeyL') window.__w14SetEnv({ sunIntensity: env.light.sunIntensity > 2.5 ? 1.0 : (env.light.sunIntensity >= 1.0 ? 2.5 : env.light.sunIntensity + 0.75) });
@@ -1109,22 +1507,58 @@ const result = {
     job: 'W06_MULTIPATCH_STREAMING', attempt: 'W06_a1',
     stream: w06StreamState, // LIVE reference — the probe snapshots it after stream.complete
     window: w06StreamState.window,
-    oceanSkip: { rule: OCEAN_SKIP_RULE, appliesTo: 'STREAMED ring tiles only (core 3x3 keeps its original all-9-tiles behavior — W05 fixture pin + 3x3 fallback)' },
+    oceanSkip: { rule: OCEAN_SKIP_RULE, appliesTo: 'STREAMED tiles only (core 3x3 keeps its original all-9-tiles behavior — W05 fixture pin + 3x3 fallback); W25: ocean/nodata tiles are MEMOIZED per name' },
     overlayCapRing: { cap: OVERLAY_CAP_RING, reason: 'position+normal+13 overlay weight attributes = 15 vertex attributes (WebGL2 minimum guarantee 16; a 15-cap produced a real Too-many-attributes shader error in the first probe run)', cappedTiles: w06StreamState.cappedOverlays },
-    cache: { keyedBy: 'tile name', limit: MAX_STREAM_CACHE, eviction: 'farthest-from-camera + geometry/material disposal', evictions: w06StreamState.cacheEvictions, note: 'limit 25 never reached for this 5x5 window (12 loaded ring tiles) — eviction wired, inactive, reported explicitly' },
+    cache: { keyedBy: 'tile name', limit: MAX_STREAM_CACHE, eviction: 'farthest-from-camera (horizontal XZ) + geometry/material disposal + W22 registry sync', evictions: w06StreamState.cacheEvictions, note: `W25: eviction ACTIVE (dynamic window; limit ${MAX_STREAM_CACHE}); core 9 fixture-pinned tiles never evicted` },
     streamingBehavior: {
       blocking: 'NONE — background async task, NOT awaited (contract: no sync blocking)',
-      renderFirst: 'fly/render loop starts on the core 3x3 BEFORE streaming; ring tiles appear per-decode in near-origin-first order',
+      renderFirst: 'fly/render loop starts on the core 3x3 BEFORE streaming; streamed tiles appear per-decode in CAMERA-RELATIVE priority order',
       initAwait: 'per-tile await only inside the background task',
     },
     flyControlsAcrossTiles: 'WSAD world-space movement — no per-tile dependence; camera grid cell reported by __w06StreamStats().camera.gridCell',
     renderedAreaVsWholeMap: 'HUD reports the RENDERED window range SEPARATELY from the whole-map availability (220x236 grid = 51920 regular tiles from the W03 index census)',
     backlog: [ // RANKED (not implemented by contract scope)
-      { rank: 1, item: 'frustum culling', why: 'cheapest win: ~30-50% of 21 tiles culled per frame; per-mesh bounding spheres already exist' },
-      { rank: 2, item: 'LOD (per-tile mesh resolution / quadtree)', why: 'vertex cost scales linearly with visible tiles; 33x33 -> 17x17 far-tile meshes halve far-terrain cost' },
-      { rank: 3, item: 'decode workers (Web Worker per tile)', why: 'BUNT fetch+inflate+TDF decode runs on the main thread today; workers keep rAF smooth beyond ~50 tiles' },
-      { rank: 4, item: 'priority queue (camera-relative re-planning)', why: 'matters once windows move with the camera; static window now — near-origin-first suffices' },
+      { rank: 1, item: 'LOD (per-tile mesh resolution / quadtree)', why: 'vertex cost scales linearly with visible tiles; 33x33 -> 17x17 far-tile meshes halve far-terrain cost' },
+      { rank: 2, item: 'decode workers (Web Worker per tile)', why: 'BUNT fetch+inflate+TDF decode runs on the main thread today; workers keep rAF smooth beyond ~50 tiles' },
+      // W22 (done): frustum culling; W25 (done): priority queue + camera-follow window
     ],
+  },
+  w25: {
+    job: 'W25_EXPLORE_WINDOW_AND_HAIR_REPAIR', attempt: 'W25_a1',
+    // live counters/logs via __w25ExploreStats() (plain object, fresh per call)
+    exploreWindow: {
+      radiusTiles: STREAM_RADIUS,
+      cacheLimit: MAX_STREAM_CACHE,
+      priority: 'camera-relative — candidates sorted by distance from the camera grid cell (W06 backlog #4 RESOLVED)',
+      evictionPolicy: w25State.evictionPolicy,
+      placement: w25State.placement,
+      placementFixNote: 'W06 BUG (found in W25): ring tiles were placed WINDOW-ORIGIN-relative, so the window column west of the core overlapped the core west column by 64 m — W25 places streamed tiles grid-absolute relative to the core patch origin (disjoint by construction)',
+      scope: 'fixed Chebyshev radius window around the camera grid cell; NOT quadtree/LOD/workers (backlog); seamless: async decode, render never blocks; ocean/nodata + failures MEMOIZED (no re-decode on replan)',
+      hooks: { stats: '__w25ExploreStats()', move: '__w03MoveCamera(dx,dy,dz)' },
+    },
+  },
+  w22: {
+    job: 'W22_PERFORMANCE_CULLING', attempt: 'W22_a1',
+    // NOTE: the live culling state is exposed via __w22Stats() (a PLAIN
+    // object built fresh per call). The live w22State is deliberately NOT
+    // embedded here: its tile records hold THREE.Mesh references (cyclic
+    // scene-graph links) which break CDP returnByValue serialization and
+    // would poison every consumer of this result object.
+    culling: { enabled: w22State.enabled, method: w22State.method, tilesRegisteredAtBuild: w22State.tiles.length },
+    hooks: {
+      toggle: '__w22SetCulling(bool)',
+      stats: '__w22Stats()',
+      perf: '__w22StartPerf(label) / __w22StopPerf()',
+      orbit: '__w22SetOrbit({centerX,centerZ,radiusM,heightM,periodSec}) / __w22SetOrbit(null)',
+      sanity: '__w22CullingSanity()',
+    },
+    scope: {
+      implemented: ['per-tile frustum culling (21 registered tiles: core 9 + ring 12)',
+        'culled count -> HUD + __w22Stats()', 'raw frame-time recording (unclamped rAF deltas)',
+        'drawCalls/triangles per recorded frame (renderer.info)', 'programmatic orbit driver'],
+      backlog: ['LOD (per-tile mesh resolution / quadtree)', 'decode workers (Web Worker per tile)',
+        'priority queue (camera-relative re-planning)'],
+    },
   },
   renderer: { threeRevision: THREE.REVISION, backend: 'WebGLRenderer', width: W, height: H },
   canvasStatsInitial: canvasStats('initial_diagnostic'),
@@ -1144,6 +1578,8 @@ window.__W03__ = result;   // W03 probe compatibility (shared fields)
 window.__W05__ = result;   // W05 canonical
 window.__W14__ = result;    // W14 canonical (environment section)
 window.__W06__ = result;    // W06 canonical (multipatch streaming section)
+window.__W22__ = result;    // W22 canonical (culling + perf section)
+window.__W25__ = result;    // W25 canonical (camera-follow explore window section)
 window.__W03_MOVEMENT__ = null;
 window.__W05_MATERIAL_MODE__ = materialMode;
-log(`W05 READY — patch ${patch.originGridX},${patch.originGridY}, splat ${splatTiles.length} tiles / ${layerTotal} layers, joins ${ISO_MATERIALS_FIXTURE.textureJoin.joinsClosed}/${ISO_MATERIALS_FIXTURE.textureJoin.distinctTexIds} REFERENCE, cross-check ${crossCheck.layers} layers OK, THREE r${THREE.REVISION}, mountHashVerified=${mountHashOk} | W06 stream: window ${w06StreamState.window.n}x${w06StreamState.window.n} @ ${w06StreamState.window.originX},${w06StreamState.window.originY}, ${ringPlan.length} ring candidates streaming in background`);
+log(`W05 READY — patch ${patch.originGridX},${patch.originGridY}, splat ${splatTiles.length} tiles / ${layerTotal} layers, joins ${ISO_MATERIALS_FIXTURE.textureJoin.joinsClosed}/${ISO_MATERIALS_FIXTURE.textureJoin.distinctTexIds} REFERENCE, cross-check ${crossCheck.layers} layers OK, THREE r${THREE.REVISION}, mountHashVerified=${mountHashOk} | W25 explore window: ${STREAM_RADIUS * 2 + 1}x${STREAM_RADIUS * 2 + 1} camera-follow @ grid ${w25State.windowCenter.gridX},${w25State.windowCenter.gridY}, ${streamQueue.length} candidates queued camera-relative, cache limit ${MAX_STREAM_CACHE}`);

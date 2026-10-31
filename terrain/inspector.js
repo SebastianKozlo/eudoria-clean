@@ -1,4 +1,14 @@
 // inspector.js — JOB W07_NIF_INSPECTOR (attempt W07_a1, 2026-10-30).
+// W09_a1 UPDATE (2026-10-30, additive): the page now dispatches the NIF
+// FORMAT from the payload header version bytes BEFORE parsing:
+//   0x0A010000 -> NifModelReader.parseWitnessModel (v10 witness, UNTOUCHED)
+//   0x0401000C -> NifModelReader41.parseModel41   (the NEW dedicated
+//                 NIF 4.1.0.12 adapter — a SEPARATE format module; the v10
+//                 reader's version gate stays in place and still 4.1-LOUD-
+//                 FAILs inside itself by design; the unit test N1 re-proves
+//                 that gate). 218757/296445 now render as REAL IR through
+//                 the shared typed IR contract (same field names + the same
+//                 FILE-ORDER hex f32 convention), REFERENCE ASSET STAGE.
 //
 // PURPOSE: a NEW browser page that inspects NIF/source assets through THE
 // SAME Rosetta pipeline (NOT a second parser): the raw NIF bytes go through
@@ -14,8 +24,8 @@
 //       .t = P.t + P.R(P.s * C.t)),
 //   (c) materials (NiMaterialProperty colors, NiTexturingProperty slots,
 //       the era Ark texture binding),
-//   (d) controllers (refs only — NO controller block type is implemented in
-//       the v10 witness scope; refs are displayed as OPAQUE, honestly),
+//   (d) controllers (v10: refs only — OPAQUE, honestly; 4.1 via reader41:
+//       DECODED NiUVController/NiUVData blocks where implemented),
 //   (e) a 3D viewport (Three r187, OrbitControls, axes helper — REFERENCE
 //       ASSET STAGE: this is NOT a world placement, NOT world instance
 //       positions; cm->m x0.01 + Z-up->Y-up (x,z,-y) bridges as the
@@ -35,11 +45,10 @@
 //   - BABYLENGUIN.NIF (10.1.0.0): NifModelReader LOUD-FAILs at the first
 //     block type outside the witness scope — displayed VERBATIM + the W08
 //     engine-oracle L3b census as REFERENCE. NO fake partial parse.
-//   - 218757/296445 (NIF 4.1.0.12): the version gate LOUD-FAILS BY DESIGN —
-//     displayed honestly as 'NIF 4.1.0.12 — dedicated adapter pending
-//     (W09 backlog)'. We do NOT have a 4.1 IR in this pipeline and we do
-//     NOT fake one; W08 comparison records (R61 peReader vs engine oracle)
-//     are fetched live as REFERENCE only.
+//   - 218757/296445 (NIF 4.1.0.12): W09 — REAL IR via the dedicated
+//     NifModelReader41 adapter (engine-oracle cross-checked 22/22 + census
+//     on both fixtures in the W09 unit test); rendered as REFERENCE asset
+//     stage. The W08 engine-oracle censuses remain shown as REFERENCE.
 //
 // All SHA pins verified in-session (W07_a1) before use; the page re-verifies
 // every fetched payload against its pin and REFUSES on mismatch.
@@ -47,6 +56,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { parseWitnessModel } from '../src/pesource/NifModelReader.js';
+import { parseModel41 } from '../src/pesource/NifModelReader41.js';
 import { PESourceMount } from '../src/pesource/PESourceMount.js';
 import { ERAS } from '../src/pesource/PEProvenance.js';
 
@@ -118,20 +128,22 @@ const ASSETS = {
     source: 'fixture', url: '/assets/218757_stripped.nif',
     sha256: '13807FC14BDD45095043B3563F400E0B7B980220D070BDD5F082683DD6ADB947',
     era: 'PE42_CORPUS (reference stage — outpost)',
-    label: '218757 — NIF 4.1.0.12 (REFERENCE stage, adapter pending)',
-    note: 'NIF 4.1.0.12 — dedicated adapter pending (W09 backlog). The v10 '
-      + 'witness reader version-gate LOUD-FAILS BY DESIGN (do not remove the '
-      + 'gate). No 4.1 IR exists in THIS pipeline; the W08 R61-vs-engine '
-      + 'comparison (22/22) is shown as REFERENCE only.',
+    label: '218757 — NIF 4.1.0.12 (W09: real IR via NifModelReader41)',
+    note: 'NIF 4.1.0.12 — parsed by the DEDICATED adapter NifModelReader41 '
+      + '(W09; R61-frozen-method semantics port, per-fixture boundary-'
+      + 'validated; engine-oracle cross-check 22/22 + census in the W09 '
+      + 'unit test). The v10 witness reader version gate stays untouched '
+      + '(4.1 still LOUD-FAILs there BY DESIGN — negative control).',
   },
   '296445': {
     source: 'fixture', url: '/assets/296445_stripped.nif',
     sha256: '23EC7FF06C27F871AFE004113060DC6DA6C93D9D5FAF0CAAE7EAA81EF403C656',
     era: 'PE42_CORPUS (reference stage — slum building)',
-    label: '296445 — NIF 4.1.0.12 (REFERENCE stage, adapter pending)',
-    note: 'NIF 4.1.0.12 — dedicated adapter pending (W09 backlog). The v10 '
-      + 'witness reader version-gate LOUD-FAILS BY DESIGN. The W08 '
-      + 'engine-oracle census (L4) is shown as REFERENCE only.',
+    label: '296445 — NIF 4.1.0.12 (W09: real IR via NifModelReader41)',
+    note: 'NIF 4.1.0.12 — parsed by the DEDICATED adapter NifModelReader41 '
+      + '(W09). Carries the era controller pair NiUVController + NiUVData '
+      + '(DECODED in the 4.1 IR — target "GeoTexanim01:0"). The W08 '
+      + 'engine-oracle census (L4) is shown as REFERENCE alongside.',
   },
   // ORIGINAL-DIRECT climate-0 witnesses (all 10 parse FULL-OK — W07 unit test).
   '166878': bntAsset(166878), '166897': bntAsset(166897), '436223': bntAsset(436223),
@@ -256,12 +268,28 @@ async function loadAsset() {
   }
 }
 
-// ---------- the pipeline (THE reader — no second parser anywhere) ----------
-let extraction = null, renderModel = null, loudFail = null;
+// ---------- the pipeline (format dispatch -> THE reader; no second parser per format) ----------
+let extraction = null, renderModel = null, loudFail = null, is41 = false;
+function peekVersion(bytes) {
+  // Minimal FORMAT sniff (dispatch only — both readers re-gate internally):
+  // header text up to first \n, then the u32 version.
+  const nl = bytes.indexOf(0x0a);
+  if (nl < 0 || nl + 5 > bytes.length) return null;
+  return (bytes[nl + 1]) | (bytes[nl + 2] << 8) | (bytes[nl + 3] << 16) | (bytes[nl + 4] << 24);
+}
 async function runPipeline() {
   try {
-    const r = parseWitnessModel(bytes, `${assetKey}.nif`);
-    extraction = r.extraction; renderModel = r.renderModel;
+    const v = peekVersion(bytes) >>> 0;
+    if (v === 0x0401000C) {
+      // NIF 4.1.0.12 -> the DEDICATED adapter (W09). Same typed IR contract.
+      const r = parseModel41(bytes, `${assetKey}.nif`);
+      extraction = r.extraction; renderModel = r.renderModel; is41 = true;
+      state.pipeline = 'NifModelReader41.parseModel41 (src/pesource — THE dedicated NIF 4.1.0.12 adapter, W09)';
+    } else {
+      // v10 witness path — UNTOUCHED (its own gate re-verifies the version).
+      const r = parseWitnessModel(bytes, `${assetKey}.nif`);
+      extraction = r.extraction; renderModel = r.renderModel; is41 = false;
+    }
     state.status = 'IR_READY';
   } catch (e) {
     loudFail = { message: String(e.message ?? e), name: e.name ?? 'Error' };
@@ -327,7 +355,11 @@ function renderGraphPanel(g) {
     // ref lines (extraData / properties / controller / dataRef / effects)
     const b = g.byIndex.get(n.index);
     const refs = [];
-    if (b.fields.extraData && b.fields.extraData.length) refs.push(`extraData: [${b.fields.extraData.join(',')}]`);
+    if (b.fields.extraData !== undefined) {
+      // v10: array of refs; 4.1: SINGLE int ref (documented difference)
+      if (Array.isArray(b.fields.extraData) && b.fields.extraData.length) refs.push(`extraData: [${b.fields.extraData.join(',')}]`);
+      else if (!Array.isArray(b.fields.extraData) && b.fields.extraData !== -1) refs.push(`extraData: ${b.fields.extraData} (v4 single link)`);
+    }
     if (b.fields.properties && b.fields.properties.length) refs.push(`properties: [${b.fields.properties.join(',')}]`);
     if (b.fields.controller !== undefined && b.fields.controller !== -1) refs.push(`controller: ${b.fields.controller}`);
     if (b.fields.dataRef !== undefined && b.fields.dataRef !== -1) refs.push(`data: ${b.fields.dataRef}`);
@@ -371,11 +403,11 @@ function renderDetails(g) {
     parts.push(`<h3>HEADER</h3><table>
       <tr><td class="k">header text</td><td>${extraction.header.text}</td></tr>
       <tr><td class="k">version</td><td>${extraction.header.versionRaw} (${extraction.header.versionString})</td></tr>
-      <tr><td class="k">userVersion</td><td>${extraction.header.userVersion}</td></tr>
+      <tr><td class="k">userVersion</td><td>${extraction.header.userVersion ?? '— (none — v4 header)'}</td></tr>
       <tr><td class="k">numBlocks</td><td>${extraction.header.numBlocks}</td></tr>
-      <tr><td class="k">blockTypes</td><td>${extraction.header.blockTypes.join(', ')}</td></tr>
+      <tr><td class="k">blockTypes</td><td>${extraction.header.blockTypes ? extraction.header.blockTypes.join(', ') : '— (inline RTTI per block — no type table in 4.1)'}</td></tr>
       <tr><td class="k">dataStartOffset</td><td>${extraction.header.dataStartOffset}</td></tr>
-      <tr><td class="k">file tail</td><td>${extraction.fileTailBytesLen} B — <span class="hex">${extraction.fileTailBytesHex.slice(0, 64)}${extraction.fileTailBytesLen > 32 ? '…' : ''}</span> (semantics UNKNOWN — recorded raw)</td></tr>
+      <tr><td class="k">file tail</td><td>${extraction.fileTailBytesLen} B — <span class="hex">${extraction.fileTailBytesHex.slice(0, 64)}${extraction.fileTailBytesLen > 32 ? '…' : ''}</span> (semantics UNKNOWN — recorded raw${extraction.fileTailBytesHex === '0100000000000000' ? '; NOTE: identical 8 B trailing pattern in both 4.1 fixtures (era observation, UNVERIFIED)' : ''})</td></tr>
     </table>`);
     if (selectedNode) {
       parts.push(`<h3>NODE #${selectedNode.index} ${selectedNode.type}${selectedNode.name ? ' "' + selectedNode.name + '"' : ''} (depth ${selectedNode.depth})</h3>`);
@@ -391,7 +423,7 @@ function renderDetails(g) {
     for (const m of mats) {
       const f = m.fields;
       parts.push(`<table>
-        <tr><td class="k">#${m.index} name</td><td>"${f.name}"</td></tr>
+        <tr><td class="k">#${m.index} name</td><td>"${f.name}"${f.materialFlags !== undefined ? ` (materialFlags=0x${f.materialFlags.toString(16)} — 4.1-ONLY field)` : ''}</td></tr>
         <tr><td class="k">ambient</td><td>[${bitsVec(f.ambient).map(v => fmt(v, 4)).join(', ')}]</td></tr>
         <tr><td class="k">diffuse</td><td>[${bitsVec(f.diffuse).map(v => fmt(v, 4)).join(', ')}]</td></tr>
         <tr><td class="k">specular</td><td>[${bitsVec(f.specular).map(v => fmt(v, 4)).join(', ')}]</td></tr>
@@ -405,9 +437,19 @@ function renderDetails(g) {
     const arks = extraction.blocks.filter(b => b.type === 'NiArkTextureExtraData');
     parts.push(`<h3>TEXTURE PROPERTIES (${texprops.length}) / ARK BINDING (${arks.length})</h3>`);
     for (const tp of texprops) {
-      const rows = tp.fields.textures.map((s, i) =>
-        `<tr><td class="k">slot ${i}</td><td>${s.has ? `has=1 source=${s.source} clamp=${s.clamp} filter=${s.filter} uv_set=${s.uv_set} transform=${s.transform_present}` : 'has=0'}</td></tr>`).join('');
-      parts.push(`<table><tr><td class="k">#${tp.index}</td><td>NiTexturingProperty (count ${tp.fields.textureCount})</td></tr>${rows}</table>`);
+      const rows = tp.fields.textures.map((s, i) => {
+        if (!s.has) return `<tr><td class="k">slot ${i}</td><td>has=0</td></tr>`;
+        // shared: has/source/clamp/filter/uv_set; 4.1-ONLY: ps2_l/ps2_k/unk1; v10-ONLY: tail_A/tail_B/transform_present
+        const shared = `has=1 source=${s.source} clamp=${s.clamp} filter=${s.filter} uv_set=${s.uv_set}`;
+        const era = s.ps2_l !== undefined
+          ? ` ps2_l=${s.ps2_l} ps2_k=${s.ps2_k} unk1=${s.unk1} (4.1 TexDesc)`
+          : (s.transform_present !== undefined ? ` transform=${s.transform_present}` : '');
+        return `<tr><td class="k">slot ${i}</td><td>${shared}${era}</td></tr>`;
+      }).join('');
+      const flagsNote = tp.fields.texFlags !== undefined
+        ? ` (texFlags=0x${tp.fields.texFlags.toString(16)}, applyMode=${tp.fields.applyMode} — 4.1 field names)`
+        : ` (fieldA=${tp.fields.fieldA}, fieldB=${tp.fields.fieldB})`;
+      parts.push(`<table><tr><td class="k">#${tp.index}</td><td>NiTexturingProperty (count ${tp.fields.textureCount})${flagsNote}</td></tr>${rows}</table>`);
     }
     for (const ak of arks) {
       for (const e of ak.fields.entries) {
@@ -421,21 +463,46 @@ function renderDetails(g) {
     for (const a of alphas) {
       parts.push(`<table><tr><td class="k">#${a.index} alpha</td><td>flags=0x${a.fields.alphaFlags.toString(16)} threshold=${a.fields.alphaThreshold}</td></tr></table>`);
     }
-    // controllers (refs only — honest)
+    // controllers
     const ctrl = [];
     for (const b of extraction.blocks) {
-      if (b.fields.controller !== undefined) ctrl.push({ i: b.index, t: b.type, n: b.fields.name, c: b.fields.controller });
+      if (b.fields && b.fields.controller !== undefined) ctrl.push({ i: b.index, t: b.type, n: b.fields.name, c: b.fields.controller });
     }
     const active = ctrl.filter(c => c.c !== -1 && c.c !== undefined);
-    parts.push(`<h3>CONTROLLERS (refs; ${active.length} active / ${ctrl.length} blocks with controller field)</h3>`);
-    if (active.length) {
+    parts.push(`<h3>CONTROLLERS (${active.length} active refs / ${ctrl.length} blocks with controller field)</h3>`);
+    if (is41 && renderModel.controllers && renderModel.controllers.length) {
+      // 4.1: DECODED controller blocks (the implemented types) — real fields,
+      // cross-checked against the engine oracle (W09 unit gates B8a-e).
+      for (const c of renderModel.controllers) {
+        if (c.type === 'NiUVController') {
+          parts.push(`<table>
+            <tr><td class="k">#${c.blockIndex} NiUVController</td><td>DECODED (4.1 adapter)</td></tr>
+            <tr><td class="k">target</td><td>#${c.targetIndex} ${c.targetType} "${c.targetName}"</td></tr>
+            <tr><td class="k">freq / phase</td><td>${fmt(c.frequency, 6)} / ${fmt(c.phase, 6)}</td></tr>
+            <tr><td class="k">begin / end</td><td>${fmt(c.startTime, 6)} / ${fmt(c.stopTime, 6)}</td></tr>
+            <tr><td class="k">data</td><td>#${c.dataRef} (NiUVData)</td></tr>
+          </table>`);
+        } else if (c.type === 'NiUVData') {
+          parts.push(`<table>
+            <tr><td class="k">#${c.blockIndex} NiUVData</td><td>DECODED (4.1 adapter)</td></tr>
+            <tr><td class="k">key groups</td><td>${c.uvGroups.map(g => `${g.numKeys} keys (interp ${g.interpolation})`).join(' | ')}</td></tr>
+          </table>`);
+        }
+      }
+      parts.push('<div class="refline">4.1 controller payloads NiUVController/NiUVData are DECODED in the reader41 IR (the two era controller types these fixtures carry); other controller block types remain opaque.</div>');
+    } else if (active.length) {
       for (const c of active) parts.push(`<div>#${c.i} ${c.t}${c.n ? ' "' + c.n + '"' : ''} -> controller ref <b>${c.c}</b> (OPAQUE — no controller block type implemented in the v10 witness scope)</div>`);
     } else {
       parts.push('<div class="refline">all controller refs are -1 (none) in this asset</div>');
     }
-    parts.push('<div class="refline">controller PAYLOADS are outside the v10 witness scope — refs are recorded opaque; the W08 engine oracle provides controller censuses (type/target/freq/phase) for reference assets.</div>');
+    if (!is41) parts.push('<div class="refline">controller PAYLOADS are outside the v10 witness scope — refs are recorded opaque; the W08 engine oracle provides controller censuses (type/target/freq/phase) for reference assets.</div>');
     // unsupported / opaque blocks
     const opaque = [];
+    if (is41 && extraction.opaqueBlocks) {
+      for (const o of extraction.opaqueBlocks) {
+        opaque.push(`#${o.index} ${o.type} — OPAQUE @${o.offset} span ${o.span} B (boundary=${o.boundaryMethod}; known-RTTI-anchored, no printable-string guessing)`);
+      }
+    }
     for (const b of extraction.blocks) {
       if (b.type === 'NiArkViewportInfoExtraData') {
         opaque.push(`#${b.index} NiArkViewportInfoExtraData — opaque ext @${b.fields.extStart}..${b.fields.extEnd} (${b.fields.extSize} B, boundary=${b.fields.boundaryMethod})`);
@@ -451,15 +518,12 @@ function renderDetails(g) {
     for (const o of opaque) parts.push(`<div class="refline">${o}</div>`);
   } else {
     // LOUD FAIL display — verbatim, no fake IR
-    parts.push(`<div class="failbox">NifModelReader LOUD FAIL (${state.status}):
+    parts.push(`<div class="failbox">Reader LOUD FAIL (${state.status}):
 ${loudFail.message}
 
-NO partial IR is displayed: the witness reader either returns the FULL canonical extraction or fails LOUDLY (fail-closed parity with the R61 oracle). This page does NOT fake a partial parse and does NOT implement a second parser.</div>`);
+NO partial IR is displayed: each format's reader either returns the FULL canonical extraction or fails LOUDLY (fail-closed parity with the R61 oracle). This page does not fake a partial parse; per-version readers are dispatched by the header version (one reader per FORMAT, never two for the same format).</div>`);
     if (state.status === 'ERA_GATE_LOUD_FAIL') {
-      parts.push(`<div class="refbox">NIF 4.1.0.12 — dedicated adapter pending (W09 backlog).
-The version gate in NifModelReader is INTENTIONAL and stays untouched (4.1 LOUD-FAIL by design).
-No 4.1 IR exists in this pipeline. REFERENCE data below comes from the W08 engine-oracle campaign
-(R61 peReader JS lineage vs stock Gamebryo 1.2 engine — fetched live, labeled REFERENCE, not parsed here).</div>`);
+      parts.push(`<div class="refbox">Unsupported NIF version for BOTH readers (the format dispatch found neither 0x0401000C (NifModelReader41) nor 0x0A010000 (NifModelReader witness)). The witness-reader version gate is INTENTIONAL and stays untouched. NIF 4.1.0.12 assets (218757/296445) now dispatch to the W09 dedicated adapter and parse as real IR; this box appears only for other unsupported versions. REFERENCE data below (if any) is engine-oracle campaign output (W08), labeled REFERENCE, not parsed here.</div>`);
     }
     if (state.status === 'WITNESS_CHAIN_LOUD_FAIL') {
       parts.push(`<div class="refbox">This is the ADAPTED copy (NiArk blocks stripped so the stock engine NiStream could load it — W08). All 11 blocks parse internally, but the witness RENDER-MODEL derivation requires the NiArkTextureExtraData era binding, which was stripped — the reader fails LOUDLY at that derivation and withholds the IR by design. The W08 engine census below is REFERENCE data.</div>`);
@@ -578,6 +642,91 @@ function addRenderModel() {
   el('viewmsg').textContent = '';
 }
 
+/** W09: multi-shape render for the NIF 4.1.0.12 reference stage (the 4.1
+ * fixtures carry 14..30 shapes). SAME calibration as the witness render:
+ * [P-UNITS]/[P-AXIS] CURRENT_RUNTIME_CALIBRATION (model_witness.js parity):
+ * NIF cm -> m x0.01; NIF Z-up -> Three Y-up via (x, z, -y). Per-shape WORLD
+ * TRS from the reader41 IR (NiTransform compose parity) applied as the mesh
+ * transform — REFERENCE ASSET STAGE, NOT world instance positions. */
+function addRenderModel41() {
+  const UNIT = 0.01;
+  let boundsCenter = [0, 0, 0], boundsRadius = 1;
+  const all = renderModel.shapes;
+  // overall bounds from per-shape center/radius (meters, Y-up bridged)
+  const centers = all.map(sh => [sh.center[0] * UNIT, sh.center[2] * UNIT, -sh.center[1] * UNIT]);
+  let cx = 0, cy = 0, cz = 0;
+  for (const c of centers) { cx += c[0]; cy += c[1]; cz += c[2]; }
+  if (centers.length) { cx /= centers.length; cy /= centers.length; cz /= centers.length; }
+  let maxR = 0;
+  for (let i = 0; i < all.length; i++) {
+    const d = Math.hypot(centers[i][0] - cx, centers[i][1] - cy, centers[i][2] - cz) + all[i].radius * UNIT;
+    if (d > maxR) maxR = d;
+  }
+  boundsCenter = [cx, cy, cz];
+  boundsRadius = Math.max(maxR, 0.1);
+  for (const sh of all) {
+    const n = sh.numVertices;
+    const positions = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      positions[i * 3] = sh.positions[i * 3] * UNIT;
+      positions[i * 3 + 1] = sh.positions[i * 3 + 2] * UNIT;
+      positions[i * 3 + 2] = -sh.positions[i * 3 + 1] * UNIT;
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    if (sh.normals) {
+      const normals = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) {
+        normals[i * 3] = sh.normals[i * 3];
+        normals[i * 3 + 1] = sh.normals[i * 3 + 2];
+        normals[i * 3 + 2] = -sh.normals[i * 3 + 1];
+      }
+      geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+    }
+    if (sh.uvSets && sh.uvSets[0]) geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(sh.uvSets[0]), 2));
+    if (sh.colors) geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(sh.colors), 4));
+    geometry.setIndex(new THREE.BufferAttribute(sh.index, 1));
+    const alphaThreshold = sh.alphaProp ? sh.alphaProp.threshold : 0;
+    const alphaBlendOn = sh.alphaProp ? (sh.alphaProp.flags & 1) === 1 : false;
+    const material = new THREE.MeshBasicMaterial({
+      vertexColors: !!sh.colors,
+      transparent: alphaBlendOn,
+      alphaTest: alphaThreshold / 255.0,
+      side: THREE.DoubleSide,
+    });
+    if (sh.material) {
+      // NiMaterialProperty diffuse as the flat-color tint (reference stage —
+      // the era TEXTURES are not mounted; the W08 finding applies: an era
+      // BASE slot with source=-1 binds NO texture file here)
+      material.color.setRGB(sh.material.diffuse[0], sh.material.diffuse[1], sh.material.diffuse[2]);
+    } else {
+      material.color.set(0x9aa3b0);
+    }
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = `nif41:${sh.shapeName}`;
+    // world TRS (row-vector NiTransform convention) -> THREE matrix
+    // (column-vector): rotation transposed; translation bridged (x, z, -y).
+    const w = sh.worldTRS;
+    const m = new THREE.Matrix4();
+    m.set(
+      w.rotation[0][0], w.rotation[1][0], w.rotation[2][0], w.translation[0] * UNIT,
+      w.rotation[0][2], w.rotation[1][2], w.rotation[2][2], w.translation[2] * UNIT,
+      -w.rotation[0][1], -w.rotation[1][1], -w.rotation[2][1], -w.translation[1] * UNIT,
+      0, 0, 0, w.scale,
+    );
+    mesh.matrixAutoUpdate = false;
+    mesh.matrix.copy(m);
+    scene.add(mesh);
+  }
+  const camDist = Math.max(boundsRadius * 2.6, 0.5);
+  camera.position.set(boundsCenter[0] + camDist * 0.55, boundsCenter[1] + camDist * 0.42, boundsCenter[2] + camDist * 0.72);
+  camera.near = Math.max(camDist / 1000, 0.001);
+  camera.far = camDist * 50;
+  camera.updateProjectionMatrix();
+  controls.target.set(boundsCenter[0], boundsCenter[1], boundsCenter[2]);
+  el('viewmsg').textContent = '';
+}
+
 // ---------- badges + state publication ----------
 function publishBadges() {
   setBadge('sha', `sha256: <b>${state.payloadSha256 ? state.payloadSha256.slice(0, 12) + '…' : '—'}</b> verified=${state.shaVerified ? 'Y' : 'N'}`);
@@ -604,12 +753,13 @@ function publishBadges() {
       const g = buildGraph();
       state.graphNodeCount = g.nodes.length;
       state.maxDepth = g.maxDepth;
-      const ctrl = extraction.blocks.filter(b => b.fields.controller !== undefined && b.fields.controller !== -1);
+      const ctrl = extraction.blocks.filter(b => b.fields && b.fields.controller !== undefined && b.fields.controller !== -1);
       state.controllerRefs = ctrl.map(b => ({ block: b.index, type: b.type, ref: b.fields.controller }));
       renderGraphPanel(g);
       selectedNode = g.nodes[0] || null;
       renderDetails(g);
-      addRenderModel();
+      if (is41) addRenderModel41();
+      else addRenderModel();
     } else {
       // fail assets: header version is known only for the era-gate case (from
       // the verbatim error) — honest, no header peek, no second parser.

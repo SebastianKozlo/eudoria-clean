@@ -70,6 +70,18 @@ The HUD/badge is the contract:
 If something looks "wrong" but is labelled as one of the above, it is not a bug — it is
 the honest ceiling of the recovered data (see `CAPABILITY_MATRIX.json`).
 
+## Performance / frame times (W22)
+
+**Where the numbers live**: the real frame-time measurements (p50/p95/p99,
+stutters, draw calls, triangles, culling on/off) for `terrain/world_iso.html`
+are in
+`99_Audits/PE2003_WORLD_ROSETTA_NIF_ENV_CHARACTER_6H_R1_PHASE2_20261031/jobs/W22/PERF_MEASUREMENTS.json`
+(raw sample arrays + aggregates + explicit measurement limitations — headless
+software raster, no vsync, single device). Per-tile frustum culling is toggled
+in-page via `KeyC` / `__w22SetCulling(bool)`; live culled count and fps are in
+`__w22Stats()` and the HUD. Headless numbers do NOT extrapolate to a real
+GPU/display setup — read the `measurement_limitations` list first.
+
 ## Tests
 
 ```bash
