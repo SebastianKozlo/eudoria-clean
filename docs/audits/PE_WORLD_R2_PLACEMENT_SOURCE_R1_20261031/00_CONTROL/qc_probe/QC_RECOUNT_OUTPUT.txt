@@ -1,0 +1,43 @@
+# QC_RECOUNT_OUTPUT.txt — independent re-derivation from raw files (NOT from the report)
+# Method: QC's own Python script over Volumes.bnt / Models.bnt bytes directly.
+# Full script persisted as qc_recount_census_join.py in this directory.
+
+## Volumes.bnt own parse (independent of tools/volume_pin.py):
+size 3,746,375; sha256 6ad8ba3c5ad6f753... (== contract pin)
+roundtrip to trailer: True
+index count: 1865; all entries end .bvi: True; distinct names: 1865
+  -> three-way (a)(b)(c) = 1865 = 1865 = 1865 (b = Z2 CSV recount in executor's VOLUME_PIN.json
+     independently re-verified by row-count + per-row name mismatch = 0)
+
+## Corpus header census (independent re-implementation of the family predicates):
+type0 (00 00 + u16 count, 4+count*36==packed): 1686 files, 1686/1686 size-ok, 0 mismatch
+type1 (u32@0==1, vertex block 12+vc*12+4<=packed): 164 files, 164/164 block-ok
+other (neither): 15 (examples 01000500, 01000d00, 01000800 — matches report)
+total 1686+164+15 = 1865
+TYPE0 records total: 21,818 (== TYPE0_FIELD_STATS.json)
+
+## Models.bnt own parse:
+entries 5,596; duplicate names 0; roundtrip True; numeric .nif ids: 5,596
+
+## Name-level join (exact / -1 / +1 / not-joined):
+exact 0; id-1 1098; id+1 10; not-joined 757; sum == 1865
+OVERLAP NOTE (QC-added): 5 bvi ids have BOTH id-1 AND id+1 present in the NIF id set;
+the executor's elif chain attributes them to id_minus_1. The two shifted criteria are
+presented as SEPARATE alternative measurements (primary = exact = 0), so no reported
+count is wrong; see QC_REPORT.md finding P3-3.
+
+## Field-level join (3 type0 samples: 506044, 105624, 506237):
+fields tested 675 (4+1+70 records x 9 f32)
+u32 reinterpretation hits: 0
+u16 (both halves) hits: 5 — exactly the executor's 5:
+  ('u16','506237.bvi',rec 9,  f8, 16201) ('rec 13', f8, 16201) ('rec 14', f8, 16201)
+  ('rec 53', f5, 16645) ('rec 58', f5, 16645)
+  -> 1:1 identical to MODEL_JOIN.json u16_hits (coincidental-classification reasoning verified).
+
+## WORLD-FRAME CLUSTERING (QC's own full-corpus measurement of f1-f6 spans, 1686 type0 files):
+max per-file span: 1790.73 (506044.bvi, range [-526.19, +1264.53] — matches report)
+files with span > 524,287 (world scale): 0
+span buckets: <1: 96 | 1-100: 1495 | 100-1k: 94 | 1k-10k: 1 | >10k: 0
+narrowest examples: 71117.bvi / 70910.bvi span 0.0059
+=> QC CONFIRMS per-file clustering corpus-wide (stronger than the 3 examples cited in
+   the report's dowod 4). No file's f1-f6 values span anything close to world scale.
